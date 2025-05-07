@@ -35,8 +35,8 @@ public class NhanVien {
     @Column(name = "tai_khoan", length = 50)
     private String taiKhoan;
 
-    @Size(max = 50)
-    @Column(name = "mat_khau", length = 50)
+    @Size(max = 255)
+    @Column(name = "mat_khau", length = 255)
     private String matKhau;
 
     @Size(max = 100)

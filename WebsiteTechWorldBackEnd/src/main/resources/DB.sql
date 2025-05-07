@@ -14,7 +14,7 @@ ma_nhan_vien as (
 		   ) persisted,
 ten_nhan_vien nvarchar(50),
 tai_khoan varchar(50),
-mat_khau varchar(50),
+mat_khau VARCHAR(255);,
 email varchar(100),
 sdt varchar(10),
 dia_chi nvarchar(100),
@@ -36,7 +36,7 @@ ma_khach_hang as (
 ten_khach_hang nvarchar(50),
 sdt varchar(10),
 tai_khoan nvarchar(50),
-mat_khau nvarchar(50),
+mat_khau VARCHAR(255);,
 email nvarchar(100),
 ngay_sinh date,
 gioi_tinh bit,  --0: nữ, 1: nam
