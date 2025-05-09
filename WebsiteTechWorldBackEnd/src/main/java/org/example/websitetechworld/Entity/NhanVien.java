@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
+import org.example.websitetechworld.Repository.JointAccount;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "nhan_vien")
-public class NhanVien {
+public class NhanVien implements JointAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_nhan_vien", nullable = false)
@@ -71,4 +72,24 @@ public class NhanVien {
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
 
+
+    @Override
+    public String tai_khoan() {
+        return this.taiKhoan;
+    }
+
+    @Override
+    public String mat_khau() {
+        return this.matKhau;
+    }
+
+    @Override
+    public String getRole() {
+        return "ROLE_" +chucVu.name();
+    }
+
+    @Override
+    public Integer getId() {
+        return this.id;
+    }
 }

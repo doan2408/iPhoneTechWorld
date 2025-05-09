@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
+import org.example.websitetechworld.Repository.JointAccount;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "khach_hang")
-public class KhachHang {
+public class KhachHang implements JointAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_khach_hang", nullable = false)
@@ -92,5 +93,26 @@ public class KhachHang {
 
     @OneToOne(mappedBy = "idKhachHang", cascade = CascadeType.ALL,orphanRemoval = true)
     private GioHang gioHang;
+
+
+    @Override
+    public String getRole() {
+        return "ROLE_KHACH_HANG";
+    }
+
+    @Override
+    public String tai_khoan() {
+        return this.taiKhoan;
+    }
+
+    @Override
+    public String mat_khau() {
+        return this.matKhau;
+    }
+
+    @Override
+    public Integer getId() {
+        return this.id;
+    }
 
 }
