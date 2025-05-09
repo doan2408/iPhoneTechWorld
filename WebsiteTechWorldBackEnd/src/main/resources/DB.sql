@@ -14,7 +14,7 @@ ma_nhan_vien as (
 		   ) persisted,
 ten_nhan_vien nvarchar(50),
 tai_khoan varchar(50),
-mat_khau VARCHAR(255);,
+mat_khau VARCHAR(255), --password123, password456
 email varchar(100),
 sdt varchar(10),
 dia_chi nvarchar(100),
@@ -408,8 +408,8 @@ so_tien_thanh_toan decimal(10,2)
 -- Bảng nhan_vien
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, nam_sinh)
 VALUES 
-    (N'Nguyễn Văn An', 'nv_an', 'password123', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
-    (N'Trần Thị Bình', 'nv_binh', 'password456', 'binh.tt@example.com', '0912345678', N'456 Nguyễn Huệ, TP.HCM', N'ENABLE', N'STAFF', 0, '1995-08-20'),
+    (N'Nguyễn Văn An', 'nv_an', '$2a$10$OprA7imS.gORyxtQ3KkfqOLuEXK2.NjHcTRRFpPfnScJQpaokqSFC', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
+    (N'Trần Thị Bình', 'nv_binh', '$2a$10$G9o3ggyK9QDDeDOuXeKGhu9eHlFNNQng.WZHRNg.dYwwTIsdVHGP2', 'binh.tt@example.com', '0912345678', N'456 Nguyễn Huệ, TP.HCM', N'ENABLE', N'STAFF', 0, '1995-08-20'),
     (N'Lê Văn Cường', 'nv_cuong', 'password789', 'cuong.lv@example.com', '0923456789', N'789 Trần Phú, Đà Nẵng', N'ENABLE', N'STAFF', 1, '1992-03-10'),
     (N'Phạm Thị Duyên', 'nv_duyen', 'password101', 'duyen.pt@example.com', '0934567890', N'101 Lê Lợi, Huế', N'DISABLE', N'STAFF', 0, '1998-11-25'),
     (N'Hoàng Văn Em', 'nv_em', 'password202', 'em.hv@example.com', '0945678901', N'202 Phạm Văn Đồng, Hà Nội', N'DISABLE', N'ADMIN', 1, '1988-07-30');
@@ -417,8 +417,8 @@ VALUES
 -- Bảng khach_hang
 INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, tong_diem, so_diem_hien_tai, hang_khach_hang, trang_thai)
 VALUES 
-    (N'Nguyễn Thị Hoa', '0987654321', N'hoa_nt', 'pass123', 'hoa.nt@example.com', '1993-04-12', 0, 'hoa.jpg', 1000.00, 500.00, N'GOLD', N'ACTIVE'),
-    (N'Trần Văn Hùng', '0976543210', N'hung_tv', 'pass456', 'hung.tv@example.com', '1985-09-25', 1, 'hung.jpg', 500.00, 200.00, N'SILVER', N'ACTIVE'),
+    (N'Nguyễn Thị Hoa', '0987654321', N'hoa_nt', '$2a$10$OprA7imS.gORyxtQ3KkfqOLuEXK2.NjHcTRRFpPfnScJQpaokqSFC', 'hoa.nt@example.com', '1993-04-12', 0, 'hoa.jpg', 1000.00, 500.00, N'GOLD', N'ACTIVE'),
+    (N'Trần Văn Hùng', '0976543210', N'hung_tv', '$2a$10$G9o3ggyK9QDDeDOuXeKGhu9eHlFNNQng.WZHRNg.dYwwTIsdVHGP2', 'hung.tv@example.com', '1985-09-25', 1, 'hung.jpg', 500.00, 200.00, N'SILVER', N'ACTIVE'),
     (N'Lê Thị Lan', '0965432109', N'lan_lt', 'pass789', 'lan.lt@example.com', '1997-12-30', 0, 'lan.jpg', 200.00, 100.00, N'MEMBER', N'INACTIVE'),
     (N'Phạm Văn Minh', '0954321098', N'minh_pv', 'pass101', 'minh.pv@example.com', '1990-06-18', 1, 'minh.jpg', 3000.00, 1500.00, N'DIAMOND', N'ACTIVE'),
     (N'Hoàng Thị Ngọc', '0943210987', N'ngoc_ht', 'pass202', 'ngoc.ht@example.com', '1995-03-05', 0, 'ngoc.jpg', 800.00, 400.00, N'GOLD', N'ACTIVE');
