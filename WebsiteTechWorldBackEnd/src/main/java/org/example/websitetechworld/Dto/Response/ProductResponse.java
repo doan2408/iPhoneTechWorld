@@ -1,2 +1,3 @@
-package org.example.websitetechworld.Dto.Request;public class ProductResponse {
+package org.example.websitetechworld.Dto.Response;
+public class ProductResponse {
 }

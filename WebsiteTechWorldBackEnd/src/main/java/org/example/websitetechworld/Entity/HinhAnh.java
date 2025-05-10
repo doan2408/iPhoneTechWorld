@@ -22,8 +22,12 @@ public class HinhAnh {
     @JoinColumn(name = "id_san_pham_chi_tiet")
     private SanPhamChiTiet idSanPhamChiTiet;
 
-    @Size(max = 100)
-    @Column(name = "url", length = 100)
+    @Size(max = 255)
+    @Column(name = "url", length = 255)
     private String url;
+
+    @Size(max = 100)
+    @Column(name = "image_public_id", length = 100)
+    private String imagePublicId;
 
 }
