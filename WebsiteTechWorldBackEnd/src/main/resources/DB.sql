@@ -36,7 +36,7 @@ ma_khach_hang as (
 ten_khach_hang nvarchar(50),
 sdt varchar(10),
 tai_khoan nvarchar(50),
-mat_khau VARCHAR(255);,
+mat_khau VARCHAR(255),
 email nvarchar(100),
 ngay_sinh date,
 gioi_tinh bit,  --0: nữ, 1: nam
@@ -317,7 +317,8 @@ nha_mang nvarchar(50)
 create table hinh_anh (
 id_hinh_anh int identity(1,1) primary key,
 id_san_pham_chi_tiet int references san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
-url varchar(100)
+url varchar(255),
+image_public_id VARCHAR(100)
 )
 
 
