@@ -15,7 +15,7 @@ public class WebsiteTechWorldApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode("password123");  // Mã hóa mật khẩu
+        String encodedPassword = encoder.encode("password456");  // Mã hóa mật khẩu
 
         System.out.println(encodedPassword);  // In ra mật khẩu đã mã hóa để dùng cho SQL
     }

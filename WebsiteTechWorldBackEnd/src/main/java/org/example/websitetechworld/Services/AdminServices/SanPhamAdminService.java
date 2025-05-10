@@ -15,7 +15,6 @@ public class SanPhamAdminService {
 
     private final SanPhamRepository sanPhamRepo;
 
-
     public ProductRequest convert(SanPham productEntity) {
         ProductRequest productRequest = new ProductRequest();
         productRequest.setId(productEntity.getId());
