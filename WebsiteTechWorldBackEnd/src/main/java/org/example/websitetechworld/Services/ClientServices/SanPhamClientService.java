@@ -28,6 +28,7 @@ public class SanPhamClientService {
         return productRequest;
     }
 
+    //hiển thị sản phẩm phía client
     public List<AdminProductRequest> getAllSanPham() {
         List<SanPham> sanPhamList = sanPhamRepo.findAll();
         return sanPhamList.stream()

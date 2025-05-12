@@ -1,21 +1,25 @@
 package org.example.websitetechworld.Controller.AdminController;
 
 import lombok.RequiredArgsConstructor;
+import org.example.websitetechworld.Dto.Request.AdminRequest.AdminProductRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminProductResponse;
+import org.example.websitetechworld.Repository.SanPhamRepository;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/admin/product")
 public class SanPhamAdminController {
 
     private final SanPhamAdminService adminService;
 
-    @GetMapping("/product")
-    public ResponseEntity<?> getSanPham() {
+    @GetMapping("")
+    public ResponseEntity<List<AdminProductResponse>> getSanPham() {
         return ResponseEntity.ok(adminService.getAllSanPham());
     }
+
 }

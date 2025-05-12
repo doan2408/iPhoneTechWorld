@@ -2,8 +2,10 @@ package org.example.websitetechworld.Services.AdminServices;
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.AdminProductRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminProductResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.SanPhamRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,26 +14,24 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SanPhamAdminService {
-
     private final SanPhamRepository sanPhamRepo;
 
-    public AdminProductRequest convert(SanPham productEntity) {
-        AdminProductRequest productRequest = new AdminProductRequest();
-        productRequest.setId(productEntity.getId());
-        productRequest.setMaSanPham(productEntity.getMaSanPham());
-        productRequest.setTenSanPham(productEntity.getTenSanPham());
-        productRequest.setThuongHieu(productEntity.getThuongHieu());
-        productRequest.setSoLuongTonKho(productEntity.getSoLuongTonKho());
+    public AdminProductResponse convert(SanPham productEntity) {
+        AdminProductResponse productResponse = new AdminProductResponse();
+        productResponse.setId(productEntity.getId());
+        productResponse.setMaSanPham(productEntity.getMaSanPham());
+        productResponse.setTenSanPham(productEntity.getTenSanPham());
+        productResponse.setThuongHieu(productEntity.getThuongHieu());
+        productResponse.setSoLuongTonKho(productEntity.getSoLuongTonKho());
         if(productEntity.getIdNhaCungCap() != null) {
-            productRequest.setTenNhaCungCap(productEntity.getIdNhaCungCap().getTenNhaCungCap());
+            productResponse.setTenNhaCungCap(productEntity.getIdNhaCungCap().getTenNhaCungCap());
         }
-        return productRequest;
+        return productResponse;
     }
 
-    public List<AdminProductRequest> getAllSanPham() {
+    public List<AdminProductResponse> getAllSanPham() {
         List<SanPham> sanPhamList = sanPhamRepo.findAll();
-        return sanPhamList.stream()
-                .map(this :: convert)
-                .collect(Collectors.toList());
+        return sanPhamList.stream().map(this::convert).collect(Collectors.toList());
     }
 }
+

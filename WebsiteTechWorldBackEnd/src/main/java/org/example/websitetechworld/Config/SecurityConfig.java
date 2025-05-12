@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-//                        .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+                        .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                         .anyRequest().permitAll()
                 )
                 .formLogin().disable()        // ❌ Tắt login mặc định bằng form
