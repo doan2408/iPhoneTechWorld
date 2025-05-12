@@ -53,7 +53,7 @@ onMounted(() => {
               :to="`/products/${product.id}`"
               class="btn btn-primary btn-sm"
             >
-              Chi tiết
+              Update
             </RouterLink>
           </td>
         </tr>
