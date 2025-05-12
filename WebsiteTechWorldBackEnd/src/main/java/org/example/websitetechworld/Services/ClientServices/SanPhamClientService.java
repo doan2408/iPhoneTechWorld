@@ -1,7 +1,8 @@
 package org.example.websitetechworld.Services.ClientServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Request.AdminRequest.AdminProductRequest;
+
+import org.example.websitetechworld.Dto.Response.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.SanPhamRepository;
 import org.springframework.stereotype.Service;
@@ -15,20 +16,21 @@ public class SanPhamClientService {
     private final SanPhamRepository sanPhamRepo;
 
 
-    public AdminProductRequest convert(SanPham productEntity) {
-        AdminProductRequest productRequest = new AdminProductRequest();
-        productRequest.setId(productEntity.getId());
-        productRequest.setMaSanPham(productEntity.getMaSanPham());
-        productRequest.setTenSanPham(productEntity.getTenSanPham());
-        productRequest.setThuongHieu(productEntity.getThuongHieu());
-        productRequest.setSoLuongTonKho(productEntity.getSoLuongTonKho());
+    public SanPhamAdminResponse convert(SanPham productEntity) {
+        SanPhamAdminResponse sanPhamAdminRespone = new SanPhamAdminResponse();
+        sanPhamAdminRespone.setId(productEntity.getId());
+        sanPhamAdminRespone.setMaSanPham(productEntity.getMaSanPham());
+        sanPhamAdminRespone.setTenSanPham(productEntity.getTenSanPham());
+        sanPhamAdminRespone.setThuongHieu(productEntity.getThuongHieu());
+        sanPhamAdminRespone.setSoLuongTonKho(productEntity.getSoLuongTonKho());
         if(productEntity.getIdNhaCungCap() != null) {
-            productRequest.setTenNhaCungCap(productEntity.getIdNhaCungCap().getTenNhaCungCap());
+            sanPhamAdminRespone.setTenNhaCungCap(productEntity.getIdNhaCungCap().getTenNhaCungCap());
         }
-        return productRequest;
+        return sanPhamAdminRespone;
     }
 
-    public List<AdminProductRequest> getAllSanPham() {
+
+    public List<SanPhamAdminResponse> getAllSanPham() {
         List<SanPham> sanPhamList = sanPhamRepo.findAll();
         return sanPhamList.stream()
                 .map(this :: convert)

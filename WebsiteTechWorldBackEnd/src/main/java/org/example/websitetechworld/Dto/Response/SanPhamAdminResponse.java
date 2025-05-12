@@ -1,5 +1,5 @@
 
-package org.example.websitetechworld.Dto.Request.AdminRequest;
+package org.example.websitetechworld.Dto.Response;
 
 
 import lombok.AllArgsConstructor;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminProductRequest {
+public class SanPhamAdminResponse {
+
     private Integer id;
 
     private String maSanPham;
