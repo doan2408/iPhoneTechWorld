@@ -15,7 +15,7 @@ public class SanPhamAdminController {
 
     private final SanPhamAdminService adminService;
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<AdminProductResponse>> getSanPham() {
         return ResponseEntity.ok(adminService.getAllSanPham());
     }
