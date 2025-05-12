@@ -54,7 +54,8 @@ public class LoginController {
             return ResponseEntity.ok(Map.of(
                     "message", "Đăng nhập thành công!",
                     "roles", roles,
-                    "id", taiKhoan.getId()
+                    "id", taiKhoan.getId(),
+                    "fullName", taiKhoan.getFullName()
             ));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai tài khoản hoặc mật khẩu!");
@@ -75,15 +76,15 @@ public class LoginController {
 
         Object principal = authentication.getPrincipal(); // là CustomUserDetails
 
-        if (principal instanceof UserDetails userDetails) {
+        if (principal instanceof CustomUserDetails userDetails) {
             return ResponseEntity.ok(Map.of(
                     "tai_khoan", userDetails.getUsername(),
-                    "roles", userDetails.getAuthorities()
+                    "roles", userDetails.getAuthorities(),
+                    "fullName", userDetails.getFullName(),
+                    "id", userDetails.getId()
             ));
         }
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể lấy thông tin người dùng");
     }
-
 }
 

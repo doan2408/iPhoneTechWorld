@@ -19,6 +19,10 @@ public class CustomUserDetails implements UserDetails {
         return account.getId(); // đảm bảo JointAccount có getId()
     }
 
+    public String getFullName() {
+        return account.getFullName();
+    }
+
     public JointAccount getAccount() {
         return account;
     }

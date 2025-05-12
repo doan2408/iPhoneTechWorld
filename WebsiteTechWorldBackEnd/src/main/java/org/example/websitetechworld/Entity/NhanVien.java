@@ -89,7 +89,14 @@ public class NhanVien implements JointAccount {
     }
 
     @Override
+    public String getFullName() {
+        return this.tenNhanVien;
+    }
+
+    @Override
     public Integer getId() {
         return this.id;
     }
+
+
 }

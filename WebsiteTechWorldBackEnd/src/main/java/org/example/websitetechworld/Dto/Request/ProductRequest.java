@@ -22,5 +22,6 @@ public class ProductRequest {
 
     private String tenNhaCungCap;
 
+    private String url;
 
 }

@@ -4,10 +4,12 @@ import clientLayout from "@/layouts/ClientLayout.vue";
 
 const clientRoutes: RouteRecordRaw[] = [
   {
-    path: "/client/home",
+    path: "/client",
     component: clientLayout,
     children: [
-      { path: "", component: () => import("@/views/Client/Home.vue") },
+      //các children này sẽ là các tùy chọn trên thanh header
+      { path: "home", component: () => import("@/views/Client/Home.vue") },
+      { path: "category", component: () => import("@/views/Client/Category.vue") },
     ],
   },
 ];

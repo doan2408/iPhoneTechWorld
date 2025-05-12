@@ -6,6 +6,7 @@ import LoginService from '@/Service/LoginService/Login.js'
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false)
 const router = useRouter()
+const user = ref<{fullName : String } | null>(null)
 
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 onMounted(async () => {
@@ -15,8 +16,10 @@ onMounted(async () => {
   if (storedLoginStatus === 'true') {
     // Nếu có trong localStorage, cố gắng lấy thông tin người dùng
     try {
-      await LoginService.getCurrentUser();  // Lấy thông tin người dùng từ API
+      const currentUser = await LoginService.getCurrentUser();  // Lấy thông tin người dùng từ API
       isLoggedIn.value = true;  // Người dùng đã đăng nhập
+      user.value = currentUser
+
     } catch (err) {
       // Nếu có lỗi (người dùng đã đăng nhập nhưng phiên hết hạn chẳng hạn)
       isLoggedIn.value = false;  // Đánh dấu người dùng không đăng nhập
@@ -50,12 +53,12 @@ const handleLogout = async () => {
     </div>
     <nav>
       <ul>
-        <li><router-link to="/client/dashboard">Danh mục</router-link></li>
+        <li><router-link to="/client/category">Danh mục</router-link></li>
         <li><router-link to="/client/users">Lọc Theo Giá</router-link></li>
         <li><router-link to="/client/products">Bạn muốn tìm gì</router-link></li>
         <li><router-link to="/client/orders">Tra cứu đơn hàng</router-link></li>
         <li><router-link to="/client/promotions">Giỏ hàng</router-link></li>
-
+        <li class="username">👤 {{ user?.fullName }}</li>
         <!-- Chỉ hiển thị nút Đăng xuất nếu người dùng đã đăng nhập -->
         <li v-if="isLoggedIn">
           <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
@@ -106,4 +109,5 @@ nav ul li a {
 nav ul li a:hover {
   text-decoration: underline;
 }
+
 </style>
