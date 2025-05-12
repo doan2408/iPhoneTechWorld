@@ -99,6 +99,4 @@ public class SanPhamChiTiet {
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<Imei> imeis = new LinkedHashSet<>();
 
-
-
 }

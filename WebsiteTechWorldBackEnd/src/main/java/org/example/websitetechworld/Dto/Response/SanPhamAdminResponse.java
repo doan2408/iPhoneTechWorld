@@ -1,15 +1,13 @@
-package org.example.websitetechworld.Dto.Request;
+package org.example.websitetechworld.Dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.websitetechworld.Entity.SanPham;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductRequest {
+public class SanPhamAdminResponse {
     private Integer id;
 
     private String maSanPham;
