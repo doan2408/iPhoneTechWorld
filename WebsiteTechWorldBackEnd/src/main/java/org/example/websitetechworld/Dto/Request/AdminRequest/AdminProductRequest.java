@@ -22,6 +22,4 @@ public class AdminProductRequest {
 
     private String tenNhaCungCap;
 
-    private String url;
-
 }
