@@ -26,6 +26,10 @@ const handleLogin = async () => {
 
     // 👇 Lấy đường dẫn muốn quay về (nếu có)
     let redirectPath = route.query.redirect || getDefaultRedirect();
+    
+    if (!redirectPath || redirectPath === "/") {
+  redirectPath = getDefaultRedirect();
+}
 
     // Nếu người dùng là customer và redirectPath không bắt đầu với "/client", thêm "/client" vào trước
     if (store.getters.isCustomer && !redirectPath.startsWith("/client")) {
