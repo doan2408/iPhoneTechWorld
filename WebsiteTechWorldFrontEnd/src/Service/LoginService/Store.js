@@ -1,24 +1,24 @@
-// src/store.js
+// src/Service/LoginService/Store.js
 import { createStore } from 'vuex';
-import LoginService from '@/Service/LoginService/Login';  // Import LoginService
+import LoginService from './Login';  // Import LoginService
 
 const store = createStore({
   state() {
     return {
-      user: null,
-      roles: []
+      user: null,  // Thông tin người dùng
+      roles: [],   // Vai trò của người dùng
     };
   },
   mutations: {
     setUser(state, user) {
-      state.user = user;
+      state.user = user;  // Cập nhật thông tin người dùng
     },
     setRoles(state, roles) {
-      state.roles = roles;
+      state.roles = roles;  // Cập nhật vai trò
     },
     clearUser(state) {
       state.user = null;
-      state.roles = [];
+      state.roles = [];  // Xóa thông tin người dùng
     }
   },
   actions: {
@@ -27,7 +27,8 @@ const store = createStore({
         const { message, roles } = await LoginService.login(tai_khoan, mat_khau);
         commit('setUser', { tai_khoan });
         commit('setRoles', roles);
-        return message;  // Trả về thông báo sau khi đăng nhập thành công
+        localStorage.setItem('isLoggedIn', 'true');  // Lưu trạng thái đăng nhập
+        return message;
       } catch (error) {
         throw error.response?.data || 'Lỗi đăng nhập';
       }
@@ -36,6 +37,7 @@ const store = createStore({
       try {
         await LoginService.logout();  // Gọi service logout
         commit('clearUser');
+        localStorage.removeItem('isLoggedIn');  // Xóa trạng thái đăng nhập
       } catch (error) {
         console.error('Lỗi đăng xuất:', error);
         commit('clearUser');
@@ -43,7 +45,7 @@ const store = createStore({
     },
     async fetchCurrentUser({ commit }) {
       try {
-        const userData = await LoginService.getCurrentUser();  // Gọi service để lấy thông tin người dùng
+        const userData = await LoginService.getCurrentUser();  // Lấy thông tin người dùng
         commit('setUser', userData);
         commit('setRoles', userData.roles || []);
       } catch (error) {

@@ -29,7 +29,7 @@ onMounted(() => {
 <!-- src/components/Product.vue -->
 <template>
   <div class="container mt-4">
-    <h2>Danh sách sản phẩm</h2>
+    <h2>Category</h2>
     <table class="table table-striped">
       <thead>
         <tr>

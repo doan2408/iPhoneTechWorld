@@ -5,20 +5,25 @@ export const API_URL = 'http://localhost:8080/api/auth'
 // Đăng nhập
 const login = async (tai_khoan, mat_khau) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, {
-      tai_khoan,
-      mat_khau
-    }, {
-      withCredentials: true  // Bảo đảm session/cookie được lưu lại
-    });
-
-    // Lưu thông tin user và role vào store hoặc localStorage
+    const response = await axios.post(`${API_URL}/login`, { tai_khoan, mat_khau }, { withCredentials: true });
     const { message, roles } = response.data;
-    return { message, roles };  // Trả về thông báo và roles
+    return { message, roles };
   } catch (error) {
-    throw error.response?.data || 'Lỗi đăng nhập';
+    if (error.response) {
+      // Nếu có response từ server
+      throw error.response.data || 'Lỗi đăng nhập';
+    } else if (error.request) {
+      // Nếu không có response (lỗi mạng, timeout, etc.)
+      throw 'Lỗi kết nối mạng';
+    } else {
+      // Lỗi xảy ra khi thiết lập yêu cầu
+      throw 'Có lỗi xảy ra khi gửi yêu cầu đăng nhập';
+    }
   }
 };
+
+
+
 
 // Đăng xuất
 export const logout = async () => {

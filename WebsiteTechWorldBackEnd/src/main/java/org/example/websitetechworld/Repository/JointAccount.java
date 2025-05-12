@@ -5,4 +5,5 @@ public interface JointAccount {
      String tai_khoan();
      String mat_khau();
      String getRole();
+     String getFullName();
 }

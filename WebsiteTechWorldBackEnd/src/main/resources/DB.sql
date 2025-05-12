@@ -318,7 +318,7 @@ create table hinh_anh (
 id_hinh_anh int identity(1,1) primary key,
 id_san_pham_chi_tiet int references san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
 url varchar(255),
-image_public_id VARCHAR(100)
+image_public_id VARCHAR(100) -- trong cloudy
 )
 
 

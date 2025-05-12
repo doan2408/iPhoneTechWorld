@@ -21,35 +21,54 @@ const loadSanPham = async () => {
 };
 
 onMounted(() => {
-  loadSanPham;
+  loadSanPham();
 });
 </script>
 
 <!-- src/components/Product.vue -->
 <template>
-  <div class="product-container">
-    <h1>Danh sách sản phẩm</h1>
-    <div v-if="isLoading">Đang tải...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <ul v-else-if="sanPhamList.length > 0">
-      <li v-for="(sanPham, index) in sanPhamList" :key="sanPham.id || index">
-        {{ sanPham.tenSanPham }} - {{ sanPham.thuongHieu }} (Số lượng:
-        {{ sanPham.soLuongTonKho }})
-      </li>
-    </ul>
-    <p v-else>Không có sản phẩm nào.</p>
+  <div class="container mt-4">
+    <h2>Danh sách sản phẩm</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mã sản phẩm</th>
+          <th>Tên sản phẩm</th>
+          <th>Thương hiệu</th>
+          <th>Số lượng tồn kho</th>
+          <th>Nhà cung cấp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="product in sanPhamList" :key="product.id">
+          <td>{{ product.id }}</td>
+          <td>{{ product.maSanPham }}</td>
+          <td>{{ product.tenSanPham }}</td>
+          <td>{{ product.thuongHieu }}</td>
+          <td>{{ product.soLuongTonKho }}</td>
+          <td>{{ product.tenNhaCungCap }}</td>
+          <td>
+            <RouterLink
+              :to="`/products/${product.id}`"
+              class="btn btn-primary btn-sm"
+            >
+              Chi tiết
+            </RouterLink>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 
 
 <style scoped>
-.product-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  text-align: center;
+.container {
+  margin-left: 215px;
 }
+
 ul {
   list-style: none;
   padding: 0;

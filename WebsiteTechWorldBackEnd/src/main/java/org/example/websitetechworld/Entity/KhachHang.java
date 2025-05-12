@@ -115,4 +115,9 @@ public class KhachHang implements JointAccount {
         return this.id;
     }
 
+    @Override
+    public String getFullName() {
+        return this.tenKhachHang;
+    }
+
 }

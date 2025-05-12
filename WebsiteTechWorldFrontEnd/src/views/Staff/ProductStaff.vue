@@ -21,7 +21,7 @@ const loadSanPham = async () => {
 };
 
 onMounted(() => {
-  loadSanPham;
+  loadSanPham();
 });
 </script>
 
