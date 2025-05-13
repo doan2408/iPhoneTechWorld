@@ -1,13 +1,21 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.AdminProductResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.SanPhamRepository;
+import org.hibernate.query.sqm.EntityTypeException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,9 +37,21 @@ public class SanPhamAdminService {
         return productResponse;
     }
 
-    public List<AdminProductResponse> getAllSanPham() {
-        List<SanPham> sanPhamList = sanPhamRepo.findAll();
-        return sanPhamList.stream().map(this::convert).collect(Collectors.toList());
+    //this đại diện cho instance (thể hiện) của lớp hiện tại
+    // – tức là class chứa phương thức getAllSanPham() và convert().
+    public Page<AdminProductResponse> getAllSanPham(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPham> sanPham = sanPhamRepo.findAll(pageable);
+        return sanPham.map(this::convert);
+    }
+
+    public AdminProductResponse detail(Integer id) {
+        Optional<SanPham> sanPham = sanPhamRepo.findById(id);
+        if (sanPham.isPresent()) {
+            return convert(sanPham.get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "khong tim thay san pham hop le:" + id);
+        }
     }
 
 

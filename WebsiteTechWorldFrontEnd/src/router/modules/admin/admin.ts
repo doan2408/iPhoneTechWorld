@@ -9,6 +9,7 @@ const adminRoutes: RouteRecordRaw[] = [
     children: [
       //các children này sẽ là các tùy chọn trên thanh header
       { path: "products", component: () => import("@/views/Admin/ProductAdmin.vue") },
+      { path: "products/:id", component: () => import("@/views/Admin/PoductAdminDetail.vue") },
     ],
   },
 ];
