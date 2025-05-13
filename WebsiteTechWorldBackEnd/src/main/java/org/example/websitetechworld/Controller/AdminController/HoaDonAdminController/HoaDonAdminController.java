@@ -4,6 +4,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDonAdminService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -18,7 +19,8 @@ public class HoaDonAdminController {
     }
 
     @GetMapping
-    public List<HoaDonAdminResponse> getAll(){
-        return hoaDonAdminService.getAllHoaDon();
+    public List<HoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo){
+        int pageSize = 4;
+        return hoaDonAdminService.getPageHoaDon(pageNo,pageSize);
     }
 }
