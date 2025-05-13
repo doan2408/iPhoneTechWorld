@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.AdminProductResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.NhaCungCap;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.NhaCungCapRepository;
 import org.example.websitetechworld.Repository.SanPhamRepository;
+import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,15 +45,17 @@ public class SanPhamAdminService {
         return sanPhamList.stream().map(this::convert).collect(Collectors.toList());
     }
 
+    @Transactional
     public SanPham createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
         SanPham sanPham = modelMapper.map(sanPhamAdminRequest, SanPham.class);
         return sanPhamRepo.save(sanPham);
     }
 
+    @Transactional
     public SanPham updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
         SanPham sanPham = sanPhamRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
 
         sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
         sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
@@ -58,7 +63,7 @@ public class SanPhamAdminService {
 
         if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
             NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
 
             sanPham.setIdNhaCungCap(nhaCungCap);
         }
@@ -66,5 +71,21 @@ public class SanPhamAdminService {
         return sanPhamRepo.save(sanPham);
     }
 
+
+    @Transactional
+    public SanPhamAdminResponse deleteSanPhamAdmin(Integer id) {
+
+        SanPham sanPham = sanPhamRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
+
+        SanPhamAdminResponse sanPhamAdminResponse = new SanPhamAdminResponse();
+        sanPhamAdminResponse.setId(sanPham.getId());
+        sanPhamAdminResponse.setTenSanPham(sanPham.getTenSanPham());
+        sanPhamAdminResponse.setThuongHieu(sanPham.getThuongHieu());
+
+        sanPhamRepo.deleteById(id);
+
+        return sanPhamAdminResponse;
+    }
 }
 

@@ -3,6 +3,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.AdminProductResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,14 @@ public class SanPhamAdminController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SanPham> createSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
-        SanPham sanPham = adminService.updateSanPhamAdmin(id,sanPhamAdminRequest);
+        SanPham sanPham = adminService.updateSanPhamAdmin(id, sanPhamAdminRequest);
         return ResponseEntity.ok(sanPham);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SanPhamAdminResponse> deleteSanPham(@PathVariable Integer id) {
+        SanPhamAdminResponse sanPhamAdminResponse = adminService.deleteSanPhamAdmin(id);
+        return ResponseEntity.ok(sanPhamAdminResponse);
     }
 
 
