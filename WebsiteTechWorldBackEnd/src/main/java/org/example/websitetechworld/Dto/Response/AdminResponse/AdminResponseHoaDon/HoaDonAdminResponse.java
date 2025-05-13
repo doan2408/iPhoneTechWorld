@@ -50,6 +50,7 @@ public class HoaDonAdminResponse {
     private String trangThaiThanhToan;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
+    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
 
     public static HoaDonAdminResponse convertDto(HoaDon hoaDon) {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
@@ -79,6 +80,10 @@ public class HoaDonAdminResponse {
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
+        }
+        if (hoaDon.getChiTietThanhToans() != null){
+            hoaDonAdminResponse.setChiTietThanhToanAdminResponseList(hoaDon.getChiTietThanhToans().stream()
+                    .map(ChiTietThanhToanAdminResponse::convertDto).collect(Collectors.toList()));
         }
 
 
