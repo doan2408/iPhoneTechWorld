@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
+package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse;
 import lombok.*;
 
 import java.time.LocalDate;

@@ -1,7 +1,7 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.HinhAnhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.HinhAnhAdminResponse;
 import org.example.websitetechworld.Entity.HinhAnh;
 import org.example.websitetechworld.Repository.HinhAnhRepository;
 import org.modelmapper.ModelMapper;

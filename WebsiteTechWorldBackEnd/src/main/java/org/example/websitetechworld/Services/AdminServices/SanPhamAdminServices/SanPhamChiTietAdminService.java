@@ -1,9 +1,9 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.BaoHanhAdminResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ImeiAdminResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.BaoHanhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
 import org.modelmapper.ModelMapper;

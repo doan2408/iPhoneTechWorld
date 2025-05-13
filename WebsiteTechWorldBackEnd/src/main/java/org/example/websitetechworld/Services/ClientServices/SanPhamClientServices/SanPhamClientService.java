@@ -2,7 +2,7 @@ package org.example.websitetechworld.Services.ClientServices.SanPhamClientServic
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.SanPhamAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.SanPhamRepository;
 import org.springframework.stereotype.Service;

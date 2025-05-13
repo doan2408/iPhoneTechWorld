@@ -1,15 +1,13 @@
-
-package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
-
+package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SanPhamAdminResponse {
+@Data
+public class SanPhamAdminRequest {
 
     private Integer id;
 
@@ -21,8 +19,6 @@ public class SanPhamAdminResponse {
 
     private Integer soLuongTonKho;
 
-    private String tenNhaCungCap;
-
-    private String url;
+    private Integer idNhaCungCap;
 
 }

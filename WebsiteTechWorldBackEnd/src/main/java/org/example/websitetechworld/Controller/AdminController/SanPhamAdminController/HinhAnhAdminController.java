@@ -1,7 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.HinhAnhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.HinhAnhAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.HinhAnhAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
