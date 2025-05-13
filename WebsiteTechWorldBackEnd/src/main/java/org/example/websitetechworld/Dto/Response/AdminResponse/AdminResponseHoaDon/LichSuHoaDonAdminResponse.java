@@ -1,18 +1,18 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Size;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.NhanVien;
-import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.example.websitetechworld.Entity.LichSuHoaDon;
 
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class LichSuHoaDonAdminResponse {
     private Integer idLichSuHoaDon;
 
@@ -28,4 +28,23 @@ public class LichSuHoaDonAdminResponse {
     private LocalDate thoiGianThayDoi;
 
     private String moTa;
+
+    public static LichSuHoaDonAdminResponse convertDto(LichSuHoaDon lichSuHoaDon) {
+        LichSuHoaDonAdminResponse response = new LichSuHoaDonAdminResponse();
+        response.setIdLichSuHoaDon(lichSuHoaDon.getId());
+        if (lichSuHoaDon.getIdNhanVien() != null){
+            response.setIdNhanVien(lichSuHoaDon.getIdNhanVien().getId());
+            response.setMaNhanVien(lichSuHoaDon.getIdNhanVien().getMaNhanVien());
+            response.setTenNhanVien(lichSuHoaDon.getIdNhanVien().getTenNhanVien());
+        }
+        if (lichSuHoaDon.getIdHoaDon() != null){
+            response.setIdHoaDon(lichSuHoaDon.getIdHoaDon().getId());
+            response.setMaHoaDon(lichSuHoaDon.getIdHoaDon().getMaHoaDon());
+        }
+        response.setHanhDong(lichSuHoaDon.getHanhDong());
+        response.setThoiGianThayDoi(lichSuHoaDon.getThoiGianThayDoi());
+        response.setMoTa(lichSuHoaDon.getMoTa());
+
+        return response;
+    }
 }

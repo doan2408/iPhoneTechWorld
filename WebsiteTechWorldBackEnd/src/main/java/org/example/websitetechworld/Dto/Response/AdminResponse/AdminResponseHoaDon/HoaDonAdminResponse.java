@@ -52,6 +52,7 @@ public class HoaDonAdminResponse {
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
     private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
     private List<GiaoHangAdminResponse> giaoHangAdminResponseList;
+    private List<LichSuHoaDonAdminResponse> lichSuHoaDonAdminResponseList;
 
     public static HoaDonAdminResponse convertDto(HoaDon hoaDon) {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
@@ -90,10 +91,10 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setGiaoHangAdminResponseList(hoaDon.getGiaoHangs().stream()
                     .map(GiaoHangAdminResponse::convertDto).toList());
         }
-
-
-
-
+        if (hoaDon.getLichSuHoaDons() != null){
+            hoaDonAdminResponse.setLichSuHoaDonAdminResponseList(hoaDon.getLichSuHoaDons().stream()
+                    .map(LichSuHoaDonAdminResponse::convertDto).toList());
+        }
         return hoaDonAdminResponse;
     }
 }
