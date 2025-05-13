@@ -1,7 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamChiTietAdminService;
 import org.springframework.http.ResponseEntity;
