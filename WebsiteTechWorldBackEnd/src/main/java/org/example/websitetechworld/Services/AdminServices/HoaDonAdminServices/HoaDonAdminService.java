@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.springframework.data.domain.PageRequest;
@@ -21,11 +22,15 @@ public class HoaDonAdminService {
         return hoaDonRepository.findAll().stream().map(HoaDonAdminResponse::convertDto).collect(Collectors.toList());
     }
 
-    public List<HoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
+    public List<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         System.out.println("So phan tu: " + pageable.getPageNumber());
-        return hoaDonRepository.findAll(pageable).stream().map(HoaDonAdminResponse::convertDto).toList();
+        return hoaDonRepository.findAll(pageable).stream().map(GetAllHoaDonAdminResponse::convertDto).toList();
 
+    }
+
+    public HoaDonAdminResponse findById(Integer id){
+        return hoaDonRepository.findById(id).map(HoaDonAdminResponse::convertDto).orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
     }
 
 

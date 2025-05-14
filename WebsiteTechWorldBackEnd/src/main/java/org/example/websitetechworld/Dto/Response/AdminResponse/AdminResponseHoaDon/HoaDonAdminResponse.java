@@ -50,9 +50,9 @@ public class HoaDonAdminResponse {
     private String trangThaiThanhToan;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
-    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
-    private List<GiaoHangAdminResponse> giaoHangAdminResponseList;
-    private List<LichSuHoaDonAdminResponse> lichSuHoaDonAdminResponseList;
+//    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
+//    private List<GiaoHangAdminResponse> giaoHangAdminResponseList;
+//    private List<LichSuHoaDonAdminResponse> lichSuHoaDonAdminResponseList;
 
     public static HoaDonAdminResponse convertDto(HoaDon hoaDon) {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
@@ -83,18 +83,18 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
         }
-        if (hoaDon.getChiTietThanhToans() != null){
-            hoaDonAdminResponse.setChiTietThanhToanAdminResponseList(hoaDon.getChiTietThanhToans().stream()
-                    .map(ChiTietThanhToanAdminResponse::convertDto).collect(Collectors.toList()));
-        }
-        if (hoaDon.getGiaoHangs() != null){
-            hoaDonAdminResponse.setGiaoHangAdminResponseList(hoaDon.getGiaoHangs().stream()
-                    .map(GiaoHangAdminResponse::convertDto).toList());
-        }
-        if (hoaDon.getLichSuHoaDons() != null){
-            hoaDonAdminResponse.setLichSuHoaDonAdminResponseList(hoaDon.getLichSuHoaDons().stream()
-                    .map(LichSuHoaDonAdminResponse::convertDto).toList());
-        }
+//        if (hoaDon.getChiTietThanhToans() != null){
+//            hoaDonAdminResponse.setChiTietThanhToanAdminResponseList(hoaDon.getChiTietThanhToans().stream()
+//                    .map(ChiTietThanhToanAdminResponse::convertDto).collect(Collectors.toList()));
+//        }
+//        if (hoaDon.getGiaoHangs() != null){
+//            hoaDonAdminResponse.setGiaoHangAdminResponseList(hoaDon.getGiaoHangs().stream()
+//                    .map(GiaoHangAdminResponse::convertDto).toList());
+//        }
+//        if (hoaDon.getLichSuHoaDons() != null){
+//            hoaDonAdminResponse.setLichSuHoaDonAdminResponseList(hoaDon.getLichSuHoaDons().stream()
+//                    .map(LichSuHoaDonAdminResponse::convertDto).toList());
+//        }
         return hoaDonAdminResponse;
     }
 }
