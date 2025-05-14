@@ -42,6 +42,11 @@ function toggleProductMenu() {
   showProductMenu.value = !showProductMenu.value
 }
 
+const showUsers = ref(false)
+function toggleUserstMenu() {
+  showUsers.value = !showUsers.value
+}
+
 </script>
 
 <template>
@@ -66,7 +71,17 @@ function toggleProductMenu() {
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
 
-          <li><router-link to="/admin/users">Quản lý người dùng</router-link></li>
+
+          <li @click="toggleUserstMenu" class="menu-toggle">
+            Quản lý người dùng
+            <span>{{ showUsers ? '▼' : '▶' }}</span>
+          </li>
+          <ul v-if="showUsers" class="submenu">
+               <li><router-link to="/admin/staff">Quản lý nhân viên</router-link></li>
+               <li><router-link to="/admin/client">Quản lý khách hàng</router-link></li>
+          </ul>
+
+         
           <li><router-link to="/admin/orders">Quản lý đơn hàng</router-link></li>
           <li><router-link to="/admin/promotions">Khuyến mãi</router-link></li>
           <li><router-link to="/admin/reports">Báo cáo</router-link></li>

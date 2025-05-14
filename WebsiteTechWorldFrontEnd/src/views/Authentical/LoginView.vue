@@ -26,10 +26,11 @@ const handleLogin = async () => {
 
     // 👇 Lấy đường dẫn muốn quay về (nếu có)
     let redirectPath = route.query.redirect || getDefaultRedirect();
-    
+
+    // Nếu redirect rỗng hoặc là '/', thì dùng trang mặc định
     if (!redirectPath || redirectPath === "/") {
-  redirectPath = getDefaultRedirect();
-}
+      redirectPath = getDefaultRedirect();
+    }
 
     // Nếu người dùng là customer và redirectPath không bắt đầu với "/client", thêm "/client" vào trước
     if (store.getters.isCustomer && !redirectPath.startsWith("/client")) {
@@ -38,8 +39,8 @@ const handleLogin = async () => {
       // Nếu không phải là customer, điều hướng về trang mặc định (getDefaultRedirect)
       redirectPath = getDefaultRedirect();
     }
-    
-    console.log('path: ',redirectPath)
+
+    console.log("path: ", redirectPath);
 
     // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
