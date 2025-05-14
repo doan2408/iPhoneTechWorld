@@ -6,7 +6,7 @@ go
 create table nhan_vien (
                            id_nhan_vien int identity(1,1) primary key,
                            ma_nhan_vien as (
-'NV' + case 
+'NV' + case
 		   when id_nhan_vien <10 then '00' + cast (id_nhan_vien as varchar)
 		   when id_nhan_vien <100 then '0' + cast (id_nhan_vien as varchar)
 		   else cast (id_nhan_vien as varchar)
@@ -317,7 +317,7 @@ create table imei (
 create table hinh_anh (
                           id_hinh_anh int identity(1,1) primary key,
                           id_san_pham_chi_tiet int references san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
-                          url varchar(100),
+                          url varchar(255),
                           image_public_id VARCHAR(100) -- trong cloudy
 )
 
@@ -361,7 +361,7 @@ create table imei_da_ban (
 CREATE TABLE giao_hang (
                            id_giao_hang INT IDENTITY(1,1) PRIMARY KEY,
                            id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
-                           id_hoa_don INT,
+                           id_hoa_don INT UNIQUE,
                            ma_giao_hang AS (
         'GH' + CASE
                    WHEN id_giao_hang < 10 THEN '00' + CAST(id_giao_hang AS VARCHAR)
@@ -372,8 +372,8 @@ CREATE TABLE giao_hang (
                            ngay_dat_hang DATE,
                            tong_gia_tri_don_hang DECIMAL(10,2),
                            dia_chi_giao_hang NVARCHAR(50),
-                           trang_thai_don_hang NVARCHAR(50) -- PENDING, PACKED, SHIPPING, DELIVERED, FAILED, RETURNED
-    CONSTRAINT FK_giao_hang_hoa_don FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE
+                           trang_thai_don_hang NVARCHAR(50), -- PENDING, PACKED, SHIPPING, DELIVERED, FAILED, RETURNED
+                           FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE
 );
 
 
