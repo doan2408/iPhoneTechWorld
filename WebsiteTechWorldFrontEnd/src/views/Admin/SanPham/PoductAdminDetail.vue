@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { detailSanPham, getAllSanPham } from "@/Service/Adminservice/ProductAdminService";
+import { detailSanPham, getAllSanPham } from "@/Service/Adminservice/Products/ProductAdminService";
 import { useRoute,useRouter } from "vue-router";
 
 // Khai báo biến phản ứng
