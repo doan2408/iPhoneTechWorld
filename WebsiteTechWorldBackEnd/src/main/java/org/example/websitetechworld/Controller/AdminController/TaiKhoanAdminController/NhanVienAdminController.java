@@ -1,6 +1,8 @@
 package org.example.websitetechworld.Controller.AdminController.TaiKhoanAdminController;
 
 import lombok.RequiredArgsConstructor;
+import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
+import org.example.websitetechworld.Entity.NhanVien;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.NhanVienAdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,15 @@ public class NhanVienAdminController {
         return ResponseEntity.ok(nhanvienAdminService.getNhanVienList(page, pageSize));
     }
 
-    @GetMapping("/detail/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getStaffDetail(@PathVariable int id) {
         return  nhanvienAdminService.getStaffById(id).map(ResponseEntity :: ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateStaff(@PathVariable("id") Integer id, @RequestBody AdminStaffRequest adminStaffRequest) {
+        NhanVien nhanVienUpdate = nhanvienAdminService.updateStaff(id, adminStaffRequest);
+        return ResponseEntity.ok(nhanVienUpdate);
     }
 }

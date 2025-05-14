@@ -64,7 +64,6 @@ public class ClientAdminService {
         Pageable pageable  = PageRequest.of(page, size);
         Page<KhachHang> clientPage = khachHangRepository.findAll(pageable);
         return clientPage.map(this :: convert);
-
     }
 
     public Optional<AdminClientResponse> getClientById(Integer id) {
