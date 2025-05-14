@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.HoaDonAdminContr
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.LichSuHoaDonAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDonAdminService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,5 +25,11 @@ public class HoaDonAdminController {
     @GetMapping("/{id}")
     public HoaDonAdminResponse findById(@PathVariable("id") int id){
         return hoaDonAdminService.findById(id);
+    }
+
+    @GetMapping("/{id}/lich-su")
+    public List<LichSuHoaDonAdminResponse> getPageHoaDon(@PathVariable Integer id, @RequestParam(defaultValue = "0") int pageNo){
+        int pageSize = 4;
+        return hoaDonAdminService.getPageLichSuHoaDon(id,pageNo,pageSize);
     }
 }
