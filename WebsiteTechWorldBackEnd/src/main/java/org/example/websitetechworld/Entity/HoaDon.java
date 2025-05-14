@@ -85,7 +85,7 @@ public class HoaDon {
     private Set<ChiTietThanhToan> chiTietThanhToans = new LinkedHashSet<>();
 
     @OneToOne(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
-    private GiaoHang giaoHangs ;
+    private GiaoHang giaoHangs;
 
     @OneToMany(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
