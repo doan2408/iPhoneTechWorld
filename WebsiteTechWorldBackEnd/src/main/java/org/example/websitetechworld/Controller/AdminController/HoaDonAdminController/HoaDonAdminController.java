@@ -35,4 +35,9 @@ public class HoaDonAdminController {
         int pageSize = 4;
         return hoaDonAdminService.getPageChiTietThanhToan(id,pageNo,pageSize);
     }
+    @GetMapping("/{id}/xem-giao-hang")
+    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer id, @RequestParam(defaultValue = "0") int pageNo){
+        int pageSize = 4;
+        return hoaDonAdminService.getPageGiaoHang(id,pageNo,pageSize);
+    }
 }
