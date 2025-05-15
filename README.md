@@ -37,6 +37,4 @@ Client (Vue.js) ↔ API (Spring Boot) ↔ Database (SQL Server)
 - 🧠 **Sơ đồ hệ thống (Draw.io ):** [Draw.io Link](https://drive.google.com/file/d/1FhcDXfjyDHKWXSTyeSVmckbm3Tn6NBRr/view?usp=sharing)
 - 🎨 **Figma - Giao diện UI/UX:** [Figma Link](https://www.figma.com/design/km1iVtaVn7y5PE0TU45K0s/Thi%E1%BA%BFt-k%E1%BA%BF-trang-website-b%C3%A1n-%C4%91i%E1%BB%87n-tho%E1%BA%A1i-Iphone---techPhone?node-id=0-1&t=21mXxMTSvoyD327l-1)
 
-## 📝 Biên bản cuộc họp
 
-📁 [Xem toàn bộ biên bản cuộc họp tại đây](https://drive.google.com/drive/folders/1oPv81rV75SCOj3qZp5gLED4wTPENeWBz?usp=sharing)

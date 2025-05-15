@@ -56,6 +56,7 @@ const handleLogout = async () => {
         <li><router-link to="/client/category">Danh mục</router-link></li>
         <li><router-link to="/client/users">Lọc Theo Giá</router-link></li>
         <li><router-link to="/client/products">Bạn muốn tìm gì</router-link></li>
+        <li><router-link to="/client/products">Đơn mua của tôi</router-link></li>
         <li><router-link to="/client/orders">Tra cứu đơn hàng</router-link></li>
         <li><router-link to="/client/promotions">Giỏ hàng</router-link></li>
         <li class="username">👤 {{ user?.fullName }}</li>

@@ -19,7 +19,7 @@ const router = createRouter({
   
 
   
-//   Khi đang ở /, hiển thị HeaderClient + Home.vue.
+//   Khi đang ở /, hiển thị HeaderDefault + Home.vue.
 
 // Khi vào /admin, hiển thị HeaderAdmin + Dashboard.vue.
 

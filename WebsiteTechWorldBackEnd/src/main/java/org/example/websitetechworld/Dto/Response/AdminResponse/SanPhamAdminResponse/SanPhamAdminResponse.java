@@ -24,6 +24,6 @@ public class SanPhamAdminResponse {
 
     private String tenNhaCungCap;
 
-//    private String url;
+    private String url;
 
 }

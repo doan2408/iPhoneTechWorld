@@ -1,19 +1,17 @@
-package org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse;
+package org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminNhanVienResponse {
+@Data
+public class AdminStaffRequest {
     private Integer id;
 
     private String maNhanVien;
@@ -21,8 +19,6 @@ public class AdminNhanVienResponse {
     private String tenNhanVien;
 
     private String taiKhoan;
-
-    private String matKhau;
 
     private String email;
 
