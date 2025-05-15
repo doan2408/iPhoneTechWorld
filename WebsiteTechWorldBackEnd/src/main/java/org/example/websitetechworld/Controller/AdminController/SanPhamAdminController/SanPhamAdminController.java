@@ -2,7 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.AdminProductResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.springframework.data.domain.Page;
@@ -18,14 +18,14 @@ public class SanPhamAdminController {
 
 
     @GetMapping()
-    public ResponseEntity<Page<AdminProductResponse>> getSanPham(@RequestParam(value = "page",defaultValue = "0") int page) {
+    public ResponseEntity<Page<SanPhamAdminResponse>> getSanPham(@RequestParam(value = "page",defaultValue = "0") int page) {
         int pageSize = 2;
         return ResponseEntity.ok(adminService.getAllSanPham(page, pageSize));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AdminProductResponse> getSanPhamById(@PathVariable("id") int id) {
-        return ResponseEntity.ok(adminService.detail(id));
+    public ResponseEntity<SanPhamAdminResponse> getSanPhamById(@PathVariable("id") int id) {
+        return ResponseEntity.ok(adminService.detailSanPhamAdmin(id));
 
     }
 
@@ -36,9 +36,15 @@ public class SanPhamAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SanPham> updateSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
-        SanPham sanPham = adminService.updateSanPhamAdmin(id,sanPhamAdminRequest);
+    public ResponseEntity<SanPhamAdminResponse> updateSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
+        SanPhamAdminResponse sanPham = adminService.updateSanPhamAdmin(id, sanPhamAdminRequest);
         return ResponseEntity.ok(sanPham);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SanPhamAdminResponse> deleteSanPham(@PathVariable Integer id) {
+        SanPhamAdminResponse sanPhamAdminResponse = adminService.deleteSanPhamAdmin(id);
+        return ResponseEntity.ok(sanPhamAdminResponse);
     }
 
 

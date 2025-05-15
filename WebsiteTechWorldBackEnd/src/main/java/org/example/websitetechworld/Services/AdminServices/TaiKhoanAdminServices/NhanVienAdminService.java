@@ -8,6 +8,7 @@ import org.example.websitetechworld.Repository.NhanVienRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,8 +17,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class NhanVienAdminService {
     private final NhanVienRepository nhanVienRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminNhanVienResponse convertResponse(NhanVien nhanVien) {
+    //convert NhanVienEntity ----> AdminNhanVienResponse
+    public AdminNhanVienResponse convertToResponse(NhanVien nhanVien) {
         AdminNhanVienResponse adminNhanVienResponse = new AdminNhanVienResponse();
         adminNhanVienResponse.setId(nhanVien.getId());
         adminNhanVienResponse.setMaNhanVien(nhanVien.getMaNhanVien());
@@ -34,24 +37,41 @@ public class NhanVienAdminService {
         return adminNhanVienResponse;
     }
 
-    //hien thi nhan vien
-    public Page<AdminNhanVienResponse> getNhanVienList(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);  // Tạo Pageable từ page và size
-        Page<NhanVien> pageResult = nhanVienRepository.findAll(pageable);  // Lấy dữ liệu phân trang từ repository
-        // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
-        return pageResult.map(this::convertResponse);  // Chuyển từng NhanVien thành AdminNhanVienResponse
+    //convert NhanVienEntity ----> AdminStaffRequest
+    public AdminStaffRequest convertToRequest(NhanVien nv) {
+        AdminStaffRequest dto = new AdminStaffRequest();
+        dto.setId(nv.getId());
+        dto.setMaNhanVien(nv.getMaNhanVien());
+        dto.setTenNhanVien(nv.getTenNhanVien());
+        dto.setTaiKhoan(nv.getTaiKhoan());
+        dto.setEmail(nv.getEmail());
+        dto.setSdt(nv.getSdt());
+        dto.setDiaChi(nv.getDiaChi());
+        dto.setTrangThai(nv.getTrangThai());
+        dto.setChucVu(nv.getChucVu());
+        dto.setGioiTinh(nv.getGioiTinh());
+        dto.setNamSinh(nv.getNamSinh());
+        return dto;
     }
 
-    //detail nhan vien
-    public Optional<AdminNhanVienResponse> getStaffById(Integer id) {
-        return nhanVienRepository.findById(id).map(this :: convertResponse);
-    }
-
-    //convert staffRequest -> staffEntity
-    public void updateNhanVienFromRequest(NhanVien nhanVien, AdminStaffRequest adminStaffRequest) {
+    //convert staffRequest -> staffEntity (Dành cho update: không có trường mật khẩu)
+    public void convertNhanVienFromRequest(NhanVien nhanVien, AdminStaffRequest adminStaffRequest, Boolean isAdd) {
         nhanVien.setMaNhanVien(adminStaffRequest.getMaNhanVien());
         nhanVien.setTenNhanVien(adminStaffRequest.getTenNhanVien());
         nhanVien.setTaiKhoan(adminStaffRequest.getTaiKhoan());
+        if (isAdd) {
+            // Khi là add, mật khẩu phải được set
+            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isEmpty()) {
+                String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
+                nhanVien.setMatKhau(encodedPassword);
+            }
+        } else {
+            // Khi là update, chỉ cập nhật mật khẩu nếu nó được truyền từ request
+            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isEmpty()) {
+                String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
+                nhanVien.setMatKhau(encodedPassword);
+            }
+        }
         nhanVien.setEmail(adminStaffRequest.getEmail());
         nhanVien.setSdt(adminStaffRequest.getSdt());
         nhanVien.setDiaChi(adminStaffRequest.getDiaChi());
@@ -61,12 +81,39 @@ public class NhanVienAdminService {
         nhanVien.setNamSinh(adminStaffRequest.getNamSinh());
     }
 
+    //hien thi nhan vien (màn admin: không có mật khẩu)
+    public Page<AdminNhanVienResponse> getNhanVienList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);  // Tạo Pageable từ page và size
+        Page<NhanVien> pageResult = nhanVienRepository.findAll(pageable);  // Lấy dữ liệu phân trang từ repository
+        // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
+        return pageResult.map(this::convertToResponse);  // Chuyển từng NhanVien thành AdminNhanVienResponse
+    }
 
-    public NhanVien updateStaff(Integer id, AdminStaffRequest staffRequest) {
+    //detail nhan vien
+    public Optional<AdminNhanVienResponse> getStaffById(Integer id) {
+        return nhanVienRepository.findById(id).map(this :: convertToResponse);
+    }
+
+
+    //update nhân viên (màn admin)
+    public AdminStaffRequest updateStaff(Integer id, AdminStaffRequest staffRequest) {
         NhanVien nhanvienExisting = nhanVienRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("khong tim thay nhan vien voi id: " + id));
-        updateNhanVienFromRequest(nhanvienExisting, staffRequest);
-        return nhanVienRepository.save(nhanvienExisting);
+        convertNhanVienFromRequest(nhanvienExisting, staffRequest, false);
+        NhanVien nhanVienUpdate =  nhanVienRepository.save(nhanvienExisting);
+        return convertToRequest(nhanVienUpdate);
     }
+
+
+    //add nhan vien
+    public AdminStaffRequest createStaff(AdminStaffRequest staffRequest) {
+        NhanVien nhanVien = new NhanVien();
+        convertNhanVienFromRequest(nhanVien, staffRequest, true);
+        NhanVien nvAdd = nhanVienRepository.save(nhanVien);
+        return convertToRequest(nvAdd);
+
+    }
+
+
 }
 
