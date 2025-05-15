@@ -23,6 +23,13 @@ public class SanPhamAdminController {
         return ResponseEntity.ok(adminService.getAllSanPham());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SanPhamAdminResponse> detailSanPham(@PathVariable Integer id) {
+        SanPhamAdminResponse sanPhamAdminResponse = adminService.detailSanPhamAdmin(id);
+        return ResponseEntity.ok(sanPhamAdminResponse);
+    }
+
+
     @PostMapping("/create")
     public ResponseEntity<SanPham> createSanPham(@RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
         SanPham sanPham = adminService.createSanPhamAdmin(sanPhamAdminRequest);
@@ -30,8 +37,8 @@ public class SanPhamAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SanPham> createSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
-        SanPham sanPham = adminService.updateSanPhamAdmin(id, sanPhamAdminRequest);
+    public ResponseEntity<SanPhamAdminResponse> updateSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
+        SanPhamAdminResponse sanPham = adminService.updateSanPhamAdmin(id, sanPhamAdminRequest);
         return ResponseEntity.ok(sanPham);
     }
 

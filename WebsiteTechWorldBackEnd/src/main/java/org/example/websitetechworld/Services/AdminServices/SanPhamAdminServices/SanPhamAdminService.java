@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.AdminProductResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.NhaCungCap;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Repository.NhaCungCapRepository;
@@ -52,7 +53,7 @@ public class SanPhamAdminService {
     }
 
     @Transactional
-    public SanPham updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
+    public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
         SanPham sanPham = sanPhamRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
@@ -68,7 +69,19 @@ public class SanPhamAdminService {
             sanPham.setIdNhaCungCap(nhaCungCap);
         }
 
-        return sanPhamRepo.save(sanPham);
+        SanPham updatedSanPham = sanPhamRepo.save(sanPham);
+
+        SanPhamAdminResponse dto = new SanPhamAdminResponse();
+        dto.setId(updatedSanPham.getId());
+        dto.setTenSanPham(updatedSanPham.getTenSanPham());
+        dto.setThuongHieu(updatedSanPham.getThuongHieu());
+        dto.setSoLuongTonKho(updatedSanPham.getSoLuongTonKho());
+
+        if (updatedSanPham.getIdNhaCungCap() != null) {
+            dto.setTenNhaCungCap(updatedSanPham.getIdNhaCungCap().getTenNhaCungCap());
+        }
+
+        return dto;
     }
 
 
@@ -87,5 +100,26 @@ public class SanPhamAdminService {
 
         return sanPhamAdminResponse;
     }
+
+    public SanPhamAdminResponse detailSanPhamAdmin(Integer id) {
+        SanPham sanPham = sanPhamRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
+
+
+        SanPhamAdminResponse sanPhamAdminResponse = new SanPhamAdminResponse();
+        sanPhamAdminResponse.setId(sanPham.getId());
+        sanPhamAdminResponse.setMaSanPham(sanPham.getMaSanPham());
+        sanPhamAdminResponse.setTenSanPham(sanPham.getTenSanPham());
+        sanPhamAdminResponse.setThuongHieu(sanPham.getThuongHieu());
+        sanPhamAdminResponse.setSoLuongTonKho(sanPham.getSoLuongTonKho());
+
+        NhaCungCap nhaCungCap = sanPham.getIdNhaCungCap();
+        if (nhaCungCap != null) {
+            sanPhamAdminResponse.setTenNhaCungCap(nhaCungCap.getTenNhaCungCap());
+        }
+
+        return sanPhamAdminResponse;
+    }
 }
+
 

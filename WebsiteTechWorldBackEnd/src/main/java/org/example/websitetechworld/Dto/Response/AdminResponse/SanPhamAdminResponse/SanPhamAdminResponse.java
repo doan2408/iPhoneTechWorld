@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-//@Data
+@Data
 
 public class SanPhamAdminResponse {
 
@@ -24,62 +24,6 @@ public class SanPhamAdminResponse {
 
     private String tenNhaCungCap;
 
-    private String url;
+//    private String url;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getMaSanPham() {
-        return maSanPham;
-    }
-
-    public void setMaSanPham(String maSanPham) {
-        this.maSanPham = maSanPham;
-    }
-
-    public String getTenSanPham() {
-        return tenSanPham;
-    }
-
-    public void setTenSanPham(String tenSanPham) {
-        this.tenSanPham = tenSanPham;
-    }
-
-    public String getThuongHieu() {
-        return thuongHieu;
-    }
-
-    public void setThuongHieu(String thuongHieu) {
-        this.thuongHieu = thuongHieu;
-    }
-
-    public Integer getSoLuongTonKho() {
-        return soLuongTonKho;
-    }
-
-    public void setSoLuongTonKho(Integer soLuongTonKho) {
-        this.soLuongTonKho = soLuongTonKho;
-    }
-
-    public String getTenNhaCungCap() {
-        return tenNhaCungCap;
-    }
-
-    public void setTenNhaCungCap(String tenNhaCungCap) {
-        this.tenNhaCungCap = tenNhaCungCap;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 }

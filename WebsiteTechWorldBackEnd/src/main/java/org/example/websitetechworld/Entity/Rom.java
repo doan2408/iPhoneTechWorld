@@ -21,12 +21,12 @@ public class Rom {
     @Size(max = 50)
     @Nationalized
     @Column(name = "dung_luong_rom", length = 50)
-    private String dungLuongRom;
+    private String dungLuong;
 
     @Size(max = 50)
     @Nationalized
     @Column(name = "loai_rom", length = 50)
-    private String loaiRom;
+    private String loai;
 
     @Size(max = 50)
     @Nationalized
