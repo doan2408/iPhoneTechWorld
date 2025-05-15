@@ -20,6 +20,8 @@ public class AdminStaffRequest {
 
     private String taiKhoan;
 
+    private String matKhau;
+
     private String email;
 
     private String sdt;

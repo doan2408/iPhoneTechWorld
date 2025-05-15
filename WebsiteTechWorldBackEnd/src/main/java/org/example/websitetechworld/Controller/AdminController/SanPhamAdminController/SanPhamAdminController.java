@@ -41,5 +41,4 @@ public class SanPhamAdminController {
         return ResponseEntity.ok(sanPham);
     }
 
-
 }

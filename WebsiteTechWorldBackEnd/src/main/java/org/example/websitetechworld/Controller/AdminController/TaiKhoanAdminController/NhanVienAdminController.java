@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/staff")
 public class NhanVienAdminController {
     private final NhanVienAdminService nhanvienAdminService;
+    private final NhanVienAdminService nhanVienAdminService;
 
     @GetMapping()
     public ResponseEntity<?> getStaff(@RequestParam(value = "page",defaultValue = "0") int page) {
@@ -27,7 +28,13 @@ public class NhanVienAdminController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStaff(@PathVariable("id") Integer id, @RequestBody AdminStaffRequest adminStaffRequest) {
-        NhanVien nhanVienUpdate = nhanvienAdminService.updateStaff(id, adminStaffRequest);
+        AdminStaffRequest nhanVienUpdate = nhanvienAdminService.updateStaff(id, adminStaffRequest);
         return ResponseEntity.ok(nhanVienUpdate);
+    }
+
+    @PostMapping()
+    public ResponseEntity<?> addStaff(@RequestBody AdminStaffRequest adminStaffRequest) {
+        AdminStaffRequest nhanVienAdd = nhanVienAdminService.createStaff(adminStaffRequest);
+        return ResponseEntity.ok(nhanVienAdd);
     }
 }
