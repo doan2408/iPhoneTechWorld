@@ -21,12 +21,12 @@ public class Ram {
     @Size(max = 50)
     @Nationalized
     @Column(name = "dung_luong_ram", length = 50)
-    private String dungLuongRam;
+    private String dungLuong;
 
     @Size(max = 50)
     @Nationalized
     @Column(name = "loai_ram", length = 50)
-    private String loaiRam;
+    private String loai;
 
     @Size(max = 50)
     @Nationalized
