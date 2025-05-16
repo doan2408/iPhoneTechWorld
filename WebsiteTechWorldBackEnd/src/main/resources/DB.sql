@@ -808,5 +808,3 @@ SELECT * FROM loai_bao_hanh
 
 --34. lich_su_bao_hanh
 SELECT * FROM lich_su_bao_hanh
-
-select * from nhan_vien
