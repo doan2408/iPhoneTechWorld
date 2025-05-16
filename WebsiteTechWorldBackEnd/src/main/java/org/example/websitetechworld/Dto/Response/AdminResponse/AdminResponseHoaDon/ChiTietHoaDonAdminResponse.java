@@ -34,13 +34,14 @@ public class ChiTietHoaDonAdminResponse {
 
     public static ChiTietHoaDonAdminResponse convertDto(ChiTietHoaDon chiTietHoaDon){
         ChiTietHoaDonAdminResponse chiTietHoaDonAdminResponse = new ChiTietHoaDonAdminResponse();
+        chiTietHoaDonAdminResponse.setIdHoaDonChiTiet(chiTietHoaDon.getId());
         if (chiTietHoaDon.getIdHoaDon() != null){
-            chiTietHoaDonAdminResponse.setIdHoaDonChiTiet(chiTietHoaDon.getId());
-            chiTietHoaDonAdminResponse.setIdHoaDon(chiTietHoaDonAdminResponse.getIdHoaDon());
+            chiTietHoaDonAdminResponse.setIdHoaDon(chiTietHoaDon.getIdHoaDon().getId());
+            chiTietHoaDonAdminResponse.setMaHoaDon(chiTietHoaDon.getIdHoaDon().getMaHoaDon());
         }
         if (chiTietHoaDon.getIdSanPhamChiTiet() != null){
             chiTietHoaDonAdminResponse.setIdSanPhamChiTiet(chiTietHoaDon.getIdSanPhamChiTiet().getId());
-            chiTietHoaDonAdminResponse.setMaChiTietHoaDon(chiTietHoaDon.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
+            chiTietHoaDonAdminResponse.setMaSanPhamChiTiet(chiTietHoaDon.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
         }
         chiTietHoaDonAdminResponse.setMaChiTietHoaDon(chiTietHoaDon.getMaChiTietHoaDon());
         chiTietHoaDonAdminResponse.setTenSanPham(chiTietHoaDon.getTenSanPham());

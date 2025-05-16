@@ -26,7 +26,7 @@ public class ChiTietGiaoHangResponseAdmin {
 
     private Integer idSanPhamChiTiet;
     private String maSanPhamChiTiet;
-
+    private String tenSanPham;
     private String maChiTietGiaoHang;
 
     private Integer soLuong;
@@ -38,6 +38,7 @@ public class ChiTietGiaoHangResponseAdmin {
         response.setId(chiTietGiaoHang.getId());
         response.setIdSanPhamChiTiet(chiTietGiaoHang.getIdSanPhamChiTiet().getId());
         response.setMaSanPhamChiTiet(chiTietGiaoHang.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
+        response.setTenSanPham(chiTietGiaoHang.getIdSanPhamChiTiet().getIdSanPham().getTenSanPham());
         response.setMaChiTietGiaoHang(chiTietGiaoHang.getMaChiTietGiaoHang());
         response.setSoLuong(chiTietGiaoHang.getSoLuong());
         response.setDonGia(chiTietGiaoHang.getDonGia());

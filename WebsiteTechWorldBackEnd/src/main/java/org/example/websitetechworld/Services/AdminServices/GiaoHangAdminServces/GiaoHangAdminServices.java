@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseGiaoHang.GetAllGiaoHangResponseAdmin;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseGiaoHang.ViewGiaoHangAdminResponse;
 import org.example.websitetechworld.Repository.GiaoHangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,11 @@ public class GiaoHangAdminServices {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return giaoHangRepository.findAll(pageable).stream()
                 .map(GetAllGiaoHangResponseAdmin::convertDto).toList();
+    }
+    public ViewGiaoHangAdminResponse findById(Integer id) {
+        return giaoHangRepository.findById(id).map(ViewGiaoHangAdminResponse::convertDto).orElseThrow(
+                () -> new RuntimeException("Không ton tai giao hang voi id nay")
+        );
     }
 
 
