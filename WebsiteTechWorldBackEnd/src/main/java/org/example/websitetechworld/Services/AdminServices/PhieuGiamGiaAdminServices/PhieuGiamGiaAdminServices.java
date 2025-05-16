@@ -46,6 +46,7 @@ public class PhieuGiamGiaAdminServices {
         });
     }
 
+    //hien thi pgg
     public List<PhieuGiamGiaAdminResponse> getPagePhieuGiamGia (Integer pageNo, Integer pageSize){
 
         Pageable pageable = PageRequest.of(pageNo,pageSize);
@@ -53,6 +54,7 @@ public class PhieuGiamGiaAdminServices {
                 .map(i -> modelMapper.map(i, PhieuGiamGiaAdminResponse.class)).toList();
     }
 
+    //detail pgg
     public PhieuGiamGiaAdminResponse getPhieuGiamGia (Integer id) {
 
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
@@ -60,6 +62,7 @@ public class PhieuGiamGiaAdminServices {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
+    //add pgg
     @Transactional
     public PhieuGiamGiaAdminResponse addPhieuGiamGia (PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
 
@@ -69,6 +72,7 @@ public class PhieuGiamGiaAdminServices {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
+    //update pgg
     public PhieuGiamGiaAdminResponse updatePhieuGiamGia (Integer id, PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
 
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
@@ -90,6 +94,8 @@ public class PhieuGiamGiaAdminServices {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
+
+    //delete pgg
     public String deletePhieuGiamGia (Integer id) {
 
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
