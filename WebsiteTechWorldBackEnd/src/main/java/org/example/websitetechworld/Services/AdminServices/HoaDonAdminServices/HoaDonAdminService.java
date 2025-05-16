@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
+import org.example.websitetechworld.Repository.GiaoHangRepository;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
 import org.springframework.data.domain.PageRequest;
@@ -16,11 +17,13 @@ public class HoaDonAdminService {
     private final HoaDonRepository hoaDonRepository;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
+    private final GiaoHangRepository giaoHangRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
+        this.giaoHangRepository = giaoHangRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -46,6 +49,10 @@ public class HoaDonAdminService {
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(Integer hoaDonId,Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(ChiTietThanhToanAdminResponse::convertDto).toList();
+    }
+    public List<GiaoHangAdminResponse> getPageGiaoHang(Integer hoaDonId,Integer pageNo, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        return giaoHangRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(GiaoHangAdminResponse::convertDto).toList();
     }
 
 
