@@ -372,7 +372,7 @@ CREATE TABLE giao_hang (
                            ngay_dat_hang DATE,
                            tong_gia_tri_don_hang DECIMAL(10,2),
                            dia_chi_giao_hang NVARCHAR(50),
-                           trang_thai_don_hang NVARCHAR(50), -- PENDING, PACKED, SHIPPING, DELIVERED, FAILED, RETURNED
+                           trang_thai_don_hang NVARCHAR(50), -- PENDING, CONFIRMED ,PACKED, SHIPPING, DELIVERED, FAILED, RETURNED
                            FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE
 );
 

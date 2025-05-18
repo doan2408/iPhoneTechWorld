@@ -14,13 +14,13 @@ import java.util.List;
 public class GiaoHangAdminController {
     private final GiaoHangAdminServices giaoHangAdminServices;
 
+    private static final int PAGE_SIZE = 4;
     public GiaoHangAdminController(GiaoHangAdminServices giaoHangAdminServices) {
         this.giaoHangAdminServices = giaoHangAdminServices;
     }
     @GetMapping
     public List<GetAllGiaoHangResponseAdmin> getPageGiaoHang(@RequestParam(defaultValue = "0") int pageNo){
-        int pageSize = 4;
-        return giaoHangAdminServices.getPageGiaoHang(pageNo,pageSize);
+        return giaoHangAdminServices.getPageGiaoHang(pageNo,PAGE_SIZE);
     }
     @GetMapping("/{id}")
     public ViewGiaoHangAdminResponse findById(@PathVariable Integer id){

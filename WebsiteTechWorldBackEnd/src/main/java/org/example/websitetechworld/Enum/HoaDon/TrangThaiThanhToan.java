@@ -1,5 +1,5 @@
 package org.example.websitetechworld.Enum.HoaDon;
 
 public enum TrangThaiThanhToan {
-    PENDING,PAID,CANCELLED,REFUNDED,COMPLETED
+    PENDING,CONFIRMED,PAID,CANCELLED,REFUNDED,COMPLETED
 }

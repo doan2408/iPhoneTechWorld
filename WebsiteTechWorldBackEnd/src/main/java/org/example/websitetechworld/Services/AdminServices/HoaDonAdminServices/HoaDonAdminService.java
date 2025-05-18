@@ -1,14 +1,21 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
+import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
+import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
 import org.example.websitetechworld.Repository.GiaoHangRepository;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +25,7 @@ public class HoaDonAdminService {
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final GiaoHangRepository giaoHangRepository;
+    private static final Logger logger = LoggerFactory.getLogger(HoaDonAdminService.class);
 
     public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository) {
         this.hoaDonRepository = hoaDonRepository;
@@ -54,6 +62,17 @@ public class HoaDonAdminService {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return giaoHangRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(GiaoHangAdminResponse::convertDto).toList();
     }
+
+    public HoaDon createPendingInvoice(){
+
+        HoaDon hoaDon = new HoaDon();
+        hoaDon.setNgayTao(LocalDate.now());
+        hoaDon.setLoaiHoaDon(LoaiHoaDon.POS);
+        hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
+        return hoaDonRepository.save(hoaDon);
+    }
+
+
 
 
 }
