@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.HoaDonAdminContr
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
@@ -105,9 +106,25 @@ public class HoaDonAdminController {
     }
 
     @DeleteMapping("/hdct/{hdctId}")
-    public ResponseEntity<?> deleteHoaDon(@PathVariable Integer hdctId){
-        hoaDonChiTietAdminServices.deleleHdct(hdctId);
-        return ResponseEntity.ok("Xoa thanh cong");
+    public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable Integer hdctId){
+        try {
+            hoaDonChiTietAdminServices.deleleHdct(hdctId);
+            return ResponseEntity.ok("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Xóa thất bại: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{idHoaDon}/khach-hang")
+    public ResponseEntity<?> selectKhachHang(@PathVariable Integer idHoaDon, @RequestBody SelectKhachHang selectKhachHang){
+        try {
+            hoaDonAdminService.selectKhachHang(idHoaDon,selectKhachHang.getKhachHangId());
+            return ResponseEntity.ok("Chọn khach hang thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Chon khach hang thất bại: " + e.getMessage());
+        }
     }
 
 

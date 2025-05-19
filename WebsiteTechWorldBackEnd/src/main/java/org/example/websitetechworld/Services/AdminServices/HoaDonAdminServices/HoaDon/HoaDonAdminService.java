@@ -3,6 +3,8 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.*;
@@ -24,14 +26,16 @@ public class HoaDonAdminService {
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final GiaoHangRepository giaoHangRepository;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
+    private final KhachHangRepository khachHangRepository;
     private static final Logger logger = LoggerFactory.getLogger(HoaDonAdminService.class);
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.giaoHangRepository = giaoHangRepository;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
+        this.khachHangRepository = khachHangRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -81,6 +85,17 @@ public class HoaDonAdminService {
                 .map(ct -> ct.getDonGia().multiply(BigDecimal.valueOf(ct.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         hoaDon.setTongTien(tongTien);
+        hoaDonRepository.save(hoaDon);
+    }
+
+    public void selectKhachHang(Integer hoaDonId, Integer khachHangId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+
+        KhachHang khachHang = khachHangRepository.findById(khachHangId)
+                .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
+
+        hoaDon.setIdKhachHang(khachHang);
         hoaDonRepository.save(hoaDon);
     }
 
