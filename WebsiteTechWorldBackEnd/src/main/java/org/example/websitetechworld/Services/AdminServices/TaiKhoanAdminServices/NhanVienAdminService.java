@@ -114,6 +114,13 @@ public class NhanVienAdminService {
 
     }
 
+    //xoa nhan vien
+    public void deleteStaff(Integer id) {
+         if(!nhanVienRepository.existsById(id)) {
+            throw new RuntimeException("Not found staff id: " + id);
+         }
+         nhanVienRepository.deleteById(id);
+    }
 
 }
 

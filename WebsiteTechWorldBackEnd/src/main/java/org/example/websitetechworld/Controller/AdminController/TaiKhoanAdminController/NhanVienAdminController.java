@@ -22,7 +22,7 @@ public class NhanVienAdminController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getStaffDetail(@PathVariable int id) {
-        return  nhanvienAdminService.getStaffById(id).map(ResponseEntity :: ok)
+        return nhanvienAdminService.getStaffById(id).map(ResponseEntity :: ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -36,5 +36,12 @@ public class NhanVienAdminController {
     public ResponseEntity<?> addStaff(@RequestBody AdminStaffRequest adminStaffRequest) {
         AdminStaffRequest nhanVienAdd = nhanVienAdminService.createStaff(adminStaffRequest);
         return ResponseEntity.ok(nhanVienAdd);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteStaff(@PathVariable Integer id) {
+        nhanVienAdminService.deleteStaff(id);
+        return ResponseEntity.ok().build();
     }
 }
