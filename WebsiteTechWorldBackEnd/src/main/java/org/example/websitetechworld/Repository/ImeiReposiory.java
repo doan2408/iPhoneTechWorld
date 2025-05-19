@@ -12,4 +12,6 @@ import java.util.List;
 public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     @Query(value = "SELECT TOP (:limit) * FROM imei WHERE id_san_pham_chi_tiet = :idSpct AND trang_thai_imei = :trangThai", nativeQuery = true)
     List<Imei> findTopByIdSanPhamChiTietAndTrangThaiImei(@Param("idSpct") Integer idSpct, @Param("trangThai") String trangThai, @Param("limit") int limit);
+
+    Imei findBySoImei(String soImei);
 }

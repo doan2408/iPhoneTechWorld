@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
@@ -37,22 +38,22 @@ public class HoaDonAdminController {
     public List<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo){
         return hoaDonAdminService.getPageHoaDon(pageNo,PAGE_SIZE);
     }
-    @GetMapping("/{id}")
-    public HoaDonAdminResponse findById(@PathVariable("id") int id){
-        return hoaDonAdminService.findById(id);
+    @GetMapping("/{idHoaDon}")
+    public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon){
+        return hoaDonAdminService.findById(idHoaDon);
     }
 
-    @GetMapping("/{id}/lich-su")
-    public List<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer id, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageLichSuHoaDon(id,pageNo,PAGE_SIZE);
+    @GetMapping("/{idHoaDon}/lich-su")
+    public List<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon,pageNo,PAGE_SIZE);
     }
-    @GetMapping("/{id}/chi-tiet-thanh-toan")
-    public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer id, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageChiTietThanhToan(id,pageNo,PAGE_SIZE);
+    @GetMapping("/{idHoaDon}/chi-tiet-thanh-toan")
+    public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+        return hoaDonAdminService.getPageChiTietThanhToan(idHoaDon,pageNo,PAGE_SIZE);
     }
-    @GetMapping("/{id}/xem-giao-hang")
-    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer id, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageGiaoHang(id,pageNo,PAGE_SIZE);
+    @GetMapping("/{idHoaDon}/xem-giao-hang")
+    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+        return hoaDonAdminService.getPageGiaoHang(idHoaDon,pageNo,PAGE_SIZE);
     }
 
     @PostMapping
@@ -78,6 +79,7 @@ public class HoaDonAdminController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể xác định thông tin nhân viên");
     }
 
+    //api them san pham ( tao hdct )
     @PostMapping("/{idHoaDon}/them-san-pham")
     public ResponseEntity<?> createHoaDonChiTiet(@PathVariable Integer idHoaDon,@RequestBody ChiTietHoaDonAdminRequest request){
         request.setIdHoaDon(idHoaDon);
@@ -92,7 +94,15 @@ public class HoaDonAdminController {
         ));
     }
 
-
+    //api update so luong
+    @PutMapping("/{idHoaDon}/so-luong/{idCthd}")
+    public ResponseEntity<?> updateSoLuong(@PathVariable Integer idHoaDon, @PathVariable Integer idCthd,
+                                           @RequestBody CthdUpdateSoLuongAdminRequest request){
+        Integer soLuong = request.getSoLuong();
+        hoaDonChiTietAdminServices.updateSoLuong(idHoaDon,idCthd,request);
+        hoaDonAdminService.updateTongTien(idHoaDon);
+        return ResponseEntity.ok("Sửa số lượng thành công");
+    }
 
 
 }
