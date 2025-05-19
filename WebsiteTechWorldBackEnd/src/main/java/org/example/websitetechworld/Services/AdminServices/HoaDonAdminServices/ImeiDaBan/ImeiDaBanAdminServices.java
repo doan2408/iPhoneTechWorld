@@ -13,12 +13,12 @@ public class ImeiDaBanAdminServices {
 
 
     // tao imei da ban
-    public List<ImeiDaBan> generateImeiDaBan(ChiTietHoaDon chiTietHoaDon, List<Imei> imeis) {
+    public List<ImeiDaBan> generateImeiDaBan(ChiTietHoaDon chiTietHoaDon, List<Imei> imeis,TrangThaiImei trangThaiImei) {
         return imeis.stream().map(imei -> {
             ImeiDaBan imeiDaBan = new ImeiDaBan();
             imeiDaBan.setIdHoaDonChiTiet(chiTietHoaDon);
             imeiDaBan.setSoImei(imei.getSoImei());
-            imeiDaBan.setTrangThai(TrangThaiImei.RESERVED);
+            imeiDaBan.setTrangThai(trangThaiImei);
             return imeiDaBan;
         }).toList();
     }

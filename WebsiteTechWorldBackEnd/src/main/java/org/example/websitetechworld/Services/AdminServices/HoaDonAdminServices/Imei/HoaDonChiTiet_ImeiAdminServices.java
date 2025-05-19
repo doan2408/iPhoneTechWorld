@@ -44,15 +44,17 @@ public class HoaDonChiTiet_ImeiAdminServices {
             throw new IllegalArgumentException("Không đủ IMEI có sẵn: cần " + soLuongCanThem + ", có " + imeisAvailable.size());
         }
 
-        reserveImeis(imeisAvailable);
+        changeStatusImei(imeisAvailable,TrangThaiImei.RESERVED);
 
-        List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(chiTietHoaDon, imeisAvailable);
+        List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(chiTietHoaDon, imeisAvailable,TrangThaiImei.RESERVED);
         imeiDaBanRepository.saveAll(imeiDaBans);
     }
 
-    //Chuyen imei qua reserved
-    public void reserveImeis(List<Imei> imeis) {
-        imeis.forEach(imei -> imei.setTrangThaiImei(TrangThaiImei.RESERVED));
+    //Doi trang thai imei
+    public void changeStatusImei(List<Imei> imeis,TrangThaiImei trangThaiImei) {
+        imeis.forEach(imei -> imei.setTrangThaiImei(trangThaiImei));
         imeiReposiory.saveAll(imeis);
     }
+
+
 }

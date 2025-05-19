@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
+package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon;
 
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
@@ -6,6 +6,7 @@ import org.example.websitetechworld.Entity.NhanVien;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

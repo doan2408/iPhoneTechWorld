@@ -14,4 +14,5 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     List<Imei> findTopByIdSanPhamChiTietAndTrangThaiImei(@Param("idSpct") Integer idSpct, @Param("trangThai") String trangThai, @Param("limit") int limit);
 
     Imei findBySoImei(String soImei);
+    List<Imei> findAllBySoImeiIn(List<String> soImeis);
 }

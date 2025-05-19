@@ -6,9 +6,9 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
-import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDonAdminService;
-import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDonChiTietAdminServices;
-import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDonAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -102,6 +102,12 @@ public class HoaDonAdminController {
         hoaDonChiTietAdminServices.updateSoLuong(idHoaDon,idCthd,request);
         hoaDonAdminService.updateTongTien(idHoaDon);
         return ResponseEntity.ok("Sửa số lượng thành công");
+    }
+
+    @DeleteMapping("/hdct/{hdctId}")
+    public ResponseEntity<?> deleteHoaDon(@PathVariable Integer hdctId){
+        hoaDonChiTietAdminServices.deleleHdct(hdctId);
+        return ResponseEntity.ok("Xoa thanh cong");
     }
 
 

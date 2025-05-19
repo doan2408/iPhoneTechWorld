@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
+package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
@@ -75,14 +75,14 @@ public class HoaDonChiTietAdminServices {
             throw new IllegalArgumentException("Không đủ IMEI có sẵn để tạo hóa đơn");
         }
 
-        hoaDonChiTiet_imeiAdminServices.reserveImeis(imeisAvailable);
+        hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeisAvailable, TrangThaiImei.RESERVED);
 
 
         ChiTietHoaDon chiTietHoaDon = toEntity(request,hoaDon,sanPhamChiTiet,donGia);
 
         ChiTietHoaDon cthdSave = chiTietHoaDonRepository.save(chiTietHoaDon);
 
-        List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(cthdSave,imeisAvailable);
+        List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(cthdSave,imeisAvailable,TrangThaiImei.RESERVED);
         imeiDaBanRepository.saveAll(imeiDaBans);
 
         return cthdSave;
@@ -112,6 +112,16 @@ public class HoaDonChiTietAdminServices {
 
     //ham xoa hoa don chi tiet khoi hoa don
     public void deleleHdct(Integer hdctId){
+        ChiTietHoaDon cthdCanXoa = chiTietHoaDonRepository.findById(hdctId).orElseThrow();
+        List<ImeiDaBan> imeiDaBanList = cthdCanXoa.getImeiDaBans().stream().toList();
+        // Lấy danh sách Imei từ soImei trong imeiDaBan
+        List<String> soImeis = imeiDaBanList.stream()
+                .map(ImeiDaBan::getSoImei)
+                .toList();
+
+        List<Imei> imeiList = imeiReposiory.findAllBySoImeiIn(soImeis);
+
+        hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeiList,TrangThaiImei.AVAILABLE);
         chiTietHoaDonRepository.deleteById(hdctId);
     }
 
