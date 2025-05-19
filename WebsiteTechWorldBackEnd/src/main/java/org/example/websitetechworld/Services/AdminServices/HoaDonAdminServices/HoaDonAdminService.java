@@ -1,19 +1,18 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
+import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
-import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
-import org.example.websitetechworld.Repository.GiaoHangRepository;
-import org.example.websitetechworld.Repository.HoaDonRepository;
-import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
+import org.example.websitetechworld.Repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -25,13 +24,15 @@ public class HoaDonAdminService {
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final GiaoHangRepository giaoHangRepository;
+    private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     private static final Logger logger = LoggerFactory.getLogger(HoaDonAdminService.class);
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.giaoHangRepository = giaoHangRepository;
+        this.chiTietHoaDonRepository = chiTietHoaDonRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -70,6 +71,18 @@ public class HoaDonAdminService {
         hoaDon.setLoaiHoaDon(LoaiHoaDon.POS);
         hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
         return hoaDonRepository.save(hoaDon);
+    }
+
+    public void updateTongTien(Integer hoaDonId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow();
+
+        List<ChiTietHoaDon> chiTietHoaDonList = chiTietHoaDonRepository.findByIdHoaDon_Id(hoaDonId);
+
+        BigDecimal tongTien = chiTietHoaDonList.stream()
+                .map(ct -> ct.getDonGia().multiply(BigDecimal.valueOf(ct.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        hoaDon.setTongTien(tongTien);
+        hoaDonRepository.save(hoaDon);
     }
 
 

@@ -82,6 +82,7 @@ public class HoaDonAdminController {
     public ResponseEntity<?> createHoaDonChiTiet(@PathVariable Integer idHoaDon,@RequestBody ChiTietHoaDonAdminRequest request){
         request.setIdHoaDon(idHoaDon);
         ChiTietHoaDon chiTietHoaDon = hoaDonChiTietAdminServices.createChiTietHoaDon(request);
+        hoaDonAdminService.updateTongTien(idHoaDon);
         return ResponseEntity.ok(Map.of(
                 "message", "Them hoa don ct thanh cong",
                 "idHoaDon", chiTietHoaDon.getIdHoaDon().getId(),
@@ -90,6 +91,8 @@ public class HoaDonAdminController {
 
         ));
     }
+
+
 
 
 }
