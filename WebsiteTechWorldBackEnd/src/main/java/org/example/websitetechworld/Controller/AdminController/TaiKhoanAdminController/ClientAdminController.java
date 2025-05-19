@@ -14,7 +14,6 @@ public class ClientAdminController {
 
     private final ClientAdminService clientAdminService;
 
-
     @GetMapping
     public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page) {
         int pageSize = 10;
