@@ -5,6 +5,8 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +21,18 @@ public class HoaDonChiTietAdminServices {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ImeiDaBanRepository imeiDaBanRepository;
     private final ImeiReposiory imeiReposiory;
+    private final ImeiDaBanAdminServices imeiDaBanAdminServices;
+    private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
 
-    public HoaDonChiTietAdminServices(ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, SanPhamRepository sanPhamRepository, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory) {
+    public HoaDonChiTietAdminServices(ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, SanPhamRepository sanPhamRepository, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory, ImeiDaBanAdminServices imeiDaBanAdminServices, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.hoaDonRepository = hoaDonRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
         this.imeiDaBanRepository = imeiDaBanRepository;
         this.imeiReposiory = imeiReposiory;
+        this.imeiDaBanAdminServices = imeiDaBanAdminServices;
+        hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
     }
 
     public ChiTietHoaDon toEntity(ChiTietHoaDonAdminRequest chiTietHoaDonAdminRequest, HoaDon hoaDon, SanPhamChiTiet sanPhamChiTiet, BigDecimal donGia){
@@ -41,6 +47,8 @@ public class HoaDonChiTietAdminServices {
         return chiTietHoaDon;
     }
 
+    //ham tao chi tiet hoa donn ( them san pham )
+    @Transactional
     public ChiTietHoaDon createChiTietHoaDon(ChiTietHoaDonAdminRequest request){
         HoaDon hoaDon = hoaDonRepository.findById(request.getIdHoaDon())
                 .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
@@ -48,7 +56,18 @@ public class HoaDonChiTietAdminServices {
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
 
+        ChiTietHoaDon cthdCheck = chiTietHoaDonRepository.findByIdHoaDon_IdAndIdSanPhamChiTiet_Id(request.getIdHoaDon(), request.getIdSanPhamChiTiet());
+
+        BigDecimal donGia = sanPhamChiTiet.getGiaBan();
         int soLuong = request.getSoLuong();
+
+        if (cthdCheck != null){
+            hoaDonChiTiet_imeiAdminServices.tangSoLuong(cthdCheck,soLuong);
+            cthdCheck.setSoLuong(cthdCheck.getSoLuong()+soLuong);
+            return chiTietHoaDonRepository.save(cthdCheck);
+        }
+
+
         List<Imei> imeisAvailable = imeiReposiory.findTopByIdSanPhamChiTietAndTrangThaiImei(
                 sanPhamChiTiet.getId(),"AVAILABLE",soLuong
         );
@@ -56,22 +75,14 @@ public class HoaDonChiTietAdminServices {
             throw new IllegalArgumentException("Không đủ IMEI có sẵn để tạo hóa đơn");
         }
 
-        imeisAvailable.forEach(imei->imei.setTrangThaiImei(TrangThaiImei.RESERVED));
-        imeiReposiory.saveAll(imeisAvailable);
+        hoaDonChiTiet_imeiAdminServices.reserveImeis(imeisAvailable);
 
-        BigDecimal donGia = sanPhamChiTiet.getGiaBan();
 
         ChiTietHoaDon chiTietHoaDon = toEntity(request,hoaDon,sanPhamChiTiet,donGia);
 
         ChiTietHoaDon cthdSave = chiTietHoaDonRepository.save(chiTietHoaDon);
 
-        List<ImeiDaBan> imeiDaBans = imeisAvailable.stream().map(imei ->{
-            ImeiDaBan imeiDaBan = new ImeiDaBan();
-            imeiDaBan.setIdHoaDonChiTiet(cthdSave);
-            imeiDaBan.setSoImei(imei.getSoImei());
-            imeiDaBan.setTrangThai(TrangThaiImei.RESERVED);
-            return imeiDaBan;
-        }).toList();
+        List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(cthdSave,imeisAvailable);
         imeiDaBanRepository.saveAll(imeiDaBans);
 
         return cthdSave;
@@ -87,58 +98,22 @@ public class HoaDonChiTietAdminServices {
         Integer soLuongMoi = request.getSoLuong();
         chiTietHoaDon.setSoLuong(request.getSoLuong());
         if (soLuongCu > soLuongMoi){
-            giamSoLuong(chiTietHoaDon,soLuongCu - soLuongMoi);
+            hoaDonChiTiet_imeiAdminServices.giamSoLuong(chiTietHoaDon,soLuongCu - soLuongMoi);
         }
         if (soLuongCu<soLuongMoi){
-           tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
+           hoaDonChiTiet_imeiAdminServices.tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
         }
         chiTietHoaDonRepository.save(chiTietHoaDon);
     }
 
-    private void giamSoLuong(ChiTietHoaDon chiTietHoaDon, int soLuongCanGiam) {
-        List<ImeiDaBan> imeiDaBans = imeiDaBanRepository.findByIdHoaDonChiTiet_Id(chiTietHoaDon.getId());
-        List<ImeiDaBan> imeiCanGiam = imeiDaBans.subList(0, soLuongCanGiam);
 
-        imeiDaBanRepository.deleteAll(imeiCanGiam);
 
-        for (ImeiDaBan imeiCanG : imeiCanGiam) {
-            Imei imei = imeiReposiory.findBySoImei(imeiCanG.getSoImei());
-            imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-            imeiReposiory.save(imei);
-        }
+
+
+    //ham xoa hoa don chi tiet khoi hoa don
+    public void deleleHdct(Integer hdctId){
+        chiTietHoaDonRepository.deleteById(hdctId);
     }
-    private void tangSoLuong(ChiTietHoaDon chiTietHoaDon, int soLuongCanThem) {
-        List<Imei> imeisAvailable = imeiReposiory.findTopByIdSanPhamChiTietAndTrangThaiImei(
-                chiTietHoaDon.getIdSanPhamChiTiet().getId(), "AVAILABLE", soLuongCanThem
-        );
-
-        if (imeisAvailable.size() < soLuongCanThem) {
-            throw new IllegalArgumentException("Không đủ IMEI có sẵn: cần " + soLuongCanThem + ", có " + imeisAvailable.size());
-        }
-
-        reserveImeis(imeisAvailable);
-
-        List<ImeiDaBan> imeiDaBans = generateImeiDaBan(chiTietHoaDon, imeisAvailable);
-        imeiDaBanRepository.saveAll(imeiDaBans);
-    }
-
-    //Chuyen imei qua reserved
-    private void reserveImeis(List<Imei> imeis) {
-        imeis.forEach(imei -> imei.setTrangThaiImei(TrangThaiImei.RESERVED));
-        imeiReposiory.saveAll(imeis);
-    }
-
-    // tao imei da ban
-    private List<ImeiDaBan> generateImeiDaBan(ChiTietHoaDon chiTietHoaDon, List<Imei> imeis) {
-        return imeis.stream().map(imei -> {
-            ImeiDaBan imeiDaBan = new ImeiDaBan();
-            imeiDaBan.setIdHoaDonChiTiet(chiTietHoaDon);
-            imeiDaBan.setSoImei(imei.getSoImei());
-            imeiDaBan.setTrangThai(TrangThaiImei.RESERVED);
-            return imeiDaBan;
-        }).toList();
-    }
-
 
 
 }
