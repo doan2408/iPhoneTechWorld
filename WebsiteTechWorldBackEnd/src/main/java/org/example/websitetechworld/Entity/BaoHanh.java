@@ -19,9 +19,9 @@ public class BaoHanh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_bao_hanh", nullable = false)
     private Integer id;
-
-    @Column(name = "id_khach_hang")
-    private Integer idKhachHang;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_khach_hang")
+    private KhachHang idKhachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham_chi_tiet")
@@ -36,6 +36,7 @@ public class BaoHanh {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_loai_bao_hanh")
     private LoaiBaoHanh idLoaiBaoHanh;
+
 
     @Enumerated(EnumType.STRING)
     @Nationalized
