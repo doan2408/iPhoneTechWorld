@@ -1,10 +1,8 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon;
 
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThongTinNguoiNhanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
-import org.example.websitetechworld.Entity.ChiTietHoaDon;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.*;
@@ -95,11 +93,18 @@ public class HoaDonAdminService {
         KhachHang khachHang = khachHangRepository.findById(khachHangId)
                 .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
 
+        String diaChiDayDu = khachHang.getDiaChis().stream()
+                .filter(DiaChi::getDiaChiChinh)
+                .findFirst()
+                .map(DiaChi::getDiaChiDayDu)
+                .orElse(null);
+
         hoaDon.setIdKhachHang(khachHang);
+        hoaDon.setTenNguoiNhan(khachHang.getTenKhachHang());
+        hoaDon.setDiaChi(diaChiDayDu);
+        hoaDon.setSdt(khachHang.getSdt());
         hoaDonRepository.save(hoaDon);
     }
-
-
 
 
 }
