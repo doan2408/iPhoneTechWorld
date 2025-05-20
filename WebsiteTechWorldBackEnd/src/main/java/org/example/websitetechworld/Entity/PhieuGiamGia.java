@@ -25,7 +25,7 @@ public class PhieuGiamGia {
 
     @Size(max = 34)
     @ColumnDefault("'VC'+case when [id_phieu_giam_gia]<10 then '00'+CONVERT([varchar],[id_phieu_giam_gia]) when [id_phieu_giam_gia]<100 then '0'+CONVERT([varchar],[id_phieu_giam_gia]) else CONVERT([varchar],[id_phieu_giam_gia]) end")
-    @Column(name = "ma_giam_gia", length = 34)
+    @Column(name = "ma_giam_gia", length = 34, insertable = false, updatable = false)
     private String maGiamGia;
 
     @Size(max = 50)

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 
 import java.time.LocalDate;
 
@@ -28,9 +30,9 @@ public class AdminNhanVienResponse {
 
     private String diaChi;
 
-    private String trangThai;
+    private NhanVienTrangThai trangThai;
 
-    private String chucVu;
+    private NhanVienChucVu chucVu;
 
     private Boolean gioiTinh;
 

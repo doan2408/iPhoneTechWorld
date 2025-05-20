@@ -43,7 +43,6 @@ public class KhachHang implements JointAccount {
     private String taiKhoan;
 
     @Size(max = 255)
-    @Nationalized
     @Column(name = "mat_khau", length = 255)
     private String matKhau;
 

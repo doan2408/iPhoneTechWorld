@@ -28,7 +28,7 @@ public class GiaoHang {
     @JoinColumn(name = "id_khach_hang")
     private KhachHang idKhachHang;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_hoa_don")
     private HoaDon idHoaDon;
