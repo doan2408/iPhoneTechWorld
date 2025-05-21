@@ -108,7 +108,9 @@ public class HoaDonAdminController {
     @DeleteMapping("/hdct/{hdctId}")
     public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable Integer hdctId){
         try {
+            ChiTietHoaDon chiTietHoaDon = hoaDonChiTietAdminServices.findById(hdctId);
             hoaDonChiTietAdminServices.deleleHdct(hdctId);
+            hoaDonAdminService.updateTongTien(chiTietHoaDon.getIdHoaDon().getId());
             return ResponseEntity.ok("Xóa thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

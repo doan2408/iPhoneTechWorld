@@ -46,6 +46,9 @@ public class HoaDonChiTietAdminServices {
 
         return chiTietHoaDon;
     }
+    public ChiTietHoaDon findById(Integer id){
+        return chiTietHoaDonRepository.findById(id).orElseThrow();
+    }
 
     //ham tao chi tiet hoa donn ( them san pham )
     @Transactional

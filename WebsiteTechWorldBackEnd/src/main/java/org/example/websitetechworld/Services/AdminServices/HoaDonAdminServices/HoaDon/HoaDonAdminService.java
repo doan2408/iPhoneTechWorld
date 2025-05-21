@@ -70,6 +70,8 @@ public class HoaDonAdminService {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setNgayTao(LocalDate.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.POS);
+        hoaDon.setPhiShip(BigDecimal.ZERO);
+        hoaDon.setSoTienGiam(BigDecimal.ZERO);
         hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
         return hoaDonRepository.save(hoaDon);
     }
@@ -83,8 +85,12 @@ public class HoaDonAdminService {
                 .map(ct -> ct.getDonGia().multiply(BigDecimal.valueOf(ct.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         hoaDon.setTongTien(tongTien);
+        BigDecimal thanhTien = tongTien.subtract(hoaDon.getSoTienGiam()).add(hoaDon.getPhiShip());
+        hoaDon.setThanhTien(thanhTien);
+
         hoaDonRepository.save(hoaDon);
     }
+
 
     public void selectKhachHang(Integer hoaDonId, Integer khachHangId){
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
