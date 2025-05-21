@@ -1,12 +1,12 @@
 package org.example.websitetechworld.Enum.HoaDon;
 
-public enum LoaiHoaDon {
-    ONLINE("Trực tuyến"),
-    POS("Tại quầy");
+public enum LoaiHinhThuc {
+    TIEN_MAT("Tiền mặt"),
+    NGAN_HANG("Ngân hàng");
 
     private final String displayName;
 
-    LoaiHoaDon(String displayName) {
+    LoaiHinhThuc(String displayName) {
         this.displayName = displayName;
     }
 
