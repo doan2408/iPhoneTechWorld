@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { getAllStaff } from '@/Service/Adminservice/TaiKhoan/NhanVienServices';
-
+import { onMounted, reactive, ref } from "vue";
+import { getAllStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
+import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
+import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 
 const staffList = ref([]);
 const isLoading = ref(false);
@@ -10,59 +11,164 @@ const error = ref("");
 const currentPage = ref(0);
 const totalPages = ref(0);
 
-
-//load staff 
+//load staff
 // nếu người dùng không truyền page khi gọi hàm
 //  → nó sẽ tự động dùng 0.
-const loadStaff = async(page =0) => {
-    try {
-        isLoading.value = true;
-        const response = await getAllStaff(page);
-        staffList.value = response.content;
-        currentPage.value = page;
-        totalPages.value = response.totalPages;
-    } catch( err) {
-        err.value = err.message || "An error was thrown while loading the satff"
-    } finally {
-        isLoading.value = false;
-    }
+const loadStaff = async (page = 0) => {
+  try {
+    isLoading.value = true;
+    const response = await getAllStaff(page);
+    staffList.value = response.content;
+    currentPage.value = page;
+    totalPages.value = response.totalPages;
+  } catch (err) {
+    err.value = err.message || "An error was thrown while loading the satff";
+  } finally {
+    isLoading.value = false;
+  }
 };
 
+// add nhan vien phía admin
+const staffRequest = ref({
+  tenNhanVien: "", // Tên nhân viên
+  trangThai: "ENABLE", //Mặc định là đang làm
+  chucVu: "STAFF", // Mặc định là Nhân Viên
+  gioiTinh: true, // Mặc định là Nam
+});
+
+const handleAddStaff = async () => {
+  try {
+    const request = await addStaff(staffRequest.value);
+    console.log(staffRequest);
+    staffRequest.value = {
+      trangThai: "ENABLE", //Mặc định là đang làm
+      chucVu: "STAFF", // Mặc định là Nhân Viên
+      gioiTinh: true,
+    }; //reset form
+    await loadStaff();
+    alert("them nhan vien thanh cong");
+  } catch (err) {
+    err.value = err.message || "An error was thrown while adding the staff";
+  }
+};
 
 //previous page
 const previousPage = () => {
-    if(currentPage.value > 0) {
-        currentPage.value -= 1;
-    }
-    else {
-        currentPage.value = totalPages.value -1
-    }
-    loadStaff(currentPage.value)
-}
+  if (currentPage.value > 0) {
+    currentPage.value -= 1;
+  } else {
+    currentPage.value = totalPages.value - 1;
+  }
+  loadStaff(currentPage.value);
+};
 
 //next page
 const nextPage = () => {
-    if(currentPage.value < totalPages.value -1) {
-        currentPage.value += 1;
-    }
-    else {
-        currentPage.value = 0
-    }
-    loadStaff(currentPage.value)
-}
+  if (currentPage.value < totalPages.value - 1) {
+    currentPage.value += 1;
+  } else {
+    currentPage.value = 0;
+  }
+  loadStaff(currentPage.value);
+};
 
 onMounted(() => {
-    loadStaff()
-})
+  loadStaff();
+});
 </script>
 
 <template>
   <div class="container mt-4">
+    <!-- Form thêm nhân viên -->
+    <h3>Thêm nhân viên</h3>
+    <form @submit.prevent="handleAddStaff">
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.tenNhanVien"
+            placeholder="Tên nhân viên"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.taiKhoan"
+            placeholder="Tên đăng nhập"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.matKhau"
+            placeholder="Mật khẩu"
+            type="password"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.email"
+            placeholder="Email"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.sdt"
+            placeholder="Số điện thoại"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.diaChi"
+            placeholder="Địa chỉ"
+            class="form-control"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <select
+            v-model="staffRequest.trangThai"
+            placeholder="Trạng thái"
+            class="form-control"
+          >
+            <option value="ENABLE">Đang làm</option>
+            <option value="DISABLE">Nghỉ</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-2">
+          <select
+            v-model="staffRequest.chucVu"
+            placeholder="Chức vụ"
+            class="form-control"
+          >
+            <option value="STAFF">Nhân Viên</option>
+            <option value="ADMIN">Quản lý</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-2">
+          <select v-model="staffRequest.gioiTinh" class="form-control">
+            <option :value="true">Nam</option>
+            <option :value="false">Nữ</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-2">
+          <input
+            v-model="staffRequest.namSinh"
+            placeholder="Năm sinh"
+            type="date"
+            class="form-control"
+          />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success mt-2">Thêm nhân viên</button>
+    </form>
+    <hr />
+
     <!-- Hiển thị khi đang tải -->
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
     </div>
-
     <h2>Danh sách nhân viên</h2>
     <table class="table table-striped">
       <thead>
@@ -89,7 +195,7 @@ onMounted(() => {
           <td>{{ staff.diaChi }}</td>
           <td>{{ staff.trangThai }}</td>
           <td>{{ staff.chucVu }}</td>
-          <td>{{ staff.gioiTinh ? 'Nam' : 'Nữ' }}</td>
+          <td>{{ staff.gioiTinh ? "Nam" : "Nữ" }}</td>
           <td>{{ new Date(staff.namSinh).getFullYear() }}</td>
           <td>
             <RouterLink
@@ -111,7 +217,6 @@ onMounted(() => {
   </div>
 </template>
 
-
 <style scoped>
 .container {
   margin-left: 215px;
@@ -129,4 +234,5 @@ li {
 .error {
   color: red;
   font-size: 1rem;
-}</style>
+}
+</style>
