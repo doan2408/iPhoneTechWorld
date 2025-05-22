@@ -9,6 +9,7 @@ import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,6 +56,35 @@ public class HoaDonChiTiet_ImeiAdminServices {
         imeis.forEach(imei -> imei.setTrangThaiImei(trangThaiImei));
         imeiReposiory.saveAll(imeis);
     }
+
+    public void updateImeiStautusFromHoaDon(List<ChiTietHoaDon> chiTietHoaDons, TrangThaiImei trangThaiImei){
+        List<Imei> imeiList = new ArrayList<>();
+        List<ImeiDaBan> imeiDaBansToUpdate = new ArrayList<>();
+
+        for (ChiTietHoaDon chiTietHoaDon : chiTietHoaDons) {
+            List<ImeiDaBan> imeiDaBans = imeiDaBanRepository.findByIdHoaDonChiTiet_Id(chiTietHoaDon.getId());
+            if (imeiDaBans.size() < chiTietHoaDon.getSoLuong()) {
+                throw new IllegalArgumentException("Không đủ IMEI cho chi tiết hóa đơn: " + chiTietHoaDon.getId());
+            }
+            for (ImeiDaBan imeiDaBan: imeiDaBans) {
+                if (imeiDaBan.getTrangThai() != TrangThaiImei.RESERVED) {
+                    throw new IllegalArgumentException("IMEI không ở trạng thái đặt trước: " + imeiDaBan.getSoImei());
+                }
+                Imei imei = imeiReposiory.findBySoImei(imeiDaBan.getSoImei());
+                if (imei == null){
+                    throw new IllegalArgumentException("Imei khong ton tai" +imeiDaBan.getSoImei());
+                }
+                imeiList.add(imei);
+                // Cập nhật trạng thái trong ImeiDaBan
+                imeiDaBan.setTrangThai(trangThaiImei);
+                imeiDaBansToUpdate.add(imeiDaBan);
+            }
+        }
+        imeiDaBanRepository.saveAll(imeiDaBansToUpdate);
+        // Đồng bộ trạng thái trong Imei
+        changeStatusImei(imeiList, trangThaiImei);
+    }
+
 
 
 }
