@@ -119,4 +119,9 @@ public class KhachHang implements JointAccount {
         return this.tenKhachHang;
     }
 
+    @Override
+    public String getEmail() {
+        return this.email;
+    }
+
 }

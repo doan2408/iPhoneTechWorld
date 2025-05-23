@@ -6,4 +6,5 @@ public interface JointAccount {
      String mat_khau();
      String getRole();
      String getFullName();
+     String getEmail();
 }

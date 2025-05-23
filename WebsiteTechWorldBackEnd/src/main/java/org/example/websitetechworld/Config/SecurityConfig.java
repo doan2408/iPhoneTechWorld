@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(Customizer.withDefaults()) // ✅ Kích hoạt CORS dùng config bên dưới
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                         .anyRequest().permitAll()
@@ -51,7 +51,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Dùng session khi cần
                 );
-
         return http.build();
     }
 

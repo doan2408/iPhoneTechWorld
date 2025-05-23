@@ -8,13 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/signUp")
+@RequestMapping("/api/auth")
 public class SignUpController {
     private final ClientService clientService;
 
-
     //dang ki tai khoan (Client)
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> signUp(@RequestBody KhachHang khachHangRequest) {
         return ResponseEntity.ok(clientService.addClient(khachHangRequest));
     }

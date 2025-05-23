@@ -10,6 +10,7 @@ import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.KhachHangRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClientService {
     private final KhachHangRepository khachHangRepository;
+    private final PasswordEncoder passwordEncoder;
 
     //convert
     private TaiKhoanClientReponse convert(KhachHang khachHang) {
@@ -69,6 +71,10 @@ public class ClientService {
         khachHang.setTongDiem(new BigDecimal(0));
         khachHang.setSoDiemHienTai(new BigDecimal(0));
         khachHang.setHangKhachHang(HangKhachHang.MEMBER);
+        khachHang.setGioiTinh(true);
+
+        String hashedPassword = passwordEncoder.encode(khachHang.getMatKhau());
+        khachHang.setMatKhau(hashedPassword);
 
         KhachHang khachHangAdd = khachHangRepository.save(khachHang);
 
