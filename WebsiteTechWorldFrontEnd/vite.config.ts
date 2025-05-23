@@ -25,11 +25,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
-    hmr: {
-      protocol: 'ws',
-      host: '172.17.192.1', // hoặc IP thật nếu truy cập từ máy khác
-      port: 5173,
-      clientPort: 5173
-    },
+    // hmr: {
+    //   protocol: 'ws',
+    //   host: '172.17.192.1', // hoặc IP thật nếu truy cập từ máy khác
+    //   port: 5173,
+    //   clientPort: 5173
+    // },
   },
 });
