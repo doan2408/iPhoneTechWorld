@@ -44,7 +44,7 @@ public class GiaoHangAdminController {
         return ResponseEntity.ok("Da xac nhan dong goi");
     }
 
-    @PutMapping("/packed")
+    @PutMapping("/shipping")
     public ResponseEntity<?> changeShipping(){
         giaoHangAdminServices.changeShipping();
         return ResponseEntity.ok("Da xac nhan dong goi");
