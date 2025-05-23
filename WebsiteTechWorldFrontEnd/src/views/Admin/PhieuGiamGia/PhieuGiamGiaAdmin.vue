@@ -17,7 +17,6 @@ const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
 const ngayKetThucFilter = ref(null);
 
-//Hehe
 const loadPhieuGiamGia = async (page) => {
     try {
         isLoading.value = true;
