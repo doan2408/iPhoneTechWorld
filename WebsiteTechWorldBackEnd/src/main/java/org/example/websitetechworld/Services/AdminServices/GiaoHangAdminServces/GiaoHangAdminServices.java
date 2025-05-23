@@ -60,5 +60,14 @@ public class GiaoHangAdminServices {
         giaoHangRepository.save(giaoHang);
     }
 
+    public void changePacked(){
+        GiaoHang giaoHang = new GiaoHang();
+        giaoHang.setTrangThaiDonHang(TrangThaiGiaoHang.PACKED);
+    }
+
+    public void changeShipping(){
+        GiaoHang giaoHang = new GiaoHang();
+        giaoHang.setTrangThaiDonHang(TrangThaiGiaoHang.SHIPPING);
+    }
 
 }
