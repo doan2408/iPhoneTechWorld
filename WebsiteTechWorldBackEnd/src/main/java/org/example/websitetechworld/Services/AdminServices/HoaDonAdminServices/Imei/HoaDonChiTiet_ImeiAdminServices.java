@@ -75,13 +75,11 @@ public class HoaDonChiTiet_ImeiAdminServices {
                     throw new IllegalArgumentException("Imei khong ton tai" +imeiDaBan.getSoImei());
                 }
                 imeiList.add(imei);
-                // Cập nhật trạng thái trong ImeiDaBan
                 imeiDaBan.setTrangThai(trangThaiImei);
                 imeiDaBansToUpdate.add(imeiDaBan);
             }
         }
         imeiDaBanRepository.saveAll(imeiDaBansToUpdate);
-        // Đồng bộ trạng thái trong Imei
         changeStatusImei(imeiList, trangThaiImei);
     }
 

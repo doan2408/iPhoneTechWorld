@@ -9,6 +9,7 @@ import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
@@ -35,8 +36,9 @@ public class HoaDonAdminService {
     private final ThanhToanFactory thanhToanFactory;
     private final ImeiAdminService imeiAdminService;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
+    private final HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_sanPhamAdminServices;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -46,6 +48,7 @@ public class HoaDonAdminService {
         this.thanhToanFactory = thanhToanFactory;
         this.imeiAdminService = imeiAdminService;
         this.hoaDonChiTiet_ImeiAdminServices = hoaDonChiTiet_ImeiAdminServices;
+        hoaDonChiTiet_sanPhamAdminServices = hoaDonChiTietSanPhamAdminServices;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -139,9 +142,10 @@ public class HoaDonAdminService {
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
 
         if (response.getMessage().equals("Thanh toán thành công")) {
-            // Cập nhật trạng thái IMEI trong ImeiDaBan và Imei
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.SOLD);
+            hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(hoaDon.getChiTietHoaDons().stream().toList());
         }
+
         return response;
     }
 
