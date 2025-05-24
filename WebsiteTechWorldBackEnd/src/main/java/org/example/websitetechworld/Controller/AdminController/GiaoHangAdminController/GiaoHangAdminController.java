@@ -38,15 +38,15 @@ public class GiaoHangAdminController {
         giaoHangAdminServices.addGiaoHang(addGIaoHangAdminRequest);
         return ResponseEntity.ok("Da gui yeu cau giao hang");
     }
-    @PutMapping("/packed")
-    public ResponseEntity<?> changePacked(){
-        giaoHangAdminServices.changePacked();
+    @PutMapping("/{idGiaoHang}/packed")
+    public ResponseEntity<?> changePacked(@PathVariable Integer idGiaoHang){
+        giaoHangAdminServices.changePacked(idGiaoHang);
         return ResponseEntity.ok("Da xac nhan dong goi");
     }
 
-    @PutMapping("/shipping")
-    public ResponseEntity<?> changeShipping(){
-        giaoHangAdminServices.changeShipping();
-        return ResponseEntity.ok("Da xac nhan dong goi");
+    @PutMapping("/{idGiaoHang}/shipping")
+    public ResponseEntity<?> changeShipping(@PathVariable Integer idGiaoHang){
+        giaoHangAdminServices.changeShipping(idGiaoHang);
+        return ResponseEntity.ok("Da chuyen qua don vi van chuyen");
     }
 }

@@ -60,14 +60,16 @@ public class GiaoHangAdminServices {
         giaoHangRepository.save(giaoHang);
     }
 
-    public void changePacked(){
-        GiaoHang giaoHang = new GiaoHang();
+    public void changePacked(Integer id){
+        GiaoHang giaoHang = giaoHangRepository.findById(id).orElseThrow();
         giaoHang.setTrangThaiDonHang(TrangThaiGiaoHang.PACKED);
+        giaoHangRepository.save(giaoHang);
     }
 
-    public void changeShipping(){
-        GiaoHang giaoHang = new GiaoHang();
+    public void changeShipping(Integer id){
+        GiaoHang giaoHang = giaoHangRepository.findById(id).orElseThrow();
         giaoHang.setTrangThaiDonHang(TrangThaiGiaoHang.SHIPPING);
+        giaoHangRepository.save(giaoHang);
     }
 
 }
