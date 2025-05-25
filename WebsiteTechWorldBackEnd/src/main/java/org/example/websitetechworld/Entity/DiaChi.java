@@ -56,4 +56,7 @@ public class DiaChi {
     @Column(name = "dia_chi_chinh")
     private Boolean diaChiChinh;
 
+    public String getDiaChiDayDu() {
+        return soNha + ", " + tenDuong + ", " + xaPhuong + ", " + quanHuyen + ", " + tinhThanhPho;
+    }
 }

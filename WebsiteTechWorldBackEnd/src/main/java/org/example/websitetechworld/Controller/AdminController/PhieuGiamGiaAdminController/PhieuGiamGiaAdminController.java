@@ -1,9 +1,14 @@
 package org.example.websitetechworld.Controller.AdminController.PhieuGiamGiaAdminController;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminServices;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -17,11 +22,20 @@ public class PhieuGiamGiaAdminController {
     }
 
     @GetMapping
-    public List<PhieuGiamGiaAdminResponse> getAll (
-            @RequestParam(defaultValue = "0",value = "pageNo") int pageNo,
-            @RequestParam(defaultValue = "2",value = "pageSize") int pageSize
+    public ResponseEntity<Page<PhieuGiamGiaAdminResponse>> getAll (
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) TrangThaiPGG trangThai,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayBatDau,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayKetThuc,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "2") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
     ) {
-        return phieuGiamGiaAdminServices.getPagePhieuGiamGia(pageNo, pageSize);
+        Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminServices.getPagePhieuGiamGia(
+                search, trangThai, ngayBatDau, ngayKetThuc, page, size, sortBy, direction
+        );
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping ("/{id}")

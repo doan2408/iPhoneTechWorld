@@ -78,14 +78,14 @@ onMounted(() => {
 
 <template>
   <div class="client-container">
-    <!-- Form thêm nhân viên -->
-    <h3>Thêm nhân viên</h3>
+    <!-- Form thêm khách hàng -->
+    <h3>Thêm khách hàng</h3>
     <form @submit.prevent="handleAddClient">
       <div class="row">
         <div class="col-md-6 mb-2">
           <input
             v-model="clientRequest.tenNhanVien"
-            placeholder="Tên nhân viên"
+            placeholder="Tên khách hàng"
             class="form-control"
           />
         </div>
@@ -160,7 +160,7 @@ onMounted(() => {
           />
         </div>
       </div>
-      <button type="submit" class="btn btn-success mt-2">Thêm nhân viên</button>
+      <button type="submit" class="btn btn-success mt-2">Thêm khách hàng</button>
     </form>
     <hr />
 
@@ -168,12 +168,12 @@ onMounted(() => {
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
     </div>
-    <h2>Danh sách nhân viên</h2>
+    <h2>Danh sách khách hàng</h2>
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>Mã nhân viên</th>
-          <th>Tên nhân viên</th>
+          <th>Mã khách hàng</th>
+          <th>Tên khách hàng</th>
           <th>Tên đăng nhập</th>
           <th>Email</th>
           <th>Địa chỉ</th>
@@ -186,7 +186,7 @@ onMounted(() => {
       </thead>
       <tbody>
         <tr v-for="client in clientList" :key="client.id">
-          <td>{{ client.maNhanVien }}</td>
+          <td>{{ client.maKhachHang }}</td>
           <td>{{ client.tenNhanVien }}</td>
           <td>{{ client.taiKhoan }}</td>
           <td>{{ client.email }}</td>

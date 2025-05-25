@@ -37,9 +37,10 @@ public class ChiTietThanhToanAdminResponse {
         if (chiTietThanhToan.getIdPhuongThucThanhToan() != null){
             response.setIdPhuongThucThanhToan(chiTietThanhToan.getId());
             response.setTenPhuongThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getTenPhuongThuc());
-            response.setLoaiHinhThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getLoaiHinhThuc());
+            response.setLoaiHinhThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getLoaiHinhThuc().getDisplayName());
         }
         response.setSoTienThanhToan(chiTietThanhToan.getSoTienThanhToan());
         return response;
     }
+
 }

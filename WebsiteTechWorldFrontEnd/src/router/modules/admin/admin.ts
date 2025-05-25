@@ -13,6 +13,7 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: "staff/:id", component: () => import("@/views/Admin/TaiKhoan/Staff/StaffDetailAdmin.vue") },
       { path: "client", component: () => import("@/views/Admin/TaiKhoan/Client/ClientAdmin.vue") },
       { path: "client/:id", component: () => import("@/views/Admin/TaiKhoan/Client/ClientAdmin.vue") },
+      { path: "promotions", component: () => import("@/views/Admin/PhieuGiamGia/PhieuGiamGiaAdmin.vue") },
     ],
   },
 ];
