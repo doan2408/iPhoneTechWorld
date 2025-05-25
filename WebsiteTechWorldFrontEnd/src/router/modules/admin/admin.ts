@@ -11,9 +11,11 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: "products/:id", component: () => import("@/views/Admin/SanPham/PoductAdminDetail.vue") },
       { path: "products/create", component: () => import("@/views/Admin/SanPham/ProductAdminCreate.vue") },
       { path: "xuatXu", component: () => import("@/views/Admin/SanPham/XuatXuAadmin.vue") },
-      { path: "staff", component: () => import("@/views/Admin/TaiKhoan/StaffAdmin.vue") },
+      { path: "staff", component: () => import("@/views/Admin/TaiKhoan/Staff/StaffAdmin.vue") },
+      { path: "staff/:id", component: () => import("@/views/Admin/TaiKhoan/Staff/StaffDetailAdmin.vue") },
+      { path: "client", component: () => import("@/views/Admin/TaiKhoan/Client/ClientAdmin.vue") },
+      { path: "client/:id", component: () => import("@/views/Admin/TaiKhoan/Client/ClientAdmin.vue") },
       { path: "promotions", component: () => import("@/views/Admin/PhieuGiamGia/PhieuGiamGiaAdmin.vue") },
-      { path: "staff/:id", component: () => import("@/views/Admin/TaiKhoan/StaffDetailAdmin.vue") },
     ],
   },
 ];

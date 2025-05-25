@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import LoginService from '@/services/LoginService/Login'
+import LoginService from '@/Service/LoginService/Login'
 import { useStore } from 'vuex'
 
 const store = useStore();
