@@ -20,16 +20,13 @@ const login = async (tai_khoan, mat_khau) => {
       throw 'Có lỗi xảy ra khi gửi yêu cầu đăng nhập';
     }
   }
-};
-
-
-
+}
 
 // Đăng xuất
 export const logout = async () => {
   try {
     const response = await axios.post(`${API_URL}/logout`, {}, {
-      withCredentials: true
+      withCredentials: true //gửi cookie để xác thực
     })
     return response.data  // Thông báo đăng xuất thành công
   } catch (error) {

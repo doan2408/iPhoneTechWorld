@@ -11,9 +11,14 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
+<<<<<<< HEAD
     "element-plus": "^2.9.10",
+=======
+    "element-plus": "^2.9.11",
+>>>>>>> 1f07188348c9986cd0a9ba8b22b07cb1ef5dfb81
     "pinia": "^3.0.2",
     "vue": "^3.5.13",
     "vue-multiselect": "^3.2.0",

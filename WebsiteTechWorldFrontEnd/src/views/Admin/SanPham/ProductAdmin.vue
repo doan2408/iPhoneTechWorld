@@ -17,8 +17,12 @@ const loadSanPham = async (page = 0) => {
   try {
     isLoading.value = true;
     const response = await getAllSanPham(page);
+<<<<<<< HEAD
     sanPhamList.value = response;
     totalPages.value = response.totalPages;
+=======
+    sanPhamList.value = response.content;talPages.value = response.totalPages;
+>>>>>>> 1f07188348c9986cd0a9ba8b22b07cb1ef5dfb81
     currentPage.value = page;
   } catch (err) {
     error.value = err.message || "Lỗi khi tải sản phẩm";

@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.TaiKhoanAdminCon
 
 
 import lombok.RequiredArgsConstructor;
+import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.ClientAdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,17 +14,26 @@ public class ClientAdminController {
 
     private final ClientAdminService clientAdminService;
 
-
     @GetMapping
     public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page) {
         int pageSize = 10;
         return ResponseEntity.ok(clientAdminService.getAllClient(page, pageSize));
     }
 
-    @GetMapping("/detail/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable int id) {
         return clientAdminService.getClientById(id)
                 .map(ResponseEntity :: ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<?> addClient(@RequestBody KhachHang khachHang) {
+        return ResponseEntity.ok(clientAdminService.addClient(khachHang));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCLient(@PathVariable int id, @RequestBody KhachHang khachHangRequest) {
+        return ResponseEntity.ok(clientAdminService.updateClient(id, khachHangRequest));
     }
 }

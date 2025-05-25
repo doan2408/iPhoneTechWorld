@@ -14,6 +14,9 @@ const router = createRouter({
       { path: 'home', component: () => import('@/views/Client/Home.vue') },
       { path: 'login', component: () => import('@/views/Authentical/LoginView.vue') },
       { path: 'category', component: () => import('@/views/Client/Category.vue') },
+      { path: 'forgot-password', component: () => import('@/views/Authentical/ForgotView.vue')},
+      { path: "verify-code", component: () => import('@/views/Authentical/VerifyCode.vue')},
+      { path: "reset-password", component: () => import('@/views/Authentical/ResetPassword.vue')},
     ]
   },
   
