@@ -17,7 +17,7 @@ const loadSanPham = async (page = 0) => {
   try {
     isLoading.value = true;
     const response = await getAllSanPham(page);
-    sanPhamList.value = response.content;
+    sanPhamList.value = response;
     totalPages.value = response.totalPages;
     currentPage.value = page;
   } catch (err) {
@@ -51,7 +51,15 @@ onMounted(() => {
 </script>
 
 <template>
+
   <div class="container mt-4">
+
+    <div class="mb-3">
+      <RouterLink to="/admin/products/create" class="btn btn-success">
+        Thêm sản phẩm mới
+      </RouterLink>
+    </div>
+
     <!-- Hiển thị khi đang tải -->
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
@@ -78,10 +86,7 @@ onMounted(() => {
           <td>{{ product.soLuongTonKho }}</td>
           <td>{{ product.tenNhaCungCap }}</td>
           <td>
-            <RouterLink
-              :to="`/admin/products/${product.id}`"
-              class="btn btn-primary btn-sm"
-            >
+            <RouterLink :to="`/admin/products/${product.id}`" class="btn btn-primary btn-sm">
               Update
             </RouterLink>
           </td>
@@ -106,13 +111,16 @@ ul {
   list-style: none;
   padding: 0;
 }
+
 li {
   padding: 1rem;
   border-bottom: 1px solid #ddd;
   font-size: 1.1rem;
 }
+
 .error {
   color: red;
   font-size: 1rem;
 }
 </style>
+

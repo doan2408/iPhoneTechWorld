@@ -67,7 +67,8 @@ function toggleUserstMenu() {
           </li>
           <ul v-if="showProductMenu" class="submenu">
             <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
-            <li><router-link to="/admin/products/add">Thêm sản phẩm</router-link></li>
+            <li><router-link to="/admin/products/create">Thêm sản phẩm</router-link></li>
+            <li><router-link to="/admin/xuatXu">Xuất xứ</router-link></li>
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
 
