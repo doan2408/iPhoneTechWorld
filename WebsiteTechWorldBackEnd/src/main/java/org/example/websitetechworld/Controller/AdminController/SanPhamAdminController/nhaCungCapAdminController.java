@@ -3,7 +3,6 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.NhaCungCapAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.NhaCungCapAdminResponse;
-import org.example.websitetechworld.Entity.NhaCungCap;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.NhaCungCapAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
