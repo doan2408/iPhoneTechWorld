@@ -63,7 +63,7 @@ function toggleUserstMenu() {
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
-            <span>{{ showProductMenu ? '▼' : '▶' }}</span>
+            <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
             <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
@@ -74,7 +74,7 @@ function toggleUserstMenu() {
 
           <li @click="toggleUserstMenu" class="menu-toggle">
             Quản lý người dùng
-            <span>{{ showUsers ? '▼' : '▶' }}</span>
+            <i :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showUsers" class="submenu">
                <li><router-link to="/admin/staff">Quản lý nhân viên</router-link></li>
@@ -100,19 +100,19 @@ function toggleUserstMenu() {
 </template>
 
 
-
 <style scoped>
+/* Giữ nguyên CSS sidebar của bạn */
 .admin-sidebar {
   width: 220px;
   height: 100vh;
-  background-color: #2c3e50;
+  background-color: #04c9ff;
   color: white;
   position: fixed;
   top: 0;
   left: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Chỉ dùng cho logout ở cuối */
+  justify-content: space-between;
   padding: 20px;
 }
 
@@ -126,6 +126,7 @@ function toggleUserstMenu() {
   font-weight: bold;
   margin-bottom: 8px;
 }
+
 
 nav ul {
   list-style-type: none;
@@ -158,7 +159,6 @@ nav a.router-link-exact-active {
   text-decoration: none;
 }
 
-
 .menu-toggle {
   cursor: pointer;
   display: flex;
@@ -169,10 +169,10 @@ nav a.router-link-exact-active {
 
 .submenu {
   padding-left: 15px;
-  background-color: #34495e; /* vùng nền khác */
+  background-color: #13e780;
   margin-top: 5px;
-  border-left: 3px solid #1abc9c;
-  border-radius: 4px;
+  border-left: 3px solid #9dff00;
+  border-radius: 10px;
 }
 
 .submenu li {
@@ -186,8 +186,41 @@ nav a.router-link-exact-active {
 
 .submenu a.router-link-exact-active {
   font-weight: bold;
-  color: #1abc9c;
+  color: #2054e4;
 }
 
-</style>
+/* 🎯 Thêm CSS cho nội dung trang bên phải */
+.content-container {
+  margin-left: 220px; /* Đẩy sang phải đúng bằng sidebar */
+  padding: 20px;
+  width: calc(100% - 220px); /* Chiếm phần còn lại của màn hình */
+  box-sizing: border-box; /* Đảm bảo padding không làm to nội dung */
+}
 
+.table {
+  width: 100%; /* Table full chiều ngang trong container */
+}
+
+/* 🎯 Responsive: khi màn hình nhỏ */
+@media screen and (max-width: 768px) {
+  .admin-sidebar {
+    width: 180px; /* Sidebar hẹp hơn */
+  }
+  .content-container {
+    margin-left: 180px;
+    width: calc(100% - 180px);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .admin-sidebar {
+    position: relative; /* Sidebar chuyển sang không fixed */
+    width: 100%;
+    height: auto;
+  }
+  .content-container {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+</style>

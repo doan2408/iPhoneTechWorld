@@ -78,7 +78,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mt-4">
+  <div class="staff-container">
     <!-- Form thêm nhân viên -->
     <h3>Thêm nhân viên</h3>
     <form @submit.prevent="handleAddStaff">
@@ -130,7 +130,7 @@ onMounted(() => {
           <select
             v-model="staffRequest.trangThai"
             placeholder="Trạng thái"
-            class="form-control"
+            class="form-select"
           >
             <option value="ENABLE">Đang làm</option>
             <option value="DISABLE">Nghỉ</option>
@@ -140,14 +140,14 @@ onMounted(() => {
           <select
             v-model="staffRequest.chucVu"
             placeholder="Chức vụ"
-            class="form-control"
+            class="form-select"
           >
             <option value="STAFF">Nhân Viên</option>
             <option value="ADMIN">Quản lý</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
-          <select v-model="staffRequest.gioiTinh" class="form-control">
+          <select v-model="staffRequest.gioiTinh" class="form-select">
             <option :value="true">Nam</option>
             <option :value="false">Nữ</option>
           </select>
@@ -218,21 +218,72 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.container {
-  margin-left: 215px;
+.staff-container {
+  margin-left: 10px; /* đúng bằng chiều rộng sidebar */
+  padding: 20px;
+  width: 99%;
+  box-sizing: border-box;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+
+.staff-container h3 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #222;
 }
-li {
-  padding: 1rem;
-  border-bottom: 1px solid #ddd;
-  font-size: 1.1rem;
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  font-size: 14px;
 }
-.error {
-  color: red;
-  font-size: 1rem;
+
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 6px rgba(40,167,69,0.3);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 15%;
+  margin-left: 85%;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.table {
+  margin-top: 30px;
+}
+
+.table th, .table td {
+  vertical-align: middle !important;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #e2e6ea;
 }
 </style>
