@@ -3,21 +3,20 @@ package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminReques
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class SanPhamAdminRequest {
+public class ImeiAdminRequest {
     private Integer id;
 
-    private String maSanPham;
+    private String soImei;
 
-    private String tenSanPham;
+    private TrangThaiImei trangThaiImei;
 
-    private String thuongHieu;
+    private String nhaMang;
 
-    private Integer soLuongTonKho;
-
-    private Integer idNhaCungCap;
+    private Integer idSanPhamChiTiet;
 
 }

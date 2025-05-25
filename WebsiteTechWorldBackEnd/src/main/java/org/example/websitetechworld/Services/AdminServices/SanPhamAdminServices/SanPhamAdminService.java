@@ -63,9 +63,15 @@ public class SanPhamAdminService {
     }
 
     @Transactional
-    public SanPham createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
-        SanPham sanPham = modelMapper.map(sanPhamAdminRequest, SanPham.class);
-        return sanPhamRepo.save(sanPham);
+    public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
+        SanPham sanPham = sanPhamRepo.save(modelMapper.map(sanPhamAdminRequest, SanPham.class));
+        if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
+            NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
+
+            sanPham.setIdNhaCungCap(nhaCungCap);
+        }
+        return convert(sanPham);
     }
 
     @Transactional
