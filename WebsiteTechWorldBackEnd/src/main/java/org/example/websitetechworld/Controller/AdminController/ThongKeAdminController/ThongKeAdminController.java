@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping ("/thong-ke")
+@RequestMapping ("/admin/thong-ke")
 public class ThongKeAdminController {
 
     private final ThongKeAdminService thongKeAdminService;

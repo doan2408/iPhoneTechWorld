@@ -3,15 +3,19 @@ package org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminSer
 import jakarta.persistence.EntityManager;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Repository.PhieuGiamGiaRepository;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -47,11 +51,36 @@ public class PhieuGiamGiaAdminServices {
     }
 
     //hien thi pgg
-    public List<PhieuGiamGiaAdminResponse> getPagePhieuGiamGia (Integer pageNo, Integer pageSize){
+    public Page<PhieuGiamGiaAdminResponse> getPagePhieuGiamGia (
+            String search,
+            TrangThaiPGG trangThai,
+            LocalDate ngayBatDau,
+            LocalDate ngayKetThuc,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
 
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return phieuGiamGiaRepository.findAll(pageable).stream()
-                .map(i -> modelMapper.map(i, PhieuGiamGiaAdminResponse.class)).toList();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        LocalDate now = LocalDate.now();
+        Page<PhieuGiamGia> pagePhieuGiamGia = phieuGiamGiaRepository.findAll(search, trangThai, ngayBatDau, ngayKetThuc, pageable);
+        pagePhieuGiamGia.forEach(entity -> {
+            if (now.isBefore(entity.getNgayBatDau())) {
+                entity.setTrangThai(TrangThaiPGG.NOT_STARTED);
+            } else if (now.isAfter(entity.getNgayKetThuc())) {
+                entity.setTrangThai(TrangThaiPGG.EXPIRED);
+            } else {
+                entity.setTrangThai(TrangThaiPGG.ACTIVE);
+            }
+            phieuGiamGiaRepository.save(entity);
+        });
+
+        return pagePhieuGiamGia.map(entity -> modelMapper.map(entity, PhieuGiamGiaAdminResponse.class));
     }
 
     //detail pgg
@@ -91,7 +120,7 @@ public class PhieuGiamGiaAdminServices {
         phieuGiamGia.setIsGlobal(phieuGiamGiaResponse.getIsGlobal());
         phieuGiamGia.setTrangThai(phieuGiamGiaResponse.getTrangThai());
 
-        return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+        return modelMapper.map(phieuGiamGiaRepository.save(phieuGiamGia), PhieuGiamGiaAdminResponse.class);
     }
 
 
