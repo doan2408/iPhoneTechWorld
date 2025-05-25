@@ -23,11 +23,11 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     @Query(value = "SELECT COUNT(*) FROM hoa_don WHERE MONTH(ngay_tao) = MONTH(GETDATE()) AND YEAR(ngay_tao) = YEAR(GETDATE())", nativeQuery = true)
     Integer dashboardSoDonHang ();
 
-    @Query(value = "SELECT COUNT(*) FROM san_pham WHERE MONTH(ngay_tao) = MONTH(GETDATE()) AND YEAR(ngay_tao) = YEAR(GETDATE())", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM san_pham", nativeQuery = true)
     Integer dashboardSoSanPham ();
 
-    @Query(value = "SELECT COUNT(*) FROM khach_hang WHERE MONTH(ngay_tao) = MONTH(GETDATE()) AND YEAR(ngay_tao) = YEAR(GETDATE())", nativeQuery = true)
-    Integer dashboardSoKhachHang ();
+    @Query(value = "SELECT COUNT(*) FROM khach_hang", nativeQuery = true)
+    Integer dashboardSoKhachHang();
 
     @Query(value = """
         SELECT TOP 5 
@@ -81,7 +81,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
             UNION ALL
             SELECT DATEADD(MONTH, 1, dau_thang)
             FROM Thang
-            WHERE MONTH(dau_thang) < 12
+            WHERE MONTH(dau_thang) < MONTH(GETDATE())
         )
         SELECT 
             FORMAT(dau_thang, 'yyyy-MM') AS thang,
