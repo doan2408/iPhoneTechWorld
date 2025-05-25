@@ -1,23 +1,25 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class SanPhamAdminRequest {
+public class RamAdminRequest {
     private Integer id;
 
-    private String maSanPham;
+    private String dungLuong;
 
-    private String tenSanPham;
+    private String loai;
 
-    private String thuongHieu;
+    private String tocDoDocGhi;
 
-    private Integer soLuongTonKho;
+    private String nhaSanXuat;
 
-    private Integer idNhaCungCap;
+    private LocalDate namRaMat;
 
 }

@@ -4,20 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class SanPhamAdminRequest {
+public class HinhAnhAdminRequest {
     private Integer id;
 
-    private String maSanPham;
+    private Integer idSanPhamChiTiet;
 
-    private String tenSanPham;
+    private String url;
 
-    private String thuongHieu;
-
-    private Integer soLuongTonKho;
-
-    private Integer idNhaCungCap;
+    private String imagePublicId;
 
 }

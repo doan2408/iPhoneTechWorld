@@ -1,23 +1,23 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class SanPhamAdminRequest {
+public class CameraSauAdminRequest {
     private Integer id;
 
-    private String maSanPham;
+    private String loaiCamera;
 
-    private String tenSanPham;
+    private String doPhanGiai;
 
-    private String thuongHieu;
+    private String khauDo;
 
-    private Integer soLuongTonKho;
+    private String loaiZoom;
 
-    private Integer idNhaCungCap;
-
+    private String cheDoChup;
 }
