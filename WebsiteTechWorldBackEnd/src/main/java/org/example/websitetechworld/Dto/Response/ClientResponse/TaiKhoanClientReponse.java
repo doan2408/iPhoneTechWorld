@@ -1,19 +1,19 @@
-package org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest;
+package org.example.websitetechworld.Dto.Response.ClientResponse;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
-import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
-
+import lombok.Setter;
+import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class AdminClientRequest {
+public class TaiKhoanClientReponse {
     private Integer id;
 
     private String maKhachHang;
@@ -38,7 +38,9 @@ public class AdminClientRequest {
 
     private BigDecimal soDiemHienTai;
 
-    private HangKhachHang hangKhachHang;
+    private String hangKhachHang;
 
-    private TrangThaiKhachHang trangThai;
+    private String trangThai;
+
+    private AdminDiaChiResponse diaChiChinh;
 }
