@@ -29,6 +29,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     @Query(value = "SELECT COUNT(*) FROM khach_hang", nativeQuery = true)
     Integer dashboardSoKhachHang();
 
+
     @Query(value = """
         SELECT TOP 5 
             sp.ma_san_pham, 

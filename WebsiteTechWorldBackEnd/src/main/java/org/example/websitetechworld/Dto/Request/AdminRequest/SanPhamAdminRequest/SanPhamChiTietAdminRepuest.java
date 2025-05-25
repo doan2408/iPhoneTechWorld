@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SanPhamChiTietAdminRepuest {
-
     private Integer id;
 
     private String maSanPhamChiTiet;

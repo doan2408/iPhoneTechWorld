@@ -3,6 +3,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.springframework.data.domain.Page;
@@ -17,21 +18,20 @@ public class SanPhamAdminController {
     private final SanPhamAdminService adminService;
 
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<Page<SanPhamAdminResponse>> getSanPham(@RequestParam(value = "page",defaultValue = "0") int page) {
-        int pageSize = 2;
+        int pageSize = 5;
         return ResponseEntity.ok(adminService.getAllSanPham(page, pageSize));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SanPhamAdminResponse> getSanPhamById(@PathVariable("id") int id) {
         return ResponseEntity.ok(adminService.detailSanPhamAdmin(id));
-
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<SanPham> createSanPham(@RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
-        SanPham sanPham = adminService.createSanPhamAdmin(sanPhamAdminRequest);
+    @PostMapping
+    public ResponseEntity<SanPhamAdminResponse> createSanPham(@RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
+        SanPhamAdminResponse sanPham = adminService.createSanPhamAdmin(sanPhamAdminRequest);
         return ResponseEntity.ok(sanPham);
     }
 

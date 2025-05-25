@@ -1,24 +1,24 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import { getAllStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
+import { getAllClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { addClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { updateClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 
-const staffList = ref([]);
+const clientList = ref([]);
 const isLoading = ref(false);
 const error = ref("");
 
 const currentPage = ref(0);
 const totalPages = ref(0);
 
-//load staff
+//load client
 // nếu người dùng không truyền page khi gọi hàm
 //  → nó sẽ tự động dùng 0.
-const loadStaff = async (page = 0) => {
+const loadClient = async (page = 0) => {
   try {
     isLoading.value = true;
-    const response = await getAllStaff(page);
-    staffList.value = response.content;
+    const response = await getAllClient(page);
+    clientList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
   } catch (err) {
@@ -28,27 +28,26 @@ const loadStaff = async (page = 0) => {
   }
 };
 
-// add nhan vien phía admin
-const staffRequest = ref({
-  tenNhanVien: "", // Tên nhân viên
+// add khach hang phía admin
+const clientRequest = ref({
+  tenKhachHang: "", // Tên khách hàng
   trangThai: "ENABLE", //Mặc định là đang làm
-  chucVu: "STAFF", // Mặc định là Nhân Viên
   gioiTinh: true, // Mặc định là Nam
 });
 
-const handleAddStaff = async () => {
+const handleAddClient = async () => {
   try {
-    const request = await addStaff(staffRequest.value);
-    console.log(staffRequest);
-    staffRequest.value = {
+    const request = await addClient(clientRequest.value);
+    console.log(clientRequest);
+    clientRequest.value = {
       trangThai: "ENABLE", //Mặc định là đang làm
-      chucVu: "STAFF", // Mặc định là Nhân Viên
+      chucVu: "STAFF", // Mặc định là khach hang
       gioiTinh: true,
     }; //reset form
-    await loadStaff();
-    alert("them nhan vien thanh cong");
+    await loadClient();
+    alert("them khach hang thanh cong");
   } catch (err) {
-    err.value = err.message || "An error was thrown while adding the staff";
+    err.value = err.message || "An error was thrown while adding the client";
   }
 };
 
@@ -59,7 +58,7 @@ const previousPage = () => {
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadStaff(currentPage.value);
+  loadClient(currentPage.value);
 };
 
 //next page
@@ -69,37 +68,37 @@ const nextPage = () => {
   } else {
     currentPage.value = 0;
   }
-  loadStaff(currentPage.value);
+  loadClient(currentPage.value);
 };
 
 onMounted(() => {
-  loadStaff();
+  loadClient();
 });
 </script>
 
 <template>
-  <div class="container mt-4">
-    <!-- Form thêm nhân viên -->
-    <h3>Thêm nhân viên</h3>
-    <form @submit.prevent="handleAddStaff">
+  <div class="client-container">
+    <!-- Form thêm khách hàng -->
+    <h3>Thêm khách hàng</h3>
+    <form @submit.prevent="handleAddClient">
       <div class="row">
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.tenNhanVien"
-            placeholder="Tên nhân viên"
+            v-model="clientRequest.tenNhanVien"
+            placeholder="Tên khách hàng"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.taiKhoan"
+            v-model="clientRequest.taiKhoan"
             placeholder="Tên đăng nhập"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.matKhau"
+            v-model="clientRequest.matKhau"
             placeholder="Mật khẩu"
             type="password"
             class="form-control"
@@ -107,30 +106,30 @@ onMounted(() => {
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.email"
+            v-model="clientRequest.email"
             placeholder="Email"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.sdt"
+            v-model="clientRequest.sdt"
             placeholder="Số điện thoại"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.diaChi"
+            v-model="clientRequest.diaChi"
             placeholder="Địa chỉ"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
           <select
-            v-model="staffRequest.trangThai"
+            v-model="clientRequest.trangThai"
             placeholder="Trạng thái"
-            class="form-control"
+            class="form-select"
           >
             <option value="ENABLE">Đang làm</option>
             <option value="DISABLE">Nghỉ</option>
@@ -138,30 +137,30 @@ onMounted(() => {
         </div>
         <div class="col-md-6 mb-2">
           <select
-            v-model="staffRequest.chucVu"
+            v-model="clientRequest.chucVu"
             placeholder="Chức vụ"
-            class="form-control"
+            class="form-select"
           >
             <option value="STAFF">Nhân Viên</option>
             <option value="ADMIN">Quản lý</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
-          <select v-model="staffRequest.gioiTinh" class="form-control">
+          <select v-model="clientRequest.gioiTinh" class="form-select">
             <option :value="true">Nam</option>
             <option :value="false">Nữ</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
           <input
-            v-model="staffRequest.namSinh"
+            v-model="clientRequest.namSinh"
             placeholder="Năm sinh"
             type="date"
             class="form-control"
           />
         </div>
       </div>
-      <button type="submit" class="btn btn-success mt-2">Thêm nhân viên</button>
+      <button type="submit" class="btn btn-success mt-2">Thêm khách hàng</button>
     </form>
     <hr />
 
@@ -169,12 +168,12 @@ onMounted(() => {
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
     </div>
-    <h2>Danh sách nhân viên</h2>
+    <h2>Danh sách khách hàng</h2>
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>Mã nhân viên</th>
-          <th>Tên nhân viên</th>
+          <th>Mã khách hàng</th>
+          <th>Tên khách hàng</th>
           <th>Tên đăng nhập</th>
           <th>Email</th>
           <th>Địa chỉ</th>
@@ -186,20 +185,20 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="staff in staffList" :key="staff.id">
-          <td>{{ staff.maNhanVien }}</td>
-          <td>{{ staff.tenNhanVien }}</td>
-          <td>{{ staff.taiKhoan }}</td>
-          <td>{{ staff.email }}</td>
-          <td>{{ staff.sdt }}</td>
-          <td>{{ staff.diaChi }}</td>
-          <td>{{ staff.trangThai }}</td>
-          <td>{{ staff.chucVu }}</td>
-          <td>{{ staff.gioiTinh ? "Nam" : "Nữ" }}</td>
-          <td>{{ new Date(staff.namSinh).getFullYear() }}</td>
+        <tr v-for="client in clientList" :key="client.id">
+          <td>{{ client.maKhachHang }}</td>
+          <td>{{ client.tenNhanVien }}</td>
+          <td>{{ client.taiKhoan }}</td>
+          <td>{{ client.email }}</td>
+          <td>{{ client.sdt }}</td>
+          <td>{{ client.diaChi }}</td>
+          <td>{{ client.trangThai }}</td>
+          <td>{{ client.chucVu }}</td>
+          <td>{{ client.gioiTinh ? "Nam" : "Nữ" }}</td>
+          <td>{{ new Date(client.namSinh).getFullYear() }}</td>
           <td>
             <RouterLink
-              :to="`/admin/staff/${staff.id}`"
+              :to="`/admin/client/${client.id}`"
               class="btn btn-primary btn-sm"
             >
               Update
@@ -218,21 +217,72 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.container {
-  margin-left: 215px;
+.client-container {
+  margin-left: 10px; /* đúng bằng chiều rộng sidebar */
+  padding: 20px;
+  width: 99%;
+  box-sizing: border-box;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+
+.client-container h3 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #222;
 }
-li {
-  padding: 1rem;
-  border-bottom: 1px solid #ddd;
-  font-size: 1.1rem;
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  font-size: 14px;
 }
-.error {
-  color: red;
-  font-size: 1rem;
+
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 6px rgba(40,167,69,0.3);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 15%;
+  margin-left: 85%;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.table {
+  margin-top: 30px;
+}
+
+.table th, .table td {
+  vertical-align: middle !important;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #e2e6ea;
 }
 </style>

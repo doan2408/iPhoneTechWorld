@@ -3,13 +3,17 @@ package org.example.websitetechworld.Controller.AdminController.HoaDonAdminContr
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
+import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
+import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/hoa-don")
@@ -26,13 +31,17 @@ public class HoaDonAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final LichSuHoaDonAdminServices lichSuHoaDonAdminServices;
     private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
+    private final ThanhToanFactory thanhToanFactory;
+    private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
 
     private static final int PAGE_SIZE = 4;
 
-    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices) {
+    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.lichSuHoaDonAdminServices = lichSuHoaDonAdminServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
+        this.thanhToanFactory = thanhToanFactory;
+        hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
     }
 
     @GetMapping
@@ -108,7 +117,9 @@ public class HoaDonAdminController {
     @DeleteMapping("/hdct/{hdctId}")
     public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable Integer hdctId){
         try {
+            ChiTietHoaDon chiTietHoaDon = hoaDonChiTietAdminServices.findById(hdctId);
             hoaDonChiTietAdminServices.deleleHdct(hdctId);
+            hoaDonAdminService.updateTongTien(chiTietHoaDon.getIdHoaDon().getId());
             return ResponseEntity.ok("Xóa thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -125,6 +136,13 @@ public class HoaDonAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Chon khach hang thất bại: " + e.getMessage());
         }
+    }
+
+
+    @PutMapping("/{idHoaDon}/thanh-toan")
+    public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest){
+        ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
+        return ResponseEntity.ok(response);
     }
 
 
