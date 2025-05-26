@@ -26,7 +26,7 @@ public class NhanVienAdminService {
         adminNhanVienResponse.setMaNhanVien(nhanVien.getMaNhanVien());
         adminNhanVienResponse.setTenNhanVien(nhanVien.getTenNhanVien());
         adminNhanVienResponse.setTaiKhoan(nhanVien.getTaiKhoan());
-        adminNhanVienResponse.setMatKhau(nhanVien.getMatKhau());
+//        adminNhanVienResponse.setMatKhau(nhanVien.getMatKhau());
         adminNhanVienResponse.setEmail(nhanVien.getEmail());
         adminNhanVienResponse.setSdt(nhanVien.getSdt());
         adminNhanVienResponse.setDiaChi(nhanVien.getDiaChi());
@@ -67,10 +67,10 @@ public class NhanVienAdminService {
             }
         } else {
             // Khi là update, chỉ cập nhật mật khẩu nếu nó được truyền từ request
-            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isEmpty()) {
-                String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
-                nhanVien.setMatKhau(encodedPassword);
-            }
+//            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isEmpty()) {
+//                String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
+//                nhanVien.setMatKhau(encodedPassword);
+//            }
         }
         nhanVien.setEmail(adminStaffRequest.getEmail());
         nhanVien.setSdt(adminStaffRequest.getSdt());
