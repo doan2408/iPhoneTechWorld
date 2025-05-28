@@ -47,6 +47,11 @@ function toggleUserstMenu() {
   showUsers.value = !showUsers.value
 }
 
+const showOrders = ref(false)
+function toggleOrderMenu() {
+  showOrders.value = !showOrders.value
+}
+
 </script>
 
 <template>
@@ -59,7 +64,7 @@ function toggleUserstMenu() {
       <nav>
         <ul>
           <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
-          
+
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
@@ -77,12 +82,19 @@ function toggleUserstMenu() {
             <i :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showUsers" class="submenu">
-               <li><router-link to="/admin/staff">Quản lý nhân viên</router-link></li>
-               <li><router-link to="/admin/client">Quản lý khách hàng</router-link></li>
+            <li><router-link to="/admin/staff">Quản lý nhân viên</router-link></li>
+            <li><router-link to="/admin/client">Quản lý khách hàng</router-link></li>
           </ul>
 
-         
-          <li><router-link to="/admin/orders">Quản lý đơn hàng</router-link></li>
+          <li @click="toggleOrderMenu" class="menu-toggle">
+            Quản lý đơn hàng
+            <i :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+          </li>
+          <ul v-if="showOrders" class="submenu">
+            <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
+            <li><router-link to="/admin/client">Quản lý giao hàng</router-link></li>
+          </ul>
+
           <li><router-link to="/admin/promotions">Khuyến mãi</router-link></li>
           <li><router-link to="/admin/reports">Báo cáo</router-link></li>
         </ul>
