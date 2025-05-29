@@ -47,7 +47,7 @@ public class HoaDonAdminController {
 
     @GetMapping
     public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo,
-                                                  @RequestParam(defaultValue = "5", value = "pageSize") int pageSize){
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize){
         return hoaDonAdminService.getPageHoaDon(pageNo,pageSize);
     }
     @GetMapping("/{idHoaDon}")
