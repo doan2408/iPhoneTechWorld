@@ -66,7 +66,7 @@ function toggleUserstMenu() {
             <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
-            <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
+            <li><router-link to="/admin/products">Danh sách sản phxxẩm</router-link></li>
             <li><router-link to="/admin/products/add">Thêm sản phẩm</router-link></li>
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
