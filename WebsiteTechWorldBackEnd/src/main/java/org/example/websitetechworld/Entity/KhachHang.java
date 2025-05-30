@@ -125,4 +125,9 @@ public class KhachHang implements JointAccount {
         return this.email;
     }
 
+    @Override
+    public String getSdt() {
+        return this.sdt;
+    }
+
 }

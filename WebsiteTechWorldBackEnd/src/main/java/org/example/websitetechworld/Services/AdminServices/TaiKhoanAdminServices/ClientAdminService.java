@@ -1,8 +1,6 @@
 package org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
-import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
 import org.example.websitetechworld.Entity.DiaChi;
@@ -10,21 +8,23 @@ import org.example.websitetechworld.Entity.GioHang;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
+import org.example.websitetechworld.Repository.DiaChiRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ClientAdminService {
     private final KhachHangRepository khachHangRepository;
+    private final DiaChiRepository diaChiRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -47,27 +47,27 @@ public class ClientAdminService {
         adminClientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
         adminClientResponse.setTrangThai(khachHang.getTrangThai().name());
 
-        // Lọc địa chỉ chính
-        DiaChi diaChiChinh = khachHang.getDiaChis().stream()
-                .filter(dc -> dc.getDiaChiChinh() == true) // Giả sử 1 là địa chỉ chính
-                .findFirst() // Lấy địa chỉ chính đầu tiên nếu có
-                .orElse(null); // Nếu không có địa chỉ chính, trả về null
+        // Tạo danh sách địa chỉ
+        List<AdminDiaChiResponse> diaChiResponses = khachHang.getDiaChis().stream()
+                .map(dc -> {
+                    AdminDiaChiResponse diaChi = new AdminDiaChiResponse();
+                    diaChi.setId(dc.getId());
+                    diaChi.setTenKhachHang(dc.getIdKhachHang().getTenKhachHang());
+                    diaChi.setTenNguoiNhan(dc.getTenNguoiNhan());
+                    diaChi.setSdtNguoiNhan(dc.getSdtNguoiNhan());
+                    diaChi.setSoNha(dc.getSoNha());
+                    diaChi.setTenDuong(dc.getTenDuong());
+                    diaChi.setXaPhuong(dc.getXaPhuong());
+                    diaChi.setQuanHuyen(dc.getQuanHuyen());
+                    diaChi.setTinhThanhPho(dc.getTinhThanhPho());
+                    diaChi.setDiaChiChinh(dc.getDiaChiChinh());
+                    return diaChi;
+                })
+                .collect(Collectors.toList());
 
-        // Chỉ lấy địa chỉ chính nếu có
-        if (diaChiChinh != null) {
-            AdminDiaChiResponse adminDiaChiResponse = new AdminDiaChiResponse();
-            adminDiaChiResponse.setId(diaChiChinh.getId());
-            adminDiaChiResponse.setTenKhachHang(diaChiChinh.getIdKhachHang().getTenKhachHang());
-            adminDiaChiResponse.setTenNguoiNhan(diaChiChinh.getTenNguoiNhan());
-            adminDiaChiResponse.setSoNha(diaChiChinh.getSoNha());
-            adminDiaChiResponse.setTenDuong(diaChiChinh.getTenDuong());
-            adminDiaChiResponse.setXaPhuong(diaChiChinh.getXaPhuong());
-            adminDiaChiResponse.setQuanHuyen(diaChiChinh.getQuanHuyen());
-            adminDiaChiResponse.setTinhThanhPho(diaChiChinh.getTinhThanhPho());
-            adminDiaChiResponse.setDiaChiChinh(diaChiChinh.getDiaChiChinh());
+        // Thêm danh sách địa chỉ vào response
+        adminClientResponse.setDiaChi(diaChiResponses);
 
-            adminClientResponse.setDiaChiChinh(adminDiaChiResponse);
-        }
         return adminClientResponse;
     }
 
@@ -121,5 +121,7 @@ public class ClientAdminService {
         }
         return null;
     }
+
+
 
 }
