@@ -15,4 +15,5 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
     Imei findBySoImei(String soImei);
     List<Imei> findAllBySoImeiIn(List<String> soImeis);
+
 }

@@ -10,10 +10,13 @@ const router = createRouter({
     path: '/',
     component: DefaultLayout,
     children: [
-      { path: '', component: () => import('@/views/Client/Home.vue') },
-      { path: 'home', component: () => import('@/views/Client/Home.vue') },
-      { path: 'login', component: () => import('@/views/Authentical/LoginView.vue') },
-      { path: 'category', component: () => import('@/views/Client/Category.vue') },
+      { path: '', component: () => import('@/views/Client/Home.vue'), meta: { title: 'Trang Chủ'}},
+      { path: 'home', component: () => import('@/views/Client/Home.vue'), meta: { title: 'Trang Chủ'} },
+      { path: 'login', component: () => import('@/views/Authentical/LoginView.vue'), meta: { title: 'Login'} },
+      { path: 'category', component: () => import('@/views/Client/Category.vue'), meta: { title: 'Category'} },
+      { path: 'forgot-password', component: () => import('@/views/Authentical/ForgotView.vue'), meta: { title: 'Forgot password'}},
+      { path: "verify-code", component: () => import('@/views/Authentical/VerifyCode.vue'), meta: { title: 'Verify'}},
+      { path: "reset-password", component: () => import('@/views/Authentical/ResetPassword.vue'), meta: { title: 'Reset password'}},
     ]
   },
   
@@ -68,6 +71,12 @@ router.beforeEach(async (to, from, next) => {
 });
 
 
+router.afterEach((to) => {
+  const defaultTitle = 'TechWorld';
+  if (typeof window !== 'undefined' && document) {
+    document.title = (to.meta?.title as string) || defaultTitle;
+  }
+});
 
 
 export default router;

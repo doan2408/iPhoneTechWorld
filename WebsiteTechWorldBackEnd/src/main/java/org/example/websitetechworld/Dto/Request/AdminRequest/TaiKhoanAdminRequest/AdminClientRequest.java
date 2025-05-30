@@ -1,14 +1,11 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
-import org.hibernate.annotations.Nationalized;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -32,13 +32,14 @@ public class NhanVienAdminController {
         return ResponseEntity.ok(nhanVienUpdate);
     }
 
+
     @PostMapping()
     public ResponseEntity<?> addStaff(@RequestBody AdminStaffRequest adminStaffRequest) {
         AdminStaffRequest nhanVienAdd = nhanVienAdminService.createStaff(adminStaffRequest);
         return ResponseEntity.ok(nhanVienAdd);
     }
-
-
+    
+    //không nên xóa tk nhân viên
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStaff(@PathVariable Integer id) {
         nhanVienAdminService.deleteStaff(id);

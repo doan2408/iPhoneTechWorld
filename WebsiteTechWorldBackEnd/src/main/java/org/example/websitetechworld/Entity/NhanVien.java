@@ -98,5 +98,10 @@ public class NhanVien implements JointAccount {
         return this.id;
     }
 
+    @Override
+    public String getEmail() {
+        return this.email;
+    }
+
 
 }

@@ -28,10 +28,18 @@ public class SanPhamChiTietAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<SanPhamChiTietResponse> createSPCT(@RequestBody SanPhamChiTietAdminRepuest sanPhamChiTietAdminRepuest) {
         SanPhamChiTietResponse response = sanPhamChiTietAdminService.createSanPhamChiTiet(sanPhamChiTietAdminRepuest);
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SanPhamChiTietResponse> updateSPCT(@PathVariable Integer id, @RequestBody SanPhamChiTietAdminRepuest sanPhamChiTietAdminRepuest) {
+        SanPhamChiTietResponse response = sanPhamChiTietAdminService.updateSanPhamChiTiet(id, sanPhamChiTietAdminRepuest);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

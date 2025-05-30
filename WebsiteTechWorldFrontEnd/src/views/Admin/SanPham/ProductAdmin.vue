@@ -17,8 +17,7 @@ const loadSanPham = async (page = 0) => {
   try {
     isLoading.value = true;
     const response = await getAllSanPham(page);
-    sanPhamList.value = response.content;
-    totalPages.value = response.totalPages;
+    sanPhamList.value = response.content;talPages.value = response.totalPages;
     currentPage.value = page;
   } catch (err) {
     error.value = err.message || "Lỗi khi tải sản phẩm";
@@ -99,8 +98,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  margin-left: 215px;
-}
+  }
 
 ul {
   list-style: none;

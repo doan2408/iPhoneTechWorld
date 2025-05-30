@@ -78,7 +78,7 @@ public class KhachHang implements JointAccount {
     @Column(name = "trang_thai", length = 50)
     private TrangThaiKhachHang trangThai;
 
-    @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DiaChi> diaChis = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "idKhachHang", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
@@ -87,10 +87,11 @@ public class KhachHang implements JointAccount {
     @OneToMany(mappedBy = "idKhachHang", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL,orphanRemoval = true)
+
+    @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<KhachHangGiamGia> khachHangGiamGias = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy = "idKhachHang", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private GioHang gioHang;
 
 
@@ -117,6 +118,11 @@ public class KhachHang implements JointAccount {
     @Override
     public String getFullName() {
         return this.tenKhachHang;
+    }
+
+    @Override
+    public String getEmail() {
+        return this.email;
     }
 
 }
