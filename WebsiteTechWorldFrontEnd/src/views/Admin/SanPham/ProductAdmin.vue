@@ -98,8 +98,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  margin-left: 215px;
-}
+  }
 
 ul {
   list-style: none;

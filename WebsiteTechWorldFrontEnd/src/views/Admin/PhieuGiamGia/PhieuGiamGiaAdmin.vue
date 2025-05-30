@@ -324,7 +324,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-    margin-left: 215px;
+    width: 100%;
 }
 
 .row {

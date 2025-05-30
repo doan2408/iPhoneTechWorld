@@ -22,7 +22,7 @@ const loadClient = async (page = 0) => {
     currentPage.value = page;
     totalPages.value = response.totalPages;
   } catch (err) {
-    err.value = err.message || "An error was thrown while loading the satff";
+    error.value = err.message || "An error was thrown while loading the satff";
   } finally {
     isLoading.value = false;
   }
@@ -31,17 +31,15 @@ const loadClient = async (page = 0) => {
 // add khach hang phía admin
 const clientRequest = ref({
   tenKhachHang: "", // Tên khách hàng
-  trangThai: "ENABLE", //Mặc định là đang làm
+  trangThai: "ACTIVE", //Mặc định là đang làm
   gioiTinh: true, // Mặc định là Nam
 });
 
 const handleAddClient = async () => {
   try {
     const request = await addClient(clientRequest.value);
-    console.log(clientRequest);
     clientRequest.value = {
-      trangThai: "ENABLE", //Mặc định là đang làm
-      chucVu: "STAFF", // Mặc định là khach hang
+      trangThai: "ACTIVE", //Mặc định là đang làm
       gioiTinh: true,
     }; //reset form
     await loadClient();
@@ -84,7 +82,7 @@ onMounted(() => {
       <div class="row">
         <div class="col-md-6 mb-2">
           <input
-            v-model="clientRequest.tenNhanVien"
+            v-model="clientRequest.tenKhachHang"
             placeholder="Tên khách hàng"
             class="form-control"
           />
@@ -131,18 +129,8 @@ onMounted(() => {
             placeholder="Trạng thái"
             class="form-select"
           >
-            <option value="ENABLE">Đang làm</option>
-            <option value="DISABLE">Nghỉ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <select
-            v-model="clientRequest.chucVu"
-            placeholder="Chức vụ"
-            class="form-select"
-          >
-            <option value="STAFF">Nhân Viên</option>
-            <option value="ADMIN">Quản lý</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
@@ -160,7 +148,9 @@ onMounted(() => {
           />
         </div>
       </div>
-      <button type="submit" class="btn btn-success mt-2">Thêm khách hàng</button>
+      <button type="submit" class="btn btn-success mt-2">
+        Thêm khách hàng
+      </button>
     </form>
     <hr />
 
@@ -179,29 +169,44 @@ onMounted(() => {
           <th>Địa chỉ</th>
           <th>Số điện thoại</th>
           <th>Trạng thái</th>
-          <th>Chức vụ</th>
           <th>Giới tính</th>
           <th>Năm sinh</th>
+          <th colspan="2" style="text-align: center;">Thao tác</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="client in clientList" :key="client.id">
           <td>{{ client.maKhachHang }}</td>
-          <td>{{ client.tenNhanVien }}</td>
+          <td>{{ client.tenKhachHang }}</td>
           <td>{{ client.taiKhoan }}</td>
           <td>{{ client.email }}</td>
+          <td>
+            {{ client.diaChi.find((dc) => dc.diaChiChinh === true)?.soNha }},
+            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.tenDuong }},
+            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.xaPhuong }},
+            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.quanHuyen }},
+            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.tinhThanhPho }}
+          </td>
           <td>{{ client.sdt }}</td>
-          <td>{{ client.diaChi }}</td>
           <td>{{ client.trangThai }}</td>
-          <td>{{ client.chucVu }}</td>
           <td>{{ client.gioiTinh ? "Nam" : "Nữ" }}</td>
-          <td>{{ new Date(client.namSinh).getFullYear() }}</td>
+          <td>{{ new Date(client.ngaySinh).getFullYear() }}</td>
           <td>
             <RouterLink
               :to="`/admin/client/${client.id}`"
               class="btn btn-primary btn-sm"
+              title="Chỉnh sửa"
             >
-              Update
+              <i class="bi bi-pencil-square"></i>
+            </RouterLink>
+          </td>
+          <td>
+            <RouterLink
+              :to="`/admin/client/addresses/${client.id}`"
+              class="btn btn-warning btn-sm"
+              title="Xem địa chỉ"
+            >
+              <i class="bi bi-geo-alt"></i>  
             </RouterLink>
           </td>
         </tr>
@@ -218,71 +223,310 @@ onMounted(() => {
 
 <style scoped>
 .client-container {
-  margin-left: 10px; /* đúng bằng chiều rộng sidebar */
-  padding: 20px;
+  margin-left: 10px;
+  padding: 30px;
   width: 99%;
   box-sizing: border-box;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
 
 .client-container h3 {
+  margin-bottom: 25px;
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 24px;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.client-container h2 {
   margin-bottom: 20px;
   font-weight: 600;
-  color: #222;
-}
-
-.form-control {
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.form-control:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 6px rgba(40,167,69,0.3);
-}
-
-.btn-success {
-  background-color: #28a745;
-  border: none;
-  padding: 10px 20px;
-  font-weight: 600;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 15%;
-  margin-left: 85%;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.table {
+  color: #2c3e50;
+  font-size: 22px;
+  text-align: center;
   margin-top: 30px;
 }
 
-.table th, .table td {
-  vertical-align: middle !important;
+/* Form styling */
+form {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
 }
 
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 2px solid #e1e8ed;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  background: white;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #95a5a6;
+  font-weight: 400;
+}
+
+/* Button styling */
+.btn-success {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  border: none;
+  padding: 12px 30px;
+  font-weight: 600;
+  border-radius: 25px;
+  cursor: pointer;
+  width: 15%;
+  margin-left: 85%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  color: white;
+  font-size: 14px;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Table styling */
+.table {
+  margin-top: 30px;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: none;
+  width: 100%;
+}
+
+/* Table header styling - FIXED */
+.table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: table-header-group; /* Ensure header is displayed */
+}
+
+.table thead tr {
+  display: table-row; /* Ensure header row is displayed */
+}
+
+.table thead th {
+  color: white !important; /* Force white text */
+  font-weight: 600 !important;
+  padding: 18px 15px !important;
+  border: none !important;
+  font-size: 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  display: table-cell !important; /* Ensure header cells are displayed */
+  vertical-align: middle !important;
+  text-align: left !important;
+  background: transparent !important; /* Let the thead background show */
+}
+
+/* Ensure the text in headers is visible */
+.table thead th:nth-child(1) { content: "Mã khách hàng"; }
+.table thead th:nth-child(2) { content: "Tên khách hàng"; }
+.table thead th:nth-child(3) { content: "Tên đăng nhập"; }
+.table thead th:nth-child(4) { content: "Email"; }
+.table thead th:nth-child(5) { content: "Địa chỉ"; }
+.table thead th:nth-child(6) { content: "Số điện thoại"; }
+.table thead th:nth-child(7) { content: "Trạng thái"; }
+.table thead th:nth-child(8) { content: "Giới tính"; }
+.table thead th:nth-child(9) { content: "Năm sinh"; }
+.table thead th:nth-child(10) { content: "Thao tác"; text-align: center !important; }
+.table thead th:nth-child(11) { content: "Thao tác"; text-align: center !important; }
+
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+  padding: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Action buttons styling */
+.btn-primary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+  margin-right: 5px;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1f4e79 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+  color: white;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+/* Icon styling */
+.bi {
+  font-size: 14px;
+}
+
+/* Pagination styling */
 .pagination {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
 .pagination button {
-  padding: 6px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
   cursor: pointer;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s ease;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(116, 185, 255, 0.3);
 }
 
 .pagination button:hover {
-  background-color: #e2e6ea;
+  background: linear-gradient(135deg, #0984e3 0%, #0770c4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+}
+
+.pagination span {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+  padding: 10px 20px;
+  background: #ecf0f1;
+  border-radius: 20px;
+}
+
+/* Loading state */
+.text-center p {
+  font-size: 18px;
+  color: #7f8c8d;
+  font-weight: 500;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* HR styling */
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 30px 0;
+  border-radius: 2px;
+}
+
+/* Address cell styling */
+.table td:nth-child(5) {
+  max-width: 200px;
+  word-wrap: break-word;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Action buttons container */
+.table td:nth-last-child(-n+2) {
+  text-align: center;
+  padding: 10px 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-success {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+  
+  .client-container {
+    padding: 15px;
+  }
+  
+  .table {
+    font-size: 12px;
+  }
+  
+  .table td:nth-child(5) {
+    max-width: 150px;
+    font-size: 11px;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+
+/* Hover effect for action buttons */
+.table tbody tr:hover .btn-primary,
+.table tbody tr:hover .btn-warning {
+  transform: scale(1.1);
 }
 </style>

@@ -26,9 +26,13 @@ const login = async (tai_khoan, mat_khau) => {
 export const logout = async () => {
   try {
     const response = await axios.post(`${API_URL}/logout`, {}, {
-      withCredentials: true //gửi cookie để xác thực
+      withCredentials: true
     })
-    return response.data  // Thông báo đăng xuất thành công
+    // Đăng xuất thành công → xóa localStorage / Vuex state nếu có
+    localStorage.removeItem('user')  // nếu có lưu thông tin user
+    // Chuyển hướng về trang login
+    window.location.href = '/login'  // Reset hoàn toàn
+    return response.data
   } catch (error) {
     throw error.response?.data || 'Lỗi đăng xuất'
   }

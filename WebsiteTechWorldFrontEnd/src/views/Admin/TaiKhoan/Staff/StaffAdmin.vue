@@ -1,13 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { getAllStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 
 const staffList = ref([]);
 const isLoading = ref(false);
-const error = ref("");
-
 const currentPage = ref(0);
 const totalPages = ref(0);
 
@@ -28,29 +25,6 @@ const loadStaff = async (page = 0) => {
   }
 };
 
-// add nhan vien phía admin
-const staffRequest = ref({
-  tenNhanVien: "", // Tên nhân viên
-  trangThai: "ENABLE", //Mặc định là đang làm
-  chucVu: "STAFF", // Mặc định là Nhân Viên
-  gioiTinh: true, // Mặc định là Nam
-});
-
-const handleAddStaff = async () => {
-  try {
-    const request = await addStaff(staffRequest.value);
-    console.log(staffRequest);
-    staffRequest.value = {
-      trangThai: "ENABLE", //Mặc định là đang làm
-      chucVu: "STAFF", // Mặc định là Nhân Viên
-      gioiTinh: true,
-    }; //reset form
-    await loadStaff();
-    alert("them nhan vien thanh cong");
-  } catch (err) {
-    err.value = err.message || "An error was thrown while adding the staff";
-  }
-};
 
 //previous page
 const previousPage = () => {
@@ -79,90 +53,9 @@ onMounted(() => {
 
 <template>
   <div class="staff-container">
-    <!-- Form thêm nhân viên -->
-    <h3>Thêm nhân viên</h3>
-    <form @submit.prevent="handleAddStaff">
-      <div class="row">
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.tenNhanVien"
-            placeholder="Tên nhân viên"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.taiKhoan"
-            placeholder="Tên đăng nhập"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.matKhau"
-            placeholder="Mật khẩu"
-            type="password"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.email"
-            placeholder="Email"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.sdt"
-            placeholder="Số điện thoại"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.diaChi"
-            placeholder="Địa chỉ"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <select
-            v-model="staffRequest.trangThai"
-            placeholder="Trạng thái"
-            class="form-select"
-          >
-            <option value="ENABLE">Đang làm</option>
-            <option value="DISABLE">Nghỉ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <select
-            v-model="staffRequest.chucVu"
-            placeholder="Chức vụ"
-            class="form-select"
-          >
-            <option value="STAFF">Nhân Viên</option>
-            <option value="ADMIN">Quản lý</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <select v-model="staffRequest.gioiTinh" class="form-select">
-            <option :value="true">Nam</option>
-            <option :value="false">Nữ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.namSinh"
-            placeholder="Năm sinh"
-            type="date"
-            class="form-control"
-          />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-success mt-2">Thêm nhân viên</button>
-    </form>
+    <div>
+      <RouterLink :to="`/admin/staff/add`" class="btn-success">Thêm nhân viên</RouterLink>
+    </div>
     <hr />
 
     <!-- Hiển thị khi đang tải -->
@@ -183,6 +76,7 @@ onMounted(() => {
           <th>Chức vụ</th>
           <th>Giới tính</th>
           <th>Năm sinh</th>
+          <th>Thao tác</th>
         </tr>
       </thead>
       <tbody>
@@ -202,7 +96,7 @@ onMounted(() => {
               :to="`/admin/staff/${staff.id}`"
               class="btn btn-primary btn-sm"
             >
-              Update
+              Sửa
             </RouterLink>
           </td>
         </tr>
@@ -219,71 +113,265 @@ onMounted(() => {
 
 <style scoped>
 .staff-container {
-  margin-left: 10px; /* đúng bằng chiều rộng sidebar */
-  padding: 20px;
+  margin-left: 10px;
+  padding: 30px;
   width: 99%;
   box-sizing: border-box;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
 
 .staff-container h3 {
+  margin-bottom: 25px;
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 24px;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.staff-container h2 {
   margin-bottom: 20px;
   font-weight: 600;
-  color: #222;
-}
-
-.form-control {
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.form-control:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 6px rgba(40,167,69,0.3);
-}
-
-.btn-success {
-  background-color: #28a745;
-  border: none;
-  padding: 10px 20px;
-  font-weight: 600;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 15%;
-  margin-left: 85%;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.table {
+  color: #2c3e50;
+  font-size: 22px;
+  text-align: center;
   margin-top: 30px;
 }
 
-.table th, .table td {
-  vertical-align: middle !important;
+/* Form styling */
+form {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
 }
 
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 2px solid #e1e8ed;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafbfc;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  background: white;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #95a5a6;
+  font-weight: 400;
+}
+
+/* Error styling */
+.text-danger {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e74c3c;
+  margin-bottom: 5px;
+}
+
+/* Button styling */
+.btn-success {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  border: none;
+  padding: 12px 30px;
+  font-weight: 600;
+  border-radius: 25px;
+  cursor: pointer;
+  width: 15%;
+  margin-left: 85%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  color: white;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Table styling */
+.table {
+  margin-top: 30px;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: none;
+  width: 100%;
+}
+
+/* Table header styling */
+.table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: table-header-group;
+}
+
+.table thead tr {
+  display: table-row;
+}
+
+.table thead th {
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 18px 15px !important;
+  border: none !important;
+  font-size: 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+  text-align: left !important;
+  background: transparent !important;
+}
+
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+  padding: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Update button styling */
+.btn-primary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+  color: white;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1f4e79 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* Pagination styling */
 .pagination {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
 .pagination button {
-  padding: 6px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
   cursor: pointer;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s ease;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(116, 185, 255, 0.3);
 }
 
 .pagination button:hover {
-  background-color: #e2e6ea;
+  background: linear-gradient(135deg, #0984e3 0%, #0770c4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+}
+
+.pagination span {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+  padding: 10px 20px;
+  background: #ecf0f1;
+  border-radius: 20px;
+}
+
+/* Loading state */
+.text-center p {
+  font-size: 18px;
+  color: #7f8c8d;
+  font-weight: 500;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* HR styling */
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 30px 0;
+  border-radius: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-success {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+  
+  .staff-container {
+    padding: 15px;
+  }
+  
+  .table {
+    font-size: 12px;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+
+/* Hover effect for action buttons */
+.table tbody tr:hover .btn-primary {
+  transform: scale(1.1);
 }
 </style>
