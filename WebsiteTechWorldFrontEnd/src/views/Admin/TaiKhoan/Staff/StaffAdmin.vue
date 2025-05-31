@@ -63,7 +63,7 @@ onMounted(() => {
       <p>Đang tải dữ liệu...</p>
     </div>
     <h2>Danh sách nhân viên</h2>
-    <table class="table table-striped">
+    <table class="table">
       <thead>
         <tr>
           <th>Mã nhân viên</th>
@@ -87,16 +87,37 @@ onMounted(() => {
           <td>{{ staff.email }}</td>
           <td>{{ staff.sdt }}</td>
           <td>{{ staff.diaChi }}</td>
-          <td>{{ staff.trangThai }}</td>
-          <td>{{ staff.chucVu }}</td>
+          <td>
+            <span
+              class="badge"
+              :class="{
+                'badge-active': staff.trangThai === 'ENABLE',
+                'badge-inactive': staff.trangThai === 'DISABLE',
+              }"
+            >
+              {{ staff.trangThai }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="badge"
+              :class="{
+                'badge-admin': staff.chucVu === 'ADMIN',
+                'badge-staff': staff.chucVu === 'STAFF',
+              }"
+            >
+              {{ staff.chucVu }}
+            </span>
+          </td>
           <td>{{ staff.gioiTinh ? "Nam" : "Nữ" }}</td>
           <td>{{ new Date(staff.namSinh).getFullYear() }}</td>
           <td>
             <RouterLink
               :to="`/admin/staff/${staff.id}`"
               class="btn btn-primary btn-sm"
+              title="Chỉnh sửa"
             >
-              Sửa
+              <i class="bi bi-pencil-square"></i>
             </RouterLink>
           </td>
         </tr>
@@ -111,267 +132,237 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .staff-container {
   margin-left: 10px;
   padding: 30px;
   width: 99%;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f8f9fa;
   min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .staff-container h3 {
   margin-bottom: 25px;
-  font-weight: 700;
-  color: #2c3e50;
+  font-weight: 600;
+  color: #495057;
   font-size: 24px;
   text-align: center;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .staff-container h2 {
   margin-bottom: 20px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #495057;
   font-size: 22px;
   text-align: center;
   margin-top: 30px;
 }
 
-/* Form styling */
-form {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  margin-bottom: 30px;
-}
-
-.form-control, .form-select {
-  border-radius: 10px;
-  border: 2px solid #e1e8ed;
-  padding: 12px 16px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  background: #fafbfc;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-  background: white;
-  outline: none;
-}
-
-.form-control::placeholder {
-  color: #95a5a6;
-  font-weight: 400;
-}
-
-/* Error styling */
-.text-danger {
-  font-size: 12px;
-  font-weight: 500;
-  color: #e74c3c;
-  margin-bottom: 5px;
-}
-
-/* Button styling */
+/* Button styling - match với tone xanh trong ảnh */
 .btn-success {
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  background: #17a2b8;
   border: none;
   padding: 12px 30px;
-  font-weight: 600;
-  border-radius: 25px;
+  font-weight: 500;
+  border-radius: 6px;
   cursor: pointer;
   width: 15%;
   margin-left: 85%;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  transition: all 0.2s ease;
   color: white;
-  font-size: 14px;
   text-decoration: none;
+  font-size: 14px;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+  background: #138496;
 }
 
-/* Table styling */
+/* Table styling - tối giản như trong ảnh */
 .table {
   margin-top: 30px;
   background: white;
-  border-radius: 15px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
   width: 100%;
 }
 
-/* Table header styling */
+/* Table header - màu trắng như trong ảnh */
 .table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: table-header-group;
-}
-
-.table thead tr {
-  display: table-row;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .table thead th {
-  color: white !important;
-  font-weight: 600 !important;
-  padding: 18px 15px !important;
+  color: #495057 !important;
+  font-weight: 500 !important;
+  padding: 16px 12px !important;
   border: none !important;
   font-size: 14px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  display: table-cell !important;
-  vertical-align: middle !important;
   text-align: left !important;
-  background: transparent !important;
+  background: white !important;
+  border-bottom: 1px solid #dee2e6 !important;
 }
 
+/* Bỏ striped, table trắng hết */
 .table tbody tr {
-  transition: all 0.3s ease;
+  background: white !important;
+  transition: background-color 0.2s ease;
 }
 
 .table tbody tr:hover {
-  background-color: #f8f9fa;
-  transform: scale(1.01);
+  background-color: #f8f9fa !important;
 }
 
 .table th,
 .table td {
   vertical-align: middle !important;
-  padding: 15px;
-  border-bottom: 1px solid #ecf0f1;
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
 }
 
 .table tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* Update button styling */
+/* Action buttons - tone xanh tối giản */
 .btn-primary {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 6px 12px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
-  color: white;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-right: 5px;
+  color: #007bff;
   text-decoration: none;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #2980b9 0%, #1f4e79 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+  background: #f8f9fa;
+  color: #007bff;
   text-decoration: none;
-  color: white;
 }
 
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 11px;
-}
-
-/* Pagination styling */
+/* Pagination - tối giản */
 .pagination {
   margin-top: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   background: white;
   padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .pagination button {
-  padding: 10px 20px;
-  border-radius: 25px;
-  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
   cursor: pointer;
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  color: white;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(116, 185, 255, 0.3);
+  background: white;
+  color: #495057;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .pagination button:hover {
-  background: linear-gradient(135deg, #0984e3 0%, #0770c4 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+  background: #e9ecef;
+  border-color: #adb5bd;
 }
 
 .pagination span {
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 16px;
-  padding: 10px 20px;
-  background: #ecf0f1;
-  border-radius: 20px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
 }
 
 /* Loading state */
 .text-center p {
-  font-size: 18px;
-  color: #7f8c8d;
+  font-size: 16px;
+  color: #6c757d;
   font-weight: 500;
   padding: 40px;
   background: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* HR styling */
 hr {
   border: none;
-  height: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  margin: 30px 0;
-  border-radius: 2px;
+  height: 1px;
+  background: #dee2e6;
+  margin: 20px 0;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .btn-success {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 15px;
-  }
-  
-  .staff-container {
-    padding: 15px;
-  }
-  
-  .table {
-    font-size: 12px;
-  }
-  
-  .pagination {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .btn-sm {
-    padding: 4px 8px;
-    font-size: 10px;
-  }
+/* Form controls */
+.form-control,
+.form-select {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
 }
 
-/* Hover effect for action buttons */
-.table tbody tr:hover .btn-primary {
-  transform: scale(1.1);
+.form-control:focus,
+.form-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  background: white;
+  outline: none;
+}
+
+/* Badge styling theo mẫu trong ảnh */
+.badge {
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-weight: bold 600 !important;
+  text-transform: uppercase !important;
+  display: inline-block !important;
+  text-align: center !important;
+  min-width: 80px !important;
+  letter-spacing: 0.5px !important;
+  
+}
+
+/* Hoạt động - giống HOÀN THÀNH (xanh lá) */
+.badge-active {
+  background-color: #e9f6f0 !important; /* Nền xanh lá nhạt */
+  color: #1cae6a !important; /* Chữ xanh lá đậm */
+}
+
+/* Không hoạt động - giống ĐÃ HỦY (đỏ) */
+.badge-inactive {
+  background-color: #fff5f5 !important; /* Nền đỏ nhạt */
+  color: #ed0e0e !important; /* Chữ đỏ đậm */
+}
+
+
+/* Hoạt động - giống HOÀN THÀNH (xanh lá) */
+.badge-admin {
+  background-color: #e5eefa !important; /* Nền xanh lá nhạt */
+  color: #177ee4 !important; /* Chữ xanh lá đậm */
+}
+
+/* Không hoạt động - giống ĐÃ HỦY (đỏ) */
+.badge-staff {
+  background-color: #fcf2f8 !important; /* Nền đỏ nhạt */
+  color: #ff0099 !important; /* Chữ đỏ đậm */
 }
 </style>

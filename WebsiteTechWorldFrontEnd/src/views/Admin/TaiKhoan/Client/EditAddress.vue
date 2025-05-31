@@ -1,9 +1,12 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getAdress, updateAddress } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElNotification } from 'element-plus'
-import { h } from 'vue'
+import {
+  getAdress,
+  updateAddress,
+} from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { ElNotification } from "element-plus";
+import { h } from "vue";
 
 // Dữ liệu địa chỉ mẫu (thay bằng API hoặc props thực tế)
 const address = ref({
@@ -19,68 +22,89 @@ const address = ref({
 
 const route = useRoute();
 const router = useRouter();
-const error = ref()
+const error = ref();
 
-const getAdressesClient = async () => {
-    try {
-        const addressId = route.params.idAddress;
-        const response = await getAdress(addressId);
-        return address.value = response;
-    }catch(err) {
-        error.value = err.message || "fail to get address"
-    }
+//thông báo
+function showCustomNotification({
+  messageText,
+  type = "success",
+  duration = 2000,
+}) {
+  ElNotification({
+    title: "",
+    message: h("div", [
+      h("span", messageText),
+      h(
+        "div",
+        {
+          style: `
+                    position: relative;
+                    height: 4px;
+                    background-color: #e0e0e0;
+                    margin-top: 8px;
+                    border-radius: 2px;
+                    overflow: hidden;
+                `,
+        },
+        [
+          h("div", {
+            style: `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        background-color: ${
+                          type === "success"
+                            ? "#28a745"
+                            : type === "error"
+                            ? "#dc3545"
+                            : "#007bff"
+                        };
+                        width: 100%;
+                        animation: progressBar ${duration}ms linear forwards;
+                    `,
+          }),
+        ]
+      ),
+    ]),
+    duration: duration,
+    type: type,
+    position: "top-right",
+  });
 }
 
-
+const getAdressesClient = async () => {
+  try {
+    const addressId = route.params.idAddress;
+    const response = await getAdress(addressId);
+    return (address.value = response);
+  } catch (err) {
+    error.value = err.message || "fail to get address";
+  }
+};
 
 const updateHandle = async () => {
   try {
-    const idUpdate = route.params.idAddress
-    const response = await updateAddress(idUpdate, address.value)
-    console.log(response)
+    const idUpdate = route.params.idAddress;
+    const response = await updateAddress(idUpdate, address.value);
+    console.log(response);
 
-    // Tạo custom notification có thanh progress tụt dần
-        ElNotification({
-            title: '',
-            message: h('div', [
-                h('span', 'Cập nhật địa chỉ thành công!'),
-                h('div', {
-                    style: `
-                        position: relative;
-                        height: 4px;
-                        background-color: #e0e0e0;
-                        margin-top: 8px;
-                        border-radius: 2px;
-                        overflow: hidden;
-                    `
-                }, [
-                    h('div', {
-                        style: `
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            height: 100%;
-                            background-color: #28a745;
-                            width: 100%;
-                            animation: progressBar 2s linear forwards;
-                        `
-                    })
-                ])
-            ]),
-            duration: 2000, // 2 giây
-            type: 'success',
-            position: 'top-right'
-        })
+    // Thêm mới thành công
+    showCustomNotification({
+      messageText: "Thêm mới thành công!",
+      type: "success",
+      duration: 2000,
+    });
+
+    
   } catch (err) {
     error.value = err.message || "fail to update address";
-    // Hiện thông báo lỗi
-        ElNotification({
-            title: 'Lỗi',
-            message: error.value,
-            type: 'error',
-            duration: 3000,
-            position: 'top-right'
-        });
+    // Thêm thất bại
+    showCustomNotification({
+      messageText: "Thêm mới thất bại!",
+      type: "error",
+      duration: 3000,
+    });
   }
 };
 
@@ -90,7 +114,7 @@ const cancelEdit = () => {
 };
 
 onMounted(() => {
-    getAdressesClient();
+  getAdressesClient();
 });
 </script>
 
