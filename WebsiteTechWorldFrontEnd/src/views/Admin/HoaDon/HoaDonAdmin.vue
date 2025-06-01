@@ -465,7 +465,6 @@
                                                     <th>Sản phẩm</th>
                                                     <th class="text-center">Số lượng</th>
                                                     <th class="text-right">Đơn giá</th>
-                                                    <th class="text-right">Thành tiền</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -474,8 +473,6 @@
                                                     <td class="product-name">{{ item.tenSanPham || 'N/A' }}</td>
                                                     <td class="text-center">{{ item.soLuong || 'N/A' }}</td>
                                                     <td class="text-right">{{ formatCurrency(item.donGia) }}</td>
-                                                    <td class="text-right font-medium">{{ formatCurrency(item.thanhTien)
-                                                        }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
