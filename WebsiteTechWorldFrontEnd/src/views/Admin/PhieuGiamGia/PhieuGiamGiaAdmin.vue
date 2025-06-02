@@ -41,7 +41,7 @@ const loadPhieuGiamGia = async (page) => {
 const loadKhachHang = async () => {
     try {
         khachHangList.value = await getAllKhachHang();
-        console.log("Danh sách khách hàng:", khachHangList.value); 
+        console.log("Danh sách khách hàng:", khachHangList.value);
         if (!khachHangList.value.length) {
             alert("Không có khách hàng nào trong hệ thống!");
         }
@@ -85,7 +85,7 @@ const savePhieuGiamGia = async () => {
     try {
         isLoading.value = true;
         const data = { ...selectedPhieuGiamGia.value };
-        console.log("Dữ liệu gửi đi:", data); 
+        console.log("Dữ liệu gửi đi:", data);
         if (data.isGlobal && data.khachHangIds.length === 0) {
             throw new Error("Vui lòng chọn ít nhất một khách hàng cho phiếu giảm giá riêng tư");
         }
@@ -151,7 +151,7 @@ const viewUpdate = async (id) => {
     try {
         const response = await detail(id);
         selectedPhieuGiamGia.value = { ...response, khachHangIds: response.khachHangIds || [] };
-        console.log("Chi tiết phiếu:", selectedPhieuGiamGia.value); 
+        console.log("Chi tiết phiếu:", selectedPhieuGiamGia.value);
         phieuGiamGiaDialogVisible.value = true;
     } catch (error) {
         console.error(error.message || "Lỗi khi tải chi tiết phiếu giảm giá");
@@ -226,8 +226,8 @@ onMounted(() => {
                 <span class="visually-hidden">Đang tải...</span>
             </div>
         </div>
-        <table v-else class="table table-striped table-bordered">
-            <thead class="table-dark">
+        <table v-else class="table">
+            <thead class="table">
                 <tr>
                     <th>Mã</th>
                     <th>Tên</th>
@@ -244,15 +244,19 @@ onMounted(() => {
                 <tr v-for="phieuGiamGia in phieuGiamGias" :key="phieuGiamGia.id">
                     <td>{{ phieuGiamGia.maGiamGia }}</td>
                     <td>{{ phieuGiamGia.tenKhuyenMai }}</td>
-                    <td>{{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm' ? phieuGiamGia.giaTriKhuyenMai + '%' : formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}</td>
+                    <td>{{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm' ? phieuGiamGia.giaTriKhuyenMai + '%' :
+                        formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}</td>
                     <td>{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
                     <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
                     <td>{{ phieuGiamGia.soLuong }}</td>
                     <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
                     <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary me-2" @click="viewUpdate(phieuGiamGia.id)">Cập nhật</button>
-                        <button class="btn btn-sm btn-danger" @click="handleDeletePhieuGiamGia(phieuGiamGia.id)">Xóa</button>
+                        <button class="btn btn-primary btn-sm" title="Chỉnh sửa" @click="viewUpdate(phieuGiamGia.id)"><i
+                                class="bi bi-pencil-square"></i></button>
+                        <button class="btn btn-danger btn-sm" style="color: red;"
+                            @click="handleDeletePhieuGiamGia(phieuGiamGia.id)"><i
+                                class="bi bi-trash"></i></button>
                     </td>
                 </tr>
             </tbody>
@@ -260,54 +264,66 @@ onMounted(() => {
 
         <!-- Phân trang -->
         <div class="d-flex justify-content-between align-items-center" style="width: 25%;">
-            <button @click="previousPage" :disabled="currentPage === 0" class="btn btn-outline-primary">Trang trước</button>
+            <button @click="previousPage" :disabled="currentPage === 0" class="btn btn-outline-primary">Trang
+                trước</button>
             <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-            <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="btn btn-outline-primary">Trang sau</button>
+            <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="btn btn-outline-primary">Trang
+                sau</button>
         </div>
 
         <!-- Dialog thêm/sửa -->
         <dialog ref="dialog" class="dialog p-4 rounded shadow-lg" style="width: 800px; margin: auto;">
             <form @submit.prevent="savePhieuGiamGia">
-                <h4 class="mb-4">{{ selectedPhieuGiamGia?.id ? 'Chỉnh sửa Phiếu Giảm Giá' : 'Thêm Phiếu Giảm Giá' }}</h4>
+                <h4 class="mb-4">{{ selectedPhieuGiamGia?.id ? 'Chỉnh sửa Phiếu Giảm Giá' : 'Thêm Phiếu Giảm Giá' }}
+                </h4>
                 <div v-if="selectedPhieuGiamGia" class="row g-3">
                     <div class="col-md-6">
                         <label for="maGiamGia" class="form-label">Mã giảm giá</label>
-                        <input id="maGiamGia" v-model="selectedPhieuGiamGia.maGiamGia" type="text" class="form-control" disabled />
+                        <input id="maGiamGia" v-model="selectedPhieuGiamGia.maGiamGia" type="text" class="form-control"
+                            disabled />
                     </div>
                     <div class="col-md-6">
                         <label for="tenKhuyenMai" class="form-label">Tên khuyến mại</label>
-                        <input id="tenKhuyenMai" v-model="selectedPhieuGiamGia.tenKhuyenMai" type="text" class="form-control" required />
+                        <input id="tenKhuyenMai" v-model="selectedPhieuGiamGia.tenKhuyenMai" type="text"
+                            class="form-control" required />
                     </div>
                     <div class="col-md-6">
                         <label for="loaiKhuyenMai" class="form-label">Loại khuyến mãi</label>
-                        <select id="loaiKhuyenMai" v-model="selectedPhieuGiamGia.loaiKhuyenMai" class="form-select" required>
+                        <select id="loaiKhuyenMai" v-model="selectedPhieuGiamGia.loaiKhuyenMai" class="form-select"
+                            required>
                             <option value="Phần trăm">Phần trăm (%)</option>
                             <option value="Cố định">VNĐ</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriKhuyenMai" class="form-label">Giá trị khuyến mãi</label>
-                        <input id="giaTriKhuyenMai" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMai" type="number" class="form-control" min="0" required />
+                        <input id="giaTriKhuyenMai" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMai" type="number"
+                            class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriDonHangToiThieu" class="form-label">Giá trị đơn hàng tối thiểu</label>
-                        <input id="giaTriDonHangToiThieu" v-model.number="selectedPhieuGiamGia.giaTriDonHangToiThieu" type="number" class="form-control" min="0" required />
+                        <input id="giaTriDonHangToiThieu" v-model.number="selectedPhieuGiamGia.giaTriDonHangToiThieu"
+                            type="number" class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriKhuyenMaiToiDa" class="form-label">Giá trị khuyến mãi tối đa</label>
-                        <input id="giaTriKhuyenMaiToiDa" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMaiToiDa" type="number" class="form-control" min="0" required />
+                        <input id="giaTriKhuyenMaiToiDa" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMaiToiDa"
+                            type="number" class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="ngayBatDau" class="form-label">Ngày bắt đầu</label>
-                        <input id="ngayBatDau" v-model="selectedPhieuGiamGia.ngayBatDau" type="date" class="form-control" required />
+                        <input id="ngayBatDau" v-model="selectedPhieuGiamGia.ngayBatDau" type="date"
+                            class="form-control" required />
                     </div>
                     <div class="col-md-6">
                         <label for="ngayKetThuc" class="form-label">Ngày kết thúc</label>
-                        <input id="ngayKetThuc" v-model="selectedPhieuGiamGia.ngayKetThuc" type="date" class="form-control" required />
+                        <input id="ngayKetThuc" v-model="selectedPhieuGiamGia.ngayKetThuc" type="date"
+                            class="form-control" required />
                     </div>
                     <div class="col-md-6">
                         <label for="hangToiThieu" class="form-label">Hạng tối thiểu</label>
-                        <select id="hangToiThieu" v-model="selectedPhieuGiamGia.hangToiThieu" class="form-select" required>
+                        <select id="hangToiThieu" v-model="selectedPhieuGiamGia.hangToiThieu" class="form-select"
+                            required>
                             <option value="MEMBER">Thành viên</option>
                             <option value="SILVER">Bạc</option>
                             <option value="GOLD">Vàng</option>
@@ -316,11 +332,13 @@ onMounted(() => {
                     </div>
                     <div class="col-md-6">
                         <label for="soDiemCanDeDoi" class="form-label">Số điểm cần để đổi</label>
-                        <input id="soDiemCanDeDoi" v-model.number="selectedPhieuGiamGia.soDiemCanDeDoi" type="number" class="form-control" min="0" required />
+                        <input id="soDiemCanDeDoi" v-model.number="selectedPhieuGiamGia.soDiemCanDeDoi" type="number"
+                            class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="soLuong" class="form-label">Số lượng</label>
-                        <input id="soLuong" v-model.number="selectedPhieuGiamGia.soLuong" type="number" class="form-control" min="0" required />
+                        <input id="soLuong" v-model.number="selectedPhieuGiamGia.soLuong" type="number"
+                            class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="isGlobal" class="form-label">Loại phiếu</label>
@@ -330,8 +348,10 @@ onMounted(() => {
                         </select>
                     </div>
                     <div v-if="selectedPhieuGiamGia.isGlobal" class="col-md-12">
-                        <label for="khachHangIds" class="form-label">Khách hàng áp dụng <small>(Giữ Ctrl/Cmd để chọn nhiều)</small></label>
-                        <select id="khachHangIds" v-model="selectedPhieuGiamGia.khachHangIds" multiple class="form-select" size="5">
+                        <label for="khachHangIds" class="form-label">Khách hàng áp dụng <small>(Giữ Ctrl/Cmd để chọn
+                                nhiều)</small></label>
+                        <select id="khachHangIds" v-model="selectedPhieuGiamGia.khachHangIds" multiple
+                            class="form-select" size="5">
                             <option v-for="khachHang in khachHangList" :key="khachHang.id" :value="khachHang.id">
                                 {{ khachHang.tenKhachHang }}
                             </option>
@@ -339,11 +359,13 @@ onMounted(() => {
                     </div>
                     <div class="col-md-12">
                         <label for="dieuKienApDung" class="form-label">Mô tả điều kiện áp dụng</label>
-                        <input id="dieuKienApDung" v-model="selectedPhieuGiamGia.dieuKienApDung" type="text" class="form-control" />
+                        <input id="dieuKienApDung" v-model="selectedPhieuGiamGia.dieuKienApDung" type="text"
+                            class="form-control" />
                     </div>
                 </div>
                 <div class="mt-4 d-flex justify-content-end gap-2">
-                    <button type="button" @click="phieuGiamGiaDialogVisible = false" class="btn btn-secondary">Hủy</button>
+                    <button type="button" @click="phieuGiamGiaDialogVisible = false"
+                        class="btn btn-secondary">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -358,15 +380,38 @@ onMounted(() => {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     background-color: #fff;
 }
+
 .form-select[multiple] {
     padding: 8px;
     cursor: pointer;
 }
+
 .form-select[multiple] option {
     padding: 8px;
 }
+
 .form-select[multiple] option:checked {
     background-color: #007bff;
     color: white;
+}
+
+/* Action buttons - tone xanh tối giản */
+.btn-primary, .btn-danger {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-right: 5px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.btn-primary, .btn-danger:hover {
+  background: #f8f9fa;
+  color: #007bff;
+  text-decoration: none;
 }
 </style>
