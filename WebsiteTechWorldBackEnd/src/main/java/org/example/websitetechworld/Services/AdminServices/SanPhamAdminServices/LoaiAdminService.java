@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class LoaiAdminService {
@@ -21,6 +23,17 @@ public class LoaiAdminService {
 
     private LoaiAdminResponse convert(Loai loai) {
         return modelMapper.map(loai, LoaiAdminResponse.class);
+    }
+
+    private List<LoaiAdminResponse> convertList(List<Loai> loai) {
+        return loai.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<LoaiAdminResponse> getAllLoaiList() {
+        List<Loai> loais = loaiRepository.findAll();
+        return convertList(loais);
     }
 
     public Page<LoaiAdminResponse> getAllLoai(Pageable pageable) {

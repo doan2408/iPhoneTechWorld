@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/cameraSau")
@@ -24,6 +26,12 @@ public class CameraSauAdminController {
             @PageableDefault(page = 0, size = 5) Pageable pageable
     ) {
         Page<CameraSauAdminResponse> cameraSaus = cameraSauAdminService.getAllCameraSau(pageable);
+        return ResponseEntity.ok(cameraSaus);
+    }
+
+    @GetMapping("/listCameraSau")
+    public ResponseEntity<List<CameraSauAdminResponse>> getAllCameraSauList() {
+        List<CameraSauAdminResponse> cameraSaus = cameraSauAdminService.getAllCameraSauList();
         return ResponseEntity.ok(cameraSaus);
     }
 

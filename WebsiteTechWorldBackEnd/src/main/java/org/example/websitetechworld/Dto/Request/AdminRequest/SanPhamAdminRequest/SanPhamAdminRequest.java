@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Set;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,8 +19,8 @@ public class SanPhamAdminRequest {
 
     private String thuongHieu;
 
-    private Integer soLuongTonKho;
-
     private Integer idNhaCungCap;
+
+    private Set<SanPhamChiTietAdminRepuest> sanPhamChiTiets;
 
 }
