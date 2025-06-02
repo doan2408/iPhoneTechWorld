@@ -11,3 +11,7 @@ export const hoaDonGetAll = (pageNo =0,pageSize = 10) => {
         }
     })
 }   
+export const hoaDonDetail = (id) => {
+    const url = url_base+ '/' + id;
+    return axios.get(url)
+}

@@ -309,6 +309,48 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    background-color: #ffffff;
+}
+
+.stat-icon svg {
+    width: 32px;
+    height: 32px;
+    color: #007bff;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #555;
+    margin: 0;
+}
 
 
 /* Action Buttons */

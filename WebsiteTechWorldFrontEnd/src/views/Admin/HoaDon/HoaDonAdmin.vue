@@ -5,7 +5,7 @@
             <div class="header-content">
                 <div class="title-section">
                     <h1 class="dashboard-title">Quản lý hóa đơn</h1>
-                    <p class="dashboard-subtitle">Theo dõi và quản lý tất cả hóa đơn của bạn</p>
+                    <p class="dashboard-subtitle">Theo dõi và quản lý tất cả hóa đơn</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-primary">
@@ -430,7 +430,7 @@
                                             <div class="info-row">
                                                 <span class="info-label">Phí ship:</span>
                                                 <span class="info-value">{{ formatCurrency(selectedInvoice.phiShip)
-                                                    }}</span>
+                                                    }}</span>   
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Số tiền giảm:</span>
@@ -714,11 +714,11 @@ const formatCurrency = (amount) => {
 const getStatusBadgeClass = (status) => {
     if (!status) return 'status-default';
     const statusMap = {
-        'completed': 'status-completed',
-        'pending': 'status-pending',
-        'cancelled': 'status-cancelled',
-        'refunded': 'status-refunded',
-        'paid': 'status-paid',
+        'hoàn tất': 'status-completed',
+        'chờ xử lý': 'status-pending',
+        'đã hủy': 'status-cancelled',
+        'đã hoàn tiền': 'status-refunded',
+        'đã thanh toán': 'status-paid',
     };
     return statusMap[status.toLowerCase()] || 'status-default';
 };
@@ -730,7 +730,7 @@ const getTypeBadgeClass = (type) => {
         'online': 'type-online',
         'offline': 'type-offline',
         'trực tuyến': 'type-online',
-        'pos': 'type-offline'
+        'tại quầy': 'type-offline'
     };
     return typeMap[type.toLowerCase()] || 'type-default'; // trả về định dạng css
 };
