@@ -80,7 +80,7 @@ const handldeUpdate = async () => {
             type: 'success',
             position: 'top-right'
         })
-        // router.push("/admin/client")
+        router.push("/admin/client")
     }
     catch( err ) {
         error.value = err.message || "Error while loading client information";

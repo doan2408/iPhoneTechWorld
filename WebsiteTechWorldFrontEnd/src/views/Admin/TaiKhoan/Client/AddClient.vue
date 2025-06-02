@@ -1,6 +1,57 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { addClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { ElNotification } from "element-plus"; 
+import { h } from "vue";
+
+//thông báo
+function showCustomNotification({
+  messageText,
+  type = "success",
+  duration = 2000,
+}) {
+  ElNotification({
+    title: "",
+    message: h("div", [
+      h("span", messageText),
+      h(
+        "div",
+        {
+          style: `
+                    position: relative;
+                    height: 4px;
+                    background-color: #e0e0e0;
+                    margin-top: 8px;
+                    border-radius: 2px;
+                    overflow: hidden;
+                `,
+        },
+        [
+          h("div", {
+            style: `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        background-color: ${
+                          type === "success"
+                            ? "#28a745"
+                            : type === "error"
+                            ? "#dc3545"
+                            : "#007bff"
+                        };
+                        width: 100%;
+                        animation: progressBar ${duration}ms linear forwards;
+                    `,
+          }),
+        ]
+      ),
+    ]),
+    duration: duration,
+    type: type,
+    position: "top-right",
+  });
+}
 
 // add khach hang phía admin
 const clientRequest = ref({
@@ -15,10 +66,20 @@ const handleAddClient = async () => {
     clientRequest.value = {
       trangThai: "ACTIVE", //Mặc định là đang làm
       gioiTinh: true,
-    }; //reset form
-    await loadClient();
-    alert("them khach hang thanh cong");
+    };
+    // Thêm mới thành công
+    showCustomNotification({
+      messageText: "Thêm mới thành công!",
+      type: "success",
+      duration: 2000,
+    });
+    router.push(`/admin/client`)
   } catch (err) {
+    showCustomNotification({
+      messageText: "Thêm mới thất bại!",
+      type: "error",
+      duration: 2000,
+    });
     err.value = err.message || "An error was thrown while adding the client";
   }
 };

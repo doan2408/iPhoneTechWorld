@@ -54,7 +54,8 @@ onMounted(() => {
 
 <template>
   <div class="address-view">
-    <h2>Địa chỉ giao hàng</h2>
+    <h2 v-if="addresses.length == 0" style="text-align: center;">Khách hàng chưa cập nhật địa chỉ</h2>
+    <h2 v-else>Địa chỉ giao hàng</h2>
     <div class="address-list">
       <div
         class="address-item"

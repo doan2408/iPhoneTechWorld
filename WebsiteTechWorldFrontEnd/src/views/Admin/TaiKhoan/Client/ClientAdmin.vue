@@ -87,14 +87,20 @@ onMounted(() => {
           <td>{{ client.taiKhoan }}</td>
           <td>{{ client.email }}</td>
           <td>
-            {{ client.diaChi.find((dc) => dc.diaChiChinh === true)?.soNha }},
-            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.tenDuong }},
-            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.xaPhuong }},
-            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.quanHuyen }},
-            {{ client.diaChi.find((dc) => dc.diaChiChinh)?.tinhThanhPho }}
+            <template
+              v-if="client.diaChi && client.diaChi.find((dc) => dc.diaChiChinh)"
+            >
+              {{ client.diaChi.find((dc) => dc.diaChiChinh).soNha }},
+              {{ client.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
+              {{ client.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
+              {{ client.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
+              {{ client.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
+            </template>
+            <template v-else>Không có</template>
           </td>
+
           <td>
-            {{ client.sdt }}
+            {{ client.sdt ? client.sdt : "Không có" }}
           </td>
 
           <!-- Cột Trạng thái -->
@@ -110,7 +116,13 @@ onMounted(() => {
             </span>
           </td>
           <td>{{ client.gioiTinh ? "Nam" : "Nữ" }}</td>
-          <td>{{ new Date(client.ngaySinh).getFullYear() }}</td>
+          <td>
+            {{
+              client.ngaySinh
+                ? new Date(client.ngaySinh).getFullYear()
+                : "Không"
+            }}
+          </td>
           <td>
             <RouterLink
               :to="`/admin/client/${client.id}`"
@@ -405,7 +417,6 @@ hr {
   text-align: center !important;
   min-width: 80px !important;
   letter-spacing: 0.5px !important;
-  
 }
 
 /* Hoạt động - giống HOÀN THÀNH (xanh lá) */

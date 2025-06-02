@@ -95,7 +95,6 @@ const updateHandle = async () => {
       type: "success",
       duration: 2000,
     });
-
     
   } catch (err) {
     error.value = err.message || "fail to update address";
