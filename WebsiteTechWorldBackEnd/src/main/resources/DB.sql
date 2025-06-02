@@ -21,7 +21,7 @@ create table nhan_vien (
                            trang_thai nvarchar(50), -- ENABLE , DISABLE
                            chuc_vu nvarchar(50), --STAFF, ADMIN
                            gioi_tinh bit, --0: nữ, 1: nam
-                           nam_sinh date
+                           ngay_sinh date
 )
 
 create table khach_hang (

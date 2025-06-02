@@ -66,8 +66,8 @@ public class NhanVien implements JointAccount {
     @Column(name = "gioi_tinh")
     private Boolean gioiTinh;
 
-    @Column(name = "nam_sinh")
-    private LocalDate namSinh;
+    @Column(name = "ngaySinh")
+    private LocalDate ngaySinh;
 
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
