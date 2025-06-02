@@ -26,7 +26,6 @@ public class NhanVienAdminService {
         adminNhanVienResponse.setMaNhanVien(nhanVien.getMaNhanVien());
         adminNhanVienResponse.setTenNhanVien(nhanVien.getTenNhanVien());
         adminNhanVienResponse.setTaiKhoan(nhanVien.getTaiKhoan());
-        adminNhanVienResponse.setMatKhau(nhanVien.getMatKhau());
         adminNhanVienResponse.setEmail(nhanVien.getEmail());
         adminNhanVienResponse.setSdt(nhanVien.getSdt());
         adminNhanVienResponse.setDiaChi(nhanVien.getDiaChi());

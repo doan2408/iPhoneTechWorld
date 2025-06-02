@@ -59,6 +59,9 @@ function toggleUserstMenu() {
       <nav>
         <ul>
           <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
+
+          <li><router-link to="/admin/statistical" class="icon stats-icon">Thống Kê </router-link></li>
+
           
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
@@ -223,4 +226,8 @@ nav a.router-link-exact-active {
     width: 100%;
   }
 }
+/* Thông KêKê */
+
+
+
 </style>
