@@ -66,10 +66,20 @@ function toggleUserstMenu() {
             <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
-            <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
-            <li><router-link to="/admin/products/create">Thêm sản phẩm</router-link></li>
+            <li><router-link to="/admin/products">Sản phẩm</router-link></li>
             <li><router-link to="/admin/xuatXu">Xuất xứ</router-link></li>
-            <li><router-link to="/admin/categories">Danh mục</router-link></li>
+            <li><router-link to="/admin/rom">Rom</router-link></li>
+            <li><router-link to="/admin/ram">Ram</router-link></li>
+            <li><router-link to="/admin/pin">Pin</router-link></li>
+            <li><router-link to="/admin/mauSac">Màu sắc</router-link></li>
+            <li><router-link to="/admin/nhaCungCap">Nhà cung cấp</router-link></li>
+            <li><router-link to="/admin/manHinh">Màn hình</router-link></li>
+            <li><router-link to="/admin/loai">Loại</router-link></li>
+            <li><router-link to="/admin/imei">Imei</router-link></li>
+            <li><router-link to="/admin/heDieuHanh">Hệ điều hành</router-link></li>
+            <li><router-link to="/admin/cpu">Cpu</router-link></li>
+            <li><router-link to="/admin/cameraTruoc">Camera trước</router-link></li>
+            <li><router-link to="/admin/cameraSau">Camera sau</router-link></li>
           </ul>
 
 
