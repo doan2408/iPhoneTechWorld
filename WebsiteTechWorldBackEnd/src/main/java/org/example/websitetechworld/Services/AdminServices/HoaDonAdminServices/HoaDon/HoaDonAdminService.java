@@ -15,6 +15,7 @@ import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminService
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -55,10 +56,10 @@ public class HoaDonAdminService {
         return hoaDonRepository.findAll().stream().map(HoaDonAdminResponse::convertDto).collect(Collectors.toList());
     }
 
-    public List<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
+    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         System.out.println("So phan tu: " + pageable.getPageNumber());
-        return hoaDonRepository.findAll(pageable).stream().map(GetAllHoaDonAdminResponse::convertDto).toList();
+        return hoaDonRepository.findAll(pageable).map(GetAllHoaDonAdminResponse::convertDto);
 
     }
 
