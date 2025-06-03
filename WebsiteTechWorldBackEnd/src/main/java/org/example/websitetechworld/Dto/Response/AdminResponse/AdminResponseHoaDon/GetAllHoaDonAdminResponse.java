@@ -31,8 +31,8 @@ public class GetAllHoaDonAdminResponse {
         }
         response.setTongTien(hoaDon.getTongTien());
         response.setNgayTao(hoaDon.getNgayTao());
-        response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().name() : null);
-        response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().name() : null);
+        response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
+        response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null);
         return  response;
     }
 }

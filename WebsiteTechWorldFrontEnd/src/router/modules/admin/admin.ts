@@ -28,6 +28,7 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: "promotions", component: () => import("@/views/Admin/PhieuGiamGia/PhieuGiamGiaAdmin.vue"), meta: { title: 'Voucher Manage'}  },
       { path: "statistical", component: () => import("@/views/Admin/ThongKe/ThongKeAdmin.vue") },
       { path: "bill", component: () => import("@/views/Admin/HoaDon/HoaDonAdmin.vue") },
+      { path: "shipping", component: () => import("@/views/Admin/GiaoHang/GiaoHangAdmin.vue") },
       ...clientAdminRoutes,
       ...staffAdminRoutes
 
