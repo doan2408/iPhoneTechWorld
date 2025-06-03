@@ -1,11 +1,17 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest;
 
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Entity.HinhAnh;
+import org.example.websitetechworld.Entity.Imei;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -42,4 +48,9 @@ public class SanPhamChiTietAdminRepuest {
     private Integer soLuong;
 
     private BigDecimal giaBan;
+
+    private Set<HinhAnh> hinhAnhs;
+
+    private Set<Imei> imeis;
+
 }

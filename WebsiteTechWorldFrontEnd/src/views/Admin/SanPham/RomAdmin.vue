@@ -1,146 +1,156 @@
 <template>
-  <div class="container mt-4">
+    <div class="container mt-4">
 
-    <el-row :gutter="20" class="mb-4 justify-content-center">
+        <el-row :gutter="20" class="mb-4 justify-content-center">
 
-      <el-col :span="6">
-        <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
-      </el-col>
+            <el-col :span="6">
+                <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
+            </el-col>
 
-      <el-col :span="3">
-        <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
-      </el-col>
+            <el-col :span="3">
+                <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
+            </el-col>
 
-    </el-row>
+        </el-row>
 
-    <div class="mb-3" style="display: flex; justify-content: flex-end;">
-      <el-link type="success" :underline="false" href="products/create">
-        <el-button type="success">Thêm sản phẩm mới</el-button>
-      </el-link>
-    </div>
+        <el-row :gutter="20" class="mb-2" justify="end" >
 
-    <el-skeleton v-if="isLoading" rows="5" animated />
+            <el-col :span="3">
+                <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
+            </el-col>
 
-    <template v-else>
-      <h2>Danh sách sản phẩm</h2>
-      <el-table :data="sanPhamList" style="width: 100%" border>
-        <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
-        <!-- <el-table-column prop="id" label="ID" width="80" /> -->
-        <el-table-column label="Hình ảnh" width="120">
-          <template #default="{ row }">
-            <img :src="row.url" alt="Ảnh sản phẩm" style="width: 60px; height: auto;" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="maSanPham" label="Mã sản phẩm" />
-        <el-table-column prop="tenSanPham" label="Tên sản phẩm" />
-        <el-table-column prop="tenLoai" label="Tên loại" />
-        <el-table-column prop="soLuong" label="Số lượng" />
-        <el-table-column prop="giaBan" label="Giá bán" />
-        <el-table-column label="Thao tác" width="180">
-          <template #default="{ row }">
-            <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="Edit" circle />
-              </router-link>
+            <el-col :span="3">
+                <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
+            </el-col>
 
-              <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+        </el-row>
 
-              <router-link :to="`/admin/products/detail/${row.id}`">
-                <el-button size="small" type="info" :icon="View" circle />
-              </router-link>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+            <h2>Danh sách rom</h2>
+        <div class="table-responsive mb-4" style="margin-top: 20px;">
+            <el-table :data="tableRom" border style="width: 100%">
+                <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
+                <el-table-column prop="dungLuong" label="Dung lượng"  width="180" />
+                <el-table-column prop="loai" label="Loại" />
+                <el-table-column prop="tocDoDocGhi" label="Tốc độ đọc ghi" />
+                <el-table-column prop="nhaSanXuat" label="Nhà sản xuất" />
+                <el-table-column prop="namRaMat" label="Năm ra mắt" />
+                <el-table-column label="Thao tác" width="180">
+                    <template #default="{ row }">
+                        <div class="action-buttons-horizontal">
+                            <router-link :to="`/admin/products/${row.id}`">
+                                <el-button size="small" type="primary" :icon="Edit" circle />
+                            </router-link>
 
-      <div class="pagination-fixed">
-        <div class="d-flex justify-content-center align-items-center gap-3" style="margin-top: 30px;">
-          <el-pagination background layout="prev, pager, next" :page-size="pageSize" :current-page="currentPage"
-            :total="totalItems" :pager-count="7" prev-text="< Trước" next-text="Sau >"
-            @current-change="handlePageChange" />
+                            <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+
+                            <router-link :to="`/admin/products/detail/${row.id}`">
+                                <el-button size="small" type="info" :icon="View" circle />
+                            </router-link>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
         </div>
-      </div>
 
-    </template>
+        <div class="pagination-fixed">
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <el-pagination background layout="prev, pager, next" :page-size="pageSize" :current-page="currentPage"
+                    :total="totalItems" :pager-count="7" prev-text="< Trước" next-text="Sau >"
+                    @current-change="handlePageChange" />
+            </div>
+        </div>
 
-    <el-alert v-if="error" :title="error" type="error" show-icon class="mt-3" />
-  </div>
+    </div>
 </template>
 
-<!-- npm install @element-plus/icons-vue -->
-<script setup>
-import { ref, onMounted, computed } from "vue";
-import { Edit, Delete, View } from '@element-plus/icons-vue'
-import { getAllSanPham } from "@/Service/Adminservice/Products/ProductAdminService";
-import { ElMessageBox } from 'element-plus'
 
-const sanPhamList = ref([]);
-const isLoading = ref(false);
-const error = ref("");
+<script setup>
+import { ref, onMounted, watch, computed } from 'vue';
+import { getAllRomPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { Edit, Delete, View } from '@element-plus/icons-vue'
+
+const tableRom = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5;
+const searchQuery = ref('');
 
-const loadSanPham = async () => {
-  try {
-    isLoading.value = true;
-    const response = await getAllSanPham(currentPage.value - 1, pageSize);
-    console.log("Dữ liệu trả về từ api", response);
-    sanPhamList.value = response.content;
-    totalPages.value = response.totalPages;
-    totalItems.value = response.totalElements;
-  } catch (err) {
-    error.value = err.message || "Lỗi khi tải sản phẩm";
-  } finally {
-    isLoading.value = false;
-  }
+const loadData = async () => {
+    try {
+        const response = await getAllRomPage(currentPage.value - 1, pageSize);
+        tableRom.value = response.content;
+        totalPages.value = response.totalPages;
+        totalItems.value = response.totalElements;
+    } catch (error) {
+        console.error('Không thể load dữ liệu:', error);
+    }
 };
 
-const handleDelete = (id) => {
-  ElMessageBox.confirm(
-    'Bạn có chắc chắn muốn xoá sản phẩm này?',
-    'Xác nhận',
-    {
-      confirmButtonText: 'Xoá',
-      cancelButtonText: 'Huỷ',
-      type: 'warning',
-    }
-  )
-    .then(() => {
-      // Gọi API xoá sản phẩm tại đây
-      console.log('Đã xoá:', id)
-    })
-    .catch(() => {
-      console.log('Đã huỷ xoá')
-    })
-}
-
 const fromRecord = computed(() => {
-  return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
+    return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
 });
-
 const toRecord = computed(() => {
-  return Math.min(currentPage.value * pageSize, totalItems.value);
+    return Math.min(currentPage.value * pageSize, totalItems.value);
 });
-
-const indexMethod = (index) => {
-  return (currentPage.value - 1) * pageSize + index + 1;
-}
 
 const handlePageChange = (newPage) => {
-  currentPage.value = newPage;
+    currentPage.value = newPage;
 };
 
 onMounted(() => {
-  loadSanPham();
+    loadData();
 });
+
+watch([currentPage, searchQuery], () => {
+    loadData();
+});
+
+const handleSearch = () => {
+    currentPage.value = 1; // Về trang 1 khi tìm kiếm
+    // loadData() đã được gọi tự động bởi watch
+};
+
+const handleRefresh = () => {
+    searchQuery.value = '';
+    currentPage.value = 1;
+    // loadData() sẽ gọi theo watch
+};
+
+const handleCreate = () => {
+    console.log('Tạo mới');
+};
+
+const indexMethod = (index) => {
+    return (currentPage.value - 1) * pageSize + index + 1;
+}
+
+
 </script>
 
-<style scoped>
-/* ===== SIMPLE DASHBOARD STYLE ===== */
 
-/* Reset và Base Styles */
+<style scoped>
+.pagination-fixed {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 24px;
+    border: 1px solid #e5e7eb;
+}
+
+::v-deep(.el-pagination button) {
+    font-size: 16px;
+    padding: 8px 16px;
+}
+
+::v-deep(.el-pagination .el-pager li) {
+    font-size: 16px;
+    padding: 6px 10px;
+}
+
+
+
 * {
     box-sizing: border-box;
 }
@@ -155,10 +165,21 @@ onMounted(() => {
     margin: 0 auto;
 }
 
-.mt-4 { margin-top: 24px; }
-.mb-4 { margin-bottom: 32px; }
-.mb-3 { margin-bottom: 24px; }
-.w-100 { width: 100%; }
+.mt-4 {
+    margin-top: 24px;
+}
+
+.mb-4 {
+    margin-bottom: 32px;
+}
+
+.mb-3 {
+    margin-bottom: 24px;
+}
+
+.w-100 {
+    width: 100%;
+}
 
 /* ===== SEARCH SECTION ===== */
 :deep(.el-row) {
@@ -231,7 +252,6 @@ onMounted(() => {
     border-color: #ef4444;
     color: white;
 }
-
 
 :deep(.el-button--danger:hover) {
     background: #dc2626;
@@ -349,10 +369,21 @@ h2 {
     border: 1px solid #e5e7eb;
 }
 
-.d-flex { display: flex; }
-.justify-content-center { justify-content: center; }
-.align-items-center { align-items: center; }
-.gap-3 { gap: 12px; }
+.d-flex {
+    display: flex;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.gap-3 {
+    gap: 12px;
+}
 
 :deep(.el-pagination button) {
     background: white;
@@ -456,31 +487,5 @@ h2 {
         height: 32px;
         font-size: 12px;
     }
-}
-
-/* ===== UTILITIES ===== */
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-li {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 1.1rem;
-}
-
-.error {
-    color: #dc2626;
-    font-size: 1rem;
-}
-
-/* ===== LINK STYLING ===== */
-:deep(.el-link) {
-    text-decoration: none;
-}
-
-:deep(.el-link:hover) {
-    text-decoration: none;
 }
 </style>

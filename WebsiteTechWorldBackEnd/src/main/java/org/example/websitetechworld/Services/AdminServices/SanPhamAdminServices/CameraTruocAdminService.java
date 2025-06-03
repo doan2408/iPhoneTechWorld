@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CameraTruocAdminService {
@@ -20,6 +22,17 @@ public class CameraTruocAdminService {
 
     private CameraTruocAdminResponse convert(CameraTruoc cameraTruoc) {
         return modelMapper.map(cameraTruoc, CameraTruocAdminResponse.class);
+    }
+
+    private List<CameraTruocAdminResponse> convertList(List<CameraTruoc> cameraTruoc) {
+        return cameraTruoc.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<CameraTruocAdminResponse> getAllCameraTruocList() {
+        List<CameraTruoc> cameraTruocs = cameraTruocRepository.findAll();
+        return convertList(cameraTruocs);
     }
 
     public Page<CameraTruocAdminResponse> getAllCameraTruoc(Pageable pageable) {

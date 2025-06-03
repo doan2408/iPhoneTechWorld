@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/loai")
@@ -25,6 +27,12 @@ public class LoaiAdminController {
     ) {
         Page<LoaiAdminResponse> loais = loaiAdminService.getAllLoai(pageable);
 
+        return ResponseEntity.ok(loais);
+    }
+
+    @GetMapping("/listLoai")
+    public ResponseEntity<List<LoaiAdminResponse>> getAllLoaiList() {
+        List<LoaiAdminResponse> loais = loaiAdminService.getAllLoaiList();
         return ResponseEntity.ok(loais);
     }
 

@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/mauSac")
@@ -25,6 +27,11 @@ public class MauSacAdminController {
     ) {
         Page<MauSacAdminResponse> mauSacs = mauSacService.getAllMauSac(pageable);
 
+        return ResponseEntity.ok(mauSacs);
+    }
+    @GetMapping("/listMauSac")
+    public ResponseEntity<List<MauSacAdminResponse>> getAllMauSacList() {
+        List<MauSacAdminResponse> mauSacs = mauSacService.getAllMauSacList();
         return ResponseEntity.ok(mauSacs);
     }
 

@@ -6,6 +6,8 @@ import App from './App.vue';
 import router from './router';
 import axios from 'axios';
 import store from '@/Service/LoginService/Store'; // Import store
+import ElementPlus from 'element-plus'; //cấu hình  element
+import 'element-plus/dist/index.css'; //cấu hình  element
 import 'bootstrap'
 
 // Cấu hình Axios trước khi khởi tạo ứng dụng
@@ -16,4 +18,6 @@ const app = createApp(App);
 
 app.use(store); // Đăng ký store
 app.use(router); // Đăng ký router
+app.use(ElementPlus); //cấu hình  element
+
 app.mount('#app');

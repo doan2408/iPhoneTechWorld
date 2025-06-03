@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class RomAdminService {
@@ -21,6 +24,17 @@ public class RomAdminService {
 
     private RomAdminResponse convert(Rom rom) {
         return modelMapper.map(rom, RomAdminResponse.class);
+    }
+
+    private List<RomAdminResponse> convertList(List<Rom> rom) {
+        return rom.stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+    }
+
+    public List<RomAdminResponse> getAllRomsList() {
+        List<Rom> list = romRepo.findAll();
+        return convertList(list);
     }
 
     public Page<RomAdminResponse> getAllRoms(Pageable pageable) {

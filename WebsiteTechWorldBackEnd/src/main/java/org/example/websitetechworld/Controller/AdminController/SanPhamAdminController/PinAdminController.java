@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/pin")
@@ -23,6 +25,12 @@ public class PinAdminController {
     ) {
         Page<PinAdminResponse> pins = pinAdminService.getAllPin(pageable);
 
+        return ResponseEntity.ok(pins);
+    }
+
+    @GetMapping("/listPin")
+    public ResponseEntity<List<PinAdminResponse>> getAllPin() {
+        List<PinAdminResponse> pins = pinAdminService.getAllPinList();
         return ResponseEntity.ok(pins);
     }
 

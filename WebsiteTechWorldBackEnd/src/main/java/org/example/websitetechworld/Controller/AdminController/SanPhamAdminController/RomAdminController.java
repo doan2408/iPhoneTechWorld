@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/rom")
@@ -24,6 +26,12 @@ public class RomAdminController {
     ) {
         Page<RomAdminResponse> roms = romAdminService.getAllRoms(pageable);
 
+        return ResponseEntity.ok(roms);
+    }
+
+    @GetMapping("/listRom")
+    public ResponseEntity<List<RomAdminResponse>> getRomAllList() {
+        List<RomAdminResponse> roms = romAdminService.getAllRomsList();
         return ResponseEntity.ok(roms);
     }
 

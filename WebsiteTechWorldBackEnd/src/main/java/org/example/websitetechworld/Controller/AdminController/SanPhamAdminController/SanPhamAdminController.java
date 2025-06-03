@@ -3,8 +3,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
-import org.example.websitetechworld.Entity.SanPham;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,7 @@ public class SanPhamAdminController {
 
 
     @GetMapping
-    public ResponseEntity<Page<SanPhamAdminResponse>> getSanPham(@RequestParam(value = "page",defaultValue = "0") int page) {
+    public ResponseEntity<Page<SanPhamHienThiAdminResponse>> getSanPham(@RequestParam(value = "page",defaultValue = "0") int page) {
         int pageSize = 5;
         return ResponseEntity.ok(adminService.getAllSanPham(page, pageSize));
     }
