@@ -51,7 +51,7 @@ public class GetAllGiaoHangResponseAdmin {
         response.setNgayDatHang(giaoHang.getNgayDatHang());
         response.setTongGiaTriDonHang(giaoHang.getTongGiaTriDonHang());
         response.setDiaChiGiaoHang(giaoHang.getDiaChiGiaoHang());
-        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().name() : null);
+        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().getDisplayName() : null);
         return response;
     }
 }

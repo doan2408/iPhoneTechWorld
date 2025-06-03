@@ -10,3 +10,7 @@ export const giaoHangGetAll = (pageNo = 0, pageSize = 10) => {
         }
     })
 }
+export const giaoHangDetail = (id) => {
+    const url = url_base + '/' + id;
+    return axios.get(url)
+}

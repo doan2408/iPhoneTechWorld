@@ -177,7 +177,7 @@
                                 </td>
                                 <td class="table-td" @click="viewDeliveryDetail(delivery)">
                                     <div class="delivery-code">
-                                        <div class="status-dot" :class="getStatusDotClass(delivery.trangThaiDonHang)">
+                                        <div class="status-dot" :class="getStatusClass(delivery.trangThaiDonHang)">
                                         </div>
                                         {{ delivery.maGiaoHang }}
                                     </div>
@@ -230,7 +230,7 @@
                         <div class="card-content" @click="viewDeliveryDetail(delivery)">
                             <div class="card-header-row">
                                 <div class="delivery-code">
-                                    <div class="status-dot" :class="getStatusDotClass(delivery.trangThaiDonHang)"></div>
+                                    <div class="status-dot" :class="getStatusClass(delivery.trangThaiDonHang)"></div>
                                     {{ delivery.maGiaoHang }}
                                 </div>
                                 <span :class="getStatusClass(delivery.trangThaiDonHang)" class="status-badge">
@@ -389,6 +389,28 @@
                                         </span>
                                     </div>
                                 </div>
+                                <div v-if="selectedDelivery.chiTietGiaoHangResponseAdminList && selectedDelivery.chiTietGiaoHangResponseAdminList.length"
+                                    class="table-container">
+                                    <table class="product-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sản phẩm</th>
+                                                <th class="text-center">Số lượng</th>
+                                                <th class="text-right"> Mã chi tiết đơn hàng</th>
+                                                <th class="text-right">Đơn giá</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="item in selectedDelivery.chiTietGiaoHangResponseAdminList"
+                                                :key="item.idChiTietHoaDon" class="product-row">
+                                                <td class="product-name">{{ item.tenSanPham || 'N/A' }}</td>
+                                                <td class="text-center">{{ item.soLuong || 'N/A' }}</td>
+                                                <td class="text-center">{{ item.maChiTietGiaoHang }}</td>
+                                                <td class="text-right">{{ formatCurrency(item.donGia) }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -474,6 +496,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { giaoHangGetAll } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import { giaoHangDetail } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+
 
 // State reactive
 const searchQuery = ref('')
@@ -481,11 +505,12 @@ const statusFilter = ref('')
 const selectedDelivery = ref(null)
 const deliveries = ref([])
 const pageNo = ref(0)
-const pageSize = ref(8) // Số lượng hiển thị trên mỗi trang
+const pageSize = ref(5) // Số lượng hiển thị trên mỗi trang
 const totalPage = ref(0)
 const totalElement = ref(0)
 const selectedItems = ref([]) // Mảng lưu các ID đã được chọn
 const viewMode = ref('table') // Chế độ xem mặc định là dạng bảng
+const isLoading = ref(false)
 
 const visiblePages = computed(() => {
     const pages = [];
@@ -526,6 +551,7 @@ const visiblePages = computed(() => {
 
 // Hàm gọi API lấy danh sách đơn giao hàng
 async function loadData() {
+    isLoading.value = true;
     try {
         const response = await giaoHangGetAll(pageNo.value, pageSize.value)
         if (Array.isArray(response.data.content)) {
@@ -538,6 +564,8 @@ async function loadData() {
         }
     } catch (error) {
         console.error('Lấy danh sách giao hàng lỗi:', error)
+    }finally{
+        isLoading.value = false;
     }
 }
 
@@ -576,49 +604,65 @@ function clearSearch() {
     searchQuery.value = ''
     statusFilter.value = ''
 }
-
-function viewDeliveryDetail(delivery) {
-    selectedDelivery.value = delivery
+const viewDeliveryDetail = async (delivery) =>{
+    isLoading.value = true
+    try {
+        const response = await giaoHangDetail(delivery.idGiaoHang);
+        selectedDelivery.value = response.data;
+    } catch (error) {
+        selectedDelivery.value = delivery;
+    }
+    finally{
+        isLoading.value = false;
+    }
 }
 
 function backToList() {
     selectedDelivery.value = null
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    })
-}
+const formatDate = (dateString) => {
+    if (!dateString) {
+        return 'N/A';
+    }
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+    }
 
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-    }).format(amount)
-}
+    const day = date.getDate().toString().padStart(2, '0');      // ngày, 2 chữ số
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // tháng, 2 chữ số (tháng bắt đầu từ 0)
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
+const formatCurrency = (amount) => {
+    if (!amount || isNaN(amount)) {
+        return '0 ₫';
+    }
+    try {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    } catch (error) {
+        return `${amount} ₫`;
+    }
+};
 
 function getStatusClass(status) {
+    if(!status) return 'status-default';
     const statusClasses = {
-        'Chờ xử lý': 'status-pending',
-        'Đang giao': 'status-shipping',
-        'Đã giao': 'status-completed',
-        'Đã hủy': 'status-cancelled'
-    }
-    return statusClasses[status] || 'status-default'
-}
+        'chờ xử lý': 'status-pending',
+        'đang giao': 'status-shipping',
+        'đã giao': 'status-dlivered',
+        'giao thất bại': 'status-failed',
+        'đã hoàn tiền': 'status-returned',
+        'đã đóng gói': 'status-packed',
 
-function getStatusDotClass(status) {
-    const statusDots = {
-        'Chờ xử lý': 'dot-pending',
-        'Đang giao': 'dot-shipping',
-        'Đã giao': 'dot-completed',
-        'Đã hủy': 'dot-cancelled'
     }
-    return statusDots[status] || 'dot-default'
+    return statusClasses[status.toLowerCase()] || 'status-default'
 }
 
 function getStatusCount(status) {
