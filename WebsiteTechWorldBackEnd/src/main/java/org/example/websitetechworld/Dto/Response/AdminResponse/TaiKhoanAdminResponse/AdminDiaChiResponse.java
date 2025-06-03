@@ -16,6 +16,8 @@ public class AdminDiaChiResponse {
 
     private String tenNguoiNhan;
 
+    private String sdtNguoiNhan;
+
     private String soNha;
 
     private String tenDuong;

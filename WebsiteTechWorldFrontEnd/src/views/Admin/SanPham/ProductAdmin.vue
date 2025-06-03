@@ -232,6 +232,7 @@ onMounted(() => {
     color: white;
 }
 
+
 :deep(.el-button--danger:hover) {
     background: #dc2626;
     border-color: #dc2626;

@@ -1,9 +1,14 @@
 package org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices;
 
 import jakarta.persistence.EntityManager;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.KhachHangGiamGia;
 import org.example.websitetechworld.Entity.PhieuGiamGia;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
+import org.example.websitetechworld.Repository.KhachHangGiamGiaRepository;
+import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.PhieuGiamGiaRepository;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -16,20 +21,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PhieuGiamGiaAdminServices {
 
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
+    private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final KhachHangRepository khachHangRepository;
     private final ModelMapper modelMapper;
     private final EntityManager entityManager;
 
-    public PhieuGiamGiaAdminServices(PhieuGiamGiaRepository phieuGiamGiaRepository, ModelMapper modelMapper, EntityManager entityManager) {
+    public PhieuGiamGiaAdminServices(
+            PhieuGiamGiaRepository phieuGiamGiaRepository,
+            KhachHangGiamGiaRepository khachHangGiamGiaRepository,
+            KhachHangRepository khachHangRepository,
+            ModelMapper modelMapper,
+            EntityManager entityManager) {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
+        this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.khachHangRepository = khachHangRepository;
         this.modelMapper = modelMapper;
         this.entityManager = entityManager;
 
+        configureModelMapper();
+    }
+
+    private void configureModelMapper() {
         TypeMap<PhieuGiamGia, PhieuGiamGiaAdminResponse> propertyMapper = modelMapper.createTypeMap(PhieuGiamGia.class, PhieuGiamGiaAdminResponse.class);
         propertyMapper.addMappings(mapper -> {
             mapper.map(PhieuGiamGia::getId, PhieuGiamGiaAdminResponse::setId);
@@ -43,28 +64,17 @@ public class PhieuGiamGiaAdminServices {
             mapper.map(PhieuGiamGia::getNgayKetThuc, PhieuGiamGiaAdminResponse::setNgayKetThuc);
             mapper.map(PhieuGiamGia::getDieuKienApDung, PhieuGiamGiaAdminResponse::setDieuKienApDung);
             mapper.map(PhieuGiamGia::getHangToiThieu, PhieuGiamGiaAdminResponse::setHangToiThieu);
+            mapper.map(PhieuGiamGia::getSoLuong, PhieuGiamGiaAdminResponse::setSoLuong);
             mapper.map(PhieuGiamGia::getSoDiemCanDeDoi, PhieuGiamGiaAdminResponse::setSoDiemCanDeDoi);
-            mapper.map(PhieuGiamGia::getSoDiemCanDeDoi, PhieuGiamGiaAdminResponse::setHangToiThieu);
             mapper.map(PhieuGiamGia::getIsGlobal, PhieuGiamGiaAdminResponse::setIsGlobal);
             mapper.map(PhieuGiamGia::getTrangThai, PhieuGiamGiaAdminResponse::setTrangThai);
         });
     }
 
-    //hien thi pgg
-    public Page<PhieuGiamGiaAdminResponse> getPagePhieuGiamGia (
-            String search,
-            TrangThaiPGG trangThai,
-            LocalDate ngayBatDau,
-            LocalDate ngayKetThuc,
-            int page,
-            int size,
-            String sortBy,
-            String direction
-    ) {
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
+    public Page<PhieuGiamGiaAdminResponse> getPagePhieuGiamGia(
+            String search, TrangThaiPGG trangThai, LocalDate ngayBatDau, LocalDate ngayKetThuc,
+            int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         LocalDate now = LocalDate.now();
@@ -80,56 +90,135 @@ public class PhieuGiamGiaAdminServices {
             phieuGiamGiaRepository.save(entity);
         });
 
-        return pagePhieuGiamGia.map(entity -> modelMapper.map(entity, PhieuGiamGiaAdminResponse.class));
+        return pagePhieuGiamGia.map(entity -> {
+            PhieuGiamGiaAdminResponse response = modelMapper.map(entity, PhieuGiamGiaAdminResponse.class);
+            if (entity.getIsGlobal()) {
+                response.setKhachHangIds(khachHangGiamGiaRepository.findKhachHangIdsByPhieuGiamGiaId(entity));
+            } else {
+                response.setKhachHangIds(List.of());
+            }
+            return response;
+        });
     }
 
-    //detail pgg
-    public PhieuGiamGiaAdminResponse getPhieuGiamGia (Integer id) {
-
-        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
-
-        return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+    public PhieuGiamGiaAdminResponse getPhieuGiamGia(Integer id) {
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
+        PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+        if (phieuGiamGia.getIsGlobal()) {
+            response.setKhachHangIds(khachHangGiamGiaRepository.findKhachHangIdsByPhieuGiamGiaId(phieuGiamGia));
+        } else {
+            response.setKhachHangIds(List.of());
+        }
+        return response;
     }
 
-    //add pgg
     @Transactional
-    public PhieuGiamGiaAdminResponse addPhieuGiamGia (PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
+    public PhieuGiamGiaAdminResponse addPhieuGiamGia(PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
+        if (phieuGiamGiaResponse.getIsGlobal() && (phieuGiamGiaResponse.getKhachHangIds() == null || phieuGiamGiaResponse.getKhachHangIds().isEmpty())) {
+            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng được chọn");
+        }
+        if (phieuGiamGiaResponse.getNgayBatDau().isAfter(phieuGiamGiaResponse.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
+        }
+        PhieuGiamGia phieuGiamGia = modelMapper.map(phieuGiamGiaResponse, PhieuGiamGia.class);
+        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
 
-        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.save(modelMapper.map(phieuGiamGiaResponse, PhieuGiamGia.class));
-        entityManager.refresh(phieuGiamGia);
+        if (phieuGiamGia.getIsGlobal()) {
 
-        return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+            for (Integer khachHangId : phieuGiamGiaResponse.getKhachHangIds()) {
+                if (!khachHangRepository.existsById(khachHangId)) {
+                    throw new IllegalArgumentException("Khách hàng ID " + khachHangId + " không tồn tại");
+                }
+            }
+            saveKhachHangGiamGia(phieuGiamGia, phieuGiamGiaResponse.getKhachHangIds());
+        }
+        PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+        response.setKhachHangIds(phieuGiamGiaResponse.getKhachHangIds());
+        return response;
     }
 
-    //update pgg
-    public PhieuGiamGiaAdminResponse updatePhieuGiamGia (Integer id, PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
+    @Transactional
+    public PhieuGiamGiaAdminResponse updatePhieuGiamGia(Integer id, PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
+        if (phieuGiamGiaResponse.getIsGlobal() && (phieuGiamGiaResponse.getKhachHangIds() == null || phieuGiamGiaResponse.getKhachHangIds().isEmpty())) {
+            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng được chọn");
+        }
+        if (phieuGiamGiaResponse.getNgayBatDau().isAfter(phieuGiamGiaResponse.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
+        }
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
+        modelMapper.map(phieuGiamGiaResponse, phieuGiamGia);
+        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
 
-        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
+        if (phieuGiamGia.getIsGlobal()) {
 
-        phieuGiamGia.setTenKhuyenMai(phieuGiamGiaResponse.getTenKhuyenMai());
-        phieuGiamGia.setLoaiKhuyenMai(phieuGiamGiaResponse.getLoaiKhuyenMai());
-        phieuGiamGia.setGiaTriKhuyenMai(phieuGiamGiaResponse.getGiaTriKhuyenMai());
-        phieuGiamGia.setGiaTriDonHangToiThieu(phieuGiamGiaResponse.getGiaTriDonHangToiThieu());
-        phieuGiamGia.setGiaTriKhuyenMaiToiDa(phieuGiamGiaResponse.getGiaTriKhuyenMaiToiDa());
-        phieuGiamGia.setNgayBatDau(phieuGiamGiaResponse.getNgayBatDau());
-        phieuGiamGia.setNgayKetThuc(phieuGiamGiaResponse.getNgayKetThuc());
-        phieuGiamGia.setDieuKienApDung(phieuGiamGiaResponse.getDieuKienApDung());
-        phieuGiamGia.setHangToiThieu(phieuGiamGiaResponse.getHangToiThieu());
-        phieuGiamGia.setSoLuong(phieuGiamGiaResponse.getSoLuong());
-        phieuGiamGia.setSoDiemCanDeDoi(phieuGiamGiaResponse.getSoDiemCanDeDoi());
-        phieuGiamGia.setIsGlobal(phieuGiamGiaResponse.getIsGlobal());
-        phieuGiamGia.setTrangThai(phieuGiamGiaResponse.getTrangThai());
+            List<KhachHangGiamGia> existingRecords = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+            Set<Integer> existingKhachHangIds = existingRecords.stream()
+                    .map(khgg -> khachHangGiamGiaRepository.getKhachHangId(khgg))
+                    .collect(Collectors.toSet());
+            Set<Integer> newKhachHangIds = new HashSet<>(phieuGiamGiaResponse.getKhachHangIds());
 
-        return modelMapper.map(phieuGiamGiaRepository.save(phieuGiamGia), PhieuGiamGiaAdminResponse.class);
+            for (Integer khachHangId : newKhachHangIds) {
+                if (!khachHangRepository.existsById(khachHangId)) {
+                    throw new IllegalArgumentException("Khách hàng ID " + khachHangId + " không tồn tại");
+                }
+            }
+
+            for (KhachHangGiamGia record : existingRecords) {
+                Integer khachHangId = khachHangGiamGiaRepository.getKhachHangId(record);
+                if (!newKhachHangIds.contains(khachHangId)) {
+                    khachHangGiamGiaRepository.delete(record);
+                }
+            }
+
+            for (Integer khachHangId : newKhachHangIds) {
+                if (!existingKhachHangIds.contains(khachHangId)) {
+
+                    createNewKhachHangGiamGia(phieuGiamGia, khachHangId);
+                }
+            }
+        } else {
+            khachHangGiamGiaRepository.deleteByIdPhieuGiamGiaId(id);
+        }
+
+        PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
+        response.setKhachHangIds(phieuGiamGiaResponse.getKhachHangIds());
+        return response;
     }
 
+    @Transactional
+    public String deletePhieuGiamGia(Integer id) {
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
 
-    //delete pgg
-    public String deletePhieuGiamGia (Integer id) {
-
-        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
+        khachHangGiamGiaRepository.deleteByIdPhieuGiamGiaId(id);
         phieuGiamGiaRepository.delete(phieuGiamGia);
-
         return "Đã xóa thành công phiếu giảm giá có id = " + id;
+    }
+
+    public List<KhachHangGiamGiaResponse> getAllKhachHang() {
+        return khachHangRepository.findAll().stream()
+                .map(kh -> new KhachHangGiamGiaResponse(kh.getId(), kh.getTenKhachHang()))
+                .collect(Collectors.toList());
+    }
+
+    private void createNewKhachHangGiamGia(PhieuGiamGia phieuGiamGia, Integer khachHangId) {
+        KhachHangGiamGia khachHangGiamGia = new KhachHangGiamGia();
+        khachHangGiamGia.setIdPhieuGiamGia(phieuGiamGia);
+        KhachHang khachHang = new KhachHang();
+        khachHang.setId(khachHangId);
+        khachHangGiamGia.setIdKhachHang(khachHang);
+        khachHangGiamGia.setIsUser(false);
+        khachHangGiamGia.setNgayCap(LocalDate.now());
+        khachHangGiamGiaRepository.save(khachHangGiamGia);
+    }
+
+    private void saveKhachHangGiamGia(PhieuGiamGia phieuGiamGia, List<Integer> khachHangIds) {
+        if (khachHangIds != null) {
+            for (Integer khachHangId : khachHangIds) {
+                createNewKhachHangGiamGia(phieuGiamGia, khachHangId);
+            }
+        }
     }
 }

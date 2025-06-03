@@ -46,7 +46,7 @@ const handldeUpdate = async () => {
     try {
         const id = route.params.id;
         const response = await updateStaff(id, staffRequest);
-        
+
         // Tạo custom notification có thanh progress tụt dần
         ElNotification({
             title: '',

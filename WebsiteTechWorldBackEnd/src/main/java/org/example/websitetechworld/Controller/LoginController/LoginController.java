@@ -29,7 +29,7 @@ public class LoginController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
         try {
             String username = request.get("tai_khoan");
-            String password = request.get("mat_khau");
+             String password = request.get("mat_khau");
 
 
             Authentication authentication = authenticationManager.authenticate(
