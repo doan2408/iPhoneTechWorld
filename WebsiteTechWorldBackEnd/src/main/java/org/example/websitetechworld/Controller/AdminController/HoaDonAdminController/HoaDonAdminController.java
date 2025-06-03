@@ -15,6 +15,7 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.L
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -45,8 +46,9 @@ public class HoaDonAdminController {
     }
 
     @GetMapping
-    public List<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo){
-        return hoaDonAdminService.getPageHoaDon(pageNo,PAGE_SIZE);
+    public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo,
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize){
+        return hoaDonAdminService.getPageHoaDon(pageNo,pageSize);
     }
     @GetMapping("/{idHoaDon}")
     public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon){
