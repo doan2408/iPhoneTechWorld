@@ -16,6 +16,12 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
 
     // NhanVienRepository
     boolean existsByEmail(String email);
+    boolean existsBySdt(String sdt);
+    boolean existsByTaiKhoan(String taiKhoan);
+
+    boolean existsByTaiKhoanAndIdNot(String taiKhoan, Integer id);
+    boolean existsByEmailAndIdNot(String email, Integer id);
+    boolean existsBySdtAndIdNot(String sdt, Integer id);
 
     @Modifying
     @Query("UPDATE NhanVien n SET n.matKhau = :password WHERE n.email = :email")

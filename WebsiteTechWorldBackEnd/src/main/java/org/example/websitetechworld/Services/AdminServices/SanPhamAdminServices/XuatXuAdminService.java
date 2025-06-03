@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +26,20 @@ public class XuatXuAdminService {
         return modelMapper.map(xuatXu, XuatXuAdminResponse.class);
     }
 
+    private List<XuatXuAdminResponse> convertList(List<XuatXu> xuatXus) {
+        return xuatXus.stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+    }
+
     public Page<XuatXuAdminResponse> getAllXuatXu(Pageable pageable) {
         Page<XuatXu> xuatXuPage = xuatXuRepo.findAll(pageable);
         return xuatXuPage.map(this::convert);
+    }
+
+    public List<XuatXuAdminResponse> getAllXuatXuList() {
+        List<XuatXu> xuatXus = xuatXuRepo.findAll();
+        return convertList(xuatXus);
     }
 
     @Transactional

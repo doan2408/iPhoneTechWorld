@@ -16,6 +16,12 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
 
     // KhachHangRepository
     boolean existsByEmail(String email);
+    boolean existsBySdt(String sdt);
+    boolean existsByTaiKhoan(String taiKhoan);
+
+    boolean existsByTaiKhoanAndIdNot(String taiKhoan, Integer id);
+    boolean existsByEmailAndIdNot(String email, Integer id);
+    boolean existsBySdtAndIdNot(String sdt, Integer id);
 
     @Modifying
     @Query("UPDATE KhachHang k SET k.matKhau = :password WHERE k.email = :email")

@@ -28,6 +28,10 @@ public class DiaChi {
     @Column(name = "ten_nguoi_nhan", length = 50)
     private String tenNguoiNhan;
 
+    @Size(max = 10)
+    @Column(name = "sdt_nguoi_nhan", length = 10)
+    private String sdtNguoiNhan;
+
     @Size(max = 50)
     @Nationalized
     @Column(name = "so_nha", length = 50)

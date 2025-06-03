@@ -7,4 +7,5 @@ public interface JointAccount {
      String getRole();
      String getFullName();
      String getEmail();
+     String getSdt();
 }

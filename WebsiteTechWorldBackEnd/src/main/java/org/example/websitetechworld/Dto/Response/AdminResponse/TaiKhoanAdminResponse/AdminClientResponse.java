@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,6 +42,6 @@ public class AdminClientResponse {
 
     private String trangThai;
 
-    private AdminDiaChiResponse diaChiChinh;
+    private List<AdminDiaChiResponse> diaChi;
 
 }

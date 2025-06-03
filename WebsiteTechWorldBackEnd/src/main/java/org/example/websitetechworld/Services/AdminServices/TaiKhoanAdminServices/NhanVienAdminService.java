@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminNhanVienResponse;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.util.Optional;
 public class NhanVienAdminService {
     private final NhanVienRepository nhanVienRepository;
     private final PasswordEncoder passwordEncoder;
+    private final KhachHangRepository khachHangRepository;
 
     //convert NhanVienEntity ----> AdminNhanVienResponse
     public AdminNhanVienResponse convertToResponse(NhanVien nhanVien) {
@@ -26,14 +28,14 @@ public class NhanVienAdminService {
         adminNhanVienResponse.setMaNhanVien(nhanVien.getMaNhanVien());
         adminNhanVienResponse.setTenNhanVien(nhanVien.getTenNhanVien());
         adminNhanVienResponse.setTaiKhoan(nhanVien.getTaiKhoan());
-//        adminNhanVienResponse.setMatKhau(nhanVien.getMatKhau());
+//      adminNhanVienResponse.setMatKhau(nhanVien.getMatKhau());
         adminNhanVienResponse.setEmail(nhanVien.getEmail());
         adminNhanVienResponse.setSdt(nhanVien.getSdt());
         adminNhanVienResponse.setDiaChi(nhanVien.getDiaChi());
         adminNhanVienResponse.setTrangThai(nhanVien.getTrangThai());
         adminNhanVienResponse.setChucVu(nhanVien.getChucVu());
         adminNhanVienResponse.setGioiTinh(nhanVien.getGioiTinh());
-        adminNhanVienResponse.setNamSinh(nhanVien.getNamSinh());
+        adminNhanVienResponse.setNamSinh(nhanVien.getNgaySinh());
         return adminNhanVienResponse;
     }
 
@@ -50,7 +52,7 @@ public class NhanVienAdminService {
         dto.setTrangThai(nv.getTrangThai());
         dto.setChucVu(nv.getChucVu());
         dto.setGioiTinh(nv.getGioiTinh());
-        dto.setNamSinh(nv.getNamSinh());
+        dto.setNamSinh(nv.getNgaySinh());
         return dto;
     }
 
@@ -78,7 +80,7 @@ public class NhanVienAdminService {
         nhanVien.setTrangThai(adminStaffRequest.getTrangThai());
         nhanVien.setChucVu(adminStaffRequest.getChucVu());
         nhanVien.setGioiTinh(adminStaffRequest.getGioiTinh());
-        nhanVien.setNamSinh(adminStaffRequest.getNamSinh());
+        nhanVien.setNgaySinh(adminStaffRequest.getNamSinh());
     }
 
     //hien thi nhan vien (màn admin: không có mật khẩu)
@@ -99,6 +101,16 @@ public class NhanVienAdminService {
     public AdminStaffRequest updateStaff(Integer id, AdminStaffRequest staffRequest) {
         NhanVien nhanvienExisting = nhanVienRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("khong tim thay nhan vien voi id: " + id));
+        // Check trùng tài khoản, email, sdt
+        if (khachHangRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(staffRequest.getTaiKhoan())) {
+            throw new RuntimeException("Tên tài khoản đã tồn tại!");
+        }
+        if (khachHangRepository.existsByEmail(staffRequest.getEmail()) || nhanVienRepository.existsByEmail(staffRequest.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại!");
+        }
+        if (khachHangRepository.existsBySdt(staffRequest.getSdt()) || nhanVienRepository.existsBySdt(staffRequest.getSdt())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại!");
+        }
         convertNhanVienFromRequest(nhanvienExisting, staffRequest, false);
         NhanVien nhanVienUpdate =  nhanVienRepository.save(nhanvienExisting);
         return convertToRequest(nhanVienUpdate);
@@ -108,10 +120,19 @@ public class NhanVienAdminService {
     //add nhan vien
     public AdminStaffRequest createStaff(AdminStaffRequest staffRequest) {
         NhanVien nhanVien = new NhanVien();
+        // Check trùng tài khoản, email, sdt
+        if (khachHangRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(staffRequest.getTaiKhoan())) {
+            throw new RuntimeException("Tên tài khoản đã tồn tại!");
+        }
+        if (khachHangRepository.existsByEmail(staffRequest.getEmail()) || nhanVienRepository.existsByEmail(staffRequest.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại!");
+        }
+        if (khachHangRepository.existsBySdt(staffRequest.getSdt()) || nhanVienRepository.existsBySdt(staffRequest.getSdt())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại!");
+        }
         convertNhanVienFromRequest(nhanVien, staffRequest, true);
         NhanVien nvAdd = nhanVienRepository.save(nhanVien);
         return convertToRequest(nvAdd);
-
     }
 
     //xoa nhan vien

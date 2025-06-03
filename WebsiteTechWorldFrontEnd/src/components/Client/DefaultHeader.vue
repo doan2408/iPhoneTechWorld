@@ -66,7 +66,7 @@ const goToLogin = () => {
 <template>
   <header class="client-header">
     <div class="logo">
-      <router-link to="/home">Trang chủ</router-link>
+      <router-link to="/home">TechWorld</router-link>
     </div>
     <nav>
       <ul>
@@ -102,12 +102,41 @@ const goToLogin = () => {
 
 <style scoped>
 .client-header {
-  background-color: #333;
+  background: linear-gradient(135deg, #1a2954 0%, #2274c7 50%, #1a405e 100%);
   color: white;
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+  --mouse-x: 0px;
+  --mouse-y: 0px;
+}
+
+/* Hiệu ứng tia lấp lánh theo chuột */
+.client-header::before {
+  content: '';
+  position: absolute;
+  top: var(--mouse-y);
+  left: var(--mouse-x);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(135, 206, 235, 0.4) 30%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.client-header:hover::before {
+  opacity: 1;
 }
 
 .client-header .logo a {
@@ -134,5 +163,12 @@ nav ul li a {
 
 nav ul li a:hover {
   text-decoration: underline;
+}
+
+/* Style cho link bị disabled */
+.disabled-link {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 </style>

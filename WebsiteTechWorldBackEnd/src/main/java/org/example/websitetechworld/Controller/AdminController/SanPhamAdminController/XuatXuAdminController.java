@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
     @RequestMapping("/admin/xuatXu")
@@ -23,6 +25,12 @@ public class XuatXuAdminController {
     ) {
         Page<XuatXuAdminResponse> xuatXus = xuatXuAdminService.getAllXuatXu(pageable);
         return ResponseEntity.ok(xuatXus);
+    }
+
+    @GetMapping("/listXuatXu")
+    public ResponseEntity<List<XuatXuAdminResponse>> getAllListXuatXu() {
+        List<XuatXuAdminResponse> list = xuatXuAdminService.getAllXuatXuList();
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("/{id}")
