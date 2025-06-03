@@ -65,13 +65,14 @@ function toggleOrderMenu() {
         <ul>
           <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
 
+          <li><router-link to="/admin/statistical" class="icon stats-icon">Thống Kê </router-link></li>
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
             <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
-            <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
+            <li><router-link to="/admin/products">Danh sách sản phxxẩm</router-link></li>
             <li><router-link to="/admin/products/add">Thêm sản phẩm</router-link></li>
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
@@ -235,4 +236,8 @@ nav a.router-link-exact-active {
     width: 100%;
   }
 }
+/* Thông KêKê */
+
+
+
 </style>

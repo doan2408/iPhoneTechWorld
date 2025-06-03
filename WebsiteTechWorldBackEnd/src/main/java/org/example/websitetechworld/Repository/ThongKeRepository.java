@@ -23,7 +23,10 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     @Query(value = "SELECT COUNT(*) FROM hoa_don WHERE MONTH(ngay_tao) = MONTH(GETDATE()) AND YEAR(ngay_tao) = YEAR(GETDATE())", nativeQuery = true)
     Integer dashboardSoDonHang ();
 
-    @Query(value = "SELECT COUNT(*) FROM san_pham", nativeQuery = true)
+    @Query(value = "SELECT \n" +
+            "    SUM(cthd.so_luong) AS tong_so_san_pham_da_ban\n" +
+            "FROM \n" +
+            "    chi_tiet_hoa_don cthd;", nativeQuery = true)
     Integer dashboardSoSanPham ();
 
     @Query(value = "SELECT COUNT(*) FROM khach_hang", nativeQuery = true)
