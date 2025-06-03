@@ -9,6 +9,7 @@ import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Repository.GiaoHangRepository;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,9 @@ public class GiaoHangAdminServices {
         this.hoaDonRepository = hoaDonRepository;
     }
 
-    public List<GetAllGiaoHangResponseAdmin> getPageGiaoHang(int pageNo, int pageSize) {
+    public Page<GetAllGiaoHangResponseAdmin> getPageGiaoHang(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return giaoHangRepository.findAll(pageable).stream()
-                .map(GetAllGiaoHangResponseAdmin::convertDto).toList();
+        return giaoHangRepository.findAll(pageable).map(GetAllGiaoHangResponseAdmin::convertDto);
     }
     public ViewGiaoHangAdminResponse findById(Integer id) {
         return giaoHangRepository.findById(id).map(ViewGiaoHangAdminResponse::convertDto).orElseThrow(

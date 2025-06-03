@@ -30,7 +30,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <h3 class="stat-number">{{ hoaDons.length }}</h3>
+                    <h3 class="stat-number">{{ totalElement }}</h3>
                     <p class="stat-label">Tổng hóa đơn</p>
                 </div>
             </div>
@@ -131,72 +131,83 @@
         <div class="table-section">
             <!-- chuyển chế độ xem -->
             <div class="table-header">
-                <h2 class="table-title">Danh sách hóa đơn</h2>
-                <div class="table-actions">
-                    <button class="view-toggle active" @click="viewMode = 'table'">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <button class="view-toggle" @click="viewMode = 'grid'">
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                            </path>
-                        </svg>
-                    </button>
+                <h2 class="table-title">
+                    <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                        </path>
+                    </svg>
+                    Danh sách hóa đơn ({{ hoaDons.length }})
+                </h2>
+                <div class="view-controls">
+                    <div class="view-toggle-buttons">
+                        <button @click="viewMode = 'table'" class="view-toggle-btn"
+                            :class="{ active: viewMode === 'table' }" title="Xem dạng bảng">
+                            <svg class="view-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <button @click="viewMode = 'grid'" class="view-toggle-btn"
+                            :class="{ active: viewMode === 'grid' }" title="Xem dạng lưới">
+                            <svg class="view-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Table View: chế độ xem bảng -->
             <div v-if="viewMode === 'table'" class="table-container">
                 <table class="modern-table">
-                    <thead>
+                    <thead class="table-header-row">
                         <tr>
-                            <th>
-                                <input type="checkbox" class="checkbox">
+                            <th class="table-th checkbox-column">
+                                <input type="checkbox" class="header-checkbox">
                             </th>
-                            <th>Mã hóa đơn</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày tạo</th>
-                            <th>Tổng tiền</th>
-                            <th>Loại</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
+                            <th class="table-th">Mã hóa đơn</th>
+                            <th class="table-th">Khách hàng</th>
+                            <th class="table-th">Ngày tạo</th>
+                            <th class="table-th">Tổng tiền</th>
+                            <th class="table-th">Loại</th>
+                            <th class="table-th">Trạng thái</th>
+                            <th class="table-th">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr v-for="(hoaDon, index) in paginatedInvoices" :key="hoaDon.id" class="table-row">
-                            <td>
-                                <input type="checkbox" class="checkbox">
+                    <tbody class="table-body">
+                        <tr v-for="(hoaDon, index) in hoaDons" :key="hoaDon.id" class="table-row">
+                            <td class="table-td checkbox-column">
+                                <input type="checkbox" class="row-checkbox">
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <div class="customer-info">
                                     <div class="customer-avatar">{{ getInitials(hoaDon.tenKhachHang) }}</div>
                                     <div class="customer-name">{{ hoaDon.tenKhachHang }}</div>
                                 </div>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <div class="amount">{{ formatCurrency(hoaDon.tongTien) }}</div>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
                                     {{ hoaDon.loaiHoaDon }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
                                     {{ hoaDon.trangThaiThanhToan }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="table-td">
                                 <div class="action-buttons">
                                     <button class="action-btn view-btn" title="Xem chi tiết"
                                         @click="viewInvoiceDetails(hoaDon)">
@@ -231,31 +242,42 @@
 
             <!-- Grid View: Xem dạng lưới -->
             <div v-else class="grid-container">
-                <div v-for="hoaDon in paginatedInvoices" :key="hoaDon.id" class="invoice-card">
-                    <div class="card-header">
-                        <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
-                        <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
-                            {{ hoaDon.trangThaiThanhToan }}
-                        </span>
+                <div v-for="hoaDon in hoaDons" :key="hoaDon.id" class="invoice-card">
+                    <div class="card-checkbox">
+                        <input type="checkbox" class="invoice-checkbox">
                     </div>
                     <div class="card-content">
-                        <div class="customer-section">
-                            <div class="customer-avatar">{{ getInitials(hoaDon.tenKhachHang) }}</div>
-                            <div class="customer-details">
-                                <div class="customer-name">{{ hoaDon.tenKhachHang }}</div>
-                                <div class="invoice-date">{{ formatDate(hoaDon.ngayTao) }}</div>
-                            </div>
-                        </div>
-                        <div class="amount-section">
-                            <div class="amount">{{ formatCurrency(hoaDon.tongTien) }}</div>
-                            <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
-                                {{ hoaDon.loaiHoaDon }}
+                        <div class="card-header-row">
+                            <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
+                            <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
+                                {{ hoaDon.trangThaiThanhToan }}
                             </span>
                         </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="card-btn primary" @click="viewInvoiceDetails(hoaDon)">Xem chi tiết</button>
-                        <button class="card-btn secondary">Chỉnh sửa</button>
+                        <div class="card-body">
+                            <div class="customer-section">
+                                <div class="customer-avatar">{{ getInitials(hoaDon.tenKhachHang) }}</div>
+                                <div class="customer-details">
+                                    <div class="customer-name">{{ hoaDon.tenKhachHang }}</div>
+                                    <div class="invoice-date">{{ formatDate(hoaDon.ngayTao) }}</div>
+                                </div>
+                            </div>
+                            <div class="card-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Tổng tiền:</span>
+                                    <span class="detail-value amount">{{ formatCurrency(hoaDon.tongTien) }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Loại:</span>
+                                    <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
+                                        {{ hoaDon.loaiHoaDon }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-btn primary" @click="viewInvoiceDetails(hoaDon)">Xem chi tiết</button>
+                            <button class="card-btn secondary">Chỉnh sửa</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,9 +285,8 @@
             <!-- Pagination: Phân trang -->
             <div class="pagination-section">
                 <div class="pagination-info">
-                    Hiển thị {{ (pageNo * pageSize) + 1 }} - {{ Math.min((pageNo + 1) * pageSize,
-                    filteredInvoices.length) }}
-                    trong tổng số {{ hoaDons.length }} hóa đơn
+                    Hiển thị {{ (pageNo * pageSize) + 1 }} - {{ (pageNo * pageSize) + 5 }}
+                    trong tổng số {{ totalElement }} hóa đơn
                 </div>
                 <div class="pagination-controls">
                     <button class="pagination-btn" :disabled="pageNo === 0" @click="changePage(pageNo - 1)">
@@ -293,6 +314,7 @@
                     </button>
                 </div>
             </div>
+
             <!-- Modal xem chi tiết hóa đơn -->
             <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
                 <div class="modal-content" @click.stop>
@@ -345,7 +367,7 @@
                         </div>
 
                         <!-- Invoice Content -->
-                        <div v-else-if="selectedInvoice">   
+                        <div v-else-if="selectedInvoice">
                             <!-- Invoice Information Card -->
                             <div class="info-card">
                                 <div class="card-header">
@@ -430,7 +452,7 @@
                                             <div class="info-row">
                                                 <span class="info-label">Phí ship:</span>
                                                 <span class="info-value">{{ formatCurrency(selectedInvoice.phiShip)
-                                                    }}</span>   
+                                                    }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Số tiền giảm:</span>
@@ -511,11 +533,14 @@
 <script setup>
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
+import { hoaDonGetAll } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
-const pageSize = ref(5);
+const pageSize = ref(6);
 const totalPage = ref(0);
+const totalElement = ref(0);
 const viewMode = ref('table'); // nếu view là table sẽ hiển thị dưới dạng table còn ko hiển thị grid 
 const searchQuery = ref('');
 const statusFilter = ref('');
@@ -530,7 +555,7 @@ const selectedInvoice = ref(null);
 const viewInvoiceDetails = async (invoice) => {
     isLoading.value = true;
     try {
-        const response = await axios.get(`/admin/hoa-don/${invoice.idHoaDon}`); // Sử dụng idHoaDon
+        const response = await hoaDonDetail(invoice.idHoaDon); // Sử dụng idHoaDon
         selectedInvoice.value = response.data;
         console.log('Dữ liệu chi tiết hóa đơn:', response.data); // Kiểm tra dữ liệu
         showModal.value = true;
@@ -548,48 +573,6 @@ const closeModal = () => {
     showModal.value = false;
     selectedInvoice.value = null;
 };
-
-// là một computed property nhiệm vụ lọc danh sách hóa đơn trả về tất cả phần tử đã lọc nhưng chưa phân trang
-const filteredInvoices = computed(() => {
-    let filtered = hoaDons.value || [];
-
-    // Apply filters: lọc theo trạng thái tìm kiếm 
-    if (searchQuery.value) {
-        filtered = filtered.filter(invoice => {
-            const maHoaDon = invoice.maHoaDon || '';
-            const tenKhachHang = invoice.tenKhachHang || '';
-            const searchTerm = searchQuery.value.toLowerCase();
-
-            return maHoaDon.toLowerCase().includes(searchTerm) ||
-                tenKhachHang.toLowerCase().includes(searchTerm);
-        });
-    }
-    
-    // lọc theo trạng thái thanh toán
-    if (statusFilter.value) {
-        filtered = filtered.filter(invoice =>
-            invoice.trangThaiThanhToan &&
-            invoice.trangThaiThanhToan.toLowerCase().includes(statusFilter.value.toLowerCase())
-        );
-    }
-
-    // lọc theo loại hóa đơn
-    if (typeFilter.value) {
-        filtered = filtered.filter(invoice =>
-            invoice.loaiHoaDon &&
-            invoice.loaiHoaDon.toLowerCase().includes(typeFilter.value.toLowerCase())
-        );
-    }
-
-    return filtered; 
-});
-
-// trả về tất cả phần tử đã lọc và phân trang
-const paginatedInvoices = computed(() => {
-    const start = pageNo.value * pageSize.value;
-    const end = start + pageSize.value;
-    return filteredInvoices.value.slice(start, end); 
-});
 
 // hiển thị số nút chuyển trang ví dụ 1 2 3 4 5 chỉ hiện 5 trang dù có 10 hay 11 trang
 const visiblePages = computed(() => {
@@ -634,19 +617,20 @@ const visiblePages = computed(() => {
 // hàm call api load dữ liệu
 const loadData = async () => {
     isLoading.value = true;
+    
     try {
-        const response = await axios.get('/admin/hoa-don');
+        // const response = await axios.get('/admin/hoa-don');
+        const response = await hoaDonGetAll(pageNo.value, pageSize.value);
 
         //Nếu response.data là object chứa content - trong backend trả về page là trả về object json
-        if (Array.isArray(response.data)) {
-            hoaDons.value = response.data;
-        }else if (Array.isArray(response.data.content)) {
+        if (Array.isArray(response.data.content)) {
             hoaDons.value = response.data.content;
-            totalPage.value = response.data.totalPage || 0;
-        }else{
+            totalPage.value = response.data.totalPages || 0;
+            totalElement.value = response.data.totalElements || 0; 
+        } else {
             hoaDons.value = [];
+            totalPage.value = 0;
         }
-        totalPage.value = Math.ceil(filteredInvoices.value.length / pageSize.value);  // math.ceil là làm tròn lên 3.1 vẫn làm tròn lên 4
     } catch (error) {
         console.error('Error loading data:', error);
         hoaDons.value = [];
@@ -658,8 +642,7 @@ const loadData = async () => {
 
 const changePage = (newPage) => {
     pageNo.value = newPage;
-    // Recalculate pagination for filtered data
-    totalPage.value = Math.ceil(filteredInvoices.value.length / pageSize.value);
+    loadData();
 };
 
 // hàm để tạo tên viết tắt trước tên 
@@ -738,11 +721,11 @@ const getTypeBadgeClass = (type) => {
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {
     pageNo.value = 0; // Khi bộ lọc thay đổi, quay về trang đầu tiên
-    totalPage.value = Math.ceil(filteredInvoices.value.length / pageSize.value);
-    // Tính lại tổng số trang dựa vào số lượng hóa đơn sau khi lọc
+    loadData();
 });
 
 onMounted(() => loadData());
 </script>
 
 <style scoped src="@/style/HoaDon/HoaDon.css"></style>
+<!-- <style scoped src="@/style/HoaDon/HoaDonTest.css"></style> -->
