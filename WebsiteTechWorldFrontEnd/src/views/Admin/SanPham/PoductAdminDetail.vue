@@ -73,7 +73,7 @@ watch(() => route.params.id, (newId) => {
 
 <style scoped>
 .container {
-  margin-left: 215px;
+  
 }
 
 ul {

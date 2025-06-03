@@ -1,18 +1,18 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import { detailStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
+import { detailClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { updateClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { useRoute, useRouter } from "vue-router";
 
 import { ElNotification } from 'element-plus'
 import { h } from 'vue'
 
-const staffRequest = reactive({
+const clientRequest = reactive({
   tenNhanVien: '',
   taiKhoan: '',
   email: '',
   sdt: '',
-  diaChi: '',
+  diaChiChinh: {},
   trangThai: '',
   chucVu: '',
   gioiTinh: true,
@@ -28,13 +28,14 @@ const router = useRouter();
 
 const id = route.params.id;
 
-const loadStaffDetail = async (id) => {
+const loadClientDetail = async (id) => {
     try {
-        const response = await detailStaff(id);
-        Object.assign(staffRequest, response)
+        const response = await detailClient(id);
+        Object.assign(clientRequest, response)
+        console.log(clientRequest)
     }
     catch (err) {
-        error.value = err.message || "Error while loading staff information"
+        error.value = err.message || "Error while loading client information"
     }
     finally {
         isLoading.value = false;
@@ -45,13 +46,13 @@ const loadStaffDetail = async (id) => {
 const handldeUpdate = async () => {
     try {
         const id = route.params.id;
-        const response = await updateStaff(id, staffRequest);
+        const response = await updateClient(id, clientRequest);
 
         // Tạo custom notification có thanh progress tụt dần
         ElNotification({
             title: '',
             message: h('div', [
-                h('span', 'Cập nhật nhân viên thành công!'),
+                h('span', 'Cập nhật khách hàng thành công!'),
                 h('div', {
                     style: `
                         position: relative;
@@ -79,10 +80,10 @@ const handldeUpdate = async () => {
             type: 'success',
             position: 'top-right'
         })
-        // router.push("/admin/staff")
+        router.push("/admin/client")
     }
     catch( err ) {
-        error.value = err.message || "Error while loading staff information";
+        error.value = err.message || "Error while loading client information";
 
         // Hiện thông báo lỗi
         ElNotification({
@@ -96,28 +97,28 @@ const handldeUpdate = async () => {
 }
 
 onMounted(() => {
-  loadStaffDetail(id);
+  loadClientDetail(id);
 });
 </script>
 
 <template>
-  <div class="staff-container">
-    <!-- Form thêm nhân viên -->
-    <h3>Thêm nhân viên</h3>
-    <form @submit.prevent="handleAddStaff">
+  <div class="client-container">
+    <!-- Form thêm khách hàng -->
+    <h3>Thêm khách hàng</h3>
+    <form @submit.prevent="handleAddClient">
       <div class="row">
         <div class="col-md-6 mb-2">
-            Tên Nhân Viên
+            Tên Khách Hàng
           <input
-            v-model="staffRequest.tenNhanVien"
-            placeholder="Tên nhân viên"
+            v-model="clientRequest.tenKhachHang"
+            placeholder="Tên khách hàng"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
             Tài khoản
           <input
-            v-model="staffRequest.taiKhoan"
+            v-model="clientRequest.taiKhoan"
             placeholder="Tên đăng nhập"
             class="form-control"
           />
@@ -125,7 +126,7 @@ onMounted(() => {
         <div class="col-md-6 mb-2">
             Email
           <input
-            v-model="staffRequest.email"
+            v-model="clientRequest.email"
             placeholder="Email"
             class="form-control"
           />
@@ -133,44 +134,25 @@ onMounted(() => {
         <div class="col-md-6 mb-2">
             Số điện thoại
           <input
-            v-model="staffRequest.sdt"
+            v-model="clientRequest.sdt"
             placeholder="Số điện thoại"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-            Địa chỉ
-          <input
-            v-model="staffRequest.diaChi"
-            placeholder="Địa chỉ"
             class="form-control"
           />
         </div>
         <div class="col-md-6 mb-2">
             Trạng thái
           <select
-            v-model="staffRequest.trangThai"
+            v-model="clientRequest.trangThai"
             placeholder="Trạng thái"
             class="form-select"
           >
-            <option value="ENABLE">Đang làm</option>
-            <option value="DISABLE">Nghỉ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-            Chức vụ
-          <select
-            v-model="staffRequest.chucVu"
-            placeholder="Chức vụ"
-            class="form-select"
-          >
-            <option value="STAFF">Nhân Viên</option>
-            <option value="ADMIN">Quản lý</option>
+            <option value="ACTIVE">Đang làm</option>
+            <option value="INACTIVE">Nghỉ</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
             Giới tính
-          <select v-model="staffRequest.gioiTinh" class="form-select">
+          <select v-model="clientRequest.gioiTinh" class="form-select">
             <option :value="true">Nam</option>
             <option :value="false">Nữ</option>
           </select>
@@ -178,7 +160,7 @@ onMounted(() => {
         <div class="col-md-6 mb-2">
             Năm sinh
           <input
-            v-model="staffRequest.namSinh"
+            v-model="clientRequest.ngaySinh"
             placeholder="Năm sinh"
             type="date"
             class="form-control"
@@ -191,7 +173,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.staff-container {
+.client-container {
   margin-left: 10px;
   padding: 20px;
   width: 99%;

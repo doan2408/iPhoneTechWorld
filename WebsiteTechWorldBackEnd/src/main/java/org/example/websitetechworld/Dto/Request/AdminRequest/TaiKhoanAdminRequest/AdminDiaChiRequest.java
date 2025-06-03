@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse;
+package org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminDiaChiResponse {
-    private Integer id;
 
-    private String tenKhachHang;
+public class AdminDiaChiRequest {
+    private Integer id;
 
     private String tenNguoiNhan;
 
@@ -29,4 +28,6 @@ public class AdminDiaChiResponse {
     private String tinhThanhPho;
 
     private Boolean diaChiChinh;
+
 }
+

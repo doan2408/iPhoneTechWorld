@@ -1,13 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { getAllStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 
 const staffList = ref([]);
 const isLoading = ref(false);
-const error = ref("");
-
 const currentPage = ref(0);
 const totalPages = ref(0);
 
@@ -28,29 +25,6 @@ const loadStaff = async (page = 0) => {
   }
 };
 
-// add nhan vien phía admin
-const staffRequest = ref({
-  tenNhanVien: "", // Tên nhân viên
-  trangThai: "ENABLE", //Mặc định là đang làm
-  chucVu: "STAFF", // Mặc định là Nhân Viên
-  gioiTinh: true, // Mặc định là Nam
-});
-
-const handleAddStaff = async () => {
-  try {
-    const request = await addStaff(staffRequest.value);
-    console.log(staffRequest);
-    staffRequest.value = {
-      trangThai: "ENABLE", //Mặc định là đang làm
-      chucVu: "STAFF", // Mặc định là Nhân Viên
-      gioiTinh: true,
-    }; //reset form
-    await loadStaff();
-    alert("them nhan vien thanh cong");
-  } catch (err) {
-    err.value = err.message || "An error was thrown while adding the staff";
-  }
-};
 
 //previous page
 const previousPage = () => {
@@ -79,90 +53,9 @@ onMounted(() => {
 
 <template>
   <div class="staff-container">
-    <!-- Form thêm nhân viên -->
-    <h3>Thêm nhân viên</h3>
-    <form @submit.prevent="handleAddStaff">
-      <div class="row">
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.tenNhanVien"
-            placeholder="Tên nhân viên"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.taiKhoan"
-            placeholder="Tên đăng nhập"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.matKhau"
-            placeholder="Mật khẩu"
-            type="password"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.email"
-            placeholder="Email"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.sdt"
-            placeholder="Số điện thoại"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.diaChi"
-            placeholder="Địa chỉ"
-            class="form-control"
-          />
-        </div>
-        <div class="col-md-6 mb-2">
-          <select
-            v-model="staffRequest.trangThai"
-            placeholder="Trạng thái"
-            class="form-select"
-          >
-            <option value="ENABLE">Đang làm</option>
-            <option value="DISABLE">Nghỉ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <select
-            v-model="staffRequest.chucVu"
-            placeholder="Chức vụ"
-            class="form-select"
-          >
-            <option value="STAFF">Nhân Viên</option>
-            <option value="ADMIN">Quản lý</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <select v-model="staffRequest.gioiTinh" class="form-select">
-            <option :value="true">Nam</option>
-            <option :value="false">Nữ</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-2">
-          <input
-            v-model="staffRequest.namSinh"
-            placeholder="Năm sinh"
-            type="date"
-            class="form-control"
-          />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-success mt-2">Thêm nhân viên</button>
-    </form>
+    <div>
+      <RouterLink :to="`/admin/staff/add`" class="btn-success">Thêm nhân viên</RouterLink>
+    </div>
     <hr />
 
     <!-- Hiển thị khi đang tải -->
@@ -170,7 +63,7 @@ onMounted(() => {
       <p>Đang tải dữ liệu...</p>
     </div>
     <h2>Danh sách nhân viên</h2>
-    <table class="table table-striped">
+    <table class="table">
       <thead>
         <tr>
           <th>Mã nhân viên</th>
@@ -183,6 +76,7 @@ onMounted(() => {
           <th>Chức vụ</th>
           <th>Giới tính</th>
           <th>Năm sinh</th>
+          <th>Thao tác</th>
         </tr>
       </thead>
       <tbody>
@@ -193,16 +87,37 @@ onMounted(() => {
           <td>{{ staff.email }}</td>
           <td>{{ staff.sdt }}</td>
           <td>{{ staff.diaChi }}</td>
-          <td>{{ staff.trangThai }}</td>
-          <td>{{ staff.chucVu }}</td>
+          <td>
+            <span
+              class="badge"
+              :class="{
+                'badge-active': staff.trangThai === 'ENABLE',
+                'badge-inactive': staff.trangThai === 'DISABLE',
+              }"
+            >
+              {{ staff.trangThai }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="badge"
+              :class="{
+                'badge-admin': staff.chucVu === 'ADMIN',
+                'badge-staff': staff.chucVu === 'STAFF',
+              }"
+            >
+              {{ staff.chucVu }}
+            </span>
+          </td>
           <td>{{ staff.gioiTinh ? "Nam" : "Nữ" }}</td>
           <td>{{ new Date(staff.namSinh).getFullYear() }}</td>
           <td>
             <RouterLink
               :to="`/admin/staff/${staff.id}`"
               class="btn btn-primary btn-sm"
+              title="Chỉnh sửa"
             >
-              Update
+              <i class="bi bi-pencil-square"></i>
             </RouterLink>
           </td>
         </tr>
@@ -217,73 +132,237 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .staff-container {
-  margin-left: 10px; /* đúng bằng chiều rộng sidebar */
-  padding: 20px;
+  margin-left: 10px;
+  padding: 30px;
   width: 99%;
   box-sizing: border-box;
+  background: #f8f9fa;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-
 
 .staff-container h3 {
+  margin-bottom: 25px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 24px;
+  text-align: center;
+}
+
+.staff-container h2 {
   margin-bottom: 20px;
   font-weight: 600;
-  color: #222;
-}
-
-.form-control {
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.form-control:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 6px rgba(40,167,69,0.3);
-}
-
-.btn-success {
-  background-color: #28a745;
-  border: none;
-  padding: 10px 20px;
-  font-weight: 600;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 15%;
-  margin-left: 85%;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.table {
+  color: #495057;
+  font-size: 22px;
+  text-align: center;
   margin-top: 30px;
 }
 
-.table th, .table td {
-  vertical-align: middle !important;
+/* Button styling - match với tone xanh trong ảnh */
+.btn-success {
+  background: #17a2b8;
+  border: none;
+  padding: 12px 30px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 15%;
+  margin-left: 85%;
+  transition: all 0.2s ease;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
 }
 
+.btn-success:hover {
+  background: #138496;
+}
+
+/* Table styling - tối giản như trong ảnh */
+.table {
+  margin-top: 30px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+  width: 100%;
+}
+
+/* Table header - màu trắng như trong ảnh */
+.table thead {
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table thead th {
+  color: #495057 !important;
+  font-weight: 500 !important;
+  padding: 16px 12px !important;
+  border: none !important;
+  font-size: 14px !important;
+  text-align: left !important;
+  background: white !important;
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Bỏ striped, table trắng hết */
+.table tbody tr {
+  background: white !important;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa !important;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Action buttons - tone xanh tối giản */
+.btn-primary {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-right: 5px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #f8f9fa;
+  color: #007bff;
+  text-decoration: none;
+}
+
+/* Pagination - tối giản */
 .pagination {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 15px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .pagination button {
-  padding: 6px 12px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
   cursor: pointer;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s ease;
+  background: white;
+  color: #495057;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .pagination button:hover {
-  background-color: #e2e6ea;
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.pagination span {
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+/* Loading state */
+.text-center p {
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* HR styling */
+hr {
+  border: none;
+  height: 1px;
+  background: #dee2e6;
+  margin: 20px 0;
+}
+
+/* Form controls */
+.form-control,
+.form-select {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  background: white;
+  outline: none;
+}
+
+/* Badge styling theo mẫu trong ảnh */
+.badge {
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-weight: bold 600 !important;
+  text-transform: uppercase !important;
+  display: inline-block !important;
+  text-align: center !important;
+  min-width: 80px !important;
+  letter-spacing: 0.5px !important;
+  
+}
+
+/* Hoạt động - giống HOÀN THÀNH (xanh lá) */
+.badge-active {
+  background-color: #e9f6f0 !important; /* Nền xanh lá nhạt */
+  color: #1cae6a !important; /* Chữ xanh lá đậm */
+}
+
+/* Không hoạt động - giống ĐÃ HỦY (đỏ) */
+.badge-inactive {
+  background-color: #fff5f5 !important; /* Nền đỏ nhạt */
+  color: #ed0e0e !important; /* Chữ đỏ đậm */
+}
+
+
+/* Hoạt động - giống HOÀN THÀNH (xanh lá) */
+.badge-admin {
+  background-color: #e5eefa !important; /* Nền xanh lá nhạt */
+  color: #177ee4 !important; /* Chữ xanh lá đậm */
+}
+
+/* Không hoạt động - giống ĐÃ HỦY (đỏ) */
+.badge-staff {
+  background-color: #fcf2f8 !important; /* Nền đỏ nhạt */
+  color: #ff0099 !important; /* Chữ đỏ đậm */
 }
 </style>

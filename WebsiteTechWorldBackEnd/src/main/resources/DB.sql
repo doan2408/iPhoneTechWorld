@@ -21,7 +21,7 @@ create table nhan_vien (
                            trang_thai nvarchar(50), -- ENABLE , DISABLE
                            chuc_vu nvarchar(50), --STAFF, ADMIN
                            gioi_tinh bit, --0: nữ, 1: nam
-                           nam_sinh date
+                           ngay_sinh date
 )
 
 create table khach_hang (
@@ -119,6 +119,7 @@ create table dia_chi (
                          id_dia_chi int identity(1,1) primary key,
                          id_khach_hang int,
                          ten_nguoi_nhan nvarchar(50),
+					     sdt_nguoi_nhan varchar(10),
                          so_nha nvarchar(50),
                          ten_duong nvarchar(50),
                          xa_phuong nvarchar(50),
@@ -462,14 +463,14 @@ VALUES
     (5, 5, 1, '2025-05-10');
 
 -- Bảng dia_chi
-INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
+INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
 VALUES
-    (1, N'Nguyễn Thị Hoa', N'123', N'Đường Láng', N'Đống Đa', N'Đống Đa', N'Hà Nội', 1),
-    (1, N'Nguyễn Văn Hoe', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'Quốc Oai', N'Hà Nội', 0),
-    (2, N'Trần Văn Hùng', N'456', N'Nguyễn Huệ', N'Quận 1', N'Quận 1', N'TP.HCM', 1),
-    (3, N'Lê Thị Lan', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
-    (4, N'Phạm Văn Minh', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
-    (5, N'Hoàng Thị Ngọc', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1);
+    (1, N'Nguyễn Thị Hoa', '0998938493',N'123', N'Đường Láng', N'Đống Đa', N'Đống Đa', N'Hà Nội', 1),
+    (1, N'Nguyễn Văn Hoe', '0998938412', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'Quốc Oai', N'Hà Nội', 0),
+    (2, N'Trần Văn Hùng', '0128473827', N'456', N'Nguyễn Huệ', N'Quận 1', N'Quận 1', N'TP.HCM', 1),
+    (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
+    (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
+    (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1);
 
 -- Bảng gio_hang
 INSERT INTO gio_hang (id_khach_hang)
@@ -807,4 +808,10 @@ SELECT * FROM chi_tiet_thanh_toan;
 SELECT * FROM loai_bao_hanh
 
 --34. lich_su_bao_hanh
-SELECT * FROM lich_su_bao_hanh
+SELECT * FROM lich_su_bao_hanh	
+
+select * from nhan_vien
+
+SELECT COUNT(*) FROM nhan_vien WHERE tai_khoan = '' OR email = '' OR sdt = ''
+union
+SELECT COUNT(*) FROM nhan_vien WHERE tai_khoan = 'hoa_nt' OR email = 'an.nv@example.com' OR sdt = '0901234567'

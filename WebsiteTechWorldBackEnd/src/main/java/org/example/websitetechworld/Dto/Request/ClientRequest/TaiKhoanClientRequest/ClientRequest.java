@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest;
+package org.example.websitetechworld.Dto.Request.ClientRequest.TaiKhoanClientRequest;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AdminClientRequest {
+public class ClientRequest {
     private Integer id;
 
     private String maKhachHang;
@@ -43,7 +42,7 @@ public class AdminClientRequest {
 
     private Boolean gioiTinh; // True: Nam, False: Nữ
 
-    private String anh;
+    private String anh; // Nếu có thể để trống
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Tổng điểm không được âm")
     private BigDecimal tongDiem;
