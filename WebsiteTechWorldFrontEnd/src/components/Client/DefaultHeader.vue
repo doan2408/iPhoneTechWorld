@@ -76,10 +76,10 @@ const goToLogin = () => {
         <li><router-link to="/orders">Tra cứu đơn hàng</router-link></li>
         <li><router-link to="/carts">Giỏ hàng</router-link></li>
 
-        <!-- Chỉ hiển thị nút Đăng xuất nếu người dùng đã đăng nhập -->
+        <!-- Chỉ hiển thị nút Đăng xuất nếu người dùng đã đăng nhập
         <li v-if="isLoggedIn">
           <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
-        </li>
+        </li> -->
 
         <!-- Chỉ hiển thị nút Đăng nhập nếu người dùng chưa đăng nhập và không ở trang đăng nhập -->
          <!-- <li v-if="isLoggedIn">
@@ -162,7 +162,7 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Style cho link bị disabled */

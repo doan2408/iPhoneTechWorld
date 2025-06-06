@@ -70,8 +70,8 @@ onMounted(() => {
           <th>Tên nhân viên</th>
           <th>Tên đăng nhập</th>
           <th>Email</th>
-          <th>Địa chỉ</th>
           <th>Số điện thoại</th>
+          <th>Địa chỉ</th>
           <th>Trạng thái</th>
           <th>Chức vụ</th>
           <th>Giới tính</th>

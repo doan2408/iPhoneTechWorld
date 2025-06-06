@@ -12,7 +12,10 @@ export const getAllStaff = async (page = 0) => {
     });
     return response.data;
   } catch (error) {
-    console.error("An error was thrown while loading the staff of admin: ", error);
+    console.error(
+      "An error was thrown while loading the staff of admin: ",
+      error
+    );
     throw error.response?.data || "Error getting staff";
   }
 };
@@ -27,24 +30,36 @@ export const detailStaff = async (id) => {
   }
 };
 
-export const updateStaff = async(id, staffRequest) => {
-    try {
-        const response = await axiosInstance.put(`/${id}`, staffRequest);
-        return response.date;
+export const updateStaff = async (id, staffRequest) => {
+  try {
+    const response = await axiosInstance.put(`/${id}`, staffRequest);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      // Server trả về lỗi (status != 2xx)
+      console.error("Lỗi phản hồi từ server:", error.response.data);
+      throw error.response.data;
+    } else if (error.request) {
+      // Request đã gửi đi rồi nhưng không nhận được phản hồi từ server
+      console.error("Không có phản hồi từ server:", error.request);
+      throw "Không có phản hồi từ server";
+    } else {
+      // Lỗi xảy ra trong quá trình tạo request (cấu hình axios sai, v.v...)
+      console.error("Lỗi khác:", error.message);
+      throw error.message;
     }
-    catch(error) {
-     console.error("Có lỗi khi update staff phía admin:", error);
-    throw error.response?.data || "Lỗi update Satff";
   }
-}
+};
 
-export const addStaff = async(staffRequest) => {
-    try {
-        const response = await axiosInstance.post(``, staffRequest);
-        return response.data;
-    }
-    catch(error) {
-     console.error("Có lỗi khi tạo staff phía admin:", error.response ? error.response.data : error.message);
+export const addStaff = async (staffRequest) => {
+  try {
+    const response = await axiosInstance.post(``, staffRequest);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Có lỗi khi tạo staff phía admin:",
+      error.response ? error.response.data : error.message
+    );
     throw error.response?.data || "Lỗi tạo Satff";
   }
-}
+};

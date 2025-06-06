@@ -9,15 +9,12 @@ const login = async (tai_khoan, mat_khau) => {
     const { message, roles } = response.data;
     return { message, roles };
   } catch (error) {
-    if (error.response) {
-      // Nếu có response từ server
-      throw error.response.data || 'Lỗi đăng nhập';
+    if (error.response && error.response.data) {
+      throw error.response.data;
     } else if (error.request) {
-      // Nếu không có response (lỗi mạng, timeout, etc.)
-      throw 'Lỗi kết nối mạng';
+      throw [{ field: "network", message: "Lỗi kết nối mạng" }];
     } else {
-      // Lỗi xảy ra khi thiết lập yêu cầu
-      throw 'Có lỗi xảy ra khi gửi yêu cầu đăng nhập';
+      throw [{ field: "request", message: "Có lỗi xảy ra khi gửi yêu cầu đăng nhập" }];
     }
   }
 }
@@ -30,11 +27,18 @@ export const logout = async () => {
     })
     // Đăng xuất thành công → xóa localStorage / Vuex state nếu có
     localStorage.removeItem('user')  // nếu có lưu thông tin user
-    // Chuyển hướng về trang login
-    window.location.href = '/login'  // Reset hoàn toàn
+    window.location.href = '/login';
+    // Tự động làm mới sau 0,5 giây
+    setTimeout(() => window.location.reload(), 500);
     return response.data
   } catch (error) {
-    throw error.response?.data || 'Lỗi đăng xuất'
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    } else if (error.request) {
+      throw [{ field: "network", message: "Lỗi kết nối mạng" }];
+    } else {
+      throw [{ field: "request", message: "Có lỗi xảy ra khi gửi yêu cầu đăng nhập" }];
+    }
   }
 }
 

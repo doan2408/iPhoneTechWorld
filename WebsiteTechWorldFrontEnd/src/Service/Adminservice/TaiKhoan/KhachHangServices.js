@@ -1,5 +1,4 @@
 import axios from "axios";
-import { da } from "element-plus/es/locales.mjs";
 
 const axiosInstance = axios.create({
     baseURL: "http://localhost:8080/admin/client",
@@ -31,11 +30,22 @@ export const detailClient = async(id) => {
 export const updateClient = async(id, clientRequest) => {
     try {
         const response = await axiosInstance.put(`/${id}`, clientRequest);
-        return response.date;
+        return response.data;
     }
     catch(error) {
-     console.error("Có lỗi khi update client phía admin:", error);
-    throw error.response?.data || "Lỗi update Client";
+     if (error.response) {
+      // Server trả về lỗi (status != 2xx)
+      console.error("Lỗi phản hồi từ server:", error.response.data);
+      throw error.response.data;
+    } else if (error.request) {
+      // Request đã gửi đi rồi nhưng không nhận được phản hồi từ server
+      console.error("Không có phản hồi từ server:", error.request);
+      throw "Không có phản hồi từ server";
+    } else {
+      // Lỗi xảy ra trong quá trình tạo request (cấu hình axios sai, v.v...)
+      console.error("Lỗi khác:", error.message);
+      throw error.message;
+    }
   }
 }
 
@@ -73,9 +83,27 @@ export const getAdress = async(id) => {
 }
 
 //update 1 địa chỉ
-export const updateAddress = async(id, addressRequest) => {
+export const updateAddress = async (id, addressRequest) => {
     try {
         const response = await axiosInstance.put(`/address/${id}`, addressRequest);
+        return response.data;
+    } catch (err) {
+        if (err.response) {
+            console.error("Lỗi từ backend (status:", err.response.status + "):", err.response.data);
+            throw err.response.data;
+        } else if (err.request) {
+            console.error("Không nhận được phản hồi từ server:", err.request);
+            throw "Không nhận được phản hồi từ server.";
+        } else {
+            console.error("Lỗi khi gửi yêu cầu update địa chỉ:", err.message);
+            throw "Lỗi khi gửi yêu cầu update địa chỉ: " + err.message;
+        }
+    }
+};
+
+export const getAdressListOfClient = async(clientId) => {
+    try {
+        const response = await axios.get(`/admin/address/${clientId}`);
         return response.data;
     }catch(err) {
         console.log("An errors was thrown while loading the address of client in admin: ", err);
