@@ -16,7 +16,6 @@ import java.util.Optional;
 public class ForgotPasswordController {
 
     private final ForgotPasswordService forgotPasswordService;
-    private final UserService userService;
 
     //check email trong database -> sendMail
     @PostMapping("/forgot-password")

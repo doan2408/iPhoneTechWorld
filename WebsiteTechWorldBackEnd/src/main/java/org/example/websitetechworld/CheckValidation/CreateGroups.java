@@ -1,2 +1,4 @@
-package org.example.websitetechworld.CheckValidation;public interface CreateGroups {
+package org.example.websitetechworld.CheckValidation;
+
+public interface CreateGroups {
 }

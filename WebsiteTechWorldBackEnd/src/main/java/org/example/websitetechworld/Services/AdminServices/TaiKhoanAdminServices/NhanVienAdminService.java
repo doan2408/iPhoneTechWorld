@@ -6,13 +6,14 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResp
 import org.example.websitetechworld.Entity.NhanVien;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
+import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -68,11 +69,13 @@ public class NhanVienAdminService {
                 nhanVien.setMatKhau(encodedPassword);
             }
         } else {
-            // Khi là update, chỉ cập nhật mật khẩu nếu nó được truyền từ request
-//            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isEmpty()) {
-//                String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
-//                nhanVien.setMatKhau(encodedPassword);
-//            }
+            if (adminStaffRequest.getMatKhau() != null && !adminStaffRequest.getMatKhau().isBlank()) {
+                // Nếu mật khẩu mới khác mật khẩu hiện tại thì mã hóa và set
+                if (!passwordEncoder.matches(adminStaffRequest.getMatKhau(), nhanVien.getMatKhau())) {
+                    String encodedPassword = passwordEncoder.encode(adminStaffRequest.getMatKhau());
+                    nhanVien.setMatKhau(encodedPassword);
+                }
+            }
         }
         nhanVien.setEmail(adminStaffRequest.getEmail());
         nhanVien.setSdt(adminStaffRequest.getSdt());
@@ -93,54 +96,81 @@ public class NhanVienAdminService {
 
     //detail nhan vien
     public Optional<AdminNhanVienResponse> getStaffById(Integer id) {
-        return nhanVienRepository.findById(id).map(this :: convertToResponse);
+        return nhanVienRepository.findById(id).map(this::convertToResponse);
     }
 
 
-    //update nhân viên (màn admin)
     public AdminStaffRequest updateStaff(Integer id, AdminStaffRequest staffRequest) {
         NhanVien nhanvienExisting = nhanVienRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("khong tim thay nhan vien voi id: " + id));
-        // Check trùng tài khoản, email, sdt
-        if (khachHangRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(staffRequest.getTaiKhoan())) {
-            throw new RuntimeException("Tên tài khoản đã tồn tại!");
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với id: " + id));
+
+        List<Map<String, String>> errors = new ArrayList<>();
+
+        if (!Objects.equals(staffRequest.getTaiKhoan(), nhanvienExisting.getTaiKhoan()) &&
+                (khachHangRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()) ||
+                        nhanVienRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()))) {
+            errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
         }
-        if (khachHangRepository.existsByEmail(staffRequest.getEmail()) || nhanVienRepository.existsByEmail(staffRequest.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại!");
+
+        if (!Objects.equals(staffRequest.getEmail(), nhanvienExisting.getEmail()) &&
+                (khachHangRepository.existsByEmail(staffRequest.getEmail()) ||
+                        nhanVienRepository.existsByEmail(staffRequest.getEmail()))) {
+            errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
         }
-        if (khachHangRepository.existsBySdt(staffRequest.getSdt()) || nhanVienRepository.existsBySdt(staffRequest.getSdt())) {
-            throw new RuntimeException("Số điện thoại đã tồn tại!");
+
+        if (!Objects.equals(staffRequest.getSdt(), nhanvienExisting.getSdt()) &&
+                (khachHangRepository.existsBySdt(staffRequest.getSdt()) ||
+                        nhanVienRepository.existsBySdt(staffRequest.getSdt()))) {
+            errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
+        }
+
+        if (staffRequest.getMatKhau() != null && !staffRequest.getMatKhau().isBlank()) {
+            String rawPassword = staffRequest.getMatKhau();
+            if (rawPassword.length() < 6 || rawPassword.length() > 20) {
+                errors.add(Map.of("field", "matKhau", "message", "Mật khẩu phải từ 6 đến 20 ký tự"));
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
         }
         convertNhanVienFromRequest(nhanvienExisting, staffRequest, false);
-        NhanVien nhanVienUpdate =  nhanVienRepository.save(nhanvienExisting);
+        NhanVien nhanVienUpdate = nhanVienRepository.save(nhanvienExisting);
         return convertToRequest(nhanVienUpdate);
     }
 
-
-    //add nhan vien
     public AdminStaffRequest createStaff(AdminStaffRequest staffRequest) {
-        NhanVien nhanVien = new NhanVien();
-        // Check trùng tài khoản, email, sdt
+        List<Map<String, String>> errors = new ArrayList<>();
+
         if (khachHangRepository.existsByTaiKhoan(staffRequest.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(staffRequest.getTaiKhoan())) {
-            throw new RuntimeException("Tên tài khoản đã tồn tại!");
+            errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
         }
+
         if (khachHangRepository.existsByEmail(staffRequest.getEmail()) || nhanVienRepository.existsByEmail(staffRequest.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại!");
+            errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
         }
+
         if (khachHangRepository.existsBySdt(staffRequest.getSdt()) || nhanVienRepository.existsBySdt(staffRequest.getSdt())) {
-            throw new RuntimeException("Số điện thoại đã tồn tại!");
+            errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
         }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
+        NhanVien nhanVien = new NhanVien();
         convertNhanVienFromRequest(nhanVien, staffRequest, true);
         NhanVien nvAdd = nhanVienRepository.save(nhanVien);
         return convertToRequest(nvAdd);
     }
 
+
     //xoa nhan vien
     public void deleteStaff(Integer id) {
-         if(!nhanVienRepository.existsById(id)) {
+        if (!nhanVienRepository.existsById(id)) {
             throw new RuntimeException("Not found staff id: " + id);
-         }
-         nhanVienRepository.deleteById(id);
+        }
+        nhanVienRepository.deleteById(id);
     }
 
 }
