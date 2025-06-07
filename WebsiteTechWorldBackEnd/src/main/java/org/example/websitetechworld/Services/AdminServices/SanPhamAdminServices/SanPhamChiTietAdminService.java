@@ -76,7 +76,7 @@ public class SanPhamChiTietAdminService {
             response.setMaSanPham(sanPham.getMaSanPham());
             response.setTenSanPham(sanPham.getTenSanPham());
             response.setThuongHieu(sanPham.getThuongHieu());
-            response.setSoLuongTonKho(sanPham.getSoLuongTonKho());
+//            response.setSoLuongTonKho(sanPham.getSoLuongTonKho());
 
             NhaCungCap ncc = sanPham.getIdNhaCungCap();
             if (ncc != null) {
