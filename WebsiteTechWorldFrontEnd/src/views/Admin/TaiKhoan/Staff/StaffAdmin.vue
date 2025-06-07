@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { getAllStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 
@@ -7,14 +7,16 @@ const staffList = ref([]);
 const isLoading = ref(false);
 const currentPage = ref(0);
 const totalPages = ref(0);
+const searchKeyword = ref("");
+const searchTimeout = ref(null); //status of searching
 
 //load staff
 // nếu người dùng không truyền page khi gọi hàm
 //  → nó sẽ tự động dùng 0.
-const loadStaff = async (page = 0) => {
+const loadStaff = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
-    const response = await getAllStaff(page);
+    const response = await getAllStaff(page, keyword);
     staffList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
@@ -25,6 +27,28 @@ const loadStaff = async (page = 0) => {
   }
 };
 
+//search staff
+const performSearch = () => {
+  //clear old timeout if has
+  if(searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  //create new timeout -- delay 500ms after user stop typing
+  searchTimeout.value = setTimeout(() => {
+    currentPage.value = 0; //reset from first page when searching
+    loadStaff(0, searchKeyword.value || null)
+  }, 500);
+}
+
+const clearSearch = () => {
+    searchKeyword.value = ""
+}
+
+watch(searchKeyword, () => {
+  performSearch();
+})
+
 
 //previous page
 const previousPage = () => {
@@ -33,7 +57,7 @@ const previousPage = () => {
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadStaff(currentPage.value);
+  loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
 //next page
@@ -43,7 +67,7 @@ const nextPage = () => {
   } else {
     currentPage.value = 0;
   }
-  loadStaff(currentPage.value);
+  loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
 onMounted(() => {
@@ -54,14 +78,66 @@ onMounted(() => {
 <template>
   <div class="staff-container">
     <div>
-      <RouterLink :to="`/admin/staff/add`" class="btn-success">Thêm nhân viên</RouterLink>
+      <RouterLink :to="`/admin/staff/add`" class="btn-success"
+      >Thêm nhân viên</RouterLink>
     </div>
     <hr />
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-input-group">
+          <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+              v-model="searchKeyword"
+              type="text"
+              class="form-control search-input"
+              placeholder="Tìm kiếm theo tên, email, số điện thoại, chức vụ..."
+            />
+            <button 
+              @click="clearSearch" 
+              class="btn-clear-inline"
+              v-if="searchKeyword"
+              title="Xóa tìm kiếm"
+            >
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+          <div class="search-status" v-if="isLoading">
+            <i class="bi bi-arrow-repeat spin"></i>
+            Đang tìm kiếm...
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Hiển thị khi đang tải -->
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
     </div>
+
+    <!-- Hiển thị kết quả tìm kiếm -->
+    <div v-if="searchKeyword && !isLoading" class="search-result-info">
+      <p>
+        <i class="bi bi-info-circle"></i>
+        Kết quả tìm kiếm cho: "<strong>{{ searchKeyword }}</strong>"
+        ({{ staffList.length }} nhân viên)
+      </p>
+    </div>
+
+     <!-- Hiển thị khi không có dữ liệu -->
+    <div v-if="!isLoading && staffList.length === 0" class="no-data">
+      <p v-if="searchKeyword">
+        <i class="bi bi-search"></i>
+        Không tìm thấy nhân viên nào với từ khóa "{{ searchKeyword }}"
+      </p>
+      <p v-else>
+        <i class="bi bi-inbox"></i>
+        Chưa có nhân viên nào
+      </p>
+    </div>
+
     <h2>Danh sách nhân viên</h2>
     <table class="table">
       <thead>
@@ -364,5 +440,136 @@ hr {
 .badge-staff {
   background-color: #fcf2f8 !important; /* Nền đỏ nhạt */
   color: #ff0099 !important; /* Chữ đỏ đậm */
+}
+
+.search-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #6c757d;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px 12px 45px;
+  border: 2px solid #dee2e6;
+  border-radius: 25px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #f8f9fa;
+  padding-right: 50px;
+}
+
+.search-input:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+  outline: none;
+  background: white;
+}
+
+.btn-clear-inline {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.btn-clear-inline:hover {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.search-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #17a2b8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.search-result-info {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-left: 4px solid #17a2b8;
+}
+
+.search-result-info p {
+  margin: 0;
+  color: #495057;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-result-info i {
+  color: #17a2b8;
+}
+
+.no-data {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin: 20px 0;
+}
+
+.no-data p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.no-data i {
+  font-size: 20px;
 }
 </style>

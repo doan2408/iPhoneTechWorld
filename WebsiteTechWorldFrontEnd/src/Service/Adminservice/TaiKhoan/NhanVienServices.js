@@ -5,11 +5,14 @@ const axiosInstance = axios.create({
   withCredentials: true, // ❗ Gửi cookie (JSESSIONID) qua CORS
 });
 
-export const getAllStaff = async (page = 0) => {
+export const getAllStaff = async (page = 0, keyword = null) => {
   try {
-    const response = await axiosInstance.get("", {
-      params: { page },
-    });
+    const params = { page };
+    //only add keyword if it is provided
+    if (keyword && keyword.trim() !== "") {
+      params.keyword = keyword.trim();
+    }
+    const response = await axiosInstance.get("", { params });
     return response.data;
   } catch (error) {
     console.error(
