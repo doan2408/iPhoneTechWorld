@@ -94,6 +94,23 @@ public class NhanVienAdminService {
         return pageResult.map(this::convertToResponse);  // Chuyển từng NhanVien thành AdminNhanVienResponse
     }
 
+    // Hiển thị nhân viên với search và phân trang
+    public Page<AdminNhanVienResponse> getNhanVienList(int page, int size, String keyword) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NhanVien> pageResult;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Nếu có từ khóa search, tìm kiếm theo nhiều trường
+            pageResult = nhanVienRepository.findByKeyword(keyword.trim(), pageable);
+        } else {
+            // Nếu không có từ khóa, lấy tất cả
+            pageResult = nhanVienRepository.findAll(pageable);
+        }
+
+        // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
+        return pageResult.map(this::convertToResponse);
+    }
+
     //detail nhan vien
     public Optional<AdminNhanVienResponse> getStaffById(Integer id) {
         return nhanVienRepository.findById(id).map(this::convertToResponse);

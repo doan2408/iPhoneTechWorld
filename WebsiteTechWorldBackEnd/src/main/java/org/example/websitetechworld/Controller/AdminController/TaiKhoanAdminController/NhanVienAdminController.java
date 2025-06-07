@@ -24,9 +24,10 @@ public class NhanVienAdminController {
     private final NhanVienAdminService nhanVienAdminService;
 
     @GetMapping()
-    public ResponseEntity<?> getStaff(@RequestParam(value = "page",defaultValue = "0") int page) {
+    public ResponseEntity<?> getStaff(@RequestParam(value = "page",defaultValue = "0") int page,
+                                      @RequestParam(value = "keyword", required = false) String keyword) {
         int pageSize = 10;
-        return ResponseEntity.ok(nhanVienAdminService.getNhanVienList(page, pageSize));
+        return ResponseEntity.ok(nhanVienAdminService.getNhanVienList(page, pageSize, keyword));
     }
 
     @GetMapping("/{id}")

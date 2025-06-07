@@ -37,7 +37,7 @@ public class ClientAdminService {
     ModelMapper modelMapper = new ModelMapper();
 
 
-    //convert
+    //convertToResponse
     private AdminClientResponse convert(KhachHang khachHang) {
         AdminClientResponse adminClientResponse = new AdminClientResponse();
         adminClientResponse.setId(khachHang.getId());
@@ -104,6 +104,19 @@ public class ClientAdminService {
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> clientPage = khachHangRepository.findAll(pageable);
         return clientPage.map(this::convert);
+    }
+
+    //search
+    public Page<AdminClientResponse> getAllClient(int page, int size, String keyWord) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> pageResult;
+        if(keyWord !=null && !keyWord.isEmpty()){
+            pageResult = khachHangRepository.findByKeyword(keyWord.trim(), pageable);
+        }
+        else {
+            pageResult = khachHangRepository.findAll(pageable);
+        }
+        return pageResult.map(this::convert);
     }
 
     //detail client

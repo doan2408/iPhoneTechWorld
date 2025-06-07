@@ -26,9 +26,10 @@ public class ClientAdminController {
     private final DiaChiAdminService diaChiAdminService;
 
     @GetMapping
-    public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page) {
+    public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page,
+                                           @RequestParam(value = "keyword", required = false) String keyWord) {
         int pageSize = 10;
-        return ResponseEntity.ok(clientAdminService.getAllClient(page, pageSize));
+        return ResponseEntity.ok(clientAdminService.getAllClient(page, pageSize, keyWord));
     }
 
     @GetMapping("/{id}")
