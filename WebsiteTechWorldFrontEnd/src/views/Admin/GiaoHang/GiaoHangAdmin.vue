@@ -209,11 +209,19 @@
                                         {{ delivery.trangThaiDonHang }}
                                     </span>
                                 </td>
-                                <td class="table-td">
-                                    <button @click.stop="viewDeliveryDetail(delivery)" class="btn btn-primary btn-sm">
-                                        Xem chi tiết
+                                <td class="table-td flex gap-2">
+                                    <!-- Detail icon -->
+                                    <button @click.stop="viewDeliveryDetail(delivery)"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+
+                                    <button @click="devliveryProcessing(delivery)"
+                                        class="btn btn-sm btn-outline-success">
+                                        <i class="fa-solid fa-gear"></i>
                                     </button>
                                 </td>
+
                             </tr>
                         </tbody>
                     </table>
@@ -497,6 +505,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { giaoHangGetAll } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { giaoHangDetail } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import router from '@/router'
 
 
 // State reactive
@@ -615,6 +624,12 @@ const viewDeliveryDetail = async (delivery) =>{
     finally{
         isLoading.value = false;
     }
+}
+const devliveryProcessing = async (delivery) => {
+    router.push({
+        name: 'GiaoHangProcessing',
+        params: {id :delivery.idGiaoHang},
+    });
 }
 
 function backToList() {
