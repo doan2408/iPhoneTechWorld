@@ -171,6 +171,7 @@
                             </th>
                             <th class="table-th">Mã hóa đơn</th>
                             <th class="table-th">Khách hàng</th>
+                            <td class="table-th">Số điện thoại</td>
                             <th class="table-th">Ngày tạo</th>
                             <th class="table-th">Tổng tiền</th>
                             <th class="table-th">Loại</th>
@@ -191,6 +192,9 @@
                                     <div class="customer-avatar">{{ getInitials(hoaDon.tenKhachHang) }}</div>
                                     <div class="customer-name">{{ hoaDon.tenKhachHang }}</div>
                                 </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="date">{{ hoaDon.sdt }}</div>
                             </td>
                             <td class="table-td">
                                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
