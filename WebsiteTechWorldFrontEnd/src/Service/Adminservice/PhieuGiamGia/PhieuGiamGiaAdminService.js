@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080/admin/phieu-giam-gia',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },

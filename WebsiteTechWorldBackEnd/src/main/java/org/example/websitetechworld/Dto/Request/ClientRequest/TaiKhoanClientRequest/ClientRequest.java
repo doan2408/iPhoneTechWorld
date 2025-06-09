@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.CheckValidation.CreateGroups;
+import org.example.websitetechworld.CheckValidation.UpdateGroups;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 
@@ -18,11 +20,10 @@ public class ClientRequest {
 
     private String maKhachHang;
 
-    @NotBlank(message = "Tên khách hàng không được để trống")
-    @Size(max = 100, message = "Tên khách hàng tối đa 100 ký tự")
+    @NotBlank(message = "Họ tên không được để trống")
+    @Size(max = 100, message = "Tên tối đa 100 ký tự")
     private String tenKhachHang;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "0\\d{9}", message = "Số điện thoại không hợp lệ")
     private String sdt;
 
@@ -30,12 +31,18 @@ public class ClientRequest {
     @Size(min = 5, max = 50, message = "Tài khoản phải từ 5 đến 50 ký tự")
     private String taiKhoan;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
+    @NotBlank(message = "Mật khẩu không được để trống", groups = CreateGroups.class)
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String matKhau;
 
-    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không đúng định dạng")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            message = "Email không đúng định dạng"
+    )
     private String email;
+
 
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     private LocalDate ngaySinh;
@@ -52,6 +59,5 @@ public class ClientRequest {
 
     private HangKhachHang hangKhachHang;
 
-    @NotNull(message = "Trạng thái khách hàng không được để trống")
     private TrangThaiKhachHang trangThai;
 }

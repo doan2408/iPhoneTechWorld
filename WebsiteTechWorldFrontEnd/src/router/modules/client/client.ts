@@ -1,4 +1,3 @@
-// src/router/modules/product.ts
 import type { RouteRecordRaw } from "vue-router";
 import clientLayout from "@/layouts/ClientLayout.vue";
 

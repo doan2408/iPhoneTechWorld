@@ -409,7 +409,7 @@ create table chi_tiet_thanh_toan (
 
 
 -- Bảng nhan_vien
-    INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, nam_sinh)
+    INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
     (N'Trần Thị Bình', 'nv_binh', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'binh.tt@example.com', '0912345678', N'456 Nguyễn Huệ, TP.HCM', N'ENABLE', N'STAFF', 0, '1995-08-20'),
@@ -809,9 +809,3 @@ SELECT * FROM loai_bao_hanh
 
 --34. lich_su_bao_hanh
 SELECT * FROM lich_su_bao_hanh	
-
-select * from nhan_vien
-
-SELECT COUNT(*) FROM nhan_vien WHERE tai_khoan = '' OR email = '' OR sdt = ''
-union
-SELECT COUNT(*) FROM nhan_vien WHERE tai_khoan = 'hoa_nt' OR email = 'an.nv@example.com' OR sdt = '0901234567'

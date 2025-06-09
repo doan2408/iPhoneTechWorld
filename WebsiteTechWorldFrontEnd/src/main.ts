@@ -19,5 +19,4 @@ const app = createApp(App);
 app.use(store); // Đăng ký store
 app.use(router); // Đăng ký router
 app.use(ElementPlus); //cấu hình  element
-
 app.mount('#app');
