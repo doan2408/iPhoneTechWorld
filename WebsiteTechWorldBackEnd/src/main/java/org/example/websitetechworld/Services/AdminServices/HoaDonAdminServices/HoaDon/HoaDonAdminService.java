@@ -68,9 +68,9 @@ public class HoaDonAdminService {
         return hoaDonRepository.findById(id).orElseThrow();
     }
 
-    public List<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId,Integer pageNo, Integer pageSize){
+    public Page<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId,Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return lichSuHoaDonRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(LichSuHoaDonAdminResponse::convertDto).toList();
+        return lichSuHoaDonRepository.findByIdHoaDon_Id(hoaDonId,pageable).map(LichSuHoaDonAdminResponse::convertDto);
     }
 
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(Integer hoaDonId,Integer pageNo, Integer pageSize){

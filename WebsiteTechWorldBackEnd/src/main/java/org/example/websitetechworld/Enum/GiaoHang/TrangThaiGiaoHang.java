@@ -17,4 +17,13 @@ public enum TrangThaiGiaoHang {
     public String getDisplayName() {
         return displayName;
     }
+
+    public static TrangThaiGiaoHang fromDisplayName(String displayName) {
+        for (TrangThaiGiaoHang status : values()) {
+            if (status.getDisplayName().equalsIgnoreCase(displayName)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Trạng thái không hợp lệ: " + displayName);
+    }
 }

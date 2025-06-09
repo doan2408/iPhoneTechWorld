@@ -19,6 +19,8 @@ public class HoaDonAdminResponse {
 
     private String maHoaDon;
 
+    private Integer idGiaoHang;
+
     private Integer idKhachHang;
     private String maKhachHang;
     private String tenKhachHang;
@@ -57,6 +59,7 @@ public class HoaDonAdminResponse {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
         hoaDonAdminResponse.setIdHoaDon(hoaDon.getId());
         hoaDonAdminResponse.setMaHoaDon(hoaDon.getMaHoaDon());
+        hoaDonAdminResponse.setIdGiaoHang(hoaDon.getGiaoHangs() != null ? hoaDon.getGiaoHangs().getId() : null);
         if (hoaDon.getIdKhachHang() != null){
             hoaDonAdminResponse.setIdKhachHang(hoaDon.getIdKhachHang().getId());
             hoaDonAdminResponse.setMaKhachHang(hoaDon.getIdKhachHang().getMaKhachHang());

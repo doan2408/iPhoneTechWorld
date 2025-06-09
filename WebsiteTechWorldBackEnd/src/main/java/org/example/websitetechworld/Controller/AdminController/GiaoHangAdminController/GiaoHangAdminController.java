@@ -1,9 +1,11 @@
 package org.example.websitetechworld.Controller.AdminController.GiaoHangAdminController;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.GiaoHangAdminRequest.AddGIaoHangAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.GiaoHangAdminRequest.CapNhatTrangThaiDTO;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseGiaoHang.GetAllGiaoHangResponseAdmin;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseGiaoHang.ViewGiaoHangAdminResponse;
 import org.example.websitetechworld.Entity.GiaoHang;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,15 +42,18 @@ public class GiaoHangAdminController {
         giaoHangAdminServices.addGiaoHang(addGIaoHangAdminRequest);
         return ResponseEntity.ok("Da gui yeu cau giao hang");
     }
-    @PutMapping("/{idGiaoHang}/packed")
-    public ResponseEntity<?> changePacked(@PathVariable Integer idGiaoHang){
-        giaoHangAdminServices.changePacked(idGiaoHang);
-        return ResponseEntity.ok("Da xac nhan dong goi");
+
+    @PutMapping("/{idGiaoHang}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Integer idGiaoHang,
+                                          @RequestBody CapNhatTrangThaiDTO request) {
+        TrangThaiGiaoHang trangThai;
+        try {
+            trangThai = TrangThaiGiaoHang.valueOf(request.getTrangThaiDonHang().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            trangThai = TrangThaiGiaoHang.fromDisplayName(request.getTrangThaiDonHang());
+        }
+        giaoHangAdminServices.updateStatus(idGiaoHang, trangThai);
+        return ResponseEntity.ok("Đã cập nhật trạng thái: " + trangThai.getDisplayName());
     }
 
-    @PutMapping("/{idGiaoHang}/shipping")
-    public ResponseEntity<?> changeShipping(@PathVariable Integer idGiaoHang){
-        giaoHangAdminServices.changeShipping(idGiaoHang);
-        return ResponseEntity.ok("Da chuyen qua don vi van chuyen");
-    }
 }

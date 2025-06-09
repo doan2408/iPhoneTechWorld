@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GiaoHangAdminServices {
@@ -72,4 +73,14 @@ public class GiaoHangAdminServices {
         giaoHangRepository.save(giaoHang);
     }
 
+    public void updateStatus(Integer idGiaoHang, TrangThaiGiaoHang newStatus) {
+        Optional<GiaoHang> optionalGiaoHang = giaoHangRepository.findById(idGiaoHang);
+        if (!optionalGiaoHang.isPresent()) {
+            throw new IllegalArgumentException("Không tìm thấy đơn giao hàng với ID: " + idGiaoHang);
+        }
+
+        GiaoHang giaoHang = optionalGiaoHang.get();
+        giaoHang.setTrangThaiDonHang(newStatus);
+        giaoHangRepository.save(giaoHang);
+    }
 }

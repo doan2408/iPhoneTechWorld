@@ -23,6 +23,8 @@ public class ViewGiaoHangAdminResponse {
 
     private Integer idHoaDon;
     private String maHoaDon;
+    private String sdt;
+    private String trangThaiThanhToan;
 
     private String maGiaoHang;
 
@@ -31,7 +33,6 @@ public class ViewGiaoHangAdminResponse {
     private BigDecimal tongGiaTriDonHang;
 
     private String diaChiGiaoHang;
-
     private String trangThaiDonHang;
 
     private List<ChiTietGiaoHangResponseAdmin> chiTietGiaoHangResponseAdminList;
@@ -47,6 +48,8 @@ public class ViewGiaoHangAdminResponse {
         if (giaoHang.getIdHoaDon() != null){
             response.setIdHoaDon(giaoHang.getIdHoaDon().getId());
             response.setMaHoaDon(giaoHang.getIdHoaDon().getMaHoaDon());
+            response.setSdt(giaoHang.getIdHoaDon().getSdt());
+            response.setTrangThaiThanhToan(giaoHang.getIdHoaDon().getTrangThaiThanhToan().name());
         }
         response.setMaGiaoHang(giaoHang.getMaGiaoHang());
         response.setNgayDatHang(giaoHang.getNgayDatHang());
