@@ -2134,3 +2134,335 @@
         max-height: 95vh;
     }
 }
+/* Action Buttons Section */
+.invoice-card-actions {
+    padding: 20px 24px;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Action Button Base Styles */
+.invoice-action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    min-width: 160px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.invoice-action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.invoice-action-button:hover::before {
+    left: 100%;
+}
+
+.invoice-btn-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Process Order Button */
+.invoice-process-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.invoice-process-button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 12px -1px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+}
+
+.invoice-process-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3);
+}
+
+/* History Button */
+.invoice-history-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.invoice-history-button:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 12px -1px rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+}
+
+.invoice-history-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3);
+}
+
+/* Payment Button */
+.invoice-payment-button {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+}
+
+.invoice-payment-button:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    box-shadow: 0 6px 12px -1px rgba(245, 158, 11, 0.4);
+    transform: translateY(-2px);
+}
+
+.invoice-payment-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(245, 158, 11, 0.3);
+}
+
+/* Button Loading State */
+.invoice-action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.invoice-action-button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .invoice-card-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .invoice-action-button {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .invoice-card-header {
+        padding: 16px 20px;
+    }
+
+    .invoice-card-content {
+        padding: 20px;
+    }
+
+    .invoice-card-actions {
+        padding: 16px 20px;
+    }
+
+    .invoice-product-table th,
+    .invoice-product-table td {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .invoice-card-header h4 {
+        font-size: 16px;
+    }
+
+    .invoice-action-button {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .invoice-btn-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .invoice-product-table {
+        font-size: 12px;
+    }
+
+    .invoice-product-table th,
+    .invoice-product-table td {
+        padding: 6px 8px;
+    }
+}
+
+/* Animation for button interactions */
+@keyframes invoiceButtonPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+.invoice-action-button:focus {
+    outline: none;
+    animation: invoiceButtonPulse 1.5s infinite;
+}
+
+/* Hover effects for table rows */
+.invoice-product-table tbody tr {
+    position: relative;
+}
+
+.invoice-product-table tbody tr::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, transparent);
+    transition: width 0.3s ease;
+    opacity: 0.1;
+}
+
+.invoice-product-table tbody tr:hover::after {
+    width: 100%;
+}
+
+/* Enhanced card shadow on focus */
+.invoice-info-card:focus-within {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: #3b82f6;
+}
+/* CSS đơn giản cho lịch sử hóa đơn */
+.invoice-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 0;
+}
+
+.invoice-history-table th {
+    background: #f3f4f6;
+    padding: 8px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.invoice-history-table td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.invoice-history-table tr:last-child td {
+    border-bottom: none;
+}
+
+.invoice-history-table tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Container cho bảng có thanh cuộn */
+.invoice-history-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+/* Header cho phần lịch sử */
+.invoice-history-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.invoice-history-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.invoice-history-icon {
+    width: 18px;
+    height: 18px;
+    color: #6b7280;
+}
+
+/* Trạng thái thanh toán */
+.invoice-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.invoice-status-paid {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.invoice-status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.invoice-status-failed {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Responsive cho bảng */
+@media (max-width: 640px) {
+    .invoice-history-table {
+        font-size: 12px;
+    }
+
+    .invoice-history-table th,
+    .invoice-history-table td {
+        padding: 6px;
+    }
+
+    .invoice-history-container {
+        max-height: 250px;
+    }
+}
+
+/* Thanh cuộn đơn giản */
+.invoice-history-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.invoice-history-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.invoice-history-container::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}

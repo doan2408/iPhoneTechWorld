@@ -332,7 +332,7 @@
                                 </path>
                             </svg>
                             <h3>
-                                <span v-if="loading">Đang tải...</span>
+                                <span v-if="isLoading">Đang tải...</span>
                                 <span v-else-if="selectedInvoice">Chi tiết hóa đơn {{ selectedInvoice.maHoaDon }}</span>
                                 <span v-else>Chi tiết hóa đơn</span>
                             </h3>
@@ -348,7 +348,7 @@
                     <!-- Body -->
                     <div class="modal-body">
                         <!-- Loading State -->
-                        <div v-if="loading" class="loading-container">
+                        <div v-if="isLoading" class="loading-container">
                             <div class="loading-spinner"></div>
                             <p>Đang tải thông tin hóa đơn...</p>
                         </div>
@@ -515,6 +515,86 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Action Buttons Section -->
+                            <div class="invoice-card-actions">
+                                <button class="invoice-action-button invoice-process-button"
+                                    @click="devliveryProcessing(selectedInvoice)">
+                                    <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                        </path>
+                                    </svg>
+                                    <span>Xử lý đơn hàng</span>
+                                </button>
+
+                                <button class="invoice-action-button invoice-history-button"
+                                    @click="loadLichSuHoaDon(selectedInvoice)">
+                                    <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>Xem lịch sử hóa đơn</span>
+                                </button>
+
+                                <button class="invoice-action-button invoice-payment-button">
+                                    <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                        </path>
+                                    </svg>
+                                    <span>Xem chi tiết thanh toán</span>
+                                </button>
+                            </div>
+                            <!-- table xem lich su -->
+                            <div v-if="showLichSuHoaDon">
+                                <div class="invoice-history-header">
+                                    <svg class="invoice-history-icon" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <h3>Lịch sử hóa đơn</h3>
+                                </div>
+
+                                <div class="invoice-history-container">
+                                    <table class="invoice-history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã giao dịch</th>
+                                                <th>Ngày</th>
+                                                <th>Số tiền</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>TX-12345</td>
+                                                <td>15/06/2024</td>
+                                                <td>250.000 ₫</td>
+                                                <td><span class="invoice-status invoice-status-paid">Đã thanh
+                                                        toán</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>TX-12346</td>
+                                                <td>16/06/2024</td>
+                                                <td>150.000 ₫</td>
+                                                <td><span class="invoice-status invoice-status-pending">Đang xử
+                                                        lý</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>TX-12347</td>
+                                                <td>17/06/2024</td>
+                                                <td>350.000 ₫</td>
+                                                <td><span class="invoice-status invoice-status-failed">Thất bại</span>
+                                                </td>
+                                            </tr>
+                                            <!-- Thêm các hàng khác nếu cần -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -540,6 +620,7 @@ import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import { hoaDonGetAll } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { viewLichSuHoaDon } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import router from '@/router'
 
 const hoaDons = ref([]);
@@ -553,9 +634,13 @@ const statusFilter = ref('');
 const typeFilter = ref('');
 const dateFilter = ref('');
 const isLoading = ref(false);
+const error = ref(null)
 // Thêm các ref để quản lý modal
 const showModal = ref(false);
 const selectedInvoice = ref(null);
+const lichSuHoaDon = ref([]);
+const showLichSuHoaDon = ref(false)
+
 
 // Hàm mở modal và lấy chi tiết hóa đơn
 const viewInvoiceDetails = async (invoice) => {
@@ -712,6 +797,13 @@ const getStatusBadgeClass = (status) => {
     return statusMap[status.toLowerCase()] || 'status-default';
 };
 
+const devliveryProcessing = async (hoaDon) => {
+    router.push({
+        name: 'GiaoHangProcessing',
+        params: { id: hoaDon.idGiaoHang },        
+    });
+
+}
 const getTypeBadgeClass = (type) => {
     if (!type) return 'type-default';
 
@@ -723,6 +815,46 @@ const getTypeBadgeClass = (type) => {
     };
     return typeMap[type.toLowerCase()] || 'type-default'; // trả về định dạng css
 };
+
+// view lịch sử hóa đơn
+async function loadLichSuHoaDon(selectedInvoice) {
+    isLoading.value = true
+    error.value = null
+    showLichSuHoaDon.value = false
+    try {
+        debugger
+        const res = await viewLichSuHoaDon(selectedInvoice.idHoaDon, pageNo.value,pageSize.value)
+        lichSuHoaDon.value = res.data.content
+        showLichSuHoaDon.value = true
+    } catch (err) {
+        error.value = 'Không tải được lịch sử'
+    } finally {
+        isLoading.value = false
+    }
+}
+
+// ten viet tat cua nhan vien
+function getEmployeeInitials(name) {
+    if (!name) return ""
+    const words = name.trim().split(" ")
+    if (words.length === 1) return words[0].charAt(0).toUpperCase()
+    return words[0].charAt(0).toUpperCase() + words[words.length - 1].charAt(0).toUpperCase()
+}
+
+//hanh dong
+function getActionBadgeClass(action) {
+    switch (action) {
+        case 'TẠO':
+            return 'badge-create'
+        case 'CẬP NHẬT':
+            return 'badge-update'
+        case 'XÓA':
+            return 'badge-delete'
+        default:
+            return 'badge-default'
+    }
+}
+
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {

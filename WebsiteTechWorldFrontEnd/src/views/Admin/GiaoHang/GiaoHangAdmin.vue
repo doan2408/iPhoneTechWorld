@@ -210,7 +210,7 @@
                                     </span>
                                 </td>
                                 <td class="table-td flex gap-2">
-                                    <!-- Detail icon -->
+                                    <!-- Button -->
                                     <button @click.stop="viewDeliveryDetail(delivery)"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>

@@ -245,7 +245,6 @@ const viewOrderDetail = async () => {
         try {
             const response = await giaoHangDetail(id)
             Object.assign(order, response.data)
-            console.log('response.data:', response.data);
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
         }
@@ -366,7 +365,6 @@ function getStatusKey(text) {
 
         return text;
 }
-console.log(getStatusKey("Chờ xử lý"))
 
 const getPaymentStatusText = (status) => {
     if (!status || typeof status !== 'string') return 'Chưa thanh toán';
