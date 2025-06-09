@@ -52,7 +52,7 @@ public class ViewGiaoHangAdminResponse {
         response.setNgayDatHang(giaoHang.getNgayDatHang());
         response.setTongGiaTriDonHang(giaoHang.getTongGiaTriDonHang());
         response.setDiaChiGiaoHang(giaoHang.getDiaChiGiaoHang());
-        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().name() : null);
+        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().getDisplayName() : null);
         if (giaoHang.getChiTietGiaoHangs() != null){
             response.setChiTietGiaoHangResponseAdminList(giaoHang.getChiTietGiaoHangs().stream()
                     .map(ChiTietGiaoHangResponseAdmin::convertDto).toList());

@@ -58,9 +58,7 @@ public class HoaDonAdminService {
 
     public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        System.out.println("So phan tu: " + pageable.getPageNumber());
         return hoaDonRepository.findAll(pageable).map(GetAllHoaDonAdminResponse::convertDto);
-
     }
 
     public HoaDonAdminResponse findById(Integer id){

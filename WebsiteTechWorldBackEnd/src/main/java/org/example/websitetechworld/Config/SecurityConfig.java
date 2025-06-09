@@ -36,7 +36,15 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(Customizer.withDefaults()) // ✅ Kích hoạt CORS dùng config bên dưới
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/css/**", "/js/**",
+
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                         .anyRequest().permitAll()
@@ -75,6 +83,7 @@ public class SecurityConfig {
 
         configuration.addAllowedMethod("*"); // Cho phép mọi phương thức HTTP
         configuration.addAllowedHeader("*"); // Cho phép mọi header
+        configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://localhost:5173"); // Chỉ cho phép frontend từ cổng 5173
 //        configuration.addAllowedOriginPattern("*"); // KHÔNG nên dùng cùng lúc với addAllowedOrigin()
         configuration.setAllowCredentials(true); // Cho phép gửi cookie (nếu cần)

@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/ram")
@@ -23,6 +25,12 @@ public class RamAdminController {
     ) {
         Page<RamAdminResponse> rams = ramAdminService.getAllRam(pageable);
 
+        return ResponseEntity.ok(rams);
+    }
+
+    @GetMapping("/listRam")
+    public ResponseEntity<List<RamAdminResponse>> getAllRam() {
+        List<RamAdminResponse> rams = ramAdminService.getAllRamList();
         return ResponseEntity.ok(rams);
     }
 

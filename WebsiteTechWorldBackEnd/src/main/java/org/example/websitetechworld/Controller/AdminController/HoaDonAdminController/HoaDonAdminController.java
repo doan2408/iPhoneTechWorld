@@ -15,6 +15,7 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.L
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

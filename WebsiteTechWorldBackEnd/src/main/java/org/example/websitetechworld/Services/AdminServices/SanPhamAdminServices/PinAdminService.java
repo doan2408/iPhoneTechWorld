@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PinAdminService {
@@ -21,6 +23,17 @@ public class PinAdminService {
 
     private PinAdminResponse convert(Pin pin) {
         return modelMapper.map(pin, PinAdminResponse.class);
+    }
+
+    private List<PinAdminResponse> convertList(List<Pin> pin) {
+        return pin.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<PinAdminResponse> getAllPinList() {
+        List<Pin> pins = pinRepository.findAll();
+        return convertList(pins);
     }
 
     public Page<PinAdminResponse> getAllPin(Pageable pageable) {

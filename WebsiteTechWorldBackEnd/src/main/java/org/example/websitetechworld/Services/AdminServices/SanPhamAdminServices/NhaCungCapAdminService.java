@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.NhaCungCapAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.NhaCungCapQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.NhaCungCapAdminResponse;
 import org.example.websitetechworld.Entity.NhaCungCap;
 import org.example.websitetechworld.Entity.Pin;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class NhaCungCapAdminService {
@@ -23,14 +27,32 @@ public class NhaCungCapAdminService {
         return modelMapper.map(nhaCungCap, NhaCungCapAdminResponse.class);
     }
 
+    private List<NhaCungCapAdminResponse> convertList(List<NhaCungCap> nhaCungCaps) {
+        return nhaCungCaps
+                .stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+    }
+
     public Page<NhaCungCapAdminResponse> getAllNhaCungCap(Pageable pageable) {
         Page<NhaCungCap> nhaCungCaps = nhaCungCapRepository.findAll(pageable);
         return nhaCungCaps.map(this::convert);
     }
 
+    public List<NhaCungCapAdminResponse> getAllNhaCungCapList() {
+        List<NhaCungCap> nhaCungCaps = nhaCungCapRepository.findAll();
+        return convertList(nhaCungCaps);
+    }
+
     @Transactional
     public NhaCungCapAdminResponse createNCC(NhaCungCapAdminRequest nhaCungCapAdminRequest) {
         NhaCungCap cungCap = nhaCungCapRepository.save(modelMapper.map(nhaCungCapAdminRequest, NhaCungCap.class));
+        return convert(cungCap);
+    }
+
+    @Transactional
+    public NhaCungCapAdminResponse quickCreateNCC(NhaCungCapQuickCreateAdminRequest req) {
+        NhaCungCap cungCap = nhaCungCapRepository.save(modelMapper.map(req, NhaCungCap.class));
         return convert(cungCap);
     }
 

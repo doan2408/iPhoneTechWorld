@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class RamAdminService {
@@ -21,6 +24,17 @@ public class RamAdminService {
 
     private RamAdminResponse convert(Ram ram) {
         return modelMapper.map(ram, RamAdminResponse.class);
+    }
+
+    private List<RamAdminResponse> convertList(List<Ram> ram) {
+        return ram.stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+    }
+
+    public List<RamAdminResponse> getAllRamList() {
+        List<Ram> rams = ramRepository.findAll();
+        return convertList(rams);
     }
 
     public Page<RamAdminResponse> getAllRam(Pageable pageable) {

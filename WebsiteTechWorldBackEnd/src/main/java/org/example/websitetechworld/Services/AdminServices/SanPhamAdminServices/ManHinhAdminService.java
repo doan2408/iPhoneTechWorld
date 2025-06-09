@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ManHinhAdminService {
@@ -21,6 +23,17 @@ public class ManHinhAdminService {
 
     private ManHinhAdminResponse convert(ManHinh manHinh) {
         return modelMapper.map(manHinh, ManHinhAdminResponse.class);
+    }
+
+    private List<ManHinhAdminResponse> convertList(List<ManHinh> manHinh) {
+        return manHinh.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<ManHinhAdminResponse> getAllManHinhList() {
+        List<ManHinh> manHinhs = manHinhRepository.findAll();
+        return convertList(manHinhs);
     }
 
     public Page<ManHinhAdminResponse> getAllManHinh(Pageable pageable) {

@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CpuAdminService {
@@ -20,6 +22,17 @@ public class CpuAdminService {
 
     private CpuAdminResponse convert(Cpu cpu) {
         return modelMapper.map(cpu, CpuAdminResponse.class);
+    }
+
+    private List<CpuAdminResponse> convertList(List<Cpu> cpu) {
+        return cpu.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<CpuAdminResponse> getAllCpuList() {
+        List<Cpu> cpus = cpuRepository.findAll();
+        return convertList(cpus);
     }
 
     public Page<CpuAdminResponse> getAllCpu(Pageable pageable) {
@@ -54,7 +67,7 @@ public class CpuAdminService {
         return convert(cpu);
     }
 
-     public CpuAdminResponse detailCpu(Integer id) {
+    public CpuAdminResponse detailCpu(Integer id) {
         Cpu cpu = cpuRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Cpu ID: " + id));
 

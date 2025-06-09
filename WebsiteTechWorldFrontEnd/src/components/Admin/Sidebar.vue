@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import LoginService from '@/Service/LoginService/Login.js'
+import LoginService from '@/Service/LoginService/Login'
 import { useStore } from 'vuex'
 
 const store = useStore();
@@ -75,7 +75,21 @@ function toggleOrderMenu() {
             <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
-            <li><router-link to="/admin/products">Danh sách sản phẩm</router-link></li>
+
+            <li><router-link to="/admin/products">Sản phẩm</router-link></li>
+            <li><router-link to="/admin/xuatXu">Xuất xứ</router-link></li>
+            <li><router-link to="/admin/rom">Rom</router-link></li>
+            <li><router-link to="/admin/ram">Ram</router-link></li>
+            <li><router-link to="/admin/pin">Pin</router-link></li>
+            <li><router-link to="/admin/mauSac">Màu sắc</router-link></li>
+            <li><router-link to="/admin/nhaCungCap">Nhà cung cấp</router-link></li>
+            <li><router-link to="/admin/manHinh">Màn hình</router-link></li>
+            <li><router-link to="/admin/loai">Loại</router-link></li>
+            <li><router-link to="/admin/imei">Imei</router-link></li>
+            <li><router-link to="/admin/heDieuHanh">Hệ điều hành</router-link></li>
+            <li><router-link to="/admin/cpu">Cpu</router-link></li>
+            <li><router-link to="/admin/cameraTruoc">Camera trước</router-link></li>
+            <li><router-link to="/admin/cameraSau">Camera sau</router-link></li>
             <li><router-link to="/admin/products/add">Thêm sản phẩm</router-link></li>
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
@@ -96,7 +110,7 @@ function toggleOrderMenu() {
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <li><router-link to="/admin/client">Quản lý giao hàng</router-link></li>
+            <li><router-link to="/admin/shipping">Quản lý giao hàng</router-link></li>
           </ul>
 
           <li><router-link to="/admin/promotions">Khuyến mãi</router-link></li>

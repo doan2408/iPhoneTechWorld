@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/cpu")
@@ -25,6 +27,12 @@ public class CpuAdminController {
     ) {
         Page<CpuAdminResponse> cpus = cpuAdminService.getAllCpu(pageable);
 
+        return ResponseEntity.ok(cpus);
+    }
+
+    @GetMapping("/listCpu")
+    public ResponseEntity<List<CpuAdminResponse>> getAllCpuList() {
+        List<CpuAdminResponse> cpus = cpuAdminService.getAllCpuList();
         return ResponseEntity.ok(cpus);
     }
 

@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.NhaCungCapAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.NhaCungCapQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.NhaCungCapAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.NhaCungCapAdminService;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +27,13 @@ public class NhaCungCapAdminController {
         return ResponseEntity.ok(nhaCungCaps);
     }
 
+    @GetMapping("/listNCC")
+    public ResponseEntity<List<NhaCungCapAdminResponse>> getAllNhaCungCapList() {
+        List<NhaCungCapAdminResponse> nhaCungCaps = nhaCungCapAdminService.getAllNhaCungCapList();
+        return ResponseEntity.ok(nhaCungCaps);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<NhaCungCapAdminResponse> detailNhaCungCap(@PathVariable Integer id) {
         NhaCungCapAdminResponse response = nhaCungCapAdminService.detailNCC(id);
@@ -35,6 +45,12 @@ public class NhaCungCapAdminController {
     public ResponseEntity<NhaCungCapAdminResponse> createNhaCungCap(@RequestBody NhaCungCapAdminRequest nhaCungCapAdminRequest) {
         NhaCungCapAdminResponse response = nhaCungCapAdminService.createNCC(nhaCungCapAdminRequest);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/quick-create")
+    public ResponseEntity<NhaCungCapAdminResponse> quickCreateNhaCungCap(@RequestBody NhaCungCapQuickCreateAdminRequest req) {
+        NhaCungCapAdminResponse response = nhaCungCapAdminService.quickCreateNCC(req);
         return ResponseEntity.ok(response);
     }
 

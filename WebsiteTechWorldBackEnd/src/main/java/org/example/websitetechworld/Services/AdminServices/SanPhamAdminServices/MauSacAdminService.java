@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MauSacAdminService {
@@ -21,6 +23,17 @@ public class MauSacAdminService {
 
     private MauSacAdminResponse convert(MauSac mauSac) {
         return modelMapper.map(mauSac, MauSacAdminResponse.class);
+    }
+
+    private List<MauSacAdminResponse> convertList(List<MauSac> mauSac) {
+        return mauSac.stream()
+                .map(this::convert)
+                .toList();
+    }
+
+    public List<MauSacAdminResponse> getAllMauSacList() {
+        List<MauSac> mauSacs = mauSacRepository.findAll();
+        return convertList(mauSacs);
     }
 
     public Page<MauSacAdminResponse> getAllMauSac(Pageable pageable) {

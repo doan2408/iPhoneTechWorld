@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseGiao
 import org.example.websitetechworld.Entity.GiaoHang;
 import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.filter.RequestContextFilter;
@@ -25,8 +26,9 @@ public class GiaoHangAdminController {
         this.requestContextFilter = requestContextFilter;
     }
     @GetMapping
-    public List<GetAllGiaoHangResponseAdmin> getPageGiaoHang(@RequestParam(defaultValue = "0") int pageNo){
-        return giaoHangAdminServices.getPageGiaoHang(pageNo,PAGE_SIZE);
+    public Page<GetAllGiaoHangResponseAdmin> getPageGiaoHang(@RequestParam(defaultValue = "0") int pageNo,
+                                                             @RequestParam(defaultValue = "10", value = "pageSize") int pageSize){
+        return giaoHangAdminServices.getPageGiaoHang(pageNo,pageSize);
     }
     @GetMapping("/{id}")
     public ViewGiaoHangAdminResponse findById(@PathVariable Integer id){
