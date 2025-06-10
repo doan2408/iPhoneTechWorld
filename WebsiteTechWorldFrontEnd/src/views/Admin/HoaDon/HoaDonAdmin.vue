@@ -169,7 +169,7 @@
                                 <input type="checkbox" class="header-checkbox">
                             </th>
                             <th class="table-th">Mã hóa đơn</th>
-                            <th class="table-th">Khách hàng</th>
+                            <th class="table-th">Người mua (Thời điểm giao dịch)</th>
                             <th class="table-th">Ngày tạo</th>
                             <th class="table-th">Tổng tiền</th>
                             <th class="table-th">Loại</th>
@@ -187,8 +187,8 @@
                             </td>
                             <td class="table-td">
                                 <div class="customer-info">
-                                    <div class="customer-avatar">{{ getInitials(hoaDon.tenKhachHang) }}</div>
-                                    <div class="customer-name">{{ hoaDon.tenKhachHang }}</div>
+                                    <div class="customer-avatar">{{ getInitials(hoaDon.tenNguoiMua) }}</div>
+                                    <div class="customer-name">{{ hoaDon.tenNguoiMua }}</div>
                                 </div>
                             </td>
                             <td class="table-td">
@@ -388,9 +388,13 @@
                                                     }}</span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">Khách hàng:</span>
-                                                <span class="info-value">{{ selectedInvoice.tenKhachHang || 'N/A'
+                                                <span class="info-label">Tên người mua</span>
+                                                <span class="info-value">{{ selectedInvoice.tenNguoiMua || 'N/A'
                                                     }}</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label">SĐT người mua:</span>
+                                                <span class="info-value">{{ selectedInvoice.sdt || 'N/A' }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày tạo:</span>
@@ -418,7 +422,7 @@
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Mã giảm giá:</span>
-                                                <span class="info-value">{{ selectedInvoice.maPhieuGiamGia || 'N/A'
+                                                <span class="info-value">{{ selectedInvoice.maPhieuGiamGia || 'Không áp dụng mã giảm gía'
                                                     }}</span>
                                             </div>
                                         </div>
@@ -426,21 +430,28 @@
                                         <!-- Right Column -->
                                         <div class="info-column">
                                             <div class="info-row">
-                                                <span class="info-label">Người nhận:</span>
-                                                <span class="info-value">{{ selectedInvoice.tenNguoiNhan || 'N/A'
+                                                <span class="info-label">Mã tài khoản mua</span>
+                                                <span class="info-value">{{ selectedInvoice.maKhachHang || 'N/A'
                                                     }}</span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">SĐT:</span>
-                                                <span class="info-value">{{ selectedInvoice.sdt || 'N/A' }}</span>
+                                                <span class="info-label">Tên tài khoản mua:</span>
+                                                <span class="info-value">{{ selectedInvoice.tenKhachHang || 'N/A'
+                                                    }}</span>
                                             </div>
-                                            <div class="info-row">
+                                            <div v-if="selectedInvoice.maKhachHang !=null" class="info-row">
+                                                <span class="info-label"><mark>⚠️Lưu ý: <br> Tên người mua là tên
+                                                        tại thời điểm giao
+                                                        dịch <br>
+                                                        Tên tài khoản mua là tên hiện tại của tài khoản</mark></span>
+                                            </div>
+                                            <!-- <div class="info-row">
                                                 <span class="info-label">Địa chỉ:</span>
                                                 <span class="info-value address"
                                                     :title="selectedInvoice.diaChi || 'N/A'">
                                                     {{ selectedInvoice.diaChi || 'N/A' }}
                                                 </span>
-                                            </div>
+                                            </div> -->
 
                                             <div class="separator"></div>
 
