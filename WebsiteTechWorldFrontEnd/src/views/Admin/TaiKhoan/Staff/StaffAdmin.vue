@@ -9,7 +9,7 @@ const currentPage = ref(0);
 const totalPages = ref(0);
 const searchKeyword = ref("");
 const searchTimeout = ref(null); //status of searching
-
+ 
 //load staff
 // nếu người dùng không truyền page khi gọi hàm
 //  → nó sẽ tự động dùng 0.
@@ -70,6 +70,8 @@ const nextPage = () => {
   loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
+
+console.log(staffList)
 onMounted(() => {
   loadStaff();
 });
