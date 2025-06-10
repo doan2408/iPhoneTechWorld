@@ -34,8 +34,19 @@ public class GiaoHang {
     private HoaDon idHoaDon;
 
     @Size(max = 34)
-    @Column(name = "ma_giao_hang", length = 34,insertable = false, updatable = false)
+    @Column(name = "ma_giao_hang", length = 34, insertable = false, updatable = false)
     private String maGiaoHang;
+
+    // Thêm thuộc tính maVanDon
+    @Size(max = 34)
+    @Column(name = "ma_van_don", length = 34, insertable = false, updatable = false)
+    private String maVanDon;
+
+    // Thêm thuộc tính tenNguoiNhan
+    @Size(max = 50)
+    @Nationalized
+    @Column(name = "ten_nguoi_nhan", length = 50)
+    private String tenNguoiNhan;
 
     @Column(name = "ngay_dat_hang")
     private LocalDate ngayDatHang;
@@ -53,7 +64,6 @@ public class GiaoHang {
     @Column(name = "trang_thai_don_hang", length = 50)
     private TrangThaiGiaoHang trangThaiDonHang;
 
-    @OneToMany(mappedBy = "idGiaoHang",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idGiaoHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChiTietGiaoHang> chiTietGiaoHangs = new LinkedHashSet<>();
-
 }

@@ -27,9 +27,10 @@ public class HoaDonAdminResponse {
     private String maPhieuGiamGia;
     private String tenPhieuGiamGia;
 
-    private String tenNguoiNhan;
+//    private String tenNguoiNhan;
+    private String tenNguoiMua;
 
-    private String diaChi;
+//    private String diaChi;
 
     private String sdt;
 
@@ -67,8 +68,9 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setMaPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getMaGiamGia());
             hoaDonAdminResponse.setTenPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getTenKhuyenMai());
         }
-        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
-        hoaDonAdminResponse.setDiaChi(hoaDon.getDiaChi());
+//        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
+//        hoaDonAdminResponse.setDiaChi(hoaDon.getDiaChi());
+        hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdt(hoaDon.getSdt());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
