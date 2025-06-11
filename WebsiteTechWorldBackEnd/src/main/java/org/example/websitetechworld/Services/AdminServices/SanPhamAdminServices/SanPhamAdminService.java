@@ -160,7 +160,7 @@ public class SanPhamAdminService {
         dto.setId(updatedSanPham.getId());
         dto.setTenSanPham(updatedSanPham.getTenSanPham());
         dto.setThuongHieu(updatedSanPham.getThuongHieu());
-        dto.setSoLuongTonKho(updatedSanPham.getSoLuongTonKho());
+//        dto.setSoLuongTonKho(updatedSanPham.getSoLuongTonKho());
 
         if (updatedSanPham.getIdNhaCungCap() != null) {
             dto.setTenNhaCungCap(updatedSanPham.getIdNhaCungCap().getTenNhaCungCap());

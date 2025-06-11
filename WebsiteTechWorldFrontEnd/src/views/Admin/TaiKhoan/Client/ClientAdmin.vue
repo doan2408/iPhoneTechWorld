@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { getAllClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { updateClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 
@@ -10,13 +10,16 @@ const error = ref("");
 const currentPage = ref(0);
 const totalPages = ref(0);
 
+const searchKeyword = ref("");
+const searchTimeout = ref(null) // status of searching
+
 //load client
 // nếu người dùng không truyền page khi gọi hàm
 //  → nó sẽ tự động dùng 0.
-const loadClient = async (page = 0) => {
+const loadClient = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
-    const response = await getAllClient(page);
+    const response = await getAllClient(page, keyword);
     clientList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
@@ -27,6 +30,29 @@ const loadClient = async (page = 0) => {
   }
 };
 
+//search client
+const performSearch = () => {
+  //clear old timeout if has
+  if(searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  //create new timeout --delay 500ms after user stop typing 
+  searchTimeout.value = setTimeout(() => {
+    currentPage.value  = 0;
+    loadClient(0, searchKeyword.value || null);
+  }, 500);
+  
+}
+
+const clearSearch = () => {
+  searchKeyword.value = ""
+}
+
+watch(searchKeyword, () => { 
+  performSearch();
+})
+
 //previous page
 const previousPage = () => {
   if (currentPage.value > 0) {
@@ -34,7 +60,7 @@ const previousPage = () => {
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadClient(currentPage.value);
+  loadClient(currentPage.value, searchKeyword.value || null);
 };
 
 //next page
@@ -44,7 +70,7 @@ const nextPage = () => {
   } else {
     currentPage.value = 0;
   }
-  loadClient(currentPage.value);
+  loadClient(currentPage.value, searchKeyword.value || null);
 };
 
 onMounted(() => {
@@ -60,10 +86,63 @@ onMounted(() => {
       >
     </div>
     <hr />
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-input-group">
+          <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+              v-model="searchKeyword"
+              type="text"
+              class="form-control search-input"
+              placeholder="Tìm kiếm theo tên, email, số điện thoại, tên tài khoản..."
+            />
+            <button 
+              @click="clearSearch" 
+              class="btn-clear-inline"
+              v-if="searchKeyword"
+              title="Xóa tìm kiếm"
+            >
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+          <div class="search-status" v-if="isLoading">
+            <i class="bi bi-arrow-repeat spin"></i>
+            Đang tìm kiếm...
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Hiển thị khi đang tải -->
     <div v-if="isLoading" class="text-center">
       <p>Đang tải dữ liệu...</p>
     </div>
+
+
+    <!-- Hiển thị kết quả tìm kiếm -->
+    <div v-if="searchKeyword && !isLoading" class="search-result-info">
+      <p>
+        <i class="bi bi-info-circle"></i>
+        Kết quả tìm kiếm cho: "<strong>{{ searchKeyword }}</strong>"
+        ({{ clientList.length }} khách hàng)
+      </p>
+    </div>
+
+     <!-- Hiển thị khi không có dữ liệu -->
+    <div v-if="!isLoading && clientList.length === 0" class="no-data">
+      <p v-if="searchKeyword">
+        <i class="bi bi-search"></i>
+        Không tìm thấy khách hàng nào với từ khóa "{{ searchKeyword }}"
+      </p>
+      <p v-else>
+        <i class="bi bi-inbox"></i>
+        Chưa có khách hàng nào
+      </p>
+    </div>
+
     <h2>Danh sách khách hàng</h2>
     <table class="table">
       <thead>
@@ -429,5 +508,136 @@ hr {
 .badge-inactive {
   background-color: #f7e7e7 !important; /* Nền đỏ nhạt */
   color: #ed0e0e !important; /* Chữ đỏ đậm */
+}
+
+.search-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #6c757d;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px 12px 45px;
+  border: 2px solid #dee2e6;
+  border-radius: 25px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #f8f9fa;
+  padding-right: 50px;
+}
+
+.search-input:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+  outline: none;
+  background: white;
+}
+
+.btn-clear-inline {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.btn-clear-inline:hover {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.search-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #17a2b8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.search-result-info {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-left: 4px solid #17a2b8;
+}
+
+.search-result-info p {
+  margin: 0;
+  color: #495057;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-result-info i {
+  color: #17a2b8;
+}
+
+.no-data {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin: 20px 0;
+}
+
+.no-data p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.no-data i {
+  font-size: 20px;
 }
 </style>

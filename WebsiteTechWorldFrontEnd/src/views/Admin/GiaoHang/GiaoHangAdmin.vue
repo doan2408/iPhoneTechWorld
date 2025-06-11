@@ -210,7 +210,7 @@
                                     </span>
                                 </td>
                                 <td class="table-td flex gap-2">
-                                    <!-- Detail icon -->
+                                    <!-- Button -->
                                     <button @click.stop="viewDeliveryDetail(delivery)"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>
@@ -275,8 +275,13 @@
                             </div>
 
                             <div class="card-footer">
-                                <button @click.stop="viewDeliveryDetail(delivery)" class="btn btn-primary btn-sm">
-                                    Xem chi tiết
+                                <button @click.stop="viewDeliveryDetail(delivery)"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+
+                                <button @click="devliveryProcessing(delivery)" class="btn btn-sm btn-outline-success">
+                                    <i class="fa-solid fa-gear"></i>
                                 </button>
                             </div>
                         </div>
@@ -671,7 +676,7 @@ function getStatusClass(status) {
     const statusClasses = {
         'chờ xử lý': 'status-pending',
         'đang giao': 'status-shipping',
-        'đã giao': 'status-dlivered',
+        'đã giao': 'status-delivered',
         'giao thất bại': 'status-failed',
         'đã hoàn tiền': 'status-returned',
         'đã đóng gói': 'status-packed',

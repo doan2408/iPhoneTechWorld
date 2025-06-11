@@ -1,6 +1,9 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.NhanVien;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +29,12 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
     @Modifying
     @Query("UPDATE KhachHang k SET k.matKhau = :password WHERE k.email = :email")
     int updatePasswordByEmail(@Param("email") String email, @Param("password") String hashedPassword);
+
+    // Tìm kiếm theo tên, email, số điện thoại
+    @Query("SELECT nv FROM KhachHang nv WHERE " +
+            "LOWER(nv.tenKhachHang) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<KhachHang> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
 }

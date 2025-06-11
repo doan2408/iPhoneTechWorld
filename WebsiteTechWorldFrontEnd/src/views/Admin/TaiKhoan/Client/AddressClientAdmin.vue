@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAdressesClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { getAdressesClient, updateAddress } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { useRoute, useRouter } from "vue-router";
+import { add } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 
 const addresses = ref([]);
 const error = ref(null);
@@ -20,31 +21,37 @@ const loadAddresses = async () => {
   }
 };
 
-const selectAddress = (id) => {
-  // Chỉ cho phép chọn địa chỉ phụ (không phải mặc định)
-  const address = addresses.value.find((addr) => addr.id === id);
-  if (!address.diaChiChinh) {
-    selectedAddressId.value = selectedAddressId.value === id ? null : id;
-  }
-};
+// const selectAddress = (id) => {
+//   // Chỉ cho phép chọn địa chỉ phụ (không phải mặc định)
+//   const address = addresses.value.find((addr) => addr.id === id);
+//   if (!address.diaChiChinh) {
+//     selectedAddressId.value = selectedAddressId.value === id ? null : id;
+//   }
+// };
 
-const setPrimary = async (address) => {
-  // Đặt địa chỉ này làm mặc định
-  addresses.value = addresses.value.map((addr) => ({
-    ...addr,
-    diaChiChinh: addr.id === address.id,
-  }));
-  // Ẩn nút sau khi đặt mặc định
-  selectedAddressId.value = null;
-  // TODO: Gọi API để cập nhật địa chỉ mặc định nếu có, ví dụ:
-  // await updatePrimaryAddressClient(address.id, true)
-};
+// const setPrimary = async (address) => {
+//   // Đặt địa chỉ này làm mặc định
+//   addresses.value = addresses.value.map((addr) => ({
+//     ...addr,
+//     diaChiChinh: addr.id === address.id,
+//   }));
+//   // Ẩn nút sau khi đặt mặc định
+//   selectedAddressId.value = null;
+//   // TODO: Gọi API để cập nhật địa chỉ mặc định nếu có, ví dụ:
+//   // await updatePrimaryAddressClient(address.id, true)
+// };
+
+
 
 const goToEdit = (addressId) => {
   router.push({
     path: `/admin/client/address/${addressId}/${route.params.idClient}`,
     query: { redirect: `/admin/client/addresses/${route.params.idClient}` },
   });
+};
+
+const back = () => {
+  router.back();
 };
 
 onMounted(() => {
@@ -66,16 +73,16 @@ onMounted(() => {
       >
         <div class="address-content">
           <div class="address-details">
-            <p><strong>Người nhận:</strong> {{ address.tenNguoiNhan }}</p>
+            <p><strong>Người nhận:</strong> {{ address.tenNguoiNhan != null ? address.tenNguoiNhan : 'Không có thông tin' }}</p>
             <p>
               <strong>Số điện thoại người nhận:</strong>
-              {{ address.sdtNguoiNhan }}
+              {{ address.sdtNguoiNhan != null ? address.sdtNguoiNhan : 'Không có thông tin' }}
             </p>
             <p>
               <strong>Địa chỉ:</strong>
-              {{ address.soNha }}, {{ address.tenDuong }},
-              {{ address.xaPhuong }}, {{ address.quanHuyen }},
-              {{ address.tinhThanhPho }}
+              {{ address.soNha != null? address.soNha : '' }}, {{ address.tenDuong != null? address.tenDuong : '' }},
+              {{ address.xaPhuong != null? address.xaPhuong : '' }}, {{ address.quanHuyen != null? address.quanHuyen : '' }},
+              {{ address.tinhThanhPho != null? address.tinhThanhPho : '' }}
             </p>
           </div>
           <span
@@ -110,6 +117,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
+      <button @click="back">Quay lại</button>
     </div>
   </div>
 </template>

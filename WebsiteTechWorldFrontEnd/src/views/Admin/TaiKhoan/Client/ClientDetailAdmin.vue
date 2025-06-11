@@ -3,98 +3,119 @@ import { onMounted, reactive, ref } from "vue";
 import { detailClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { updateClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { useRoute, useRouter } from "vue-router";
-
-import { ElNotification } from 'element-plus'
-import { h } from 'vue'
+import { ElNotification } from "element-plus";
+import { h } from "vue";
 
 const clientRequest = reactive({
-  tenNhanVien: '',
-  taiKhoan: '',
-  email: '',
-  sdt: '',
-  diaChiChinh: {},
-  trangThai: '',
-  chucVu: '',
+  tenKhachHang: "",
+  taiKhoan: "",
+  email: "",
+  sdt: "",
+  trangThai: "",
   gioiTinh: true,
-  namSinh: ''
+  namSinh: "",
 });
 
-
 const isLoading = ref(false);
-const error = ref("");
+const errors = reactive({});
 const route = useRoute();
 const router = useRouter();
 
-
 const id = route.params.id;
 
-const loadClientDetail = async (id) => {
-    try {
-        const response = await detailClient(id);
-        Object.assign(clientRequest, response)
-        console.log(clientRequest)
-    }
-    catch (err) {
-        error.value = err.message || "Error while loading client information"
-    }
-    finally {
-        isLoading.value = false;
-    }
+//thông báo
+function showCustomNotification({
+  messageText,
+  type = "success",
+  duration = 2000,
+}) {
+  ElNotification({
+    title: "",
+    message: h("div", [
+      h("span", messageText),
+      h(
+        "div",
+        {
+          style: `
+                    position: relative;
+                    height: 4px;
+                    background-color: #e0e0e0;
+                    margin-top: 8px;
+                    border-radius: 2px;
+                    overflow: hidden;
+                `,
+        },
+        [
+          h("div", {
+            style: `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        background-color: ${
+                          type === "success"
+                            ? "#28a745"
+                            : type === "error"
+                            ? "#dc3545"
+                            : "#007bff"
+                        };
+                        width: 100%;
+                        animation: progressBar ${duration}ms linear forwards;
+                    `,
+          }),
+        ]
+      ),
+    ]),
+    duration: duration,
+    type: type,
+    position: "top-right",
+  });
 }
 
+const loadClientDetail = async (id) => {
+  try {
+    const response = await detailClient(id);
+    Object.assign(clientRequest, response);
+    console.log(clientRequest);
+  } catch (err) {
+    errors = err.message || "Error while loading client information";
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const handldeUpdate = async () => {
-    try {
-        const id = route.params.id;
-        const response = await updateClient(id, clientRequest);
+  try {
+    // reset lỗi cũ
+    Object.keys(errors).forEach((key) => delete errors[key]);
 
-        // Tạo custom notification có thanh progress tụt dần
-        ElNotification({
-            title: '',
-            message: h('div', [
-                h('span', 'Cập nhật khách hàng thành công!'),
-                h('div', {
-                    style: `
-                        position: relative;
-                        height: 4px;
-                        background-color: #e0e0e0;
-                        margin-top: 8px;
-                        border-radius: 2px;
-                        overflow: hidden;
-                    `
-                }, [
-                    h('div', {
-                        style: `
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            height: 100%;
-                            background-color: #28a745;
-                            width: 100%;
-                            animation: progressBar 2s linear forwards;
-                        `
-                    })
-                ])
-            ]),
-            duration: 2000, // 2 giây
-            type: 'success',
-            position: 'top-right'
-        })
-        router.push("/admin/client")
-    }
-    catch( err ) {
-        error.value = err.message || "Error while loading client information";
+    const id = route.params.id;
+    const response = await updateClient(id, clientRequest);
 
-        // Hiện thông báo lỗi
-        ElNotification({
-            title: 'Lỗi',
-            message: error.value,
-            type: 'error',
-            duration: 3000,
-            position: 'top-right'
-        });
+    // Thêm mới thành công
+    showCustomNotification({
+      messageText: "Update thông tin thành công!",
+      type: "success",
+      duration: 2000,
+    });
+    setTimeout(() => {
+      router.push("/admin/client");
+    }, 1000);
+  } catch (err) {
+    if (Array.isArray(err)) {
+      // err là mảng lỗi [{field, message}, ...]
+      err.forEach(({ field, message }) => {
+        errors[field] = message;
+      });
+    } else {
+      showCustomNotification({
+        messageText: "Có lỗi xảy ra!",
+        type: "error",
+        duration: 2000,
+      });
     }
-}
+  }
+};
 
 onMounted(() => {
   loadClientDetail(id);
@@ -104,11 +125,14 @@ onMounted(() => {
 <template>
   <div class="client-container">
     <!-- Form thêm khách hàng -->
-    <h3>Thêm khách hàng</h3>
+    <h3>Update khách hàng</h3>
     <form @submit.prevent="handleAddClient">
       <div class="row">
         <div class="col-md-6 mb-2">
-            Tên Khách Hàng
+          <div v-if="errors.tenKhachHang" class="text-danger mb-1">
+            {{ errors.tenKhachHang }}
+          </div>
+          Tên Khách Hàng
           <input
             v-model="clientRequest.tenKhachHang"
             placeholder="Tên khách hàng"
@@ -116,7 +140,10 @@ onMounted(() => {
           />
         </div>
         <div class="col-md-6 mb-2">
-            Tài khoản
+          Tài khoản
+          <div v-if="errors.taiKhoan" class="text-danger mb-1">
+            {{ errors.taiKhoan }}
+          </div>
           <input
             v-model="clientRequest.taiKhoan"
             placeholder="Tên đăng nhập"
@@ -124,7 +151,10 @@ onMounted(() => {
           />
         </div>
         <div class="col-md-6 mb-2">
-            Email
+          Email
+          <div v-if="errors.email" class="text-danger mb-1">
+            {{ errors.email }}
+          </div>
           <input
             v-model="clientRequest.email"
             placeholder="Email"
@@ -132,7 +162,10 @@ onMounted(() => {
           />
         </div>
         <div class="col-md-6 mb-2">
-            Số điện thoại
+          Số điện thoại
+          <div v-if="errors.sdt" class="text-danger mb-1">
+            {{ errors.sdt }}
+          </div>
           <input
             v-model="clientRequest.sdt"
             placeholder="Số điện thoại"
@@ -140,25 +173,25 @@ onMounted(() => {
           />
         </div>
         <div class="col-md-6 mb-2">
-            Trạng thái
+          Trạng thái
           <select
             v-model="clientRequest.trangThai"
             placeholder="Trạng thái"
             class="form-select"
           >
-            <option value="ACTIVE">Đang làm</option>
-            <option value="INACTIVE">Nghỉ</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
-            Giới tính
+          Giới tính
           <select v-model="clientRequest.gioiTinh" class="form-select">
             <option :value="true">Nam</option>
             <option :value="false">Nữ</option>
           </select>
         </div>
         <div class="col-md-6 mb-2">
-            Năm sinh
+          Năm sinh
           <input
             v-model="clientRequest.ngaySinh"
             placeholder="Năm sinh"
@@ -167,7 +200,9 @@ onMounted(() => {
           />
         </div>
       </div>
-      <button type="submit" @click="handldeUpdate" class="btn btn-success mt-2">Update thông tin</button>
+      <button type="submit" @click="handldeUpdate" class="btn btn-success mt-2">
+        Update thông tin
+      </button>
     </form>
   </div>
 </template>
@@ -179,5 +214,4 @@ onMounted(() => {
   width: 99%;
   box-sizing: border-box;
 }
-
 </style>

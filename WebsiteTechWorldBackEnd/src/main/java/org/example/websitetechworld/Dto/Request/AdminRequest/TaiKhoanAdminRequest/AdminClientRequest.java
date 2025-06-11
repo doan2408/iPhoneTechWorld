@@ -23,22 +23,24 @@ public class AdminClientRequest {
     @Size(max = 100, message = "Tên khách hàng tối đa 100 ký tự")
     private String tenKhachHang;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "0\\d{9}", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^$|0\\d{9}", message = "Số điện thoại không hợp lệ")
     private String sdt;
 
-    @NotBlank(message = "Tài khoản không được để trống")
     @Size(min = 5, max = 50, message = "Tài khoản phải từ 5 đến 50 ký tự")
     private String taiKhoan;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String matKhau;
 
-    @Email(message = "Email không hợp lệ")
+    @Email(message = "Email không đúng định dạng")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            message = "Email không đúng định dạng"
+    )
     private String email;
 
-    @Past(message = "Ngày sinh phải là ngày trong quá khứ")
+
+    @Past(message = "Ngày sinh không được sau hiện tại")
     private LocalDate ngaySinh;
 
     private Boolean gioiTinh; // True: Nam, False: Nữ

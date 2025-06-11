@@ -140,12 +140,14 @@ public class PhieuGiamGiaAdminServices {
 
     @Transactional
     public PhieuGiamGiaAdminResponse updatePhieuGiamGia(Integer id, PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
+
         if (phieuGiamGiaResponse.getIsGlobal() && (phieuGiamGiaResponse.getKhachHangIds() == null || phieuGiamGiaResponse.getKhachHangIds().isEmpty())) {
             throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng được chọn");
         }
         if (phieuGiamGiaResponse.getNgayBatDau().isAfter(phieuGiamGiaResponse.getNgayKetThuc())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
+
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
         modelMapper.map(phieuGiamGiaResponse, phieuGiamGia);
@@ -165,23 +167,31 @@ public class PhieuGiamGiaAdminServices {
                 }
             }
 
+            for (Integer khachHangId : newKhachHangIds) {
+
+                if (existingKhachHangIds.contains(khachHangId) || khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIdKhachHang(phieuGiamGia, khachHangId)) {
+
+                    KhachHangGiamGia existingRecord = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIdKhachHang(phieuGiamGia, khachHangId);
+                    if (existingRecord != null && existingRecord.getIsUser()) {
+                        throw new IllegalStateException("Khách hàng ID " + khachHangId + " đã sử dụng phiếu này");
+                    }
+                } else {
+                    createNewKhachHangGiamGia(phieuGiamGia, khachHangId);
+                }
+            }
+
             for (KhachHangGiamGia record : existingRecords) {
                 Integer khachHangId = khachHangGiamGiaRepository.getKhachHangId(record);
                 if (!newKhachHangIds.contains(khachHangId)) {
                     khachHangGiamGiaRepository.delete(record);
                 }
             }
-
-            for (Integer khachHangId : newKhachHangIds) {
-                if (!existingKhachHangIds.contains(khachHangId)) {
-
-                    createNewKhachHangGiamGia(phieuGiamGia, khachHangId);
-                }
-            }
         } else {
-            khachHangGiamGiaRepository.deleteByIdPhieuGiamGiaId(id);
-        }
 
+            List<KhachHangGiamGia> unusedRecords = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+            khachHangGiamGiaRepository.deleteAll(unusedRecords);
+        }
+        
         PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
         response.setKhachHangIds(phieuGiamGiaResponse.getKhachHangIds());
         return response;

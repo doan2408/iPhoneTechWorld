@@ -75,6 +75,7 @@ function toggleOrderMenu() {
             <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
+
             <li><router-link to="/admin/products">Sản phẩm</router-link></li>
             <li><router-link to="/admin/xuatXu">Xuất xứ</router-link></li>
             <li><router-link to="/admin/rom">Rom</router-link></li>
@@ -110,6 +111,7 @@ function toggleOrderMenu() {
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
             <li><router-link to="/admin/shipping">Quản lý giao hàng</router-link></li>
+            <li><router-link to="/admin/ban-hang">Bán hàng</router-link></li>
           </ul>
 
           <li><router-link to="/admin/promotions">Khuyến mãi</router-link></li>

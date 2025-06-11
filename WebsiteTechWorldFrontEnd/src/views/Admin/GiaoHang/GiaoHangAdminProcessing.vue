@@ -137,7 +137,7 @@
                     <div class="card-content">
                         <div class="items-summary">
                             <div v-for="item in order.chiTietGiaoHangResponseAdminList" :key="item.id" class="item-row">
-                                <!-- <img :src="item.image" :alt="item.name" class="item-image" /> -->
+                                <img :src="item.imageSanPham" :alt="item.name" class="item-image" />
                                 <div class="item-info">
                                     <span class="item-name">{{ item.tenSanPham }}</span>
                                     <span class="item-qty">x{{ item.soLuong }}</span>
@@ -238,21 +238,20 @@ const statusUpdate = null;
 
 
 
-// Sample order data with more details
+// ham view giao hang
 const viewOrderDetail = async () => {
     const id = route.params.id
     if (id) {
         try {
             const response = await giaoHangDetail(id)
             Object.assign(order, response.data)
-            console.log('response.data:', response.data);
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
         }
     }
 }
 
-// Order steps for timeline
+// ham cap nha tien do giao dien giao hang
 const orderSteps = computed(() => [
     {
         id: 1,
@@ -300,13 +299,14 @@ const orderSteps = computed(() => [
         description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng bị trả lại hoặc giao thất bại' : null
     }
 ])
-// Computed properties
+// bien trang thai
 const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
 
 const canCancel = computed(() =>
     ['Chờ xử lý', 'Đã xác nhận'].includes(order.trangThaiDonHang)
 );
-// Methods
+
+//format date
 const formatDate = (dateString) => {
     if (!dateString) {
         return 'N/A';
@@ -323,6 +323,7 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year}`;
 };
 
+// format currency
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -366,7 +367,6 @@ function getStatusKey(text) {
 
         return text;
 }
-console.log(getStatusKey("Chờ xử lý"))
 
 const getPaymentStatusText = (status) => {
     if (!status || typeof status !== 'string') return 'Chưa thanh toán';
