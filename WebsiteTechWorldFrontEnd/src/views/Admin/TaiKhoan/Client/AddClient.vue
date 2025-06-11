@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { addClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElNotification } from "element-plus"; 
+import { ElNotification } from "element-plus";
 import { h } from "vue";
+import { useRouter } from "vue-router";
 
 //thông báo
 function showCustomNotification({
@@ -52,6 +53,8 @@ function showCustomNotification({
     position: "top-right",
   });
 }
+const errors = reactive({});
+const router = useRouter()
 
 // add khach hang phía admin
 const clientRequest = ref({
@@ -62,6 +65,9 @@ const clientRequest = ref({
 
 const handleAddClient = async () => {
   try {
+    //reset lỗi cũ
+    Object.keys(errors).forEach((key) => delete errors[key]);
+
     const request = await addClient(clientRequest.value);
     clientRequest.value = {
       trangThai: "ACTIVE", //Mặc định là đang làm
@@ -73,14 +79,23 @@ const handleAddClient = async () => {
       type: "success",
       duration: 2000,
     });
-    router.push(`/admin/client`)
+    router.push(`/admin/client`);
   } catch (err) {
+    const errorData = err?.response?.data;
+    if (Array.isArray(err)) {
+      // err là mảng lỗi [{field, message}, ...]
+      err.forEach(({ field, message }) => {
+        errors[field] = message;
+      });
+    }
+    else {
+    console.error("Unexpected error format:", err);
     showCustomNotification({
-      messageText: "Thêm mới thất bại!",
+      messageText: "Có lỗi xảy ra!",
       type: "error",
       duration: 2000,
     });
-    err.value = err.message || "An error was thrown while adding the client";
+  } 
   }
 };
 </script>
@@ -92,6 +107,9 @@ const handleAddClient = async () => {
     <form @submit.prevent="handleAddClient">
       <div class="row">
         <div class="col-md-6 mb-2">
+          <div v-if="errors.tenKhachHang" class="text-danger mb-1">
+            {{ errors.tenKhachHang }}
+          </div>
           <input
             v-model="clientRequest.tenKhachHang"
             placeholder="Tên khách hàng"
@@ -99,21 +117,30 @@ const handleAddClient = async () => {
           />
         </div>
         <div class="col-md-6 mb-2">
+          <div v-if="errors.taiKhoan" class="text-danger mb-1">
+            {{ errors.taiKhoan }}
+          </div>
           <input
             v-model="clientRequest.taiKhoan"
             placeholder="Tên đăng nhập"
             class="form-control"
           />
         </div>
-        <div class="col-md-6 mb-2">
+        <!-- <div class="col-md-6 mb-2">
+          <div v-if="errors.matKhau" class="text-danger mb-1">
+            {{ errors.matKhau }}
+          </div>
           <input
             v-model="clientRequest.matKhau"
             placeholder="Mật khẩu"
             type="password"
             class="form-control"
           />
-        </div>
+        </div> -->
         <div class="col-md-6 mb-2">
+          <div v-if="errors.email" class="text-danger mb-1">
+            {{ errors.email }}
+          </div>
           <input
             v-model="clientRequest.email"
             placeholder="Email"
@@ -121,19 +148,22 @@ const handleAddClient = async () => {
           />
         </div>
         <div class="col-md-6 mb-2">
+          <div v-if="errors.sdt" class="text-danger mb-1">
+            {{ errors.sdt }}
+          </div>
           <input
             v-model="clientRequest.sdt"
             placeholder="Số điện thoại"
             class="form-control"
           />
         </div>
-        <div class="col-md-6 mb-2">
+        <!-- <div class="col-md-6 mb-2">
           <input
             v-model="clientRequest.diaChi"
             placeholder="Địa chỉ"
             class="form-control"
           />
-        </div>
+        </div> -->
         <div class="col-md-6 mb-2">
           <select
             v-model="clientRequest.trangThai"
@@ -163,5 +193,5 @@ const handleAddClient = async () => {
         Thêm khách hàng
       </button>
     </form>
-    </div>
+  </div>
 </template>

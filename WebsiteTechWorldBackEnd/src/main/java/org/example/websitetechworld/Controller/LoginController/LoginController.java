@@ -14,9 +14,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +28,7 @@ import java.util.Map;
 @RequestMapping("/api/auth/")
 public class LoginController {
     private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
@@ -31,36 +36,53 @@ public class LoginController {
             String username = request.get("tai_khoan");
              String password = request.get("mat_khau");
 
+            List<Map<String, String>> errors = new ArrayList<>();
 
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
+            // Kiểm tra tài khoản
+            try {
+                userDetailsService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException e) {
+                errors.add(Map.of("field", "tai_khoan", "message", "Tài khoản không tồn tại"));
+            }
 
-            // ✅ Gán vào SecurityContext
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authentication);
+            // Kiểm tra mật khẩu (chỉ nếu tài khoản tồn tại)
+            if (errors.isEmpty()) {
+                try {
+                    Authentication authentication = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(username, password)
+                    );
 
-            // ✅ Lưu context vào session
-            HttpSession session = httpRequest.getSession(true);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+                    SecurityContext context = SecurityContextHolder.getContext();
+                    context.setAuthentication(authentication);
 
-            String roles = authentication.getAuthorities().toString();
+                    HttpSession session = httpRequest.getSession(true);
+                    session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 
+                    String roles = authentication.getAuthorities().toString();
+                    CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
 
-//            authentication.getPrincipal() trả về UserDetails mà loadUserByName retunrn về CustomUserDetails được implement UserDetails
-            CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
-            System.out.println(taiKhoan.getId());
+                    return ResponseEntity.ok(Map.of(
+                            "message", "Đăng nhập thành công!",
+                            "roles", roles,
+                            "id", taiKhoan.getId(),
+                            "fullName", taiKhoan.getFullName()
+                    ));
+                } catch (BadCredentialsException e) {
+                    errors.add(Map.of("field", "mat_khau", "message", "Mật khẩu không đúng"));
+                }
+            }
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Đăng nhập thành công!",
-                    "roles", roles,
-                    "id", taiKhoan.getId(),
-                    "fullName", taiKhoan.getFullName()
-            ));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai tài khoản hoặc mật khẩu!");
+            // Trả về mảng lỗi nếu có
+            if (!errors.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
+            }
+
+            // Trường hợp không có lỗi nhưng cũng không xác thực được (hiếm)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of(Map.of("field", "server", "message", "Lỗi xử lý đăng nhập")));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of(Map.of("field", "server", "message", "Lỗi server: " + e.getMessage())));
         }
     }
 

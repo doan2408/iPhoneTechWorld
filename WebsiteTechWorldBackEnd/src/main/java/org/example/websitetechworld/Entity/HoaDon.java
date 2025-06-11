@@ -24,7 +24,7 @@ public class HoaDon {
     private Integer id;
 
     @Size(max = 34)
-    @Column(name = "ma_hoa_don", length = 34,insertable = false, updatable = false)
+    @Column(name = "ma_hoa_don", length = 34, insertable = false, updatable = false)
     private String maHoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,20 +35,18 @@ public class HoaDon {
     @JoinColumn(name = "id_phieu_giam_gia")
     private PhieuGiamGia idPhieuGiamGia;
 
+    // Đổi từ tenNguoiNhan thành tenNguoiMua
     @Size(max = 50)
     @Nationalized
-    @Column(name = "ten_nguoi_nhan", length = 50)
-    private String tenNguoiNhan;
-
-    @Size(max = 100)
-    @Nationalized
-    @Column(name = "dia_chi", length = 100)
-    private String diaChi;
+    @Column(name = "ten_nguoi_mua", length = 50)
+    private String tenNguoiMua;
 
     @Size(max = 10)
     @Nationalized
     @Column(name = "sdt", length = 10)
     private String sdt;
+
+    // Xóa thuộc tính diaChi
 
     @Column(name = "phi_ship", precision = 10, scale = 2)
     private BigDecimal phiShip;
@@ -78,16 +76,15 @@ public class HoaDon {
     @Column(name = "trang_thai_thanh_toan", length = 50)
     private TrangThaiThanhToan trangThaiThanhToan;
 
-    @OneToMany(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idHoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChiTietHoaDon> chiTietHoaDons = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idHoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChiTietThanhToan> chiTietThanhToans = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(mappedBy = "idHoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private GiaoHang giaoHangs;
 
-    @OneToMany(mappedBy = "idHoaDon",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idHoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
-
 }

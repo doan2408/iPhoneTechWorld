@@ -1,12 +1,12 @@
 <script setup>
-import { ref, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 
 const tai_khoan = ref("");
 const mat_khau = ref("");
 const confirm_mat_khau = ref("");
-const error = ref("");
+const errors = reactive({})
 const isLoading = ref(false);
 const router = useRouter();
 const route = useRoute(); // Khai báo useRoute để lấy route.query
@@ -46,7 +46,12 @@ const handleLogin = async () => {
     // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
   } catch (err) {
-    error.value = err.message || "Đăng nhập thất bại";
+    console.log("Error:", err);
+    if (Array.isArray(err)) {
+      err.forEach(({ field, message }) => {
+        errors[field] = message; // Gán lỗi vào errors
+      });
+    } 
   } finally {
     isLoading.value = false;
   }
@@ -64,39 +69,57 @@ function getDefaultRedirect() {
 const isLogin = ref(true); // true: đăng nhập, false: đăng ký
 
 watch([tai_khoan, mat_khau], () => {
-  error.value = "";
+  delete errors.tai_khoan;
+  delete errors.mat_khau;
+  delete errors.server;
 });
 </script>
 
 <template>
   <div class="login-page">
     <div class="login-container">
-      <h2>{{ isLogin ? "Đăng nhập" : "Đăng ký" }}</h2>
-
+      <h2>Đăng nhập</h2>
       <form @submit.prevent="handleLogin">
-    <div>
-      <label>Tài khoản:</label>
-      <input v-model="tai_khoan" type="text" placeholder="Nhập tài khoản" required />
-    </div>
-    <div>
-      <label>Mật khẩu:</label>
-      <input v-model="mat_khau" type="password" placeholder="Nhập mật khẩu" required />
-    </div>
-    <div class="forgot-password-wrapper">
-      <router-link to="/forgot-password" class="forgot-password-link">Quên mật khẩu?</router-link>
-    </div>
-
-    <button type="submit" :disabled="isLoading">
-      {{ isLoading ? "Đang xử lý..." : "Đăng nhập" }}
-    </button>
-
-    <p v-if="error" style="color: red">{{ error }}</p>
-
-    <p class="switch-mode">
-      Chưa có tài khoản?
-      <span @click="emit('switchToRegister')" class="switch-link">Tạo tài khoản</span>
-    </p>
-  </form>
+        <div>
+          <label>Tài khoản:</label>
+          <input
+            v-model.trim="tai_khoan"
+            type="text"
+            placeholder="Nhập tài khoản"
+            class="form-control"
+            required
+          />
+          <div v-if="errors.tai_khoan" class="text-danger mb-1">
+            {{ errors.tai_khoan }}
+          </div>
+        </div>
+        <div>
+          <label>Mật khẩu:</label>
+          <input
+            v-model.trim="mat_khau"
+            type="password"
+            placeholder="Nhập mật khẩu"
+            class="form-control"
+            required
+          />
+          <div v-if="errors.mat_khau" class="text-danger mb-1">
+            {{ errors.mat_khau }}
+          </div>
+        </div>
+        <div v-if="errors.server" class="text-danger mb-1">
+          {{ errors.server }}
+        </div>
+        <div class="forgot-password-wrapper">
+          <router-link to="/forgot-password" class="forgot-password-link">Quên mật khẩu?</router-link>
+        </div>
+        <button type="submit" :disabled="isLoading" class="btn btn-primary">
+          {{ isLoading ? "Đang xử lý..." : "Đăng nhập" }}
+        </button>
+        <p class="switch-mode">
+          Chưa có tài khoản?
+          <span @click="emit('switchToRegister')" class="switch-link">Tạo tài khoản</span>
+        </p>
+      </form>
     </div>
   </div>
 </template>
@@ -119,11 +142,11 @@ watch([tai_khoan, mat_khau], () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 91.4vh;
-  background-image: url("src/components/images/loginBackground.jpg"); /* Chèn ảnh nền ở đây */
-  background-size: cover; /* Phủ ảnh toàn bộ */
-  background-position: center; /* Canh giữa ảnh */
-  background-repeat: no-repeat; /* Không lặp lại ảnh */
+  min-height: 100vh;
+  background-image: url("src/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
+  background-size: cover !important; /* Phủ ảnh toàn bộ */
+  background-position: center !important; /* Canh giữa ảnh */
+  background-repeat: no-repeat !important; /* Không lặp lại ảnh */
 }
 
 /* Tiêu đề login - làm đẹp hơn */
@@ -183,7 +206,7 @@ watch([tai_khoan, mat_khau], () => {
 
 /* Cấu trúc chính của login container */
 .login-container {
-  max-width: 400px; /* Giữ nguyên kích thước */
+  max-width: 420px; /* Giữ nguyên kích thước */
   width: 100%;
   padding: 2.5rem; /* Giữ nguyên padding */
   background: var(--glass-bg); /* Nền mờ */
@@ -210,8 +233,8 @@ watch([tai_khoan, mat_khau], () => {
 /* Tiêu đề login */
 .login-container h2 {
   color: #1ed6ff;
-  margin-bottom: 2rem; /* Giữ nguyên */
-  font-size: 2rem; /* Giữ nguyên */
+  margin-bottom: 2rem;
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase; /* Chữ in hoa */

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getAdress,
@@ -7,6 +7,7 @@ import {
 } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { ElNotification } from "element-plus";
 import { h } from "vue";
+import { de } from "element-plus/es/locales.mjs";
 
 // Dữ liệu địa chỉ mẫu (thay bằng API hoặc props thực tế)
 const address = ref({
@@ -22,7 +23,7 @@ const address = ref({
 
 const route = useRoute();
 const router = useRouter();
-const error = ref();
+const errors = reactive({});
 
 //thông báo
 function showCustomNotification({
@@ -73,15 +74,37 @@ function showCustomNotification({
   });
 }
 
+// Lưu trạng thái ban đầu của địa chỉ chính
+const originalPrimaryStatus = ref(false);
+
 const getAdressesClient = async () => {
+  Object.keys(errors).forEach((key) => delete errors[key]);
+
   try {
     const addressId = route.params.idAddress;
     const response = await getAdress(addressId);
-    return (address.value = response);
+    address.value = response;
+    
+    // Lưu trạng thái ban đầu
+    originalPrimaryStatus.value = response.diaChiChinh;
+
   } catch (err) {
-    error.value = err.message || "fail to get address";
+    errors.general = err.message || "fail to get address";
   }
 };
+
+function handleTogglePrimary(event) {
+  // Nếu địa chỉ hiện tại đang là địa chỉ chính (true) thì không cho chuyển về false
+  if (originalPrimaryStatus.value === true && address.value.diaChiChinh === false) {
+    // Khôi phục lại trạng thái true
+    address.value.diaChiChinh = true;
+    showCustomNotification({
+      messageText: "Không thể bỏ trạng thái địa chỉ chính. Mỗi khách hàng phải có ít nhất một địa chỉ chính.",
+      type: "error",
+      duration: 3000,
+    });
+  }
+}
 
 const updateHandle = async () => {
   try {
@@ -91,19 +114,25 @@ const updateHandle = async () => {
 
     // Thêm mới thành công
     showCustomNotification({
-      messageText: "Thêm mới thành công!",
+      messageText: "Cập nhật thành công!",
       type: "success",
       duration: 2000,
     });
-    
+    setTimeout(() => {
+      router.push(`/admin/client/addresses/${route.params.idClient}`);
+    }, 1000);
   } catch (err) {
-    error.value = err.message || "fail to update address";
-    // Thêm thất bại
-    showCustomNotification({
-      messageText: "Thêm mới thất bại!",
-      type: "error",
-      duration: 3000,
-    });
+    if (Array.isArray(err)) {
+      err.forEach(({ field, message }) => {
+        errors[field] = message;
+      });
+    } else {
+      showCustomNotification({
+        messageText: "Cập nhật thất bại!",
+        type: "error",
+        duration: 2000,
+      });
+    }
   }
 };
 
@@ -123,74 +152,104 @@ onMounted(() => {
     <form class="address-form" @submit.prevent="updateHandle">
       <div class="form-group">
         <label for="tenNguoiNhan">Tên người nhận</label>
+        <span v-if="errors.tenNguoiNhan" class="text-danger mb-1">{{
+          errors.tenNguoiNhan
+        }}</span>
         <input
           id="tenNguoiNhan"
           v-model="address.tenNguoiNhan"
           type="text"
           placeholder="Nhập tên người nhận"
-          required
         />
       </div>
       <div class="form-group">
         <label for="sdtNguoiNhan">Số điện thoại người nhận</label>
+        <span v-if="errors.sdtNguoiNhan" class="text-danger mb-1">{{
+          errors.sdtNguoiNhan
+        }}</span>
         <input
           id="sdtNguoiNhan"
           v-model="address.sdtNguoiNhan"
           type="text"
           placeholder="Nhập số điện thoại người nhận"
-          required
         />
       </div>
       <div class="form-group">
         <label for="soNha">Số nhà</label>
+        <span v-if="errors.soNha" class="text-danger mb-1">{{
+          errors.soNha
+        }}</span>
         <input
           id="soNha"
           v-model="address.soNha"
           type="text"
           placeholder="Nhập số nhà"
-          required
         />
       </div>
       <div class="form-group">
         <label for="tenDuong">Tên đường</label>
+        <span v-if="errors.tenDuong" class="text-danger mb-1">{{
+          errors.tenDuong
+        }}</span>
         <input
           id="tenDuong"
           v-model="address.tenDuong"
           type="text"
           placeholder="Nhập tên đường"
-          required
         />
       </div>
       <div class="form-group">
         <label for="xaPhuong">Xã/Phường</label>
+        <span v-if="errors.xaPhuong" class="text-danger mb-1">{{
+          errors.xaPhuong
+        }}</span>
         <input
           id="xaPhuong"
           v-model="address.xaPhuong"
           type="text"
           placeholder="Nhập xã/phường"
-          required
         />
       </div>
       <div class="form-group">
         <label for="quanHuyen">Quận/Huyện</label>
+        <span v-if="errors.quanHuyen" class="text-danger mb-1">{{
+          errors.quanHuyen
+        }}</span>
         <input
           id="quanHuyen"
           v-model="address.quanHuyen"
           type="text"
           placeholder="Nhập quận/huyện"
-          required
         />
       </div>
       <div class="form-group">
         <label for="tinhThanhPho">Tỉnh/Thành phố</label>
+        <span v-if="errors.tinhThanhPho" class="text-danger mb-1">{{
+          errors.tinhThanhPho
+        }}</span>
         <input
           id="tinhThanhPho"
           v-model="address.tinhThanhPho"
           type="text"
           placeholder="Nhập tỉnh/thành phố"
-          required
         />
       </div>
+      <div class="form-group">
+        <label for="diaChiChinh">Địa chỉ chính</label>
+        <label class="switch">
+          <input
+            type="checkbox"
+            id="diaChiChinh"
+            v-model="address.diaChiChinh"
+            @change="handleTogglePrimary"
+          />
+          <span class="slider"></span>
+        </label>
+        <span v-if="originalPrimaryStatus" class="note">
+          (Địa chỉ chính không thể bỏ chọn)
+        </span>
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="btn-save">Lưu</button>
         <button type="button" class="btn-cancel" @click="cancelEdit">
@@ -291,5 +350,56 @@ h2 {
     padding: 6px 12px;
     font-size: 14px;
   }
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin-left: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.note {
+  font-size: 0.85em;
+  color: gray;
+  margin-left: 10px;
 }
 </style>

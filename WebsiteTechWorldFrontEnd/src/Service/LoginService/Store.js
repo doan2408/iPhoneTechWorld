@@ -49,7 +49,11 @@ const store = createStore({
         localStorage.setItem("isLoggedIn", "true"); // Lưu trạng thái đăng nhập
         return message;
       } catch (error) {
-        throw error.response?.data || "Lỗi đăng nhập";
+        if (Array.isArray(error)) {
+        throw error; // Ném mảng lỗi từ LoginService
+      } else {
+        throw [{ field: "server", message: error.message || "Lỗi đăng nhập" }]; // Chuẩn hóa thành mảng
+      }
       }
     },
     async logout({ commit }) {
@@ -81,14 +85,11 @@ const store = createStore({
         commit("setRegistrationStatus", "success");
       } catch (error) {
         commit("setRegistrationStatus", "error");
-        // Xử lý lỗi
-        if (error.response) {
-          throw error.response.data || "Lỗi đăng ký";
-        } else if (error.request) {
-          throw "Lỗi kết nối tới máy chủ";
-        } else {
-          throw "Có lỗi xảy ra khi đăng ký";
-        }
+        if (Array.isArray(error)) {
+        throw error; // Ném mảng lỗi từ LoginService
+      } else {
+        throw [{ field: "server", message: error.message || "Đăng ký thất bại" }]; // Chuẩn hóa thành mảng
+      }
       }
     },
   },

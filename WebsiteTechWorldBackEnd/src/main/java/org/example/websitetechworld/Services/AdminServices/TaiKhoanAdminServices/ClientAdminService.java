@@ -12,7 +12,7 @@ import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
-import org.hibernate.validator.internal.constraintvalidators.bv.NullValidator;
+import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,7 @@ public class ClientAdminService {
     ModelMapper modelMapper = new ModelMapper();
 
 
-    //convert
+    //convertToResponse
     private AdminClientResponse convert(KhachHang khachHang) {
         AdminClientResponse adminClientResponse = new AdminClientResponse();
         adminClientResponse.setId(khachHang.getId());
@@ -43,7 +45,7 @@ public class ClientAdminService {
         adminClientResponse.setTenKhachHang(khachHang.getTenKhachHang());
         adminClientResponse.setSdt(khachHang.getSdt());
         adminClientResponse.setTaiKhoan(khachHang.getTaiKhoan());
-        adminClientResponse.setMatKhau(khachHang.getMatKhau());
+//        adminClientResponse.setMatKhau(khachHang.getMatKhau());
         adminClientResponse.setEmail(khachHang.getEmail());
         adminClientResponse.setNgaySinh(khachHang.getNgaySinh());
         adminClientResponse.setGioiTinh(khachHang.getGioiTinh());
@@ -104,6 +106,19 @@ public class ClientAdminService {
         return clientPage.map(this::convert);
     }
 
+    //search
+    public Page<AdminClientResponse> getAllClient(int page, int size, String keyWord) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> pageResult;
+        if(keyWord !=null && !keyWord.isEmpty()){
+            pageResult = khachHangRepository.findByKeyword(keyWord.trim(), pageable);
+        }
+        else {
+            pageResult = khachHangRepository.findAll(pageable);
+        }
+        return pageResult.map(this::convert);
+    }
+
     //detail client
     public Optional<AdminClientResponse> getClientById(Integer id) {
         return khachHangRepository.findById(id).map(this::convert);
@@ -111,19 +126,34 @@ public class ClientAdminService {
 
     //add client
     public KhachHang addClient(AdminClientRequest request) {
+        List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
-        if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan())) {
-            throw new RuntimeException("Tên tài khoản đã tồn tại!");
-        }
-        if (khachHangRepository.existsByEmail(request.getEmail()) || nhanVienRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại!");
-        }
-        if (khachHangRepository.existsBySdt(request.getSdt()) || nhanVienRepository.existsBySdt(request.getSdt())) {
-            throw new RuntimeException("Số điện thoại đã tồn tại!");
+        if(request.getTaiKhoan() != null) {
+            if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan())) {
+                errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
+            }
         }
 
-        String hashedPassword = passwordEncoder.encode(request.getMatKhau());
-        request.setMatKhau(hashedPassword);
+        if(request.getEmail() != null) {
+            if (khachHangRepository.existsByEmail(request.getEmail()) || nhanVienRepository.existsByEmail(request.getEmail())) {
+                errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
+            }
+        }
+
+        if(request.getSdt() != null) {
+            if (khachHangRepository.existsBySdt(request.getSdt()) || nhanVienRepository.existsBySdt(request.getSdt())) {
+                errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
+        if(request.getMatKhau() != null) {
+            String hashedPassword = passwordEncoder.encode(request.getMatKhau());
+            request.setMatKhau(hashedPassword);
+        }
 
         request.setAnh("Default.jpg");
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
@@ -141,7 +171,10 @@ public class ClientAdminService {
 
         //set ngược lại
         khachHangAdd.setGioHang(gioHang);
-
+        DiaChi diaChi = new DiaChi();
+        diaChi.setIdKhachHang(khachHangAdd);
+        diaChi.setDiaChiChinh(true);
+        diaChiRepository.save(diaChi);
         //lưu id khách hàng và giỏ hàng cũng sẽ được lưu theo Cascade
         return khachHangRepository.save(khachHangAdd);
     }
@@ -149,19 +182,38 @@ public class ClientAdminService {
     //update khách hàng
     public KhachHang updateClient(Integer id, AdminClientRequest khachHangRequest) {
         KhachHang existing = khachHangRepository.findById(id).orElse(null);
+
+        List<Map<String, String>> errors = new ArrayList<>();
         if (existing != null) {
-            if (!existing.getTaiKhoan().equals(khachHangRequest.getTaiKhoan()) &&
-                    (khachHangRepository.existsByTaiKhoan(khachHangRequest.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(khachHangRequest.getTaiKhoan()))) {
-                throw new RuntimeException("Tài khoản đã tồn tại!");
+            // Kiểm tra tài khoản có bị trùng không (trừ chính nó)
+            if (khachHangRequest.getTaiKhoan() != null &&
+                    !khachHangRequest.getTaiKhoan().equals(existing.getTaiKhoan()) &&
+                    (khachHangRepository.existsByTaiKhoan(khachHangRequest.getTaiKhoan()) ||
+                            nhanVienRepository.existsByTaiKhoan(khachHangRequest.getTaiKhoan()))) {
+
+                errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
             }
-            // Check trùng sdt, email (trừ chính bản thân khách hàng hiện tại)
-            if (!existing.getSdt().equals(khachHangRequest.getSdt()) &&
-                    (khachHangRepository.existsBySdt(khachHangRequest.getSdt()) || nhanVienRepository.existsBySdt(khachHangRequest.getSdt()))) {
-                throw new RuntimeException("Số điện thoại đã tồn tại!");
+
+            // Kiểm tra trùng số điện thoại
+            if (khachHangRequest.getSdt() != null &&
+                    !khachHangRequest.getSdt().equals(existing.getSdt()) &&
+                    (khachHangRepository.existsBySdt(khachHangRequest.getSdt()) ||
+                            nhanVienRepository.existsBySdt(khachHangRequest.getSdt()))) {
+
+                errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
             }
-            if (!existing.getEmail().equals(khachHangRequest.getEmail()) &&
-                    (khachHangRepository.existsByEmail(khachHangRequest.getEmail()) || nhanVienRepository.existsByEmail(khachHangRequest.getEmail()))) {
-                throw new RuntimeException("Email đã tồn tại!");
+
+            // Kiểm tra trùng email
+            if (khachHangRequest.getEmail() != null &&
+                    !khachHangRequest.getEmail().equals(existing.getEmail()) &&
+                    (khachHangRepository.existsByEmail(khachHangRequest.getEmail()) ||
+                            nhanVienRepository.existsByEmail(khachHangRequest.getEmail()))) {
+
+                errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
+            }
+
+            if(!errors.isEmpty()) {
+                throw new ValidationException(errors);
             }
 
             existing.setTenKhachHang(khachHangRequest.getTenKhachHang());
@@ -171,16 +223,13 @@ public class ClientAdminService {
             existing.setGioiTinh(khachHangRequest.getGioiTinh());
             existing.setAnh(khachHangRequest.getAnh());
 
-            if (khachHangRequest.getMatKhau() != null && !khachHangRequest.getMatKhau().isEmpty()) {
-                if (!passwordEncoder.matches(khachHangRequest.getMatKhau(), existing.getMatKhau())) {
-                    existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
+            if (khachHangRequest.getMatKhau() != null && !khachHangRequest.getMatKhau().trim().isEmpty()) {
+                if (!passwordEncoder.matches(khachHangRequest.getMatKhau().trim(), existing.getMatKhau().trim())) {
+                    existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau().trim()));
                 }
             }
             return khachHangRepository.save(existing);
         }
         return null;
     }
-
-
-
 }

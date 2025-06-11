@@ -19,7 +19,7 @@
       </el-link>
     </div>
 
-    <el-skeleton v-if="isLoading" rows="5" animated />
+    <el-skeleton v-if="isLoading" :rows="5" animated />
 
     <template v-else>
       <h2>Danh sách sản phẩm</h2>

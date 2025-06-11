@@ -113,7 +113,7 @@ const handleAddStaff = async () => {
           {{ errors.tenNhanVien }}
         </div>
         <input
-          v-model="staffRequest.tenNhanVien"
+          v-model.trim="staffRequest.tenNhanVien"
           placeholder="Tên nhân viên"
           class="form-control"
         />
@@ -123,7 +123,7 @@ const handleAddStaff = async () => {
           {{ errors.taiKhoan }}
         </div>
         <input
-          v-model="staffRequest.taiKhoan"
+          v-model.trim="staffRequest.taiKhoan"
           placeholder="Tên đăng nhập"
           class="form-control"
         />
@@ -133,7 +133,7 @@ const handleAddStaff = async () => {
           {{ errors.matKhau }}
         </div>
         <input
-          v-model="staffRequest.matKhau"
+          v-model.trim="staffRequest.matKhau"
           placeholder="Mật khẩu"
           type="password"
           class="form-control"
@@ -144,7 +144,7 @@ const handleAddStaff = async () => {
           {{ errors.email }}
         </div>
         <input
-          v-model="staffRequest.email"
+          v-model.trim="staffRequest.email"
           placeholder="Email"
           class="form-control"
         />
@@ -154,7 +154,7 @@ const handleAddStaff = async () => {
           {{ errors.sdt }}
         </div>
         <input
-          v-model="staffRequest.sdt"
+          v-model.trim="staffRequest.sdt"
           placeholder="Số điện thoại"
           class="form-control"
         />
@@ -164,7 +164,7 @@ const handleAddStaff = async () => {
           {{ errors.diaChi }}
         </div>
         <input
-          v-model="staffRequest.diaChi"
+          v-model.trim="staffRequest.diaChi"
           placeholder="Địa chỉ"
           class="form-control"
         />

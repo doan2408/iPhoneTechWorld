@@ -24,7 +24,7 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(new InternetAddress(
-                    "nguyenbadoan.qc2005@gmail.com", "Chủ tịch TechWorld Nguyễn Bá Đoàn", "UTF-8"
+                    "nguyenbadoan.qc2005@gmail.com", "TECHWORLD SHOP", "UTF-8"
             ));
 
             helper.setTo(toEmail);
