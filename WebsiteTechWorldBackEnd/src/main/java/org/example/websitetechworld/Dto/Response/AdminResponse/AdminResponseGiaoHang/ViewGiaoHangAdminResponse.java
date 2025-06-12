@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.websitetechworld.Entity.GiaoHang;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,29 +36,27 @@ public class ViewGiaoHangAdminResponse {
 
     private List<ChiTietGiaoHangResponseAdmin> chiTietGiaoHangResponseAdminList;
 
-    public static ViewGiaoHangAdminResponse convertDto(GiaoHang giaoHang){
-        ViewGiaoHangAdminResponse response = new ViewGiaoHangAdminResponse();
-        response.setIdGiaoHang(giaoHang.getId());
-        if (giaoHang.getIdKhachHang() != null){
-            response.setIdKhachHang(giaoHang.getIdKhachHang().getId());
-            response.setMaKhachHang(giaoHang.getIdKhachHang().getMaKhachHang());
-            response.setTenKhachHang(giaoHang.getIdKhachHang().getTenKhachHang());
-        }
-        if (giaoHang.getIdHoaDon() != null){
-            response.setIdHoaDon(giaoHang.getIdHoaDon().getId());
-            response.setMaHoaDon(giaoHang.getIdHoaDon().getMaHoaDon());
-            response.setSdt(giaoHang.getIdHoaDon().getSdt());
-            response.setTrangThaiThanhToan(giaoHang.getIdHoaDon().getTrangThaiThanhToan().name());
-        }
-        response.setMaGiaoHang(giaoHang.getMaGiaoHang());
-        response.setNgayDatHang(giaoHang.getNgayDatHang());
-        response.setTongGiaTriDonHang(giaoHang.getTongGiaTriDonHang());
-        response.setDiaChiGiaoHang(giaoHang.getDiaChiGiaoHang());
-        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().getDisplayName() : null);
-        if (giaoHang.getChiTietGiaoHangs() != null){
-            response.setChiTietGiaoHangResponseAdminList(giaoHang.getChiTietGiaoHangs().stream()
-                    .map(ChiTietGiaoHangResponseAdmin::convertDto).toList());
-        }
-        return response;
-    }
+//    public static ViewGiaoHangAdminResponse convertDto(GiaoHang giaoHang){
+//        ViewGiaoHangAdminResponse response = new ViewGiaoHangAdminResponse();
+//        response.setIdGiaoHang(giaoHang.getId());
+//        if (giaoHang.getIdKhachHang() != null){
+//            response.setIdKhachHang(giaoHang.getIdKhachHang().getId());
+//            response.setMaKhachHang(giaoHang.getIdKhachHang().getMaKhachHang());
+//            response.setTenKhachHang(giaoHang.getIdKhachHang().getTenKhachHang());
+//        }
+//        if (giaoHang.getIdHoaDon() != null){
+//            response.setIdHoaDon(giaoHang.getIdHoaDon().getId());
+//            response.setMaHoaDon(giaoHang.getIdHoaDon().getMaHoaDon());
+//        }
+//        response.setMaGiaoHang(giaoHang.getMaGiaoHang());
+//        response.setNgayDatHang(giaoHang.getNgayDatHang());
+//        response.setTongGiaTriDonHang(giaoHang.getTongGiaTriDonHang());
+//        response.setDiaChiGiaoHang(giaoHang.getDiaChiGiaoHang());
+//        response.setTrangThaiDonHang(giaoHang.getTrangThaiDonHang()!= null ?giaoHang.getTrangThaiDonHang().getDisplayName() : null);
+//        if (giaoHang.getChiTietGiaoHangs() != null){
+//            response.setChiTietGiaoHangResponseAdminList(giaoHang.getChiTietGiaoHangs().stream()
+//                    .map(ChiTietGiaoHangResponseAdmin::convertDto).toList());
+//        }
+//        return response;
+//    }
 }

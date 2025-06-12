@@ -19,8 +19,6 @@ public class HoaDonAdminResponse {
 
     private String maHoaDon;
 
-    private Integer idGiaoHang;
-
     private Integer idKhachHang;
     private String maKhachHang;
     private String tenKhachHang;
@@ -59,7 +57,6 @@ public class HoaDonAdminResponse {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
         hoaDonAdminResponse.setIdHoaDon(hoaDon.getId());
         hoaDonAdminResponse.setMaHoaDon(hoaDon.getMaHoaDon());
-        hoaDonAdminResponse.setIdGiaoHang(hoaDon.getGiaoHangs() != null ? hoaDon.getGiaoHangs().getId() : null);
         if (hoaDon.getIdKhachHang() != null){
             hoaDonAdminResponse.setIdKhachHang(hoaDon.getIdKhachHang().getId());
             hoaDonAdminResponse.setMaKhachHang(hoaDon.getIdKhachHang().getMaKhachHang());
@@ -78,7 +75,7 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());
         hoaDonAdminResponse.setThanhTien(hoaDon.getThanhTien());
-        hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTao());
+        hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTaoHoaDon());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
         hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );

@@ -30,7 +30,7 @@ public class GetAllHoaDonAdminResponse {
         response.setTenNguoiMua(hoaDon.getTenNguoiMua());
         response.setSdt(hoaDon.getSdt());
         response.setTongTien(hoaDon.getTongTien());
-        response.setNgayTao(hoaDon.getNgayTao());
+        response.setNgayTao(hoaDon.getNgayTaoHoaDon());
         response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null);
         return  response;
