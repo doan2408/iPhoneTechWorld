@@ -184,7 +184,7 @@
                                 <input type="checkbox" class="row-checkbox">
                             </td>
                             <td class="table-td">
-                                <div class="invoice-stt">{{ (pageNo * pageSize ) +index +1 }}</div>
+                                <div class="invoice-stt">{{ (pageNo * pageSize ) +index+ 1 }}</div>
                             </td>
                             <td class="table-td">
                                 <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
