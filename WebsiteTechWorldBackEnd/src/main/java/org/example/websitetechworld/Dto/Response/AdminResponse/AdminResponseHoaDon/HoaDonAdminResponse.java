@@ -75,7 +75,7 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());
         hoaDonAdminResponse.setThanhTien(hoaDon.getThanhTien());
-        hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTao());
+        hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTaoHoaDon());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
         hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );

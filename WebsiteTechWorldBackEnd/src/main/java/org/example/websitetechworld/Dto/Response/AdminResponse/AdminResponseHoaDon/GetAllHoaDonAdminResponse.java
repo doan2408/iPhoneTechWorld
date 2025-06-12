@@ -28,7 +28,7 @@ public class GetAllHoaDonAdminResponse {
         response.setMaHoaDon(hoaDon.getMaHoaDon());
         response.setTenNguoiMua(hoaDon.getTenNguoiMua());
         response.setTongTien(hoaDon.getTongTien());
-        response.setNgayTao(hoaDon.getNgayTao());
+        response.setNgayTao(hoaDon.getNgayTaoHoaDon());
         response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null);
         return  response;

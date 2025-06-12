@@ -64,10 +64,10 @@ public class HoaDonAdminController {
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
         return hoaDonAdminService.getPageChiTietThanhToan(idHoaDon,pageNo,PAGE_SIZE);
     }
-    @GetMapping("/{idHoaDon}/xem-giao-hang")
-    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageGiaoHang(idHoaDon,pageNo,PAGE_SIZE);
-    }
+//    @GetMapping("/{idHoaDon}/xem-giao-hang")
+//    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+//        return hoaDonAdminService.getPageGiaoHang(idHoaDon,pageNo,PAGE_SIZE);
+//    }
 
     @PostMapping
     public ResponseEntity<?> createPendingInvoice(){

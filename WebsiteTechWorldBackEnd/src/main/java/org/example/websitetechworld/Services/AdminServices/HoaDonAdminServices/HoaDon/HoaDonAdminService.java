@@ -30,7 +30,6 @@ public class HoaDonAdminService {
     private final HoaDonRepository hoaDonRepository;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
-    private final GiaoHangRepository giaoHangRepository;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     private final KhachHangRepository khachHangRepository;
     private static final Logger logger = LoggerFactory.getLogger(HoaDonAdminService.class);
@@ -39,11 +38,10 @@ public class HoaDonAdminService {
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
     private final HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_sanPhamAdminServices;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, GiaoHangRepository giaoHangRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
-        this.giaoHangRepository = giaoHangRepository;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.khachHangRepository = khachHangRepository;
         this.thanhToanFactory = thanhToanFactory;
@@ -77,15 +75,11 @@ public class HoaDonAdminService {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(ChiTietThanhToanAdminResponse::convertDto).toList();
     }
-    public List<GiaoHangAdminResponse> getPageGiaoHang(Integer hoaDonId,Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return giaoHangRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(GiaoHangAdminResponse::convertDto).toList();
-    }
 
     public HoaDon createPendingInvoice(){
 
         HoaDon hoaDon = new HoaDon();
-        hoaDon.setNgayTao(LocalDate.now());
+        hoaDon.setNgayTaoHoaDon(LocalDate.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.POS);
         hoaDon.setPhiShip(BigDecimal.ZERO);
         hoaDon.setSoTienGiam(BigDecimal.ZERO);
