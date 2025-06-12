@@ -168,6 +168,7 @@
                             <th class="table-th checkbox-column">
                                 <input type="checkbox" class="header-checkbox">
                             </th>
+                            <th class="table-th">STT</th>
                             <th class="table-th">Mã hóa đơn</th>
                             <th class="table-th">Người mua (Thời điểm giao dịch)</th>
                             <th class="table-th">Ngày tạo</th>
@@ -181,6 +182,9 @@
                         <tr v-for="(hoaDon, index) in hoaDons" :key="hoaDon.id" class="table-row">
                             <td class="table-td checkbox-column">
                                 <input type="checkbox" class="row-checkbox">
+                            </td>
+                            <td class="table-td">
+                                <div class="invoice-stt">{{ (pageNo * pageSize ) +index +1 }}</div>
                             </td>
                             <td class="table-td">
                                 <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
