@@ -176,7 +176,7 @@
                             <th class="table-th">Ngày tạo</th>
                             <th class="table-th">Tổng tiền</th>
                             <th class="table-th">Loại</th>
-                            <th class="table-th">Trạng thái</th>
+                            <th class="table-th">Trạng thái thanh toán</th>
                             <th class="table-th">Hành động</th>
                         </tr>
                     </thead>
@@ -427,7 +427,7 @@
                                             <div class="info-row">
                                                 <span class="info-label">Ngày thanh toán:</span>
                                                 <span class="info-value">{{ formatDate(selectedInvoice.ngayThanhToan) ||
-                                                    'N/A' }}</span>
+                                                    'Chưa thanh toán' }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Mã giảm giá:</span>
@@ -444,8 +444,8 @@
                                                     }}</span>
                                             </div>
                                             <div class="info-row">
-                                                <span class="info-label">Tên tài khoản mua:</span>
-                                                <span class="info-value">{{ selectedInvoice.tenKhachHang || 'N/A'
+                                                <span class="info-label">Tên người nhận:</span>
+                                                <span class="info-value">{{ selectedInvoice.tenNguoiNhan || 'N/A'
                                                     }}</span>
                                             </div>
                                             <div v-if="selectedInvoice.maKhachHang !=null" class="info-row">
@@ -773,7 +773,7 @@ const getInitials = (name) => {
 // định dạng ngày
 const formatDate = (dateString) => {
     if (!dateString) {
-        return 'N/A';
+        return 'Chưa thanh toán';
     }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
