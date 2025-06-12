@@ -21,17 +21,16 @@ public class HoaDonAdminResponse {
 
     private Integer idKhachHang;
     private String maKhachHang;
-    private String tenKhachHang;
+    private String tenKhachHang; //ten tai khoan
 
     private Integer idPhieuGiamGia;
     private String maPhieuGiamGia;
     private String tenPhieuGiamGia;
 
     private String tenNguoiMua;
+    private String tenNguoiNhan;
 
-//    private String diaChi;
-
-    private String sdt;
+    private String sdtNguoiMua;
 
     private BigDecimal phiShip;
 
@@ -68,9 +67,10 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setTenPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getTenKhuyenMai());
         }
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
+        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
 //        hoaDonAdminResponse.setDiaChi(hoaDon.getDiaChi());
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
-        hoaDonAdminResponse.setSdt(hoaDon.getSdt());
+        hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());
