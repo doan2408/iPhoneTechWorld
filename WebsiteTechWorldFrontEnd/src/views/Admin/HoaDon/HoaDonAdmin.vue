@@ -403,7 +403,7 @@
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">SĐT người mua:</span>
-                                                <span class="info-value">{{ selectedInvoice.sdt || 'N/A' }}</span>
+                                                <span class="info-value">{{ selectedInvoice.sdtNguoiMua || 'N/A' }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày tạo:</span>

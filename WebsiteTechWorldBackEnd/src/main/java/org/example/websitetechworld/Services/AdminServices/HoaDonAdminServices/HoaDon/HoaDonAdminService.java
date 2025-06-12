@@ -120,7 +120,7 @@ public class HoaDonAdminService {
 //        hoaDon.setTenNguoiNhan(khachHang.getTenKhachHang());
 //        hoaDon.setDiaChi(diaChiDayDu);
         hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
-        hoaDon.setSdt(khachHang.getSdt());
+        hoaDon.setSdtNguoiMua(khachHang.getSdt());
         hoaDonRepository.save(hoaDon);
     }
 

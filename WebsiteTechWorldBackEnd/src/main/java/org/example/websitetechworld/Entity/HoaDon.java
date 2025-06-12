@@ -44,8 +44,8 @@ public class HoaDon {
 
     @Size(max = 10)
     @Nationalized
-    @Column(name = "sdt", length = 10)
-    private String sdt;
+    @Column(name = "sdt_nguoi_mua", length = 10)
+    private String sdtNguoiMua;
 
     // Xóa thuộc tính diaChi
 
@@ -92,6 +92,11 @@ public class HoaDon {
     @Nationalized
     @Column(name = "ten_nguoi_nhan", length = 50)
     private String tenNguoiNhan;
+
+    @Size(max = 10)
+    @Nationalized
+    @Column(name = "sdt_nguoi_nhan", length = 10)
+    private String sdtNguoiNhan;
 
     @Size(max = 100)
     @Nationalized
