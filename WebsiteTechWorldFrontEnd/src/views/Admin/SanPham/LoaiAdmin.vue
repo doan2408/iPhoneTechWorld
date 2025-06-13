@@ -2,27 +2,21 @@
     <div class="container mt-4">
 
         <el-row :gutter="20" class="mb-4 justify-content-center">
-
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
-
         </el-row>
 
-        <el-row :gutter="20" class="mb-2" justify="end" >
-
+        <el-row :gutter="20" class="mb-2" justify="end">
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
-
         </el-row>
 
         <h2>Danh sách loại</h2>
@@ -34,15 +28,14 @@
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            <router-link :to="`/admin/products/${row.id}`">
-                                <el-button size="small" type="primary" :icon="Edit" circle />
-                            </router-link>
+                            
+                            <el-button size="small" type="primary" :icon="Edit" circle />
 
                             <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-
+                            <!-- 
                             <router-link :to="`/admin/products/detail/${row.id}`">
                                 <el-button size="small" type="info" :icon="View" circle />
-                            </router-link>
+                            </router-link> -->
                         </div>
                     </template>
                 </el-table-column>
@@ -57,12 +50,31 @@
             </div>
         </div>
 
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa Loại' : 'Thêm mới Loại'" width="900px"
+            :close-on-click-modal="false" :destroy-on-close="true">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+                size="medium" class="hdh-form">
+                <el-row :gutter="20">
+                    <el-col>
+                        <el-form-item label="Loại" prop="loai">
+                            <el-input v-model="formData.tenLoai" placeholder="Nhập tên loại (Ví dụ: Thường, Pro)"
+                                autocomplete="on" style="width: 100%" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row justify="end" style="margin-top: 30px;">
+                    <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                </el-row>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, reactive } from 'vue';
 import { getAllLoaiPage } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 
@@ -72,11 +84,18 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5; // Số bản ghi trên 1 trang
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const rules = {
+    loai: [
+        { required: true, message: 'Vui lòng nhập loại', trigger: 'blur' },
+    ]
+}
 
+const formData = reactive({
+    id: null,
+    tenLoai: ''
+});
 
-
-
-// loadData gọi API với phân trang và tìm kiếm
 const loadData = async () => {
     try {
         const response = await getAllLoaiPage(currentPage.value - 1, pageSize);
@@ -96,15 +115,12 @@ const fromRecord = computed(() => {
 const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
-// Tự động load khi component mounted
-onMounted(() => {
-    loadData();
-});
 
-// Watch để khi thay đổi trang hoặc tìm kiếm thì load lại dữ liệu
-watch([currentPage, searchQuery], () => {
-    loadData();
-});
+const resetForm = () => {
+    formData.id = null;
+    formData.tenLoai = '';
+};
+
 
 const handleSearch = () => {
     currentPage.value = 1; // Về trang 1 khi tìm kiếm
@@ -118,7 +134,12 @@ const handleRefresh = () => {
 };
 
 const handleCreate = () => {
-    console.log('Tạo mới');
+    resetForm();
+    dialogVisible.value = true;
+};
+
+const handleClose = () => {
+    dialogVisible.value = false;
 };
 
 const indexMethod = (index) => {
@@ -128,11 +149,20 @@ const indexMethod = (index) => {
 const handlePageChange = (newPage) => {
     currentPage.value = newPage;
 };
+// Tự động load khi component mounted
+onMounted(() => {
+    loadData();
+});
+
+// Watch để khi thay đổi trang hoặc tìm kiếm thì load lại dữ liệu
+watch([currentPage, searchQuery], () => {
+    loadData();
+});
+
 </script>
 
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
     font-size: 16px;
     padding: 8px 16px;
