@@ -24,21 +24,21 @@
       <el-table :data="tableCameraTruoc" border style="width: 100%">
         <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
         <!-- <el-table-column prop="id" label="ID" /> -->
-        <el-table-column prop="loaiCamera" label="Hãng sản xuất" />
-        <el-table-column prop="doPhanGiai" label="Số nhân" />
-        <el-table-column prop="khauDo" label="Số lượng" />
-        <el-table-column prop="loaiZoom" label="Xung nhịp" />
-        <el-table-column prop="cheDoChup" label="Công nghệ sản xuất" />
+        <el-table-column prop="loaiCamera" label="Loại camera" />
+        <el-table-column prop="doPhanGiai" label="Độ phân giải" />
+        <el-table-column prop="khauDo" label="Khẩu độ" />
+        <el-table-column prop="loaiZoom" label="Loại zoom" />
+        <el-table-column prop="cheDoChup" label="Chế độ chụp" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="icons.Edit" circle />
-              </router-link>
-              <el-button size="small" type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
-              <router-link :to="`/admin/products/detail/${row.id}`">
+              
+              <el-button type="primary" :icon="icons.Edit" circle @click="openDetail(row, true)" />
+
+              <el-button type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
+              <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                 <el-button size="small" type="info" :icon="icons.View" circle />
-              </router-link>
+              </router-link> -->
             </div>
           </template>
         </el-table-column>
@@ -53,18 +53,75 @@
       </div>
     </div>
 
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa camera trước' : 'Thêm mới camera trước'"
+      width="900px" :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left" size="medium"
+        class="camera-form">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Loại camera" prop="loaiCamera">
+              <el-input v-model="formData.loaiCamera" placeholder="Nhập loại camera..." autocomplete="on" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Độ phân giải" prop="doPhanGiai">
+              <el-input v-model="formData.doPhanGiai" placeholder="Ví dụ: 12MP" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Khẩu độ" prop="khauDo">
+              <el-input v-model="formData.khauDo" placeholder="Ví dụ: f/1.8" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Loại zoom" prop="loaiZoom">
+              <el-input v-model="formData.loaiZoom" placeholder="Ví dụ: Optical 2x" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="Chế độ chụp" prop="cheDoChup">
+              <el-input v-model="formData.cheDoChup" placeholder="Nhập chế độ chụp" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row justify="end" style="margin-top: 30px;">
+          <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+          <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+        </el-row>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { getAllCameraTruocPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { deleteCameraTruoc, getAllCameraTruocPage, postCameraTruoc, putCameraTruoc } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
 
 export default {
   data() {
     return {
+      dialogVisible: false,
+      isEditMode: false,
+      formData: {
+        id: null,
+        loaiCamera: '',
+        doPhanGiai: '',
+        khauDo: '',
+        loaiZoom: '',
+        cheDoChup: ''
+      },
       tableCameraTruoc: [],
       currentPage: 1,
       totalPages: 1,
@@ -72,10 +129,17 @@ export default {
       pageSize: 5,
       searchQuery: '',
       icons: {
-        Edit,
-        Delete,
-        View
-      }
+        Edit: markRaw(Edit),
+        Delete: markRaw(Delete),
+        View: markRaw(View)
+      },
+      rules: {
+        loaiCamera: [{ required: true, message: 'Vui lòng nhập loại camera', trigger: 'blur' }],
+        doPhanGiai: [{ required: true, message: 'Vui lòng nhập độ phân giải', trigger: 'blur' }],
+        khauDo: [{ required: true, message: 'Vui lòng nhập khẩu độ', trigger: 'blur' }],
+        loaiZoom: [{ required: true, message: 'Vui lòng nhập loại zoom', trigger: 'blur' }],
+        cheDoChup: [{ required: true, message: 'Vui lòng nhập chế độ chụp', trigger: 'blur' }],
+      },
     };
   },
   computed: {
@@ -97,6 +161,16 @@ export default {
         console.error('Không thể load dữ liệu:', error);
       }
     },
+    resetForm() {
+      this.formData = {
+        id: null,
+        loaiCamera: '',
+        doPhanGiai: '',
+        khauDo: '',
+        loaiZoom: '',
+        cheDoChup: ''
+      };
+    },
     handleSearch() {
       this.currentPage = 1;
       this.loadData();
@@ -106,8 +180,42 @@ export default {
       this.currentPage = 1;
       this.loadData();
     },
+    handleClose() {
+      this.dialogVisible = false;
+    },
     handleCreate() {
-      this.$router.push('/admin/products/create');
+      this.resetForm();
+      this.isEditMode = false;
+      this.dialogVisible = true;
+    },
+    async submitForm() {
+      this.isLoading = true;
+      try {
+        await this.$refs.formRef.validate();
+
+        if (this.isEditMode) {
+          await putCameraTruoc(this.formData.id, this.formData);
+          this.$message.success('Cập nhật camera trước thành công!');
+        } else {
+          await postCameraTruoc(this.formData);
+          this.$message.success('Thêm camera trước thành công!');
+        }
+
+        this.resetForm();
+        this.dialogVisible = false;
+        this.loadData();
+
+      } catch (error) {
+        const msg = error.response?.data?.message || 'Dữ liệu không hợp lệ, vui lòng kiểm tra lại!';
+        this.$message.error(msg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    openDetail(data, isEdit = false) {
+      this.formData = { ...data };
+      this.isEditMode = isEdit;
+      this.dialogVisible = true;
     },
     indexMethod(index) {
       return (this.currentPage - 1) * this.pageSize + index + 1;
@@ -115,20 +223,29 @@ export default {
     handlePageChange(newPage) {
       this.currentPage = newPage;
     },
-    handleDelete(id) {
-      console.log('Xóa:', id);
+    async handleDelete(id) {
+      try {
+        // Đợi người dùng xác nhận
+        await this.$confirm('Bạn có chắc chắn muốn xoá mục này?', 'Xác nhận', {
+          confirmButtonText: 'Xoá',
+          cancelButtonText: 'Huỷ',
+          type: 'warning'
+        });
+
+        // Nếu xác nhận thì thực hiện xoá
+        await deleteCameraTruoc(id);
+        this.$message.success('Xoá thành công');
+        this.loadData();
+
+      } catch (error) {
+        // Nếu người dùng huỷ xác nhận, hoặc API xoá lỗi
+        if (error === 'cancel') {
+          this.$message.info('Đã huỷ xoá');
+        } else {
+          this.$message.error('Xoá thất bại');
+        }
+      }
     },
-    getTrangThaiDisplayName(status) {
-      const map = {
-        AVAILABLE: 'Có sẵn',
-        RESERVED: 'Đã đặt trước',
-        SOLD: 'Đã bán',
-        RETURNED: 'Đã trả lại',
-        REFURBISHED: 'Tân trang',
-        BLACKLISTED: 'Bị chặn'
-      };
-      return map[status] || status;
-    }
   },
   mounted() {
     this.loadData();
@@ -145,7 +262,6 @@ export default {
 </script>
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
   font-size: 16px;
   padding: 8px 16px;
