@@ -1,6 +1,8 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.NhanVien;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +28,14 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     @Modifying
     @Query("UPDATE NhanVien n SET n.matKhau = :password WHERE n.email = :email")
     int updatePasswordByEmail(@Param("email") String email, @Param("password") String hashedPassword);
+
+    // Tìm kiếm theo tên, email, số điện thoại, chức vụ
+    @Query("SELECT nv FROM NhanVien nv WHERE " +
+            "LOWER(nv.tenNhanVien) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.chucVu) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(nv.taiKhoan) LIKE LOWER(CONCAT('%', :keyword, '%'))" )
+    Page<NhanVien> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
 }

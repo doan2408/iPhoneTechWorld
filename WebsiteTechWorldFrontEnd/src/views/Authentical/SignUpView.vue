@@ -1,31 +1,32 @@
 <!-- src/components/RegisterForm.vue -->
 <script setup>
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import { useStore } from "vuex";
 
 
 const khachHangRegister = ref({})
 const confirm_mat_khau = ref("");
-const error = ref("");
+const errors = reactive({});
 const isLoading = ref(false);
 const store = useStore();
 const emit = defineEmits(["switchToLogin"]);
 
 const handleRegister = async () => {
-  const { taiKhoan, matKhau, tenKhachHang, email} = khachHangRegister.value;
-  if (
-    !taiKhoan?.trim() ||
-    !matKhau?.trim() ||
-    !email?.trim()
-  ) {
-    error.value = "Vui lòng nhập đầy đủ thông tin";
-    return;
-  }
+  //remove old errors
+  Object.keys(errors).forEach(key => delete errors[key]);
 
+  const { taiKhoan, matKhau, tenKhachHang, email} = khachHangRegister.value;
+
+  // Kiểm tra input
+  if (!taiKhoan?.trim()) errors.taiKhoan = "Vui lòng nhập tài khoản";
+  if (!matKhau?.trim()) errors.matKhau = "Vui lòng nhập mật khẩu";
+  if (!tenKhachHang?.trim()) errors.tenKhachHang = "Vui lòng nhập họ tên";
+  if (!email?.trim()) errors.email = "Vui lòng nhập email";
   if (matKhau !== confirm_mat_khau.value) {
-    error.value = "Mật khẩu nhập lại không khớp";
-    return;
+    errors.confirm_mat_khau = "Mật khẩu nhập lại không khớp";
   }
+  
+  if(Object.keys(errors).length > 0) return;
 
   try {
     isLoading.value = true;
@@ -33,11 +34,20 @@ const handleRegister = async () => {
     await store.dispatch("register", khachHangRegister.value);
     emit("switchToLogin");
   } catch (err) {
-    error.value = err.message || "Đăng ký thất bại";
+    console.log("Error:", err);
+    if (Array.isArray(err)) {
+      err.forEach(({ field, message }) => {
+        errors[field] = message; // Gán lỗi vào errors
+      });
+    } 
+    else {
+      errors.server = err.message || "Register failed"
+    }
   } finally {
     isLoading.value = false;
   }
 };
+
 </script>
 
 <template>
@@ -46,39 +56,48 @@ const handleRegister = async () => {
       <h2>Đăng ký</h2>
       <form @submit.prevent="handleRegister">
         <div>
+          <div v-if="errors.taiKhoan" class="text-danger mb-1">
+            {{ errors.taiKhoan }}
+          </div>
           <label>Tài khoản:</label>
           <input
-            v-model="khachHangRegister.taiKhoan"
+            v-model.trim="khachHangRegister.taiKhoan"
             type="text"
             placeholder="Nhập tài khoản"
-            required
+            
           />
         </div>
         <div>
+          <div v-if="errors.tenKhachHang" class="text-danger mb-1">
+            {{ errors.tenKhachHang }}
+          </div>
           <label>Họ tên:</label>
           <input
             v-model="khachHangRegister.tenKhachHang"
             type="text"
             placeholder="Nhập họ tên"
-            required
           />
         </div>
         <div>
+          <div v-if="errors.email" class="text-danger mb-1">
+            {{ errors.email }}
+          </div>
           <label>Email:</label>
           <input
             v-model="khachHangRegister.email"
             type="email"
             placeholder="Nhập email"
-            required
           />
         </div>
         <div>
+          <div v-if="errors.matKhau" class="text-danger mb-1">
+            {{ errors.matKhau }}
+          </div>
           <label>Mật khẩu:</label>
           <input
             v-model="khachHangRegister.matKhau"
             type="password"
             placeholder="Nhập password"
-            required
           />
         </div>
         <div>
@@ -87,15 +106,16 @@ const handleRegister = async () => {
             v-model="confirm_mat_khau"
             type="password"
             placeholder="Xác nhận mật khẩu"
-            required
           />
+          <div v-if="errors.confirm_mat_khau" class="text-danger mb-1">
+            {{ errors.confirm_mat_khau }}
+          </div>
         </div>
 
         <button type="submit" :disabled="isLoading">
           {{ isLoading ? "Đang xử lý..." : "Đăng ký" }}
         </button>
 
-        <p v-if="error" style="color: red">{{ error }}</p>
 
         <p class="switch-mode">
           Đã có tài khoản?

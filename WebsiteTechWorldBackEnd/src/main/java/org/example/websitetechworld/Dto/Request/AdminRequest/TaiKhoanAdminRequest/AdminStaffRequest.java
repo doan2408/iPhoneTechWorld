@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.CheckValidation.CreateGroups;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 
@@ -24,13 +25,17 @@ public class AdminStaffRequest {
     @NotBlank(message = "Tài khoản không được để trống")
     private String taiKhoan;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 20, message = "Mật khẩu phải từ 6 đến 20 ký tự")
+    @NotBlank(message = "Mật khẩu không được để trống", groups = CreateGroups.class)
     private String matKhau;
 
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            message = "Email không đúng định dạng"
+    )
     private String email;
+
 
     @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "\\d{10}", message = "Số điện thoại phải đúng 10 chữ số")

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.hibernate.annotations.Nationalized;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -31,6 +32,10 @@ public class SanPham {
     @Nationalized
     @Column(name = "thuong_hieu", length = 50)
     private String thuongHieu;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai", length = 50)
+    private TrangThaiSanPham trangThaiSanPham;
 
     // Xóa thuộc tính soLuongTonKho
 
