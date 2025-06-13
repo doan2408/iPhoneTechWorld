@@ -38,4 +38,6 @@ public class Imei {
     @Column(name = "nha_mang", length = 50)
     private String nhaMang;
 
+
+
 }

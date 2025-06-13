@@ -20,5 +20,5 @@ public class MauSac {
     @Nationalized
     @Column(name = "ten_mau", length = 50)
     private String tenMau;
-
+// thêm mã mầu hexColor 
 }
