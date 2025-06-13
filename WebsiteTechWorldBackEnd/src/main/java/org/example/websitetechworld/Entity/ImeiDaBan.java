@@ -20,7 +20,7 @@ public class ImeiDaBan {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_hoa_don_chi_tiet")
     private ChiTietHoaDon idHoaDonChiTiet;
 
