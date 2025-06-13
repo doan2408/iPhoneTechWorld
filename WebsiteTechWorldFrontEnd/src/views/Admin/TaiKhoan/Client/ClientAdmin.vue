@@ -11,7 +11,7 @@ const currentPage = ref(0);
 const totalPages = ref(0);
 
 const searchKeyword = ref("");
-const searchTimeout = ref(null) // status of searching
+const searchTimeout = ref(null); // status of searching
 
 //load client
 // nếu người dùng không truyền page khi gọi hàm
@@ -33,25 +33,24 @@ const loadClient = async (page = 0, keyword = null) => {
 //search client
 const performSearch = () => {
   //clear old timeout if has
-  if(searchTimeout.value) {
+  if (searchTimeout.value) {
     clearTimeout(searchTimeout.value);
   }
 
-  //create new timeout --delay 500ms after user stop typing 
+  //create new timeout --delay 500ms after user stop typing
   searchTimeout.value = setTimeout(() => {
-    currentPage.value  = 0;
+    currentPage.value = 0;
     loadClient(0, searchKeyword.value || null);
   }, 500);
-  
-}
+};
 
 const clearSearch = () => {
-  searchKeyword.value = ""
-}
+  searchKeyword.value = "";
+};
 
-watch(searchKeyword, () => { 
+watch(searchKeyword, () => {
   performSearch();
-})
+});
 
 //previous page
 const previousPage = () => {
@@ -71,6 +70,15 @@ const nextPage = () => {
     currentPage.value = 0;
   }
   loadClient(currentPage.value, searchKeyword.value || null);
+};
+const firstPage = () => {
+  const firstPage = 0;
+  currentPage.value = firstPage;
+};
+
+const latePage = () => {
+  const latePage = totalPages.value - 1;
+  currentPage.value = latePage;
 };
 
 onMounted(() => {
@@ -99,8 +107,8 @@ onMounted(() => {
               class="form-control search-input"
               placeholder="Tìm kiếm theo tên, email, số điện thoại, tên tài khoản..."
             />
-            <button 
-              @click="clearSearch" 
+            <button
+              @click="clearSearch"
               class="btn-clear-inline"
               v-if="searchKeyword"
               title="Xóa tìm kiếm"
@@ -121,17 +129,16 @@ onMounted(() => {
       <p>Đang tải dữ liệu...</p>
     </div>
 
-
     <!-- Hiển thị kết quả tìm kiếm -->
     <div v-if="searchKeyword && !isLoading" class="search-result-info">
       <p>
         <i class="bi bi-info-circle"></i>
-        Kết quả tìm kiếm cho: "<strong>{{ searchKeyword }}</strong>"
-        ({{ clientList.length }} khách hàng)
+        Kết quả tìm kiếm cho: "<strong>{{ searchKeyword }}</strong
+        >" ({{ clientList.length }} khách hàng)
       </p>
     </div>
 
-     <!-- Hiển thị khi không có dữ liệu -->
+    <!-- Hiển thị khi không có dữ liệu -->
     <div v-if="!isLoading && clientList.length === 0" class="no-data">
       <p v-if="searchKeyword">
         <i class="bi bi-search"></i>
@@ -147,6 +154,7 @@ onMounted(() => {
     <table class="table">
       <thead>
         <tr>
+          <th>STT</th>
           <th>Mã khách hàng</th>
           <th>Tên khách hàng</th>
           <th>Tên đăng nhập</th>
@@ -160,7 +168,8 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="client in clientList" :key="client.id">
+        <tr v-for="(client, index) in clientList" :key="client.id">
+          <td>{{ index + 1 + (currentPage * 10) }}</td>
           <td>{{ client.maKhachHang }}</td>
           <td>{{ client.tenKhachHang }}</td>
           <td>{{ client.taiKhoan }}</td>
@@ -592,8 +601,12 @@ hr {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .search-result-info {
