@@ -11,6 +11,8 @@ const khachHangList = ref([]);
 
 const currentPage = ref(0);
 const totalPages = ref(0);
+const pageSize = ref(5);
+
 const search = ref("");
 const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
@@ -21,7 +23,7 @@ const loadPhieuGiamGia = async (page) => {
         isLoading.value = true;
         const response = await getAll({
             page: page,
-            size: 3,
+            size: pageSize.value,
             search: search.value || null,
             trangThai: trangThaiFilter.value || null,
             ngayBatDau: ngayBatDauFilter.value || null,
@@ -247,8 +249,9 @@ onMounted(() => {
             </div>
         </div>
         <table v-else class="table">
-            <thead class="table">
+            <thead>
                 <tr>
+                    <th>STT</th>
                     <th>Mã</th>
                     <th>Tên</th>
                     <th>Giá trị giảm</th>
@@ -261,31 +264,45 @@ onMounted(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="phieuGiamGia in phieuGiamGias" :key="phieuGiamGia.id">
-                    <td>{{ phieuGiamGia.maGiamGia }}</td>
-                    <td>{{ phieuGiamGia.tenKhuyenMai }}</td>
-                    <td>{{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm' ? phieuGiamGia.giaTriKhuyenMai + '%' :
-                        formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}</td>
-                    <td>{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
-                    <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
-                    <td>{{ phieuGiamGia.soLuong }}</td>
-                    <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
-                    <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
-                    <td>
-                        <button class="btn btn-outline-primary btn-sm" title="Chỉnh sửa"
-                            @click="viewUpdate(phieuGiamGia.id)"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn btn-outline-danger btn-sm" style="margin-left: 5%;"
-                            @click="handleDeletePhieuGiamGia(phieuGiamGia.id)"><i class="bi bi-trash"></i></button>
-                    </td>
+                <tr v-if="phieuGiamGias.length === 0">
+                    <td colspan="10" class="text-center">Không có phiếu giảm giá nào.</td>
+                </tr>
+                <tr v-else v-for="(phieuGiamGia, index) in phieuGiamGias" :key="index">
+                    <template v-if="phieuGiamGia">
+                        <td>{{ index + 1 + currentPage * pageSize }}</td>
+                        <td>{{ phieuGiamGia.maGiamGia }}</td>
+                        <td>{{ phieuGiamGia.tenKhuyenMai }}</td>
+                        <td>
+                            {{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm'
+                                ? phieuGiamGia.giaTriKhuyenMai + '%'
+                                : formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}
+                        </td>
+                        <td>{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
+                        <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
+                        <td>{{ phieuGiamGia.soLuong }}</td>
+                        <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
+                        <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" title="Chỉnh sửa"
+                                @click="viewUpdate(phieuGiamGia.id)">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" style="margin-left: 5%;"
+                                @click="handleDeletePhieuGiamGia(phieuGiamGia.id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </template>
                 </tr>
             </tbody>
         </table>
 
+
         <!-- Phân trang -->
-        <div class="d-flex justify-content-between align-items-center" style="width: 25%;">
+        <div class="pagination">
             <button @click="previousPage" :disabled="currentPage === 0" class="btn btn-outline-primary">Trang
                 trước</button>
-            <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+            <span style="margin: auto 10px;">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
             <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="btn btn-outline-primary">Trang
                 sau</button>
         </div>
@@ -436,6 +453,33 @@ onMounted(() => {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.25rem;
     margin: 1.5rem auto;
+}
+
+.table {
+    min-height: 350px;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    height: 20%;
+    min-height: 50px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 1.5rem auto;
+    min-height: 40px;
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dialog {
