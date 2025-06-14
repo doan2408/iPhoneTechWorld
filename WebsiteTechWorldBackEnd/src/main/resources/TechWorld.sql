@@ -86,19 +86,18 @@ CREATE TABLE hoa_don (
 
                          id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
                          id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia),
-
                          ten_nguoi_mua NVARCHAR(50),
                          sdt_nguoi_mua NVARCHAR(10),
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan NVARCHAR(10),
                          dia_chi_giao_hang NVARCHAR(100),
                          ngay_dat_hang DATE,
-
                          phi_ship DECIMAL(10,2),
                          tong_tien DECIMAL(10,2),
                          so_tien_giam DECIMAL(10,2),
                          thanh_tien DECIMAL(10,2),
                          ngay_tao_hoa_don DATE,
+						 ngay_tao_don_hang DATE, -- new
                          loai_hoa_don NVARCHAR(50),
                          ngay_thanh_toan DATE,
                          trang_thai_thanh_toan NVARCHAR(50),
@@ -313,6 +312,7 @@ CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
                       so_imei VARCHAR(70),
+					  so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
                       nha_mang NVARCHAR(50)
 );
@@ -403,11 +403,11 @@ INSERT INTO hoa_don  (
     ten_nguoi_mua, sdt_nguoi_mua,
     ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang,
     phi_ship, tong_tien, so_tien_giam, thanh_tien,
-    ngay_tao_hoa_don, loai_hoa_don , ngay_thanh_toan, trang_thai_thanh_toan,ma_van_don,sdt_nguoi_nhan
+    ngay_tao_hoa_don, ngay_tao_don_hang, loai_hoa_don , ngay_thanh_toan, trang_thai_thanh_toan,ma_van_don,sdt_nguoi_nhan
 ) VALUES
-      (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING','VD001','0911111111'),
-      (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID','VD001','0922222222'),
-      (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED','VD001','0933333333');
+      (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), '2025-06-15' ,N'ONLINE', NULL, N'PENDING','VD001','0911111111'),
+      (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), '2025-06-13' ,N'POS', GETDATE(), N'PAID','VD001','0922222222'),
+      (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), '2025-06-14' ,N'ONLINE', GETDATE(), N'COMPLETED','VD001','0933333333');
 
 
 INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don , hanh_dong, thoi_gian_thay_doi, mo_ta)
@@ -579,13 +579,13 @@ VALUES
     (4, '2025-04-01', '2025-04-05', N'Lỗi phần mềm, treo máy', N'REPAIRED'),
     (5, '2025-05-13', NULL, N'Nứt màn hình do rơi vỡ', N'WARRANTY_VOID');
 
-INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei, nha_mang)
+INSERT INTO imei (id_san_pham_chi_tiet, so_imei, so_imei_2, trang_thai_imei, nha_mang)
 VALUES
-    (1, '123456789012345', N'AVAILABLE', N'Viettel'),
-    (2, '123456789012346', N'AVAILABLE', N'Mobifone'),
-    (3, '123456789012347', N'AVAILABLE', N'Vinaphone'),
-    (4, '123456789012348', N'AVAILABLE', N'Viettel'),
-    (5, '123456789012349', N'AVAILABLE', N'Mobifone');
+    (1, '123456789012345', '543210987654321', 'AVAILABLE', 'Viettel'),
+    (2, '123456789012346', '543210987654322', 'AVAILABLE', 'Mobifone'),
+    (3, '123456789012347', '543210987654323', 'AVAILABLE', 'Vinaphone'),
+    (4, '123456789012348', '543210987654324', 'AVAILABLE', 'Viettel'),
+    (5, '123456789012349', '543210987654325', 'AVAILABLE', 'Mobifone');
 
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
 VALUES
@@ -706,7 +706,6 @@ SELECT * FROM chi_tiet_hoa_don ;
 
 -- 28. imei_da_ban
 SELECT * FROM imei_da_ban;
-
 
 -- 31. phuong_thuc_thanh_toan
 SELECT * FROM phuong_thuc_thanh_toan;
