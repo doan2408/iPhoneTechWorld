@@ -186,7 +186,6 @@ const resetErrors = () => {
 
 
 const submitForm = async () => {
-    resetErrors()
     if (!formRef.value) return;
 
     try {
@@ -283,6 +282,7 @@ const openDetail = (row) => {
     isEditMode.value = true;
     Object.assign(formData, row);
     dialogVisible.value = true;
+    resetErrors()
 };
 
 const indexMethod = (index) => {
