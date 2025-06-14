@@ -54,14 +54,14 @@
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Tên nhà cung cấp" prop="tenNhaCungCap">
+                        <el-form-item label="Tên nhà cung cấp" prop="tenNhaCungCap" :error="errors.tenNhaCungCap">
                             <el-input v-model="formData.tenNhaCungCap"
                                 placeholder="Nhập tên nhà cung cấp (ví dụ: Công ty ABC)" autocomplete="on" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Địa chỉ" prop="diaChi">
+                        <el-form-item label="Địa chỉ" prop="diaChi" :error="errors.diaChi">
                             <el-input v-model="formData.diaChi"
                                 placeholder="Nhập địa chỉ (ví dụ: 123 Lê Lợi, Q.1, TP.HCM)" />
                         </el-form-item>
@@ -70,13 +70,13 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Số điện thoại" prop="sdt">
+                        <el-form-item label="Số điện thoại" prop="sdt" :error="errors.sdt">
                             <el-input v-model="formData.sdt" placeholder="Nhập số điện thoại (ví dụ: 0901234567)" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Email" prop="email">
+                        <el-form-item label="Email" prop="email" :error="errors.email">
                             <el-input v-model="formData.email" placeholder="Nhập email (ví dụ: example@gmail.com)" />
                         </el-form-item>
                     </el-col>
@@ -108,36 +108,43 @@ const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
 
-const rules = {
-    tenNhaCungCap: [
-        { required: true, message: 'Vui lòng nhập tên nhà cung cấp', trigger: 'blur' },
-        { min: 2, max: 100, message: 'Tên phải từ 2 đến 100 ký tự', trigger: 'blur' }
-    ],
-    diaChi: [
-        { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' },
-        { max: 200, message: 'Địa chỉ tối đa 200 ký tự', trigger: 'blur' }
-    ],
-    sdt: [
-        { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
-        {
-            pattern: /^(0|\+84)[0-9]{9,10}$/,
-            message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)',
-            trigger: 'blur'
-        }
-    ],
-    email: [
-        { required: true, message: 'Vui lòng nhập email', trigger: 'blur' },
-        {
-            type: 'email',
-            message: 'Email không đúng định dạng',
-            trigger: ['blur', 'change']
-        }
-    ]
-};
+// const rules = {
+//     tenNhaCungCap: [
+//         { required: true, message: 'Vui lòng nhập tên nhà cung cấp', trigger: 'blur' },
+//         { min: 2, max: 100, message: 'Tên phải từ 2 đến 100 ký tự', trigger: 'blur' }
+//     ],
+//     diaChi: [
+//         { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' },
+//         { max: 200, message: 'Địa chỉ tối đa 200 ký tự', trigger: 'blur' }
+//     ],
+//     sdt: [
+//         { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
+//         {
+//             pattern: /^(0|\+84)[0-9]{9,10}$/,
+//             message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)',
+//             trigger: 'blur'
+//         }
+//     ],
+//     email: [
+//         { required: true, message: 'Vui lòng nhập email', trigger: 'blur' },
+//         {
+//             type: 'email',
+//             message: 'Email không đúng định dạng',
+//             trigger: ['blur', 'change']
+//         }
+//     ]
+// };
 
 
 const formData = reactive({
     id: null,
+    tenNhaCungCap: '',
+    diaChi: '',
+    sdt: '',
+    email: '',
+})
+
+const errors = reactive({
     tenNhaCungCap: '',
     diaChi: '',
     sdt: '',
@@ -170,6 +177,13 @@ const resetForm = () => {
     formData.email = '';
 };
 
+const resetErrors = () => {
+    errors.tenNhaCungCap = '';
+    errors.diaChi = '';
+    errors.sdt = '';
+    errors.email = '';
+};
+
 const handleSearch = () => {
     currentPage.value = 1;
 };
@@ -180,6 +194,7 @@ const handleRefresh = () => {
 };
 
 const submitForm = async () => {
+    resetErrors()
     if (!formRef.value) return;
 
     try {
@@ -196,8 +211,22 @@ const submitForm = async () => {
         dialogVisible.value = false;
         loadData();
     } catch (error) {
-        console.error('Lỗi xử lý form', error);
-        ElMessage.error('Vui lòng kiểm tra lại thông tin');
+        errors.tenNhaCungCap = error.message.tenNhaCungCap || ''
+        errors.diaChi = error.message.diaChi || ''
+        errors.sdt = error.message.sdt || ''
+        errors.email = error.message.email || ''
+
+        const errorMessages = [];
+        if (errors.tenNhaCungCap) errorMessages.push(errors.tenNhaCungCap);
+        if (errors.diaChi) errorMessages.push(errors.diaChi);
+        if (errors.sdt) errorMessages.push(errors.sdt);
+        if (errors.email) errorMessages.push(errors.email);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
     }
 }
 

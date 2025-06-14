@@ -54,18 +54,18 @@
 
         <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa ram' : 'Thêm mới ram'" width="900px"
             :close-on-click-modal="false" :destroy-on-close="true">
-            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+            <el-form :model="formData" ref="formRef" label-width="140px" label-position="left"
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Dung lượng" prop="dungLuong">
+                        <el-form-item label="Dung lượng" prop="dungLuong" :error="errors.dungLuong">
                             <el-input v-model="formData.dungLuong" placeholder="Nhập dung lượng (ví dụ: 128GB)"
                                 autocomplete="on" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Loại" prop="loai">
+                        <el-form-item label="Loại" prop="loai" :error="errors.loai">
                             <el-input v-model="formData.loai" placeholder="Nhập loại bộ nhớ (ví dụ: NVMe)" />
                         </el-form-item>
                     </el-col>
@@ -73,13 +73,13 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat">
+                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat" :error="errors.nhaSanXuat">
                             <el-input v-model="formData.nhaSanXuat"
                                 placeholder="Nhập tên nhà sản xuất (ví dụ: Apple)" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="Năm ra mắt" prop="namRaMat">
+                        <el-form-item label="Năm ra mắt" prop="namRaMat" :error="errors.namRaMat">
                             <el-date-picker v-model="formData.namRaMat" type="date" value-format="YYYY-MM-DD"
                                 placeholder="Chọn ngày ra mắt" style="width: 100%;" />
                         </el-form-item>
@@ -88,7 +88,7 @@
 
                 <el-row :gutter="20">
                     <el-col>
-                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi">
+                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi" :error="errors.tocDoDocGhi">
                             <el-input v-model="formData.tocDoDocGhi" placeholder="Ví dụ: 12MP" />
                         </el-form-item>
                     </el-col>
@@ -121,12 +121,12 @@ const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
 
-const rules = {
-    dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng', trigger: 'blur' }],
-    loai: [{ required: true, message: 'Vui lòng nhập loại', trigger: 'blur' }],
-    nhaSanXuat: [{ required: true, message: 'Vui lòng nhập nhà sản xuất', trigger: 'blur' }],
-    namRaMat: [{ required: true, message: 'Vui lòng chọn năm ra mắt', trigger: 'change' }],
-};
+// const rules = {
+//     dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng', trigger: 'blur' }],
+//     loai: [{ required: true, message: 'Vui lòng nhập loại', trigger: 'blur' }],
+//     nhaSanXuat: [{ required: true, message: 'Vui lòng nhập nhà sản xuất', trigger: 'blur' }],
+//     namRaMat: [{ required: true, message: 'Vui lòng chọn năm ra mắt', trigger: 'change' }],
+// };
 
 const formData = reactive({
     id: null,
@@ -137,9 +137,17 @@ const formData = reactive({
     namRaMat: null,
 })
 
+const errors = reactive({
+    dungLuong: '',
+    loai: '',
+    tocDoDocGhi: '',
+    nhaSanXuat: '',
+    namRaMat: null,
+})
+
 const loadData = async () => {
     try {
-        const response = await getAllRamPage(currentPage.value - 1, pageSize, searchQuery.value);
+        const response = await getAllRamPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
         tableRam.value = response.content;
         totalPages.value = response.totalPages;
         totalItems.value = response.totalElements;
@@ -162,10 +170,23 @@ const resetForm = () => {
     formData.tocDoDocGhi = '';
     formData.nhaSanXuat = '';
     formData.namRaMat = '';
+    errors.dungLuong = '';
+    errors.loai = '';
+    errors.tocDoDocGhi = '';
+    errors.nhaSanXuat = '';
+    errors.namRaMat = '';
 }
 
+const resetErrors = () => {
+    errors.dungLuong = '';
+    errors.loai = '';
+    errors.tocDoDocGhi = '';
+    errors.nhaSanXuat = '';
+    errors.namRaMat = '';
+}
 
 const submitForm = async () => {
+    resetErrors()
     if (!formRef.value) return;
 
     try {
@@ -182,8 +203,24 @@ const submitForm = async () => {
         dialogVisible.value = false;
         loadData();
     } catch (error) {
-        console.log('Lỗi xử lý form', error);
-        ElMessage.error('Vui lòng kiểm tra lại thông tin');
+        errors.dungLuong = error.message.dungLuong || ''
+        errors.loai = error.message.loai || ''
+        errors.tocDoDocGhi = error.message.tocDoDocGhi || ''
+        errors.nhaSanXuat = error.message.nhaSanXuat || ''
+        errors.namRaMat = error.message.namRaMat || ''
+
+        const errorMessages = [];
+        if (errors.dungLuong) errorMessages.push(errors.dungLuong);
+        if (errors.loai) errorMessages.push(errors.loai);
+        if (errors.tocDoDocGhi) errorMessages.push(errors.tocDoDocGhi);
+        if (errors.nhaSanXuat) errorMessages.push(errors.nhaSanXuat);
+        if (errors.namRaMat) errorMessages.push(errors.namRaMat);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
     }
 }
 

@@ -98,7 +98,7 @@ const formData = reactive({
 
 const loadData = async () => {
     try {
-        const response = await getAllLoaiPage(currentPage.value - 1, pageSize);
+        const response = await getAllLoaiPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
         // currentPage trong UI thường bắt đầu từ 1, backend bắt đầu từ 0 nên -1
         tableLoai.value = response.content;
         totalPages.value = response.totalPages;
