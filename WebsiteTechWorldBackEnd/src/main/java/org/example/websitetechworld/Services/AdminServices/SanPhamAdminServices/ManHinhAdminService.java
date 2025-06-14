@@ -9,6 +9,7 @@ import org.example.websitetechworld.Repository.ManHinhRepository;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,9 +37,22 @@ public class ManHinhAdminService {
         return convertList(manHinhs);
     }
 
+    //hiển thị màn hình phân trang
     public Page<ManHinhAdminResponse> getAllManHinh(Pageable pageable) {
         Page<ManHinh> manHinhs = manHinhRepository.findAll(pageable);
         return manHinhs.map(this::convert);
+    }
+
+    //search, hiển thị, phân trang man hinh
+    public Page<ManHinhAdminResponse> getAllManHinh(Pageable pageable, String keyword) {
+        Page<ManHinh> pageResult;
+        if (keyword != null || keyword.trim().isEmpty()) {
+            pageResult = manHinhRepository.findByKeyword(keyword, pageable);
+        }
+        else {
+            pageResult = manHinhRepository.findAll(pageable);
+        }
+        return pageResult.map(this::convert);
     }
 
     @Transactional
