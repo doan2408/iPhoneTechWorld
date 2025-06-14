@@ -12,4 +12,6 @@ public class MauSacAdminResponse {
     private Integer id;
 
     private String tenMau;
+
+    private String maMau;
 }
