@@ -1,12 +1,16 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamBanHangAdminResponse;
 import org.example.websitetechworld.Entity.SanPham;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
@@ -33,4 +37,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                 hinhAnh.url
             """)
     Page<SanPhamHienThiAdminResponse> getAllHienThi(Pageable pageable);
+
+
+
+
+
+
 }

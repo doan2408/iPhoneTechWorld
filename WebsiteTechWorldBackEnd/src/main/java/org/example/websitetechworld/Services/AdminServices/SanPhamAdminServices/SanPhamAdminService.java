@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamBanHangAdminResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +40,7 @@ public class SanPhamAdminService {
     private final CameraSauRepository cameraSauRepository;
     private final XuatXuRepository xuatXuRepository;
     private final LoaiRepository loaiRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
     private final ModelMapper modelMapper;
 
@@ -185,6 +186,15 @@ public class SanPhamAdminService {
 
         return sanPhamAdminResponse;
     }
+
+
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContaining(tenSanPham, pageable);
+
+        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+    }
+
 
 }
 

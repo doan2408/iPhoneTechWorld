@@ -198,7 +198,7 @@
                                 </div>
                             </td>
                             <td class="table-td">
-                                <div class="date">{{ hoaDon.sdt }}</div>
+                                <div class="date">{{ hoaDon.sdtNguoiMua }}</div>
                             </td>
                             <td class="table-td">
                                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
@@ -397,13 +397,19 @@
                                                     }}</span>
                                             </div>
                                             <div class="info-row">
+                                                <span class="info-label">Mã tài khoản mua</span>
+                                                <span class="info-value">{{ selectedInvoice.maKhachHang || 'N/A'
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-row">
                                                 <span class="info-label">Tên người mua</span>
                                                 <span class="info-value">{{ selectedInvoice.tenNguoiMua || 'N/A'
                                                     }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">SĐT người mua:</span>
-                                                <span class="info-value">{{ selectedInvoice.sdtNguoiMua || 'N/A' }}</span>
+                                                <span class="info-value">{{ selectedInvoice.sdtNguoiMua || 'N/A'
+                                                    }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày tạo:</span>
@@ -434,18 +440,20 @@
                                                 <span class="info-value">{{ selectedInvoice.maPhieuGiamGia || 'Không áp dụng mã giảm gía'
                                                     }}</span>
                                             </div>
+
                                         </div>
 
                                         <!-- Right Column -->
                                         <div class="info-column">
-                                            <div class="info-row">
-                                                <span class="info-label">Mã tài khoản mua</span>
-                                                <span class="info-value">{{ selectedInvoice.maKhachHang || 'N/A'
-                                                    }}</span>
-                                            </div>
+
                                             <div class="info-row">
                                                 <span class="info-label">Tên người nhận:</span>
                                                 <span class="info-value">{{ selectedInvoice.tenNguoiNhan || 'N/A'
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label"> SDT Người nhận:</span>
+                                                <span class="info-value">{{ selectedInvoice.sdtNguoiNhan || 'N/A'
                                                     }}</span>
                                             </div>
                                             <div v-if="selectedInvoice.maKhachHang !=null" class="info-row">
@@ -453,6 +461,18 @@
                                                         tại thời điểm giao
                                                         dịch <br>
                                                         Tên tài khoản mua là tên hiện tại của tài khoản</mark></span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label"> Địa chỉ giao hàng:</span>
+                                                <span class="info-value">{{ selectedInvoice.diaChiGiaoHang || 'N/A'
+                                                    }}</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label"> Trạng thái đơn hàng:</span>
+                                                <span class="badge"
+                                                    :class="getStatusBadgeClass(selectedInvoice.trangThaiDonHang)">{{
+                                                    selectedInvoice.trangThaiDonHang || 'N/A'
+                                                    }}</span>
                                             </div>
                                             <!-- <div class="info-row">
                                                 <span class="info-label">Địa chỉ:</span>
@@ -800,6 +820,7 @@ const formatCurrency = (amount) => {
     }
 };
 
+//tra ve class css
 const getStatusBadgeClass = (status) => {
     if (!status) return 'status-default';
     const statusMap = {
@@ -808,6 +829,12 @@ const getStatusBadgeClass = (status) => {
         'đã hủy': 'status-cancelled',
         'đã hoàn tiền': 'status-refunded',
         'đã thanh toán': 'status-paid',
+        'chờ xử lý': 'status-pending',
+        'đang giao': 'status-shipping',
+        'đã giao': 'status-delivered',
+        'giao thất bại': 'status-failed',
+        'đã hoàn tiền': 'status-returned',
+        'đã đóng gói': 'status-packed',
     };
     return statusMap[status.toLowerCase()] || 'status-default';
 };
@@ -815,7 +842,7 @@ const getStatusBadgeClass = (status) => {
 const devliveryProcessing = async (hoaDon) => {
     router.push({
         name: 'GiaoHangProcessing',
-        params: { id: hoaDon.idGiaoHang },        
+        params: { id: hoaDon.idHoaDon },        
     });
 
 }

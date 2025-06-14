@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamBanHangAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +47,10 @@ public class SanPhamAdminController {
         return ResponseEntity.ok(sanPhamAdminResponse);
     }
 
+    // ham lay ten san pham
+    @GetMapping("/ten-san-pham")
+    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham( @RequestParam(value = "tenSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
+        return ResponseEntity.ok(adminService.getProductNames(tenSanPham,pageNo, pageSize));
+    }
 
 }

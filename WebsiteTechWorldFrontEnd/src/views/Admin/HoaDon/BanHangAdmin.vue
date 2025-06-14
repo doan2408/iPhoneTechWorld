@@ -46,41 +46,40 @@
             </div>
         </div>
 
-        <!-- Main content -->
+        <!-- Main content : nội dung -->
         <div class="pos-main">
-            <!-- Left panel - Categories & Products -->
+            <!--  phần bên trái -->
             <div class="left-panel">
-                <!-- Categories -->
+                <!-- Categories : danh mục sản phẩm -->
                 <div class="categories-section">
                     <h3>Danh mục sản phẩm</h3>
                     <div class="categories-list">
-                        <button v-for="category in categories" :key="category.id"
-                            @click="selectedCategory = category.id"
-                            :class="['category-btn', { active: selectedCategory === category.id }]">
+                        <button v-for="category in paginatedCategories" :key="category.tenSanPham"
+                            @click="selectedCategory = category.tenSanPham,
+                            productsLoad(category)"
+                            :class="['category-btn', { active: selectedCategory === category.tenSanPham }]">
                             <component :is="category.icon" class="category-icon" />
-                            {{ category.name }}
+                            {{ category.tenSanPham }}
                         </button>
+                        <!-- phan trang category -->
+                        <div class="pagination-controls">
+                            <button @click="pageNo--" :disabled="pageNo === 0">Trang trước</button>
+                            <span>Trang {{ pageNo + 1 }} / {{ totalPagesCategory }}</span>
+                            <button @click="pageNo++" :disabled="pageNo + 1 >= totalPagesCategory">Trang sau</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Quick actions -->
+                <!-- Quick actions : hành động  -->
                 <div class="quick-actions">
                     <button class="quick-btn">
                         <History class="btn-icon" />
                         Lịch sử bán hàng
                     </button>
-                    <button class="quick-btn">
-                        <FileText class="btn-icon" />
-                        Hóa đơn chờ
-                    </button>
-                    <button class="quick-btn">
-                        <Users class="btn-icon" />
-                        Khách hàng
-                    </button>
                 </div>
             </div>
 
-            <!-- Right panel - Products & Cart -->
+            <!--  : button chọn khách hàng , sản phẩm , giỏ hàng-->
             <div class="right-panel">
                 <!-- Customer search -->
                 <div class="customer-search">
@@ -141,7 +140,7 @@
                         </div>
                     </div>
 
-                    <!-- Pagination -->
+                    <!-- Phan trang san pham -->
                     <div class="pagination">
                         <button @click="previousPage" :disabled="currentPage === 1" class="page-btn">
                             <ChevronLeft class="page-icon" />
@@ -249,154 +248,58 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, markRaw } from 'vue'
 import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
     ChevronUp, ChevronDown, Minus, Trash2, History, FileText,
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
 } from 'lucide-vue-next'
-
+import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdminService';
+import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
-
-// Categories
-const categories = ref([
-    { id: 'all', name: 'Tất cả', icon: List },
-    { id: 'phone', name: 'Điện thoại', icon: Smartphone },
-    { id: 'laptop', name: 'Laptop', icon: Laptop },
-    { id: 'watch', name: 'Đồng hồ', icon: Watch },
-    { id: 'headphone', name: 'Tai nghe', icon: Headphones },
-    { id: 'camera', name: 'Camera', icon: Camera },
-    { id: 'gaming', name: 'Gaming', icon: Gamepad2 }
-])
-
 const selectedCategory = ref('all')
+const products = ref([])
+const tenSanPham = ref('')
+const pageNo = ref(0)
+const pageSize = ref(5)
+const categoryProduct = ref([])
+
+// category san pham fix cung
+const danhMucSanPham = () => {
+    const danhMuc = Array.from({ length: 11 }, (_, i) => {
+        const version = i + 6 
+        return {
+            tenSanPham: `IPhone ${version}`,
+            icon: markRaw(Smartphone) 
+        }
+    })
+
+    categoryProduct.value = danhMuc
+}
+// phan trang category
+const totalPagesCategory = computed(() =>
+    Math.ceil(categoryProduct.value.length / pageSize.value)
+)
+const paginatedCategories = computed(() => {
+    const start = pageNo.value * pageSize.value
+    const end = start + pageSize.value
+    return categoryProduct.value.slice(start, end)
+})
+
+
+
 
 // Products
-const products = ref([
-    {
-        id: 1,
-        name: 'Apple Watch Series 9 GPS + Cellular',
-        price: 12990000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 2,
-        name: 'Apple Watch Series 9 GPS + Cellular',
-        price: 12990000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 3,
-        name: 'Đồng hồ thông minh Huawei Kids',
-        price: 2990000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 4,
-        name: 'Đồng hồ thông minh Huawei Kids',
-        price: 2990000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 5,
-        name: 'Vòng đeo tay thông minh Xiaomi Mi',
-        price: 1290000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 6,
-        name: 'Vòng đeo tay thông minh Xiaomi Mi',
-        price: 1290000,
-        stock: 0,
-        category: 'watch',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 7,
-        name: 'iPhone 14 256GB',
-        price: 23990000,
-        stock: 0,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 8,
-        name: 'iPhone 14 256GB',
-        price: 23990000,
-        stock: 0,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 9,
-        name: 'Samsung Galaxy S23 Ultra 256GB',
-        price: 23990000,
-        stock: 15,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 10,
-        name: 'Samsung Galaxy S23 Ultra 256GB',
-        price: 23990000,
-        stock: 8,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 11,
-        name: 'Xiaomi Redmi Note 13 Pro 128GB',
-        price: 7290000,
-        stock: 25,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 12,
-        name: 'Xiaomi Redmi Note 13 Pro 128GB',
-        price: 7290000,
-        stock: 12,
-        category: 'phone',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 13,
-        name: 'Macbook Air 13 inch M2 256GB',
-        price: 23690000,
-        stock: 5,
-        category: 'laptop',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 14,
-        name: 'Dell Inspiron 15 3520 i5 1235U',
-        price: 15490000,
-        stock: 18,
-        category: 'laptop',
-        image: '/placeholder.svg?height=80&width=80'
-    },
-    {
-        id: 15,
-        name: 'Dell Inspiron 15 3520 i5 1235U',
-        price: 15490000,
-        stock: 22,
-        category: 'laptop',
-        image: '/placeholder.svg?height=80&width=80'
-    }
-])
+const productsLoad = async (category) =>{
+    debugger
+    tenSanPham.value = category.tenSanPham
+    console.log(tenSanPham.value)
+    const response = await findSanPhamBanHang(tenSanPham.value,pageNo.value,pageSize.value)
+    products.value = response.data.content
+}
 
 // Pagination
 const currentPage = ref(1)
@@ -612,841 +515,11 @@ const formatCurrency = (amount) => {
 // Initialize
 onMounted(() => {
     calculateTotal()
+    danhMucSanPham()
 })
 </script>
 
-<style scoped>
-.pos-system {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #f5f7fa;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+<style scoped src="@/style/HoaDon/BanHang.css">
 
-/* Header */
-.pos-header {
-    background: #4f46e5;
-    color: white;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.left-section {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-}
-
-.search-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-icon {
-    position: absolute;
-    left: 12px;
-    width: 18px;
-    height: 18px;
-    color: #9ca3af;
-    z-index: 1;
-}
-
-.search-input {
-    padding: 10px 12px 10px 40px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    width: 280px;
-    font-size: 14px;
-    background: white;
-}
-
-.invoice-tabs {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.invoice-tab {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    border: 1px solid transparent;
-}
-
-.invoice-tab:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.invoice-tab.active {
-    background: white;
-    color: #4f46e5;
-    border-color: #e5e7eb;
-}
-
-.close-tab-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-tab-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.close-icon {
-    width: 14px;
-    height: 14px;
-}
-
-.add-tab-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.add-tab-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.add-icon {
-    width: 16px;
-    height: 16px;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.action-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-icon {
-    width: 16px;
-    height: 16px;
-}
-
-.phone-number {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.menu-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.menu-icon {
-    width: 16px;
-    height: 16px;
-}
-
-/* Main Content */
-.pos-main {
-    flex: 1;
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    overflow: hidden;
-}
-
-/* Left Panel */
-.left-panel {
-    width: 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.categories-section {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.categories-section h3 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    color: #1f2937;
-}
-
-.categories-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.category-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    text-align: left;
-}
-
-.category-btn:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-}
-
-.category-btn.active {
-    background: #4f46e5;
-    color: white;
-    border-color: #4f46e5;
-}
-
-.category-icon {
-    width: 18px;
-    height: 18px;
-}
-
-.quick-actions {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.quick-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 8px;
-}
-
-.quick-btn:last-child {
-    margin-bottom: 0;
-}
-
-.quick-btn:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-}
-
-/* Right Panel */
-.right-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.customer-search {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.customer-search .search-box {
-    flex: 1;
-}
-
-.customer-search .search-input {
-    width: 100%;
-}
-
-.customer-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.customer-btn {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.customer-btn:hover {
-    background: #e5e7eb;
-}
-
-.selected-customer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-}
-
-.customer-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.customer-icon {
-    width: 20px;
-    height: 20px;
-    color: #0369a1;
-}
-
-.customer-phone {
-    display: block;
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 2px;
-}
-
-.clear-customer-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.clear-icon {
-    width: 14px;
-    height: 14px;
-}
-
-.products-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* Thêm dòng này */
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    /* Giảm minmax từ 200px xuống 180px */
-    gap: 12px;
-    /* Giảm gap từ 16px xuống 12px */
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 16px;
-    padding: 4px;
-    /* Thêm padding nhỏ */
-}
-
-.product-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 12px;
-    /* Giảm padding từ 16px xuống 12px */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
-    position: relative;
-    min-height: 160px;
-    /* Thêm chiều cao tối thiểu */
-    display: flex;
-    flex-direction: column;
-}
-
-.product-info {
-    flex: 1;
-    /* Thêm để chiếm hết không gian còn lại */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.product-info h4 {
-    margin: 0 0 8px 0;
-    font-size: 13px;
-    /* Giảm font-size từ 14px xuống 13px */
-    color: #1f2937;
-    line-height: 1.3;
-    /* Giảm line-height */
-    height: 34px;
-    /* Giảm height từ 40px xuống 34px */
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.product-price {
-    font-size: 14px;
-    /* Giảm từ 16px xuống 14px */
-    font-weight: 600;
-    color: #4f46e5;
-    margin-bottom: 4px;
-}
-
-.product-stock {
-    font-size: 11px;
-    /* Giảm từ 12px xuống 11px */
-    color: #6b7280;
-}
-
-/* Responsive cho products grid */
-@media (max-width: 1200px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
-}
-
-@media (max-width: 1024px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 8px;
-    }
-
-    .product-card {
-        padding: 8px;
-        min-height: 140px;
-    }
-
-    .product-info h4 {
-        font-size: 12px;
-        height: 30px;
-    }
-
-    .product-price {
-        font-size: 13px;
-    }
-}
-
-/* Footer */
-.pos-footer {
-    background: white;
-    border-top: 1px solid #e5e7eb;
-    padding: 20px;
-    display: flex;
-    gap: 20px;
-    align-items: flex-end;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.cart-summary {
-    flex: 1;
-}
-
-.order-notes {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.notes-icon {
-    width: 18px;
-    height: 18px;
-    color: #6b7280;
-}
-
-.notes-input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.cart-items-summary {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 16px;
-}
-
-.cart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.toggle-cart-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-.toggle-icon {
-    width: 16px;
-    height: 16px;
-}
-
-.cart-items-list {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.cart-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.cart-item:last-child {
-    border-bottom: none;
-}
-
-.cart-item-image {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.cart-item-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.item-name {
-    font-size: 14px;
-    color: #1f2937;
-    font-weight: 500;
-}
-
-.item-price {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-.cart-item-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.qty-btn {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #d1d5db;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.qty-icon {
-    width: 12px;
-    height: 12px;
-}
-
-.quantity {
-    min-width: 24px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.item-total {
-    min-width: 80px;
-    text-align: right;
-    font-weight: 600;
-    color: #4f46e5;
-    font-size: 14px;
-}
-
-.remove-item-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remove-icon {
-    width: 12px;
-    height: 12px;
-}
-
-.total-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.total-amount {
-    color: #4f46e5;
-}
-
-.payment-btn {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 160px;
-}
-
-.payment-btn:hover:not(:disabled) {
-    background: #4338ca;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.payment-btn:disabled {
-    background: #d1d5db;
-    color: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Modal */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #1f2937;
-}
-
-.close-modal-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.form-input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.form-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    resize: vertical;
-    min-height: 80px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 20px 24px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.cancel-btn {
-    padding: 10px 20px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background: white;
-    cursor: pointer;
-}
-
-.save-btn {
-    padding: 10px 20px;
-    background: #4f46e5;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .pos-main {
-        flex-direction: column;
-    }
-
-    .left-panel {
-        width: 100%;
-        flex-direction: row;
-        gap: 20px;
-    }
-
-    .categories-section,
-    .quick-actions {
-        flex: 1;
-    }
-
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .pos-header {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .left-section {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .search-input {
-        width: 200px;
-    }
-
-    .invoice-tabs {
-        overflow-x: auto;
-    }
-
-    .left-panel {
-        flex-direction: column;
-    }
-
-    .categories-list {
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 8px;
-    }
-
-    .category-btn {
-        white-space: nowrap;
-    }
-
-    .pos-footer {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .payment-btn {
-        width: 100%;
-    }
-}
 </style>
   

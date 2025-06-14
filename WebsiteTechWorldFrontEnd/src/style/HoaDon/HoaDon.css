@@ -692,6 +692,35 @@
     background: #e9ecef;
     color: #495057;
 }
+.status-pending {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.status-shipping {
+    background-color: #e0f2fe;
+    color: #1e40af;
+}
+
+.status-delivered {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.status-returned {
+    background-color: #fee2e2;
+    color: #9f1239;
+}
+
+.status-packed {
+    background-color: #ffedd5;
+    color: #7c2d12;
+}
+
+.status-failed {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
 
 /* Modal Footer */
 .modal-footer {

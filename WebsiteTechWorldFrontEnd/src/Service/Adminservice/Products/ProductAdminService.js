@@ -39,6 +39,19 @@ const postData = async (url, data) => {
   }
 };
 
+export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/ten-san-pham';
+  return axios.get(url, {
+    params: {
+      tenSanPham,
+      pageNo,
+      pageSize
+    }
+  }
+  )
+}
+
 
 export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${page}&size=${size}`);
 export const postSanPham = (data) => postData('/admin/product', data);
