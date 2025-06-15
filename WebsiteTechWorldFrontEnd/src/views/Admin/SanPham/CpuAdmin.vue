@@ -10,7 +10,7 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="mb-2" justify="end" >
+    <el-row :gutter="20" class="mb-2" justify="end">
       <el-col :span="3">
         <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
       </el-col>
@@ -29,19 +29,17 @@
         <el-table-column prop="soLuong" label="Số lượng" />
         <el-table-column prop="xungNhip" label="Xung nhịp" />
         <el-table-column prop="congNgheSanXuat" label="Công nghệ sản xuất" />
-        <el-table-column prop="boNhoDem" label="Bố nhớ đệm" />
+        <el-table-column prop="boNhoDem" label="Bộ nhớ đệm" />
         <el-table-column prop="tieuThuDienNang" label="Tiêu thụ điện năng" />
         <el-table-column prop="namRaMat" label="Năm ra mắt" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="icons.Edit" circle />
-              </router-link>
+              <el-button size="small" type="primary" :icon="icons.Edit" circle @click="openDetail(row, true)" />
               <el-button size="small" type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
-              <router-link :to="`/admin/products/detail/${row.id}`">
+              <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                 <el-button size="small" type="info" :icon="icons.View" circle />
-              </router-link>
+              </router-link> -->
             </div>
           </template>
         </el-table-column>
@@ -56,18 +54,102 @@
       </div>
     </div>
 
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa cpu' : 'Thêm mới cpu'"
+      :close-on-click-modal="false" :destroy-on-close="true" width="800px">
+      <el-form :model="formData" ref="formRef" :rules="rules" label-width="150px">
+        <el-row :gutter="20">
+          <!-- Hãng sản xuất -->
+          <el-col :span="12">
+            <el-form-item label="Hãng sản xuất" prop="hangSanXuat">
+              <el-input v-model="formData.hangSanXuat" placeholder="Nhập tên hãng sản xuất (ví dụ: Intel, AMD...)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Số nhân -->
+          <el-col :span="12">
+            <el-form-item label="Số nhân" prop="soNhan">
+              <el-input v-model="formData.soNhan" placeholder="Nhập số lượng nhân (ví dụ: 8)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Số lượng -->
+          <el-col :span="12">
+            <el-form-item label="Số lượng" prop="soLuong">
+              <el-input type="number" v-model.number="formData.soLuong" placeholder="Nhập số lượng linh kiện..." />
+            </el-form-item>
+          </el-col>
+
+          <!-- Xung nhịp -->
+          <el-col :span="12">
+            <el-form-item label="Xung nhịp" prop="xungNhip">
+              <el-input v-model="formData.xungNhip" placeholder="Nhập xung nhịp (ví dụ: 3.2GHz)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Công nghệ sản xuất -->
+          <el-col :span="12">
+            <el-form-item label="Công nghệ sản xuất" prop="congNgheSanXuat">
+              <el-input v-model="formData.congNgheSanXuat" placeholder="Nhập công nghệ sản xuất (ví dụ: 7nm, 5nm...)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Bộ nhớ đệm -->
+          <el-col :span="12">
+            <el-form-item label="Bộ nhớ đệm" prop="boNhoDem">
+              <el-input v-model="formData.boNhoDem" placeholder="Nhập bộ nhớ đệm (ví dụ: 16MB)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Tiêu thụ điện năng -->
+          <el-col :span="12">
+            <el-form-item label="Tiêu thụ điện năng" prop="tieuThuDienNang">
+              <el-input v-model="formData.tieuThuDienNang" placeholder="Nhập mức tiêu thụ điện (ví dụ: 65W)" />
+            </el-form-item>
+          </el-col>
+
+          <!-- Năm ra mắt -->
+          <el-col :span="12">
+            <el-form-item label="Năm ra mắt" prop="namRaMat">
+              <el-date-picker v-model="formData.namRaMat" type="date" value-format="YYYY-MM-DD"
+                placeholder="Chọn ngày ra mắt sản phẩm" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- Nút hành động -->
+        <div style="text-align: right; margin-top: 20px;">
+          <el-button @click="handleClose">Hủy</el-button>
+          <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+        </div>
+      </el-form>
+    </el-dialog>
+
+
   </div>
 </template>
 
 <script>
-import { getAllCpuPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { deleteCpu, getAllCpuPage, postCpu, putCpu } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
 
 export default {
   data() {
     return {
+      dialogVisible: false,
+      isEditMode: false,
+      formData: {
+        id: null,
+        hangSanXuat: '',
+        soNhan: '',
+        soLuong: null,
+        xungNhip: '',
+        congNgheSanXuat: '',
+        boNhoDem: '',
+        tieuThuDienNang: '',
+        namRaMat: null,
+      },
       tableCpu: [],
       currentPage: 1,
       totalPages: 1,
@@ -75,10 +157,20 @@ export default {
       pageSize: 5,
       searchQuery: '',
       icons: {
-        Edit,
-        Delete,
-        View
-      }
+        Edit: markRaw(Edit),
+        Delete: markRaw(Delete),
+        View: markRaw(View)
+      },
+      rules: {
+        hangSanXuat: [{ required: true, message: 'Vui lòng nhập hãng sản xuất', trigger: 'blur' }],
+        soNhan: [{ required: true, message: 'Vui lòng nhập số nhân', trigger: 'blur' }],
+        soLuong: [{ required: true, message: 'Vui lòng nhập số lượng', trigger: 'blur' }],
+        xungNhip: [{ required: true, message: 'Vui lòng nhập xung nhịp', trigger: 'blur' }],
+        congNgheSanXuat: [{ required: true, message: 'Vui lòng nhập công nghệ sản xuất', trigger: 'blur' }],
+        boNhoDem: [{ required: true, message: 'Vui lòng nhập bộ nhớ đệm', trigger: 'blur' }],
+        tieuThuDienNang: [{ required: true, message: 'Vui lòng nhập tiêu thụ điện năng', trigger: 'blur' }],
+        namRaMat: [{ required: true, message: 'Vui lòng chọn năng ra mắt', trigger: 'blur' }],
+      },
     };
   },
   computed: {
@@ -100,6 +192,19 @@ export default {
         console.error('Không thể load dữ liệu:', error);
       }
     },
+    resetForm() {
+      this.formData = {
+        id: null,
+        hangSanXuat: '',
+        soNhan: '',
+        soLuong: null,
+        xungNhip: '',
+        congNgheSanXuat: '',
+        boNhoDem: '',
+        tieuThuDienNang: '',
+        namRaMat: null,
+      };
+    },
     handleSearch() {
       this.currentPage = 1;
       this.loadData();
@@ -110,7 +215,36 @@ export default {
       this.loadData();
     },
     handleCreate() {
-      this.$router.push('/admin/products/create');
+      this.resetForm();
+      this.dialogVisible = true;
+    },
+    handleClose() {
+      this.dialogVisible = false;
+    },
+    async submitForm() {
+      try {
+        await this.$refs.formRef.validate();
+
+        if (this.isEditMode) {
+          await putCpu(this.formData.id, this.formData);
+          this.$message.success('Cập nhật thành công!');
+        } else {
+          await postCpu(this.formData);
+          this.$message.success('Thêm cpu thành công!');
+          console.log('Dữ liệu data', this.formData);
+        }
+
+        this.resetForm();
+        this.dialogVisible = false;
+        this.loadData();
+      } catch (err) {
+        this.$message.error('Vui lòng điền đầy đủ và hợp lệ các trường!');
+      }
+    },
+    openDetail(data, isEdit = false) {
+      this.formData = { ...data };
+      this.isEditMode = isEdit;
+      this.dialogVisible = true;
     },
     indexMethod(index) {
       return (this.currentPage - 1) * this.pageSize + index + 1;
@@ -118,20 +252,29 @@ export default {
     handlePageChange(newPage) {
       this.currentPage = newPage;
     },
-    handleDelete(id) {
-      console.log('Xóa:', id);
+    async handleDelete(id) {
+      try {
+        // Đợi người dùng xác nhận
+        await this.$confirm('Bạn có chắc chắn muốn xoá mục này?', 'Xác nhận', {
+          confirmButtonText: 'Xoá',
+          cancelButtonText: 'Huỷ',
+          type: 'warning'
+        });
+
+        // Nếu xác nhận thì thực hiện xoá
+        await deleteCpu(id);
+        this.$message.success('Xoá thành công');
+        this.loadData();
+
+      } catch (error) {
+        // Nếu người dùng huỷ xác nhận, hoặc API xoá lỗi
+        if (error === 'cancel') {
+          this.$message.info('Đã huỷ xoá');
+        } else {
+          this.$message.error('Xoá thất bại');
+        }
+      }
     },
-    getTrangThaiDisplayName(status) {
-      const map = {
-        AVAILABLE: 'Có sẵn',
-        RESERVED: 'Đã đặt trước',
-        SOLD: 'Đã bán',
-        RETURNED: 'Đã trả lại',
-        REFURBISHED: 'Tân trang',
-        BLACKLISTED: 'Bị chặn'
-      };
-      return map[status] || status;
-    }
   },
   mounted() {
     this.loadData();
@@ -148,7 +291,6 @@ export default {
 </script>
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
   font-size: 16px;
   padding: 8px 16px;

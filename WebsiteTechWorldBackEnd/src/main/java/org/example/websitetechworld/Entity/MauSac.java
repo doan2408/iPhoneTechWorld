@@ -25,5 +25,4 @@ public class MauSac {
     @Nationalized
     @Column(name = "hex_color", length = 7)
     private String maMau;
-
 }

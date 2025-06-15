@@ -2,27 +2,21 @@
     <div class="container mt-4">
 
         <el-row :gutter="20" class="mb-4 justify-content-center">
-
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
-
         </el-row>
 
-        <el-row :gutter="20" class="mb-2" justify="end" >
-
+        <el-row :gutter="20" class="mb-2" justify="end">
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
-
         </el-row>
         <h2>Danh sách ram</h2>
         <div class="table-responsive mb-4" style="margin-top: 20px;">
@@ -36,13 +30,14 @@
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            <router-link :to="`/admin/products/${row.id}`">
-                                <el-button size="small" type="primary" :icon="Edit" circle />
-                            </router-link>
+
+                            <el-button size="small" type="primary" :icon="Edit" circle @click="openDetail(row)" />
+
                             <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-                            <router-link :to="`/admin/products/detail/${row.id}`">
+
+                            <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                                 <el-button size="small" type="info" :icon="View" circle />
-                            </router-link>
+                            </router-link> -->
                         </div>
                     </template>
                 </el-table-column>
@@ -57,14 +52,64 @@
             </div>
         </div>
 
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa ram' : 'Thêm mới ram'" width="900px"
+            :close-on-click-modal="false" :destroy-on-close="true">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+                class="hdh-form">
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Dung lượng" prop="dungLuong">
+                            <el-input v-model="formData.dungLuong" placeholder="Nhập dung lượng (ví dụ: 128GB)"
+                                autocomplete="on" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Loại" prop="loai">
+                            <el-input v-model="formData.loai" placeholder="Nhập loại bộ nhớ (ví dụ: NVMe)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat">
+                            <el-input v-model="formData.nhaSanXuat"
+                                placeholder="Nhập tên nhà sản xuất (ví dụ: Apple)" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="Năm ra mắt" prop="namRaMat">
+                            <el-date-picker v-model="formData.namRaMat" type="date" value-format="YYYY-MM-DD"
+                                placeholder="Chọn ngày ra mắt" style="width: 100%;" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col>
+                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi">
+                            <el-input v-model="formData.tocDoDocGhi" placeholder="Ví dụ: 12MP" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row justify="end" style="margin-top: 30px;">
+                    <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                </el-row>
+            </el-form>
+        </el-dialog>
+
     </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { getAllRamPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ref, onMounted, watch, computed, reactive } from 'vue';
+import { deleteRam, getAllRamPage, postRam, putRam } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableRam = ref([]);
 const currentPage = ref(1);
@@ -72,10 +117,29 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5;
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null);
+
+const rules = {
+    dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng', trigger: 'blur' }],
+    loai: [{ required: true, message: 'Vui lòng nhập loại', trigger: 'blur' }],
+    nhaSanXuat: [{ required: true, message: 'Vui lòng nhập nhà sản xuất', trigger: 'blur' }],
+    namRaMat: [{ required: true, message: 'Vui lòng chọn năm ra mắt', trigger: 'change' }],
+};
+
+const formData = reactive({
+    id: null,
+    dungLuong: '',
+    loai: '',
+    tocDoDocGhi: '',
+    nhaSanXuat: '',
+    namRaMat: null,
+})
 
 const loadData = async () => {
     try {
-        const response = await getAllRamPage(currentPage.value - 1, pageSize);
+        const response = await getAllRamPage(currentPage.value - 1, pageSize, searchQuery.value);
         tableRam.value = response.content;
         totalPages.value = response.totalPages;
         totalItems.value = response.totalElements;
@@ -91,17 +155,58 @@ const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
 
-const handlePageChange = (newPage) => {
-    currentPage.value = newPage;
-};
+const resetForm = () => {
+    formData.id = null;
+    formData.dungLuong = '';
+    formData.loai = '';
+    formData.tocDoDocGhi = '';
+    formData.nhaSanXuat = '';
+    formData.namRaMat = '';
+}
 
-onMounted(() => {
-    loadData();
-});
 
-watch([currentPage, searchQuery], () => {
-    loadData();
-});
+const submitForm = async () => {
+    if (!formRef.value) return;
+
+    try {
+        await formRef.value.validate();
+
+        if (isEditMode.value) {
+            await putRam(formData.id, formData);
+            ElMessage.success('Cập nhật ram thành công!');
+        } else {
+            await postRam(formData);
+            ElMessage.success('Thêm mới ram thành công!');
+        }
+        resetForm();
+        dialogVisible.value = false;
+        loadData();
+    } catch (error) {
+        console.log('Lỗi xử lý form', error);
+        ElMessage.error('Vui lòng kiểm tra lại thông tin');
+    }
+}
+
+const handleDelete = async (id) => {
+    try {
+        await ElMessageBox.confirm(
+            'Bạn có chắc chắn muốn xoá ram này không?',
+            'Xác nhận xoá',
+            {
+                confirmButtonText: 'Xoá',
+                cancelButtonText: 'Huỷ',
+                type: 'warning',
+            }
+        );
+        await deleteRam(id);
+        ElMessage.success('Xoá thành công!');
+        loadData(); // tải lại danh sách sau khi xoá
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+        }
+    }
+}
 
 const handleSearch = () => {
     currentPage.value = 1; // Về trang 1 khi tìm kiếm
@@ -115,13 +220,38 @@ const handleRefresh = () => {
 };
 
 const handleCreate = () => {
-    console.log('Tạo mới');
-};
+    resetForm();
+    dialogVisible.value = true;
+    isEditMode.value = false;
+}
 
+const handleClose = () => {
+    dialogVisible.value = false;
+}
+
+const openDetail = (row) => {
+    isEditMode.value = true;
+    Object.assign(formData, row);
+    dialogVisible.value = true;
+};
 
 const indexMethod = (index) => {
     return (currentPage.value - 1) * pageSize + index + 1;
 }
+
+const handlePageChange = (newPage) => {
+    currentPage.value = newPage;
+};
+
+
+onMounted(() => {
+    loadData();
+});
+
+watch([currentPage, searchQuery], () => {
+    loadData();
+});
+
 
 </script>
 

@@ -21,11 +21,13 @@ import java.util.List;
 public class ManHinhAdminController {
     private final ManHinhAdminService manHinhAdminService;
 
+    //phân trang, search, hiển thị
     @GetMapping
     public ResponseEntity<Page<ManHinhAdminResponse>> getAllManHinh(
-            @PageableDefault(page = 0, size = 5) Pageable pageable
+            @PageableDefault(page = 0, size = 5) Pageable pageable,
+            @RequestParam("keyword") String keyword
     ) {
-        Page<ManHinhAdminResponse> manHinhs = manHinhAdminService.getAllManHinh(pageable);
+        Page<ManHinhAdminResponse> manHinhs = manHinhAdminService.getAllManHinh(pageable, keyword);
         return ResponseEntity.ok(manHinhs);
     }
 

@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SanPhamChiTietAdminRepuest {
-    private Integer id;
+//    private Integer id;
 
     private String maSanPhamChiTiet;
 
@@ -49,8 +49,8 @@ public class SanPhamChiTietAdminRepuest {
 
     private BigDecimal giaBan;
 
-    private Set<HinhAnh> hinhAnhs;
+    private Set<HinhAnhAdminRequest> hinhAnhs;
 
-    private Set<Imei> imeis;
+    private Set<ImeiAdminRequest> imeis;
 
 }
