@@ -383,7 +383,7 @@ p[style*="color: red"] {
 }
 
 .forgot-password-link {
-  color: rgba(248, 3, 3, 0.85);
+  color: rgb(3, 220, 248);
   text-decoration: underline;
   font-weight: bold;
   font-size: 0.9rem; /* Giữ nguyên */
@@ -419,5 +419,9 @@ p[style*="color: red"] {
   color: #1abc9c; /* Màu khi hover */
   text-decoration: underline;
   background: rgba(26, 188, 156, 0.1); /* Nền mờ khi hover */
+}
+
+input.form-control[type="text"], [type="password"] {
+  color: #ffffff !important;
 }
 </style>

@@ -111,7 +111,13 @@ export const postLoai = (dataLoai) => postData('/loai', dataLoai);
 export const putLoai = (id, dataLoai) => putData(`/loai/${id}`, dataLoai);
 export const deleteLoai = (idLoai) => deleteData(`/loai/${idLoai}`);
 
-export const getAllManHinhPage = (page = 0, size = 5) => fetchData(`/manHinh?page=${page}&size=${size}`);
+export const getAllManHinhPage = (page = 0, size = 5, keyword = null) => {
+  let url = `/manHinh?page=${page}&size=${size}`;
+  if (keyword && keyword.trim() !== "") {
+    url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+  }
+  return fetchData(url);
+};
 export const postManHinh = (dataManHinh) => postData('/manHinh', dataManHinh);
 export const putManHinh = (id, dataManHinh) => putData(`/manHinh/${id}`, dataManHinh);
 export const deleteManHinh = (idManHinh) => deleteData(`/manHinh/${idManHinh}`);
@@ -124,8 +130,13 @@ export const deleteMauSac = (idMauSac) => deleteData(`/mauSac/${idMauSac}`);
 
 export const getAllIemiPage = (page = 0, size = 5) => fetchData(`/imei?page=${page}&size=${size}`);
 
-export const getAllHeDieuHanhPage = (page = 0, size = 5) => fetchData(`/heDieuHanh?page=${page}&size=${size}`);
-export const postHDH = (dataHDH) => postData('/heDieuHanh', dataHDH);
+export const getAllHeDieuHanhAll = (page = 0, size = 5, keyword = null) => {
+  let url = `/heDieuHanh?page=${page}&size=${size}`;
+  if (keyword && keyword.trim() !== "") {
+    url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+  }
+  return fetchData(url);
+};export const postHDH = (dataHDH) => postData('/heDieuHanh', dataHDH);
 export const putHDH = (id, dataHDH) => putData(`/heDieuHanh/${id}`, dataHDH);
 export const deleteHDH = (idHDH) => deleteData(`/heDieuHanh/${idHDH}`);
 

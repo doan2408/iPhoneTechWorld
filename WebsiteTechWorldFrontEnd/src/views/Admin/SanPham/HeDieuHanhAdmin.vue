@@ -1,21 +1,22 @@
 <template>
   <div class="container mt-4">
 
-    <el-row :gutter="20" class="mb-4 justify-content-center">
-      <el-col :span="6">
-        <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
+    <el-row :gutter="20" class="mb-4" align="middle">
+      <!-- Thanh tìm kiếm căn trái -->
+      <el-col :span="8">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="Tìm kiếm theo phiên bản, nhà phát triển, giao diện người dùng "
+          clearable
+          prefix-icon="Search"
+          @clear="clearSearch"
+        />
       </el-col>
-      <el-col :span="3">
-        <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
-      </el-col>
-    </el-row>
 
-    <el-row :gutter="20" class="mb-2" justify="end">
-      <el-col :span="3">
-        <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
-      </el-col>
-      <el-col :span="3">
-        <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
+      <!-- Các nút căn phải -->
+      <el-col :span="16" class="text-right" align="right">
+        <el-button type="primary" @click="handleCreate">Tạo mới</el-button>
+        <el-button type="primary" @click="handleRefresh">Làm mới</el-button>
       </el-col>
     </el-row>
 
@@ -117,9 +118,9 @@ export default {
         View: markRaw(View)
       },
       rules: {
-        phienBan: [{ required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }],
-        nhaPhatTrien: [{ required: true, message: 'Vui lòng nhập nhà phát triển', trigger: 'blur' }],
-        giaoDienNguoiDung: [{ required: true, message: 'Vui lòng nhập giao diện người dùng', trigger: 'blur' }],
+        phienBan: [{ required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
+        nhaPhatTrien: [{ required: true, message: 'Vui lòng nhập nhà phát triển', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
+        giaoDienNguoiDung: [{ required: true, message: 'Vui lòng nhập giao diện người dùng', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
       }
     };
   },
