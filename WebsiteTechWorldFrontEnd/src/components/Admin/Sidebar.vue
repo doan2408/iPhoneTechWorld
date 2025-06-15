@@ -114,7 +114,7 @@ function toggleOrderMenu() {
             <li><router-link to="/admin/ban-hang">Bán hàng</router-link></li>
           </ul>
 
-          <li><router-link to="/admin/promotions">Khuyến mãi</router-link></li>
+          <li><router-link to="/admin/promotions">Quản lý khuyến mãi</router-link></li>
           <li><router-link to="/admin/reports">Báo cáo</router-link></li>
         </ul>
       </nav>

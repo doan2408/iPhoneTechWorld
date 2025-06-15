@@ -225,14 +225,12 @@
         </el-table-column>
 
         <el-table-column prop="soLuong" label="Số lượng" width="90" />
-
-        <el-table-column label="Đơn giá">
-          <template #default="{ row, $index }">
-            <el-input v-model.number="row.giaBan" type="number" placeholder="Nhập giá trị" min="0"
-              @change="() => onGiaBanChange($index, row.giaBan)" />
+        
+        <el-table-column prop="giaBan" label="Đơn giá">
+          <template #default="{ row }">
+            <el-input v-model.number="row.giaBan" type="number" placeholder="Nhập giá trị" min="0" />
           </template>
         </el-table-column>
-
 
         <el-table-column label="Thao tác" width="560">
           <template #default="{ row, $index }">
@@ -244,7 +242,7 @@
                 Upload
               </el-button>
 
-              <el-button type="danger" @click="() => moDialogNhapImei(row, phienBan.chiTiet, index)">
+              <el-button type="danger" @click="moDialogNhapImei(row)">
                 Nhập
               </el-button>
 
@@ -253,16 +251,11 @@
               </el-button>
 
             </div>
-            <el-button @click="console.log(JSON.stringify(danhSachPhienBan))">Kiểm tra danh sách</el-button>
-
           </template>
-
         </el-table-column>
       </el-table>
     </div>
-
     <NhapImeiDialog v-model="dialogVisible" @confirm="nhanImeiTuDialog" />
-
     <div v-if="daChonDayDu" style="margin-bottom: 40px;">
 
       <div style="margin-bottom: 40px;">
@@ -299,10 +292,10 @@
 
 
           <el-table-column label="Upload ảnh">
-            <template #default="{ row, $index }">
-              <el-upload :http-request="customUpload" :before-upload="(file) => handleBeforeUpload(file, row)"
-                :on-success="(response, file) => handleUploadSuccess(response, file, $index)" :show-file-list="false">
-                <el-button>Upload ảnh</el-button>
+            <template #default="{ row }">
+              <el-upload :http-request="customUpload" :show-file-list="false" :data="{ row }"
+                :before-upload="(file) => handleBeforeUpload(file, row)">
+                <el-button type="primary">Tải ảnh</el-button>
               </el-upload>
             </template>
           </el-table-column>
@@ -327,7 +320,7 @@
 <script setup>
 import { onMounted, reactive, ref, watch, computed } from 'vue';
 import axios from 'axios';
-import { getAllCameraSauList, getAllCameraTruocList, getAllCpuList, getAllHDHList, getAllLoaiList, getAllManHinhList, getAllMauSacList, getAllNhaCungCapList, getAllPinList, getAllRamList, getAllRomList, getAllXuatXuList, postChiTietSanPham, postNhaCungCapList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
+import { getAllCameraSauList, getAllCameraTruocList, getAllCpuList, getAllHDHList, getAllLoaiList, getAllManHinhList, getAllMauSacList, getAllNhaCungCapList, getAllPinList, getAllRamList, getAllRomList, getAllXuatXuList, postNhaCungCapList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import DialogThemNhaCungCap from '@/components/Admin/dialogs/DialogThemNhaCungCap.vue';
 import NhapImeiDialog from '@/components/Admin/dialogs/DialogThemIemi.vue';
 import { ElMessage } from 'element-plus';
@@ -351,33 +344,55 @@ const addNCCDialog = ref(null);
 const hienThiBang = ref(false);
 const dialogVisible = ref(false);
 const currentRow = ref(null);
+const anhTheoMau = reactive({});
 const danhSachPhienBan = ref([]);
 
-
 const customUpload = async (options) => {
-  const { file, onSuccess, onError, onProgress } = options;
+  const { file } = options;
+
+  if (!file) {
+    ElMessage.error('Vui lòng chọn file ảnh');
+    return;
+  }
 
   const formData = new FormData();
   formData.append('file', file);
 
   try {
     const res = await axios.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (event) => {
-        let percent = Math.round((event.loaded * 100) / event.total);
-        onProgress({ percent });
-      }
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-    onSuccess(res.data, file);
+
+    const response = res.data;
+    console.log('✅ Upload thành công:', response);
     ElMessage.success('Upload thành công!');
-  } catch (error) {
-    onError(error);
-    ElMessage.error('Upload thất bại!');
+
+    // Nếu bạn muốn sử dụng URL trả về:
+    // const imageUrl = response.url;
+    // làm gì đó với imageUrl...
+
+  } catch (err) {
+    if (err.response) {
+      console.error('Lỗi từ server:', err.response.data);
+      const message = err.response.data?.message || 'Lỗi không xác định từ server';
+      ElMessage.error(`Upload lỗi: ${message}`);
+
+    } else if (err.request) {
+      console.error('Không có phản hồi từ server:', err.request);
+      ElMessage.error('Không thể kết nối đến server. Vui lòng kiểm tra lại địa chỉ hoặc khởi động backend.');
+
+    } else {
+      console.error('Lỗi không xác định:', err.message);
+      ElMessage.error(`Lỗi không xác định: ${err.message}`);
+    }
   }
 };
 
 
 const sanPham = reactive({
+  id: null,
   tenSanPham: '',
   thuongHieu: '',
   idNhaCungCap: '',
@@ -386,6 +401,7 @@ const sanPham = reactive({
 
 const addChiTiet = () => {
   sanPham.sanPhamChiTiets.push({
+    idSanPham: null,
     idMau: [],
     idRam: [],
     idRom: [],
@@ -399,19 +415,10 @@ const addChiTiet = () => {
     idLoai: null,
     hinhAnhs: [],
     imeis: [],
-    allImei: [],
     soLuong: 0,
     giaBan: 0,
   });
-
-  danhSachPhienBan.value = tinhToanPhienBan(sanPham, danhSachPhienBan.value);
 };
-
-const onGiaBanChange = (index, newGiaBan) => {
-  sanPham.sanPhamChiTiets[index].giaBan = newGiaBan;
-};
-
-
 const createSanPham = async () => {
   try {
     // 👉 Bước 0: Kiểm tra tên sản phẩm
@@ -424,10 +431,23 @@ const createSanPham = async () => {
     const { tenSanPham, thuongHieu, idNhaCungCap } = sanPham;
     console.log('📤 Gửi dữ liệu sản phẩm chính:', { tenSanPham, thuongHieu, idNhaCungCap });
 
-    await postSanPham({ tenSanPham, thuongHieu, idNhaCungCap });
+    const response = await postSanPham({ tenSanPham, thuongHieu, idNhaCungCap });
+
+    const idSanPhamMoi = response.data.id;
+    sanPham.id = idSanPhamMoi;
+
+    console.log('✅ Đã tạo sản phẩm thành công, ID mới là:', idSanPhamMoi);
 
     // 👉 Bước 2: Cập nhật chi tiết sản phẩm (thêm idSanPham, hình ảnh)
     sanPham.sanPhamChiTiets.forEach((ct, index) => {
+      const mauId = Array.isArray(ct.idMau) && ct.idMau.length > 0 ? ct.idMau[0] : null;
+      const url = mauId && anhTheoMau[mauId] ? anhTheoMau[mauId] : null;
+
+      ct.idSanPham = idSanPhamMoi;
+
+      // Gán hình ảnh theo màu (nếu có)
+      ct.hinhAnhs = url ? [{ duongDan: url }] : [];
+
       console.log(`🧩 Chi tiết sản phẩm #${index + 1}:`);
       console.log('→ ID sản phẩm:', ct.idSanPham);
       console.log('→ ID Màu:', ct.idMau);
@@ -443,8 +463,7 @@ const createSanPham = async () => {
         idCameraSau: ct.idCameraSau,
         idLoai: ct.idLoai,
         idXuatXu: ct.idXuatXu,
-        imeis: ct.imei || ct.imeis,       // thử cả 2
-        hinhAnhs: ct.hinhAnh || ct.hinhAnhs || ct.url, // thử các biến thể
+        imeis: ct.imeis,
         soLuong: ct.soLuong,
         giaBan: ct.giaBan
       });
@@ -454,7 +473,7 @@ const createSanPham = async () => {
     console.log('🚀 Gửi danh sách chi tiết sản phẩm:');
     console.log(JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
 
-    await postChiTietSanPham(sanPham.sanPhamChiTiets);
+    await postSanPhamChiTiets(sanPham.sanPhamChiTiets);
 
     // ✅ Thành công
     ElMessage.success('Tạo sản phẩm thành công!');
@@ -466,6 +485,7 @@ const createSanPham = async () => {
     ElMessage.error('Tạo sản phẩm thất bại!');
   }
 };
+
 
 
 
@@ -486,6 +506,28 @@ const handleSelectClick = () => {
 const handleClick = () => {
   alert('Bạn cần implement thêm thương hiệu mới');
 };
+
+
+// const saveForm = async () => {
+//   if (!sanPham.tenSanPham.trim()) {
+//     alert('Tên sản phẩm không được để trống');
+//     return;
+//   }
+//   if (sanPham.sanPhamChiTiets.length === 0) {
+//     alert('Bạn cần thêm ít nhất một cấu hình chi tiết');
+//     return;
+//   }
+//   try {
+//     console.log('Dữ liệu gửi đi:', JSON.stringify(sanPham, null, 2));
+//     const response = await axios.post(sanPham);
+//     console.log('Dữ liệu đã được lưu:', response.data);
+//     alert('Lưu thành công!');
+//     hienThiBang.value = true;
+//   } catch (error) {
+//     console.error('Lỗi khi lưu dữ liệu:', error);
+//     alert('Lưu thất bại. Vui lòng thử lại.');
+//   }
+// };
 
 
 function xoaChiTiet(phienBan, chiTiet) {
@@ -607,12 +649,8 @@ function tinhToanPhienBan(sanPham, danhSachCu = []) {
             tenMauSac: layTenMauSac(idMau),
             tenSanPham: sanPham.tenSanPham,
             // 👇 Giữ lại giá trị cũ nếu có
-            // ✅ Dữ liệu chính xác theo IMEI
-            soLuong: chiTiet.allImei?.length || 0,
-            giaBan: chiTiet.giaBan || 0,
-
-            // Liên kết lại để xử lý sau
-            chiTietGoc: chiTiet
+            soLuong: chiTietCu?.soLuong ?? chiTiet.soLuong ?? 0,
+            giaBan: chiTietCu?.giaBan ?? chiTiet.giaBan ?? 0,
           });
         });
       });
@@ -652,6 +690,8 @@ const daChonDayDu = computed(() => {
     for (const chiTiet of phienBan.chiTiet) {
       if (
         chiTiet.idMau == null ||
+        chiTiet.giaBan == null ||
+        chiTiet.soLuong == null ||
         !chiTiet.tenSanPham?.trim()
       ) {
         console.log("Thiếu thông tin:", chiTiet);
@@ -665,23 +705,22 @@ const daChonDayDu = computed(() => {
 
 
 // upload ảnh
-const handleUploadSuccess = (response, file, chiTietIndex) => {
-  console.log('✅ Upload thành công với response:', response);
-  console.log('📌 chiTietIndex:', chiTietIndex);
-  console.log('📦 sản phẩm chi tiết:', sanPham.sanPhamChiTiets[chiTietIndex]);
 
+const handleUploadSuccess = (response, file, chiTietIndex) => {
   try {
-    if (response && response.url) {
+    if (response.url && response.public_id) {
+      // Thêm ảnh vào hinhAnhs của chi tiết sản phẩm tương ứng
       sanPham.sanPhamChiTiets[chiTietIndex].hinhAnhs.push({
-        url: response.url
+        url: response.url,
+        imagePublicId: response.public_id
       });
       ElMessage.success("Upload ảnh thành công!");
     } else {
-      ElMessage.warning("Thiếu URL từ phản hồi backend");
+      ElMessage.warning("Thiếu URL hoặc public_id từ phản hồi backend");
     }
   } catch (error) {
-    console.error("❌ Lỗi khi xử lý upload ảnh:", error);
-    ElMessage.error("Lỗi upload ảnh!");
+    console.error("Lỗi khi xử lý upload:", error);
+    ElMessage.error("Lỗi trong quá trình upload ảnh!");
   }
 };
 
@@ -696,114 +735,32 @@ const handleBeforeUpload = (file, row) => {
 };
 
 
-const currentList = ref(null); // danh sách chứa dòng đó
-const currentIndex = ref(-1);
 
-const moDialogNhapImei = (row, list, index) => {
-  if (!row) {
-    console.warn('❌ Không tìm thấy dòng chi tiết sản phẩm');
-    return;
-  }
-
+// xử lý imei
+const moDialogNhapImei = (row) => {
   if (row.listImei && row.listImei.length > 0) {
     alert("Đã upload file IMEI, không được nhập thủ công nữa.");
     return;
   }
-
   currentRow.value = row;
-  currentList.value = list;
-  currentIndex.value = index;
   dialogVisible.value = true;
-
-  console.log("✅ Mở dialog nhập IMEI:", row);
 };
 
 
 const nhanImeiTuDialog = (imeis) => {
-  try {
-    console.log('🔔 nhanImeiTuDialog được gọi với imeis:', imeis);
-    console.log('📦 currentIndex.value:', currentIndex.value);
-    console.log('📦 sanPham.sanPhamChiTiets:', sanPham.sanPhamChiTiets);
+  const row = currentRow.value;
+  if (!row) return;
 
-    const index = currentIndex.value;
-    const row = sanPham.sanPhamChiTiets?.[index];
-
-    if (!row) {
-      console.warn("⚠️ Không tìm thấy dòng cần cập nhật IMEI tại index:", index);
-      return;
-    }
-
-    if (!Array.isArray(imeis)) {
-      console.warn('❌ imeis không phải là mảng');
-      return;
-    }
-
-    row.allImei ??= [];
-
-    const imeisChuoi = imeis.map(i => i.soImei ?? '').filter(i => i);
-    const imeiMoi = imeisChuoi.filter(i => !row.allImei.includes(i));
-
-    row.allImei = [...row.allImei, ...imeiMoi];  // Force reactivity
-    row.imeis = row.allImei.map(i => ({ soImei: i }));
-    row.soLuong = row.allImei.length;
-
-    // for (const phienBan of danhSachPhienBan.value) {
-    //   const chiTietIndex = phienBan.chiTiet.findIndex(ct =>
-    //     ct.idMau === row.idMau &&
-    //     ct.tenSanPham === row.tenSanPham
-    //   );
-
-    //   if (chiTietIndex !== -1) {
-    //     // Clone row để trigger reactive update
-    //     phienBan.chiTiet.splice(chiTietIndex, 1, { ...row });
-    //     break;
-    //   }
-    // }
-
-    phienBan.chiTiet.splice(chiTietIndex, 1, { ...row });
-    // Trigger reactivity cho Vue bằng splice
-    sanPham.sanPhamChiTiets.splice(index, 1, { ...row });
-
-    danhSachPhienBan.value = tinhToanPhienBan(sanPham);
-
-
-    console.log("✅ Updated soLuong:", row.soLuong)
-    console.log('📦 Danh sách sản phẩm chi tiết sau khi nhập IMEI:', sanPham.sanPhamChiTiets);
-    console.log('📦 Số lượng:', row.soLuong);
-    console.log(`✅ Đã nhập ${imeiMoi.length} IMEI mới. Tổng cộng: ${row.allImei.length}`);
-    alert(`Đã nhập ${imeiMoi.length} IMEI mới. Tổng cộng: ${row.allImei.length}`);
-  } catch (error) {
-    console.error('❌ Lỗi trong nhanImeiTuDialog:', error);
+  if (!row.allImei) {
+    row.allImei = [];
   }
+
+  const imeiMoi = imeis.filter(i => !row.allImei.includes(i));
+  row.allImei.push(...imeiMoi);
+  row.soLuong = row.allImei.length;
+
+  alert(`Đã nhập ${imeiMoi.length} IMEI mới. Tổng cộng: ${row.allImei.length}`);
 };
-
-
-const nhanImeiTuDialog2 = (imeisMoi, row) => {
-  // Gán danh sách IMEI mới
-  row.allImei = imeisMoi;
-
-  // Cập nhật lại số lượng theo số imei
-  row.soLuong = imeisMoi.length;
-
-  // Cập nhật lại danh sách phiên bản sau khi thay đổi dữ liệu gốc
-  danhSachPhienBan.value = tinhToanPhienBan(sanPham);
-};
-
-
-
-
-
-///xử lý sô lượng
-
-watch(
-  () => sanPham.sanPhamChiTiets.map(row => row.allImei?.length || 0),
-  (newLengths) => {
-    newLengths.forEach((len, index) => {
-      sanPham.sanPhamChiTiets[index].soLuong = len;
-    });
-  },
-  { deep: true }
-);
 
 
 const handleFileChange = (event, row) => {

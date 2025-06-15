@@ -11,6 +11,8 @@ const khachHangList = ref([]);
 
 const currentPage = ref(0);
 const totalPages = ref(0);
+const pageSize = ref(5);
+
 const search = ref("");
 const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
@@ -21,7 +23,7 @@ const loadPhieuGiamGia = async (page) => {
         isLoading.value = true;
         const response = await getAll({
             page: page,
-            size: 3,
+            size: pageSize.value,
             search: search.value || null,
             trangThai: trangThaiFilter.value || null,
             ngayBatDau: ngayBatDauFilter.value || null,
@@ -194,29 +196,49 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container mt-4">
+    <div class="container">
+        <div class="header-content">
+            <div class="title-section">
+                <h1 class="dashboard-title">Quản lý khuyến mãi</h1>
+            </div>
+            <div class="header-actions">
+                <button @click="createPhieuGiamGia" class="btn btn-outline-primary">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                        </path>
+                    </svg>Tạo khuyến mãi mới
+                </button>
+            </div>
+        </div>
+
         <!-- Bộ lọc -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <input v-model="search" type="text" placeholder="Tìm kiếm mã hoặc tên..." class="form-control" />
-            </div>
-            <div class="col-md-2">
-                <select v-model="trangThaiFilter" class="form-select">
-                    <option :value="null">-- Tất cả trạng thái --</option>
-                    <option value="NOT_STARTED">Chưa bắt đầu</option>
-                    <option value="ACTIVE">Đang hoạt động</option>
-                    <option value="EXPIRED">Đã hết hạn</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <input v-model="ngayBatDauFilter" type="date" class="form-control" placeholder="Ngày bắt đầu" />
-            </div>
-            <div class="col-md-2">
-                <input v-model="ngayKetThucFilter" type="date" class="form-control" placeholder="Ngày kết thúc" />
-            </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button @click="clear" class="btn btn-outline-secondary">Làm mới</button>
-                <button @click="createPhieuGiamGia" class="btn btn-primary">Tạo phiếu</button>
+        <div class="search-card">
+            <div class="search-content">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input v-model="search" type="text" placeholder="Tìm kiếm theo mã hoặc tên..."
+                            class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <select v-model="trangThaiFilter" class="form-select">
+                            <option :value="null">-- Tất cả trạng thái --</option>
+                            <option value="NOT_STARTED">Chưa bắt đầu</option>
+                            <option value="ACTIVE">Đang hoạt động</option>
+                            <option value="EXPIRED">Đã hết hạn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input v-model="ngayBatDauFilter" type="date" class="form-control" placeholder="Ngày bắt đầu" />
+                    </div>
+                    <div class="col-md-2">
+                        <input v-model="ngayKetThucFilter" type="date" class="form-control"
+                            placeholder="Ngày kết thúc" />
+                    </div>
+                    <div class="col-md-2">
+                        <button @click="clear" class="btn btn-outline-secondary" style="margin: 0 auto;">Làm
+                            mới</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -227,8 +249,9 @@ onMounted(() => {
             </div>
         </div>
         <table v-else class="table">
-            <thead class="table">
+            <thead>
                 <tr>
+                    <th>STT</th>
                     <th>Mã</th>
                     <th>Tên</th>
                     <th>Giá trị giảm</th>
@@ -241,32 +264,45 @@ onMounted(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="phieuGiamGia in phieuGiamGias" :key="phieuGiamGia.id">
-                    <td>{{ phieuGiamGia.maGiamGia }}</td>
-                    <td>{{ phieuGiamGia.tenKhuyenMai }}</td>
-                    <td>{{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm' ? phieuGiamGia.giaTriKhuyenMai + '%' :
-                        formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}</td>
-                    <td>{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
-                    <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
-                    <td>{{ phieuGiamGia.soLuong }}</td>
-                    <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
-                    <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" title="Chỉnh sửa" @click="viewUpdate(phieuGiamGia.id)"><i
-                                class="bi bi-pencil-square"></i></button>
-                        <button class="btn btn-danger btn-sm" style="color: red;"
-                            @click="handleDeletePhieuGiamGia(phieuGiamGia.id)"><i
-                                class="bi bi-trash"></i></button>
-                    </td>
+                <tr v-if="phieuGiamGias.length === 0">
+                    <td colspan="10" class="text-center">Không có phiếu giảm giá nào.</td>
+                </tr>
+                <tr v-else v-for="(phieuGiamGia, index) in phieuGiamGias" :key="index">
+                    <template v-if="phieuGiamGia">
+                        <td>{{ index + 1 + currentPage * pageSize }}</td>
+                        <td>{{ phieuGiamGia.maGiamGia }}</td>
+                        <td>{{ phieuGiamGia.tenKhuyenMai }}</td>
+                        <td>
+                            {{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm'
+                                ? phieuGiamGia.giaTriKhuyenMai + '%'
+                                : formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}
+                        </td>
+                        <td>{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
+                        <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
+                        <td>{{ phieuGiamGia.soLuong }}</td>
+                        <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
+                        <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" title="Chỉnh sửa"
+                                @click="viewUpdate(phieuGiamGia.id)">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" style="margin-left: 5%;"
+                                @click="handleDeletePhieuGiamGia(phieuGiamGia.id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </template>
                 </tr>
             </tbody>
         </table>
 
+
         <!-- Phân trang -->
-        <div class="d-flex justify-content-between align-items-center" style="width: 25%;">
+        <div class="pagination">
             <button @click="previousPage" :disabled="currentPage === 0" class="btn btn-outline-primary">Trang
                 trước</button>
-            <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+            <span style="margin: auto 10px;">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
             <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="btn btn-outline-primary">Trang
                 sau</button>
         </div>
@@ -374,6 +410,78 @@ onMounted(() => {
 </template>
 
 <style scoped>
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    padding: 1.5rem;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin-right: 0.5em;
+}
+
+.dashboard-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1.5rem;
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333333;
+    margin: 0;
+}
+
+.search-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+    margin: 1.5rem auto;
+}
+
+.table {
+    min-height: 350px;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    height: 20%;
+    min-height: 50px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 1.5rem auto;
+    min-height: 40px;
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .dialog {
     border: none;
     border-radius: 8px;
@@ -393,25 +501,5 @@ onMounted(() => {
 .form-select[multiple] option:checked {
     background-color: #007bff;
     color: white;
-}
-
-/* Action buttons - tone xanh tối giản */
-.btn-primary, .btn-danger {
-  background: white;
-  border: 1px solid #dee2e6;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-  margin-right: 5px;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.btn-primary, .btn-danger:hover {
-  background: #f8f9fa;
-  color: #007bff;
-  text-decoration: none;
 }
 </style>

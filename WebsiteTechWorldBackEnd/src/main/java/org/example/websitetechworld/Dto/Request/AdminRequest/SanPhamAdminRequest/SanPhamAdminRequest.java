@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 public class SanPhamAdminRequest {
-    private Integer id;
+//    private Integer id;
 
     private String maSanPham;
 

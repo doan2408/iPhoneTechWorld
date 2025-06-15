@@ -2,15 +2,12 @@
   <div class="container mt-4">
 
     <el-row :gutter="20" class="mb-4 justify-content-center">
-
       <el-col :span="6">
         <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
       </el-col>
-
       <el-col :span="3">
         <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
       </el-col>
-
     </el-row>
 
     <div class="mb-3" style="display: flex; justify-content: flex-end;">

@@ -2,27 +2,21 @@
     <div class="container mt-4">
 
         <el-row :gutter="20" class="mb-4 justify-content-center">
-
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
-
         </el-row>
 
         <el-row :gutter="20" class="mb-2" justify="end" >
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
-
         </el-row>
 
         <h2>Danh sách màu</h2>
@@ -72,6 +66,7 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5; // Số bản ghi trên 1 trang
 const searchQuery = ref('');
+
 
 const fromRecord = computed(() => {
     return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;

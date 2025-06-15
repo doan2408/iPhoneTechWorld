@@ -61,7 +61,7 @@
 <script>
 import { getAllIemiPage } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -74,9 +74,9 @@ export default {
       pageSize: 5,
       searchQuery: '',
       icons: {
-        Edit,
-        Delete,
-        View
+        Edit: markRaw(Edit),
+        Delete: markRaw(Delete),
+        View: markRaw(View)
       }
     };
   },
