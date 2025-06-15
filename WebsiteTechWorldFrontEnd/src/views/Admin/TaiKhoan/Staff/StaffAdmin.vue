@@ -144,6 +144,7 @@ onMounted(() => {
     <table class="table">
       <thead>
         <tr>
+          <th>STT</th>
           <th>Mã nhân viên</th>
           <th>Tên nhân viên</th>
           <th>Tên đăng nhập</th>
@@ -158,7 +159,8 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="staff in staffList" :key="staff.id">
+        <tr v-for="staff, index in staffList" :key="staff.id">
+          <td>{{ index + 1 + (currentPage * 10) }}</td>
           <td>{{ staff.maNhanVien }}</td>
           <td>{{ staff.tenNhanVien }}</td>
           <td>{{ staff.taiKhoan }}</td>
