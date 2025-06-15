@@ -28,16 +28,23 @@ const fetchDataList = async (url) => {
   }
 }
 
-
 const postData = async (url, data) => {
   try {
-    const response = await axiosInstance.post(url, data);
-    return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
+    const headers = {};
+
+    // Nếu là FormData thì không set Content-Type (axios tự set đúng boundary)
+    if (!(data instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await axiosInstance.post(url, data, { headers });
+    return response.data;
   } catch (error) {
     console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
     throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
   }
 };
+
 
 const postDataSpct = async (url, data) => {
   try {

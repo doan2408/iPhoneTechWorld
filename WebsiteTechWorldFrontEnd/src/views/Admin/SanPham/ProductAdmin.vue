@@ -32,6 +32,11 @@
         <el-table-column prop="tenSanPham" label="Tên sản phẩm" />
         <el-table-column prop="tenLoai" label="Tên loại" />
         <el-table-column prop="soLuong" label="Số lượng" />
+        <el-table-column label="Trạng thái">
+  <template #default="{ row }">
+    {{ trangThaiSanPhamMap[row.trangThaiSanPham] || "Không rõ" }}
+  </template>
+</el-table-column>
         <el-table-column prop="giaBan" label="Giá bán" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
@@ -127,6 +132,14 @@ const indexMethod = (index) => {
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
+};
+
+const trangThaiSanPhamMap = {
+  ACTIVE: "Đang kinh doanh",
+  DISCONTINUED: "Ngừng kinh doanh",
+  COMING_SOON: "Sắp ra mắt",
+  TEMPORARILY_UNAVAILABLE: "Tạm ngừng bán",
+  OUT_OF_STOCK: "Hết hàng"
 };
 
 onMounted(() => {
