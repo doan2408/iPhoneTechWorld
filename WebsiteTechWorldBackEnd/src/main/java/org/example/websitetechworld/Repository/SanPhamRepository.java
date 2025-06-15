@@ -17,6 +17,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                 sp.tenSanPham,
                 loai.tenLoai,
                 spct.soLuong,
+                sp.trangThaiSanPham,
                 spct.giaBan,
                 hinhAnh.url
             ) from SanPhamChiTiet spct
@@ -29,6 +30,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                 sp.tenSanPham,
                 loai.tenLoai,
                 spct.soLuong,
+                sp.trangThaiSanPham,
                 spct.giaBan,
                 hinhAnh.url
             """)

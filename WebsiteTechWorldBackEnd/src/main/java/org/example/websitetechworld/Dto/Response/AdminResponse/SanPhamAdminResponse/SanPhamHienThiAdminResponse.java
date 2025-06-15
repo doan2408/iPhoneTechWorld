@@ -3,6 +3,7 @@ package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResp
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 
 import java.math.BigDecimal;
 
@@ -21,7 +22,10 @@ public class SanPhamHienThiAdminResponse {
 
     private Integer soLuong;
 
+    private TrangThaiSanPham trangThaiSanPham;
+
     private BigDecimal giaBan;
 
     private String url;
+
 }

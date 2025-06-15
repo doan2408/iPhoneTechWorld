@@ -5,6 +5,7 @@ package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResp
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 
 import java.util.Set;
 
@@ -22,7 +23,7 @@ public class SanPhamAdminResponse {
 
     private String thuongHieu;
 
-    private Integer soLuongTonKho;
+    private TrangThaiSanPham trangThaiSanPham;
 
     private String tenNhaCungCap;
 
