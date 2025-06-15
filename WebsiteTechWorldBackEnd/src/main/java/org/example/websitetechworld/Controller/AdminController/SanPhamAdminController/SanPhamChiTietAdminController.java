@@ -41,5 +41,4 @@ public class SanPhamChiTietAdminController {
 
         return ResponseEntity.ok(response);
     }
-
 }

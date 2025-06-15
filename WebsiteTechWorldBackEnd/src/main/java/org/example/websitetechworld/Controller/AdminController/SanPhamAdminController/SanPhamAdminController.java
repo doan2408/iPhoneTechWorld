@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class SanPhamAdminController {
 
     private final SanPhamAdminService adminService;
+    private final SanPhamAdminService sanPhamAdminService;
 
 
     @GetMapping
@@ -51,6 +52,11 @@ public class SanPhamAdminController {
     @GetMapping("/ten-san-pham")
     public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham( @RequestParam(value = "tenSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
         return ResponseEntity.ok(adminService.getProductNames(tenSanPham,pageNo, pageSize));
+    }
+    @GetMapping("/category")
+    public ResponseEntity<?> loadCategorey (@RequestParam(value = "pageNo", defaultValue = "0") int pageNo,@RequestParam(value = "pageSize", defaultValue = "5") int pageSize){
+        return ResponseEntity.ok(sanPhamAdminService.getProductNameCategory(pageNo,pageSize));
+
     }
 
 }

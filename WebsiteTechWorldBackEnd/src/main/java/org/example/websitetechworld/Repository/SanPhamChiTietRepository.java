@@ -31,5 +31,4 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContaining(String tenSanPham, Pageable pageable);
 
-
 }

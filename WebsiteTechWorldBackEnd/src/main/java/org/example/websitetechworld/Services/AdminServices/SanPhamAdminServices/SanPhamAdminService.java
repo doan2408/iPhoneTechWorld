@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.stereotype.Service;
@@ -319,6 +320,11 @@ public class SanPhamAdminService {
         Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContaining(tenSanPham, pageable);
 
         return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+    }
+
+    public Page<String> getProductNameCategory(int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("ten_dong_san_pham").ascending());
+        return sanPhamRepo.findTenDongSanPham(pageable);
     }
 
 

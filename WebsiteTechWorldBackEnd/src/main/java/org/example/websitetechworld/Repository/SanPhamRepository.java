@@ -38,7 +38,34 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             """)
     Page<SanPhamHienThiAdminResponse> getAllHienThi(Pageable pageable);
 
-
+    @Query(value = """
+        SELECT DISTINCT
+            CASE
+                WHEN ten_san_pham LIKE N'% Pro Max' THEN REPLACE(ten_san_pham, N' Pro Max', N'')
+                WHEN ten_san_pham LIKE N'% Pro' THEN REPLACE(ten_san_pham, N' Pro', N'')
+                WHEN ten_san_pham LIKE N'% Plus' THEN REPLACE(ten_san_pham, N' Plus', N'')
+                WHEN ten_san_pham LIKE N'% Mini' THEN REPLACE(ten_san_pham, N' Mini', N'')
+                WHEN ten_san_pham LIKE N'% SE' THEN REPLACE(ten_san_pham, N' SE', N'')
+                ELSE ten_san_pham
+            END AS ten_dong_san_pham
+        FROM san_pham
+        """,
+            countQuery = """
+        SELECT COUNT(*) FROM (
+            SELECT DISTINCT
+                CASE
+                    WHEN ten_san_pham LIKE N'% Pro Max' THEN REPLACE(ten_san_pham, N' Pro Max', N'')
+                    WHEN ten_san_pham LIKE N'% Pro' THEN REPLACE(ten_san_pham, N' Pro', N'')
+                    WHEN ten_san_pham LIKE N'% Plus' THEN REPLACE(ten_san_pham, N' Plus', N'')
+                    WHEN ten_san_pham LIKE N'% Mini' THEN REPLACE(ten_san_pham, N' Mini', N'')
+                    WHEN ten_san_pham LIKE N'% SE' THEN REPLACE(ten_san_pham, N' SE', N'')
+                    ELSE ten_san_pham
+                END
+            FROM san_pham
+        ) AS temp
+        """,
+            nativeQuery = true)
+    Page<String> findTenDongSanPham(Pageable pageable);
 
 
 
