@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
@@ -311,6 +312,15 @@ public class SanPhamAdminService {
 
         return sanPhamAdminResponse;
     }
+
+
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContaining(tenSanPham, pageable);
+
+        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+    }
+
 
 }
 

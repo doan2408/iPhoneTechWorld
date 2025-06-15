@@ -39,6 +39,18 @@ const postData = async (url, data) => {
   }
 };
 
+export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/ten-san-pham';
+  return axios.get(url, {
+    params: {
+      tenSanPham,
+      pageNo,
+      pageSize
+    }
+  }
+  )
+}
 const postDataSpct = async (url, data) => {
   try {
     const response = await axiosInstance.post(url, data, {

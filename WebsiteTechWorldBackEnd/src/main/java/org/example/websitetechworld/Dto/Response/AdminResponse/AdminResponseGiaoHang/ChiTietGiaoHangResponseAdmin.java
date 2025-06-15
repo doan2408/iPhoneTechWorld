@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.math.BigDecimal;
 
 @Getter
@@ -18,6 +19,7 @@ public class ChiTietGiaoHangResponseAdmin {
     private String maSanPhamChiTiet;
     private String tenSanPham;
     private String maChiTietGiaoHang;
+    private String imageSanPham;
 
     private Integer soLuong;
 
@@ -35,3 +37,4 @@ public class ChiTietGiaoHangResponseAdmin {
 //        return response;
 //    }
 }
+
