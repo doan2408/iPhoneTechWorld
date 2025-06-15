@@ -1,12 +1,11 @@
 <template>
   <div class="container mt-4">
-
     <el-row :gutter="20" class="mb-4" align="middle">
       <!-- Thanh tìm kiếm căn trái -->
       <el-col :span="8">
         <el-input
           v-model="searchKeyword"
-          placeholder="Tìm kiếm theo phiên bản, nhà phát triển, giao diện người dùng "
+          placeholder="Tìm kiếm theo phiên bản, nhà phát triển..."
           clearable
           prefix-icon="Search"
           @clear="clearSearch"
@@ -24,18 +23,14 @@
     <div class="table-responsive mb-4" style="margin-top: 20px;">
       <el-table :data="tableHDH" border style="width: 100%">
         <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
-        <!-- <el-table-column prop="id" label="ID" /> -->
         <el-table-column prop="phienBan" label="Phiên bản" />
         <el-table-column prop="nhaPhatTrien" label="Nhà phát triển" />
         <el-table-column prop="giaoDienNguoiDung" label="Giao diện người dùng" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <el-button size="small" type="primary" @click="openDetail(row, true)" :icon="icons.Edit" circle />
-              <el-button size="small" type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
-              <!-- <router-link :to="`/admin/products/detail/${row.id}`">
-                <el-button size="small" type="info" :icon="icons.View" circle />
-              </router-link> -->
+              <el-button size="small" type="primary" @click="handleEdit(row)" :icon="Edit" circle />
+              <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
             </div>
           </template>
         </el-table-column>
@@ -85,154 +80,172 @@
         </el-row>
       </el-form>
     </el-dialog>
-
   </div>
 </template>
 
-<script>
-import { deleteHDH, getAllHeDieuHanhPage, postHDH, putHDH } from '@/Service/Adminservice/Products/ProductAdminService';
-import { Edit, Delete, View } from '@element-plus/icons-vue';
-import { computed, markRaw } from 'vue';
-import { useRouter } from 'vue-router';
+<script setup>
+import { ref, onMounted, watch, reactive } from 'vue';
+import {
+  deleteHDH,
+  getAllHeDieuHanhPage,
+  postHDH,
+  putHDH,
+} from '@/Service/Adminservice/Products/ProductAdminService';
+import { Edit, Delete } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-export default {
-  data() {
-    return {
-      dialogVisible: false,
-      isEditMode: false,
-      formData: {
-        id: null,
-        phienBan: '',
-        nhaPhatTrien: '',
-        giaoDienNguoiDung: '',
-      },
-      tableHDH: [],
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 0,
-      pageSize: 5,
-      searchQuery: '',
-      icons: {
-        Edit: markRaw(Edit),
-        Delete: markRaw(Delete),
-        View: markRaw(View)
-      },
-      rules: {
-        phienBan: [{ required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
-        nhaPhatTrien: [{ required: true, message: 'Vui lòng nhập nhà phát triển', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
-        giaoDienNguoiDung: [{ required: true, message: 'Vui lòng nhập giao diện người dùng', trigger: 'blur' }, {max: 50, message: "Không được vượt quá 50 ký tự"}],
-      }
-    };
-  },
-  computed: {
-    fromRecord() {
-      return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
-    },
-    toRecord() {
-      return Math.min(this.currentPage * this.pageSize, this.totalItems);
+const tableHDH = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalItems = ref(0);
+const pageSize = 5;
+const searchKeyword = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null);
+const keyword = ref('');
+const errors = reactive({})
+const formData = reactive({
+  id: null,
+  phienBan: '',
+  nhaPhatTrien: '',
+  giaoDienNguoiDung: '',
+});
+
+const rules = {
+  phienBan: [
+    { required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' },
+    { max: 50, message: 'Không được vượt quá 50 ký tự', trigger: 'blur' },
+  ],
+  nhaPhatTrien: [
+    { required: true, message: 'Vui lòng nhập nhà phát triển', trigger: 'blur' },
+    { max: 50, message: 'Không được vượt quá 50 ký tự', trigger: 'blur' },
+  ],
+  giaoDienNguoiDung: [
+    { required: true, message: 'Vui lòng nhập giao diện người dùng', trigger: 'blur' },
+    { max: 50, message: 'Không được vượt quá 50 ký tự', trigger: 'blur' },
+  ],
+};
+
+const loadData = async () => {
+  try {
+    const response = await getAllHeDieuHanhPage(
+      currentPage.value - 1,
+      pageSize,
+      keyword.value.trim() || null
+    );
+    tableHDH.value = response.content;
+    totalPages.value = response.totalPages;
+    totalItems.value = response.totalElements;
+  } catch (error) {
+    console.error('Không thể load dữ liệu:', error);
+    ElMessage.error('Không thể tải dữ liệu');
+  }
+};
+
+const clearSearch = () => {
+  searchKeyword.value = '';
+  keyword.value = '';
+  currentPage.value = 1;
+  loadData();
+};
+
+const handleRefresh = () => {
+  clearSearch();
+};
+
+const handleCreate = () => {
+  try {
+    resetForm();
+    dialogVisible.value = true;
+    isEditMode.value = false;
+  } catch (error) {
+    console.error('Lỗi khi mở form tạo mới:', error);
+    ElMessage.error('Không thể mở form tạo mới');
+  }
+};
+
+const submitForm = async () => {
+  if (!formRef.value) return;
+
+  try {
+    await formRef.value.validate();
+
+    if (isEditMode.value) {
+      await putHDH(formData.id, formData);
+      ElMessage.success('Cập nhật thành công!');
+    } else {
+      await postHDH(formData);
+      ElMessage.success('Thêm mới thành công!');
     }
-  },
-  methods: {
-    async loadData() {
-      try {
-        const response = await getAllHeDieuHanhPage(this.currentPage - 1, this.pageSize, this.searchQuery.trim());
-        this.tableHDH = response.content;
-        this.totalPages = response.totalPages;
-        this.totalItems = response.totalElements;
-      } catch (error) {
-        console.error('Không thể load dữ liệu:', error);
-      }
-    },
-    resetForm() {
-      this.formData = {
-        id: null,
-        phienBan: '',
-        nhaPhatTrien: '',
-        giaoDienNguoiDung: '',
-      }
-    },
-    handleSearch() {
-      this.currentPage = 1;
-      this.loadData();
-    },
-    handleRefresh() {
-      this.searchQuery = '';
-      this.currentPage = 1;
-      this.loadData();
-    },
-    async submitForm() {
-      try {
-        await this.$refs.formRef.validate();
 
-        if (this.isEditMode) {
-          await putHDH(this.formData.id, this.formData);
-          this.$message.success('Cập nhật hệ điều hành thành công!');
-        } else {
-          await postHDH(this.formData);
-          this.$message.success('Thêm thành hệ điều hành công!');
-        }
-
-        this.resetForm();
-        this.dialogVisible = false;
-        this.loadData();
-      } catch (error) {
-        this.$message.error('Vui lòng điền đầy đủ thông tin và hợp lệ các trường!');
-      }
-    },
-    openDetail(data, isEdit = false) {
-      this.formData = { ...data };
-      this.isEditMode = isEdit;
-      this.dialogVisible = true;
-    },
-    handleCreate() {
-      this.resetForm();
-      this.dialogVisible = true;
-    },
-    handleClose() {
-      this.dialogVisible = false;
-    },
-    indexMethod(index) {
-      return (this.currentPage - 1) * this.pageSize + index + 1;
-    },
-    handlePageChange(newPage) {
-      this.currentPage = newPage;
-    },
-    async handleDelete(id) {
-      try {
-        // Đợi người dùng xác nhận
-        await this.$confirm('Bạn có chắc chắn muốn xoá mục này?', 'Xác nhận', {
-          confirmButtonText: 'Xoá',
-          cancelButtonText: 'Huỷ',
-          type: 'warning'
-        });
-
-        // Nếu xác nhận thì thực hiện xoá
-        await deleteHDH(id);
-        this.$message.success('Xoá thành công');
-        this.loadData();
-
-      } catch (error) {
-        // Nếu người dùng huỷ xác nhận, hoặc API xoá lỗi
-        if (error === 'cancel') {
-          this.$message.info('Đã huỷ xoá');
-        } else {
-          this.$message.error('Xoá thất bại');
-        }
-      }
-    },
-  },
-  mounted() {
-    this.loadData();
-  },
-  watch: {
-    currentPage() {
-      this.loadData();
-    },
-    searchQuery() {
-      this.loadData();
+    resetForm();
+    dialogVisible.value = false;
+    loadData();
+  } catch (error) {
+    console.error('Lỗi xử lý form:', error, error.response);
+    if(Array.isArray(error)) {
+      error.forEach(({field, message}) => {
+        ElMessage.error(errors[field] = message)
+      }) 
     }
   }
 };
+
+const handleClose = () => {
+  dialogVisible.value = false;
+};
+
+const handleEdit = (row) => {
+  isEditMode.value = true;
+  Object.assign(formData, row);
+  dialogVisible.value = true;
+};
+
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('Bạn có chắc chắn muốn xóa không?', 'Xác nhận', {
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      type: 'warning',
+    });
+
+    await deleteHDH(id);
+    ElMessage.success('Xóa thành công');
+    loadData();
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Lỗi khi xóa:', error);
+      ElMessage.error('Xóa thất bại');
+    }
+  }
+};
+
+const indexMethod = (index) => {
+  return (currentPage.value - 1) * pageSize + index + 1;
+};
+
+const handlePageChange = (newPage) => {
+  currentPage.value = newPage;
+  loadData();
+};
+
+const resetForm = () => {
+  formData.id = null;
+  formData.phienBan = '';
+  formData.nhaPhatTrien = '';
+  formData.giaoDienNguoiDung = '';
+};
+
+onMounted(() => {
+  loadData();
+});
+
+watch(searchKeyword, () => {
+  keyword.value = searchKeyword.value.trim();
+  currentPage.value = 1;
+  loadData();
+});
 </script>
 
 <style scoped>

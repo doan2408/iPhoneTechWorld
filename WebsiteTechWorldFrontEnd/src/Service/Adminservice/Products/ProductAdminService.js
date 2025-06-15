@@ -130,7 +130,7 @@ export const deleteMauSac = (idMauSac) => deleteData(`/mauSac/${idMauSac}`);
 
 export const getAllIemiPage = (page = 0, size = 5) => fetchData(`/imei?page=${page}&size=${size}`);
 
-export const getAllHeDieuHanhAll = (page = 0, size = 5, keyword = null) => {
+export const getAllHeDieuHanhPage = (page = 0, size = 5, keyword = null) => {
   let url = `/heDieuHanh?page=${page}&size=${size}`;
   if (keyword && keyword.trim() !== "") {
     url += `&keyword=${encodeURIComponent(keyword.trim())}`;
