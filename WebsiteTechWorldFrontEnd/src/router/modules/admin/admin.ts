@@ -17,7 +17,7 @@ const adminRoutes: RouteRecordRaw[] = [
       ...clientAdminRoutes,
       ...staffAdminRoutes,
       ...hoaDonRoutes,
-      ...giaoHangRoutes
+      ...giaoHangRoutes,
       ...sanPhamAdminRouters
     ],
   },
