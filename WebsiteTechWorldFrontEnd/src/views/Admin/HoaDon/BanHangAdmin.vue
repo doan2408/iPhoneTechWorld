@@ -289,16 +289,13 @@ const paginatedCategories = computed(() => {
     return categoryProduct.value.slice(start, end)
 })
 
-
-
-
 // Products
 const productsLoad = async (category) =>{
-    debugger
     tenSanPham.value = category.tenSanPham
     console.log(tenSanPham.value)
     const response = await findSanPhamBanHang(tenSanPham.value,pageNo.value,pageSize.value)
     products.value = response.data.content
+    console.log("Product trong ham load: ",products.value)
 }
 
 // Pagination
@@ -338,27 +335,28 @@ const currentInvoice = computed(() => {
 })
 
 const filteredProducts = computed(() => {
-    let filtered = products.value
+    let filtered = products.value;
+    console.log('Product ngoai ham load',products.value)
 
     if (selectedCategory.value !== 'all') {
-        filtered = filtered.filter(p => p.category === selectedCategory.value)
+        filtered = filtered.filter(p =>
+            p.tenSanPham.toLowerCase().includes(selectedCategory.value.toLowerCase())
+        );
     }
 
     if (productSearchQuery.value) {
         filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(productSearchQuery.value.toLowerCase())
-        )
+            p.tenSanPham.toLowerCase().includes(productSearchQuery.value.toLowerCase())
+        );
     }
 
-    // Pagination
-    const start = (currentPage.value - 1) * itemsPerPage
-    const end = start + itemsPerPage
-    return filtered.slice(start, end)
-})
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filtered.slice(start, end);
+});
 
 const totalPages = computed(() => {
     let filtered = products.value
-
     if (selectedCategory.value !== 'all') {
         filtered = filtered.filter(p => p.category === selectedCategory.value)
     }

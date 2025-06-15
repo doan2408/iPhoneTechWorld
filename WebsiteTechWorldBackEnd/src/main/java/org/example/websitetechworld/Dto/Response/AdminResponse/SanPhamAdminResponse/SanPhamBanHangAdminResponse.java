@@ -1,9 +1,6 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.example.websitetechworld.Entity.HinhAnh;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
@@ -15,6 +12,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class SanPhamBanHangAdminResponse {
     private Integer id;
 
