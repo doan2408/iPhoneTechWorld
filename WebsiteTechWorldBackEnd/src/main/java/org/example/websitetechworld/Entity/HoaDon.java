@@ -109,9 +109,6 @@ public class HoaDon {
     @Column(name = "ngay_tao_hoa_don")
     private LocalDate ngayTaoHoaDon;
 
-    @Column(name = "ngay_tao_don_hang")
-    private LocalDate ngayTaoDonHang;
-
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_don_hang", length = 50)

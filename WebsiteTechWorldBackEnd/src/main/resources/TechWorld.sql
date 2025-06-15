@@ -97,7 +97,6 @@ CREATE TABLE hoa_don (
                          so_tien_giam DECIMAL(10,2),
                          thanh_tien DECIMAL(10,2),
                          ngay_tao_hoa_don DATE,
-						 ngay_tao_don_hang DATE, -- new
                          loai_hoa_don NVARCHAR(50),
                          ngay_thanh_toan DATE,
                          trang_thai_thanh_toan NVARCHAR(50),
@@ -403,11 +402,11 @@ INSERT INTO hoa_don  (
     ten_nguoi_mua, sdt_nguoi_mua,
     ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang,
     phi_ship, tong_tien, so_tien_giam, thanh_tien,
-    ngay_tao_hoa_don, ngay_tao_don_hang, loai_hoa_don , ngay_thanh_toan, trang_thai_thanh_toan,ma_van_don,sdt_nguoi_nhan
+    ngay_tao_hoa_don, loai_hoa_don , ngay_thanh_toan, trang_thai_thanh_toan,ma_van_don,sdt_nguoi_nhan
 ) VALUES
-      (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), '2025-06-15' ,N'ONLINE', NULL, N'PENDING','VD001','0911111111'),
-      (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), '2025-06-13' ,N'POS', GETDATE(), N'PAID','VD001','0922222222'),
-      (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), '2025-06-14' ,N'ONLINE', GETDATE(), N'COMPLETED','VD001','0933333333');
+      (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE() ,N'ONLINE', NULL, N'PENDING','VD001','0911111111'),
+      (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID','VD001','0922222222'),
+      (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(),  N'ONLINE', GETDATE(), N'COMPLETED','VD001','0933333333');
 
 
 INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don , hanh_dong, thoi_gian_thay_doi, mo_ta)
