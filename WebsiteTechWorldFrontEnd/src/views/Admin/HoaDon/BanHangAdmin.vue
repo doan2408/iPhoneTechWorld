@@ -54,18 +54,17 @@
                 <div class="categories-section">
                     <h3>Danh mục sản phẩm</h3>
                     <div class="categories-list">
-                        <button v-for="category in paginatedCategories" :key="category.tenSanPham"
-                            @click="selectedCategory = category.tenSanPham,
-                            productsLoad(category)"
+                        <button v-for="category in categoryProduct" :key="category.tenSanPham" @click="selectedCategory = category.tenSanPham,
+                            loadProducts(category)"
                             :class="['category-btn', { active: selectedCategory === category.tenSanPham }]">
                             <component :is="category.icon" class="category-icon" />
                             {{ category.tenSanPham }}
                         </button>
                         <!-- phan trang category -->
                         <div class="pagination-controls">
-                            <button @click="pageNo--" :disabled="pageNo === 0">Trang trước</button>
+                            <button @click="prevPage" :disabled="pageNo === 0"> &lt; </button>
                             <span>Trang {{ pageNo + 1 }} / {{ totalPagesCategory }}</span>
-                            <button @click="pageNo++" :disabled="pageNo + 1 >= totalPagesCategory">Trang sau</button>
+                            <button @click="nextPage" :disabled="pageNo + 1 >= totalPagesCategory"> &gt; </button>
                         </div>
                     </div>
                 </div>
@@ -79,7 +78,7 @@
                 </div>
             </div>
 
-            <!--  : button chọn khách hàng , sản phẩm , giỏ hàng-->
+            <!-- phần bên phải : button chọn khách hàng , sản phẩm , giỏ hàng-->
             <div class="right-panel">
                 <!-- Customer search -->
                 <div class="customer-search">
@@ -124,124 +123,130 @@
                         <div v-for="product in filteredProducts" :key="product.id" @click="addToCart(product)"
                             class="product-card">
                             <div class="product-image">
-                                <img :src="product.image" :alt="product.name" />
-                                <div v-if="product.stock === 0" class="out-of-stock">
+                                <img :src="product.url" :alt="product.tenSanPham" />
+                                <div v-if="product.soLuong === 0" class="out-of-stock">
                                     Hết hàng
                                 </div>
-                                <div v-else-if="product.stock <= 5" class="low-stock">
-                                    {{ product.stock }}
+                                <div v-else-if="product.soLuong <= 5" class="low-stock">
+                                    {{ product.soLuong }}
                                 </div>
                             </div>
                             <div class="product-info">
-                                <h4>{{ product.name }}</h4>
-                                <div class="product-price">{{ formatCurrency(product.price) }}</div>
-                                <div class="product-stock">{{ product.stock }}</div>
+                                <h4>{{ product.tenSanPham }} {{ product.rom }}</h4>
+                                <div class="product-color">{{ product.mau }}</div>
+                                <div class="product-price">{{ formatCurrency(product.giaBan) }}</div>
+                                <div class="product-stock" :class="{
+                                    'out-of-stock-text': product.soLuong === 0,
+                                    'low-stock-text': product.soLuong > 0 && product.soLuong <= 5,
+                                    'in-stock-text': product.soLuong > 5
+                                }">
+                                    {{ product.soLuong === 0 ? 'Hết hàng' : 'Số lượng: '+ product.soLuong }}
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Phan trang san pham -->
-                    <div class="pagination">
-                        <button @click="previousPage" :disabled="currentPage === 1" class="page-btn">
-                            <ChevronLeft class="page-icon" />
-                        </button>
-                        <span class="page-info">{{ currentPage }}/{{ totalPages }}</span>
-                        <button @click="nextPage" :disabled="currentPage === totalPages" class="page-btn">
-                            <ChevronRight class="page-icon" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer - Cart & Payment -->
-        <div class="pos-footer">
-            <div class="cart-summary">
-                <!-- Order notes -->
-                <div class="order-notes">
-                    <Edit class="notes-icon" />
-                    <input v-model="currentInvoice.notes" type="text" placeholder="Ghi chú đơn hàng"
-                        class="notes-input" />
                 </div>
 
-                <!-- Cart items (if any) -->
-                <div v-if="currentInvoice.items.length > 0" class="cart-items-summary">
-                    <div class="cart-header">
-                        <span>Sản phẩm đã chọn ({{ currentInvoice.items.length }})</span>
-                        <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
-                            <ChevronUp v-if="showCartDetails" class="toggle-icon" />
-                            <ChevronDown v-else class="toggle-icon" />
-                        </button>
-                    </div>
-
-                    <div v-if="showCartDetails" class="cart-items-list">
-                        <div v-for="item in currentInvoice.items" :key="item.id" class="cart-item">
-                            <img :src="item.image" :alt="item.name" class="cart-item-image" />
-                            <div class="cart-item-info">
-                                <span class="item-name">{{ item.name }}</span>
-                                <span class="item-price">{{ formatCurrency(item.price) }}</span>
-                            </div>
-                            <div class="cart-item-controls">
-                                <button @click="decreaseQuantity(item)" class="qty-btn">
-                                    <Minus class="qty-icon" />
-                                </button>
-                                <span class="quantity">{{ item.quantity }}</span>
-                                <button @click="increaseQuantity(item)" class="qty-btn">
-                                    <Plus class="qty-icon" />
-                                </button>
-                            </div>
-                            <div class="item-total">{{ formatCurrency(item.price * item.quantity) }}</div>
-                            <button @click="removeFromCart(item)" class="remove-item-btn">
-                                <Trash2 class="remove-icon" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total -->
-                <div class="total-section">
-                    <span class="total-label">Tổng tiền hàng:</span>
-                    <span class="total-amount">{{ formatCurrency(currentInvoice.total) }}</span>
-                </div>
-            </div>
-
-            <!-- Payment button -->
-            <button @click="processPayment" :disabled="currentInvoice.items.length === 0" class="payment-btn">
-                THANH TOÁN
-            </button>
-        </div>
-
-        <!-- Customer Modal -->
-        <div v-if="showCustomerModal" class="modal-overlay" @click="showCustomerModal = false">
-            <div class="modal-content" @click.stop>
-                <div class="modal-header">
-                    <h3>Thêm khách hàng mới</h3>
-                    <button @click="showCustomerModal = false" class="close-modal-btn">
-                        <X class="close-icon" />
+                <!-- Phan trang san pham -->
+                <div class="pagination">
+                    <button @click="previousPageProduct(currentCategory)" :disabled="pageNoProduct === 0" class="page-btn">
+                        <ChevronLeft class="page-icon" />
+                    </button>
+                    <span class="page-info">{{ pageNoProduct +1 }}/{{ totalPagesProdut }}</span>
+                    <button @click="nextPageProduct(currentCategory)" :disabled="pageNoProduct + 1  === totalPagesProdut" class="page-btn">
+                        <ChevronRight class="page-icon" />
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Tên khách hàng *</label>
-                        <input v-model="newCustomer.name" type="text" class="form-input" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input v-model="newCustomer.phone" type="tel" class="form-input" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input v-model="newCustomer.email" type="email" class="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label>Địa chỉ</label>
-                        <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer - Cart & Payment -->
+    <div class="pos-footer">
+        <div class="cart-summary">
+            <!-- Order notes -->
+            <div class="order-notes">
+                <Edit class="notes-icon" />
+                <input v-model="currentInvoice.notes" type="text" placeholder="Ghi chú đơn hàng" class="notes-input" />
+            </div>
+
+            <!-- Cart items (if any) -->
+            <div v-if="currentInvoice.items.length > 0" class="cart-items-summary">
+                <div class="cart-header">
+                    <span>Sản phẩm đã chọn ({{ currentInvoice.items.length }})</span>
+                    <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
+                        <ChevronUp v-if="showCartDetails" class="toggle-icon" />
+                        <ChevronDown v-else class="toggle-icon" />
+                    </button>
+                </div>
+
+                <div v-if="showCartDetails" class="cart-items-list">
+                    <div v-for="item in currentInvoice.items" :key="item.id" class="cart-item">
+                        <img :src="item.image" :alt="item.name" class="cart-item-image" />
+                        <div class="cart-item-info">
+                            <span class="item-name">{{ item.name }}</span>
+                            <span class="item-price">{{ formatCurrency(item.price) }}</span>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button @click="decreaseQuantity(item)" class="qty-btn">
+                                <Minus class="qty-icon" />
+                            </button>
+                            <span class="quantity">{{ item.quantity }}</span>
+                            <button @click="increaseQuantity(item)" class="qty-btn">
+                                <Plus class="qty-icon" />
+                            </button>
+                        </div>
+                        <div class="item-total">{{ formatCurrency(item.price * item.quantity) }}</div>
+                        <button @click="removeFromCart(item)" class="remove-item-btn">
+                            <Trash2 class="remove-icon" />
+                        </button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
-                    <button @click="addCustomer" class="save-btn">Lưu</button>
+            </div>
+
+            <!-- Total -->
+            <div class="total-section">
+                <span class="total-label">Tổng tiền hàng:</span>
+                <span class="total-amount">{{ formatCurrency(currentInvoice.total) }}</span>
+            </div>
+        </div>
+
+        <!-- Payment button -->
+        <button @click="processPayment" :disabled="currentInvoice.items.length === 0" class="payment-btn">
+            THANH TOÁN
+        </button>
+    </div>
+
+    <!-- Customer Modal -->
+    <div v-if="showCustomerModal" class="modal-overlay" @click="showCustomerModal = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Thêm khách hàng mới</h3>
+                <button @click="showCustomerModal = false" class="close-modal-btn">
+                    <X class="close-icon" />
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tên khách hàng *</label>
+                    <input v-model="newCustomer.name" type="text" class="form-input" required />
                 </div>
+                <div class="form-group">
+                    <label>Số điện thoại *</label>
+                    <input v-model="newCustomer.phone" type="tel" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input v-model="newCustomer.email" type="email" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ</label>
+                    <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
+                <button @click="addCustomer" class="save-btn">Lưu</button>
             </div>
         </div>
     </div>
@@ -256,7 +261,10 @@ import {
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
 } from 'lucide-vue-next'
 import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdminService';
+import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
+import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { ca } from 'element-plus/es/locales.mjs';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -265,41 +273,44 @@ const products = ref([])
 const tenSanPham = ref('')
 const pageNo = ref(0)
 const pageSize = ref(5)
+const pageNoProduct = ref(0)
+const pageSizeProduct = ref(10)
 const categoryProduct = ref([])
+const totalPagesCategory = ref(1)
+const totalPagesProdut = ref(1)
+const currentCategory = ref({ tenSanPham: 'All' })
 
-// category san pham fix cung
-const danhMucSanPham = () => {
-    const danhMuc = Array.from({ length: 11 }, (_, i) => {
-        const version = i + 6 
-        return {
-            tenSanPham: `IPhone ${version}`,
-            icon: markRaw(Smartphone) 
-        }
-    })
 
-    categoryProduct.value = danhMuc
+// category san pham 
+const danhMucSanPham =  async () => {
+    try {
+        const response = await loadCategory(pageNo.value, pageSize.value)
+        const danhMuc = response.data.content.map(ten => ({
+            tenSanPham: ten,
+            icon: markRaw(Smartphone)
+        }))
+        categoryProduct.value = danhMuc
+        totalPagesCategory.value = response.data.totalPages
+    } catch (error) {
+        console.error('Lỗi khi load danh mục sản phẩm:', error)
+    }
 }
-// phan trang category
-const totalPagesCategory = computed(() =>
-    Math.ceil(categoryProduct.value.length / pageSize.value)
-)
-const paginatedCategories = computed(() => {
-    const start = pageNo.value * pageSize.value
-    const end = start + pageSize.value
-    return categoryProduct.value.slice(start, end)
-})
 
-// Products
-const productsLoad = async (category) =>{
-    tenSanPham.value = category.tenSanPham
-    console.log(tenSanPham.value)
-    const response = await findSanPhamBanHang(tenSanPham.value,pageNo.value,pageSize.value)
-    products.value = response.data.content
-    console.log("Product trong ham load: ",products.value)
-}
+const loadProducts = async (category) => {
+    selectedCategory.value = category.tenSanPham;
+    let response;
+    if (selectedCategory.value.toLowerCase() === 'all') {
+        response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value);
+    } else {
+        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value);
+    }
+    products.value = response.data.content;
+    totalPagesProdut.value = response.data.totalPages
+
+};
+
 
 // Pagination
-const currentPage = ref(1)
 const itemsPerPage = 12
 
 // Invoices management
@@ -334,41 +345,29 @@ const currentInvoice = computed(() => {
     return invoices.value.find(inv => inv.id === currentInvoiceId.value) || invoices.value[0]
 })
 
+
+// ham loc
 const filteredProducts = computed(() => {
     let filtered = products.value;
-    console.log('Product ngoai ham load',products.value)
 
-    if (selectedCategory.value !== 'all') {
+    // Nếu KHÔNG phải 'all' thì mới lọc theo category
+    if (selectedCategory.value && selectedCategory.value.toLowerCase() !== 'all') {
         filtered = filtered.filter(p =>
             p.tenSanPham.toLowerCase().includes(selectedCategory.value.toLowerCase())
         );
     }
 
-    if (productSearchQuery.value) {
+    // Nếu có nhập tìm kiếm thì tiếp tục lọc theo search
+    if (productSearchQuery.value && productSearchQuery.value.trim() !== '') {
         filtered = filtered.filter(p =>
             p.tenSanPham.toLowerCase().includes(productSearchQuery.value.toLowerCase())
         );
     }
 
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return filtered.slice(start, end);
+    return filtered;
 });
 
-const totalPages = computed(() => {
-    let filtered = products.value
-    if (selectedCategory.value !== 'all') {
-        filtered = filtered.filter(p => p.category === selectedCategory.value)
-    }
 
-    if (productSearchQuery.value) {
-        filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(productSearchQuery.value.toLowerCase())
-        )
-    }
-
-    return Math.ceil(filtered.length / itemsPerPage)
-})
 
 // Methods
 const selectInvoice = (id) => {
@@ -479,16 +478,37 @@ const addCustomer = () => {
     showCustomerModal.value = false
 }
 
-const previousPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--
+// chuyen trang category
+const nextPage = async () => {
+    if (pageNo.value + 1 < totalPagesCategory.value) {
+        pageNo.value++
+        await danhMucSanPham()
     }
+
 }
 
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++
+const prevPage = async () => {
+    if (pageNo.value > 0) {
+        pageNo.value--
+        await danhMucSanPham()
     }
+
+}
+//chuyen trang product
+const nextPageProduct = async (category) => {
+    if (pageNoProduct.value + 1 < totalPagesProdut.value) {
+        pageNoProduct.value++
+        await loadProducts(category)
+    }
+
+}
+
+const previousPageProduct = async (category) => {
+    if (pageNoProduct.value > 0) {
+        pageNoProduct.value--
+        await loadProducts(category)
+    }
+
 }
 
 const processPayment = () => {
@@ -509,12 +529,13 @@ const focusCustomerSearch = () => {
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
-
 // Initialize
-onMounted(() => {
-    calculateTotal()
-    danhMucSanPham()
-})
+onMounted(async () => {
+    calculateTotal();
+    await danhMucSanPham();
+    selectedCategory.value = 'all';
+    await loadProducts({ tenSanPham: 'all' });
+}); 
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css">

@@ -2,10 +2,10 @@ package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResp
 
 import lombok.*;
 import org.example.websitetechworld.Entity.HinhAnh;
-import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 
 import java.math.BigDecimal;
+import java.sql.Struct;
 import java.util.Set;
 
 @Getter
@@ -13,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SanPhamBanHangAdminResponse {
+public class SanPhamChiTietHienThiResponse {
     private Integer id;
 
     private String maSanPham;
@@ -24,17 +24,14 @@ public class SanPhamBanHangAdminResponse {
 
     private String rom;
 
-    private String url;
-
     private Integer soLuong;
 
     private BigDecimal giaBan;
 
+    private String url;
 
-
-
-    public static SanPhamBanHangAdminResponse converDto(SanPhamChiTiet sanPhamChiTiet){
-        SanPhamBanHangAdminResponse response = new SanPhamBanHangAdminResponse();
+    public static SanPhamChiTietHienThiResponse converDto(SanPhamChiTiet sanPhamChiTiet){
+        SanPhamChiTietHienThiResponse response = new SanPhamChiTietHienThiResponse();
         response.setId(sanPhamChiTiet.getId());
         if (sanPhamChiTiet.getIdSanPham() != null){
             response.setMaSanPham(sanPhamChiTiet.getIdSanPham().getMaSanPham());
@@ -54,7 +51,7 @@ public class SanPhamBanHangAdminResponse {
             String urlDauTien = hinhAnhDauTien.getUrl();
             response.setUrl(urlDauTien);
         }
+//        response.setTenLoai();
         return response;
     }
-
 }

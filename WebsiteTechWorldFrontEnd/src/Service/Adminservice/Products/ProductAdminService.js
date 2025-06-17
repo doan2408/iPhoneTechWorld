@@ -87,7 +87,7 @@ const deleteData = async (url) => {
 };
 
 export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
-
+export const getAllSanPhamChiTiet = (pageNo, pageSize) => fetchData(`/sanPhamChiTiet?page=${page}&size=${size}`);
 export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${page}&size=${size}`);
 export const postSanPham = (data) => postData('/product', data);
 export const detailSanPham = (id) => fetchData(`/product/${id}`);
@@ -172,3 +172,25 @@ export const getAllHDHList = () => fetchDataList('/heDieuHanh/listHDH');
 export const getAllCpuList = () => fetchDataList('/cpu/listCpu');
 export const getAllCameraTruocList = () => fetchDataList('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchDataList('/cameraSau/listCameraSau');
+
+
+export const loadCategory = (pageNo, pageSize) =>{
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/category';
+  return axios.get(url,{
+    params:{
+      pageNo,
+      pageSize
+    }
+  })
+
+}
+export const loadSanPhamChiTiet = (pageNo,pageSize) => {
+  const urlProduct = '/admin/sanPhamChiTiet'
+  return axios.get(urlProduct, {
+    params: {
+      pageNo,
+      pageSize
+    }
+  })
+}

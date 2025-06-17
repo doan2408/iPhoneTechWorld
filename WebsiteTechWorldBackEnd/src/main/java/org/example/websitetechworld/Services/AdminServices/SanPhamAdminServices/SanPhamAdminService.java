@@ -8,6 +8,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamChiTietAdminRepuest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 
@@ -317,7 +318,7 @@ public class SanPhamAdminService {
 
     public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContaining(tenSanPham, pageable);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(tenSanPham, TrangThaiSanPham.ACTIVE, pageable);
 
         return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
     }

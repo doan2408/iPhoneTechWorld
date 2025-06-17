@@ -60,7 +60,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                     WHEN ten_san_pham LIKE N'% Mini' THEN REPLACE(ten_san_pham, N' Mini', N'')
                     WHEN ten_san_pham LIKE N'% SE' THEN REPLACE(ten_san_pham, N' SE', N'')
                     ELSE ten_san_pham
-                END
+                END AS ten_goc
             FROM san_pham
         ) AS temp
         """,

@@ -3,15 +3,17 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamChiTietAdminRepuest;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.BaoHanhAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -228,6 +230,11 @@ public class SanPhamChiTietAdminService {
         SanPhamChiTiet save = sanPhamChiTietRepo.save(sanPhamChiTiet);
 
         return mapEntityToResponse(save);
+    }
+
+    public Page<SanPhamChiTietHienThiResponse> getAllSanPhamChiTiet(int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        return sanPhamChiTietRepo.findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable).map(SanPhamChiTietHienThiResponse::converDto);
     }
 
 

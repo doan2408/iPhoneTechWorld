@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,8 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             "WHERE s.id = :id")
     Optional<SanPhamChiTiet> findFullById(@Param("id") Integer id);
 
-    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContaining(String tenSanPham, Pageable pageable);
+    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(String tenSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+
+    Page<SanPhamChiTiet> findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham trangThaiSanPham, Pageable pageable);
 
 }
