@@ -156,7 +156,6 @@ export default {
 }
 
 
-
 .pagination-fixed {
   background: white;
   border-radius: 8px;

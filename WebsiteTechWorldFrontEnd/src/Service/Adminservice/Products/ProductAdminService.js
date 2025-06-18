@@ -18,26 +18,23 @@ const fetchData = async (url) => {
   }
 }
 
-const fetchDataList = async (url) => {
-  try {
-    const response = await axiosInstance.get(url);
-    return response.data; // trả về data từ server
-  } catch (error) {
-    console.error(`Lỗi lấy dữ liệu từ ${url}:`, error);
-    throw error.response?.data || `Lỗi lấy dữ liệu từ ${url}`;
-  }
-}
+// const fetchDataList = async (url) => {
+//   try {
+//     const response = await axiosInstance.get(url);
+//     return response.data; // trả về data từ server
+//   } catch (error) {
+//     console.error(`Lỗi lấy dữ liệu từ ${url}:`, error);
+//     throw error.response?.data || `Lỗi lấy dữ liệu từ ${url}`;
+//   }
+// }
 
 const postData = async (url, data) => {
   try {
-    const headers = {};
-
-    // Nếu là FormData thì không set Content-Type (axios tự set đúng boundary)
-    if (!(data instanceof FormData)) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await axiosInstance.post(url, data, { headers });
+    const response = await axiosInstance.post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
@@ -46,19 +43,19 @@ const postData = async (url, data) => {
 };
 
 
-const postDataSpct = async (url, data) => {
-  try {
-    const response = await axiosInstance.post(url, data, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data; // hoặc response.data.content tùy backend
-  } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
-    throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
-  }
-};
+// const postDataSpct = async (url, data) => {
+//   try {
+//     const response = await axiosInstance.post(url, data, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//     return response.data; // hoặc response.data.content tùy backend
+//   } catch (error) {
+//     console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
+//     throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
+//   }
+// };
 
 const putData = async (url, data) => {
   try {
@@ -81,11 +78,12 @@ const deleteData = async (url) => {
   }
 };
 
-export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
+// export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
 
 export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${page}&size=${size}`);
 export const postSanPham = (data) => postData('/product', data);
-export const detailSanPham = (id) => fetchData(`/product/${id}`);
+export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
+export const getSanPhamById = (id) => fetchData(`/product/${id}`);
 
 
 export const getAllXuatXuPage = (page = 0, size = 5) => fetchData(`/xuatXu?page=${page}&size=${size}`);
@@ -152,18 +150,18 @@ export const putCameraSau = (id, dataCameraSau) => putData(`/cameraSau/${id}`, d
 export const deleteCameraSau = (idCameraSau) => deleteData(`/cameraSau/${idCameraSau}`);
 
 
-export const getAllNhaCungCapList = () => fetchDataList('/nhaCungCap/listNCC');
+export const getAllNhaCungCapList = () => fetchData('/nhaCungCap/listNCC');
 export const postNhaCungCapList = (data) => postData('/nhaCungCap/quick-create', data)
 
-export const getAllXuatXuList = () => fetchDataList('/xuatXu/listXuatXu');
-export const getAllRomList = () => fetchDataList('/rom/listRom');
-export const getAllRamList = () => fetchDataList('/ram/listRam');
-export const getAllPinList = () => fetchDataList('/pin/listPin');
-export const getAllMauSacList = () => fetchDataList('/mauSac/listMauSac');
-export const getAllManHinhList = () => fetchDataList('/manHinh/listManHinh');
-export const getAllLoaiList = () => fetchDataList('/loai/listLoai');
-export const getAllHinhAnhList = () => fetchDataList('/hinhAnh/listHinhAnh');
-export const getAllHDHList = () => fetchDataList('/heDieuHanh/listHDH');
-export const getAllCpuList = () => fetchDataList('/cpu/listCpu');
-export const getAllCameraTruocList = () => fetchDataList('/cameraTruoc/listCameraTruoc');
-export const getAllCameraSauList = () => fetchDataList('/cameraSau/listCameraSau');
+export const getAllXuatXuList = () => fetchData('/xuatXu/listXuatXu');
+export const getAllRomList = () => fetchData('/rom/listRom');
+export const getAllRamList = () => fetchData('/ram/listRam');
+export const getAllPinList = () => fetchData('/pin/listPin');
+export const getAllMauSacList = () => fetchData('/mauSac/listMauSac');
+export const getAllManHinhList = () => fetchData('/manHinh/listManHinh');
+export const getAllLoaiList = () => fetchData('/loai/listLoai');
+export const getAllHinhAnhList = () => fetchData('/hinhAnh/listHinhAnh');
+export const getAllHDHList = () => fetchData('/heDieuHanh/listHDH');
+export const getAllCpuList = () => fetchData('/cpu/listCpu');
+export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
+export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
