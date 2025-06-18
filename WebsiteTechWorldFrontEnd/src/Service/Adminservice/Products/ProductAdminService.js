@@ -34,7 +34,7 @@ const postData = async (url, data) => {
     const response = await axiosInstance.post(url, data);
     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
   } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
+    console.error(`Lỗi gửi dữ liệu tới ${url}:`, data);
     throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
   }
 };
@@ -81,32 +81,32 @@ export const postSanPham = (data) => postData('/product', data);
 export const detailSanPham = (id) => fetchData(`/product/${id}`);
 
 
-export const getAllXuatXuPage = (page = 0, size = 5) => fetchData(`/xuatXu?page=${page}&size=${size}`);
+export const getAllXuatXuPage = (page = 0, size = 5, search = '') => fetchData(`/xuatXu/search?search=${search}&page=${page}&size=${size}`);
 export const postXuatXu = (dataXuatXu) => postData('/xuatXu', dataXuatXu);
 export const putXuatXu = (id, dataXuatXu) => putData(`/xuatXu/${id}`, dataXuatXu);
 export const deleteXuatXu = (idXuatXu) => deleteData(`/xuatXu/${idXuatXu}`);
 
-export const getAllPinPage = (page = 0, size = 5) => fetchData(`/pin?page=${page}&size=${size}`);
+export const getAllPinPage = (page = 0, size = 5, search = '') => fetchData(`/pin/search?search=${search}&page=${page}&size=${size}`);
 export const postPin = (dataPin) => postData('/pin', dataPin);
 export const putPin = (id, dataPin) => putData(`/pin/${id}`, dataPin);
 export const deletePin = (idPin) => deleteData(`/pin/${idPin}`);
 
-export const getAllRamPage = (page = 0, size = 5) => fetchData(`/ram?page=${page}&size=${size}`);
+export const getAllRamPage = (page = 0, size = 5, search = '') => fetchData(`/ram/search?search=${search}&page=${page}&size=${size}`);
 export const postRam = (dataRam) => postData('/ram', dataRam);
 export const putRam = (id, dataRam) => putData(`/ram/${id}`, dataRam);
 export const deleteRam = (idRam) => deleteData(`/ram/${idRam}`);
 
-export const getAllRomPage = (page = 0, size = 5) => fetchData(`/rom?page=${page}&size=${size}`);
+export const getAllRomPage = (page = 0, size = 5, search = '') => fetchData(`/rom/search?search=${search}&page=${page}&size=${size}`);
 export const postRom = (dataRom) => postData('/rom', dataRom);
 export const putRom = (id, dataRom) => putData(`/rom/${id}`, dataRom);
 export const deleteRom = (idRom) => deleteData(`/rom/${idRom}`);
 
-export const getAllNhaCungCapPage = (page = 0, size = 5) => fetchData(`/nhaCungCap?page=${page}&size=${size}`);
+export const getAllNhaCungCapPage = (page = 0, size = 5, search = '') => fetchData(`/nhaCungCap/search?search=${search}&page=${page}&size=${size}`);
 export const postNCC = (dataNCC) => postData('/nhaCungCap', dataNCC);
 export const putNCC = (id, dataNCC) => putData(`/nhaCungCap/${id}`, dataNCC);
 export const deleteNCC = (idNCC) => deleteData(`/nhaCungCap/${idNCC}`);
 
-export const getAllLoaiPage = (page = 0, size = 5) => fetchData(`/loai?page=${page}&size=${size}`);
+export const getAllLoaiPage = (page = 0, size = 5, search = '') => fetchData(`/loai/search?search=${search}&page=${page}&size=${size}`);
 export const postLoai = (dataLoai) => postData('/loai', dataLoai);
 export const putLoai = (id, dataLoai) => putData(`/loai/${id}`, dataLoai);
 export const deleteLoai = (idLoai) => deleteData(`/loai/${idLoai}`);
@@ -122,7 +122,7 @@ export const postManHinh = (dataManHinh) => postData('/manHinh', dataManHinh);
 export const putManHinh = (id, dataManHinh) => putData(`/manHinh/${id}`, dataManHinh);
 export const deleteManHinh = (idManHinh) => deleteData(`/manHinh/${idManHinh}`);
 
-export const getAllMauSacPage = (page = 0, size = 5) => fetchData(`/mauSac?page=${page}&size=${size}`);
+export const getAllMauSacPage = (page = 0, size = 5, search = '') => fetchData(`/mauSac/search?search=${search}&page=${page}&size=${size}`);
 export const postMauSac = (dataMauSac) => postData('/mauSac', dataMauSac);
 export const putMauSac = (id, dataMauSac) => putData(`/mauSac/${id}`, dataMauSac);
 export const deleteMauSac = (idMauSac) => deleteData(`/mauSac/${idMauSac}`);

@@ -1,8 +1,8 @@
-<template>
+searchQuery<template>
     <div class="container mt-4">
         <el-row :gutter="20" class="mb-4 justify-content-center">
             <el-col :span="6">
-                <el-input v-model="searchPin" placeholder="Tìm kiếm" clearable />
+                <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
@@ -57,14 +57,14 @@
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Phiên bản" prop="phienBan">
+                        <el-form-item label="Phiên bản" prop="phienBan" :error="errors.phienBan">
                             <el-input v-model="formData.phienBan"
                                 placeholder="Nhập tên phiên bản (ví dụ: Pro, Pro Max)" autocomplete="on" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Công suất sạc" prop="congSuatSac">
+                        <el-form-item label="Công suất sạc" prop="congSuatSac" :error="errors.congSuatSac">
                             <el-input v-model="formData.congSuatSac"
                                 placeholder="Nhập công suất sạc (ví dụ: 67W, 120W)" />
                         </el-form-item>
@@ -73,14 +73,14 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Thời gian sử dụng" prop="thoiGianSuDung">
+                        <el-form-item label="Thời gian sử dụng" prop="thoiGianSuDung" :error="errors.thoiGianSuDung">
                             <el-input v-model="formData.thoiGianSuDung"
                                 placeholder="Nhập thời gian sử dụng (ví dụ: 12 giờ, 1 ngày)" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Số lần sạc tối đa" prop="soLanSacToiDa">
+                        <el-form-item label="Số lần sạc tối đa" prop="soLanSacToiDa" :error="errors.soLanSacToiDa">
                             <el-input v-model="formData.soLanSacToiDa"
                                 placeholder="Nhập số lần sạc tối đa (ví dụ: 1000 lần)" />
                         </el-form-item>
@@ -104,7 +104,6 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 const dataPin = ref([]);
-const searchPin = ref('');
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
@@ -114,23 +113,30 @@ const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
 
-const rules = {
-    phienBan: [
-        { required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }
-    ],
-    congSuatSac: [
-        { required: true, message: 'Vui lòng nhập công suất sạc', trigger: 'blur' }
-    ],
-    thoiGianSuDung: [
-        { required: true, message: 'Vui lòng nhập thời gian sử dụng', trigger: 'blur' }
-    ],
-    soLanSacToiDa: [
-        { required: true, message: 'Vui lòng nhập số lần sạc tối đa', trigger: 'blur' }
-    ]
-}
+// const rules = {
+//     phienBan: [
+//         { required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }
+//     ],
+//     congSuatSac: [
+//         { required: true, message: 'Vui lòng nhập công suất sạc', trigger: 'blur' }
+//     ],
+//     thoiGianSuDung: [
+//         { required: true, message: 'Vui lòng nhập thời gian sử dụng', trigger: 'blur' }
+//     ],
+//     soLanSacToiDa: [
+//         { required: true, message: 'Vui lòng nhập số lần sạc tối đa', trigger: 'blur' }
+//     ]
+// }
 
 const formData = reactive({
     id: null,
+    phienBan: '',
+    congSuatSac: '',
+    thoiGianSuDung: '',
+    soLanSacToiDa: '',
+})
+
+const errors = reactive({
     phienBan: '',
     congSuatSac: '',
     thoiGianSuDung: '',
@@ -165,8 +171,22 @@ const submitForm = async () => {
         dialogVisible.value = false;
         loadData();
     } catch (error) {
-        console.log('Lỗi xử lý form', error);
-        ElMessage.error('Vui lòng kiểm tra lại thông tin');
+        errors.phienBan = error.message.phienBan || ''
+        errors.congSuatSac = error.message.congSuatSac || ''
+        errors.thoiGianSuDung = error.message.thoiGianSuDung || ''
+        errors.soLanSacToiDa = error.message.soLanSacToiDa || ''
+
+        const errorMessages = [];
+        if (errors.phienBan) errorMessages.push(errors.phienBan);
+        if (errors.congSuatSac) errorMessages.push(errors.congSuatSac);
+        if (errors.thoiGianSuDung) errorMessages.push(errors.thoiGianSuDung);
+        if (errors.soLanSacToiDa) errorMessages.push(errors.soLanSacToiDa);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
     }
 }
 
@@ -200,14 +220,21 @@ const toRecord = computed(() => {
 
 const resetForm = () => {
     formData.id = null,
-        formData.congSuatSac = '';
+    formData.congSuatSac = '';
     formData.phienBan = '';
     formData.thoiGianSuDung = '';
     formData.soLanSacToiDa = '';
 }
 
+const resetErrors = () => {
+    errors.congSuatSac = '';
+    errors.phienBan = '';
+    errors.thoiGianSuDung = '';
+    errors.soLanSacToiDa = '';
+}
+
 const handleSearch = () => {
-    searchQuery.value = searchPin.value;
+    searchQuery.value = '';
     currentPage.value = 1;
     loadData();
 };
@@ -225,12 +252,12 @@ const openDetail = (row) => {
     isEditMode.value = true;
     Object.assign(formData, row);
     dialogVisible.value = true;
+    resetErrors()
 };
 
 const handleRefresh = () => {
     searchQuery.value = '';
     currentPage.value = 1;
-    searchPin.value = '';
     loadData();
 };
 

@@ -251,7 +251,7 @@ const nhaMangOptions = [
 // Validation rules
 const rules = {
   soImei: [
-    { required: true, message: "Vui lòng nhập số IMEI", trigger: "blur" },
+    { required: true, message: "Vui lòng nhập số IMEI 1", trigger: "blur" },
     {
       pattern: /^\d{15}$/,
       message: "Số IMEI phải có đúng 15 chữ số",
@@ -259,6 +259,7 @@ const rules = {
     },
   ],
   soImei2: [
+    {required : true, message: "Vui lòng nhập số IMEI 2", trigger: "blur"},
     {
       pattern: /^\d{15}$/,
       message: "Số IMEI 2 phải có đúng 15 chữ số (nếu có)",
