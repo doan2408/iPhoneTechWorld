@@ -127,8 +127,16 @@ export const postMauSac = (dataMauSac) => postData('/mauSac', dataMauSac);
 export const putMauSac = (id, dataMauSac) => putData(`/mauSac/${id}`, dataMauSac);
 export const deleteMauSac = (idMauSac) => deleteData(`/mauSac/${idMauSac}`);
 
-
-export const getAllIemiPage = (page = 0, size = 5) => fetchData(`/imei?page=${page}&size=${size}`);
+export const getAllImeiPage = (page = 0, size = 5, keyword = null) => {
+  let url = `/imei?page=${page}&size=${size}`;
+  if(keyword && keyword.trim() !== "") {
+    url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+  }
+  return fetchData(url);
+};
+export const postImei = (dataImei) => postData('/imei', dataImei);
+export const putImei = (id, dataImei) => putData(`/imei/${id}`, dataImei)
+export const deleteImei = (idImei) => deleteData(`/imei/${id}`)
 
 export const getAllHeDieuHanhPage = (page = 0, size = 5, keyword = null) => {
   let url = `/heDieuHanh?page=${page}&size=${size}`;
@@ -136,16 +144,29 @@ export const getAllHeDieuHanhPage = (page = 0, size = 5, keyword = null) => {
     url += `&keyword=${encodeURIComponent(keyword.trim())}`;
   }
   return fetchData(url);
-};export const postHDH = (dataHDH) => postData('/heDieuHanh', dataHDH);
+};
+export const postHDH = (dataHDH) => postData('/heDieuHanh', dataHDH);
 export const putHDH = (id, dataHDH) => putData(`/heDieuHanh/${id}`, dataHDH);
 export const deleteHDH = (idHDH) => deleteData(`/heDieuHanh/${idHDH}`);
 
-export const getAllCpuPage = (page = 0, size = 5) => fetchData(`/cpu?page=${page}&size=${size}`);
+export const getAllCpuPage = (page = 0, size = 5, keyword = null) => {
+  let url = `/cpu?page=${page}&size=${size}`;
+  if (keyword && keyword.trim() !== "") {
+    url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+  }
+  return fetchData(url);
+};
 export const postCpu = (dataCpu) => postData('/cpu', dataCpu);
 export const putCpu = (id, dataCpu) => putData(`/cpu/${id}`, dataCpu);
 export const deleteCpu = (idCpu) => deleteData(`/cpu/${idCpu}`);
 
-export const getAllCameraTruocPage = (page = 0, size = 5) => fetchData(`/cameraTruoc?page=${page}&size=${size}`);
+export const getAllCameraTruocPage = (page = 0, size = 5, keyword = null) => {
+  let url = `/cameraTruoc?page=${page}&size=${size}`;
+  if(keyword && keyword.trim() !== "") {
+    url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+  }
+  return fetchData(url);
+}
 export const postCameraTruoc = (dataCameraTruoc) => postData('/cameraTruoc',dataCameraTruoc);
 export const putCameraTruoc = (id, dataCameraTruoc) => putData(`/cameraTruoc/${id}`, dataCameraTruoc);
 export const deleteCameraTruoc = (idCameraTruoc) => deleteData(`/cameraTruoc/${idCameraTruoc}`);
