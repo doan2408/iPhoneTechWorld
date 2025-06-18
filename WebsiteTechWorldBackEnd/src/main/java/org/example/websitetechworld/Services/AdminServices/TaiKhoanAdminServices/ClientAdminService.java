@@ -53,7 +53,7 @@ public class ClientAdminService {
         adminClientResponse.setTongDiem(khachHang.getTongDiem());
         adminClientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
         adminClientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
-        adminClientResponse.setTrangThai(khachHang.getTrangThai().name());
+        adminClientResponse.setTrangThai(khachHang.getTrangThai());
 
         // Tạo danh sách địa chỉ
         List<AdminDiaChiResponse> diaChiResponses = khachHang.getDiaChis().stream()

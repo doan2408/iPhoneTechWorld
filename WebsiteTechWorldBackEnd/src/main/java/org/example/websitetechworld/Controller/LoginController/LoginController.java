@@ -34,7 +34,7 @@ public class LoginController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
         try {
             String username = request.get("tai_khoan");
-             String password = request.get("mat_khau");
+            String password = request.get("mat_khau");
 
             List<Map<String, String>> errors = new ArrayList<>();
 
@@ -51,6 +51,21 @@ public class LoginController {
                     Authentication authentication = authenticationManager.authenticate(
                             new UsernamePasswordAuthenticationToken(username, password)
                     );
+                    CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
+
+                    if(!"ENABLE".equalsIgnoreCase(taiKhoan.gettrangThai())) {
+                        System.out.println(taiKhoan.gettrangThai());
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
+                        );
+                    }
+
+                    if(!"ACTIVE".equalsIgnoreCase(taiKhoan.gettrangThai())) {
+                        System.out.println(taiKhoan.gettrangThai());
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
+                        );
+                    }
 
                     SecurityContext context = SecurityContextHolder.getContext();
                     context.setAuthentication(authentication);
@@ -59,7 +74,6 @@ public class LoginController {
                     session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 
                     String roles = authentication.getAuthorities().toString();
-                    CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
 
                     return ResponseEntity.ok(Map.of(
                             "message", "Đăng nhập thành công!",
