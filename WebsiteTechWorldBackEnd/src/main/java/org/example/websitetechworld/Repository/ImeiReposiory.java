@@ -1,10 +1,13 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.Imei;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,5 +18,10 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
     Imei findBySoImei(String soImei);
     List<Imei> findAllBySoImeiIn(List<String> soImeis);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Imei imei WHERE imei.idSanPhamChiTiet = :sanPhamChiTiet")
+    void deleteByIdSanPhamChiTiet(SanPhamChiTiet sanPhamChiTiet);
 
 }

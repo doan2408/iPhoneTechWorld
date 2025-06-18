@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +27,14 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             "LEFT JOIN FETCH s.idLoai " +
             "WHERE s.id = :id")
     Optional<SanPhamChiTiet> findFullById(@Param("id") Integer id);
+
+//    @Query("""
+//        select new org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse(
+//            sp.maSanPham,
+//
+//        ) from SanPhamChiTiet spct
+//        join spct.idSanPham sp
+//""")
+
 
 }
