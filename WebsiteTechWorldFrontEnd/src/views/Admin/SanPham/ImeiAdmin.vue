@@ -53,7 +53,7 @@
           label="STT"
           width="80"
         />
-        <el-table-column prop="soImei" label="Số IMEI" />
+        <el-table-column prop="soImei" label="Số IMEI 1" />
         <el-table-column prop="soImei2" label="Số IMEI 2" />
         <el-table-column label="Trạng thái">
           <template #default="{ row }">
@@ -119,7 +119,7 @@
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="Số IMEI" prop="soImei">
+            <el-form-item label="Số IMEI 1" prop="soImei">
               <el-input
                 v-model="formData.soImei"
                 placeholder="Nhập số IMEI (15 chữ số)"
