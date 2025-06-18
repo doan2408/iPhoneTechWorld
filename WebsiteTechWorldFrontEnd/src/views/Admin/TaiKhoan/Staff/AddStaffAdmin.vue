@@ -2,59 +2,10 @@
 import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ElNotification } from "element-plus"; 
+import { ElMessage, ElNotification } from "element-plus"; 
 import { h } from "vue";
 
 const router = useRouter();
-
-//thông báo
-function showCustomNotification({
-  messageText,
-  type = "success",
-  duration = 2000,
-}) {
-  ElNotification({
-    title: "",
-    message: h("div", [
-      h("span", messageText),
-      h(
-        "div",
-        {
-          style: `
-                    position: relative;
-                    height: 4px;
-                    background-color: #e0e0e0;
-                    margin-top: 8px;
-                    border-radius: 2px;
-                    overflow: hidden;
-                `,
-        },
-        [
-          h("div", {
-            style: `
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        height: 100%;
-                        background-color: ${
-                          type === "success"
-                            ? "#28a745"
-                            : type === "error"
-                            ? "#dc3545"
-                            : "#007bff"
-                        };
-                        width: 100%;
-                        animation: progressBar ${duration}ms linear forwards;
-                    `,
-          }),
-        ]
-      ),
-    ]),
-    duration: duration,
-    type: type,
-    position: "top-right",
-  });
-}
 
 // add nhan vien phía admin
 const staffRequest = ref({
@@ -78,12 +29,7 @@ const handleAddStaff = async () => {
       chucVu: "STAFF",
       gioiTinh: true,
     };
-    // Thêm mới thành công
-    showCustomNotification({
-      messageText: "Thêm mới thành công!",
-      type: "success",
-      duration: 2000,
-    });
+    ElMessage.success("Thêm nhân viên thành công");
     router.push(`/admin/staff`)
   } catch (err) {
     if (Array.isArray(err)) {
@@ -92,11 +38,7 @@ const handleAddStaff = async () => {
         errors[field] = message;
       });
     } else {
-      showCustomNotification({
-        messageText: "Có lỗi xảy ra!",
-        type: "error",
-        duration: 2000,
-      });
+      ElMessage.error("Thêm nhân viên thất bại");
     }
   }
 };
