@@ -1,12 +1,15 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.Imei;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -31,5 +34,10 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
     @Query("SELECT COUNT(i) FROM Imei i WHERE COALESCE(i.soImei2, '') = COALESCE(:soImei2, '')")
     Integer countSoImei2(@Param("soImei2") String soImei2);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Imei imei WHERE imei.idSanPhamChiTiet = :sanPhamChiTiet")
+    void deleteByIdSanPhamChiTiet(SanPhamChiTiet sanPhamChiTiet);
 
 }

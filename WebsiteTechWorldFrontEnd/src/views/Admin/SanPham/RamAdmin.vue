@@ -112,9 +112,9 @@ import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableRam = ref([]);
-const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
+const currentPage = ref(1);
 const pageSize = 5;
 const searchQuery = ref('');
 const dialogVisible = ref(false);

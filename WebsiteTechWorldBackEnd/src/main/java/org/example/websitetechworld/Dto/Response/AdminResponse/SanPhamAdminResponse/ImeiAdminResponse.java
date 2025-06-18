@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,7 +14,7 @@ public class ImeiAdminResponse {
     private Integer id;
     private String soImei;
     private String soImei2;
-    private String trangThaiImei;
+    private TrangThaiImei trangThaiImei;
     private String nhaMang;
     private Integer idSanPhamChiTiet;
     private String maSanPhamChiTiet;

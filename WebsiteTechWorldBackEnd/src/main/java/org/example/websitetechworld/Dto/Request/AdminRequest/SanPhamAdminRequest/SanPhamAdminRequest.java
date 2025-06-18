@@ -3,6 +3,7 @@ package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminReques
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,8 @@ public class SanPhamAdminRequest {
     private String tenSanPham;
 
     private String thuongHieu;
+
+    private TrangThaiSanPham trangThaiSanPham;
 
     private Integer idNhaCungCap;
 

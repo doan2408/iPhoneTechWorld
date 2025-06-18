@@ -17,6 +17,7 @@ const sanPhamAdminRouters: RouteRecordRaw[] = [
       { path: "cameraSau", component: () => import("@/views/Admin/SanPham/CameraSauAdmin.vue") },
       { path: "products", component: () => import("@/views/Admin/SanPham/ProductAdmin.vue"), meta: { title: 'Products Manage'} },
       { path: "products/:id", component: () => import("@/views/Admin/SanPham/PoductAdminDetail.vue"), meta: { title: 'Product Detail'} },
+      { path: "products/view/:id", component: () => import("@/views/Admin/SanPham/ProductAdminView.vue"), meta: { title: 'Product View'} },
 ];
 
 export default sanPhamAdminRouters;

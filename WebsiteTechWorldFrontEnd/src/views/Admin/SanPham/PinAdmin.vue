@@ -214,6 +214,7 @@ const handleDelete = async (id) => {
 const fromRecord = computed(() => {
     return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
 });
+
 const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
@@ -260,7 +261,6 @@ const handleRefresh = () => {
     currentPage.value = 1;
     loadData();
 };
-
 
 
 
