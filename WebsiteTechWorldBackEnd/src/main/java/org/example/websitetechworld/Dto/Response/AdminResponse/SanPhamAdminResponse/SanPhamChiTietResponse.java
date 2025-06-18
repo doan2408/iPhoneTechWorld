@@ -70,7 +70,7 @@ public class SanPhamChiTietResponse {
     //Cpu
     private String hangSanXuat;
     private String soNhan;
-    private Integer soLuongCpu;
+    private String chipXuLy;
     private String xungNhip;
     private String congNgheSanXuat;
     private String boNhoDem;

@@ -140,8 +140,8 @@ public class SanPhamChiTietAdminService {
         Cpu cpu = entity.getIdCpu();
         if (cpu != null) {
             response.setHangSanXuat(cpu.getHangSanXuat());
+            response.setChipXuLy(cpu.getChipXuLy());
             response.setSoNhan(cpu.getSoNhan());
-            response.setSoLuongCpu(cpu.getSoLuong());
             response.setXungNhip(cpu.getXungNhip());
             response.setCongNgheSanXuat(cpu.getCongNgheSanXuat());
             response.setBoNhoDem(cpu.getBoNhoDem());

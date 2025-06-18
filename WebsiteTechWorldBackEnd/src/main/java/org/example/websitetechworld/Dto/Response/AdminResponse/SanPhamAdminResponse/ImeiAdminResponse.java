@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ImeiAdminResponse {
     private Integer id;
     private String soImei;
+    private String soImei2;
     private String trangThaiImei;
     private String nhaMang;
     private Integer idSanPhamChiTiet;
