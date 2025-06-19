@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminNhanVienResponse;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
 import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
@@ -102,10 +103,10 @@ public class NhanVienAdminService {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             // Nếu có từ khóa search, tìm kiếm theo nhiều trường
-            pageResult = nhanVienRepository.findByKeyword(keyword.trim(), pageable);
+            pageResult = nhanVienRepository.findByKeyword(keyword.trim(), NhanVienChucVu.ADMIN, pageable);
         } else {
             // Nếu không có từ khóa, lấy tất cả
-            pageResult = nhanVienRepository.findAll(pageable);
+            pageResult = nhanVienRepository.findByNotChucVu(NhanVienChucVu.ADMIN, pageable);
         }
 
         // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
