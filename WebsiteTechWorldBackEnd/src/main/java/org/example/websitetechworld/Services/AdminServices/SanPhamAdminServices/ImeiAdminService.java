@@ -3,11 +3,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ImeiAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Entity.Imei;
-import org.example.websitetechworld.Entity.ImeiRepository;
-import org.example.websitetechworld.Entity.Loai;
-import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
