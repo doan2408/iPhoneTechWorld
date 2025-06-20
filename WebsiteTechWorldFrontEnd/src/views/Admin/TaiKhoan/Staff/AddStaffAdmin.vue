@@ -13,7 +13,7 @@ const staffRequest = ref({
   trangThai: "ENABLE", //Mặc định là đang làm
   chucVu: "STAFF", // Mặc định là Nhân Viên
   gioiTinh: true, // Mặc định là Nam
-  matKhau: "password123"
+  matKhau: ""
 });
 
 const errors = reactive({});
@@ -77,7 +77,7 @@ const handleAddStaff = async () => {
         </div>
         <input
           v-model.trim="staffRequest.matKhau"
-          placeholder="Mật khẩu (nếu bỏ qua, mặc định là password123)"
+          placeholder="Mật khẩu"
           type="password"
           class="form-control"
         />
