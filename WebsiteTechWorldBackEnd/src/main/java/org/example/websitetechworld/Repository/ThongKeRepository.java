@@ -203,4 +203,3 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     @Query(value = "SELECT COUNT(*) FROM hoa_don WHERE trang_thai_thanh_toan = 'COMPLETED'", nativeQuery = true)
     Integer donHangDaHoanTat ();
 }
-

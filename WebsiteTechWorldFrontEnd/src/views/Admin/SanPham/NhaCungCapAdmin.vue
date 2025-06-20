@@ -18,7 +18,7 @@
             </el-col>
         </el-row>
 
-        <h2>Danh sách pin</h2>
+        <h2>Danh nhà cung cấp</h2>
         <div class="table-responsive mb-4" style="margin-top: 20px;">
             <el-table :data="tableNCC" border style="width: 100%">
                 <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
@@ -48,20 +48,20 @@
             </div>
         </div>
 
-        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa hệ điều hành' : 'Thêm mới hệ điều hành'"
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa nhà cung cấp' : 'Thêm mới nhà cung cấp'"
             width="900px" :close-on-click-modal="false" :destroy-on-close="true">
             <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Tên nhà cung cấp" prop="tenNhaCungCap">
+                        <el-form-item label="Tên nhà cung cấp" prop="tenNhaCungCap" :error="errors.tenNhaCungCap">
                             <el-input v-model="formData.tenNhaCungCap"
                                 placeholder="Nhập tên nhà cung cấp (ví dụ: Công ty ABC)" autocomplete="on" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Địa chỉ" prop="diaChi">
+                        <el-form-item label="Địa chỉ" prop="diaChi" :error="errors.diaChi">
                             <el-input v-model="formData.diaChi"
                                 placeholder="Nhập địa chỉ (ví dụ: 123 Lê Lợi, Q.1, TP.HCM)" />
                         </el-form-item>
@@ -70,13 +70,13 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Số điện thoại" prop="sdt">
+                        <el-form-item label="Số điện thoại" prop="sdt" :error="errors.sdt">
                             <el-input v-model="formData.sdt" placeholder="Nhập số điện thoại (ví dụ: 0901234567)" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Email" prop="email">
+                        <el-form-item label="Email" prop="email" :error="errors.email">
                             <el-input v-model="formData.email" placeholder="Nhập email (ví dụ: example@gmail.com)" />
                         </el-form-item>
                     </el-col>
@@ -144,6 +144,13 @@ const formData = reactive({
     email: '',
 })
 
+const errors = reactive({
+    tenNhaCungCap: '',
+    diaChi: '',
+    sdt: '',
+    email: '',
+})
+
 const fromRecord = computed(() => {
     return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
 });
@@ -168,6 +175,13 @@ const resetForm = () => {
     formData.diaChi = '';
     formData.sdt = '';
     formData.email = '';
+};
+
+const resetErrors = () => {
+    errors.tenNhaCungCap = '';
+    errors.diaChi = '';
+    errors.sdt = '';
+    errors.email = '';
 };
 
 const handleSearch = () => {
@@ -196,8 +210,22 @@ const submitForm = async () => {
         dialogVisible.value = false;
         loadData();
     } catch (error) {
-        console.error('Lỗi xử lý form', error);
-        ElMessage.error('Vui lòng kiểm tra lại thông tin');
+        errors.tenNhaCungCap = error.message.tenNhaCungCap || ''
+        errors.diaChi = error.message.diaChi || ''
+        errors.sdt = error.message.sdt || ''
+        errors.email = error.message.email || ''
+
+        const errorMessages = [];
+        if (errors.tenNhaCungCap) errorMessages.push(errors.tenNhaCungCap);
+        if (errors.diaChi) errorMessages.push(errors.diaChi);
+        if (errors.sdt) errorMessages.push(errors.sdt);
+        if (errors.email) errorMessages.push(errors.email);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
     }
 }
 
@@ -205,6 +233,7 @@ const openDetail = (row) => {
     isEditMode.value = true;
     Object.assign(formData, row);
     dialogVisible.value = true;
+    resetErrors()
 };
 
 const handleCreate = () => {

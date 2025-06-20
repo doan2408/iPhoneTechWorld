@@ -2,9 +2,12 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse;
 
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 
 import java.util.Set;
 
@@ -22,11 +25,12 @@ public class SanPhamAdminResponse {
 
     private String thuongHieu;
 
-    private Integer soLuongTonKho;
+    @Enumerated(EnumType.STRING)
+    private TrangThaiSanPham trangThaiSanPham;
 
     private String tenNhaCungCap;
 
-    private String url;
+//    private String url;
 
     private Set<SanPhamChiTietResponse> sanPhamChiTiets;
 

@@ -17,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -142,8 +144,8 @@ public class SanPhamChiTietAdminService {
         Cpu cpu = entity.getIdCpu();
         if (cpu != null) {
             response.setHangSanXuat(cpu.getHangSanXuat());
+            response.setChipXuLy(cpu.getChipXuLy());
             response.setSoNhan(cpu.getSoNhan());
-            response.setSoLuongCpu(cpu.getSoLuong());
             response.setXungNhip(cpu.getXungNhip());
             response.setCongNgheSanXuat(cpu.getCongNgheSanXuat());
             response.setBoNhoDem(cpu.getBoNhoDem());
@@ -172,7 +174,7 @@ public class SanPhamChiTietAdminService {
 
         XuatXu xuatXu = entity.getIdXuatXu();
         if (xuatXu != null) {
-            response.setXuatXu(xuatXu.getMaXuatXu());
+            response.setMaXuatXu(xuatXu.getMaXuatXu());
             response.setTenQuocGia(xuatXu.getTenQuocGia());
 
         }
@@ -184,12 +186,24 @@ public class SanPhamChiTietAdminService {
 
         if (entity.getImeis() != null && !entity.getImeis().isEmpty()) {
             Imei firstImei = entity.getImeis().iterator().next();
-            response.setImei(firstImei.getSoImei()); // sửa theo tên field thực tế
+            ImeiAdminResponse imeiResponse = new ImeiAdminResponse();
+            imeiResponse.setSoImei(firstImei.getSoImei());
+            imeiResponse.setNhaMang(firstImei.getNhaMang());
+            imeiResponse.setTrangThaiImei(firstImei.getTrangThaiImei());
+            response.setImeis(new LinkedHashSet<>(Collections.singletonList(imeiResponse)));
+        } else {
+            response.setImeis(new LinkedHashSet<>());
         }
 
+        // Ánh xạ hinhAnhs (chỉ lấy phần tử đầu tiên)
         if (entity.getHinhAnhs() != null && !entity.getHinhAnhs().isEmpty()) {
             HinhAnh firstImage = entity.getHinhAnhs().iterator().next();
-            response.setUrl(firstImage.getUrl()); // sửa theo tên field thực tế
+            HinhAnhAdminResponse hinhAnhResponse = new HinhAnhAdminResponse();
+            hinhAnhResponse.setUrl(firstImage.getUrl());
+            hinhAnhResponse.setImagePublicId(firstImage.getImagePublicId());
+            response.setHinhAnhs(new LinkedHashSet<>(Collections.singletonList(hinhAnhResponse)));
+        } else {
+            response.setHinhAnhs(new LinkedHashSet<>());
         }
 
         return response;

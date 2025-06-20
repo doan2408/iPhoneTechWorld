@@ -97,6 +97,7 @@ CREATE TABLE hoa_don (
                          so_tien_giam DECIMAL(10,2),
                          thanh_tien DECIMAL(10,2),
                          ngay_tao_hoa_don DATE,
+                         ngay_tao_don_hang DATE, -- new
                          loai_hoa_don NVARCHAR(50),
                          ngay_thanh_toan DATE,
                          trang_thai_thanh_toan NVARCHAR(50),
@@ -163,7 +164,7 @@ CREATE TABLE camera_truoc (
 
 CREATE TABLE cpu (
                      id_cpu INT IDENTITY(1,1) PRIMARY KEY,
-					 chip_xu_ly NVARCHAR(50),
+                     chip_xu_ly NVARCHAR(50),
                      hang_san_xuat NVARCHAR(50),
                      so_nhan NVARCHAR(50),
                      xung_nhip NVARCHAR(50),
@@ -312,7 +313,7 @@ CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
                       so_imei VARCHAR(70),
-					  so_imei_2 VARCHAR(70), -- new
+                      so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
                       nha_mang NVARCHAR(50)
 );
@@ -374,9 +375,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      so_tien_thanh_toan DECIMAL(10,2)
 );
 
-
 -- Table nhan_vien
-
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
@@ -586,7 +585,6 @@ VALUES
     (N'Apple A9', N'Apple', N'2 nhân', N'1.8 GHz', N'7nm', N'4MB', N'15W', '2016-09-01');
 
 -- Table loai
-
 INSERT INTO loai (ten_loai)
 VALUES
     (N'Thường'),

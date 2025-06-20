@@ -8,6 +8,6 @@ import lombok.Data;
 public class ApiErrorResponse {
     private int statusCode;
     private String error;
-    private String message;
+    private Object message;
     private String path;
 }

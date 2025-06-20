@@ -1,12 +1,7 @@
 <!-- DialogThemImei.vue -->
 <template>
   <el-dialog v-model="visible" title="Nhập danh sách IMEI" width="500px">
-    <el-input
-      type="textarea"
-      v-model="imeiInput"
-      placeholder="Nhập IMEI cách nhau bằng dấu phẩy (,)"
-      :rows="5"
-    />
+    <el-input type="textarea" v-model="imeiInput" placeholder="Nhập IMEI cách nhau bằng dấu phẩy (,)" :rows="5" />
 
     <template #footer>
       <span class="dialog-footer">
@@ -58,7 +53,7 @@ const confirm = () => {
     return;
   }
 
-  emit('confirm', imeis);
+  emit('confirm', imeis, props.row);
   emit('update:modelValue', false);
 };
 

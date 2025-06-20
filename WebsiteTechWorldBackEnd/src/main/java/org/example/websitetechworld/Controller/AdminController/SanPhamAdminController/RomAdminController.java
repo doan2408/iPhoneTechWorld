@@ -3,20 +3,22 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RomAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RomAdminResponse;
-import org.example.websitetechworld.Entity.Rom;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.RomAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/rom")
+@Validated
 public class RomAdminController {
     private final RomAdminService romAdminService;
 
@@ -25,7 +27,6 @@ public class RomAdminController {
             @PageableDefault(page = 0, size = 5) Pageable pageable
     ) {
         Page<RomAdminResponse> roms = romAdminService.getAllRoms(pageable);
-
         return ResponseEntity.ok(roms);
     }
 
@@ -35,10 +36,19 @@ public class RomAdminController {
         return ResponseEntity.ok(roms);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<RomAdminResponse>> searchRoms(
+            @RequestParam(required = false) String search,
+            @PageableDefault(page = 0, size = 5) Pageable pageable
+    ) {
+        Page<RomAdminResponse> roms = romAdminService.searchRoms(search, pageable);
+        return ResponseEntity.ok(roms);
+    }
+
     @PostMapping
-    public ResponseEntity<RomAdminResponse> createRom(@RequestBody RomAdminRequest romAdminRequest) {
+    public ResponseEntity<RomAdminResponse> createRom(@Valid @RequestBody RomAdminRequest romAdminRequest) {
         RomAdminResponse romAdminResponse = romAdminService.createRom(romAdminRequest);
-        return ResponseEntity.ok(romAdminResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(romAdminResponse);
     }
 
     @GetMapping("/{id}")
@@ -48,9 +58,8 @@ public class RomAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RomAdminResponse> updateRom(@PathVariable Integer id, @RequestBody RomAdminRequest romAdminRequest) {
+    public ResponseEntity<RomAdminResponse> updateRom(@PathVariable Integer id, @Valid @RequestBody RomAdminRequest romAdminRequest) {
         RomAdminResponse romAdminResponse = romAdminService.updateRom(id, romAdminRequest);
-
         return ResponseEntity.ok(romAdminResponse);
     }
 
@@ -59,6 +68,4 @@ public class RomAdminController {
         RomAdminResponse romAdminResponse = romAdminService.deleteRom(id);
         return ResponseEntity.ok(romAdminResponse);
     }
-
-
 }

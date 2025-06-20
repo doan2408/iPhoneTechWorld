@@ -1,34 +1,29 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
-
-import java.math.BigDecimal;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SanPhamHienThiAdminResponse {
 
+public class SanPhamAdminUpdateResponse {
     private Integer id;
 
     private String maSanPham;
 
     private String tenSanPham;
 
-    private String tenLoai;
+    private String thuongHieu;
 
-    private Integer soLuong;
-
-    @Enumerated(EnumType.STRING)
     private TrangThaiSanPham trangThaiSanPham;
 
-    private BigDecimal giaBan;
+    private Integer idNhaCungCap;
 
-    private String url;
+    private Set<SanPhamChiTietAdminDetailResponse> sanPhamChiTiets;
 
 }

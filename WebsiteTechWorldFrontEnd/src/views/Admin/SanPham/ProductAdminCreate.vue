@@ -1,886 +1,616 @@
+```vue
 <template>
-  <h1 style="text-align: center; font-size: 32px; margin-bottom: 20px;">Thêm sản phẩm</h1>
-
-  <el-form :model="sanPham" label-width="100px" label-position="top" class="form-container">
-
-    <el-form-item label="Tên sản phẩm">
-      <el-input v-model="sanPham.tenSanPham" placeholder="Nhập tên sản phẩm" />
+  <el-form :model="sanPham" :rules="rules" ref="sanPhamForm" label-width="120px">
+    <h2>Thêm sản phẩm</h2>
+    <!-- Thông tin sản phẩm chính -->
+    <el-form-item label="Tên sản phẩm" prop="tenSanPham">
+      <el-input v-model="sanPham.tenSanPham"></el-input>
     </el-form-item>
 
-    <el-row :gutter="20" align="middle">
+    <el-form-item label="Thương hiệu" prop="thuongHieu">
+      <el-input v-model="sanPham.thuongHieu"></el-input>
+    </el-form-item>
 
+    <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
+      <el-select v-model="sanPham.idNhaCungCap" placeholder="Chọn nhà cung cấp">
+        <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap" :value="ncc.id"></el-option>
+      </el-select>
+    </el-form-item>
+
+    <el-form-item label="Trạng thái" prop="trangThaiSanPham">
+      <el-select v-model="sanPham.trangThaiSanPham" placeholder="Chọn trạng thái">
+        <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label"
+          :value="tt.value"></el-option>
+      </el-select>
+    </el-form-item>
+
+    <!-- Chọn thuộc tính để tạo biến thể -->
+    <h3>Tạo biến thể sản phẩm</h3>
+    <el-row :gutter="20">
       <el-col :span="12">
-        <el-form-item label="Thương hiệu">
-          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <el-input v-model="sanPham.thuongHieu" placeholder="Nhập tên thương hiệu" />
-            <el-button size="small" type="primary" @click="handleClick" style="height: 32px;">
-              +
-            </el-button>
-          </div>
+        <el-form-item label="Màu sắc">
+          <el-select v-model="selectedMaus" multiple placeholder="Chọn màu sắc">
+            <el-option v-for="mau in maus" :key="mau.id" :label="mau.tenMau" :value="mau.id"></el-option>
+          </el-select>
         </el-form-item>
       </el-col>
-
-
       <el-col :span="12">
-        <el-form-item label="Nhà cung cấp">
-          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <el-select v-model="sanPham.idNhaCungCap" placeholder="Chọn nhà cung cấp" style="flex: 1;">
-              <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap" :value="ncc.id" />
-            </el-select>
-
-            <el-button size="small" type="primary" @click="openDialog" style="height: 32px;">
-              +
-            </el-button>
-          </div>
+        <el-form-item label="RAM">
+          <el-select v-model="selectedRams" multiple placeholder="Chọn RAM">
+            <el-option v-for="ram in rams" :key="ram.id" :label="ram.dungLuong" :value="ram.id"></el-option>
+          </el-select>
         </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="ROM">
+          <el-select v-model="selectedRoms" multiple placeholder="Chọn ROM">
+            <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-button type="primary" @click="generateVariants">Tạo biến thể</el-button>
 
-        <DialogThemNhaCungCap ref="addNCCDialog" @saved="handleNhaCungCapAdded" />
+    <!-- Danh sách chi tiết sản phẩm -->
+    <h3>Chi tiết sản phẩm</h3>
+    <el-row :gutter="20">
+      <el-col :span="10">
+        <el-card>
+          <h4>Danh sách chi tiết</h4>
+          <el-table :data="sanPham.sanPhamChiTiets" style="margin-top: 10px" @row-click="selectChiTiet">
+            <el-table-column label="Chi tiết" type="index" width="80"></el-table-column>
+            <el-table-column label="Màu sắc">
+              <template #default="{ row }">
+                {{ getMauSacLabels(row.idMau) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="RAM">
+              <template #default="{ row }">
+                {{ getRamLabels(row.idRam) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="ROM">
+              <template #default="{ row }">
+                {{ getRomLabels(row.idRom) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Hành động" width="100">
+              <template #default="{ $index }">
+                <el-button type="danger" size="small" @click.stop="removeChiTiet($index)">Xóa</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+      <el-col :span="14">
+        <el-card v-if="selectedChiTiet !== null">
+          <h4>Thông tin chi tiết {{ selectedChiTiet + 1 }}</h4>
+          <el-form-item label="Màn hình" :prop="`sanPhamChiTiets.${selectedChiTiet}.idManHinh`"
+            :rules="[{ required: true, message: 'Vui lòng chọn màn hình' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idManHinh" placeholder="Chọn màn hình">
+              <el-option v-for="mh in manHinhs" :key="mh.id" :label="mh.kichThuoc" :value="mh.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Hệ điều hành" :prop="`sanPhamChiTiets.${selectedChiTiet}.idHeDieuHanh`"
+            :rules="[{ required: true, message: 'Vui lòng chọn hệ điều hành' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idHeDieuHanh" placeholder="Chọn hệ điều hành">
+              <el-option v-for="hdh in heDieuHanhs" :key="hdh.id" :label="hdh.phienBan" :value="hdh.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Pin" :prop="`sanPhamChiTiets.${selectedChiTiet}.idPin`"
+            :rules="[{ required: true, message: 'Vui lòng chọn pin' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idPin" placeholder="Chọn pin">
+              <el-option v-for="pin in pins" :key="pin.id" :label="pin.congSuatSac" :value="pin.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="CPU" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCpu`"
+            :rules="[{ required: true, message: 'Vui lòng chọn CPU' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCpu" placeholder="Chọn CPU">
+              <el-option v-for="cpu in cpus" :key="cpu.id" :label="cpu.xungNhip" :value="cpu.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Camera trước" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCameraTruoc`"
+            :rules="[{ required: true, message: 'Vui lòng chọn camera trước' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraTruoc" placeholder="Chọn camera trước">
+              <el-option v-for="cam in cameraTruocs" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Camera sau" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCameraSau`"
+            :rules="[{ required: true, message: 'Vui lòng chọn camera sau' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraSau" placeholder="Chọn camera sau">
+              <el-option v-for="cam in cameraSaus" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Xuất xứ" :prop="`sanPhamChiTiets.${selectedChiTiet}.idXuatXu`"
+            :rules="[{ required: true, message: 'Vui lòng chọn xuất xứ' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idXuatXu" placeholder="Chọn xuất xứ">
+              <el-option v-for="xx in xuatXus" :key="xx.id" :label="xx.maXuatXu" :value="xx.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Loại" :prop="`sanPhamChiTiets.${selectedChiTiet}.idLoai`"
+            :rules="[{ required: true, message: 'Vui lòng chọn loại' }]">
+            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idLoai" placeholder="Chọn loại">
+              <el-option v-for="loai in loais" :key="loai.id" :label="loai.tenLoai" :value="loai.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Giá bán" :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`" :rules="[
+            { required: true, message: 'Vui lòng nhập giá bán', type: 'number' },
+            { type: 'number', min: 0, max: 100000000, message: 'Giá bán phải từ 0 đến 100 triệu' }
+          ]">
+            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :min="0"
+              :precision="2"></el-input-number>
+          </el-form-item>
+          <el-form-item label="IMEI" :prop="`sanPhamChiTiets.${selectedChiTiet}.imeisInput`"
+            :rules="[{ required: true, message: 'Vui lòng nhập IMEI' }]">
+            <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
+              placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy"
+              @input="capNhatSoLuong(selectedChiTiet)"></el-input>
+            <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
+              accept=".txt,.csv" style="margin-top: 8px;">
+              <el-button type="primary">Tải lên file IMEI</el-button>
+            </el-upload>
+            <div v-if="selectedChiTiet !== null" style="margin-top: 8px;">
+              Số lượng IMEI hợp lệ: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}
+              <span v-if="sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis?.length" style="color: red;">
+                ({{ sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis.length }} IMEI không hợp lệ: {{
+                  sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis.join(', ') }})
+              </span>
+            </div>
+          </el-form-item>
+          <el-form-item label="Hình ảnh" :prop="`sanPhamChiTiets.${selectedChiTiet}.hinhAnhs`"
+            :rules="[{ required: true, message: 'Vui lòng tải lên ít nhất một hình ảnh', trigger: 'change' }]">
+            <el-upload :file-list="sanPham.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
+              :on-change="(file, fileList) => handleFileChange(file, fileList, selectedChiTiet)"
+              :on-remove="(file, fileList) => handleFileRemove(file, fileList, selectedChiTiet)" :auto-upload="false"
+              accept="image/jpeg,image/png" list-type="picture" :limit="5"
+              :on-exceed="() => ElMessage.warning('Chỉ được tải lên tối đa 5 ảnh!')">
+              <el-button type="primary">Tải lên hình ảnh</el-button>
+            </el-upload>
+          </el-form-item>
+        </el-card>
+        <el-card v-else>
+          <h4>Vui lòng chọn hoặc thêm chi tiết sản phẩm</h4>
+        </el-card>
       </el-col>
     </el-row>
 
-
-
-    <h3>Chi tiết sản phẩm</h3>
-    <div v-for="chiTiet in sanPham.sanPhamChiTiets" :key="chiTiet.id">
-
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Hệ điều hành">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idHeDieuHanh" placeholder="Chọn hệ điều hành">
-                <el-option v-for="hdh in heDieuHanhs" :key="hdh.id" :label="hdh.phienBan" :value="hdh.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Kích thước màn hình">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idManHinh" placeholder="Chọn màn hình">
-                <el-option v-for="manhinh in manHinhs" :key="manhinh.id" :label="manhinh.kichThuoc"
-                  :value="manhinh.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Xuất xứ">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idXuatXu" placeholder="Chọn xuất xứ">
-                <el-option v-for="xx in xuatXus" :key="xx.id" :label="xx.maXuatXu" :value="xx.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Camera trước">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idCameraTruoc" placeholder="Chọn camera trước" multiple>
-                <el-option v-for="cameraTruoc in cameraTruocs" :key="cameraTruoc.id" :label="cameraTruoc.doPhanGiai"
-                  :value="cameraTruoc.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Camera sau">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idCameraSau" placeholder="Chọn camera sau" multiple>
-                <el-option v-for="cameraSau in cameraSaus" :key="cameraSau.id" :label="cameraSau.doPhanGiai"
-                  :value="cameraSau.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Pin">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idPin" placeholder="Chọn pin">
-                <el-option v-for="pin in pins" :key="pin.id" :label="pin.congSuatSac" :value="pin.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Cpu">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idCpu" placeholder="Chọn cpu">
-                <el-option v-for="cpu in cpus" :key="cpu.idCpu" :label="cpu.xungNhip" :value="cpu.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="12">
-          <el-form-item label="Loại">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idLoai" placeholder="Chọn loại">
-                <el-option v-for="loai in loais" :key="loai.id" :label="loai.tenLoai" :value="loai.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Màu sắc">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idMau" placeholder="Chọn màu sắc" multiple>
-                <el-option v-for="mau in mauSacs" :key="mau.id" :label="mau.tenMau" :value="mau.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Ram">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idRam" placeholder="Chọn ram" multiple>
-                <el-option v-for="ram in rams" :key="ram.id" :label="ram.dungLuong" :value="ram.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="Rom">
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-              <el-select v-model="chiTiet.idRom" placeholder="Chọn rom" multiple>
-                <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id" />
-              </el-select>
-              <el-button size="small" type="primary" @click="handleSelectClick" style="height: 32px;">
-                +
-              </el-button>
-            </div>
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </div>
-
-    <div v-for="(phienBan, index) in danhSachPhienBan" :key="index" style="margin-bottom: 40px;">
-      <h3 style="margin-bottom: 10px;">PHIÊN BẢN {{ phienBan.tenPhienBan }}</h3> <!-- Tên nhóm RAM-ROM -->
-
-      <el-table :data="phienBan.chiTiet" border style="width: 100%">
-        <el-table-column label="STT" width="60" header-align="center" align="center">
-          <template #default="{ $index }">
-            {{ index * phienBan.chiTiet.length + $index + 1 }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="tenSanPham" label="Tên sản phẩm" width="150" />
-
-        <el-table-column label="Màu sắc" width="120">
-          <template #default="{ row }">
-            <div :style="{
-              width: '30px',
-              height: '30px',
-              backgroundColor: layMauSac(row.idMau),
-              borderRadius: '4px',
-              margin: '0 auto'
-            }"></div>
-            <div style="text-align:center; font-size: 12px;">{{ layTenMauSac(row.idMau) }}</div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="soLuong" label="Số lượng" width="90" />
-
-        <el-table-column label="Đơn giá">
-          <template #default="{ row, $index }">
-            <el-input v-model.number="row.giaBan" type="number" placeholder="Nhập giá trị" min="0"
-              @change="() => onGiaBanChange($index, row.giaBan)" />
-          </template>
-        </el-table-column>
-
-
-        <el-table-column label="Thao tác" width="560">
-          <template #default="{ row, $index }">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <input type="file" :ref="'fileInput_' + $index" @change="(event) => handleFileChange(event, row)"
-                style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;" />
-
-              <el-button type="danger" @click="uploadFile(row)">
-                Upload
-              </el-button>
-
-              <el-button type="danger" @click="() => moDialogNhapImei(row, phienBan.chiTiet, index)">
-                Nhập
-              </el-button>
-
-              <el-button type="danger" @click="xoaChiTiet(phienBan, row)">
-                Xoá
-              </el-button>
-
-            </div>
-            <el-button @click="console.log(JSON.stringify(danhSachPhienBan))">Kiểm tra danh sách</el-button>
-
-          </template>
-
-        </el-table-column>
-      </el-table>
-    </div>
-
-    <NhapImeiDialog v-model="dialogVisible" @confirm="nhanImeiTuDialog" />
-
-    <div v-if="daChonDayDu" style="margin-bottom: 40px;">
-
-      <div style="margin-bottom: 40px;">
-        <h2>Thêm ảnh</h2>
-
-        <el-table :data="danhSachMauSac" border style="margin-top: 20px;">
-          <el-table-column label="Tên màu sắc">
-            <template #default="{ row }">
-              <div>{{ row.tenMauSac }}</div>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="Màu">
-            <template #default="{ row }">
-              <div :style="{
-                width: '30px',
-                height: '30px',
-                backgroundColor: row.hexColor,
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }">
-              </div>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="Ảnh">
-            <template #default="{ row }">
-              <div v-if="row.anhUrl">
-                <img :src="row.anhUrl" style="width: 50px;" />
-              </div>
-              <div v-else>Chưa có ảnh</div>
-            </template>
-          </el-table-column>
-
-
-          <el-table-column label="Upload ảnh">
-            <template #default="{ row, $index }">
-              <el-upload :http-request="customUpload" :before-upload="(file) => handleBeforeUpload(file, row)"
-                :on-success="(response, file) => handleUploadSuccess(response, file, $index)" :show-file-list="false">
-                <el-button>Upload ảnh</el-button>
-              </el-upload>
-            </template>
-          </el-table-column>
-
-        </el-table>
-      </div>
-
-    </div>
-
-
-    <div style="display: flex; justify-content: center; margin-top: 20px;">
-      <el-button type="success" @click="createSanPham">Lưu sản phẩm</el-button>
-    </div>
-
+    <el-button type="success" @click="submitForm">Lưu sản phẩm</el-button>
   </el-form>
 </template>
 
-
-
-
-
-<script setup>
-import { onMounted, reactive, ref, watch, computed } from 'vue';
+<script>
+import { onMounted, reactive, ref } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { getAllCameraSauList, getAllCameraTruocList, getAllCpuList, getAllHDHList, getAllLoaiList, getAllManHinhList, getAllMauSacList, getAllNhaCungCapList, getAllPinList, getAllRamList, getAllRomList, getAllXuatXuList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
+import { debounce } from 'chart.js/helpers';
 import axios from 'axios';
-import { getAllCameraSauList, getAllCameraTruocList, getAllCpuList, getAllHDHList, getAllLoaiList, getAllManHinhList, getAllMauSacList, getAllNhaCungCapList, getAllPinList, getAllRamList, getAllRomList, getAllXuatXuList, postChiTietSanPham, postNhaCungCapList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
-import DialogThemNhaCungCap from '@/components/Admin/dialogs/DialogThemNhaCungCap.vue';
-import NhapImeiDialog from '@/components/Admin/dialogs/DialogThemIemi.vue';
-import { ElMessage } from 'element-plus';
 
+export default {
+  setup() {
+    const sanPham = reactive({
+      tenSanPham: '',
+      thuongHieu: '',
+      idNhaCungCap: '',
+      trangThaiSanPham: '',
+      sanPhamChiTiets: []
+    });
 
-const nhaCungCaps = ref([]);
-const mauSacs = ref([]);
-const rams = ref([]);
-const roms = ref([]);
-const manHinhs = ref([]);
-const heDieuHanhs = ref([]);
-const pins = ref([]);
-const cpus = ref([]);
-const cameraTruocs = ref([]);
-const cameraSaus = ref([]);
-const xuatXus = ref([]);
-const loais = ref([]);
-const thuongHieus = ref([]);
-const errorMessage = ref('');
-const addNCCDialog = ref(null);
-const hienThiBang = ref(false);
-const dialogVisible = ref(false);
-const currentRow = ref(null);
-const danhSachPhienBan = ref([]);
-
-
-const customUpload = async (options) => {
-  const { file, onSuccess, onError, onProgress } = options;
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    const res = await axios.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (event) => {
-        let percent = Math.round((event.loaded * 100) / event.total);
-        onProgress({ percent });
+    const rules = {
+      tenSanPham: [{ required: true, message: 'Vui lòng nhập tên sản phẩm' }],
+      thuongHieu: [{ required: true, message: 'Vui lòng nhập thương hiệu' }],
+      idNhaCungCap: [{ required: true, message: 'Vui lòng chọn nhà cung cấp' }],
+      trangThaiSanPham: [{ required: true, message: 'Vui lòng chọn trạng thái' }],
+      sanPhamChiTiets: {
+        giaBan: [
+          { required: true, message: 'Vui lòng nhập giá bán', type: 'number' },
+          { type: 'number', min: 0, max: 100000000, message: 'Giá bán phải từ 0 đến 100 triệu' }
+        ],
+        hinhAnhs: [{ required: true, message: 'Vui lòng tải lên ít nhất một hình ảnh', trigger: 'change' }]
       }
-    });
-    onSuccess(res.data, file);
-    ElMessage.success('Upload thành công!');
-  } catch (error) {
-    onError(error);
-    ElMessage.error('Upload thất bại!');
-  }
-};
+    };
 
+    const sanPhamForm = ref(null);
+    const selectedMaus = ref([]);
+    const selectedRams = ref([]);
+    const selectedRoms = ref([]);
+    const nhaCungCaps = ref([]);
+    const maus = ref([]);
+    const rams = ref([]);
+    const roms = ref([]);
+    const manHinhs = ref([]);
+    const heDieuHanhs = ref([]);
+    const pins = ref([]);
+    const cpus = ref([]);
+    const cameraTruocs = ref([]);
+    const cameraSaus = ref([]);
+    const xuatXus = ref([]);
+    const loais = ref([]);
+    const selectedChiTiet = ref(null);
 
-const sanPham = reactive({
-  tenSanPham: '',
-  thuongHieu: '',
-  idNhaCungCap: '',
-  sanPhamChiTiets: []
-});
+    const danhSachTrangThaiSanPham = [
+      { label: "Đang kinh doanh", value: "ACTIVE" },
+      { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
+      { label: "Sắp ra mắt", value: "COMING_SOON" },
+      { label: "Tạm ngừng bán", value: "TEMPORARILY_UNAVAILABLE" },
+      { label: "Hết hàng", value: "OUT_OF_STOCK" }
+    ];
 
-const addChiTiet = () => {
-  sanPham.sanPhamChiTiets.push({
-    idMau: [],
-    idRam: [],
-    idRom: [],
-    idManHinh: null,
-    idHeDieuHanh: null,
-    idPin: null,
-    idCpu: null,
-    idCameraTruoc: null,
-    idCameraSau: [],
-    idXuatXu: null,
-    idLoai: null,
-    hinhAnhs: [],
-    imeis: [],
-    allImei: [],
-    soLuong: 0,
-    giaBan: 0,
-  });
+    const fetchDanhMuc = async () => {
+      try {
+        const responses = await Promise.all([
+          getAllNhaCungCapList(),
+          getAllMauSacList(),
+          getAllRamList(),
+          getAllRomList(),
+          getAllManHinhList(),
+          getAllHDHList(),
+          getAllPinList(),
+          getAllCpuList(),
+          getAllCameraTruocList(),
+          getAllCameraSauList(),
+          getAllXuatXuList(),
+          getAllLoaiList()
+        ]);
 
-  danhSachPhienBan.value = tinhToanPhienBan(sanPham, danhSachPhienBan.value);
-};
+        nhaCungCaps.value = responses[0];
+        maus.value = responses[1];
+        rams.value = responses[2];
+        roms.value = responses[3];
+        manHinhs.value = responses[4];
+        heDieuHanhs.value = responses[5];
+        pins.value = responses[6];
+        cpus.value = responses[7];
+        cameraTruocs.value = responses[8];
+        cameraSaus.value = responses[9];
+        xuatXus.value = responses[10];
+        loais.value = responses[11];
 
-const onGiaBanChange = (index, newGiaBan) => {
-  sanPham.sanPhamChiTiets[index].giaBan = newGiaBan;
-};
-
-
-const createSanPham = async () => {
-  try {
-    // 👉 Bước 0: Kiểm tra tên sản phẩm
-    if (!sanPham.tenSanPham.trim()) {
-      ElMessage.warning('Tên sản phẩm không được để trống');
-      return;
-    }
-
-    // 👉 Bước 1: Gửi sản phẩm chính (KHÔNG GỬI CHI TIẾT)
-    const { tenSanPham, thuongHieu, idNhaCungCap } = sanPham;
-    console.log('📤 Gửi dữ liệu sản phẩm chính:', { tenSanPham, thuongHieu, idNhaCungCap });
-
-    await postSanPham({ tenSanPham, thuongHieu, idNhaCungCap });
-
-    // 👉 Bước 2: Cập nhật chi tiết sản phẩm (thêm idSanPham, hình ảnh)
-    sanPham.sanPhamChiTiets.forEach((ct, index) => {
-      console.log(`🧩 Chi tiết sản phẩm #${index + 1}:`);
-      console.log('→ ID sản phẩm:', ct.idSanPham);
-      console.log('→ ID Màu:', ct.idMau);
-      console.log('→ Hình ảnh:', ct.hinhAnhs);
-      console.log('→ Các trường khác:', {
-        idRam: ct.idRam,
-        idRom: ct.idRom,
-        idCpu: ct.idCpu,
-        idManHinh: ct.idManHinh,
-        idPin: ct.idPin,
-        idHeDieuHanh: ct.idHeDieuHanh,
-        idCameraTruoc: ct.idCameraTruoc,
-        idCameraSau: ct.idCameraSau,
-        idLoai: ct.idLoai,
-        idXuatXu: ct.idXuatXu,
-        imeis: ct.imei || ct.imeis,       // thử cả 2
-        hinhAnhs: ct.hinhAnh || ct.hinhAnhs || ct.url, // thử các biến thể
-        soLuong: ct.soLuong,
-        giaBan: ct.giaBan
-      });
-    });
-
-    // 👉 Bước 3: Gửi danh sách chi tiết sản phẩm
-    console.log('🚀 Gửi danh sách chi tiết sản phẩm:');
-    console.log(JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
-
-    await postChiTietSanPham(sanPham.sanPhamChiTiets);
-
-    // ✅ Thành công
-    ElMessage.success('Tạo sản phẩm thành công!');
-    console.log('🎉 Tạo sản phẩm hoàn tất! Dữ liệu đầy đủ:');
-    console.log(JSON.stringify(sanPham, null, 2));
-  } catch (error) {
-    // ❌ Lỗi xảy ra
-    console.error('❌ Lỗi khi tạo sản phẩm:', error);
-    ElMessage.error('Tạo sản phẩm thất bại!');
-  }
-};
-
-
-
-//open dialog
-
-function openDialog() {
-  addNCCDialog.value?.open();
-}
-
-function handleNhaCungCapAdded(newNCC) {
-  nhaCungCaps.value.push(newNCC);
-}
-
-const handleSelectClick = () => {
-  dialogVisible.value = true;
-};
-
-const handleClick = () => {
-  alert('Bạn cần implement thêm thương hiệu mới');
-};
-
-
-function xoaChiTiet(phienBan, chiTiet) {
-  const idRam = phienBan.idRam;
-  const idRom = phienBan.idRom;
-  const idMau = chiTiet.idMau;
-
-  // Tìm index bản ghi chi tiết tương ứng
-  const index = sanPham.sanPhamChiTiets.findIndex(item => {
-    return item.idRam.includes(idRam) &&
-      item.idRom.includes(idRom) &&
-      item.idMau.includes(idMau);
-  });
-
-  if (index !== -1) {
-    const item = sanPham.sanPhamChiTiets[index];
-
-    // Xóa màu trong mảng idMau
-    item.idMau = item.idMau.filter(m => m !== idMau);
-  }
-}
-
-// hiển thị bảng màu
-watch(
-  () => [sanPham.tenSanPham, sanPham.sanPhamChiTiets],
-  ([ten, chiTiet]) => {
-    const tenHopLe = ten.trim().length > 0;
-    const chiTietHopLe = Array.isArray(chiTiet) && chiTiet.length > 0;
-    hienThiBang.value = tenHopLe && chiTietHopLe;
-  },
-  { deep: true }
-);
-
-
-// Tạo bản đồ mã màu
-const mapMauSac = computed(() => {
-  const map = new Map();
-  for (const mau of mauSacs.value) {
-    map.set(mau.id, mau.hexColor || '#000000');
-  }
-  return map;
-});
-
-// Hàm lấy tên màu từ ID
-const layTenMauSac = (id) => {
-  const mau = mauSacs.value.find((m) => m.id === id);
-  return mau ? mau.tenMau : 'Không rõ';
-};
-
-// Hàm lấy màu dạng hex
-const layMauSac = (id) => {
-  return mapMauSac.value.get(id) || '#000000';
-};
-
-// Hàm lấy tên RAM từ ID
-const layTenRam = (id) => {
-  const ram = rams.value.find((r) => r.id === id);
-  return ram ? ram.dungLuong : 'Không rõ';
-};
-
-// Hàm lấy tên ROM từ ID
-const layTenRom = (id) => {
-  const rom = roms.value.find((r) => r.id === id);
-  return rom ? rom.dungLuong : 'Không rõ';
-};
-
-
-
-// Khi sanPham hoặc chi tiết sản phẩm thay đổi, tính lại
-watch(
-  () => sanPham.sanPhamChiTiets,
-  (newVal) => {
-    const danhSachCu = danhSachPhienBan.value; // giữ bản cũ
-    danhSachPhienBan.value = tinhToanPhienBan(sanPham, danhSachCu);
-  },
-  { immediate: true, deep: true }
-);
-
-
-// Hàm xử lý tính danh sách phiên bản
-function tinhToanPhienBan(sanPham, danhSachCu = []) {
-  const groupByRamRom = {};
-  const chiTiets = sanPham.sanPhamChiTiets || [];
-
-  const validChiTiets = chiTiets.filter((chiTiet) =>
-    chiTiet.idMau?.length && chiTiet.idRam?.length && chiTiet.idRom?.length
-  );
-
-  validChiTiets.forEach((chiTiet) => {
-    const maus = chiTiet.idMau;
-    const rams = chiTiet.idRam;
-    const roms = chiTiet.idRom;
-
-    rams.forEach((idRam) => {
-      roms.forEach((idRom) => {
-        const key = `${idRam}-${idRom}`;
-        if (!groupByRamRom[key]) {
-          groupByRamRom[key] = {
-            idRam: idRam,
-            idRom: idRom,
-            tenPhienBan: `${layTenRam(idRam)} / ${layTenRom(idRom)}`,
-            chiTiet: [],
-          };
+        const requiredLists = [
+          { name: 'Nhà cung cấp', list: nhaCungCaps.value },
+          { name: 'Màu sắc', list: maus.value },
+          { name: 'RAM', list: rams.value },
+          { name: 'ROM', list: roms.value },
+          { name: 'Màn hình', list: manHinhs.value },
+          { name: 'Hệ điều hành', list: heDieuHanhs.value },
+          { name: 'Pin', list: pins.value },
+          { name: 'CPU', list: cpus.value },
+          { name: 'Camera trước', list: cameraTruocs.value },
+          { name: 'Camera sau', list: cameraSaus.value },
+          { name: 'Xuất xứ', list: xuatXus.value },
+          { name: 'Loại', list: loais.value }
+        ];
+        const emptyLists = requiredLists.filter(item => !item.list.length);
+        if (emptyLists.length) {
+          ElMessage.error(`Không thể tải danh mục: ${emptyLists.map(item => item.name).join(', ')}`);
         }
+      } catch (error) {
+        ElMessage.error('Lỗi khi lấy danh mục: ' + error.message);
+      }
+    };
 
-        maus.forEach((idMau) => {
-          // 🔁 Tìm thông tin cũ (nếu có)
-          const cu = danhSachCu.find(p =>
-            p.idRam === idRam &&
-            p.idRom === idRom &&
-            p.chiTiet?.some(ct => ct.idMau === idMau)
-          );
-
-          const chiTietCu = cu?.chiTiet?.find(ct => ct.idMau === idMau);
-
-          groupByRamRom[key].chiTiet.push({
-            idMau: idMau,
-            hexColor: layMauSac(idMau),
-            tenMauSac: layTenMauSac(idMau),
-            tenSanPham: sanPham.tenSanPham,
-            // 👇 Giữ lại giá trị cũ nếu có
-            // ✅ Dữ liệu chính xác theo IMEI
-            soLuong: chiTiet.allImei?.length || 0,
-            giaBan: chiTiet.giaBan || 0,
-
-            // Liên kết lại để xử lý sau
-            chiTietGoc: chiTiet
+    const generateVariants = () => {
+      if (!selectedMaus.value.length || !selectedRams.value.length || !selectedRoms.value.length) {
+        ElMessage.error('Vui lòng chọn ít nhất một màu sắc, RAM và ROM để tạo biến thể.');
+        return;
+      }
+      // Xóa sạch danh sách biến thể cũ
+      sanPham.sanPhamChiTiets = [];
+      const existingCombinations = new Set();
+      const newVariants = [];
+      selectedMaus.value.forEach(mau => {
+        selectedRams.value.forEach(ram => {
+          selectedRoms.value.forEach(rom => {
+            const combination = `${mau}-${ram}-${rom}`;
+            if (!existingCombinations.has(combination)) {
+              existingCombinations.add(combination);
+              newVariants.push({
+                idMau: mau,
+                idRam: ram,
+                idRom: rom,
+                idManHinh: manHinhs.value[0]?.id || null,
+                idHeDieuHanh: heDieuHanhs.value[0]?.id || null,
+                idPin: pins.value[0]?.id || null,
+                idCpu: cpus.value[0]?.id || null,
+                idCameraTruoc: cameraTruocs.value[0]?.id || null,
+                idCameraSau: cameraSaus.value[0]?.id || null,
+                idXuatXu: xuatXus.value[0]?.id || null,
+                idLoai: loais.value[0]?.id || null,
+                soLuong: 0,
+                giaBan: 0,
+                hinhAnhs: [],
+                imeisInput: '',
+                invalidImeis: [],
+                hasDuplicates: false
+              });
+            }
           });
         });
       });
-    });
-  });
+      sanPham.sanPhamChiTiets = newVariants;
+      selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
+      console.log('Biến thể mới được tạo:', JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
+      ElMessage.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
+    };
 
-  return Object.values(groupByRamRom);
-}
+    const validateIMEI = (imei) => /^\d{15}$/.test(imei);
 
+    const capNhatSoLuong = debounce((index) => {
+      // 1. Lấy và làm sạch danh sách IMEI
+      const imeis = sanPham.sanPhamChiTiets[index].imeisInput
+        .split(',')
+        .map(i => i.trim())
+        .filter(i => i && i.length > 0);
 
-// xử lý bảng màu load ảnh
-
-const danhSachMauSac = computed(() => {
-  const danhSach = new Map();
-
-  (sanPham.sanPhamChiTiets || []).forEach((chiTiet) => {
-    (chiTiet.idMau || []).forEach((idMau) => {
-      if (!danhSach.has(idMau)) {
-        danhSach.set(idMau, {
-          idMau,
-          tenMauSac: layTenMauSac(idMau),
-          hexColor: layMauSac(idMau),
-        });
+      // 2. Kiểm tra danh sách trống
+      if (!imeis.length) {
+        sanPham.sanPhamChiTiets[index].soLuong = 0;
+        sanPham.sanPhamChiTiets[index].invalidImeis = [];
+        sanPham.sanPhamChiTiets[index].hasDuplicates = false;
+        ElMessage.warning('Danh sách IMEI không được để trống.');
+        return;
       }
-    });
-  });
 
-  return Array.from(danhSach.values());
-});
+      // 3. Lọc IMEI hợp lệ và loại bỏ trùng lặp trong biến thể hiện tại
+      const validImeis = new Set(imeis.filter(imei => validateIMEI(imei)));
 
-const daChonDayDu = computed(() => {
-  if (!danhSachPhienBan.value.length) return false;
+      // 4. Debug toàn bộ sanPhamChiTiets
+      console.log('Tổng số biến thể:', sanPham.sanPhamChiTiets.length);
+      console.log('Nội dung sanPhamChiTiets:', JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
 
-  for (const phienBan of danhSachPhienBan.value) {
-    if (!phienBan.chiTiet || !phienBan.chiTiet.length) return false;
-
-    for (const chiTiet of phienBan.chiTiet) {
-      if (
-        chiTiet.idMau == null ||
-        !chiTiet.tenSanPham?.trim()
-      ) {
-        console.log("Thiếu thông tin:", chiTiet);
-        return false;
-      }
-    }
-  }
-
-  return true;
-});
-
-
-// upload ảnh
-const handleUploadSuccess = (response, file, chiTietIndex) => {
-  console.log('✅ Upload thành công với response:', response);
-  console.log('📌 chiTietIndex:', chiTietIndex);
-  console.log('📦 sản phẩm chi tiết:', sanPham.sanPhamChiTiets[chiTietIndex]);
-
-  try {
-    if (response && response.url) {
-      sanPham.sanPhamChiTiets[chiTietIndex].hinhAnhs.push({
-        url: response.url
+      // 5. Thu thập IMEI hợp lệ từ các biến thể khác
+      const allImeis = new Set();
+      sanPham.sanPhamChiTiets.forEach((chiTiet, i) => {
+        if (i !== index && chiTiet.imeisInput && chiTiet.imeisInput.trim()) {
+          const otherImeis = chiTiet.imeisInput
+            .split(',')
+            .map(i => i.trim())
+            .filter(i => i && validateIMEI(i));
+          console.log(`IMEIs của biến thể ${i}:`, otherImeis);
+          otherImeis.forEach(i => allImeis.add(i));
+        }
       });
-      ElMessage.success("Upload ảnh thành công!");
-    } else {
-      ElMessage.warning("Thiếu URL từ phản hồi backend");
-    }
-  } catch (error) {
-    console.error("❌ Lỗi khi xử lý upload ảnh:", error);
-    ElMessage.error("Lỗi upload ảnh!");
-  }
-};
 
+      // 6. Kiểm tra trùng lặp
+      const duplicates = [...validImeis].filter(i => allImeis.has(i));
 
-const handleBeforeUpload = (file, row) => {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    row.anhUrl = e.target.result; // Hiển thị ảnh base64 preview tạm thời
-  };
-  reader.readAsDataURL(file);
-  return true; // Cho phép tiếp tục upload
-};
+      // Debug
+      console.log('IMEIs hiện tại:', imeis);
+      console.log('IMEIs hợp lệ (biến thể hiện tại):', [...validImeis]);
+      console.log('Tất cả IMEIs (các biến thể khác):', [...allImeis]);
+      console.log('IMEIs trùng lặp:', duplicates);
 
+      if (duplicates.length) {
+        sanPham.sanPhamChiTiets[index].hasDuplicates = true;
+        ElMessage.error(`Phát hiện IMEI trùng lặp: ${duplicates.join(', ')}`);
+      } else {
+        sanPham.sanPhamChiTiets[index].hasDuplicates = false;
+      }
 
-const currentList = ref(null); // danh sách chứa dòng đó
-const currentIndex = ref(-1);
+      // 7. Cập nhật số lượng và danh sách IMEI không hợp lệ
+      sanPham.sanPhamChiTiets[index].soLuong = validImeis.size;
+      sanPham.sanPhamChiTiets[index].invalidImeis = imeis.filter(i => !validateIMEI(i));
+    }, 150);
 
-const moDialogNhapImei = (row, list, index) => {
-  if (!row) {
-    console.warn('❌ Không tìm thấy dòng chi tiết sản phẩm');
-    return;
-  }
+    const handleImeiFileChange = (file, index) => {
+      try {
+        if (file.raw.size > 1024 * 1024) {
+          throw new Error('File quá lớn, vui lòng chọn file dưới 1MB');
+        }
+        if (!['text/plain', 'text/csv'].includes(file.raw.type)) {
+          throw new Error('Vui lòng chọn file .txt hoặc .csv');
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target.result;
+          const imeis = content
+            .split(/[\n,;\s]+/)
+            .map(i => i.trim())
+            .filter(i => i);
+          if (!imeis.length) {
+            throw new Error('File không chứa IMEI hợp lệ');
+          }
+          sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(', ');
+          capNhatSoLuong(index);
+          ElMessage.success(`Đã tải lên ${imeis.length} IMEI từ file ${file.name}`);
+        };
+        reader.onerror = () => {
+          throw new Error('Lỗi khi đọc file');
+        };
+        reader.readAsText(file.raw);
+      } catch (error) {
+        ElMessage.error('Lỗi khi xử lý file IMEI: ' + error.message);
+      }
+    };
 
-  if (row.listImei && row.listImei.length > 0) {
-    alert("Đã upload file IMEI, không được nhập thủ công nữa.");
-    return;
-  }
+    const removeChiTiet = (index) => {
+      sanPham.sanPhamChiTiets.splice(index, 1);
+      if (selectedChiTiet.value === index) {
+        selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
+      } else if (selectedChiTiet.value > index) {
+        selectedChiTiet.value--;
+      }
+      console.log('Biến thể sau khi xóa:', JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
+    };
 
-  currentRow.value = row;
-  currentList.value = list;
-  currentIndex.value = index;
-  dialogVisible.value = true;
+    const selectChiTiet = (row, column, event) => {
+      const index = sanPham.sanPhamChiTiets.indexOf(row);
+      selectedChiTiet.value = index;
+    };
 
-  console.log("✅ Mở dialog nhập IMEI:", row);
-};
+    const getMauSacLabels = (idMau) => {
+      if (!Array.isArray(idMau)) idMau = [idMau];
+      return idMau.map(id => maus.value.find(m => String(m.id) === String(id))?.tenMau || '').join(', ');
+    };
 
+    const getRamLabels = (idRam) => {
+      if (!Array.isArray(idRam)) idRam = [idRam];
+      return idRam.map(id => rams.value.find(r => String(r.id) === String(id))?.dungLuong || '').join(', ');
+    };
 
-const nhanImeiTuDialog = (imeis) => {
-  try {
-    console.log('🔔 nhanImeiTuDialog được gọi với imeis:', imeis);
-    console.log('📦 currentIndex.value:', currentIndex.value);
-    console.log('📦 sanPham.sanPhamChiTiets:', sanPham.sanPhamChiTiets);
+    const getRomLabels = (idRom) => {
+      if (!Array.isArray(idRom)) idRom = [idRom];
+      return idRom.map(id => roms.value.find(r => String(r.id) === String(id))?.dungLuong || '').join(', ');
+    };
 
-    const index = currentIndex.value;
-    const row = sanPham.sanPhamChiTiets?.[index];
+    const handleFileChange = async (file, fileList, index) => {
+      try {
+        if (!['image/jpeg', 'image/png'].includes(file.raw.type)) {
+          throw new Error('Chỉ chấp nhận file JPEG hoặc PNG');
+        }
+        if (file.raw.size > 5 * 1024 * 1024) {
+          throw new Error('Kích thước ảnh không được vượt quá 5MB');
+        }
+        const formData = new FormData();
+        formData.append('file', file.raw);
+        const response = await axios.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        sanPham.sanPhamChiTiets[index].hinhAnhs.push({
+          name: file.name,
+          url: response.data.url,
+          imagePublicId: response.data.imagePublicId
+        });
+        ElMessage.success(`Tải ảnh ${file.name} thành công!`);
+      } catch (error) {
+        ElMessage.error('Lỗi khi tải ảnh: ' + (error.response?.data?.message || error.message));
+      }
+    };
 
-    if (!row) {
-      console.warn("⚠️ Không tìm thấy dòng cần cập nhật IMEI tại index:", index);
-      return;
-    }
+    const handleFileRemove = (file, fileList, index) => {
+      sanPham.sanPhamChiTiets[index].hinhAnhs = fileList.filter(f => f.url);
+      ElMessage.success(`Đã xóa ảnh ${file.name}`);
+    };
 
-    if (!Array.isArray(imeis)) {
-      console.warn('❌ imeis không phải là mảng');
-      return;
-    }
+    const submitForm = async () => {
+      try {
+        if (!sanPham.sanPhamChiTiets.length) {
+          ElMessage.error('Vui lòng tạo ít nhất một biến thể sản phẩm.');
+          return;
+        }
+        await sanPhamForm.value.validate();
 
-    row.allImei ??= [];
+        // Kiểm tra trùng lặp IMEI
+        for (const chiTiet of sanPham.sanPhamChiTiets) {
+          if (chiTiet.hasDuplicates) {
+            ElMessage.error(`Vui lòng sửa các IMEI trùng lặp trong biến thể ${getMauSacLabels(chiTiet.idMau)} - ${getRamLabels(chiTiet.idRam)} - ${getRomLabels(chiTiet.idRom)} trước khi lưu.`);
+            return;
+          }
+          const validImeis = chiTiet.imeisInput
+            .split(',')
+            .map(i => i.trim())
+            .filter(i => i && validateIMEI(i));
+          if (chiTiet.soLuong !== validImeis.length) {
+            ElMessage.error(`Số lượng IMEI hợp lệ (${validImeis.length}) không khớp với số lượng (${chiTiet.soLuong}) trong biến thể ${getMauSacLabels(chiTiet.idMau)} - ${getRamLabels(chiTiet.idRam)} - ${getRomLabels(chiTiet.idRom)}`);
+            return;
+          }
+        }
 
-    const imeisChuoi = imeis.map(i => i.soImei ?? '').filter(i => i);
-    const imeiMoi = imeisChuoi.filter(i => !row.allImei.includes(i));
+        const payload = {
+          tenSanPham: sanPham.tenSanPham,
+          thuongHieu: sanPham.thuongHieu,
+          idNhaCungCap: sanPham.idNhaCungCap,
+          trangThaiSanPham: sanPham.trangThaiSanPham,
+          sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {
+            const imeis = chiTiet.imeisInput
+              .split(',')
+              .map(i => i.trim())
+              .filter(i => i && validateIMEI(i));
+            return {
+              idMau: chiTiet.idMau,
+              idRam: chiTiet.idRam,
+              idRom: chiTiet.idRom,
+              idManHinh: chiTiet.idManHinh,
+              idHeDieuHanh: chiTiet.idHeDieuHanh,
+              idPin: chiTiet.idPin,
+              idCpu: chiTiet.idCpu,
+              idCameraTruoc: chiTiet.idCameraTruoc,
+              idCameraSau: chiTiet.idCameraSau,
+              idXuatXu: chiTiet.idXuatXu,
+              idLoai: chiTiet.idLoai,
+              soLuong: chiTiet.soLuong,
+              giaBan: chiTiet.giaBan,
+              imeis: imeis.map(i => ({ soImei: i })),
+              hinhAnhs: chiTiet.hinhAnhs.map(h => ({
+                url: h.url,
+                imagePublicId: h.imagePublicId
+              }))
+            };
+          })
+        };
 
-    row.allImei = [...row.allImei, ...imeiMoi];  // Force reactivity
-    row.imeis = row.allImei.map(i => ({ soImei: i }));
-    row.soLuong = row.allImei.length;
+        console.log(JSON.stringify(payload, null, 2));
+        await postSanPham(payload);
+        ElMessageBox.confirm('Sản phẩm đã được lưu thành công. Bạn có muốn làm mới form?', 'Xác nhận', {
+          confirmButtonText: 'Có',
+          cancelButtonText: 'Không'
+        }).then(() => {
+          sanPham.tenSanPham = '';
+          sanPham.thuongHieu = '';
+          sanPham.idNhaCungCap = '';
+          sanPham.trangThaiSanPham = '';
+          sanPham.sanPhamChiTiets = [];
+          selectedMaus.value = [];
+          selectedRams.value = [];
+          selectedRoms.value = [];
+          selectedChiTiet.value = null;
+          ElMessage.success('Form đã được làm mới!');
+        });
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message;
+        if (error.response?.status === 400) {
+          ElMessage.error(`Dữ liệu không hợp lệ: ${errorMessage}`);
+        } else if (error.response?.status === 500) {
+          ElMessage.error('Lỗi hệ thống, vui lòng thử lại sau.');
+        } else {
+          ElMessage.error('Lỗi khi lưu sản phẩm: ' + errorMessage);
+        }
+      }
+    };
 
-    // for (const phienBan of danhSachPhienBan.value) {
-    //   const chiTietIndex = phienBan.chiTiet.findIndex(ct =>
-    //     ct.idMau === row.idMau &&
-    //     ct.tenSanPham === row.tenSanPham
-    //   );
-
-    //   if (chiTietIndex !== -1) {
-    //     // Clone row để trigger reactive update
-    //     phienBan.chiTiet.splice(chiTietIndex, 1, { ...row });
-    //     break;
-    //   }
-    // }
-
-    phienBan.chiTiet.splice(chiTietIndex, 1, { ...row });
-    // Trigger reactivity cho Vue bằng splice
-    sanPham.sanPhamChiTiets.splice(index, 1, { ...row });
-
-    danhSachPhienBan.value = tinhToanPhienBan(sanPham);
-
-
-    console.log("✅ Updated soLuong:", row.soLuong)
-    console.log('📦 Danh sách sản phẩm chi tiết sau khi nhập IMEI:', sanPham.sanPhamChiTiets);
-    console.log('📦 Số lượng:', row.soLuong);
-    console.log(`✅ Đã nhập ${imeiMoi.length} IMEI mới. Tổng cộng: ${row.allImei.length}`);
-    alert(`Đã nhập ${imeiMoi.length} IMEI mới. Tổng cộng: ${row.allImei.length}`);
-  } catch (error) {
-    console.error('❌ Lỗi trong nhanImeiTuDialog:', error);
-  }
-};
-
-
-const nhanImeiTuDialog2 = (imeisMoi, row) => {
-  // Gán danh sách IMEI mới
-  row.allImei = imeisMoi;
-
-  // Cập nhật lại số lượng theo số imei
-  row.soLuong = imeisMoi.length;
-
-  // Cập nhật lại danh sách phiên bản sau khi thay đổi dữ liệu gốc
-  danhSachPhienBan.value = tinhToanPhienBan(sanPham);
-};
-
-
-
-
-
-///xử lý sô lượng
-
-watch(
-  () => sanPham.sanPhamChiTiets.map(row => row.allImei?.length || 0),
-  (newLengths) => {
-    newLengths.forEach((len, index) => {
-      sanPham.sanPhamChiTiets[index].soLuong = len;
+    onMounted(() => {
+      fetchDanhMuc();
     });
-  },
-  { deep: true }
-);
 
-
-const handleFileChange = (event, row) => {
-  row.fileUpload = event.target.files[0]; // chỉ lưu file
-};
-
-const uploadFile = (row) => {
-  const file = row.fileUpload;
-  if (!file) {
-    alert("Vui lòng chọn file trước.");
-    return;
+    return {
+      sanPham,
+      rules,
+      sanPhamForm,
+      nhaCungCaps,
+      maus,
+      rams,
+      roms,
+      manHinhs,
+      heDieuHanhs,
+      pins,
+      cpus,
+      cameraTruocs,
+      cameraSaus,
+      xuatXus,
+      loais,
+      selectedChiTiet,
+      selectedMaus,
+      selectedRams,
+      selectedRoms,
+      danhSachTrangThaiSanPham,
+      generateVariants,
+      removeChiTiet,
+      selectChiTiet,
+      getMauSacLabels,
+      getRamLabels,
+      getRomLabels,
+      handleFileChange,
+      handleFileRemove,
+      submitForm,
+      capNhatSoLuong,
+      handleImeiFileChange
+    };
   }
-
-  const reader = new FileReader();
-
-  reader.onload = (e) => {
-    const text = e.target.result;
-    const imeis = text
-      .trim()
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-
-    row.soLuong = imeis.length;
-    row.listImei = imeis; // Lưu lại danh sách IMEI đã upload
-    alert(`Đã upload ${imeis.length} IMEI.`);
-  };
-
-  reader.onerror = () => {
-    alert("Không thể đọc file.");
-  };
-
-  reader.readAsText(file);
 };
-
-
-
-
-onMounted(async () => {
-  try {
-    nhaCungCaps.value = await getAllNhaCungCapList();
-    xuatXus.value = await getAllXuatXuList();
-    roms.value = await getAllRomList();
-    mauSacs.value = await getAllMauSacList();
-    rams.value = await getAllRamList();
-    heDieuHanhs.value = await getAllHDHList();
-    manHinhs.value = await getAllManHinhList();
-    pins.value = await getAllPinList();
-    cpus.value = await getAllCpuList();
-    cameraTruocs.value = await getAllCameraTruocList();
-    cameraSaus.value = await getAllCameraSauList();
-    loais.value = await getAllLoaiList();
-
-    if (sanPham.sanPhamChiTiets.length === 0) {
-      addChiTiet();
-    }
-  } catch (error) {
-    console.error('Lỗi khi lấy dữ liệu từ API:', error);
-    errorMessage.value = 'Có lỗi xảy ra khi lấy dữ liệu. Vui lòng thử lại sau.';
-  }
-});
-
-
-
 </script>
 
 <style scoped>
-.form-container {
-  max-width: 1350px;
-  background-color: #f5f5f5;
-  padding: 24px;
-  border-radius: 8px;
-}
-
-.el-form {
-  background-color: #b5abab;
-  padding: 24px;
-  box-shadow: 0 4px 10px rgba(226, 209, 209, 0.1);
+.el-table {
+  cursor: pointer;
 }
 </style>
+```

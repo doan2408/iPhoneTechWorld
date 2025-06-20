@@ -49,19 +49,18 @@
       </div>
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa xuất xứ' : 'Thêm mới xuất xứ'"
-      width="900px" :close-on-click-modal="false" :destroy-on-close="true">
-      <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
-        class="hdh-form">
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa xuất xứ' : 'Thêm mới xuất xứ'" width="900px"
+      :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form :model="formData" ref="formRef" label-width="140px" label-position="left" class="hdh-form">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="Mã xuất xứ" prop="maXuatXu">
+            <el-form-item label="Mã xuất xứ" prop="maXuatXu" :error="errors.maXuatXu">
               <el-input v-model="formData.maXuatXu" placeholder="Nhập mã xuất xứ..." autocomplete="on" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="Tên quốc gia" prop="tenQuocGia">
+            <el-form-item label="Tên quốc gia" prop="tenQuocGia" :error="errors.tenQuocGia">
               <el-input v-model="formData.tenQuocGia" placeholder="Nhập tên quốc gia..." />
             </el-form-item>
           </el-col>
@@ -94,10 +93,10 @@ const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
 
-const rules = {
-  maXuatXu: [{ required: true, message: 'Vui lòng nhập mã xuất xứ', trigger: 'blur' }],
-  tenQuocGia: [{ required: true, message: 'Vui lòng nhập tên quốc gia', trigger: 'blur' }],
-};
+// const rules = {
+//   maXuatXu: [{ required: true, message: 'Vui lòng nhập mã xuất xứ', trigger: 'blur' }],
+//   tenQuocGia: [{ required: true, message: 'Vui lòng nhập tên quốc gia', trigger: 'blur' }],
+// };
 
 const formData = reactive({
   id: null,
@@ -109,14 +108,24 @@ const resetForm = () => {
   formData.id = null;
   formData.maXuatXu = '';
   formData.tenQuocGia = '';
+  errors.maXuatXu = '';
+  errors.tenQuocGia = ''
 }
 
+const resetErrors = () => {
+  errors.maXuatXu = '';
+  errors.tenQuocGia = ''
+}
 
+const errors = reactive({
+  maXuatXu: '',
+  tenQuocGia: ''
+})
 
 
 const loadData = async () => {
   try {
-    const response = await getAllXuatXuPage(currentPage.value - 1, pageSize);
+    const response = await getAllXuatXuPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
     tableData.value = response.content;
     totalPages.value = response.totalPages;
     totalItems.value = response.totalElements;
@@ -126,10 +135,11 @@ const loadData = async () => {
 };
 
 const submitForm = async () => {
+
   if (!formRef.value) return;
 
   try {
-    await formRef.value.validate();
+    // await formRef.value.validate();
 
     if (isEditMode.value) {
       await putXuatXu(formData.id, formData);
@@ -142,8 +152,19 @@ const submitForm = async () => {
     dialogVisible.value = false;
     loadData();
   } catch (error) {
-    console.log('Lỗi xử lý form', error);
-    ElMessage.error('Vui lòng kiểm tra lại thông tin');
+
+    errors.maXuatXu = error.message.maXuatXu || ''
+    errors.tenQuocGia = error.message.tenQuocGia || ''
+
+    const errorMessages = [];
+    if (errors.maXuatXu) errorMessages.push(errors.maXuatXu);
+    if (errors.tenQuocGia) errorMessages.push(errors.tenQuocGia);
+
+    if (errorMessages.length > 0) {
+      ElMessage.error('Đã xảy ra lỗi không xác định');
+    } else {
+      ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+    }
   }
 }
 
@@ -200,12 +221,14 @@ const handleCreate = () => {
 
 const handleClose = () => {
   dialogVisible.value = false;
+  resetForm()
 }
 
 const openDetail = (row) => {
   isEditMode.value = true;
   Object.assign(formData, row);
   dialogVisible.value = true;
+  resetErrors()
 };
 
 const indexMethod = (index) => {
