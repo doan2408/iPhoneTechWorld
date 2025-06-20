@@ -129,6 +129,8 @@ public class LoginController {
                     "tai_khoan", userDetails.getUsername(),
                     "roles", userDetails.getAuthorities(),
                     "fullName", userDetails.getFullName(),
+                    "email", userDetails.getAccount().getEmail(),
+                    "sdt", userDetails.getAccount().getSdt(),
                     "id", userDetails.getId()
             ));
         }

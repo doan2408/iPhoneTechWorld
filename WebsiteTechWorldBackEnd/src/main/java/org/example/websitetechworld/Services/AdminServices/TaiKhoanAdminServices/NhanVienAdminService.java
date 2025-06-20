@@ -173,6 +173,13 @@ public class NhanVienAdminService {
             errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
         }
 
+        if (staffRequest.getMatKhau() != null && !staffRequest.getMatKhau().isBlank()) {
+            String rawPassword = staffRequest.getMatKhau();
+            if (rawPassword.length() < 6 || rawPassword.length() > 20) {
+                errors.add(Map.of("field", "matKhau", "message", "Mật khẩu phải từ 6 đến 20 ký tự"));
+            }
+        }
+
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
