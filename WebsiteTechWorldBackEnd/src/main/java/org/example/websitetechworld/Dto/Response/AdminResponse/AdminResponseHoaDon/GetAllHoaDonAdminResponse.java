@@ -16,7 +16,8 @@ import java.time.LocalDate;
 public class GetAllHoaDonAdminResponse {
     private Integer idHoaDon;
     private String maHoaDon;
-    private String tenKhachHang;
+    private String tenNguoiMua;
+    private String sdtNguoiMua;
     private BigDecimal tongTien;
     private LocalDate ngayTao;
     private String loaiHoaDon;
@@ -26,11 +27,10 @@ public class GetAllHoaDonAdminResponse {
         GetAllHoaDonAdminResponse response = new GetAllHoaDonAdminResponse();
         response.setIdHoaDon(hoaDon.getId());
         response.setMaHoaDon(hoaDon.getMaHoaDon());
-        if (hoaDon.getIdKhachHang() != null){
-            response.setTenKhachHang(hoaDon.getIdKhachHang().getTenKhachHang());
-        }
+        response.setTenNguoiMua(hoaDon.getTenNguoiMua());
+        response.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
         response.setTongTien(hoaDon.getTongTien());
-        response.setNgayTao(hoaDon.getNgayTao());
+        response.setNgayTao(hoaDon.getNgayTaoHoaDon());
         response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null);
         return  response;

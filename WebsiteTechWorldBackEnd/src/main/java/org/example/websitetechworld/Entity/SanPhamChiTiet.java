@@ -84,8 +84,6 @@ public class SanPhamChiTiet {
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<ChiTietGiaoHang> chiTietGiaoHangs = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<ChiTietHoaDon> chiTietHoaDons = new LinkedHashSet<>();

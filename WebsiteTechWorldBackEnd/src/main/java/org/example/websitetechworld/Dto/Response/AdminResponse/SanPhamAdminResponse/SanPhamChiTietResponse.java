@@ -29,7 +29,7 @@ public class SanPhamChiTietResponse {
     private String maSanPham;
     private String tenSanPham;
     private String thuongHieu;
-    private Integer soLuongTonKho;
+//    private Integer soLuongTonKho;
 
     private String tenNhaCungCap;
     private String diaChi;

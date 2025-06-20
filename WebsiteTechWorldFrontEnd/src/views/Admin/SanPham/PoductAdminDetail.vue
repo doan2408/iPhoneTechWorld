@@ -72,9 +72,6 @@ watch(() => route.params.id, (newId) => {
 
 
 <style scoped>
-.container {
-  
-}
 
 ul {
   list-style: none;

@@ -38,28 +38,28 @@ public class HeDieuHanhAdminController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HeDieuHanhAdminResponse> detailHinhAnh(@PathVariable Integer id) {
+    public ResponseEntity<HeDieuHanhAdminResponse> detailHeDieuHanh(@PathVariable Integer id) {
         HeDieuHanhAdminResponse response = heDieuHanhAdminService.detailHeDieuHanh(id);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<HeDieuHanhAdminResponse> createHinhAnh(@RequestBody HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
+    public ResponseEntity<HeDieuHanhAdminResponse> createHeDieuHanh(@RequestBody HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
         HeDieuHanhAdminResponse response = heDieuHanhAdminService.createHeDieuHanh(heDieuHanhAdminRequest);
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HeDieuHanhAdminResponse> updateHinhAnh(@PathVariable Integer id, @RequestBody HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
+    public ResponseEntity<HeDieuHanhAdminResponse> updateHeDieuHanh(@PathVariable Integer id, @RequestBody HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
         HeDieuHanhAdminResponse response = heDieuHanhAdminService.updateHeDieuHanh(id, heDieuHanhAdminRequest);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HeDieuHanhAdminResponse> deleteHinhAnh(@PathVariable Integer id) {
+    public ResponseEntity<HeDieuHanhAdminResponse> deleteHeDieuHanh(@PathVariable Integer id) {
         HeDieuHanhAdminResponse response = heDieuHanhAdminService.deleteHeDieuHanh(id);
 
         return ResponseEntity.ok(response);

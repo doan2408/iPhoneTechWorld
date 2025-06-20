@@ -28,6 +28,10 @@ public class Imei {
     @Column(name = "so_imei", length = 70)
     private String soImei;
 
+    @Size(max = 70)
+    @Column(name = "so_imei_2", length = 70)
+    private String soImei2;
+
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_imei", length = 50)
@@ -37,5 +41,7 @@ public class Imei {
     @Nationalized
     @Column(name = "nha_mang", length = 50)
     private String nhaMang;
+
+
 
 }
