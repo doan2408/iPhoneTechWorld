@@ -373,7 +373,9 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      so_tien_thanh_toan DECIMAL(10,2)
 );
 
+
 -- Table nhan_vien
+
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
@@ -583,6 +585,7 @@ VALUES
     (N'Apple A9', N'Apple', N'2 nhân', N'1.8 GHz', N'7nm', N'4MB', N'15W', '2016-09-01');
 
 -- Table loai
+
 INSERT INTO loai (ten_loai)
 VALUES
     (N'Thường'),

@@ -82,9 +82,6 @@ public class KhachHang implements JointAccount {
     private Set<DiaChi> diaChis = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "idKhachHang", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<GiaoHang> giaoHangs = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "idKhachHang", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
 
 

@@ -10,7 +10,7 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="mb-2" justify="end" >
+    <el-row :gutter="20" class="mb-2" justify="end">
       <el-col :span="3">
         <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
       </el-col>
@@ -30,13 +30,11 @@
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="icons.Edit" circle />
-              </router-link>
+              <el-button size="small" type="primary" @click="openDetail(row, true)" :icon="icons.Edit" circle />
               <el-button size="small" type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
-              <router-link :to="`/admin/products/detail/${row.id}`">
+              <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                 <el-button size="small" type="info" :icon="icons.View" circle />
-              </router-link>
+              </router-link> -->
             </div>
           </template>
         </el-table-column>
@@ -51,18 +49,62 @@
       </div>
     </div>
 
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa hệ điều hành' : 'Thêm mới hệ điều hành'"
+      width="900px" :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left" size="medium"
+        class="hdh-form">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Phiên bản" prop="phienBan">
+              <el-input v-model="formData.phienBan" placeholder="Nhập tên phiên bản hệ điều hành..."
+                autocomplete="on" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Nhà phát triển" prop="nhaPhatTrien">
+              <el-input v-model="formData.nhaPhatTrien"
+                placeholder="Nhập tên nhà phát triển (ví dụ: Apple...)" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Giao diện người dùng" prop="giaoDienNguoiDung">
+              <el-input v-model="formData.giaoDienNguoiDung"
+                placeholder="Nhập giao diện người dùng (ví dụ: One UI, MIUI...)" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row justify="end" style="margin-top: 30px;">
+          <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+          <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+        </el-row>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { getAllHeDieuHanhPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { deleteHDH, getAllHeDieuHanhPage, postHDH, putHDH } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
   data() {
     return {
+      dialogVisible: false,
+      isEditMode: false,
+      formData: {
+        id: null,
+        phienBan: '',
+        nhaPhatTrien: '',
+        giaoDienNguoiDung: '',
+      },
       tableHDH: [],
       currentPage: 1,
       totalPages: 1,
@@ -70,9 +112,14 @@ export default {
       pageSize: 5,
       searchQuery: '',
       icons: {
-        Edit,
-        Delete,
-        View
+        Edit: markRaw(Edit),
+        Delete: markRaw(Delete),
+        View: markRaw(View)
+      },
+      rules: {
+        phienBan: [{ required: true, message: 'Vui lòng nhập phiên bản', trigger: 'blur' }],
+        nhaPhatTrien: [{ required: true, message: 'Vui lòng nhập nhà phát triển', trigger: 'blur' }],
+        giaoDienNguoiDung: [{ required: true, message: 'Vui lòng nhập giao diện người dùng', trigger: 'blur' }],
       }
     };
   },
@@ -95,6 +142,14 @@ export default {
         console.error('Không thể load dữ liệu:', error);
       }
     },
+    resetForm() {
+      this.formData = {
+        id: null,
+        phienBan: '',
+        nhaPhatTrien: '',
+        giaoDienNguoiDung: '',
+      }
+    },
     handleSearch() {
       this.currentPage = 1;
       this.loadData();
@@ -104,8 +159,36 @@ export default {
       this.currentPage = 1;
       this.loadData();
     },
+    async submitForm() {
+      try {
+        await this.$refs.formRef.validate();
+
+        if (this.isEditMode) {
+          await putHDH(this.formData.id, this.formData);
+          this.$message.success('Cập nhật hệ điều hành thành công!');
+        } else {
+          await postHDH(this.formData);
+          this.$message.success('Thêm thành hệ điều hành công!');
+        }
+
+        this.resetForm();
+        this.dialogVisible = false;
+        this.loadData();
+      } catch (error) {
+        this.$message.error('Vui lòng điền đầy đủ thông tin và hợp lệ các trường!');
+      }
+    },
+    openDetail(data, isEdit = false) {
+      this.formData = { ...data };
+      this.isEditMode = isEdit;
+      this.dialogVisible = true;
+    },
     handleCreate() {
-      this.$router.push('/admin/products/create');
+      this.resetForm();
+      this.dialogVisible = true;
+    },
+    handleClose() {
+      this.dialogVisible = false;
     },
     indexMethod(index) {
       return (this.currentPage - 1) * this.pageSize + index + 1;
@@ -113,20 +196,29 @@ export default {
     handlePageChange(newPage) {
       this.currentPage = newPage;
     },
-    handleDelete(id) {
-      console.log('Xóa:', id);
+    async handleDelete(id) {
+      try {
+        // Đợi người dùng xác nhận
+        await this.$confirm('Bạn có chắc chắn muốn xoá mục này?', 'Xác nhận', {
+          confirmButtonText: 'Xoá',
+          cancelButtonText: 'Huỷ',
+          type: 'warning'
+        });
+
+        // Nếu xác nhận thì thực hiện xoá
+        await deleteHDH(id);
+        this.$message.success('Xoá thành công');
+        this.loadData();
+
+      } catch (error) {
+        // Nếu người dùng huỷ xác nhận, hoặc API xoá lỗi
+        if (error === 'cancel') {
+          this.$message.info('Đã huỷ xoá');
+        } else {
+          this.$message.error('Xoá thất bại');
+        }
+      }
     },
-    getTrangThaiDisplayName(status) {
-      const map = {
-        AVAILABLE: 'Có sẵn',
-        RESERVED: 'Đã đặt trước',
-        SOLD: 'Đã bán',
-        RETURNED: 'Đã trả lại',
-        REFURBISHED: 'Tân trang',
-        BLACKLISTED: 'Bị chặn'
-      };
-      return map[status] || status;
-    }
   },
   mounted() {
     this.loadData();
@@ -143,7 +235,6 @@ export default {
 </script>
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
   font-size: 16px;
   padding: 8px 16px;

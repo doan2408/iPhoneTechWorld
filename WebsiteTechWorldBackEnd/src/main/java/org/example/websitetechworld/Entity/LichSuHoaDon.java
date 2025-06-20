@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -29,10 +30,9 @@ public class LichSuHoaDon {
     @JoinColumn(name = "id_hoa_don")
     private HoaDon idHoaDon;
 
-    @Size(max = 100)
-    @Nationalized
+    @Enumerated(EnumType.STRING)
     @Column(name = "hanh_dong", length = 100)
-    private String hanhDong;
+    private HanhDongLichSuHoaDon hanhDong;
 
     @Column(name = "thoi_gian_thay_doi")
     private LocalDate thoiGianThayDoi;

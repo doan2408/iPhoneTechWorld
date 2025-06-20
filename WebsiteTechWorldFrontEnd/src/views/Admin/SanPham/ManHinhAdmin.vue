@@ -2,27 +2,21 @@
     <div class="container mt-4">
 
         <el-row :gutter="20" class="mb-4 justify-content-center">
-
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
-
         </el-row>
 
-        <el-row :gutter="20" class="mb-2" justify="end" >
-
+        <el-row :gutter="20" class="mb-2" justify="end">
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
-
         </el-row>
 
         <h2>Danh sách màn hình</h2>
@@ -40,15 +34,14 @@
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            <router-link :to="`/admin/products/${row.id}`">
-                                <el-button size="small" type="primary" :icon="Edit" circle />
-                            </router-link>
 
-                            <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+                            <el-button type="primary" :icon="Edit" circle @click="handleEdit(row)" />
 
+                            <el-button type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+                            <!-- 
                             <router-link :to="`/admin/products/detail/${row.id}`">
-                                <el-button size="small" type="info" :icon="View" circle />
-                            </router-link>
+                                <el-button type="info" :icon="View" circle />
+                            </router-link> -->
                         </div>
                     </template>
                 </el-table-column>
@@ -63,14 +56,82 @@
             </div>
         </div>
 
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa hệ điều hành' : 'Thêm mới hệ điều hành'"
+            width="900px" :close-on-click-modal="false" :destroy-on-close="true">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+                class="hdh-form">
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Tên màn hình" prop="tenManHinh">
+                            <el-input v-model="formData.tenManHinh"
+                                placeholder="Nhập tên màn hình (ví dụ: AMOLED, Retina, Dynamic Island...)"
+                                autocomplete="on" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Kích thước" prop="kichThuoc">
+                            <el-input v-model="formData.kichThuoc" placeholder="Nhập kích thước (ví dụ: 6.5 inch)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Loại màn hình" prop="loaiManHinh">
+                            <el-input v-model="formData.loaiManHinh"
+                                placeholder="Nhập loại màn hình (ví dụ: OLED, IPS, LCD)" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Độ phân giải" prop="doPhanGiai">
+                            <el-input v-model="formData.doPhanGiai"
+                                placeholder="Nhập độ phân giải (ví dụ: 1080 x 2400 pixels)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Tần số quét" prop="tanSoQuet">
+                            <el-input v-model="formData.tanSoQuet" placeholder="Nhập tần số quét (ví dụ: 120Hz)" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Độ sáng" prop="doSang">
+                            <el-input v-model="formData.doSang" placeholder="Nhập độ sáng (ví dụ: 1000 nits)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col>
+                        <el-form-item label="Chất liệu kính" prop="chatLieuKinh">
+                            <el-input v-model="formData.chatLieuKinh"
+                                placeholder="Nhập chất liệu kính (ví dụ: Gorilla Glass Victus)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+
+                <el-row justify="end" style="margin-top: 30px;">
+                    <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                </el-row>
+            </el-form>
+        </el-dialog>
+
     </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { getAllManHinhPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ref, onMounted, watch, computed, reactive } from 'vue';
+import { deleteManHinh, getAllManHinhPage, postManHinh, putManHinh } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableManHinh = ref([]);
 const currentPage = ref(1);
@@ -78,7 +139,27 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5; // Số bản ghi trên 1 trang
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null)
+const formData = reactive({
+    id: null,
+    tenManHinh: '',
+    kichThuoc: '',
+    loaiManHinh: '',
+    doPhanGiai: '',
+    tanSoQuet: '',
+    doSang: '',
+    chatLieuKinh: '',
+})
 
+const rules = {
+    tenManHinh: [
+        {
+            required: true, message: 'Vui lòng nhập tên màn hình', trigger: 'blur'
+        },
+    ]
+}
 
 const loadData = async () => {
     try {
@@ -100,13 +181,16 @@ const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
 
-onMounted(() => {
-    loadData();
-});
-
-watch([currentPage, searchQuery], () => {
-    loadData();
-});
+const resetForm = () => {
+    formData.id = null
+    formData.tenManHinh = ''
+    formData.kichThuoc = ''
+    formData.loaiManHinh = ''
+    formData.doPhanGiai = ''
+    formData.tanSoQuet = ''
+    formData.doSang = ''
+    formData.chatLieuKinh = ''
+}
 
 const handleSearch = () => {
     currentPage.value = 1; // Về trang 1 khi tìm kiếm
@@ -117,8 +201,62 @@ const handleRefresh = () => {
     currentPage.value = 1;
 };
 
+const submitForm = async () => {
+    if (!formRef.value) return;
+
+    try {
+        await formRef.value.validate();
+
+        if (isEditMode.value) {
+            await putManHinh(formData.id, formData); // Sửa
+            ElMessage.success('Cập nhật thành công!');
+        } else {
+            await postManHinh(formData); // Thêm mới
+            ElMessage.success('Thêm mới thành công!');
+        }
+
+        resetForm();
+        dialogVisible.value = false;
+        loadData();
+    } catch (error) {
+        console.error("Lỗi xử lý form:", error);
+        ElMessage.error('Vui lòng kiểm tra lại thông tin!');
+    }
+}
+
 const handleCreate = () => {
-    console.log('Tạo mới');
+    resetForm();
+    dialogVisible.value = true;
+    isEditMode.value = false;
+};
+
+const handleClose = () => {
+    dialogVisible.value = false;
+};
+
+const handleEdit = (row) => {
+    isEditMode.value = true;
+    Object.assign(formData, row);
+    dialogVisible.value = true;
+};
+
+const handleDelete = async (id) => {
+    try {
+        await ElMessageBox.confirm('Bạn có chắc chắn muốn xóa không?', 'Xác nhận', {
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            type: 'warning',
+        });
+
+        await deleteManHinh(id);
+        ElMessage.success('Xóa thành công');
+        loadData();
+    } catch (error) {
+        if (error !== 'cancel') {
+            console.error('Lỗi khi xóa:', error);
+            ElMessage.error('Xóa thất bại');
+        }
+    }
 };
 
 const indexMethod = (index) => {
@@ -129,11 +267,18 @@ const handlePageChange = (newPage) => {
     currentPage.value = newPage;
 };
 
+onMounted(() => {
+    loadData();
+});
+
+watch([currentPage, searchQuery], () => {
+    loadData();
+});
+
 </script>
 
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
     font-size: 16px;
     padding: 8px 16px;

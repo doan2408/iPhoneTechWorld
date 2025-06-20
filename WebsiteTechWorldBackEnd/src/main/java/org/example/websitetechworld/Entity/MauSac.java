@@ -21,4 +21,8 @@ public class MauSac {
     @Column(name = "ten_mau", length = 50)
     private String tenMau;
 
+    @Size(max = 7)
+    @Nationalized
+    @Column(name = "hex_color", length = 7)
+    private String maMau;
 }

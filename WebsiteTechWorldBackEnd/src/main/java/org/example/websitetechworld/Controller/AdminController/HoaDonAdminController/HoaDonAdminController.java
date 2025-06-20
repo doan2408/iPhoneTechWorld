@@ -57,17 +57,17 @@ public class HoaDonAdminController {
     }
 
     @GetMapping("/{idHoaDon}/lich-su")
-    public List<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+    public Page<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
         return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon,pageNo,PAGE_SIZE);
     }
     @GetMapping("/{idHoaDon}/chi-tiet-thanh-toan")
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
         return hoaDonAdminService.getPageChiTietThanhToan(idHoaDon,pageNo,PAGE_SIZE);
     }
-    @GetMapping("/{idHoaDon}/xem-giao-hang")
-    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageGiaoHang(idHoaDon,pageNo,PAGE_SIZE);
-    }
+//    @GetMapping("/{idHoaDon}/xem-giao-hang")
+//    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
+//        return hoaDonAdminService.getPageGiaoHang(idHoaDon,pageNo,PAGE_SIZE);
+//    }
 
     @PostMapping
     public ResponseEntity<?> createPendingInvoice(){
@@ -147,6 +147,18 @@ public class HoaDonAdminController {
         ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/all-name-hoa-don")
+    public ResponseEntity<?> getAllNameHoaDon(){
+        List<TabHoaDonAdminResponse> tabList = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer nhanVienId = customUserDetails.getId();
+            tabList = lichSuHoaDonAdminServices.findMaHoaDonPendingByNhanVien(nhanVienId);
+        }
+        return ResponseEntity.ok(tabList);
+    }
+
 
 
 }
