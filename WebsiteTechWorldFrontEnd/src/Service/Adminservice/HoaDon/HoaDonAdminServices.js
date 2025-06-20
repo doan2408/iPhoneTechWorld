@@ -26,3 +26,18 @@ export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
         }
     )
 }
+
+export const hoaDonDelete = (id) => {
+    const url = url_base+ '/' + id;
+    return axios.delete(url)
+}
+
+export const doanhThuTheoThang = () => {
+    const url = url_base+ '/doanh-thu-thang';
+    return axios.get(url)
+}
+
+export const countHoaDonPending = () => {
+    const url = url_base+ '/count/pending';
+    return axios.get(url)
+}

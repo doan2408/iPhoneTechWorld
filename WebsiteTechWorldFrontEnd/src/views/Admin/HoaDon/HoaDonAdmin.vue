@@ -45,7 +45,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <h3 class="stat-number">₫2.5M</h3>
+                    <h3 class="stat-number">{{ doanhThuThang }}</h3>
                     <p class="stat-label">Doanh thu tháng</p>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <h3 class="stat-number">15</h3>
+                    <h3 class="stat-number">{{ choXuLy }}</h3>
                     <p class="stat-label">Chờ xử lý</p>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <h3 class="stat-number">85%</h3>
+                    <h3 class="stat-number">{{ tinhPhanTramDaXuLy(totalElement, choXuLy) }}</h3>
                     <p class="stat-label">Tỷ lệ hoàn thành</p>
                 </div>
             </div>
@@ -235,7 +235,8 @@
                                             </path>
                                         </svg>
                                     </button>
-                                    <button class="action-btn delete-btn" title="Xóa">
+                                    <button class="action-btn delete-btn" title="Xóa"
+                                    @click="deleteHoaDon(hoaDon)">
                                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -656,6 +657,9 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { hoaDonGetAll } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { viewLichSuHoaDon } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { hoaDonDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { doanhThuTheoThang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { countHoaDonPending } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import router from '@/router'
 
 const hoaDons = ref([]);
@@ -675,6 +679,9 @@ const showModal = ref(false);
 const selectedInvoice = ref(null);
 const lichSuHoaDon = ref([]);
 const showLichSuHoaDon = ref(false)
+// Thong ke
+const doanhThuThang = ref(0);
+const choXuLy = ref(0);
 
 
 // Hàm mở modal và lấy chi tiết hóa đơn
@@ -747,12 +754,17 @@ const loadData = async () => {
     try {
         // const response = await axios.get('/admin/hoa-don');
         const response = await hoaDonGetAll(pageNo.value, pageSize.value);
+        
+        const count = await countHoaDonPending();
+        const doanhThu = await doanhThuTheoThang();
 
         //Nếu response.data là object chứa content - trong backend trả về page là trả về object json
         if (Array.isArray(response.data.content)) {
             hoaDons.value = response.data.content;
             totalPage.value = response.data.totalPages || 0;
             totalElement.value = response.data.totalElements || 0; 
+            choXuLy.value = count.data || 0;
+            doanhThuThang.value = formatCurrency(doanhThu.data || 0);
         } else {
             hoaDons.value = [];
             totalPage.value = 0;
@@ -764,6 +776,17 @@ const loadData = async () => {
     } finally {
         isLoading.value = false;
     }
+};
+
+//Xoa hoa don
+const deleteHoaDon = async (hoaDon) => {
+    
+    try {
+        const response = await hoaDonDelete(hoaDon.idHoaDon);
+    } catch (error) {
+        console.error('Delete Hoa don', error);
+    } 
+    loadData()
 };
 
 const changePage = (newPage) => {
@@ -819,6 +842,13 @@ const formatCurrency = (amount) => {
         return `${amount} ₫`;
     }
 };
+
+const tinhPhanTramDaXuLy = (total, choXuLy) => {
+  if (total === 0) return "0%";
+  const phanTram = Math.round(100 * (total - choXuLy) / total);
+  return `${phanTram}%`;
+}
+
 
 //tra ve class css
 const getStatusBadgeClass = (status) => {
