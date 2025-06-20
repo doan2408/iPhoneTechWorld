@@ -1,23 +1,23 @@
 ```vue
 <template>
-  <el-form :model="sanPham" :rules="rules" ref="sanPhamForm" label-width="120px">
+  <el-form :model="sanPham" ref="sanPhamForm" label-width="120px">
     <h2>Thêm sản phẩm</h2>
     <!-- Thông tin sản phẩm chính -->
-    <el-form-item label="Tên sản phẩm" prop="tenSanPham">
+    <el-form-item label="Tên sản phẩm" :error="errors.tenSanPham">
       <el-input v-model="sanPham.tenSanPham"></el-input>
     </el-form-item>
 
-    <el-form-item label="Thương hiệu" prop="thuongHieu">
+    <el-form-item label="Thương hiệu" :error="errors.thuongHieu">
       <el-input v-model="sanPham.thuongHieu"></el-input>
     </el-form-item>
 
-    <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
+    <el-form-item label="Nhà cung cấp">
       <el-select v-model="sanPham.idNhaCungCap" placeholder="Chọn nhà cung cấp">
         <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap" :value="ncc.id"></el-option>
       </el-select>
     </el-form-item>
 
-    <el-form-item label="Trạng thái" prop="trangThaiSanPham">
+    <el-form-item label="Trạng thái">
       <el-select v-model="sanPham.trangThaiSanPham" placeholder="Chọn trạng thái">
         <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label"
           :value="tt.value"></el-option>
@@ -85,63 +85,55 @@
       <el-col :span="14">
         <el-card v-if="selectedChiTiet !== null">
           <h4>Thông tin chi tiết {{ selectedChiTiet + 1 }}</h4>
-          <el-form-item label="Màn hình" :prop="`sanPhamChiTiets.${selectedChiTiet}.idManHinh`"
-            :rules="[{ required: true, message: 'Vui lòng chọn màn hình' }]">
+          <el-form-item label="Màn hình">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idManHinh" placeholder="Chọn màn hình">
               <el-option v-for="mh in manHinhs" :key="mh.id" :label="mh.kichThuoc" :value="mh.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Hệ điều hành" :prop="`sanPhamChiTiets.${selectedChiTiet}.idHeDieuHanh`"
-            :rules="[{ required: true, message: 'Vui lòng chọn hệ điều hành' }]">
+          <el-form-item label="Hệ điều hành">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idHeDieuHanh" placeholder="Chọn hệ điều hành">
               <el-option v-for="hdh in heDieuHanhs" :key="hdh.id" :label="hdh.phienBan" :value="hdh.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Pin" :prop="`sanPhamChiTiets.${selectedChiTiet}.idPin`"
-            :rules="[{ required: true, message: 'Vui lòng chọn pin' }]">
+          <el-form-item label="Pin">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idPin" placeholder="Chọn pin">
               <el-option v-for="pin in pins" :key="pin.id" :label="pin.congSuatSac" :value="pin.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="CPU" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCpu`"
-            :rules="[{ required: true, message: 'Vui lòng chọn CPU' }]">
+          <el-form-item label="CPU">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCpu" placeholder="Chọn CPU">
               <el-option v-for="cpu in cpus" :key="cpu.id" :label="cpu.xungNhip" :value="cpu.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Camera trước" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCameraTruoc`"
-            :rules="[{ required: true, message: 'Vui lòng chọn camera trước' }]">
+          <el-form-item label="Camera trước">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraTruoc" placeholder="Chọn camera trước">
               <el-option v-for="cam in cameraTruocs" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Camera sau" :prop="`sanPhamChiTiets.${selectedChiTiet}.idCameraSau`"
-            :rules="[{ required: true, message: 'Vui lòng chọn camera sau' }]">
+          <el-form-item label="Camera sau">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraSau" placeholder="Chọn camera sau">
               <el-option v-for="cam in cameraSaus" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Xuất xứ" :prop="`sanPhamChiTiets.${selectedChiTiet}.idXuatXu`"
-            :rules="[{ required: true, message: 'Vui lòng chọn xuất xứ' }]">
+          <el-form-item label="Xuất xứ">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idXuatXu" placeholder="Chọn xuất xứ">
               <el-option v-for="xx in xuatXus" :key="xx.id" :label="xx.maXuatXu" :value="xx.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Loại" :prop="`sanPhamChiTiets.${selectedChiTiet}.idLoai`"
-            :rules="[{ required: true, message: 'Vui lòng chọn loại' }]">
+          <el-form-item label="Loại">
             <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idLoai" placeholder="Chọn loại">
               <el-option v-for="loai in loais" :key="loai.id" :label="loai.tenLoai" :value="loai.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Giá bán" :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`" :rules="[
-            { required: true, message: 'Vui lòng nhập giá bán', type: 'number' },
-            { type: 'number', min: 0, max: 100000000, message: 'Giá bán phải từ 0 đến 100 triệu' }
-          ]">
+          <el-form-item label="Giá bán">
             <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :min="0"
               :precision="2"></el-input-number>
           </el-form-item>
-          <el-form-item label="IMEI" :prop="`sanPhamChiTiets.${selectedChiTiet}.imeisInput`"
-            :rules="[{ required: true, message: 'Vui lòng nhập IMEI' }]">
+          <el-form-item label="Số lượng">
+            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0"
+              :disabled="true"></el-input-number>
+          </el-form-item>
+          <el-form-item label="IMEI">
             <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
               placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy"
               @input="capNhatSoLuong(selectedChiTiet)"></el-input>
@@ -150,15 +142,10 @@
               <el-button type="primary">Tải lên file IMEI</el-button>
             </el-upload>
             <div v-if="selectedChiTiet !== null" style="margin-top: 8px;">
-              Số lượng IMEI hợp lệ: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}
-              <span v-if="sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis?.length" style="color: red;">
-                ({{ sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis.length }} IMEI không hợp lệ: {{
-                  sanPham.sanPhamChiTiets[selectedChiTiet].invalidImeis.join(', ') }})
-              </span>
+              Số lượng IMEI: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}
             </div>
           </el-form-item>
-          <el-form-item label="Hình ảnh" :prop="`sanPhamChiTiets.${selectedChiTiet}.hinhAnhs`"
-            :rules="[{ required: true, message: 'Vui lòng tải lên ít nhất một hình ảnh', trigger: 'change' }]">
+          <el-form-item label="Hình ảnh">
             <el-upload :file-list="sanPham.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
               :on-change="(file, fileList) => handleFileChange(file, fileList, selectedChiTiet)"
               :on-remove="(file, fileList) => handleFileRemove(file, fileList, selectedChiTiet)" :auto-upload="false"
@@ -195,20 +182,6 @@ export default {
       sanPhamChiTiets: []
     });
 
-    const rules = {
-      tenSanPham: [{ required: true, message: 'Vui lòng nhập tên sản phẩm' }],
-      thuongHieu: [{ required: true, message: 'Vui lòng nhập thương hiệu' }],
-      idNhaCungCap: [{ required: true, message: 'Vui lòng chọn nhà cung cấp' }],
-      trangThaiSanPham: [{ required: true, message: 'Vui lòng chọn trạng thái' }],
-      sanPhamChiTiets: {
-        giaBan: [
-          { required: true, message: 'Vui lòng nhập giá bán', type: 'number' },
-          { type: 'number', min: 0, max: 100000000, message: 'Giá bán phải từ 0 đến 100 triệu' }
-        ],
-        hinhAnhs: [{ required: true, message: 'Vui lòng tải lên ít nhất một hình ảnh', trigger: 'change' }]
-      }
-    };
-
     const sanPhamForm = ref(null);
     const selectedMaus = ref([]);
     const selectedRams = ref([]);
@@ -226,6 +199,7 @@ export default {
     const xuatXus = ref([]);
     const loais = ref([]);
     const selectedChiTiet = ref(null);
+    const errors = reactive({});
 
     const danhSachTrangThaiSanPham = [
       { label: "Đang kinh doanh", value: "ACTIVE" },
@@ -293,7 +267,6 @@ export default {
         ElMessage.error('Vui lòng chọn ít nhất một màu sắc, RAM và ROM để tạo biến thể.');
         return;
       }
-      // Xóa sạch danh sách biến thể cũ
       sanPham.sanPhamChiTiets = [];
       const existingCombinations = new Set();
       const newVariants = [];
@@ -318,9 +291,7 @@ export default {
                 soLuong: 0,
                 giaBan: 0,
                 hinhAnhs: [],
-                imeisInput: '',
-                invalidImeis: [],
-                hasDuplicates: false
+                imeisInput: ''
               });
             }
           });
@@ -332,63 +303,13 @@ export default {
       ElMessage.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
     };
 
-    const validateIMEI = (imei) => /^\d{15}$/.test(imei);
-
     const capNhatSoLuong = debounce((index) => {
-      // 1. Lấy và làm sạch danh sách IMEI
       const imeis = sanPham.sanPhamChiTiets[index].imeisInput
         .split(',')
         .map(i => i.trim())
         .filter(i => i && i.length > 0);
-
-      // 2. Kiểm tra danh sách trống
-      if (!imeis.length) {
-        sanPham.sanPhamChiTiets[index].soLuong = 0;
-        sanPham.sanPhamChiTiets[index].invalidImeis = [];
-        sanPham.sanPhamChiTiets[index].hasDuplicates = false;
-        ElMessage.warning('Danh sách IMEI không được để trống.');
-        return;
-      }
-
-      // 3. Lọc IMEI hợp lệ và loại bỏ trùng lặp trong biến thể hiện tại
-      const validImeis = new Set(imeis.filter(imei => validateIMEI(imei)));
-
-      // 4. Debug toàn bộ sanPhamChiTiets
-      console.log('Tổng số biến thể:', sanPham.sanPhamChiTiets.length);
-      console.log('Nội dung sanPhamChiTiets:', JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
-
-      // 5. Thu thập IMEI hợp lệ từ các biến thể khác
-      const allImeis = new Set();
-      sanPham.sanPhamChiTiets.forEach((chiTiet, i) => {
-        if (i !== index && chiTiet.imeisInput && chiTiet.imeisInput.trim()) {
-          const otherImeis = chiTiet.imeisInput
-            .split(',')
-            .map(i => i.trim())
-            .filter(i => i && validateIMEI(i));
-          console.log(`IMEIs của biến thể ${i}:`, otherImeis);
-          otherImeis.forEach(i => allImeis.add(i));
-        }
-      });
-
-      // 6. Kiểm tra trùng lặp
-      const duplicates = [...validImeis].filter(i => allImeis.has(i));
-
-      // Debug
-      console.log('IMEIs hiện tại:', imeis);
-      console.log('IMEIs hợp lệ (biến thể hiện tại):', [...validImeis]);
-      console.log('Tất cả IMEIs (các biến thể khác):', [...allImeis]);
-      console.log('IMEIs trùng lặp:', duplicates);
-
-      if (duplicates.length) {
-        sanPham.sanPhamChiTiets[index].hasDuplicates = true;
-        ElMessage.error(`Phát hiện IMEI trùng lặp: ${duplicates.join(', ')}`);
-      } else {
-        sanPham.sanPhamChiTiets[index].hasDuplicates = false;
-      }
-
-      // 7. Cập nhật số lượng và danh sách IMEI không hợp lệ
-      sanPham.sanPhamChiTiets[index].soLuong = validImeis.size;
-      sanPham.sanPhamChiTiets[index].invalidImeis = imeis.filter(i => !validateIMEI(i));
+      sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
+      console.log(`Cập nhật số lượng cho biến thể ${index}:`, imeis.length);
     }, 150);
 
     const handleImeiFileChange = (file, index) => {
@@ -406,9 +327,6 @@ export default {
             .split(/[\n,;\s]+/)
             .map(i => i.trim())
             .filter(i => i);
-          if (!imeis.length) {
-            throw new Error('File không chứa IMEI hợp lệ');
-          }
           sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(', ');
           capNhatSoLuong(index);
           ElMessage.success(`Đã tải lên ${imeis.length} IMEI từ file ${file.name}`);
@@ -487,23 +405,6 @@ export default {
           ElMessage.error('Vui lòng tạo ít nhất một biến thể sản phẩm.');
           return;
         }
-        await sanPhamForm.value.validate();
-
-        // Kiểm tra trùng lặp IMEI
-        for (const chiTiet of sanPham.sanPhamChiTiets) {
-          if (chiTiet.hasDuplicates) {
-            ElMessage.error(`Vui lòng sửa các IMEI trùng lặp trong biến thể ${getMauSacLabels(chiTiet.idMau)} - ${getRamLabels(chiTiet.idRam)} - ${getRomLabels(chiTiet.idRom)} trước khi lưu.`);
-            return;
-          }
-          const validImeis = chiTiet.imeisInput
-            .split(',')
-            .map(i => i.trim())
-            .filter(i => i && validateIMEI(i));
-          if (chiTiet.soLuong !== validImeis.length) {
-            ElMessage.error(`Số lượng IMEI hợp lệ (${validImeis.length}) không khớp với số lượng (${chiTiet.soLuong}) trong biến thể ${getMauSacLabels(chiTiet.idMau)} - ${getRamLabels(chiTiet.idRam)} - ${getRomLabels(chiTiet.idRom)}`);
-            return;
-          }
-        }
 
         const payload = {
           tenSanPham: sanPham.tenSanPham,
@@ -514,7 +415,7 @@ export default {
             const imeis = chiTiet.imeisInput
               .split(',')
               .map(i => i.trim())
-              .filter(i => i && validateIMEI(i));
+              .filter(i => i);
             return {
               idMau: chiTiet.idMau,
               idRam: chiTiet.idRam,
@@ -554,15 +455,38 @@ export default {
           selectedRoms.value = [];
           selectedChiTiet.value = null;
           ElMessage.success('Form đã được làm mới!');
+          Object.keys(errors).forEach(k => delete errors[k]);
         });
       } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message;
-        if (error.response?.status === 400) {
-          ElMessage.error(`Dữ liệu không hợp lệ: ${errorMessage}`);
-        } else if (error.response?.status === 500) {
-          ElMessage.error('Lỗi hệ thống, vui lòng thử lại sau.');
+        console.error('Lỗi khi lưu sản phẩm:', {
+          status: error.response?.status,
+          responseData: error.response?.data,
+          message: error.message,
+          rawError: error
+        });
+
+        // TH1: Validation từ backend: message là object (từng field bị lỗi)
+        if (
+          error.response?.status === 400 &&
+          typeof error.response?.data?.message === 'object'
+        ) {
+          const fieldErrors = error.response.data.message;
+          const errorMessages = Object.entries(fieldErrors)
+            .map(([field, msg]) => `${msg}`)
+            .join('; ');
+          ElMessage.error(`Lỗi xác thực: ${errorMessages}`);
+
+          // Nếu muốn hiển thị từng lỗi dưới input:
+          Object.keys(errors).forEach(k => delete errors[k]); // clear lỗi cũ
+          Object.assign(errors, fieldErrors); // gán lỗi mới
+
+          // TH2: message là string (lỗi logic, business khác)
+        } else if (typeof error.response?.data?.message === 'string') {
+          ElMessage.error(error.response.data.message);
+
+          // TH3: Lỗi không rõ
         } else {
-          ElMessage.error('Lỗi khi lưu sản phẩm: ' + errorMessage);
+          ElMessage.error(error.message || 'Lỗi không xác định');
         }
       }
     };
@@ -573,7 +497,6 @@ export default {
 
     return {
       sanPham,
-      rules,
       sanPhamForm,
       nhaCungCaps,
       maus,
@@ -592,6 +515,7 @@ export default {
       selectedRams,
       selectedRoms,
       danhSachTrangThaiSanPham,
+      errors,
       generateVariants,
       removeChiTiet,
       selectChiTiet,

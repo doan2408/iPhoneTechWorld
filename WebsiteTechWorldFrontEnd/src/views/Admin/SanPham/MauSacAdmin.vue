@@ -80,7 +80,7 @@
 import { ref, onMounted, watch, computed, reactive } from 'vue';
 import { getAllMauSacPage, postMauSac, putMauSac, deleteMauSac } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableMauSac = ref([]);
 const currentPage = ref(1);
