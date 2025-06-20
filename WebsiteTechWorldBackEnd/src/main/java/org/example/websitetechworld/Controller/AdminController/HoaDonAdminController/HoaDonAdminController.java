@@ -148,6 +148,16 @@ public class HoaDonAdminController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/all-name-hoa-don")
+    public ResponseEntity<?> getAllNameHoaDon(){
+        List<TabHoaDonAdminResponse> tabList = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer nhanVienId = customUserDetails.getId();
+            tabList = lichSuHoaDonAdminServices.findMaHoaDonPendingByNhanVien(nhanVienId);
+        }
+        return ResponseEntity.ok(tabList);
+    }
 
 
 

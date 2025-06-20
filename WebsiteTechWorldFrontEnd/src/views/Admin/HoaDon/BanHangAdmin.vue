@@ -13,8 +13,8 @@
                 <!-- Tabs hóa đơn -->
                 <div class="invoice-tabs">
                     <div v-for="invoice in invoices" :key="invoice.id" @click="selectInvoice(invoice.id)"
-                        :class="['invoice-tab', { active: currentInvoiceId === invoice.id }]">
-                        <span>{{ invoice.name }}</span>
+                        :class="['invoice-tab', { active: currentInvoiceId == invoice.id }]">
+                        <span>{{ invoice.maHoaDon }}</span>
                         <button v-if="invoices.length > 1" @click.stop="closeInvoice(invoice.id)" class="close-tab-btn">
                             <X class="close-icon" />
                         </button>
@@ -103,19 +103,20 @@
                     </div>
                 </div>
 
-                <!-- Selected customer info -->
-                <div v-if="currentInvoice.customer.name" class="selected-customer">
+                <!-- Chon chon khach hang -->
+                <!-- <div v-if="currentInvoice && currentInvoice.maHoaDon" class="selected-customer">
                     <div class="customer-info">
+                        <input type="hidden" value="{{ currentInvoice.id }}">
                         <User class="customer-icon" />
                         <div>
-                            <strong>{{ currentInvoice.customer.name }}</strong>
-                            <span class="customer-phone">{{ currentInvoice.customer.phone }}</span>
-                        </div>
+                            <strong>{{ currentInvoice.maHoaDon }}</strong> -->
+                            <!-- <span class="customer-phone">{{ currentInvoice.customer.phone }}</span> -->
+                        <!-- </div>
                     </div>
                     <button @click="clearCustomer" class="clear-customer-btn">
                         <X class="clear-icon" />
                     </button>
-                </div>
+                </div> -->
 
                 <!-- Products grid -->
                 <div class="products-section">
@@ -149,11 +150,13 @@
 
                 <!-- Phan trang san pham -->
                 <div class="pagination">
-                    <button @click="previousPageProduct(currentCategory)" :disabled="pageNoProduct === 0" class="page-btn">
+                    <button @click="previousPageProduct(currentCategory)" :disabled="pageNoProduct === 0"
+                        class="page-btn">
                         <ChevronLeft class="page-icon" />
                     </button>
                     <span class="page-info">{{ pageNoProduct +1 }}/{{ totalPagesProdut }}</span>
-                    <button @click="nextPageProduct(currentCategory)" :disabled="pageNoProduct + 1  === totalPagesProdut" class="page-btn">
+                    <button @click="nextPageProduct(currentCategory)"
+                        :disabled="pageNoProduct + 1  === totalPagesProdut" class="page-btn">
                         <ChevronRight class="page-icon" />
                     </button>
                 </div>
@@ -165,13 +168,13 @@
     <div class="pos-footer">
         <div class="cart-summary">
             <!-- Order notes -->
-            <div class="order-notes">
+            <!-- <div class="order-notes">
                 <Edit class="notes-icon" />
                 <input v-model="currentInvoice.notes" type="text" placeholder="Ghi chú đơn hàng" class="notes-input" />
-            </div>
+            </div> -->
 
-            <!-- Cart items (if any) -->
-            <div v-if="currentInvoice.items.length > 0" class="cart-items-summary">
+            <!-- Cart items (if any) : san pham da chon -->
+            <!-- <div v-if="currentInvoice.items.length > 0" class="cart-items-summary">
                 <div class="cart-header">
                     <span>Sản phẩm đã chọn ({{ currentInvoice.items.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
@@ -202,19 +205,19 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <!-- Total -->
-            <div class="total-section">
-                <span class="total-label">Tổng tiền hàng:</span>
+            <!-- Total tong tien hang -->
+            <!-- <div class="total-section">
+                 <span class="total-label">Tổng tiền hàng:</span>
                 <span class="total-amount">{{ formatCurrency(currentInvoice.total) }}</span>
-            </div>
+            </div> -->
         </div>
 
         <!-- Payment button -->
-        <button @click="processPayment" :disabled="currentInvoice.items.length === 0" class="payment-btn">
+        <!-- <button @click="processPayment" :disabled="currentInvoice.items.length === 0" class="payment-btn">
             THANH TOÁN
-        </button>
+        </button> -->
     </div>
 
     <!-- Customer Modal -->
@@ -253,7 +256,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, markRaw } from 'vue'
+import { ref, reactive, computed, onMounted, markRaw, watch } from 'vue'
 import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
@@ -264,7 +267,9 @@ import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdmin
 import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
+import { useRoute, useRouter } from 'vue-router';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -279,7 +284,11 @@ const categoryProduct = ref([])
 const totalPagesCategory = ref(1)
 const totalPagesProdut = ref(1)
 const currentCategory = ref({ tenSanPham: 'All' })
-
+const tabHoaDon = ref([])
+const invoices = ref([]) // hien thi tab
+const currentInvoiceId = ref(null)
+const route = useRoute();
+const router = useRouter();
 
 // category san pham 
 const danhMucSanPham =  async () => {
@@ -313,19 +322,63 @@ const loadProducts = async (category) => {
 // Pagination
 const itemsPerPage = 12
 
-// Invoices management
-const invoices = ref([
-    {
-        id: 1,
-        name: 'Hóa đơn 1',
-        items: [],
-        customer: { name: '', phone: '', email: '', address: '' },
-        notes: '',
-        total: 0
-    }
-])
+const loadTabHoaDon = async () => {
+    const response = await loadHoaDonByIdNhanVien();
+    tabHoaDon.value = response.data;
 
-const currentInvoiceId = ref(1)
+    // Merge dữ liệu vào invoices tránh trùng
+    response.data.forEach(inv => addOrUpdateInvoice(inv));
+
+    const queryId = route.query.invoiceId;
+    const storedId = localStorage.getItem('selectedInvoiceId');
+    const defaultId = invoices.value.length > 0 ? invoices.value[0].id : null;
+
+    let finalId = null;
+    if (queryId && invoices.value.some(i => i.id === queryId)) {
+        finalId = queryId;
+    } else if (storedId && invoices.value.some(i => i.id === storedId)) {
+        finalId = storedId;
+    } else {
+        finalId = defaultId;
+    }
+
+    currentInvoiceId.value = finalId;
+
+    if (finalId) {
+        localStorage.setItem('selectedInvoiceId', finalId);
+
+        const invoice = invoices.value.find(i => i.id === finalId);
+        const hasDetail = invoice?.chiTietSanPham;
+
+        if (!hasDetail) {
+            try {
+                const res = await hoaDonDetail(finalId);
+                if (res.data) {
+                    addOrUpdateInvoice(res.data);
+                }
+            } catch (error) {
+                console.error("Không thể tải chi tiết hóa đơn:", error);
+            }
+        }
+    }
+
+    // Nếu có query trên URL thì xoá đi sau khi xử lý
+    if (queryId) {
+        router.replace({ query: { ...route.query, invoiceId: undefined } });
+    }
+};
+
+const addOrUpdateInvoice = (invoice) => {
+    const index = invoices.value.findIndex(i => i.id === invoice.id);
+    if (index !== -1) {
+        invoices.value[index] = { ...invoices.value[index], ...invoice };
+    } else {
+        // Tránh thêm nếu đã có 1 hóa đơn cùng maHoaDon
+        if (!invoices.value.some(i => i.maHoaDon === invoice.maHoaDon)) {
+            invoices.value.push(invoice);
+        }
+    }
+};
 let nextInvoiceId = 2
 
 // Customer modal
@@ -340,7 +393,7 @@ const newCustomer = reactive({
 // Cart display
 const showCartDetails = ref(false)
 
-// Computed properties
+// handle invoice tab logic 
 const currentInvoice = computed(() => {
     return invoices.value.find(inv => inv.id === currentInvoiceId.value) || invoices.value[0]
 })
@@ -369,10 +422,27 @@ const filteredProducts = computed(() => {
 
 
 
-// Methods
-const selectInvoice = (id) => {
-    currentInvoiceId.value = id
-}
+// ham chon hoa don tab
+const selectInvoice = async (id) => {
+    currentInvoiceId.value = id;
+    localStorage.setItem('selectedInvoiceId', id);
+
+    const invoice = invoices.value.find(i => i.id === id);
+    const hasDetail = invoice?.chiTietSanPham && invoice.chiTietSanPham.length > 0;
+
+    if (!hasDetail) {
+        try {
+            const res = await hoaDonDetail(id);
+            if (res.data) {
+                addOrUpdateInvoice(res.data);
+            }
+        } catch (error) {
+            console.error("Lỗi khi load chi tiết hóa đơn:", error);
+        }
+    }
+};
+
+
 
 const addNewInvoice = () => {
     const newInvoice = {
@@ -416,7 +486,7 @@ const addToCart = (product) => {
         })
     }
 
-    calculateTotal()
+    // calculateTotal()
 }
 
 const removeFromCart = (item) => {
@@ -424,7 +494,7 @@ const removeFromCart = (item) => {
     const index = invoice.items.findIndex(cartItem => cartItem.id === item.id)
     if (index > -1) {
         invoice.items.splice(index, 1)
-        calculateTotal()
+        // calculateTotal()
     }
 }
 
@@ -432,23 +502,23 @@ const increaseQuantity = (item) => {
     const product = products.value.find(p => p.id === item.id)
     if (item.quantity < product.stock) {
         item.quantity++
-        calculateTotal()
+        // calculateTotal()
     }
 }
 
 const decreaseQuantity = (item) => {
     if (item.quantity > 1) {
         item.quantity--
-        calculateTotal()
+        // calculateTotal()
     } else {
         removeFromCart(item)
     }
 }
 
-const calculateTotal = () => {
-    const invoice = currentInvoice.value
-    invoice.total = invoice.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-}
+// const calculateTotal = () => {
+//     const invoice = currentInvoice.value
+//     invoice.total = invoice.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+// }
 
 const searchCustomer = () => {
     // Simulate customer search
@@ -529,12 +599,14 @@ const focusCustomerSearch = () => {
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
+
 // Initialize
 onMounted(async () => {
-    calculateTotal();
+    // calculateTotal();
     await danhMucSanPham();
     selectedCategory.value = 'all';
     await loadProducts({ tenSanPham: 'all' });
+    loadTabHoaDon();
 }); 
 </script>
 
