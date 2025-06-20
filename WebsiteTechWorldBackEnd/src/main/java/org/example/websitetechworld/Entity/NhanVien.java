@@ -66,7 +66,7 @@ public class NhanVien implements JointAccount {
     @Column(name = "gioi_tinh")
     private Boolean gioiTinh;
 
-    @Column(name = "ngaySinh")
+    @Column(name = "ngay_sinh")
     private LocalDate ngaySinh;
 
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})

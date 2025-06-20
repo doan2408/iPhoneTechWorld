@@ -9,6 +9,9 @@ import store from '@/Service/LoginService/Store'; // Import store
 import ElementPlus from 'element-plus'; //cấu hình  element
 import 'element-plus/dist/index.css'; //cấu hình  element
 import 'bootstrap'
+import '@fortawesome/fontawesome-free/css/all.css'
+import '@fortawesome/fontawesome-free/js/all.js'
+
 
 // Cấu hình Axios trước khi khởi tạo ứng dụng
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080';

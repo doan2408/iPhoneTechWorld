@@ -22,6 +22,8 @@ public class ViewGiaoHangAdminResponse {
 
     private Integer idHoaDon;
     private String maHoaDon;
+    private String sdt;
+    private String trangThaiThanhToan;
 
     private String maGiaoHang;
 
@@ -30,7 +32,6 @@ public class ViewGiaoHangAdminResponse {
     private BigDecimal tongGiaTriDonHang;
 
     private String diaChiGiaoHang;
-
     private String trangThaiDonHang;
 
     private List<ChiTietGiaoHangResponseAdmin> chiTietGiaoHangResponseAdminList;
