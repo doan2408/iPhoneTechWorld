@@ -23,6 +23,10 @@ public class CustomUserDetails implements UserDetails {
         return account.getFullName();
     }
 
+    public String gettrangThai() {
+        return account.getTrangThai();
+    }
+
     public JointAccount getAccount() {
         return account;
     }

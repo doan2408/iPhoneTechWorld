@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminNhanVienResponse;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
 import org.example.websitetechworld.exception.ValidationException;
@@ -33,7 +34,7 @@ public class NhanVienAdminService {
         adminNhanVienResponse.setEmail(nhanVien.getEmail());
         adminNhanVienResponse.setSdt(nhanVien.getSdt());
         adminNhanVienResponse.setDiaChi(nhanVien.getDiaChi());
-        adminNhanVienResponse.setTrangThai(nhanVien.getTrangThai());
+        adminNhanVienResponse.setTrangThai(NhanVienTrangThai.valueOf(nhanVien.getTrangThai()));
         adminNhanVienResponse.setChucVu(nhanVien.getChucVu());
         adminNhanVienResponse.setGioiTinh(nhanVien.getGioiTinh());
         adminNhanVienResponse.setNamSinh(nhanVien.getNgaySinh());
@@ -50,7 +51,7 @@ public class NhanVienAdminService {
         dto.setEmail(nv.getEmail());
         dto.setSdt(nv.getSdt());
         dto.setDiaChi(nv.getDiaChi());
-        dto.setTrangThai(nv.getTrangThai());
+        dto.setTrangThai(NhanVienTrangThai.valueOf(nv.getTrangThai()));
         dto.setChucVu(nv.getChucVu());
         dto.setGioiTinh(nv.getGioiTinh());
         dto.setNamSinh(nv.getNgaySinh());

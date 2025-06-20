@@ -1,4 +1,5 @@
 <script setup>
+import { ElMessage } from "element-plus";
 import { reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
@@ -45,13 +46,19 @@ const handleLogin = async () => {
 
     // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
+    ElMessage.success("Đăng nhập thành công !");
   } catch (err) {
     console.log("Error:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
-        errors[field] = message; // Gán lỗi vào errors
+        if(field === "trang_thai") {
+          ElMessage.error(message);
+        }
+        else [
+          errors[field] = message //lỗi cấm tài khoản
+        ]
       });
-    } 
+    }
   } finally {
     isLoading.value = false;
   }

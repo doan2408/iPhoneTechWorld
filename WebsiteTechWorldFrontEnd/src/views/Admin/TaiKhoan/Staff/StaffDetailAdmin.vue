@@ -1,60 +1,11 @@
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { detailStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { useRoute, useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { h } from "vue";
-
-//thông báo
-function showCustomNotification({
-  messageText,
-  type = "success",
-  duration = 2000,
-}) {
-  ElNotification({
-    title: "",
-    message: h("div", [
-      h("span", messageText),
-      h(
-        "div",
-        {
-          style: `
-                    position: relative;
-                    height: 4px;
-                    background-color: #e0e0e0;
-                    margin-top: 8px;
-                    border-radius: 2px;
-                    overflow: hidden;
-                `,
-        },
-        [
-          h("div", {
-            style: `
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        height: 100%;
-                        background-color: ${
-                          type === "success"
-                            ? "#28a745"
-                            : type === "error"
-                            ? "#dc3545"
-                            : "#007bff"
-                        };
-                        width: 100%;
-                        animation: progressBar ${duration}ms linear forwards;
-                    `,
-          }),
-        ]
-      ),
-    ]),
-    duration: duration,
-    type: type,
-    position: "top-right",
-  });
-}
-
+import store from "@/Service/LoginService/Store";
 
 const staffRequest = reactive({
   tenNhanVien: "",
@@ -93,12 +44,9 @@ const handldeUpdate = async () => {
     const id = route.params.id;
     const response = await updateStaff(id, staffRequest);
 
-    // Thêm mới thành công
-    showCustomNotification({
-      messageText: "Thêm mới thành công!",
-      type: "success",
-      duration: 2000,
-    });
+    // Update thành công
+    ElMessage.success("Update nhân viên thành công");
+    
     setTimeout(() => {
     router.push("/admin/staff")
     }, 1000);
@@ -110,15 +58,16 @@ const handldeUpdate = async () => {
         errors[field] = message;
       });
     } else {
-      showCustomNotification({
-        messageText: "Có lỗi xảy ra!",
-        type: "error",
-        duration: 2000,
-      });
+      ElMessage.success("Update nhân viên thất bại")
     }
   }
 };
 
+//check roles: admin or staff
+const isAdmin = computed(() => {
+  const roles = store.state.role;
+  return Array.isArray(roles) && roles.map(role => (typeof role === "string" ? role : role.authority))
+})
 onMounted(() => {
   loadStaffDetail(id);
 });

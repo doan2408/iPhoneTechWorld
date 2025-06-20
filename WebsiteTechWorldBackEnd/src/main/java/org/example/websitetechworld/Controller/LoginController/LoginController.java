@@ -30,11 +30,17 @@ public class LoginController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
+    //check role
+    public boolean hasRole(Authentication auth, String role) {
+        return auth.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
         try {
             String username = request.get("tai_khoan");
-             String password = request.get("mat_khau");
+            String password = request.get("mat_khau");
 
             List<Map<String, String>> errors = new ArrayList<>();
 
@@ -51,6 +57,26 @@ public class LoginController {
                     Authentication authentication = authenticationManager.authenticate(
                             new UsernamePasswordAuthenticationToken(username, password)
                     );
+                    CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
+
+
+                    if(hasRole(authentication, "ROLE_STAFF") || hasRole(authentication, "ROLE_ADMIN")) {
+                        if(!"ENABLE".equalsIgnoreCase(taiKhoan.gettrangThai())) {
+                            System.out.println(taiKhoan.gettrangThai());
+                            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                    List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
+                            );
+                        }
+                    }
+                    else {
+                        if(!"ACTIVE".equalsIgnoreCase(taiKhoan.gettrangThai())) {
+                            System.out.println(taiKhoan.gettrangThai());
+                            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                    List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
+                            );
+                        }
+                    }
+
 
                     SecurityContext context = SecurityContextHolder.getContext();
                     context.setAuthentication(authentication);
@@ -59,8 +85,8 @@ public class LoginController {
                     session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 
                     String roles = authentication.getAuthorities().toString();
-                    CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
-
+//                  String roles = authentication.getAuthorities().iterator().next().getAuthority();
+                    System.out.println(roles);
                     return ResponseEntity.ok(Map.of(
                             "message", "Đăng nhập thành công!",
                             "roles", roles,
