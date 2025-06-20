@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, reactive } from "vue";
 import { getAll, detail, add, update, deletePhieuGiamGia, getAllKhachHang } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
+import { ElMessage } from "element-plus";
 
 const phieuGiamGias = ref([]);
 const isLoading = ref(false);
 const phieuGiamGiaDialogVisible = ref(false);
 const dialog = ref(null);
-const selectedPhieuGiamGia = ref(null);
 const khachHangList = ref([]);
 
 const currentPage = ref(0);
@@ -17,6 +17,70 @@ const search = ref("");
 const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
 const ngayKetThucFilter = ref(null);
+
+const formData = reactive({
+    id: null,
+    maGiamGia: "#####",
+    tenKhuyenMai: "",
+    loaiKhuyenMai: "Phần trăm",
+    giaTriKhuyenMai: 0,
+    giaTriDonHangToiThieu: 0,
+    giaTriKhuyenMaiToiDa: 0,
+    ngayBatDau: "",
+    ngayKetThuc: "",
+    hangToiThieu: "MEMBER",
+    soDiemCanDeDoi: 0,
+    soLuong: 0,
+    dieuKienApDung: "",
+    trangThai: "ACTIVE",
+    isGlobal: true,
+    khachHangIds: [],
+})
+
+const errors = reactive({
+    maGiamGia: '',
+    tenKhuyenMai: '',
+    giaTriKhuyenMai: '',
+    giaTriDonHangToiThieu: '',
+    giaTriKhuyenMaiToiDa: '',
+    ngayBatDau: '',
+    ngayKetThuc: '',
+    soDiemCanDeDoi: '',
+    soLuong: '',
+    dieuKienApDung: '',
+})
+
+const resetForm = () => {
+    formData.id = null;
+    formData.maGiamGia = "#####";
+    formData.tenKhuyenMai = "";
+    formData.loaiKhuyenMai = "Phần trăm";
+    formData.giaTriKhuyenMai = 0;
+    formData.giaTriDonHangToiThieu = 0;
+    formData.giaTriKhuyenMaiToiDa = 0;
+    formData.ngayBatDau = "";
+    formData.ngayKetThuc = "";
+    formData.hangToiThieu = "MEMBER";
+    formData.soDiemCanDeDoi = 0;
+    formData.soLuong = 0;
+    formData.dieuKienApDung = "";
+    formData.trangThai = "ACTIVE";
+    formData.isGlobal = true;
+    formData.khachHangIds = []
+}
+
+const resetErrors = () => {
+    errors.maGiamGia = '';
+    errors.tenKhuyenMai = '';
+    errors.giaTriKhuyenMai = '';
+    errors.giaTriDonHangToiThieu = '';
+    errors.giaTriKhuyenMaiToiDa = '';
+    errors.ngayBatDau = '';
+    errors.ngayKetThuc = '';
+    errors.soDiemCanDeDoi = '';
+    errors.soLuong = '';
+    errors.dieuKienApDung = ''
+}
 
 const loadPhieuGiamGia = async (page) => {
     try {
@@ -43,7 +107,6 @@ const loadPhieuGiamGia = async (page) => {
 const loadKhachHang = async () => {
     try {
         khachHangList.value = await getAllKhachHang();
-        console.log("Danh sách khách hàng:", khachHangList.value);
         if (!khachHangList.value.length) {
             alert("Không có khách hàng nào trong hệ thống!");
         }
@@ -53,60 +116,54 @@ const loadKhachHang = async () => {
     }
 };
 
-const clear = () => {
-    currentPage.value = 0;
-    search.value = "";
-    trangThaiFilter.value = null;
-    ngayBatDauFilter.value = null;
-    ngayKetThucFilter.value = null;
-    loadPhieuGiamGia(0);
-};
-
 const createPhieuGiamGia = () => {
-    selectedPhieuGiamGia.value = {
-        maGiamGia: "#####",
-        tenKhuyenMai: "",
-        loaiKhuyenMai: "Phần trăm",
-        giaTriKhuyenMai: 0,
-        giaTriDonHangToiThieu: 0,
-        giaTriKhuyenMaiToiDa: 0,
-        ngayBatDau: "",
-        ngayKetThuc: "",
-        hangToiThieu: "MEMBER",
-        soDiemCanDeDoi: 0,
-        soLuong: 0,
-        dieuKienApDung: "",
-        trangThai: "ACTIVE",
-        isGlobal: false,
-        khachHangIds: [],
-    };
     phieuGiamGiaDialogVisible.value = true;
 };
 
 const savePhieuGiamGia = async () => {
     try {
         isLoading.value = true;
-        const data = { ...selectedPhieuGiamGia.value };
-        console.log("Dữ liệu gửi đi:", data);
-        if (data.isGlobal && data.khachHangIds.length === 0) {
-            throw new Error("Vui lòng chọn ít nhất một khách hàng cho phiếu giảm giá riêng tư");
-        }
-        if (new Date(data.ngayBatDau) > new Date(data.ngayKetThuc)) {
-            throw new Error("Ngày bắt đầu phải trước ngày kết thúc");
-        }
-        if (data.id) {
-            await update(data.id, data);
+
+        if (formData.id) {
+            await update(formData.id, formData);
             alert("Cập nhật phiếu giảm giá thành công!");
         } else {
-            await add(data);
+            await add(formData);
             alert("Thêm phiếu giảm giá thành công!");
         }
         phieuGiamGiaDialogVisible.value = false;
         dialog.value?.close();
         loadPhieuGiamGia(currentPage.value);
     } catch (error) {
-        console.error(error.message || "Lỗi khi lưu phiếu giảm giá");
-        alert(error.message || "Lỗi khi lưu phiếu giảm giá");
+        console.log(error)
+        errors.maGiamGia = error.message.maGiamGia || ''
+        errors.tenKhuyenMai = error.message.tenKhuyenMai || ''
+        errors.giaTriKhuyenMai = error.message.giaTriKhuyenMai || ''
+        errors.giaTriDonHangToiThieu = error.message.giaTriDonHangToiThieu || ''
+        errors.giaTriKhuyenMaiToiDa = error.message.giaTriKhuyenMaiToiDa || ''
+        errors.ngayBatDau = error.message.ngayBatDau || ''
+        errors.ngayKetThuc = error.message.ngayKetThuc || ''
+        errors.soDiemCanDeDoi = error.message.soDiemCanDeDoi || ''
+        errors.soLuong = error.message.soLuong || ''
+        errors.dieuKienApDung = error.message.dieuKienApDung || ''
+
+        const errorMessages = [];
+        if (errors.maGiamGia) errorMessages.push(errors.maGiamGia);
+        if (errors.tenKhuyenMai) errorMessages.push(errors.tenKhuyenMai);
+        if (errors.giaTriKhuyenMai) errorMessages.push(errors.giaTriKhuyenMai);
+        if (errors.giaTriDonHangToiThieu) errorMessages.push(errors.giaTriDonHangToiThieu);
+        if (errors.giaTriKhuyenMaiToiDa) errorMessages.push(errors.giaTriKhuyenMaiToiDa);
+        if (errors.ngayBatDau) errorMessages.push(errors.ngayBatDau);
+        if (errors.ngayKetThuc) errorMessages.push(errors.ngayKetThuc);
+        if (errors.soDiemCanDeDoi) errorMessages.push(errors.soDiemCanDeDoi);
+        if (errors.soLuong) errorMessages.push(errors.soLuong);
+        if (errors.dieuKienApDung) errorMessages.push(errors.dieuKienApDung);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
     } finally {
         isLoading.value = false;
     }
@@ -139,6 +196,15 @@ const previousPage = () => {
     }
 };
 
+const clear = () => {
+    currentPage.value = 0;
+    search.value = "";
+    trangThaiFilter.value = null;
+    ngayBatDauFilter.value = null;
+    ngayKetThucFilter.value = null;
+    loadPhieuGiamGia(0);
+};
+
 const trangThaiLabels = {
     NOT_STARTED: "Chưa bắt đầu",
     ACTIVE: "Đang hoạt động",
@@ -152,8 +218,7 @@ const convertTrangThai = (trangThai) => {
 const viewUpdate = async (id) => {
     try {
         const response = await detail(id);
-        selectedPhieuGiamGia.value = { ...response, khachHangIds: response.khachHangIds || [] };
-        console.log("Chi tiết phiếu:", selectedPhieuGiamGia.value);
+        Object.assign(formData, { ...response, khachHangIds: response.khachHangIds || [] })
         phieuGiamGiaDialogVisible.value = true;
     } catch (error) {
         console.error(error.message || "Lỗi khi tải chi tiết phiếu giảm giá");
@@ -183,9 +248,9 @@ watch(phieuGiamGiaDialogVisible, (visible) => {
     }
 });
 
-watch(() => selectedPhieuGiamGia.value?.isGlobal, (newIsGlobal) => {
+watch(() => formData.value?.isGlobal, (newIsGlobal) => {
     if (!newIsGlobal) {
-        selectedPhieuGiamGia.value.khachHangIds = [];
+        formData.value.khachHangIds = [];
     }
 });
 
@@ -281,7 +346,7 @@ onMounted(() => {
                         <td>{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
                         <td>{{ phieuGiamGia.soLuong }}</td>
                         <td>{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
-                        <td>{{ phieuGiamGia.isGlobal ? 'Riêng tư' : 'Công khai' }}</td>
+                        <td>{{ phieuGiamGia.isGlobal ? 'Công khai' : 'Riêng tư' }}</td>
                         <td>
                             <button class="btn btn-outline-primary btn-sm" title="Chỉnh sửa"
                                 @click="viewUpdate(phieuGiamGia.id)">
@@ -309,57 +374,53 @@ onMounted(() => {
 
         <!-- Dialog thêm/sửa -->
         <dialog ref="dialog" class="dialog p-4 rounded shadow-lg" style="width: 800px; margin: auto;">
-            <form @submit.prevent="savePhieuGiamGia">
-                <h4 class="mb-4">{{ selectedPhieuGiamGia?.id ? 'Chỉnh sửa Phiếu Giảm Giá' : 'Thêm Phiếu Giảm Giá' }}
+            <form :model="formData" @submit.prevent="savePhieuGiamGia">
+                <h4 class="mb-4">{{ formData?.id ? 'Chỉnh sửa Phiếu Giảm Giá' : 'Thêm Phiếu Giảm Giá' }}
                 </h4>
-                <div v-if="selectedPhieuGiamGia" class="row g-3">
+                <div v-if="formData" class="row g-3">
                     <div class="col-md-6">
                         <label for="maGiamGia" class="form-label">Mã giảm giá</label>
-                        <input id="maGiamGia" v-model="selectedPhieuGiamGia.maGiamGia" type="text" class="form-control"
-                            disabled />
+                        <input id="maGiamGia" v-model="formData.maGiamGia" type="text" class="form-control" disabled />
                     </div>
                     <div class="col-md-6">
                         <label for="tenKhuyenMai" class="form-label">Tên khuyến mại</label>
-                        <input id="tenKhuyenMai" v-model="selectedPhieuGiamGia.tenKhuyenMai" type="text"
-                            class="form-control" required />
+                        <input id="tenKhuyenMai" v-model="formData.tenKhuyenMai" type="text" class="form-control" />
+                        <div v-if="errors.tenKhuyenMai" class="text-danger mt-1">{{ errors.tenKhuyenMai }}</div>
                     </div>
                     <div class="col-md-6">
                         <label for="loaiKhuyenMai" class="form-label">Loại khuyến mãi</label>
-                        <select id="loaiKhuyenMai" v-model="selectedPhieuGiamGia.loaiKhuyenMai" class="form-select"
-                            required>
+                        <select id="loaiKhuyenMai" v-model="formData.loaiKhuyenMai" class="form-select">
                             <option value="Phần trăm">Phần trăm (%)</option>
                             <option value="Cố định">VNĐ</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriKhuyenMai" class="form-label">Giá trị khuyến mãi</label>
-                        <input id="giaTriKhuyenMai" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMai" type="number"
-                            class="form-control" min="0" required />
+                        <input id="giaTriKhuyenMai" v-model.number="formData.giaTriKhuyenMai" type="number" class="form-control" min="0"/>
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriDonHangToiThieu" class="form-label">Giá trị đơn hàng tối thiểu</label>
-                        <input id="giaTriDonHangToiThieu" v-model.number="selectedPhieuGiamGia.giaTriDonHangToiThieu"
-                            type="number" class="form-control" min="0" required />
+                        <input id="giaTriDonHangToiThieu" v-model.number="formData.giaTriDonHangToiThieu" type="number"
+                            class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="giaTriKhuyenMaiToiDa" class="form-label">Giá trị khuyến mãi tối đa</label>
-                        <input id="giaTriKhuyenMaiToiDa" v-model.number="selectedPhieuGiamGia.giaTriKhuyenMaiToiDa"
-                            type="number" class="form-control" min="0" required />
+                        <input id="giaTriKhuyenMaiToiDa" v-model.number="formData.giaTriKhuyenMaiToiDa" type="number"
+                            class="form-control" min="0" required />
                     </div>
                     <div class="col-md-6">
                         <label for="ngayBatDau" class="form-label">Ngày bắt đầu</label>
-                        <input id="ngayBatDau" v-model="selectedPhieuGiamGia.ngayBatDau" type="date"
-                            class="form-control" required />
+                        <input id="ngayBatDau" v-model="formData.ngayBatDau" type="date" class="form-control"
+                            required />
                     </div>
                     <div class="col-md-6">
                         <label for="ngayKetThuc" class="form-label">Ngày kết thúc</label>
-                        <input id="ngayKetThuc" v-model="selectedPhieuGiamGia.ngayKetThuc" type="date"
-                            class="form-control" required />
+                        <input id="ngayKetThuc" v-model="formData.ngayKetThuc" type="date" class="form-control"
+                            required />
                     </div>
                     <div class="col-md-6">
                         <label for="hangToiThieu" class="form-label">Hạng tối thiểu</label>
-                        <select id="hangToiThieu" v-model="selectedPhieuGiamGia.hangToiThieu" class="form-select"
-                            required>
+                        <select id="hangToiThieu" v-model="formData.hangToiThieu" class="form-select">
                             <option value="MEMBER">Thành viên</option>
                             <option value="SILVER">Bạc</option>
                             <option value="GOLD">Vàng</option>
@@ -368,26 +429,25 @@ onMounted(() => {
                     </div>
                     <div class="col-md-6">
                         <label for="soDiemCanDeDoi" class="form-label">Số điểm cần để đổi</label>
-                        <input id="soDiemCanDeDoi" v-model.number="selectedPhieuGiamGia.soDiemCanDeDoi" type="number"
-                            class="form-control" min="0" required />
+                        <input id="soDiemCanDeDoi" v-model.number="formData.soDiemCanDeDoi" type="number"
+                            class="form-control" min="0" />
                     </div>
                     <div class="col-md-6">
                         <label for="soLuong" class="form-label">Số lượng</label>
-                        <input id="soLuong" v-model.number="selectedPhieuGiamGia.soLuong" type="number"
-                            class="form-control" min="0" required />
+                        <input id="soLuong" v-model.number="formData.soLuong" type="number" class="form-control"
+                            min="0" />
                     </div>
                     <div class="col-md-6">
                         <label for="isGlobal" class="form-label">Loại phiếu</label>
-                        <select id="isGlobal" v-model="selectedPhieuGiamGia.isGlobal" class="form-select" required>
-                            <option :value="false">Công khai</option>
-                            <option :value="true">Riêng tư</option>
+                        <select id="isGlobal" v-model="formData.isGlobal" class="form-select">
+                            <option :value="true">Công khai</option>
+                            <option :value="false">Riêng tư</option>
                         </select>
                     </div>
-                    <div v-if="selectedPhieuGiamGia.isGlobal" class="col-md-12">
+                    <div v-if="!formData.isGlobal" class="col-md-12">
                         <label for="khachHangIds" class="form-label">Khách hàng áp dụng <small>(Giữ Ctrl/Cmd để chọn
                                 nhiều)</small></label>
-                        <select id="khachHangIds" v-model="selectedPhieuGiamGia.khachHangIds" multiple
-                            class="form-select" size="5">
+                        <select id="khachHangIds" v-model="formData.khachHangIds" multiple class="form-select" size="5">
                             <option v-for="khachHang in khachHangList" :key="khachHang.id" :value="khachHang.id">
                                 {{ khachHang.tenKhachHang }}
                             </option>
@@ -395,8 +455,7 @@ onMounted(() => {
                     </div>
                     <div class="col-md-12">
                         <label for="dieuKienApDung" class="form-label">Mô tả điều kiện áp dụng</label>
-                        <input id="dieuKienApDung" v-model="selectedPhieuGiamGia.dieuKienApDung" type="text"
-                            class="form-control" />
+                        <input id="dieuKienApDung" v-model="formData.dieuKienApDung" type="text" class="form-control" />
                     </div>
                 </div>
                 <div class="mt-4 d-flex justify-content-end gap-2">

@@ -37,3 +37,18 @@ export const loadHoaDonByIdNhanVien = () => {
     const url = url_base + '/all-name-hoa-don';
     return axios.get(url)
 }
+
+export const hoaDonDelete = (id) => {
+    const url = url_base+ '/' + id;
+    return axios.delete(url)
+}
+
+export const doanhThuTheoThang = () => {
+    const url = url_base+ '/doanh-thu-thang';
+    return axios.get(url)
+}
+
+export const countHoaDonPending = () => {
+    const url = url_base+ '/count/pending';
+    return axios.get(url)
+}

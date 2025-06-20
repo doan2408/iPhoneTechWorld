@@ -109,6 +109,9 @@ public class HoaDon {
     @Column(name = "ngay_tao_hoa_don")
     private LocalDate ngayTaoHoaDon;
 
+    @Column(name = "is_delete")
+    private Boolean isDelete;
+
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_don_hang", length = 50)

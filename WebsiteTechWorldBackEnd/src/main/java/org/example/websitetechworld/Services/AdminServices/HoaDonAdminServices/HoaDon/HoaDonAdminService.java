@@ -56,7 +56,7 @@ public class HoaDonAdminService {
 
     public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return hoaDonRepository.findAll(pageable).map(GetAllHoaDonAdminResponse::convertDto);
+        return hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull(pageable).map(GetAllHoaDonAdminResponse::convertDto);
     }
 
     public HoaDonAdminResponse findById(Integer id){
@@ -143,5 +143,28 @@ public class HoaDonAdminService {
         return response;
     }
 
+    public void deleteHoaDon (Integer id){
+        HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
 
+        TrangThaiThanhToan trangThai = hoaDon.getTrangThaiThanhToan();
+
+        if (trangThai == TrangThaiThanhToan.PENDING) {
+            hoaDonRepository.delete(hoaDon);
+
+        } else if (trangThai == TrangThaiThanhToan.CONFIRMED || trangThai == TrangThaiThanhToan.CANCELLED) {
+            hoaDon.setIsDelete(true);
+            hoaDonRepository.save(hoaDon);
+
+        } else {
+            throw new IllegalStateException("Không thể xóa hóa đơn ở trạng thái: " + trangThai);
+        }
+    }
+
+    public Integer countHoaDonPending () {
+        return hoaDonRepository.countByTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
+    }
+
+    public BigDecimal doangThuThang () {
+        return hoaDonRepository.doanhThuThang();
+    }
 }

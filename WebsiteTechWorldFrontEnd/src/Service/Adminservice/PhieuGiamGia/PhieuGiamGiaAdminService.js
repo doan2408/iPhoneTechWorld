@@ -32,7 +32,9 @@ export const detail = async (id) => {
 
 export const add = async (data) => {
   try {
+    console.log(data)
     const response = await axiosInstance.post('', data);
+    
     return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm phiếu giảm giá:', error);
