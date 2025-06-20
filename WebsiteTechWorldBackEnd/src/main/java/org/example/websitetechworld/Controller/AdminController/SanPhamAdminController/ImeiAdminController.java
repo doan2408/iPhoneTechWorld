@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -116,4 +117,16 @@ public class ImeiAdminController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @PostMapping("/check-imeis")
+    public ResponseEntity<Map<String, List<String>>> checkImeiDuplicates(@RequestBody Map<String, List<String>> request) {
+        List<String> imeis = request.get("imeis");
+        List<String> duplicates = imeiAdminService.checkImeiDuplicates(imeis);
+        Map<String, List<String>> response = new HashMap<>();
+        response.put("duplicates", duplicates);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

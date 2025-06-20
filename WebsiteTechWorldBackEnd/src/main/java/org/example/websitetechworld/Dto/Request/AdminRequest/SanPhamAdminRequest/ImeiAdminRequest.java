@@ -28,7 +28,7 @@ public class ImeiAdminRequest {
     @Size(max = 100, message = "Nhà mạng không được vượt quá 100 ký tự")
     private String nhaMang;
 
-    @NotNull(message = "ID sản phẩm chi tiết không được để trống")
+//    @NotNull(message = "ID sản phẩm chi tiết không được để trống")
     private Integer idSanPhamChiTiet;
 
 }

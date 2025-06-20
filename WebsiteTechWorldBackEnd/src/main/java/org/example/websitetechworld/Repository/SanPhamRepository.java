@@ -39,4 +39,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
         """, nativeQuery = true)
     Page<Object[]> getAllHienThi(Pageable pageable);
 
+
+    Boolean existsByTenSanPham (String tenSanPham);
 }
