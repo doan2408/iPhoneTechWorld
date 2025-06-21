@@ -4,12 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ImeiAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.LoaiAdminRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ViewImeiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.LoaiAdminResponse;
+import org.example.websitetechworld.Entity.Imei;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin/imei")
 public class ImeiAdminController {
     private final ImeiAdminService imeiAdminService;
+    private final HoaDonChiTiet_ImeiAdminServices imeiAdminServices;
 
     @GetMapping
     public ResponseEntity<Page<ImeiAdminResponse>> getAllImei(
@@ -127,6 +132,18 @@ public class ImeiAdminController {
         response.put("duplicates", duplicates);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<Page<ViewImeiAdminResponse>> getAvailableImeis(
+            @RequestParam("productId") Integer productId, // Tên parameter phải khớp với frontend
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ViewImeiAdminResponse> imeisPage = imeiAdminServices.getAvailableImeisByProductId(productId, pageable);
+        return ResponseEntity.ok(imeisPage);
+    }
+
 
 
 }

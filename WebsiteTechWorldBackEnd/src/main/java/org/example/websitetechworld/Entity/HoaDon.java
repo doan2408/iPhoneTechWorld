@@ -49,16 +49,16 @@ public class HoaDon {
 
     // Xóa thuộc tính diaChi
 
-    @Column(name = "phi_ship", precision = 10, scale = 2)
+    @Column(name = "phi_ship", precision = 19, scale = 2)
     private BigDecimal phiShip;
 
-    @Column(name = "tong_tien", precision = 10, scale = 2)
+    @Column(name = "tong_tien", precision = 19, scale = 2)
     private BigDecimal tongTien;
 
-    @Column(name = "so_tien_giam", precision = 10, scale = 2)
+    @Column(name = "so_tien_giam", precision = 19, scale = 2)
     private BigDecimal soTienGiam;
 
-    @Column(name = "thanh_tien", precision = 10, scale = 2)
+    @Column(name = "thanh_tien", precision = 19, scale = 2)
     private BigDecimal thanhTien;
 
     @Enumerated(EnumType.STRING)

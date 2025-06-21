@@ -1206,3 +1206,362 @@
       min-width: 50px;
     }
   }
+  .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+  } 
+
+  .modal-content-2 {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      transition: all 0.3s ease;
+  } 
+
+  .modal-actions button {
+      margin: 10px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+  }
+
+  .btn-danger {
+      background-color: #dc3545;
+      color: white;
+  }
+
+  .btn-warning {
+      background-color: #ffc107;
+      color: black;
+  }
+
+  .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+  }
+
+  .btn-primary {
+      background-color: #007bff;
+      color: white;
+  }
+
+  .quantity-input-group {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .quantity-input-group label {
+      font-weight: bold;
+  }
+
+  .quantity-input-group input[type="number"] {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1em;
+  }
+
+  /* --- CSS cho hiệu ứng chuyển động của <Transition> --- */
+  .modal-fade-enter-from,
+  .modal-fade-leave-to {
+      opacity: 0;
+  }
+
+  .modal-fade-enter-active,
+  .modal-fade-leave-active {
+      transition: opacity 0.3s ease;
+  }
+
+  .modal-fade-enter-from .modal-content,
+  .modal-fade-leave-to .modal-content {
+      transform: scale(0.9); }
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Thêm để đảm bảo overlay bao phủ toàn bộ và không bị cuộn ngang */
+    overflow: hidden;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    /* Tăng kích thước tối đa của modal */
+    width: 95%;
+    /* Chiếm nhiều không gian hơn trên màn hình */
+    max-width: 800px;
+    /* Tăng max-width đáng kể */
+    /* min-width: 500px; */
+    /* Có thể thêm min-width nếu cần */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* Tăng chiều cao tối đa */
+    overflow: hidden;
+    /* Quan trọng: Ngăn modal tự tạo scrollbars không mong muốn */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #888;
+    padding: 0 5px;
+}
+
+.close-button:hover {
+    color: #555;
+}
+
+.modal-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Cho phép cuộn dọc nếu nội dung dài */
+    /* Bỏ padding-right và đảm bảo không có overflow-x */
+    padding: 10px 0;
+    /* Chỉ padding trên dưới */
+    margin-bottom: 20px;
+    /* Quan trọng: Ngăn cuộn ngang trong body */
+    overflow-x: hidden;
+}
+
+.imei-list {
+    display: grid;
+    /* Thay đổi để đảm bảo số cột và kích thước ô phù hợp với modal lớn hơn */
+    /* Dùng repeat(auto-fit, minmax(...)) để tự động điều chỉnh số cột */
+    /* Điều chỉnh minmax để các ô không quá nhỏ hoặc quá lớn */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    /* Tăng minmax và dùng auto-fit */
+    gap: 15px;
+    /* Tăng khoảng cách giữa các ô */
+    padding: 0 10px;
+    /* Thêm padding ngang cho lưới IMEI để tránh dính lề */
+}
+
+.imei-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    height: 60px;
+    box-sizing: border-box;
+    /* Đảm bảo nội dung không tràn ra khỏi item */
+    overflow: hidden;
+}
+
+.imei-item:hover {
+    background-color: #eaf6ff;
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.imei-item input[type="checkbox"] {
+    margin-right: 12px;
+    transform: scale(1.3);
+    accent-color: #007bff;
+    flex-shrink: 0;
+}
+
+.imei-item label {
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    text-align: left;
+}
+
+/* Kiểu cho IMEI đã chọn */
+.imei-item input[type="checkbox"]:checked+label {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.imei-item input[type="checkbox"]:checked {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 25px;
+    gap: 15px;
+    /* Thêm padding ngang để căn chỉnh với imei-list */
+    padding: 0 10px;
+}
+
+.pagination-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.pagination-controls span {
+    font-weight: 500;
+    color: #666;
+    font-size: 1em;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: 10px;
+    /* Thêm padding ngang để căn chỉnh với nội dung */
+    padding-right: 25px;
+    /* Giữ padding phải bằng padding của modal-content */
+    padding-left: 25px;
+    /* Giữ padding trái bằng padding của modal-content */
+}
+
+.btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.confirm-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.confirm-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+.auto-select-btn {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.auto-select-btn:hover {
+    background-color: #e0a800; }
+    
+.quantity-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    /* Đẩy sang phải */
+    margin-right: 20px;
+    /* Khoảng cách với nút đóng */
+}
+
+.quantity-input-group label {
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+}
+
+.quantity-input-group input[type="number"] {
+    width: 80px;
+    /* Chiều rộng cố định */
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    text-align: center;
+    -moz-appearance: textfield;
+    /* Loại bỏ nút tăng giảm mặc định trên Firefox */
+}
+
+/* Loại bỏ mũi tên tăng giảm trên Chrome, Safari, Edge */
+.quantity-input-group input[type="number"]::-webkit-outer-spin-button,
+.quantity-input-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; }
