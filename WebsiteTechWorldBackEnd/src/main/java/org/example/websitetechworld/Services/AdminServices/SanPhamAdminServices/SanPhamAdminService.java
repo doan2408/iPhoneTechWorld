@@ -179,7 +179,7 @@ public class SanPhamAdminService {
         // map các trường khác tương tự
 
         if (sanPham.getIdNhaCungCap() != null) {
-            response.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
+            response.setIdNhaCungCap(sanPham.getIdNhaCungCap().getId());
         }
 
         // map danh sách chi tiết sản phẩm
@@ -206,10 +206,10 @@ public class SanPhamAdminService {
             String trangThaiStr = (String) hienThi[3];
             TrangThaiSanPham trangThai = TrangThaiSanPham.valueOf(trangThaiStr);
             sp.setTrangThaiSanPham(trangThai);
-            sp.setGiaBan((BigDecimal) hienThi[4]);
-            sp.setTenLoai((String) hienThi[5]);
-            sp.setSoLuong((Integer) hienThi[6]);
-            sp.setUrl((String) hienThi[7]);
+//            sp.setGiaBan((BigDecimal) hienThi[4]);
+            sp.setTenLoai((String) hienThi[4]);
+            sp.setSoLuong((Integer) hienThi[5]);
+            sp.setUrl((String) hienThi[6]);
             sanPhamHienThi.add(sp);
 
         }
@@ -247,20 +247,20 @@ public class SanPhamAdminService {
         Set<SanPhamChiTietAdminDetailResponse> chiTietList = sanPham.getSanPhamChiTiets().stream().map(ct -> {
             SanPhamChiTietAdminDetailResponse dto = new SanPhamChiTietAdminDetailResponse();
             dto.setId(ct.getId());
-            dto.setMaSanPhamChiTiet(ct.getMaSanPhamChiTiet());
-            dto.setIdMau(ct.getIdMau().getId());
-            dto.setIdRam(ct.getIdRam().getId());
-            dto.setIdRom(ct.getIdRom().getId());
-            dto.setIdManHinh(ct.getIdManHinh().getId());
-            dto.setIdHeDieuHanh(ct.getIdHeDieuHanh().getId());
-            dto.setIdPin(ct.getIdPin().getId());
-            dto.setIdCpu(ct.getIdCpu().getId());
-            dto.setIdCameraTruoc(ct.getIdCameraTruoc().getId());
-            dto.setIdCameraSau(ct.getIdCameraSau().getId());
-            dto.setIdXuatXu(ct.getIdXuatXu().getId());
-            dto.setIdLoai(ct.getIdLoai().getId());
-            dto.setSoLuong(ct.getSoLuong()); // Sửa tên ở đây
+            dto.setSoLuong(ct.getSoLuong());
             dto.setGiaBan(ct.getGiaBan());
+            dto.setMaSanPhamChiTiet(ct.getMaSanPhamChiTiet());
+            dto.setIdMau(ct.getIdMau() != null ? ct.getIdMau().getId() : null);
+            dto.setIdRam(ct.getIdRam() != null ? ct.getIdRam().getId() : null);
+            dto.setIdRom(ct.getIdRom() != null ? ct.getIdRom().getId() : null);
+            dto.setIdManHinh(ct.getIdManHinh() != null ? ct.getIdManHinh().getId() : null);
+            dto.setIdHeDieuHanh(ct.getIdHeDieuHanh() != null ? ct.getIdHeDieuHanh().getId() : null);
+            dto.setIdPin(ct.getIdPin() != null ? ct.getIdPin().getId() : null);
+            dto.setIdCpu(ct.getIdCpu() != null ? ct.getIdCpu().getId() : null);
+            dto.setIdCameraTruoc(ct.getIdCameraTruoc() != null ? ct.getIdCameraTruoc().getId() : null);
+            dto.setIdCameraSau(ct.getIdCameraSau() != null ? ct.getIdCameraSau().getId() : null);
+            dto.setIdXuatXu(ct.getIdXuatXu() != null ? ct.getIdXuatXu().getId() : null);
+            dto.setIdLoai(ct.getIdLoai() != null ? ct.getIdLoai().getId() : null);
 
             // imeis
             if (ct.getImeis() != null) {
@@ -293,6 +293,177 @@ public class SanPhamAdminService {
         return response;
     }
 
+    public SanPhamAdminResponse getViewSanPham(Integer id) {
+        // Tìm sản phẩm theo ID, ném ngoại lệ nếu không tìm thấy
+        SanPham sanPham = sanPhamRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
+
+        // Khởi tạo đối tượng phản hồi
+        SanPhamAdminResponse response = new SanPhamAdminResponse();
+
+        // Gán thông tin cơ bản của sản phẩm
+        response.setId(sanPham.getId());
+        response.setTenSanPham(sanPham.getTenSanPham());
+        response.setThuongHieu(sanPham.getThuongHieu());
+        response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
+        if (sanPham.getIdNhaCungCap() != null) {
+            response.setIdNhaCungCap(sanPham.getIdNhaCungCap().getId());
+        }
+
+        // Chuyển đổi danh sách chi tiết sản phẩm
+        Set<SanPhamChiTietResponse> chiTietList = (sanPham.getSanPhamChiTiets() != null)
+                ? sanPham.getSanPhamChiTiets().stream().map(ct -> {
+            SanPhamChiTietResponse dto = new SanPhamChiTietResponse();
+
+            // Thông tin cơ bản của sản phẩm chi tiết
+            dto.setId(ct.getId());
+            dto.setMaSanPhamChiTiet(ct.getMaSanPhamChiTiet());
+            dto.setSoLuongSPCT(ct.getSoLuong());
+            dto.setGiaBan(ct.getGiaBan());
+
+            // Thông tin sản phẩm
+            if (ct.getIdSanPham() != null) {
+                dto.setMaSanPham(ct.getIdSanPham().getMaSanPham());
+                dto.setTenSanPham(ct.getIdSanPham().getTenSanPham());
+                dto.setThuongHieu(ct.getIdSanPham().getThuongHieu());
+                dto.setTrangThaiSanPham(ct.getIdSanPham().getTrangThaiSanPham());
+
+                NhaCungCap cungCap = ct.getIdSanPham().getIdNhaCungCap();
+                if (cungCap != null) {
+                    dto.setTenNhaCungCap(cungCap.getTenNhaCungCap());
+                    dto.setDiaChi(cungCap.getDiaChi());
+                    dto.setSdt(cungCap.getSdt());
+                    dto.setEmail(cungCap.getEmail());
+                }
+            }
+
+            // Thông tin màu sắc
+            if (ct.getIdMau() != null) {
+                dto.setTenMau(ct.getIdMau().getTenMau());
+                dto.setMaMau(ct.getIdMau().getMaMau());
+            }
+
+            // Thông tin RAM
+            if (ct.getIdRam() != null) {
+                dto.setDungLuongRam(ct.getIdRam().getDungLuong());
+                dto.setLoaiRam(ct.getIdRam().getLoai());
+                dto.setTocDoDocGhiRam(ct.getIdRam().getTocDoDocGhi());
+                dto.setNhaSanXuatRam(ct.getIdRam().getNhaSanXuat());
+                dto.setNamRaMatRam(ct.getIdRam().getNamRaMat());
+            }
+
+            // Thông tin ROM
+            if (ct.getIdRom() != null) {
+                dto.setDungLuongRom(ct.getIdRom().getDungLuong());
+                dto.setLoaiRom(ct.getIdRom().getLoai());
+                dto.setTocDoDocGhiRom(ct.getIdRom().getTocDoDocGhi());
+                dto.setNhaSanXuatRom(ct.getIdRom().getNhaSanXuat());
+                dto.setNamRaMatRom(ct.getIdRom().getNamRaMat());
+            }
+
+            // Thông tin màn hình
+            if (ct.getIdManHinh() != null) {
+                dto.setTenManHinh(ct.getIdManHinh().getTenManHinh());
+                dto.setKichThuoc(ct.getIdManHinh().getKichThuoc());
+                dto.setLoaiManHinh(ct.getIdManHinh().getLoaiManHinh());
+                dto.setDoPhanGiaiManHinh(ct.getIdManHinh().getDoPhanGiai());
+                dto.setTanSoQuet(ct.getIdManHinh().getTanSoQuet());
+                dto.setDoSang(ct.getIdManHinh().getDoSang());
+                dto.setChatLieuKinh(ct.getIdManHinh().getChatLieuKinh());
+            }
+
+            // Thông tin hệ điều hành
+            if (ct.getIdHeDieuHanh() != null) {
+                dto.setPhienBanHeDieuHanh(ct.getIdHeDieuHanh().getPhienBan());
+                dto.setNhaPhatTrien(ct.getIdHeDieuHanh().getNhaPhatTrien());
+                dto.setGiaoDienNguoiDung(ct.getIdHeDieuHanh().getGiaoDienNguoiDung());
+            }
+
+            // Thông tin pin
+            if (ct.getIdPin() != null) {
+                dto.setPhienBanPin(ct.getIdPin().getPhienBan());
+                dto.setCongSuatSac(ct.getIdPin().getCongSuatSac());
+                dto.setThoiGianSuDung(ct.getIdPin().getThoiGianSuDung());
+                dto.setSoLanSacToiDa(ct.getIdPin().getSoLanSacToiDa());
+            }
+
+            // Thông tin CPU
+            if (ct.getIdCpu() != null) {
+                dto.setHangSanXuat(ct.getIdCpu().getHangSanXuat());
+                dto.setSoNhan(ct.getIdCpu().getSoNhan());
+                dto.setChipXuLy(ct.getIdCpu().getChipXuLy());
+                dto.setXungNhip(ct.getIdCpu().getXungNhip());
+                dto.setCongNgheSanXuat(ct.getIdCpu().getCongNgheSanXuat());
+                dto.setBoNhoDem(ct.getIdCpu().getBoNhoDem());
+                dto.setTieuThuDienNang(ct.getIdCpu().getTieuThuDienNang());
+                dto.setNamRaMat(ct.getIdCpu().getNamRaMat());
+            }
+
+            // Thông tin camera trước
+            if (ct.getIdCameraTruoc() != null) {
+                dto.setLoaiCameraTruoc(ct.getIdCameraTruoc().getLoaiCamera());
+                dto.setDoPhanGiaiCameraTruoc(ct.getIdCameraTruoc().getDoPhanGiai());
+                dto.setKhauDoCameraTruoc(ct.getIdCameraTruoc().getKhauDo());
+                dto.setLoaiZoomCameraTruoc(ct.getIdCameraTruoc().getLoaiZoom());
+                dto.setCheDoChupCameraTruoc(ct.getIdCameraTruoc().getCheDoChup());
+            }
+
+            // Thông tin camera sau
+            if (ct.getIdCameraSau() != null) {
+                dto.setLoaiCameraSau(ct.getIdCameraSau().getLoaiCamera());
+                dto.setDoPhanGiaiCameraSau(ct.getIdCameraSau().getDoPhanGiai());
+                dto.setKhauDoCameraSau(ct.getIdCameraSau().getKhauDo());
+                dto.setLoaiZoomCameraSau(ct.getIdCameraSau().getLoaiZoom());
+                dto.setCheDoChupCameraSau(ct.getIdCameraSau().getCheDoChup());
+            }
+
+            // Thông tin xuất xứ
+            if (ct.getIdXuatXu() != null) {
+                dto.setMaXuatXu(ct.getIdXuatXu().getMaXuatXu());
+                dto.setTenQuocGia(ct.getIdXuatXu().getTenQuocGia());
+            }
+
+            // Thông tin loại sản phẩm
+            if (ct.getIdLoai() != null) {
+                dto.setTenLoai(ct.getIdLoai().getTenLoai());
+            }
+
+            // Xử lý danh sách IMEI
+            if (ct.getImeis() != null && !ct.getImeis().isEmpty()) {
+                dto.setImeis(ct.getImeis().stream()
+                        .map(i -> {
+                            ImeiAdminResponse imeiDto = new ImeiAdminResponse();
+                            imeiDto.setSoImei(i.getSoImei());
+                            return imeiDto;
+                        }).collect(Collectors.toSet()));
+            } else {
+                dto.setImeis(new HashSet<>());
+            }
+
+            // Xử lý danh sách hình ảnh
+            if (ct.getHinhAnhs() != null && !ct.getHinhAnhs().isEmpty()) {
+                dto.setHinhAnhs(ct.getHinhAnhs().stream()
+                        .map(img -> {
+                            HinhAnhAdminResponse imgDto = new HinhAnhAdminResponse();
+                            imgDto.setUrl(img.getUrl());
+                            imgDto.setImagePublicId(img.getImagePublicId());
+                            return imgDto;
+                        }).collect(Collectors.toSet()));
+            } else {
+                dto.setHinhAnhs(new HashSet<>());
+            }
+
+            return dto;
+        }).collect(Collectors.toSet())
+                : new HashSet<>();
+
+        // Gán danh sách chi tiết sản phẩm vào phản hồi
+        response.setSanPhamChiTiets(chiTietList);
+
+        return response;
+    }
+
+
 
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
@@ -302,8 +473,30 @@ public class SanPhamAdminService {
             throw new BusinessException("Tên sản phẩm đã toàn tại: " + sanPhamAdminRequest.getTenSanPham());
         }
 
+
         Set<String> variantKeySet = new HashSet<>();
+        Set<String> allImeis = new HashSet<>();
         for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+            List<String> imeiList = rq.getImeis().stream()
+                    .map(i -> i.getSoImei().trim())
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+
+            Set<String> imeiSet = new HashSet<>(imeiList);
+            if (imeiSet.size() < imeiList.size()) {
+                throw new BusinessException("Chi tiết sản phẩm có IMEI bị trùng trong chính nó.");
+            }
+
+            for (String imei : imeiList) {
+                if (!allImeis.add(imei)) {
+                    throw new BusinessException("IMEI bị trùng giữa các biến thể: " + imei);
+                }
+
+                // Check trùng với DB
+                if (imeiReposiory.existsBySoImei(imei)) {
+                    throw new BusinessException("IMEI đã tồn tại trong hệ thống: " + imei);
+                }
+            }
             String variantKey = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%d-%d",
                     rq.getIdMau(), rq.getIdRam(), rq.getIdRom(), rq.getIdManHinh(),
                     rq.getIdHeDieuHanh(), rq.getIdPin(), rq.getIdCpu(), rq.getIdCameraTruoc(),
@@ -440,7 +633,7 @@ public class SanPhamAdminService {
         response.setTenSanPham(sanPham.getTenSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
         if (sanPham.getIdNhaCungCap() != null) {
-            response.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
+            response.setIdNhaCungCap(Integer.valueOf(sanPham.getIdNhaCungCap().getId()));
         }
 
         if (sanPham.getSanPhamChiTiets() != null) {
@@ -456,19 +649,24 @@ public class SanPhamAdminService {
 
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
-        // Bước 1: Validate request
-        if (sanPhamAdminRequest == null || sanPhamAdminRequest.getTenSanPham() == null) {
-            throw new BusinessException("Dữ liệu sản phẩm không hợp lệ");
-        }
-        if (sanPhamAdminRequest.getIdNhaCungCap() != null && !nhaCungCapRepository.existsById(sanPhamAdminRequest.getIdNhaCungCap())) {
-            throw new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap());
+
+        // Kiểm tra biến thể trùng lặp
+        Set<String> variantKeySet = new HashSet<>();
+        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+            String variantKey = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%d-%d",
+                    rq.getIdMau(), rq.getIdRam(), rq.getIdRom(), rq.getIdManHinh(),
+                    rq.getIdHeDieuHanh(), rq.getIdPin(), rq.getIdCpu(), rq.getIdCameraTruoc(),
+                    rq.getIdCameraSau(), rq.getIdXuatXu());
+            if (!variantKeySet.add(variantKey)) {
+                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
+            }
         }
 
-        // Bước 2: Tìm sản phẩm cần cập nhật
+        // Tìm sản phẩm cần cập nhật
         SanPham sanPham = sanPhamRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
 
-        // Bước 3: Cập nhật thông tin sản phẩm
+        // Cập nhật thông tin sản phẩm
         sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
         sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
         sanPham.setTrangThaiSanPham(
@@ -477,30 +675,25 @@ public class SanPhamAdminService {
         );
 
         if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
-            NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap()).orElseThrow();
+            NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
             sanPham.setIdNhaCungCap(nhaCungCap);
         } else {
             sanPham.setIdNhaCungCap(null);
         }
 
-        // Bước 4: Xử lý chi tiết sản phẩm
+        // Xử lý chi tiết sản phẩm
         Set<SanPhamChiTiet> existingChiTietSet = sanPham.getSanPhamChiTiets();
         Set<SanPhamChiTiet> updatedChiTietSet = new HashSet<>();
 
         if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
             for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-                // Validate chi tiết
-                if (rq.getSoLuong() == null || rq.getSoLuong() < 0) {
-                    throw new BusinessException("Số lượng không hợp lệ");
-                }
-                if (rq.getGiaBan() == null || rq.getGiaBan().compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new BusinessException("Giá bán phải lớn hơn 0");
-                }
 
                 // Tìm hoặc tạo mới chi tiết sản phẩm
                 SanPhamChiTiet chiTiet;
                 if (rq.getId() != null && sanPhamChiTietRepository.existsById(rq.getId())) {
-                    chiTiet = sanPhamChiTietRepository.findById(rq.getId()).orElseThrow();
+                    chiTiet = sanPhamChiTietRepository.findById(rq.getId())
+                            .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết sản phẩm với ID: " + rq.getId()));
                 } else {
                     chiTiet = new SanPhamChiTiet();
                     chiTiet.setIdSanPham(sanPham);
@@ -510,7 +703,7 @@ public class SanPhamAdminService {
                 chiTiet.setSoLuong(rq.getSoLuong());
                 chiTiet.setGiaBan(rq.getGiaBan());
 
-                // Validate and update foreign keys
+                // Validate và cập nhật foreign keys
                 if (rq.getIdMau() != null) {
                     chiTiet.setIdMau(mauSacRepository.findById(rq.getIdMau())
                             .orElseThrow(() -> new NotFoundException("Không tìm thấy màu sắc với ID: " + rq.getIdMau())));
@@ -571,16 +764,14 @@ public class SanPhamAdminService {
                 } else {
                     chiTiet.setIdXuatXu(null);
                 }
-                if
-
-                (rq.getIdLoai() != null) {
+                if (rq.getIdLoai() != null) {
                     chiTiet.setIdLoai(loaiRepository.findById(rq.getIdLoai())
                             .orElseThrow(() -> new NotFoundException("Không tìm thấy loại với ID: " + rq.getIdLoai())));
                 } else {
                     chiTiet.setIdLoai(null);
                 }
 
-                // Lưu chi tiết
+                // Lưu chi tiết sản phẩm
                 SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
 
                 // Cập nhật hình ảnh
@@ -588,8 +779,8 @@ public class SanPhamAdminService {
                     // Xóa hình ảnh cũ
                     hinhAnhRepository.deleteByIdSanPhamChiTiet(chiTietSaved.getId());
                     // Lưu hình ảnh mới
-                    hinhAnhRepository.saveAll(rq.getHinhAnhs().stream()
-                            .filter(ha -> ha.getUrl() != null)
+                    List<HinhAnh> newImages = rq.getHinhAnhs().stream()
+                            .filter(ha -> ha.getUrl() != null && !ha.getUrl().trim().isEmpty())
                             .map(ha -> {
                                 HinhAnh hinhAnh = new HinhAnh();
                                 hinhAnh.setIdSanPhamChiTiet(chiTietSaved);
@@ -597,7 +788,15 @@ public class SanPhamAdminService {
                                 hinhAnh.setImagePublicId(ha.getImagePublicId());
                                 return hinhAnh;
                             })
-                            .toList());
+                            .toList();
+                    if (!newImages.isEmpty()) {
+                        hinhAnhRepository.saveAll(newImages);
+                    } else {
+                        throw new BusinessException("Danh sách hình ảnh mới không chứa URL hợp lệ cho chi tiết sản phẩm ID: " + chiTietSaved.getId());
+                    }
+                } else {
+                    // Nếu không có hình ảnh mới, ném lỗi để yêu cầu client cung cấp hình ảnh
+                    throw new BusinessException("Không có danh sách hình ảnh để cập nhật cho chi tiết sản phẩm ID: " + chiTietSaved.getId());
                 }
 
                 // Cập nhật IMEI
@@ -622,37 +821,39 @@ public class SanPhamAdminService {
             }
         }
 
-// Xóa các chi tiết không còn trong request
+        // Xóa các chi tiết không còn trong request
         Set<SanPhamChiTiet> chiTietCanXoa = sanPham.getSanPhamChiTiets().stream()
-                .filter(oldChiTiet -> updatedChiTietSet.stream().noneMatch(newChiTiet -> newChiTiet.getId() != null && newChiTiet.getId().equals(oldChiTiet.getId())))
+                .filter(oldChiTiet -> updatedChiTietSet.stream()
+                        .noneMatch(newChiTiet -> newChiTiet.getId() != null && newChiTiet.getId().equals(oldChiTiet.getId())))
                 .collect(Collectors.toSet());
 
         sanPham.getSanPhamChiTiets().removeAll(chiTietCanXoa);
 
-// Xóa trong DB nếu cần
+        // Xóa trong DB nếu cần
         sanPhamChiTietRepository.deleteAll(chiTietCanXoa);
 
-// Thêm hoặc cập nhật các chi tiết còn lại
+        // Thêm hoặc cập nhật các chi tiết còn lại
         for (SanPhamChiTiet chiTietMoi : updatedChiTietSet) {
             // Thiết lập quan hệ 2 chiều nếu chưa có
             chiTietMoi.setIdSanPham(sanPham);
 
             // Nếu đã có thì update, nếu chưa thì thêm
-            if (sanPham.getSanPhamChiTiets().stream().noneMatch(old -> old.getId() != null && old.getId().equals(chiTietMoi.getId()))) {
+            if (sanPham.getSanPhamChiTiets().stream()
+                    .noneMatch(old -> old.getId() != null && old.getId().equals(chiTietMoi.getId()))) {
                 sanPham.getSanPhamChiTiets().add(chiTietMoi);
             }
         }
 
         sanPham = sanPhamRepo.save(sanPham);
 
-        // Bước 5: Tạo response
+        // Tạo response
         SanPhamAdminResponse response = new SanPhamAdminResponse();
         response.setId(sanPham.getId());
         response.setMaSanPham(sanPham.getMaSanPham());
         response.setTenSanPham(sanPham.getTenSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
         if (sanPham.getIdNhaCungCap() != null) {
-            response.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
+            response.setIdNhaCungCap(Integer.valueOf(sanPham.getIdNhaCungCap().getId()));
         }
 
         if (sanPham.getSanPhamChiTiets() != null) {
@@ -664,7 +865,6 @@ public class SanPhamAdminService {
 
         return response;
     }
-
 
     @Transactional
     public SanPhamAdminResponse deleteSanPhamAdmin(Integer id) {

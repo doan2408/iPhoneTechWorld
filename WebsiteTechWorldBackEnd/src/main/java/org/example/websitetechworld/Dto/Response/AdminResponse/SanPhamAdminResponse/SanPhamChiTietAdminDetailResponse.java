@@ -24,7 +24,7 @@ public class SanPhamChiTietAdminDetailResponse {
     private Integer idCameraSau;
     private Integer idXuatXu;
     private Integer idLoai;
-    private Integer soLuong; // Đây là soLuong chứ không phải soLuongSPCT
+    private Integer soLuong;
     private BigDecimal giaBan;
     private String imeisInput;
     private Set<ImeiAdminResponse> imeis;
