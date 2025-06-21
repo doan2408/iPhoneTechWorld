@@ -52,3 +52,13 @@ export const countHoaDonPending = () => {
     const url = url_base+ '/count/pending';
     return axios.get(url)
 }
+
+export const addProductIntoInvoice = (idHoaDon,requestData) => {
+    const url =url_base +'/'+idHoaDon +'/them-san-pham';
+    return axios.post(url,requestData)
+}
+
+export const deleteDetailInvoice = (idChiTietHoaDon) => {
+    const url = url_base + '/hdct/' + idChiTietHoaDon ;
+    return axios.delete(url)
+}

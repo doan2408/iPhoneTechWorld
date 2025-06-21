@@ -39,7 +39,7 @@
                 <button class="action-btn" title="In">
                     <Printer class="btn-icon" />
                 </button>
-                <span class="phone-number">0395346933</span>
+                <!-- <span class="phone-number">0395346933</span> -->
                 <button class="menu-btn">
                     <Menu class="menu-icon" />
                 </button>
@@ -110,8 +110,8 @@
                         <User class="customer-icon" />
                         <div>
                             <strong>{{ currentInvoice.maHoaDon }}</strong> -->
-                            <!-- <span class="customer-phone">{{ currentInvoice.customer.phone }}</span> -->
-                        <!-- </div>
+                <!-- <span class="customer-phone">{{ currentInvoice.customer.phone }}</span> -->
+                <!-- </div>
                     </div>
                     <button @click="clearCustomer" class="clear-customer-btn">
                         <X class="clear-icon" />
@@ -141,7 +141,7 @@
                                     'low-stock-text': product.soLuong > 0 && product.soLuong <= 5,
                                     'in-stock-text': product.soLuong > 5
                                 }">
-                                    {{ product.soLuong === 0 ? 'Hết hàng' : 'Số lượng: '+ product.soLuong }}
+                                    {{ product.soLuong === 0 ? 'Hết hàng' : 'Số lượng: ' + product.soLuong }}
                                 </div>
                             </div>
                         </div>
@@ -154,9 +154,9 @@
                         class="page-btn">
                         <ChevronLeft class="page-icon" />
                     </button>
-                    <span class="page-info">{{ pageNoProduct +1 }}/{{ totalPagesProdut }}</span>
-                    <button @click="nextPageProduct(currentCategory)"
-                        :disabled="pageNoProduct + 1  === totalPagesProdut" class="page-btn">
+                    <span class="page-info">{{ pageNoProduct + 1 }}/{{ totalPagesProdut }}</span>
+                    <button @click="nextPageProduct(currentCategory)" :disabled="pageNoProduct + 1 === totalPagesProdut"
+                        class="page-btn">
                         <ChevronRight class="page-icon" />
                     </button>
                 </div>
@@ -174,44 +174,46 @@
             </div> -->
 
             <!-- Cart items (if any) : san pham da chon -->
-            <!-- <div v-if="currentInvoice.items.length > 0" class="cart-items-summary">
+            <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0"  class="cart-items-summary">
                 <div class="cart-header">
-                    <span>Sản phẩm đã chọn ({{ currentInvoice.items.length }})</span>
+                    <span>Sản phẩm đã chọn ({{ currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
                     </button>
                 </div>
+                
 
                 <div v-if="showCartDetails" class="cart-items-list">
-                    <div v-for="item in currentInvoice.items" :key="item.id" class="cart-item">
-                        <img :src="item.image" :alt="item.name" class="cart-item-image" />
+                    <div v-for="item in currentInvoiceDetail?.chiTietHoaDonAdminResponseList" :key="item.idHoaDonChiTiet"
+                        class="cart-item">
+                        <img :src="item.imageSanPham" :alt="item.tenSanPham" class="cart-item-image" />
                         <div class="cart-item-info">
-                            <span class="item-name">{{ item.name }}</span>
-                            <span class="item-price">{{ formatCurrency(item.price) }}</span>
+                            <span class="item-name">{{ item.tenSanPham }}</span>
+                            <span class="item-price">{{ formatCurrency(item.donGia) }}</span>
                         </div>
                         <div class="cart-item-controls">
                             <button @click="decreaseQuantity(item)" class="qty-btn">
                                 <Minus class="qty-icon" />
                             </button>
-                            <span class="quantity">{{ item.quantity }}</span>
+                            <span class="quantity">{{ item.soLuong }}</span>
                             <button @click="increaseQuantity(item)" class="qty-btn">
                                 <Plus class="qty-icon" />
                             </button>
                         </div>
-                        <div class="item-total">{{ formatCurrency(item.price * item.quantity) }}</div>
+                        <div class="item-total">{{ formatCurrency(item.soLuong * item.donGia) }}</div>
                         <button @click="removeFromCart(item)" class="remove-item-btn">
                             <Trash2 class="remove-icon" />
                         </button>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
             <!-- Total tong tien hang -->
-            <!-- <div class="total-section">
-                 <span class="total-label">Tổng tiền hàng:</span>
-                <span class="total-amount">{{ formatCurrency(currentInvoice.total) }}</span>
-            </div> -->
+            <div class="total-section">
+                <span class="total-label">Tổng tiền hàng:</span>
+                <span class="total-amount">{{ formatCurrency(invoices.total) }}</span>
+            </div>
         </div>
 
         <!-- Payment button -->
@@ -256,7 +258,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, markRaw, watch } from 'vue'
+import { ref, reactive, computed, onMounted, markRaw, watch, watchEffect } from 'vue'
 import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
@@ -267,6 +269,8 @@ import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdmin
 import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { deleteDetailInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { addProductIntoInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -289,9 +293,10 @@ const invoices = ref([]) // hien thi tab
 const currentInvoiceId = ref(null)
 const route = useRoute();
 const router = useRouter();
+const currentInvoiceDetail = ref([]); 
 
 // category san pham 
-const danhMucSanPham =  async () => {
+const danhMucSanPham = async () => {
     try {
         const response = await loadCategory(pageNo.value, pageSize.value)
         const danhMuc = response.data.content.map(ten => ({
@@ -322,51 +327,67 @@ const loadProducts = async (category) => {
 // Pagination
 const itemsPerPage = 12
 
+//load tab hoa don
 const loadTabHoaDon = async () => {
+    // Bước 1: Load các hóa đơn của nhân viên
     const response = await loadHoaDonByIdNhanVien();
-    tabHoaDon.value = response.data;
-
-    // Merge dữ liệu vào invoices tránh trùng
     response.data.forEach(inv => addOrUpdateInvoice(inv));
+    tabHoaDon.value = [...invoices.value]; // clone ra nếu cần reactive riêng
 
     const queryId = route.query.invoiceId;
-    const storedId = localStorage.getItem('selectedInvoiceId');
-    const defaultId = invoices.value.length > 0 ? invoices.value[0].id : null;
+    const storedId = localStorage.getItem("selectedInvoiceId");
 
-    let finalId = null;
-    if (queryId && invoices.value.some(i => i.id === queryId)) {
-        finalId = queryId;
-    } else if (storedId && invoices.value.some(i => i.id === storedId)) {
-        finalId = storedId;
-    } else {
-        finalId = defaultId;
-    }
-
-    currentInvoiceId.value = finalId;
-
-    if (finalId) {
-        localStorage.setItem('selectedInvoiceId', finalId);
-
-        const invoice = invoices.value.find(i => i.id === finalId);
-        const hasDetail = invoice?.chiTietSanPham;
-
-        if (!hasDetail) {
-            try {
-                const res = await hoaDonDetail(finalId);
-                if (res.data) {
-                    addOrUpdateInvoice(res.data);
-                }
-            } catch (error) {
-                console.error("Không thể tải chi tiết hóa đơn:", error);
+    // Bước 2: Nếu storedId chưa có trong danh sách → fetch
+    if (storedId && !invoices.value.find(i => i.id == storedId)) {
+        try {
+            const res = await hoaDonDetail(storedId);
+            if (res.data) addOrUpdateInvoice(res.data);
+            if (res.data) {
+                currentInvoiceDetail.value = res.data;
+                console.log(currentInvoiceDetail.value);
+                
             }
+        } catch (e) {
+            console.warn("Không thể tải hóa đơn từ localStorage:", e);
         }
     }
 
-    // Nếu có query trên URL thì xoá đi sau khi xử lý
+    // Bước 3: Xác định finalId
+    let finalId = null;
+    if (queryId && invoices.value.some(i => i.id == queryId)) {
+        finalId = queryId;
+    } else if (storedId && invoices.value.some(i => i.id == storedId)) {
+        finalId = storedId;
+    } else if (invoices.value.length > 0) {
+        finalId = invoices.value[0].id;
+    }
+
+    // Bước 4: Gán finalId chính xác duy nhất ở đây
+    if (finalId) {
+        currentInvoiceId.value = finalId;
+        localStorage.setItem('selectedInvoiceId', finalId);
+
+        // Nếu chưa có chi tiết → gọi thêm
+        const selected = invoices.value.find(i => i.id == finalId);
+        if (!selected?.chiTietHoaDonAdminResponseList) {
+            try {
+                const res = await hoaDonDetail(finalId);
+                if (res.data) addOrUpdateInvoice(res.data);
+                if (res.data) {
+                    currentInvoiceDetail.value = res.data; 
+                    console.log(currentInvoiceDetail.value);
+                }
+            } catch (e) {
+                console.error("Không thể load chi tiết:", e);
+            }
+        }
+    }
+    
     if (queryId) {
         router.replace({ query: { ...route.query, invoiceId: undefined } });
     }
 };
+
 
 const addOrUpdateInvoice = (invoice) => {
     const index = invoices.value.findIndex(i => i.id === invoice.id);
@@ -391,12 +412,14 @@ const newCustomer = reactive({
 })
 
 // Cart display
-const showCartDetails = ref(false)
+const showCartDetails = ref(true)
 
 // handle invoice tab logic 
 const currentInvoice = computed(() => {
-    return invoices.value.find(inv => inv.id === currentInvoiceId.value) || invoices.value[0]
-})
+    const id = Number(currentInvoiceId.value);
+    const invoice = invoices.value.find(inv => inv.id === id) || invoices.value[0];
+    return invoice;
+});
 
 
 // ham loc
@@ -469,33 +492,43 @@ const closeInvoice = (id) => {
     }
 }
 
-const addToCart = (product) => {
-    if (product.stock === 0) return
+// tuong ung dto ChiTietHoaDonAdminRequest 
+const chiTietHoaDonAdminRequest = {
+    idHoaDon: null,
+    idSanPhamChiTiet: null,
+    tenSanPham: null,
+    moTa: null,
+    soLuong: null,
+};
 
-    const invoice = currentInvoice.value
-    const existingItem = invoice.items.find(item => item.id === product.id)
+// them vao gio hang
+const addToCart = async (product) => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
 
-    if (existingItem) {
-        if (existingItem.quantity < product.stock) {
-            existingItem.quantity++
-        }
-    } else {
-        invoice.items.push({
-            ...product,
-            quantity: 1
-        })
+    if (product.soLuong === 0) return
+    const data = {
+        idHoaDon : storedId,
+        idSanPhamChiTiet: product.id,
+        tenSanPham: product.tenSanPham,
+        moTa: product.moTa,
+        soLuong: 1 
+    };
+
+    try {
+        const response = await addProductIntoInvoice(storedId, data);
+        await loadTabHoaDon();
+    } catch (err) {
+        console.error("Thêm sản phẩm thất bại:", err);
     }
+
+
 
     // calculateTotal()
 }
 
-const removeFromCart = (item) => {
-    const invoice = currentInvoice.value
-    const index = invoice.items.findIndex(cartItem => cartItem.id === item.id)
-    if (index > -1) {
-        invoice.items.splice(index, 1)
-        // calculateTotal()
-    }
+//xoas hoa đơn chi tiết
+const removeFromCart = async (item) => {
+    const res = await deleteDetailInvoice(item.idHoaDonChiTiet)
 }
 
 const increaseQuantity = (item) => {
@@ -600,6 +633,27 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
 
+watch(currentInvoiceId, async (newId) => {
+    if (!newId) return;
+
+    const selected = invoices.value.find(i => i.id == newId);
+    // Nếu chưa có chi tiết thì mới gọi
+    if (!selected?.chiTietHoaDonAdminResponseList) {
+        try {
+            const res = await hoaDonDetail(newId);
+            console.log("Reload chi tiết khi tab change:", res.data);
+            if (res.data) {
+                addOrUpdateInvoice(res.data);
+                currentInvoiceDetail.value = res.data; // Gán lại chi tiết mới
+            }
+        } catch (e) {
+            console.error("Lỗi khi load detail khi tab change:", e);
+        }
+    } else {
+        currentInvoiceDetail.value = selected;
+    }
+});
+
 // Initialize
 onMounted(async () => {
     // calculateTotal();
@@ -610,7 +664,4 @@ onMounted(async () => {
 }); 
 </script>
 
-<style scoped src="@/style/HoaDon/BanHang.css">
-
-</style>
-  
+<style scoped src="@/style/HoaDon/BanHang.css"></style>
