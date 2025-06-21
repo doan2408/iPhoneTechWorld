@@ -171,7 +171,7 @@
                             </th>
                             <th class="table-th">STT</th>
                             <th class="table-th">Mã hóa đơn</th>
-                            <th class="table-th">Người mua (Thời điểm giao dịch)</th>
+                            <th class="table-th">Người mua</th>
                             <td class="table-th">Số điện thoại</td>
                             <th class="table-th">Ngày tạo</th>
                             <th class="table-th">Tổng tiền</th>

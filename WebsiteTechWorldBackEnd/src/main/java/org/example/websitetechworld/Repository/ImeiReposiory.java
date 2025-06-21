@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,5 +44,7 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
 
     boolean existsBySoImei(String soImei);
+
+    Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImei(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei, Pageable pageable);
 
 }
