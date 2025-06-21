@@ -69,6 +69,9 @@ public class PhieuGiamGiaAdminRequest {
 
     private List<Integer> khachHangIds;
 
+    private Boolean khachHangMoi = false; // Thêm trường mới
+    private Boolean khachHangCu = false;  // Thêm trường mới
+
     @NotNull(message = "Trạng thái không được để trống")
     private TrangThaiPGG trangThai;
 }

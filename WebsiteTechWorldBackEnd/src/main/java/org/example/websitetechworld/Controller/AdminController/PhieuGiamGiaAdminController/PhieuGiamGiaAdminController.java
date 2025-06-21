@@ -66,8 +66,11 @@ public class PhieuGiamGiaAdminController {
     }
 
     @GetMapping("/khach-hang")
-    public ResponseEntity<List<KhachHangGiamGiaResponse>> getAllKhachHang() {
-        List<KhachHangGiamGiaResponse> khachHangList = phieuGiamGiaAdminServices.getAllKhachHang();
+    public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<KhachHangGiamGiaResponse> khachHangList = phieuGiamGiaAdminServices.getAllKhachHang(search, page, size);
         return ResponseEntity.ok(khachHangList);
     }
 }

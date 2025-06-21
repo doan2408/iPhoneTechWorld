@@ -4,7 +4,7 @@
       <img src="https://img.icons8.com/ios-filled/50/FFA500/doughnut-chart.png" class="icon" />
       <div class="stat-content">
         <div class="stat-title">Tổng Doanh Thu</div>
-        <div class="stat-value">{{ dashboardData?.doanhThuThang ?? '...' }}</div>
+        <div class="stat-value">{{ dashboardData?.doanhThuThang ?? '0' }}</div>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
       <img src="https://img.icons8.com/ios-filled/50/32CD32/megaphone.png" class="icon" />
       <div class="stat-content">
         <div class="stat-title">Số Đơn Hàng</div>
-        <div class="stat-value">{{ dashboardData?.tongSoDonhang ?? '...' }}</div>
+        <div class="stat-value">{{ dashboardData?.tongSoDonhang ?? '0' }}</div>
       </div>
     </div>
 
@@ -20,7 +20,7 @@
       <img src="https://cdnv2.tgdd.vn/mwg-static/common/News/1569702/iphone%2016%20pro%20-%203.jpg" class="icon" />
       <div class="stat-content">
         <div class="stat-title">Sản Phẩm Đã Bán </div>
-        <div class="stat-value">{{ dashboardData?.tongSoSanPham ?? '...' }}</div>
+        <div class="stat-value">{{ dashboardData?.tongSoSanPham ?? '0' }}</div>
       </div>
     </div>
 
@@ -29,28 +29,89 @@
         class="icon" />
       <div class="stat-content">
         <div class="stat-title">Số Khách Hàng</div>
-        <div class="stat-value">{{ dashboardData?.tongSoKhachHang ?? '...' }}</div>
+        <div class="stat-value">{{ dashboardData?.tongSoKhachHang ?? '0' }}</div>
       </div>
     </div>
   </div>
-  <!-- Biều đồ  -->
-  <div class="chart-container">
-    <div class="header">
-      <h2 class="title">Tổng Doanh Thu</h2>
-      <p class="subtitle">Giữa các tháng</p>
+  <div class="charts-flex-wrapper">
+    <!-- Biểu đồ cột -->
+    <div class="chart-container">
+      <div class="header">
+        <h2 class="title">Tổng Doanh Thu</h2>
+        <p class="subtitle">Giữa các tháng</p>
+      </div>
+
+      <div class="chart">
+        <div class="chart-placeholder">
+          <canvas id="revenueChart" width="450" height="350"></canvas>
+        </div>
+      </div>
+      <br>
+      <div class="footer">
+        <p>Updated theo từng tháng</p>
+      </div>
     </div>
 
-    <div class="chart">
+    <!-- Biểu đồ tròn -->
+    <div class="product-chart-container">
+      <div class="chart-header">
+        <h2 class="chart-title">Thống kê sản phẩm bán chạy</h2>
+        <p class="chart-subtitle">Dựa trên tổng số lượng bán</p>
+      </div>
 
-      <div class="chart-placeholder"><canvas id="revenueChart"width="490" height="300"></canvas></div>
-    </div>
-
-   
-
-    <div class="footer">
-      <p>Updated theo từng tháng</p>
+      <div class="chart-wrapper">
+        <canvas id="LetrevenueChart" width="600" height="400"></canvas>
+      </div>
     </div>
   </div>
+  <div class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Sản phẩm bán chạy</h2>
+
+    <!-- Bộ lọc thời gian -->
+    <div class="mb-4 flex gap-2 items-center">
+      <label>Ngày bắt đầu:</label>
+      <input type="date" v-model="startDate" class="border p-1" />
+      <label>Ngày kết thúc:</label>
+      <input type="date" v-model="endDate" class="border p-1" />
+      <button @click="fetchData" class="px-3 py-1 bg-blue-500 text-white rounded">Lọc</button>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <table class="min-w-full border border-gray-300">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border px-4 py-2">Tên sản phẩm</th>
+          <th class="border px-4 py-2">Số lượng bán</th>
+          <th class="border px-4 py-2">Doanh thu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in items" :key="index">
+          <td class="border px-4 py-2">{{ item.ten_san_pham }}</td>
+          <td class="border px-4 py-2">{{ item.tong_so_luong_ban }}</td>
+          <td class="border px-4 py-2">{{ formatCurrency(item.tong_doanh_thu) }}</td>
+        </tr>
+        <!-- <tr v-if="items.length === 0">
+          <td colspan="3" class="text-center py-4 text-gray-500">Không có dữ liệu</td>
+        </tr> -->
+      </tbody>
+    </table>
+
+    <!-- Phân trang -->
+    <div class="pagination flex items-center gap-4 mt-4">
+      <button :disabled="page === 1" @click="prevPage"
+        class="px-3 py-1 border rounded bg-gray-200 disabled:opacity-50">Trước</button>
+      <span>Trang {{ page }}</span>
+      <button :disabled="!hasMore" @click="nextPage"
+        class="px-3 py-1 border rounded bg-gray-200 disabled:opacity-50">Sau</button>
+    </div>
+
+    <!-- Thông báo lỗi -->
+    <div v-if="error" class="mt-4 text-red-500">{{ error }}</div>
+  </div>
+
+
+
 
 </template>
 
@@ -58,6 +119,8 @@
 import { ref, onMounted } from 'vue'
 import { getDashboardAdmin } from '@/Service/Adminservice/ThongKe/ThongKeAdminService'
 import { getDoanhThuTheoThang } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { getSanPhamBanChay } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+// import { getTopSanPhamBanChay } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
 import Chart from 'chart.js/auto'
 
 const dashboardData = ref(null)
@@ -94,8 +157,8 @@ onMounted(async () => {
         datasets: [{
           label: 'Tổng Doanh Thu',
           data: revenues.value,
-          backgroundColor: '#4bc0c0',
-          borderColor: '#379b9b',
+          backgroundColor: '#40a9ff', // Xanh dương nhạt hơn một chút
+          borderColor: '#40a9ff',
           fill: false,
           tension: 0.3,
           pointStyle: 'circle', // điểm hình tròn
@@ -126,126 +189,101 @@ onMounted(async () => {
     console.error('Lỗi lấy doanh thu:', error)
   }
 })
+//biểu đồ tròn 
+const tenSP = ref([])
+const soLuong = ref([])
+let LetchartInstance = null
+
+onMounted(async () => {
+  try {
+    const data = await getSanPhamBanChay()
+
+    tenSP.value = data.map(item => item.ten_san_pham)
+    soLuong.value = data.map(item => item.tong_so_luong_ban)
+
+    const ctx = document.getElementById('LetrevenueChart').getContext('2d')
+
+    if (LetchartInstance) {
+      LetchartInstance.destroy()
+    }
+
+    LetchartInstance = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: tenSP.value,
+        datasets: [{
+          label: 'Tổng số SP bán',
+          data: soLuong.value,
+        }]
+      },
+      options: {
+        responsive: true,
+      }
+    })
+  } catch (error) {
+    console.error('Lỗi lấy doanh thu:', error)
+  }
+})
+///danh sách ap 
+// const items = ref([])
+// const page = ref(1)
+// const limit = 10     
+// const hasMore = ref(false)
+// const error = ref(null)
+// const startDate = ref('')
+// const endDate = ref('')
+
+// Hàm gọi API
+// const fetchData = async () => {
+//   error.value = null
+//   try {
+//     const response = await axiosInstance.get('/admin/thong-ke/top-san-pham-ban-chay', {
+//       params: {
+//         startDate: startDate.value,
+//         endDate: endDate.value,
+//         page: page.value,
+//         limit
+//       }
+//     })
+
+//     items.value = response.data.content || []
+//     hasMore.value = (response.data.number + 1) < response.data.totalPages
+//   } catch (err) {
+//     error.value = err.response?.data?.message || 'Lỗi không xác định khi lấy dữ liệu'
+//   }
+// }
+
+// Hàm phân trang
+// const prevPage = () => {
+//   if (page.value > 1) {
+//     page.value--
+//     fetchData()
+//   }
+// }
+
+// const nextPage = () => {
+//   if (hasMore.value) {
+//     page.value++
+//     fetchData()
+//   }
+// }
+
+// // Định dạng tiền tệ
+// const formatCurrency = (val) => {
+//   return Number(val).toLocaleString('vi-VN', {
+//     style: 'currency',
+//     currency: 'VND'
+//   })
+// }
+
+// // Khởi tạo ngày mặc định
+// onMounted(() => {
+//   const today = new Date().toISOString().split('T')[0]
+//   startDate.value = today
+//   endDate.value = today
+//   fetchData()
+// })
 </script>
 
 
-<style scoped>
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  background-color: #faf9fb;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 15px;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.icon {
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
-}
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-title {
-  font-size: 14px;
-  color: #999;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 4px;
-  color: #333;
-}
-
-.stat-updated {
-  font-size: 12px;
-  color: #888;
-  margin-top: 6px;
-}
-
-/* Biều đồ  */
-.chart-container {
-  width: 100%;
-  max-width: 600px;
-  /* max-height: 400px; */
-  margin-top: 20px;
-  margin-left: 20px;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: Arial, sans-serif;
-  background: #fff;
-}
-
-
-.header {
-  margin-bottom: 1rem;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2d3748;
-  letter-spacing: 0.5px;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: #718096;
-  font-style: italic;
-}
-
-.chart {
-  margin: 20px 0;
-  height: 300px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-}
-
-.legend {
-  display: flex;
-  gap: 20px;
-  margin-top: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-}
-
-.dot {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
-}
-
-.dot.open {
-  background-color: #2CA8FF;
-}
-
-.footer {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #666;
-}
-</style>
+<style scoped src="@/style/ThongKe/ThongKe.css"></style>

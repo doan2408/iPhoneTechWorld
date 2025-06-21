@@ -6,6 +6,9 @@ import org.example.websitetechworld.Repository.ThongKeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,10 +100,27 @@ public class ThongKeAdminService {
     }
 
 
-    public List<Map<String, Object>> topSanPhamBanChay () {
+//    public Map<String, Object> getTopSanPhamBanChay(LocalDate startDate , LocalDate endDate, int page, int limit) {
+//        int offset = (page - 1) * limit;
+//        if (limit <= 0 || page <= 0) {
+//            throw new IllegalArgumentException("Page và limit phải lớn hơn 0");
+//        }
+//
+//        Date start = java.sql.Date.valueOf(startDate);
+//        Date end = java.sql.Date.valueOf(endDate);
+//
+//        List<Map<String, Object>> items = thongKeRepository.topSanPhamBanChay(start, end, offset, limit);
+//        long totalItems = thongKeRepository.countSanPhamBanChay(start, end);
+//        int totalPages = (int) Math.ceil((double) totalItems / limit);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("content", items);
+//        response.put("number", page - 1); // giống như Spring Data Page
+//        response.put("totalPages", totalPages);
+//        response.put("totalItems", totalItems);
+//        return response;
+//    }
 
-        return thongKeRepository.topSanPhamBanChay();
-    }
 
     public List<Map<String, Object>> sanPhamTonKhoNhieu () {
 

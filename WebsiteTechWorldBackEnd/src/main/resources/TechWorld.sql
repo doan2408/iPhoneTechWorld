@@ -498,7 +498,7 @@ VALUES
     (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
     (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
     (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1),
-    (1, 'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
+    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
     (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'Quận 3', N'TP.HCM', 0),
     (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'Thanh Khê', N'Đà Nẵng', 0),
     (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'Phong Điền', N'Huế', 0),
@@ -887,6 +887,25 @@ VALUES
     (13, '123456789012357', '543210987654333', 'AVAILABLE', 'Viettel'),
     (14, '123456789012358', '543210987654334', 'AVAILABLE', 'Mobifone'),
     (15, '123456789012359', '543210987654335', 'AVAILABLE', 'Vinaphone');
+
+-- Table hinh_anh
+INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
+VALUES
+    (1, 'https://example.com/images/iphone16_black.jpg', 'iphone16_black_001'),
+    (2, 'https://example.com/images/iphone16pro_white.jpg', 'iphone16pro_white_002'),
+    (3, 'https://example.com/images/iphone15_gold.jpg', 'iphone15_gold_003'),
+    (4, 'https://example.com/images/iphone14_blue.jpg', 'iphone14_blue_004'),
+    (5, 'https://example.com/images/iphone13_pink.jpg', 'iphone13_pink_005'),
+    (6, 'https://example.com/images/iphone16plus_gray.jpg', 'iphone16plus_gray_006'),
+    (7, 'https://example.com/images/iphone15pro_silver.jpg', 'iphone15pro_silver_007'),
+    (8, 'https://example.com/images/iphone14pro_green.jpg', 'iphone14pro_green_008'),
+    (9, 'https://example.com/images/iphone13pro_red.jpg', 'iphone13pro_red_009'),
+    (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
+    (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
+    (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
+    (13, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'),
+    (14, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'),
+    (15, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015');
 
 -- Table imei_da_ban
 INSERT INTO imei_da_ban (id_chi_tiet_hoa_don, so_imei, trang_thai)

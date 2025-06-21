@@ -93,6 +93,18 @@ const nextPage = () => {
   loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
+const firstPage = () => {
+  const firstPage = 0;
+  currentPage.value = firstPage;
+  loadStaff(currentPage.value, searchKeyword.value || null);
+};
+
+const lastPage = () => { // Renamed from latePage to lastPage for clarity
+  const lastPage = totalPages.value - 1;
+  currentPage.value = lastPage;
+  loadStaff(currentPage.value, searchKeyword.value || null); 
+};
+
 // Modal functions
 const openAddModal = () => {
   showModal.value = true;
@@ -303,11 +315,13 @@ onMounted(() => {
         </el-table-column>
       </el-table>
 
-      <!-- Pagination - GIỮ NGUYÊN LOGIC CŨ -->
+      <!-- Pagination -->
       <div class="pagination">
+        <button @click="firstPage">Trang đầu</button>
         <button @click="previousPage">Trang trước</button>
         <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
         <button @click="nextPage">Trang sau</button>
+        <button @click="lastPage">Trang cuối</button>
       </div>
     </div>
 
