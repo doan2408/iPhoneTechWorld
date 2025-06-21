@@ -235,13 +235,16 @@
                                             </path>
                                         </svg>
                                     </button>
-                                    <button class="action-btn delete-btn" title="Xóa"
-                                    @click="deleteHoaDon(hoaDon)">
-                                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
+                                    <button 
+                                        class="action-btn delete-btn" 
+                                        title="Xóa"
+                                        :disabled="hoaDon.trangThaiThanhToan === 'Hoàn tất'"
+                                        @click="deleteHoaDon(hoaDon)">
+                                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                </path>
+                                            </svg>
                                     </button>
                                 </div>
                             </td>
@@ -657,10 +660,11 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { hoaDonGetAll } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { viewLichSuHoaDon } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { hoaDonDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { hoaDonSoftDelete, hoaDonHardDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { doanhThuTheoThang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { countHoaDonPending } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import router from '@/router'
+import Swal from 'sweetalert2';
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -745,8 +749,6 @@ const visiblePages = computed(() => {
     return pages;
 });
 
-
-
 // hàm call api load dữ liệu
 const loadData = async () => {
     isLoading.value = true;
@@ -778,15 +780,50 @@ const loadData = async () => {
     }
 };
 
-//Xoa hoa don
 const deleteHoaDon = async (hoaDon) => {
     
+    const confirmDelete = await Swal.fire({
+        title: 'Xác nhận xóa hóa đơn',
+        text: 'Bạn muốn xóa mềm hay xóa cứng hóa đơn này?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Xóa mềm',
+        cancelButtonText: 'Hủy',
+        showDenyButton: hoaDon.trangThaiThanhToan == 'Chờ xử lý',
+        denyButtonText: 'Xóa cứng'
+    });
+
     try {
-        const response = await hoaDonDelete(hoaDon.idHoaDon);
+        if (confirmDelete.isConfirmed) {
+            await hoaDonSoftDelete(hoaDon.idHoaDon); 
+            Swal.fire('Thành công!', 'Hóa đơn đã được xóa mềm.', 'success');
+        }
+        else if (confirmDelete.isDenied) {
+            const hardDeleteConfirm = await Swal.fire({
+                title: 'Xác nhận xóa cứng',
+                text: 'Hành động này không thể khôi phục! Bạn có chắc chắn muốn xóa cứng?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa cứng',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (hardDeleteConfirm.isConfirmed) {
+                await hoaDonHardDelete(hoaDon.idHoaDon); 
+                Swal.fire('Thành công!', 'Hóa đơn đã được xóa cứng.', 'success');
+            } else {
+                return; 
+            }
+        }
+        else {
+            return;
+        }
+
+        loadData(); // Tải lại dữ liệu sau khi xóa thành công
     } catch (error) {
         console.error('Delete Hoa don', error);
-    } 
-    loadData()
+        Swal.fire('Lỗi!', 'Đã xảy ra lỗi khi xóa hóa đơn.', 'error');
+    }
 };
 
 const changePage = (newPage) => {

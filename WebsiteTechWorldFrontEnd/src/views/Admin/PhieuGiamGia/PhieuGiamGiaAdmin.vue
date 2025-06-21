@@ -522,8 +522,8 @@ onMounted(() => {
             <div v-if="errors.giaTriDonHangToiThieu" class="text-danger mt-1">{{ errors.giaTriDonHangToiThieu }}</div>
           </div>
           <div class="col-md-6">
-            <label for="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Cố định'" class="form-label">Giá trị khuyến mãi tối đa</label>
-            <input id="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Cố định'" v-model.number="formData.giaTriKhuyenMaiToiDa" type="number"
+            <label for="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" class="form-label">Giá trị khuyến mãi tối đa</label>
+            <input id="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" v-model.number="formData.giaTriKhuyenMaiToiDa" type="number"
               class="form-control" min="0" />
             <div v-if="errors.giaTriKhuyenMaiToiDa" class="text-danger mt-1">{{ errors.giaTriKhuyenMaiToiDa }}</div>
           </div>

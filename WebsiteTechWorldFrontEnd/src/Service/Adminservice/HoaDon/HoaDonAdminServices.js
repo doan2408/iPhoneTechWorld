@@ -38,8 +38,13 @@ export const loadHoaDonByIdNhanVien = () => {
     return axios.get(url)
 }
 
-export const hoaDonDelete = (id) => {
-    const url = url_base+ '/' + id;
+export const hoaDonSoftDelete = (id) => {
+    const url = url_base+ '/soft-delete/' + id;
+    return axios.delete(url)
+}
+
+export const hoaDonHardDelete = (id) => {
+    const url = url_base+ '/hard-delete/' + id;
     return axios.delete(url)
 }
 
