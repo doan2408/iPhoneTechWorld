@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from "vue-router";
 import adminLayout from "@/layouts/AdminLayout.vue";
 import clientAdminRoutes from "./ClientRoutes/clientRoutes";
 import staffAdminRoutes from "./StaffRoutes/staffRoutes";
+import { Title } from "chart.js";
 
 const adminRoutes: RouteRecordRaw[] = [
   {
@@ -26,7 +27,7 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: "products", component: () => import("@/views/Admin/SanPham/ProductAdmin.vue"), meta: { title: 'Products Manage'} },
       { path: "products/:id", component: () => import("@/views/Admin/SanPham/PoductAdminDetail.vue"), meta: { title: 'Product Detail'} },
       { path: "promotions", component: () => import("@/views/Admin/PhieuGiamGia/PhieuGiamGiaAdmin.vue"), meta: { title: 'Voucher Manage'}  },
-      { path: "statistical", component: () => import("@/views/Admin/ThongKe/ThongKeAdmin.vue") },
+      { path: "statistical", component: () => import("@/views/Admin/ThongKe/ThongKeAdmin.vue") , meta: {Title : "Statisticial"}},
       { path: "bill", component: () => import("@/views/Admin/HoaDon/HoaDonAdmin.vue") },
       { path: "shipping", component: () => import("@/views/Admin/GiaoHang/GiaoHangAdmin.vue") },
       ...clientAdminRoutes,
