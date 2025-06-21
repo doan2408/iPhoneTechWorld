@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +50,6 @@ public class PhieuGiamGiaAdminServices {
     }
 
     private void configureModelMapper() {
-        // Ánh xạ từ PhieuGiamGia sang PhieuGiamGiaAdminResponse
         TypeMap<PhieuGiamGia, PhieuGiamGiaAdminResponse> propertyMapper = modelMapper.createTypeMap(PhieuGiamGia.class, PhieuGiamGiaAdminResponse.class);
         propertyMapper.addMappings(mapper -> {
             mapper.map(PhieuGiamGia::getId, PhieuGiamGiaAdminResponse::setId);
@@ -73,7 +69,6 @@ public class PhieuGiamGiaAdminServices {
             mapper.map(PhieuGiamGia::getTrangThai, PhieuGiamGiaAdminResponse::setTrangThai);
         });
 
-        // Ánh xạ từ PhieuGiamGiaAdminRequest sang PhieuGiamGia, bỏ qua khachHangGiamGias
         TypeMap<PhieuGiamGiaAdminRequest, PhieuGiamGia> requestMapper = modelMapper.createTypeMap(PhieuGiamGiaAdminRequest.class, PhieuGiamGia.class);
         requestMapper.addMappings(mapper -> mapper.skip(PhieuGiamGia::setKhachHangGiamGias));
     }
@@ -85,123 +80,154 @@ public class PhieuGiamGiaAdminServices {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<PhieuGiamGia> pagePhieuGiamGia = phieuGiamGiaRepository.findAll(search, trangThai, ngayBatDau, ngayKetThuc, pageable);
-        return pagePhieuGiamGia.map(entity -> {
-            PhieuGiamGiaAdminResponse response = modelMapper.map(entity, PhieuGiamGiaAdminResponse.class);
-            if (!entity.getIsGlobal()) {
-                List<Integer> khachHangIds = entity.getKhachHangGiamGias().stream()
-                        .map(khgg -> khgg.getIdKhachHang().getId())
-                        .collect(Collectors.toList());
-                response.setKhachHangIds(khachHangIds);
-            } else {
-                response.setKhachHangIds(List.of());
-            }
-            return response;
-        });
+        return pagePhieuGiamGia.map(this::mapToResponse);
     }
 
     public PhieuGiamGiaAdminResponse getPhieuGiamGia(Integer id) {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
+        return mapToResponse(phieuGiamGia);
+    }
+
+    private PhieuGiamGiaAdminResponse mapToResponse(PhieuGiamGia phieuGiamGia) {
         PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
         if (!phieuGiamGia.getIsGlobal()) {
             List<Integer> khachHangIds = phieuGiamGia.getKhachHangGiamGias().stream()
                     .map(khgg -> khgg.getIdKhachHang().getId())
                     .collect(Collectors.toList());
             response.setKhachHangIds(khachHangIds);
+
+            // Suy ra khachHangMoi và khachHangCu
+            List<Integer> newCustomerIds = khachHangRepository.findNewCustomers().stream()
+                    .map(KhachHang::getId)
+                    .toList();
+            List<Integer> oldCustomerIds = khachHangRepository.findOldCustomers().stream()
+                    .map(KhachHang::getId)
+                    .toList();
+            response.setKhachHangMoi(!Collections.disjoint(khachHangIds, newCustomerIds));
+            response.setKhachHangCu(!Collections.disjoint(khachHangIds, oldCustomerIds));
         } else {
             response.setKhachHangIds(List.of());
+            response.setKhachHangMoi(false);
+            response.setKhachHangCu(false);
         }
         return response;
     }
 
     @Transactional
     public PhieuGiamGiaAdminResponse addPhieuGiamGia(PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
-        // Kiểm tra ngày bắt đầu và ngày kết thúc
+        // Kiểm tra ngày
         if (phieuGiamGiaAdminRequest.getNgayBatDau().isAfter(phieuGiamGiaAdminRequest.getNgayKetThuc())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
 
-        // Kiểm tra logic isGlobal và khachHangIds
+        // Kiểm tra logic isGlobal và khachHangIds/khachHangMoi/khachHangCu
         if (!phieuGiamGiaAdminRequest.getIsGlobal() &&
-                (phieuGiamGiaAdminRequest.getKhachHangIds() == null || phieuGiamGiaAdminRequest.getKhachHangIds().isEmpty())) {
-            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng được chọn");
+                (phieuGiamGiaAdminRequest.getKhachHangIds() == null || phieuGiamGiaAdminRequest.getKhachHangIds().isEmpty()) &&
+                !phieuGiamGiaAdminRequest.getKhachHangMoi() &&
+                !phieuGiamGiaAdminRequest.getKhachHangCu()) {
+            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng hoặc nhóm khách hàng được chọn");
         }
 
         // Ánh xạ DTO sang entity
         PhieuGiamGia phieuGiamGia = modelMapper.map(phieuGiamGiaAdminRequest, PhieuGiamGia.class);
-
-        // Đảm bảo khachHangGiamGias rỗng trước khi lưu
         phieuGiamGia.setKhachHangGiamGias(new LinkedHashSet<>());
-
-        // Lưu entity vào database
         phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
 
-        // Nếu không phải global, lưu danh sách khách hàng được áp dụng
-        if (!phieuGiamGia.getIsGlobal() && phieuGiamGiaAdminRequest.getKhachHangIds() != null) {
-            List<Integer> invalidIds = phieuGiamGiaAdminRequest.getKhachHangIds().stream()
+        // Xử lý khách hàng nếu không global
+        if (!phieuGiamGia.getIsGlobal()) {
+            Set<Integer> allKhachHangIds = new HashSet<>();
+            if (phieuGiamGiaAdminRequest.getKhachHangIds() != null) {
+                allKhachHangIds.addAll(phieuGiamGiaAdminRequest.getKhachHangIds());
+            }
+
+            // Thêm khách mới
+            if (phieuGiamGiaAdminRequest.getKhachHangMoi()) {
+                List<Integer> newCustomerIds = khachHangRepository.findNewCustomers().stream()
+                        .map(KhachHang::getId)
+                        .toList();
+                allKhachHangIds.addAll(newCustomerIds);
+            }
+
+            // Thêm khách cũ
+            if (phieuGiamGiaAdminRequest.getKhachHangCu()) {
+                List<Integer> oldCustomerIds = khachHangRepository.findOldCustomers().stream()
+                        .map(KhachHang::getId)
+                        .toList();
+                allKhachHangIds.addAll(oldCustomerIds);
+            }
+
+            // Kiểm tra tồn tại
+            List<Integer> invalidIds = allKhachHangIds.stream()
                     .filter(id -> !khachHangRepository.existsById(id))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!invalidIds.isEmpty()) {
                 throw new IllegalArgumentException("Các ID khách hàng không tồn tại: " + invalidIds);
             }
 
-            for (Integer khachHangId : phieuGiamGiaAdminRequest.getKhachHangIds()) {
+            // Lưu khách hàng vào KhachHangGiamGia
+            for (Integer khachHangId : allKhachHangIds) {
                 KhachHang khachHang = khachHangRepository.findById(khachHangId)
                         .orElseThrow(() -> new IllegalArgumentException("Khách hàng ID " + khachHangId + " không tồn tại"));
                 createNewKhachHangGiamGia(phieuGiamGia, khachHang);
             }
         }
 
-        // Ánh xạ entity sang response DTO
-        PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
-
-        // Gán khachHangIds cho response
-        if (!phieuGiamGia.getIsGlobal()) {
-            List<Integer> khachHangIds = phieuGiamGia.getKhachHangGiamGias().stream()
-                    .map(khgg -> khgg.getIdKhachHang().getId())
-                    .collect(Collectors.toList());
-            response.setKhachHangIds(khachHangIds);
-        } else {
-            response.setKhachHangIds(List.of());
-        }
-
-        return response;
+        return mapToResponse(phieuGiamGia);
     }
 
     @Transactional
     public PhieuGiamGiaAdminResponse updatePhieuGiamGia(Integer id, PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
-        // Tìm phiếu giảm giá
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
 
-        // Kiểm tra ngày bắt đầu và ngày kết thúc
+        // Kiểm tra ngày
         if (phieuGiamGiaAdminRequest.getNgayBatDau().isAfter(phieuGiamGiaAdminRequest.getNgayKetThuc())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
 
-        // Kiểm tra logic isGlobal và khachHangIds
+        // Kiểm tra logic isGlobal và khachHangIds/khachHangMoi/khachHangCu
         if (!phieuGiamGiaAdminRequest.getIsGlobal() &&
-                (phieuGiamGiaAdminRequest.getKhachHangIds() == null || phieuGiamGiaAdminRequest.getKhachHangIds().isEmpty())) {
-            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng được chọn");
+                (phieuGiamGiaAdminRequest.getKhachHangIds() == null || phieuGiamGiaAdminRequest.getKhachHangIds().isEmpty()) &&
+                !phieuGiamGiaAdminRequest.getKhachHangMoi() &&
+                !phieuGiamGiaAdminRequest.getKhachHangCu()) {
+            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng hoặc nhóm khách hàng được chọn");
         }
 
-        // Ánh xạ DTO sang entity (trừ khachHangGiamGias)
+        // Ánh xạ DTO sang entity
         modelMapper.map(phieuGiamGiaAdminRequest, phieuGiamGia);
 
         // Xử lý mối quan hệ KhachHangGiamGia
         if (phieuGiamGia.getIsGlobal()) {
-            // Nếu isGlobal = true, xóa tất cả bản ghi KhachHangGiamGia chưa sử dụng
             List<KhachHangGiamGia> unusedRecords = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
             khachHangGiamGiaRepository.deleteAll(unusedRecords);
             phieuGiamGia.getKhachHangGiamGias().clear();
         } else {
-            // Nếu isGlobal = false, cập nhật danh sách khách hàng
-            Set<Integer> newKhachHangIds = new HashSet<>(phieuGiamGiaAdminRequest.getKhachHangIds());
+            Set<Integer> newKhachHangIds = new HashSet<>();
+            if (phieuGiamGiaAdminRequest.getKhachHangIds() != null) {
+                newKhachHangIds.addAll(phieuGiamGiaAdminRequest.getKhachHangIds());
+            }
 
-            // Kiểm tra tồn tại của khách hàng
+            // Thêm khách mới
+            if (phieuGiamGiaAdminRequest.getKhachHangMoi()) {
+                List<Integer> newCustomerIds = khachHangRepository.findNewCustomers().stream()
+                        .map(KhachHang::getId)
+                        .toList();
+                newKhachHangIds.addAll(newCustomerIds);
+            }
+
+            // Thêm khách cũ
+            if (phieuGiamGiaAdminRequest.getKhachHangCu()) {
+                List<Integer> oldCustomerIds = khachHangRepository.findOldCustomers().stream()
+                        .map(KhachHang::getId)
+                        .toList();
+                newKhachHangIds.addAll(oldCustomerIds);
+            }
+
+            // Kiểm tra tồn tại
             List<Integer> invalidIds = newKhachHangIds.stream()
                     .filter(khId -> !khachHangRepository.existsById(khId))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!invalidIds.isEmpty()) {
                 throw new IllegalArgumentException("Các ID khách hàng không tồn tại: " + invalidIds);
             }
@@ -211,7 +237,7 @@ public class PhieuGiamGiaAdminServices {
                     .map(khgg -> khgg.getIdKhachHang().getId())
                     .collect(Collectors.toSet());
 
-            // Thêm các khách hàng mới
+            // Thêm khách hàng mới
             for (Integer khachHangId : newKhachHangIds) {
                 if (!existingKhachHangIds.contains(khachHangId)) {
                     KhachHang khachHang = khachHangRepository.findById(khachHangId)
@@ -220,33 +246,18 @@ public class PhieuGiamGiaAdminServices {
                 }
             }
 
-            // Xóa các bản ghi KhachHangGiamGia không còn trong danh sách mới (chưa sử dụng)
+            // Xóa các bản ghi không còn trong danh sách mới
             List<KhachHangGiamGia> recordsToRemove = phieuGiamGia.getKhachHangGiamGias().stream()
                     .filter(khgg -> !newKhachHangIds.contains(khgg.getIdKhachHang().getId()) && !khgg.getIsUser())
-                    .collect(Collectors.toList());
+                    .toList();
             for (KhachHangGiamGia record : recordsToRemove) {
                 phieuGiamGia.getKhachHangGiamGias().remove(record);
                 khachHangGiamGiaRepository.delete(record);
             }
         }
 
-        // Lưu entity
         phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
-
-        // Ánh xạ entity sang response DTO
-        PhieuGiamGiaAdminResponse response = modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
-
-        // Gán khachHangIds cho response
-        if (!phieuGiamGia.getIsGlobal()) {
-            List<Integer> khachHangIds = phieuGiamGia.getKhachHangGiamGias().stream()
-                    .map(khgg -> khgg.getIdKhachHang().getId())
-                    .collect(Collectors.toList());
-            response.setKhachHangIds(khachHangIds);
-        } else {
-            response.setKhachHangIds(List.of());
-        }
-
-        return response;
+        return mapToResponse(phieuGiamGia);
     }
 
     @Transactional
@@ -254,7 +265,6 @@ public class PhieuGiamGiaAdminServices {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá"));
 
-        // Kiểm tra xem phiếu có đang được sử dụng
         boolean hasUsed = khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIsUser(phieuGiamGia, true);
         if (hasUsed) {
             throw new IllegalStateException("Không thể xóa phiếu giảm giá đã được sử dụng");
@@ -265,10 +275,12 @@ public class PhieuGiamGiaAdminServices {
         return "Đã xóa thành công phiếu giảm giá có id = " + id;
     }
 
-    public List<KhachHangGiamGiaResponse> getAllKhachHang() {
-        return khachHangRepository.findAll().stream()
-                .map(kh -> new KhachHangGiamGiaResponse(kh.getId(), kh.getTenKhachHang()))
-                .collect(Collectors.toList());
+    public Page<KhachHangGiamGiaResponse> getAllKhachHang(String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> khachHangPage = (search == null || search.isEmpty()) ?
+                khachHangRepository.findAll(pageable) :
+                khachHangRepository.findByTenKhachHangContainingIgnoreCase(search, pageable);
+        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(), kh.getTenKhachHang()));
     }
 
     private void createNewKhachHangGiamGia(PhieuGiamGia phieuGiamGia, KhachHang khachHang) {
@@ -279,16 +291,6 @@ public class PhieuGiamGiaAdminServices {
         khachHangGiamGia.setNgayCap(LocalDate.now());
         phieuGiamGia.getKhachHangGiamGias().add(khachHangGiamGia);
         khachHangGiamGiaRepository.save(khachHangGiamGia);
-    }
-
-    private void saveKhachHangGiamGia(PhieuGiamGia phieuGiamGia, List<Integer> khachHangIds) {
-        if (khachHangIds != null) {
-            for (Integer khachHangId : khachHangIds) {
-                KhachHang khachHang = khachHangRepository.findById(khachHangId)
-                        .orElseThrow(() -> new IllegalArgumentException("Khách hàng ID " + khachHangId + " không tồn tại"));
-                createNewKhachHangGiamGia(phieuGiamGia, khachHang);
-            }
-        }
     }
 
     @Transactional

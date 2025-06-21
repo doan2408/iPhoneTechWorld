@@ -29,5 +29,7 @@ public class PhieuGiamGiaAdminResponse {
     private BigDecimal soDiemCanDeDoi;
     private Boolean isGlobal;
     private List<Integer> khachHangIds;
+    private Boolean khachHangMoi; // Thêm trường mới
+    private Boolean khachHangCu;  // Thêm trường mới
     private TrangThaiPGG trangThai;
 }
