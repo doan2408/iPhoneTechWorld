@@ -132,10 +132,21 @@ public class HoaDonAdminController {
     }
 
     // Xoa hoa don
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteHoaDon(@PathVariable Integer id){
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<?> hoaDonSoftDelete (@PathVariable Integer id){
         try {
-            hoaDonAdminService.deleteHoaDon(id);
+            hoaDonAdminService.hoaDonSoftDelete(id);
+            return ResponseEntity.ok("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Xóa thất bại: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/hard-delete/{id}")
+    public ResponseEntity<?> hoaDonHardDelete (@PathVariable Integer id){
+        try {
+            hoaDonAdminService.hoaDonHardDelete(id);
             return ResponseEntity.ok("Xóa thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

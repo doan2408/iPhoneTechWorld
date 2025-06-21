@@ -143,21 +143,15 @@ public class HoaDonAdminService {
         return response;
     }
 
-    public void deleteHoaDon (Integer id){
+    public void hoaDonSoftDelete (Integer id){
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+        hoaDon.setIsDelete(true);
+        hoaDonRepository.save(hoaDon);
+    }
 
-        TrangThaiThanhToan trangThai = hoaDon.getTrangThaiThanhToan();
-
-        if (trangThai == TrangThaiThanhToan.PENDING) {
-            hoaDonRepository.delete(hoaDon);
-
-        } else if (trangThai == TrangThaiThanhToan.CONFIRMED || trangThai == TrangThaiThanhToan.CANCELLED) {
-            hoaDon.setIsDelete(true);
-            hoaDonRepository.save(hoaDon);
-
-        } else {
-            throw new IllegalStateException("Không thể xóa hóa đơn ở trạng thái: " + trangThai);
-        }
+    public void hoaDonHardDelete (Integer id){
+        HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+        hoaDonRepository.delete(hoaDon);
     }
 
     public Integer countHoaDonPending () {
