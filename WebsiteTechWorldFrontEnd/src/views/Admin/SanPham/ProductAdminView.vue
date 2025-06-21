@@ -33,12 +33,12 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="Địa chỉ NCC">
-            <el-input :value="sanPhamModel.diaChi" readonly></el-input>
+            <el-input v-model="sanPhamModel.diaChi" readonly></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="SĐT NCC">
-            <el-input :value="sanPhamModel.sdt" readonly></el-input>
+            <el-input v-model="sanPhamModel.sdt" readonly></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -46,7 +46,7 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="Email NCC">
-            <el-input :value="sanPhamModel.email" readonly></el-input>
+            <el-input v-model="sanPhamModel.email" readonly></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -56,20 +56,14 @@
       <el-table :data="sanPhamModel.sanPhamChiTiets" style="width: 100%" border @row-click="selectChiTiet">
         <el-table-column type="index" label="STT" width="80" :index="indexMethod" />
         <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
-        <el-table-column label="Màu sắc" prop="idMau">
-          <template #default="{ row }">
-            {{ getMauSacLabel(row.idMau) }}
-          </template>
+        <el-table-column label="Màu sắc" prop="tenMau">
+
         </el-table-column>
-        <el-table-column label="RAM" prop="idRam">
-          <template #default="{ row }">
-            {{ getRamLabel(row.idRam) }}
-          </template>
+        <el-table-column label="RAM" prop="dungLuongRam">
+
         </el-table-column>
-        <el-table-column label="ROM" prop="idRom">
-          <template #default="{ row }">
-            {{ getRomLabel(row.idRom) }}
-          </template>
+        <el-table-column label="ROM" prop="dungLuongRom">
+
         </el-table-column>
         <el-table-column prop="soLuongSPCT" label="Số lượng" width="120" />
         <el-table-column prop="giaBan" label="Giá bán" width="120" />
@@ -89,8 +83,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Màu sắc">
-              <el-input :value="getMauSacLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idMau)"
-                readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].tenMau" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -105,7 +98,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="Dung lượng RAM">
-              <el-input :value="getRamLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idRam)" readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].dungLuongRam" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -137,7 +130,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="Dung lượng ROM">
-              <el-input :value="getRomLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idRom)" readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].dungLuongRom" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -174,8 +167,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Kích thước">
-              <el-input :value="getManHinhLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idManHinh)"
-                readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].kichThuoc" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -214,8 +206,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="Phiên bản HĐH">
-              <el-input :value="getHeDieuHanhLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idHeDieuHanh)"
-                readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].phienBanHeDieuHanh" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -240,7 +231,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Công suất sạc">
-              <el-input :value="getPinLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idPin)" readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].congSuatSac" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -271,23 +262,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Số lượng CPU">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].soLuongCpu" readonly></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="Xung nhịp">
-              <el-input :value="getCpuLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idCpu)" readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="Công nghệ sản xuất">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].congNgheSanXuat" readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="Bộ nhớ đệm">
               <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].boNhoDem" readonly></el-input>
             </el-form-item>
@@ -299,6 +273,19 @@
               <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].tieuThuDienNang" readonly></el-input>
             </el-form-item>
           </el-col>
+          <el-col :span="8">
+            <el-form-item label="Xung nhịp">
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].xungNhip" readonly></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="Công nghệ sản xuất">
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].congNgheSanXuat" readonly></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+
           <el-col :span="8">
             <el-form-item label="Năm ra mắt">
               <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].namRaMat" readonly></el-input>
@@ -316,7 +303,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Độ phân giải">
-              <el-input :value="getCameraTruocLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idCameraTruoc)"
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].doPhanGiaiCameraTruoc"
                 readonly></el-input>
             </el-form-item>
           </el-col>
@@ -349,8 +336,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Độ phân giải">
-              <el-input :value="getCameraSauLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idCameraSau)"
-                readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].doPhanGiaiCameraSau" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -382,13 +368,12 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="Quốc gia">
-              <el-input :value="getXuatXuLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idXuatXu)"
-                readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].tenQuocGia" readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="Loại sản phẩm">
-              <el-input :value="getLoaiLabel(sanPhamModel.sanPhamChiTiets[selectedChiTiet].idLoai)" readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet].tenLoai" readonly></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -446,7 +431,6 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import {
-  getSanPhamById,
   getAllNhaCungCapList,
   getAllMauSacList,
   getAllRamList,
@@ -459,6 +443,7 @@ import {
   getAllCameraSauList,
   getAllXuatXuList,
   getAllLoaiList,
+  getViewSanPham,
 } from '@/Service/Adminservice/Products/ProductAdminService';
 
 const route = useRoute();
@@ -499,91 +484,106 @@ const danhSachTrangThaiSanPham = [
 
 const fetchSanPham = async (id) => {
   try {
-    const response = await getSanPhamById(id);
+    const response = await getViewSanPham(id);
+
     sanPhamModel.id = response.id;
     sanPhamModel.tenSanPham = response.tenSanPham;
     sanPhamModel.thuongHieu = response.thuongHieu;
     sanPhamModel.idNhaCungCap = response.idNhaCungCap;
     sanPhamModel.trangThaiSanPham = response.trangThaiSanPham;
-    sanPhamModel.diaChi = response.diaChi;
-    sanPhamModel.sdt = response.sdt;
-    sanPhamModel.email = response.email;
-    sanPhamModel.sanPhamChiTiets = response.sanPhamChiTiets.map((chiTiet) => ({
-      id: chiTiet.id,
-      maSanPhamChiTiet: chiTiet.maSanPhamChiTiet,
-      idMau: chiTiet.idMau,
-      maMau: chiTiet.maMau,
-      tenMau: chiTiet.tenMau,
-      idRam: chiTiet.idRam,
-      dungLuongRam: chiTiet.dungLuongRam,
-      loaiRam: chiTiet.loaiRam,
-      tocDoDocGhiRam: chiTiet.tocDoDocGhiRam,
-      nhaSanXuatRam: chiTiet.nhaSanXuatRam,
-      namRaMatRam: chiTiet.namRaMatRam,
-      idRom: chiTiet.idRom,
-      dungLuongRom: chiTiet.dungLuongRom,
-      loaiRom: chiTiet.loaiRom,
-      tocDoDocGhiRom: chiTiet.tocDoDocGhiRom,
-      nhaSanXuatRom: chiTiet.nhaSanXuatRom,
-      namRaMatRom: chiTiet.namRaMatRom,
-      idManHinh: chiTiet.idManHinh,
-      tenManHinh: chiTiet.tenManHinh,
-      kichThuoc: chiTiet.kichThuoc,
-      loaiManHinh: chiTiet.loaiManHinh,
-      doPhanGiaiManHinh: chiTiet.doPhanGiaiManHinh,
-      tanSoQuet: chiTiet.tanSoQuet,
-      doSang: chiTiet.doSang,
-      chatLieuKinh: chiTiet.chatLieuKinh,
-      idHeDieuHanh: chiTiet.idHeDieuHanh,
-      phienBanHeDieuHanh: chiTiet.phienBanHeDieuHanh,
-      nhaPhatTrien: chiTiet.nhaPhatTrien,
-      giaoDienNguoiDung: chiTiet.giaoDienNguoiDung,
-      idPin: chiTiet.idPin,
-      phienBanPin: chiTiet.phienBanPin,
-      congSuatSac: chiTiet.congSuatSac,
-      thoiGianSuDung: chiTiet.thoiGianSuDung,
-      soLanSacToiDa: chiTiet.soLanSacToiDa,
-      idCpu: chiTiet.idCpu,
-      hangSanXuat: chiTiet.hangSanXuat,
-      soNhan: chiTiet.soNhan,
-      soLuongCpu: chiTiet.soLuongCpu,
-      xungNhip: chiTiet.xungNhip,
-      congNgheSanXuat: chiTiet.congNgheSanXuat,
-      boNhoDem: chiTiet.boNhoDem,
-      tieuThuDienNang: chiTiet.tieuThuDienNang,
-      namRaMat: chiTiet.namRaMat,
-      idCameraTruoc: chiTiet.idCameraTruoc,
-      loaiCameraTruoc: chiTiet.loaiCameraTruoc,
-      doPhanGiaiCameraTruoc: chiTiet.doPhanGiaiCameraTruoc,
-      khauDoCameraTruoc: chiTiet.khauDoCameraTruoc,
-      loaiZoomCameraTruoc: chiTiet.loaiZoomCameraTruoc,
-      cheDoChupCameraTruoc: chiTiet.cheDoChupCameraTruoc,
-      idCameraSau: chiTiet.idCameraSau,
-      loaiCameraSau: chiTiet.loaiCameraSau,
-      doPhanGiaiCameraSau: chiTiet.doPhanGiaiCameraSau,
-      khauDoCameraSau: chiTiet.khauDoCameraSau,
-      loaiZoomCameraSau: chiTiet.loaiZoomCameraSau,
-      cheDoChupCameraSau: chiTiet.cheDoChupCameraSau,
-      idXuatXu: chiTiet.idXuatXu,
-      maXuatXu: chiTiet.maXuatXu,
-      tenQuocGia: chiTiet.tenQuocGia,
-      idLoai: chiTiet.idLoai,
-      tenLoai: chiTiet.tenLoai,
-      soLuongSPCT: chiTiet.soLuongSPCT,
-      giaBan: chiTiet.giaBan,
-      imeisInput: chiTiet.imeis?.map((i) => i.soImei).join(', ') || '',
-      hinhAnhs: chiTiet.hinhAnhs?.map((h) => ({
-        name: h.url.split('/').pop(),
-        url: h.url,
-        imagePublicId: h.imagePublicId,
-      })) || [],
-    }));
+
+    if (Array.isArray(response.sanPhamChiTiets) && response.sanPhamChiTiets.length > 0) {
+      const chiTietDauTien = response.sanPhamChiTiets[0];
+      sanPhamModel.diaChi = chiTietDauTien?.diaChi ?? '';
+      sanPhamModel.sdt = chiTietDauTien?.sdt ?? '';
+      sanPhamModel.email = chiTietDauTien?.email ?? '';
+
+    }
+
+    sanPhamModel.sanPhamChiTiets = response.sanPhamChiTiets.map((chiTiet, index) => {
+      const mapped = {
+        id: chiTiet.id,
+        maSanPhamChiTiet: chiTiet.maSanPhamChiTiet,
+        // idMau: chiTiet.idMau,
+        tenMau: chiTiet.tenMau,
+        maMau: chiTiet.maMau,
+        // idRam: chiTiet.idRam,
+        dungLuongRam: chiTiet.dungLuongRam,
+        loaiRam: chiTiet.loaiRam,
+        tocDoDocGhiRam: chiTiet.tocDoDocGhiRam,
+        nhaSanXuatRam: chiTiet.nhaSanXuatRam,
+        namRaMatRam: chiTiet.namRaMatRam,
+
+        // idRom: chiTiet.idRom,
+        dungLuongRom: chiTiet.dungLuongRom,
+        loaiRom: chiTiet.loaiRom,
+        tocDoDocGhiRom: chiTiet.tocDoDocGhiRom,
+        nhaSanXuatRom: chiTiet.nhaSanXuatRom,
+        namRaMatRom: chiTiet.namRaMatRom,
+        // idManHinh: chiTiet.idManHinh,
+        tenManHinh: chiTiet.tenManHinh,
+        kichThuoc: chiTiet.kichThuoc,
+        loaiManHinh: chiTiet.loaiManHinh,
+        doPhanGiaiManHinh: chiTiet.doPhanGiaiManHinh,
+        tanSoQuet: chiTiet.tanSoQuet,
+        doSang: chiTiet.doSang,
+        chatLieuKinh: chiTiet.chatLieuKinh,
+        // idHeDieuHanh: chiTiet.idHeDieuHanh,
+        phienBanHeDieuHanh: chiTiet.phienBanHeDieuHanh,
+        nhaPhatTrien: chiTiet.nhaPhatTrien,
+        giaoDienNguoiDung: chiTiet.giaoDienNguoiDung,
+        // idPin: chiTiet.idPin,
+        phienBanPin: chiTiet.phienBanPin,
+        congSuatSac: chiTiet.congSuatSac,
+        thoiGianSuDung: chiTiet.thoiGianSuDung,
+        soLanSacToiDa: chiTiet.soLanSacToiDa,
+        // idCpu: chiTiet.idCpu,
+        hangSanXuat: chiTiet.hangSanXuat,
+        soNhan: chiTiet.soNhan,
+        xungNhip: chiTiet.xungNhip,
+        congNgheSanXuat: chiTiet.congNgheSanXuat,
+        boNhoDem: chiTiet.boNhoDem,
+        tieuThuDienNang: chiTiet.tieuThuDienNang,
+        namRaMat: chiTiet.namRaMat,
+        // idCameraTruoc: chiTiet.idCameraTruoc,
+        loaiCameraTruoc: chiTiet.loaiCameraTruoc,
+        doPhanGiaiCameraTruoc: chiTiet.doPhanGiaiCameraTruoc,
+        khauDoCameraTruoc: chiTiet.khauDoCameraTruoc,
+        loaiZoomCameraTruoc: chiTiet.loaiZoomCameraTruoc,
+        cheDoChupCameraTruoc: chiTiet.cheDoChupCameraTruoc,
+        // idCameraSau: chiTiet.idCameraSau,
+        loaiCameraSau: chiTiet.loaiCameraSau,
+        doPhanGiaiCameraSau: chiTiet.doPhanGiaiCameraSau,
+        khauDoCameraSau: chiTiet.khauDoCameraSau,
+        loaiZoomCameraSau: chiTiet.loaiZoomCameraSau,
+        cheDoChupCameraSau: chiTiet.cheDoChupCameraSau,
+        // idXuatXu: chiTiet.idXuatXu,
+        maXuatXu: chiTiet.maXuatXu,
+        tenQuocGia: chiTiet.tenQuocGia,
+        // idLoai: chiTiet.idLoai,
+        tenLoai: chiTiet.tenLoai,
+        soLuongSPCT: chiTiet.soLuongSPCT,
+        giaBan: chiTiet.giaBan,
+        imeisInput: chiTiet.imeis?.map((i) => i.soImei).join(', ') || '',
+        hinhAnhs: chiTiet.hinhAnhs?.map((h) => ({
+          name: h.url.split('/').pop(),
+          url: h.url,
+          imagePublicId: h.imagePublicId,
+        })) || [],
+      };
+
+      return mapped;
+    });
+
     selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null;
+
   } catch (err) {
     error.value = err.message || 'Lỗi khi tải chi tiết sản phẩm';
     ElMessage.error(error.value);
+    console.error('❌ ~ Lỗi khi fetchSanPham:', err);
   }
 };
+
 
 const fetchDanhMuc = async () => {
   try {
@@ -619,20 +619,82 @@ const fetchDanhMuc = async () => {
   }
 };
 
-const getNhaCungCapLabel = (id) => nhaCungCaps.value.find((ncc) => ncc.id === id)?.tenNhaCungCap || 'Không rõ';
-const getTrangThaiLabel = (value) =>
-  danhSachTrangThaiSanPham.find((tt) => tt.value === value)?.label || 'Không rõ';
-const getMauSacLabel = (id) => maus.value.find((m) => m.id === id)?.tenMau || 'Không rõ';
-const getRamLabel = (id) => rams.value.find((r) => r.id === id)?.dungLuongRam || 'Không rõ';
-const getRomLabel = (id) => roms.value.find((r) => r.id === id)?.dungLuongRom || 'Không rõ';
-const getManHinhLabel = (id) => manHinhs.value.find((mh) => mh.id === id)?.kichThuoc || 'Không rõ';
-const getHeDieuHanhLabel = (id) => heDieuHanhs.value.find((hdh) => hdh.id === id)?.phienBanHeDieuHanh || 'Không rõ';
-const getPinLabel = (id) => pins.value.find((p) => p.id === id)?.congSuatSac || 'Không rõ';
-const getCpuLabel = (id) => cpus.value.find((c) => c.id === id)?.xungNhip || 'Không rõ';
-const getCameraTruocLabel = (id) => cameraTruocs.value.find((c) => c.id === id)?.doPhanGiaiCameraTruoc || 'Không rõ';
-const getCameraSauLabel = (id) => cameraSaus.value.find((c) => c.id === id)?.doPhanGiaiCameraSau || 'Không rõ';
-const getXuatXuLabel = (id) => xuatXus.value.find((xx) => xx.id === id)?.tenQuocGia || 'Không rõ';
-const getLoaiLabel = (id) => loais.value.find((l) => l.id === id)?.tenLoai || 'Không rõ';
+const getNhaCungCapLabel = (id) => {
+  const result = nhaCungCaps.value.find((ncc) => ncc.id === id);
+  return result?.tenNhaCungCap || 'Không rõ';
+};
+
+const getTrangThaiLabel = (value) => {
+  const result = danhSachTrangThaiSanPham.find((tt) => tt.value === value);
+  return result?.label || 'Không rõ';
+};
+
+// const getMauSacLabel = (id) => {
+//   const result = maus.value.find((m) => m.id === id);
+//   console.log('Màu sắc:', id, '=>', result?.tenMau || 'Không rõ');
+//   return result?.tenMau || 'Không rõ';
+// };
+
+// const getRamLabel = (id) => {
+//   const result = rams.value.find((r) => r.id === id);
+//   console.log('RAM:', id, '=>', result?.dungLuongRam || 'Không rõ');
+//   return result?.dungLuongRam || 'Không rõ';
+// };
+
+// const getRomLabel = (id) => {
+//   const result = roms.value.find((r) => r.id === id);
+//   console.log('ROM:', id, '=>', result?.dungLuongRom || 'Không rõ');
+//   return result?.dungLuongRom || 'Không rõ';
+// };
+
+// const getManHinhLabel = (id) => {
+//   const result = manHinhs.value.find((mh) => mh.id === id);
+//   console.log('Màn hình:', id, '=>', result?.kichThuoc || 'Không rõ');
+//   return result?.kichThuoc || 'Không rõ';
+// };
+
+// const getHeDieuHanhLabel = (id) => {
+//   const result = heDieuHanhs.value.find((hdh) => hdh.id === id);
+//   console.log('Hệ điều hành:', id, '=>', result?.phienBanHeDieuHanh || 'Không rõ');
+//   return result?.phienBanHeDieuHanh || 'Không rõ';
+// };
+
+// const getPinLabel = (id) => {
+//   const result = pins.value.find((p) => p.id === id);
+//   console.log('Pin:', id, '=>', result?.congSuatSac || 'Không rõ');
+//   return result?.congSuatSac || 'Không rõ';
+// };
+
+// const getCpuLabel = (id) => {
+//   const result = cpus.value.find((c) => c.id === id);
+//   console.log('CPU:', id, '=>', result?.xungNhip || 'Không rõ');
+//   return result?.xungNhip || 'Không rõ';
+// };
+
+// const getCameraTruocLabel = (id) => {
+//   const result = cameraTruocs.value.find((c) => c.id === id);
+//   console.log('Camera trước:', id, '=>', result?.doPhanGiaiCameraTruoc || 'Không rõ');
+//   return result?.doPhanGiaiCameraTruoc || 'Không rõ';
+// };
+
+// const getCameraSauLabel = (id) => {
+//   const result = cameraSaus.value.find((c) => c.id === id);
+//   console.log('Camera sau:', id, '=>', result?.doPhanGiaiCameraSau || 'Không rõ');
+//   return result?.doPhanGiaiCameraSau || 'Không rõ';
+// };
+
+// const getXuatXuLabel = (id) => {
+//   const result = xuatXus.value.find((xx) => xx.id === id);
+//   console.log('Xuất xứ:', id, '=>', result?.tenQuocGia || 'Không rõ');
+//   return result?.tenQuocGia || 'Không rõ';
+// };
+
+// const getLoaiLabel = (id) => {
+//   const result = loais.value.find((l) => l.id === id);
+//   console.log('Loại:', id, '=>', result?.tenLoai || 'Không rõ');
+//   return result?.tenLoai || 'Không rõ';
+// };
+
 
 const selectChiTiet = (row, column, event) => {
   const index = sanPhamModel.sanPhamChiTiets.indexOf(row);
