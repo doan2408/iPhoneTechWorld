@@ -162,7 +162,7 @@ CREATE TABLE camera_truoc (
 
 CREATE TABLE cpu (
                      id_cpu INT IDENTITY(1,1) PRIMARY KEY,
-					 chip_xu_ly NVARCHAR(50),
+                     chip_xu_ly NVARCHAR(50),
                      hang_san_xuat NVARCHAR(50),
                      so_nhan NVARCHAR(50),
                      xung_nhip NVARCHAR(50),
@@ -311,7 +311,7 @@ CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
                       so_imei VARCHAR(70),
-					  so_imei_2 VARCHAR(70), -- new
+                      so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
                       nha_mang NVARCHAR(50)
 );
@@ -373,7 +373,9 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      so_tien_thanh_toan DECIMAL(10,2)
 );
 
+
 -- Table nhan_vien
+
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
@@ -583,6 +585,7 @@ VALUES
     (N'Apple A9', N'Apple', N'2 nhân', N'1.8 GHz', N'7nm', N'4MB', N'15W', '2016-09-01');
 
 -- Table loai
+
 INSERT INTO loai (ten_loai)
 VALUES
     (N'Thường'),
@@ -885,6 +888,26 @@ VALUES
     (13, '123456789012357', '543210987654333', 'AVAILABLE', 'Viettel'),
     (14, '123456789012358', '543210987654334', 'AVAILABLE', 'Mobifone'),
     (15, '123456789012359', '543210987654335', 'AVAILABLE', 'Vinaphone');
+
+
+-- Table hinh_anh
+INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
+VALUES
+    (1, 'https://example.com/images/iphone16_black.jpg', 'iphone16_black_001'),
+    (2, 'https://example.com/images/iphone16pro_white.jpg', 'iphone16pro_white_002'),
+    (3, 'https://example.com/images/iphone15_gold.jpg', 'iphone15_gold_003'),
+    (4, 'https://example.com/images/iphone14_blue.jpg', 'iphone14_blue_004'),
+    (5, 'https://example.com/images/iphone13_pink.jpg', 'iphone13_pink_005'),
+    (6, 'https://example.com/images/iphone16plus_gray.jpg', 'iphone16plus_gray_006'),
+    (7, 'https://example.com/images/iphone15pro_silver.jpg', 'iphone15pro_silver_007'),
+    (8, 'https://example.com/images/iphone14pro_green.jpg', 'iphone14pro_green_008'),
+    (9, 'https://example.com/images/iphone13pro_red.jpg', 'iphone13pro_red_009'),
+    (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
+    (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
+    (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
+    (13, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'),
+    (14, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'),
+    (15, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015');
 
 -- Table imei_da_ban
 INSERT INTO imei_da_ban (id_chi_tiet_hoa_don, so_imei, trang_thai)
