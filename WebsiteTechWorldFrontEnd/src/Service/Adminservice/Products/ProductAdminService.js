@@ -33,8 +33,13 @@ const postData = async (url, data) => {
     const response = await axiosInstance.post(url, data);
     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
   } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${url}:`, data);
-    throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
+    console.error('Lỗi gửi dữ liệu tới /admin/product:', {
+      data,
+      status: error.response?.status,
+      responseData: error.response?.data,
+      message: error.message
+    });
+    throw error;
   }
 };
 

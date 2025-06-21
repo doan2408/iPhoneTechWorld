@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
@@ -42,22 +43,9 @@ public class SanPhamAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createSanPham( @RequestBody SanPhamAdminRequest request, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .toList());
-        }
-        try {
+    public ResponseEntity<?> createSanPham(@Valid @RequestBody SanPhamAdminRequest request) {
             SanPhamAdminResponse response = sanPhamAdminService.createSanPhamAdmin(request);
             return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
-        }
     }
 
     @PutMapping("/{id}")

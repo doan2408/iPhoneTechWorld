@@ -70,4 +70,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             nativeQuery = true)
     Page<String> findTenDongSanPham(Pageable pageable);
 
+
+    Boolean existsByTenSanPham (String tenSanPham);
 }
