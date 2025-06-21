@@ -661,6 +661,7 @@ import { hoaDonDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { doanhThuTheoThang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { countHoaDonPending } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import router from '@/router'
+import Swal from 'sweetalert2';
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -745,8 +746,6 @@ const visiblePages = computed(() => {
     return pages;
 });
 
-
-
 // hàm call api load dữ liệu
 const loadData = async () => {
     isLoading.value = true;
@@ -778,15 +777,53 @@ const loadData = async () => {
     }
 };
 
-//Xoa hoa don
 const deleteHoaDon = async (hoaDon) => {
-    
+    // Hiển thị confirm dialog để hỏi người dùng
+    const confirmDelete = await Swal.fire({
+        title: 'Xác nhận xóa hóa đơn',
+        text: 'Bạn muốn xóa mềm hay xóa cứng hóa đơn này?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Xóa mềm',
+        cancelButtonText: 'Hủy',
+        showDenyButton: true,
+        denyButtonText: 'Xóa cứng'
+    });
+
     try {
-        const response = await hoaDonDelete(hoaDon.idHoaDon);
+        // Xử lý xóa mềm
+        if (confirmDelete.isConfirmed) {
+            await hoaDonSoftDelete(hoaDon.idHoaDon); 
+            Swal.fire('Thành công!', 'Hóa đơn đã được xóa mềm.', 'success');
+        }
+        // Xử lý xóa cứng
+        else if (confirmDelete.isDenied) {
+            console.log(hoaDon)
+            const hardDeleteConfirm = await Swal.fire({
+                title: 'Xác nhận xóa cứng',
+                text: 'Hành động này không thể khôi phục! Bạn có chắc chắn muốn xóa cứng?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa cứng',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (hardDeleteConfirm.isConfirmed) {
+                await hoaDonHardDelete(hoaDon.idHoaDon); 
+                Swal.fire('Thành công!', 'Hóa đơn đã được xóa cứng.', 'success');
+            } else {
+                return; 
+            }
+        }
+        else {
+            return;
+        }
+
+        loadData(); // Tải lại dữ liệu sau khi xóa thành công
     } catch (error) {
         console.error('Delete Hoa don', error);
-    } 
-    loadData()
+        Swal.fire('Lỗi!', 'Đã xảy ra lỗi khi xóa hóa đơn.', 'error');
+    }
 };
 
 const changePage = (newPage) => {
