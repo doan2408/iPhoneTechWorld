@@ -235,13 +235,16 @@
                                             </path>
                                         </svg>
                                     </button>
-                                    <button class="action-btn delete-btn" title="Xóa"
-                                    @click="deleteHoaDon(hoaDon)">
-                                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
+                                    <button 
+                                        class="action-btn delete-btn" 
+                                        title="Xóa"
+                                        :disabled="hoaDon.trangThaiThanhToan === 'Hoàn tất'"
+                                        @click="deleteHoaDon(hoaDon)">
+                                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                </path>
+                                            </svg>
                                     </button>
                                 </div>
                             </td>
@@ -657,7 +660,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { hoaDonGetAll } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { viewLichSuHoaDon } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { hoaDonDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { hoaDonSoftDelete, hoaDonHardDelete } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { doanhThuTheoThang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { countHoaDonPending } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import router from '@/router'
@@ -778,7 +781,7 @@ const loadData = async () => {
 };
 
 const deleteHoaDon = async (hoaDon) => {
-    // Hiển thị confirm dialog để hỏi người dùng
+    
     const confirmDelete = await Swal.fire({
         title: 'Xác nhận xóa hóa đơn',
         text: 'Bạn muốn xóa mềm hay xóa cứng hóa đơn này?',
@@ -786,19 +789,16 @@ const deleteHoaDon = async (hoaDon) => {
         showCancelButton: true,
         confirmButtonText: 'Xóa mềm',
         cancelButtonText: 'Hủy',
-        showDenyButton: true,
+        showDenyButton: hoaDon.trangThaiThanhToan == 'Chờ xử lý',
         denyButtonText: 'Xóa cứng'
     });
 
     try {
-        // Xử lý xóa mềm
         if (confirmDelete.isConfirmed) {
             await hoaDonSoftDelete(hoaDon.idHoaDon); 
             Swal.fire('Thành công!', 'Hóa đơn đã được xóa mềm.', 'success');
         }
-        // Xử lý xóa cứng
         else if (confirmDelete.isDenied) {
-            console.log(hoaDon)
             const hardDeleteConfirm = await Swal.fire({
                 title: 'Xác nhận xóa cứng',
                 text: 'Hành động này không thể khôi phục! Bạn có chắc chắn muốn xóa cứng?',
