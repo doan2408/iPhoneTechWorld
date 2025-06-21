@@ -454,21 +454,21 @@ VALUES
 -- Table lich_su_hoa_don
 INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don, hanh_dong, thoi_gian_thay_doi, mo_ta)
 VALUES
-    (1, 1, N'Tạo hóa đơn', '2025-05-02', N'Khách hàng đặt iPhone 16'),
-    (2, 2, N'Thanh toán hóa đơn', '2025-04-20', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (3, 3, N'Xác nhận đơn hàng', '2025-05-01', N'Đơn iPhone 14 chờ thanh toán'),
-    (4, 4, N'Tạo hóa đơn', '2025-05-03', N'Khách hàng đặt iPhone 16 Pro'),
-    (5, 5, N'Thanh toán hóa đơn', '2025-04-21', N'Thanh toán iPhone 15 tại cửa hàng'),
-    (1, 6, N'Xác nhận đơn hàng', '2025-05-02', N'Đơn iPhone 13 chờ thanh toán'),
-    (2, 7, N'Tạo hóa đơn', '2025-05-04', N'Khách hàng đặt iPhone 16'),
-    (3, 8, N'Thanh toán hóa đơn', '2025-04-22', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (4, 9, N'Xác nhận đơn hàng', '2025-05-03', N'Đơn iPhone 14 chờ thanh toán'),
-    (5, 10, N'Tạo hóa đơn', '2025-05-05', N'Khách hàng đặt iPhone 16 Pro'),
-    (1, 11, N'Thanh toán hóa đơn', '2025-04-23', N'Thanh toán iPhone 15 tại cửa hàng'),
-    (2, 12, N'Xác nhận đơn hàng', '2025-05-04', N'Đơn iPhone 13 chờ thanh toán'),
-    (3, 13, N'Tạo hóa đơn', '2025-05-06', N'Khách hàng đặt iPhone 16'),
-    (4, 14, N'Thanh toán hóa đơn', '2025-04-24', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (5, 15, N'Xác nhận đơn hàng', '2025-05-05', N'Đơn iPhone 14 chờ thanh toán');
+    (1, 1, N'CREATE', '2025-05-02', N'Khách hàng đặt iPhone 16'),
+    (2, 2, N'THANH_TOAN', '2025-04-20', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
+    (3, 3, N'CONFIRM', '2025-05-01', N'Đơn iPhone 14 chờ thanh toán'),
+    (4, 4, N'CREATE', '2025-05-03', N'Khách hàng đặt iPhone 16 Pro'),
+    (5, 5, N'THANH_TOAN', '2025-04-21', N'Thanh toán iPhone 15 tại cửa hàng'),
+    (1, 6, N'CONFIRM', '2025-05-02', N'Đơn iPhone 13 chờ thanh toán'),
+    (2, 7, N'CREATE', '2025-05-04', N'Khách hàng đặt iPhone 16'),
+    (3, 8, N'THANH_TOAN', '2025-04-22', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
+    (4, 9, N'CONFIRM', '2025-05-03', N'Đơn iPhone 14 chờ thanh toán'),
+    (5, 10, N'CREATE', '2025-05-05', N'Khách hàng đặt iPhone 16 Pro'),
+    (1, 11, N'THANH_TOAN', '2025-04-23', N'Thanh toán iPhone 15 tại cửa hàng'),
+    (2, 12, N'CONFIRM', '2025-05-04', N'Đơn iPhone 13 chờ thanh toán'),
+    (3, 13, N'CREATE', '2025-05-06', N'Khách hàng đặt iPhone 16'),
+    (4, 14, N'THANH_TOAN', '2025-04-24', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
+    (5, 15, N'CONFIRM', '2025-05-05', N'Đơn iPhone 14 chờ thanh toán');
 
 -- Table khach_hang_giam_gia
 INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap)
