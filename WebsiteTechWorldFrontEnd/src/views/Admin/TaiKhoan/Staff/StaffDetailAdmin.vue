@@ -144,7 +144,7 @@ onMounted(() => {
           Chức vụ
           <select v-model="staffRequest.chucVu" class="form-select">
             <option value="STAFF">Nhân Viên</option>
-            <option value="ADMIN">Quản lý</option>
+            <!-- <option value="ADMIN">Quản lý</option> -->
           </select>
         </div>
 

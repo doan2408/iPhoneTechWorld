@@ -13,6 +13,7 @@ const staffRequest = ref({
   trangThai: "ENABLE", //Mặc định là đang làm
   chucVu: "STAFF", // Mặc định là Nhân Viên
   gioiTinh: true, // Mặc định là Nam
+  matKhau: ""
 });
 
 const errors = reactive({});
@@ -128,7 +129,7 @@ const handleAddStaff = async () => {
           class="form-select"
         >
           <option value="STAFF">Nhân Viên</option>
-          <option value="ADMIN">Quản lý</option>
+          <!-- <option value="ADMIN">Quản lý</option> -->
         </select>
       </div>
       <div class="col-md-6 mb-2">
