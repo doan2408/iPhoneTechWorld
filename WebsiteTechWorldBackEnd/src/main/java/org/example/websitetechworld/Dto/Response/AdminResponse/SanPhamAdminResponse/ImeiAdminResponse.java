@@ -15,7 +15,6 @@ public class ImeiAdminResponse {
     private String soImei;
     private String soImei2;
     private TrangThaiImei trangThaiImei;
-    private String nhaMang;
     private Integer idSanPhamChiTiet;
     private String maSanPhamChiTiet;
 }

@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,8 +27,7 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     @Query("SELECT imei FROM Imei imei WHERE " +
             "LOWER(imei.soImei) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(imei.soImei2) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(imei.trangThaiImei) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(imei.nhaMang) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(imei.trangThaiImei) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Imei> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT COUNT(i) FROM Imei i WHERE COALESCE(i.soImei, '') = COALESCE(:soImei, '')")
@@ -43,5 +43,7 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
 
     boolean existsBySoImei(String soImei);
+
+    Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImei(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei, Pageable pageable);
 
 }

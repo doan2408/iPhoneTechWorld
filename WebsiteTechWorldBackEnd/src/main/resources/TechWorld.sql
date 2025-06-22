@@ -315,7 +315,6 @@ CREATE TABLE imei (
                       so_imei VARCHAR(70),
                       so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
-                      nha_mang NVARCHAR(50)
 );
 
 CREATE TABLE hinh_anh (
@@ -375,7 +374,9 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      so_tien_thanh_toan DECIMAL(10,2)
 );
 
+
 -- Table nhan_vien
+
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
@@ -585,6 +586,7 @@ VALUES
     (N'Apple A9', N'Apple', N'2 nhân', N'1.8 GHz', N'7nm', N'4MB', N'15W', '2016-09-01');
 
 -- Table loai
+
 INSERT INTO loai (ten_loai)
 VALUES
     (N'Thường'),
@@ -870,23 +872,23 @@ VALUES
     (15, '2025-06-11', NULL, N'Lỗi sạc không dây', N'IN_REPAIR');
 
 -- Table imei
-INSERT INTO imei (id_san_pham_chi_tiet, so_imei, so_imei_2, trang_thai_imei, nha_mang)
+INSERT INTO imei (id_san_pham_chi_tiet, so_imei, so_imei_2, trang_thai_imei)
 VALUES
-    (1, '123456789012345', '543210987654321', 'AVAILABLE', 'Viettel'),
-    (2, '123456789012346', '543210987654322', 'AVAILABLE', 'Mobifone'),
-    (3, '123456789012347', '543210987654323', 'AVAILABLE', 'Vinaphone'),
-    (4, '123456789012348', '543210987654324', 'AVAILABLE', 'Viettel'),
-    (5, '123456789012349', '543210987654325', 'AVAILABLE', 'Mobifone'),
-    (6, '123456789012350', '543210987654326', 'AVAILABLE', 'Vinaphone'),
-    (7, '123456789012351', '543210987654327', 'AVAILABLE', 'Viettel'),
-    (8, '123456789012352', '543210987654328', 'AVAILABLE', 'Mobifone'),
-    (9, '123456789012353', '543210987654329', 'AVAILABLE', 'Vinaphone'),
-    (10, '123456789012354', '543210987654330', 'AVAILABLE', 'Viettel'),
-    (11, '123456789012355', '543210987654331', 'AVAILABLE', 'Mobifone'),
-    (12, '123456789012356', '543210987654332', 'AVAILABLE', 'Vinaphone'),
-    (13, '123456789012357', '543210987654333', 'AVAILABLE', 'Viettel'),
-    (14, '123456789012358', '543210987654334', 'AVAILABLE', 'Mobifone'),
-    (15, '123456789012359', '543210987654335', 'AVAILABLE', 'Vinaphone');
+    (1, '123456789012345', '543210987654321', 'AVAILABLE'),
+    (2, '123456789012346', '543210987654322', 'AVAILABLE'),
+    (3, '123456789012347', '543210987654323', 'AVAILABLE'),
+    (4, '123456789012348', '543210987654324', 'AVAILABLE'),
+    (5, '123456789012349', '543210987654325', 'AVAILABLE'),
+    (6, '123456789012350', '543210987654326', 'AVAILABLE'),
+    (7, '123456789012351', '543210987654327', 'AVAILABLE'),
+    (8, '123456789012352', '543210987654328', 'AVAILABLE'),
+    (9, '123456789012353', '543210987654329', 'AVAILABLE'),
+    (10, '123456789012354', '543210987654330', 'AVAILABLE'),
+    (11, '123456789012355', '543210987654331', 'AVAILABLE'),
+    (12, '123456789012356', '543210987654332', 'AVAILABLE'),
+    (13, '123456789012357', '543210987654333', 'AVAILABLE'),
+    (14, '123456789012358', '543210987654334', 'AVAILABLE'),
+    (15, '123456789012359', '543210987654335', 'AVAILABLE');
 
 -- Table hinh_anh
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)

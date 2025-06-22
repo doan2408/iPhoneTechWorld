@@ -139,7 +139,6 @@ public class ImeiAdminService {
 
         imeiOld.setSoImei(req.getSoImei());
         imeiOld.setSoImei2(req.getSoImei2());
-        imeiOld.setNhaMang(req.getNhaMang());
         imeiOld.setTrangThaiImei(req.getTrangThaiImei());
         imeiOld.setIdSanPhamChiTiet(sanPhamChiTietRepo.findById(req.getIdSanPhamChiTiet()).orElse(null));
 
