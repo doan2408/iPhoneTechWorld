@@ -15,11 +15,14 @@ export const getAllStaff = async (page = 0, keyword = null) => {
     const response = await axiosInstance.get("", { params });
     return response.data;
   } catch (error) {
-    console.error(
-      "An error was thrown while loading the staff of admin: ",
-      error
-    );
-    throw error.response?.data || "Error getting staff";
+    if (error.response) {
+      console.error("Error response:", error.response.data);
+      console.error("Status:", error.response.status);
+    } else if (error.request) {
+      console.error("No response from server:", error.request);
+    } else {
+      console.error("Axios error:", error.message);
+    }
   }
 };
 

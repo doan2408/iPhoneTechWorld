@@ -10,7 +10,7 @@ const store = createStore({
   state() {
     return {
       isLoggedIn: localStorage.getItem("isLoggedIn") === "true",//trạng thái đăng nhập
-      user: null, // Thông tin người dùng
+      user: JSON.parse(localStorage.getItem("user")) || null, // Thông tin người dùng
       roles: [], // Vai trò của người dùng
       registrationStatus: null, //trạng thái đăng kí
     };
@@ -37,25 +37,28 @@ const store = createStore({
     },
   },
   actions: {
-    async login({ commit }, { tai_khoan, mat_khau }) {
-      try {
-        const { message, roles } = await LoginService.login(
-          tai_khoan,
-          mat_khau
-        );
-        commit("setUser", { tai_khoan });
-        commit("setRoles", roles);
-        commit("setLoggedIn", "true"); //update state
-        localStorage.setItem("isLoggedIn", "true"); // Lưu trạng thái đăng nhập
-        return message;
-      } catch (error) {
-        if (Array.isArray(error)) {
-        throw error; // Ném mảng lỗi từ LoginService
-      } else {
-        throw [{ field: "server", message: error.message || "Lỗi đăng nhập" }]; // Chuẩn hóa thành mảng
-      }
-      }
-    },
+    async login({ commit, dispatch }, { tai_khoan, mat_khau }) {
+  try {
+    const { message, roles } = await LoginService.login(tai_khoan, mat_khau);
+    commit("setRoles", roles);
+    commit("setLoggedIn", true);
+    localStorage.setItem("isLoggedIn", "true");
+
+    // ⬇ Gọi API /me để lấy full user
+    const user = await LoginService.getCurrentUser();
+    commit("setUser", user);
+    localStorage.setItem("user", JSON.stringify(user)); // nếu muốn giữ khi reload
+
+    return message;
+  } catch (error) {
+    if (Array.isArray(error)) {
+      throw error;
+    } else {
+      throw [{ field: "server", message: error.message || "Lỗi đăng nhập" }];
+    }
+  }
+}
+,
     async logout({ commit }) {
       try {
         await LoginService.logout(); // Gọi service logout
@@ -71,6 +74,7 @@ const store = createStore({
         const userData = await LoginService.getCurrentUser(); // Lấy thông tin người dùng
         commit("setUser", userData);
         commit("setRoles", userData.roles || []);
+        localStorage.setItem("user", JSON.stringify(user));
       } catch (error) {
         commit("clearUser");
         throw error.response?.data || "Lỗi lấy thông tin người dùng";

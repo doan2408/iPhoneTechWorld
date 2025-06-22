@@ -25,7 +25,7 @@
 
 <script setup>
 import { postNhaCungCapList } from '@/Service/Adminservice/Products/ProductAdminService'
-import { reactive, ref, defineExpose, defineEmits } from 'vue'
+import { reactive, ref, } from 'vue'
 
 const emit = defineEmits(['saved'])
 

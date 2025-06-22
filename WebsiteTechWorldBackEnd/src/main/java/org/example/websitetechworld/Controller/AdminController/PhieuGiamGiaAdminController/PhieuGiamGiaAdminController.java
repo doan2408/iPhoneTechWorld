@@ -1,5 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.PhieuGiamGiaAdminController;
 
+import jakarta.validation.Valid;
+import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
@@ -32,6 +34,7 @@ public class PhieuGiamGiaAdminController {
             @RequestParam(defaultValue = "3") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
+        phieuGiamGiaAdminServices.updateTrangThaiPhieuGiamGia();
         Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminServices.getPagePhieuGiamGia(
                 search, trangThai, ngayBatDau, ngayKetThuc, page, size, sortBy, direction);
         return ResponseEntity.ok(result);
@@ -44,15 +47,15 @@ public class PhieuGiamGiaAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<PhieuGiamGiaAdminResponse> addPhieuGiamGia(@RequestBody PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
-        PhieuGiamGiaAdminResponse created = phieuGiamGiaAdminServices.addPhieuGiamGia(phieuGiamGiaResponse);
+    public ResponseEntity<PhieuGiamGiaAdminResponse> addPhieuGiamGia(@Valid @RequestBody PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
+        PhieuGiamGiaAdminResponse created = phieuGiamGiaAdminServices.addPhieuGiamGia(phieuGiamGiaAdminRequest);
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PhieuGiamGiaAdminResponse> updatePhieuGiamGia(
-            @PathVariable int id, @RequestBody PhieuGiamGiaAdminResponse phieuGiamGiaResponse) {
-        PhieuGiamGiaAdminResponse updated = phieuGiamGiaAdminServices.updatePhieuGiamGia(id, phieuGiamGiaResponse);
+            @PathVariable int id, @Valid @RequestBody PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
+        PhieuGiamGiaAdminResponse updated = phieuGiamGiaAdminServices.updatePhieuGiamGia(id, phieuGiamGiaAdminRequest);
         return ResponseEntity.ok(updated);
     }
 
@@ -63,8 +66,11 @@ public class PhieuGiamGiaAdminController {
     }
 
     @GetMapping("/khach-hang")
-    public ResponseEntity<List<KhachHangGiamGiaResponse>> getAllKhachHang() {
-        List<KhachHangGiamGiaResponse> khachHangList = phieuGiamGiaAdminServices.getAllKhachHang();
+    public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<KhachHangGiamGiaResponse> khachHangList = phieuGiamGiaAdminServices.getAllKhachHang(search, page, size);
         return ResponseEntity.ok(khachHangList);
     }
 }

@@ -3,7 +3,7 @@
         <!-- Order Header -->
         <div class="order-header">
             <div class="order-info">
-                <h1>Đơn hàng #{{ order.maGiaoHang }} *mvd</h1>
+                <h1>Đơn hàng #{{ order.maVanDon }} </h1>
                 <p class="order-date">
                     <Clock class="icon-small" />
                     Ngày đặt: {{ formatDate(order.ngayDatHang) }}
@@ -12,7 +12,7 @@
             <div class="order-summary">
                 <div class="total-info">
                     <span class="total-label">Tổng tiền</span>
-                    <span class="total-amount">{{ formatCurrency(order.tongGiaTriDonHang) }}</span>
+                    <span class="total-amount">{{ formatCurrency(order.thanhTien) }}</span>
                 </div>
                 <span :class="'status status-' + getStatusKey(order.trangThaiDonHang)">
                     {{ getStatusText(order.trangThaiDonHang) }}
@@ -65,19 +65,19 @@
                                 <User class="avatar-icon" />
                             </div>
                             <div class="customer-details">
-                                <h4>{{ order.tenKhachHang }}</h4>
+                                <h4>{{ order.tenNguoiNhan }}</h4>
                                 <span class="customer-type">{{ order.maKhachHang }} *Hạng</span>
                             </div>
                         </div>
                         <div class="contact-info">
                             <div class="contact-item">
                                 <Phone class="icon-small" />
-                                <span>{{ order.sdt }}</span>
+                                <span>{{ order.sdtNguoiNhan }}</span>
                                 <button @click="callCustomer" class="contact-btn">Gọi</button>
                             </div>
                             <div class="contact-item">
                                 <Mail class="icon-small" />
-                                <span>{{ order.sdt }} *Email</span>
+                                <span>{{ order.sdtNguoiNhan }} *Email</span>
                                 <button @click="emailCustomer" class="contact-btn">Email</button>
                             </div>
                         </div>
@@ -132,12 +132,12 @@
                 <div class="detail-card items-card">
                     <div class="card-header">
                         <Package class="icon" />
-                        <h3>Sản phẩm ({{ order.chiTietGiaoHangResponseAdminList?.length || 0 }} món)</h3>
+                        <h3>Sản phẩm ({{ order.chiTietHoaDonAdminResponseList?.length || 0 }} món)</h3>
                     </div>
                     <div class="card-content">
                         <div class="items-summary">
-                            <div v-for="item in order.chiTietGiaoHangResponseAdminList" :key="item.id" class="item-row">
-                                <!-- <img :src="item.image" :alt="item.name" class="item-image" /> -->
+                            <div v-for="item in order.chiTietHoaDonAdminResponseList" :key="item.id" class="item-row">
+                                <img :src="item.imageSanPham" :alt="item.name" class="item-image" />
                                 <div class="item-info">
                                     <span class="item-name">{{ item.tenSanPham }}</span>
                                     <span class="item-qty">x{{ item.soLuong }}</span>
@@ -148,7 +148,7 @@
                         <div class="total-summary">
                             <div class="total-row">
                                 <span>Tổng cộng:</span>
-                                <span class="total-price">{{ formatCurrency(order.tongGiaTriDonHang) }}</span>
+                                <span class="total-price">{{ formatCurrency(order.thanhTien) }}</span>
                             </div>
                         </div>
                     </div>
@@ -227,7 +227,7 @@ import {
     FileText,
     Edit
 } from 'lucide-vue-next'
-import { giaoHangDetail } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
@@ -238,12 +238,12 @@ const statusUpdate = null;
 
 
 
-// Sample order data with more details
+// ham view giao hang
 const viewOrderDetail = async () => {
     const id = route.params.id
     if (id) {
         try {
-            const response = await giaoHangDetail(id)
+            const response = await hoaDonDetail(id)
             Object.assign(order, response.data)
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
@@ -251,7 +251,7 @@ const viewOrderDetail = async () => {
     }
 }
 
-// Order steps for timeline
+// ham cap nha tien do giao dien giao hang
 const orderSteps = computed(() => [
     {
         id: 1,
@@ -299,13 +299,14 @@ const orderSteps = computed(() => [
         description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng bị trả lại hoặc giao thất bại' : null
     }
 ])
-// Computed properties
+// bien trang thai
 const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
 
 const canCancel = computed(() =>
     ['Chờ xử lý', 'Đã xác nhận'].includes(order.trangThaiDonHang)
 );
-// Methods
+
+//format date
 const formatDate = (dateString) => {
     if (!dateString) {
         return 'N/A';
@@ -322,6 +323,7 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year}`;
 };
 
+// format currency
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -411,7 +413,7 @@ const updateOrderStatus = async (newStatus) => {
 }
 
 const callCustomer = () => {
-    window.open(`tel:${order.sdt}`)
+    window.open(`tel:${order.sdtNguoiNhan}`)
 }
 
 const emailCustomer = () => {

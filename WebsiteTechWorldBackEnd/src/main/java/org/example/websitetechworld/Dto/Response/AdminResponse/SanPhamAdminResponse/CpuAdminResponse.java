@@ -17,9 +17,9 @@ public class CpuAdminResponse {
 
     private String hangSanXuat;
 
-    private String soNhan;
+    private String chipXuLy;
 
-    private Integer soLuong;
+    private String soNhan;
 
     private String xungNhip;
 

@@ -1,21 +1,22 @@
 <template>
   <div class="container mt-4">
 
-    <el-row :gutter="20" class="mb-4 justify-content-center">
-      <el-col :span="6">
-        <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
+    <el-row :gutter="20" class="mb-4" align="middle">
+      <!-- Thanh tìm kiếm căn trái -->
+      <el-col :span="8">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="Tìm kiếm theo loại, "
+          clearable
+          prefix-icon="Search"
+          @clear="clearSearch"
+        />
       </el-col>
-      <el-col :span="3">
-        <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
-      </el-col>
-    </el-row>
 
-    <el-row :gutter="20" class="mb-2" justify="end">
-      <el-col :span="3">
-        <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
-      </el-col>
-      <el-col :span="3">
-        <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
+      <!-- Các nút căn phải -->
+      <el-col :span="16" class="text-right" align="right">
+        <el-button type="primary" @click="handleCreate">Tạo mới</el-button>
+        <el-button type="primary" @click="handleRefresh">Làm mới</el-button>
       </el-col>
     </el-row>
 
@@ -24,21 +25,21 @@
       <el-table :data="tableCameraTruoc" border style="width: 100%">
         <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
         <!-- <el-table-column prop="id" label="ID" /> -->
-        <el-table-column prop="loaiCamera" label="Hãng sản xuất" />
-        <el-table-column prop="doPhanGiai" label="Số nhân" />
-        <el-table-column prop="khauDo" label="Số lượng" />
-        <el-table-column prop="loaiZoom" label="Xung nhịp" />
-        <el-table-column prop="cheDoChup" label="Công nghệ sản xuất" />
+        <el-table-column prop="loaiCamera" label="Loại camera" />
+        <el-table-column prop="doPhanGiai" label="Độ phân giải" />
+        <el-table-column prop="khauDo" label="Khẩu độ" />
+        <el-table-column prop="loaiZoom" label="Loại zoom" />
+        <el-table-column prop="cheDoChup" label="Chế độ chụp" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="icons.Edit" circle />
-              </router-link>
-              <el-button size="small" type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
-              <router-link :to="`/admin/products/detail/${row.id}`">
+              
+              <el-button type="primary" :icon="icons.Edit" circle @click="openDetail(row)" />
+
+              <el-button type="danger" :icon="icons.Delete" circle @click="handleDelete(row.id)" />
+              <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                 <el-button size="small" type="info" :icon="icons.View" circle />
-              </router-link>
+              </router-link> -->
             </div>
           </template>
         </el-table-column>
@@ -53,99 +54,240 @@
       </div>
     </div>
 
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa camera trước' : 'Thêm mới camera trước'"
+      width="900px" :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left" size="medium"
+        class="camera-form">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Loại camera" prop="loaiCamera">
+              <el-input v-model="formData.loaiCamera" placeholder="Nhập loại camera..." autocomplete="on" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Độ phân giải" prop="doPhanGiai">
+              <el-input v-model="formData.doPhanGiai" placeholder="Ví dụ: 12MP" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Khẩu độ" prop="khauDo">
+              <el-input v-model="formData.khauDo" placeholder="Ví dụ: f/1.8" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Loại zoom" prop="loaiZoom">
+              <el-input v-model="formData.loaiZoom" placeholder="Ví dụ: Optical 2x" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="Chế độ chụp" prop="cheDoChup">
+              <el-input v-model="formData.cheDoChup" placeholder="Nhập chế độ chụp" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row justify="end" style="margin-top: 30px;">
+          <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+          <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+        </el-row>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
-<script>
-import { getAllCameraTruocPage } from '@/Service/Adminservice/Products/ProductAdminService';
+<script setup>
+import { deleteCameraTruoc, getAllCameraTruocPage, postCameraTruoc, putCameraTruoc } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { computed, markRaw, ref, reactive, onMounted, watch, nextTick } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-export default {
-  data() {
-    return {
-      tableCameraTruoc: [],
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 0,
-      pageSize: 5,
-      searchQuery: '',
-      icons: {
-        Edit,
-        Delete,
-        View
-      }
-    };
-  },
-  computed: {
-    fromRecord() {
-      return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
-    },
-    toRecord() {
-      return Math.min(this.currentPage * this.pageSize, this.totalItems);
+// Reactive data
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const isLoading = ref(false);
+const formData = reactive({
+  id: null,
+  loaiCamera: '',
+  doPhanGiai: '',
+  khauDo: '',
+  loaiZoom: '',
+  cheDoChup: ''
+});
+const tableCameraTruoc = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalItems = ref(0);
+const pageSize = ref(5);
+const formRef = ref(null);
+const searchKeyword = ref('')
+const keyword = ref("")
+const errors = reactive({})
+
+// Icons
+const icons = {
+  Edit: markRaw(Edit),
+  Delete: markRaw(Delete),
+  View: markRaw(View)
+};
+
+// Validation rules
+const rules = {
+  loaiCamera: [{ required: true, message: 'Vui lòng nhập loại camera', trigger: 'blur' }],
+  doPhanGiai: [{ required: true, message: 'Vui lòng nhập độ phân giải', trigger: 'blur' }],
+  khauDo: [{ required: true, message: 'Vui lòng nhập khẩu độ', trigger: 'blur' }],
+  loaiZoom: [{ required: true, message: 'Vui lòng nhập loại zoom', trigger: 'blur' }],
+  cheDoChup: [{ required: true, message: 'Vui lòng nhập chế độ chụp', trigger: 'blur' }],
+};
+
+// Computed properties
+const fromRecord = computed(() => {
+  return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize.value + 1;
+});
+
+const toRecord = computed(() => {
+  return Math.min(currentPage.value * pageSize.value, totalItems.value);
+});
+
+// Methods
+const loadData = async () => {
+  try {
+    const response = await getAllCameraTruocPage(currentPage.value - 1, pageSize.value, keyword.value.trim() || null)
+    tableCameraTruoc.value = response.content;
+    totalPages.value = response.totalPages;
+    totalItems.value = response.totalElements;
+  } catch (error) {
+    console.error('Không thể load dữ liệu:', error);
+  }
+};
+
+const resetForm = () => {
+  Object.assign(formData, {
+    id: null,
+    loaiCamera: '',
+    doPhanGiai: '',
+    khauDo: '',
+    loaiZoom: '',
+    cheDoChup: ''
+  });
+};
+
+
+const handleRefresh = () => {
+  clearSearch();
+};
+
+const clearSearch = () => {
+  searchKeyword.value = "";
+  keyword.value = "";
+  currentPage.value = 1;
+  loadData();
+}
+
+const handleClose = () => {
+  dialogVisible.value = false;
+};
+
+const handleCreate = () => {
+  resetForm();
+  isEditMode.value = false;
+  dialogVisible.value = true;
+};
+
+const submitForm = async () => {
+  isLoading.value = true;
+  try {
+    await formRef.value.validate();
+
+    if (isEditMode.value) {
+      await putCameraTruoc(formData.id, formData);
+      ElMessage.success('Cập nhật camera trước thành công!');
+    } else {
+      await postCameraTruoc(formData);
+      ElMessage.success('Thêm camera trước thành công!');
     }
-  },
-  methods: {
-    async loadData() {
-      try {
-        const response = await getAllCameraTruocPage(this.currentPage - 1, this.pageSize, this.searchQuery.trim());
-        this.tableCameraTruoc = response.content;
-        this.totalPages = response.totalPages;
-        this.totalItems = response.totalElements;
-      } catch (error) {
-        console.error('Không thể load dữ liệu:', error);
-      }
-    },
-    handleSearch() {
-      this.currentPage = 1;
-      this.loadData();
-    },
-    handleRefresh() {
-      this.searchQuery = '';
-      this.currentPage = 1;
-      this.loadData();
-    },
-    handleCreate() {
-      this.$router.push('/admin/products/create');
-    },
-    indexMethod(index) {
-      return (this.currentPage - 1) * this.pageSize + index + 1;
-    },
-    handlePageChange(newPage) {
-      this.currentPage = newPage;
-    },
-    handleDelete(id) {
-      console.log('Xóa:', id);
-    },
-    getTrangThaiDisplayName(status) {
-      const map = {
-        AVAILABLE: 'Có sẵn',
-        RESERVED: 'Đã đặt trước',
-        SOLD: 'Đã bán',
-        RETURNED: 'Đã trả lại',
-        REFURBISHED: 'Tân trang',
-        BLACKLISTED: 'Bị chặn'
-      };
-      return map[status] || status;
+
+    resetForm();
+    dialogVisible.value = false;
+    loadData();
+
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Dữ liệu không hợp lệ, vui lòng kiểm tra lại!';
+    if(Array.isArray(error)) {
+      error.forEach(({ field, message }) => {
+        ElMessage.error(errors[field] = message)
+      })
     }
-  },
-  mounted() {
-    this.loadData();
-  },
-  watch: {
-    currentPage() {
-      this.loadData();
-    },
-    searchQuery() {
-      this.loadData();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const openDetail = (row) => {
+  isEditMode.value = true;
+  Object.assign(formData, data);
+  dialogVisible.value = true;
+};
+
+const indexMethod = (index) => {
+  return (currentPage.value - 1) * pageSize.value + index + 1;
+};
+
+const handlePageChange = (newPage) => {
+  currentPage.value = newPage;
+};
+
+const handleDelete = async (id) => {
+  try {
+    // Đợi người dùng xác nhận
+    await ElMessageBox.confirm('Bạn có chắc chắn muốn xoá mục này?', 'Xác nhận', {
+      confirmButtonText: 'Xoá',
+      cancelButtonText: 'Huỷ',
+      type: 'warning'
+    });
+
+    // Nếu xác nhận thì thực hiện xoá
+    await deleteCameraTruoc(id);
+    ElMessage.success('Xoá thành công');
+    loadData();
+
+  } catch (error) {
+    // Nếu người dùng huỷ xác nhận, hoặc API xoá lỗi
+    if (error === 'cancel') {
+      ElMessage.info('Đã huỷ xoá');
+    } else {
+      ElMessage.error('Xoá thất bại');
     }
   }
 };
+
+// Lifecycle
+onMounted(() => {
+  loadData();
+});
+
+watch(currentPage, () => {
+  loadData();
+})
+
+// Watchers
+watch(searchKeyword, () => {
+  keyword.value = searchKeyword.value.trim();
+  currentPage.value = 1;
+  loadData();
+});
 </script>
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
   font-size: 16px;
   padding: 8px 16px;

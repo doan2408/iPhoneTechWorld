@@ -1,4 +1,5 @@
 <script setup>
+import { ElMessage } from "element-plus";
 import { reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
@@ -45,13 +46,19 @@ const handleLogin = async () => {
 
     // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
+    ElMessage.success("Đăng nhập thành công !");
   } catch (err) {
     console.log("Error:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
-        errors[field] = message; // Gán lỗi vào errors
+        if(field === "trang_thai") {
+          ElMessage.error(message);
+        }
+        else [
+          errors[field] = message //lỗi cấm tài khoản
+        ]
       });
-    } 
+    }
   } finally {
     isLoading.value = false;
   }
@@ -60,7 +67,7 @@ const handleLogin = async () => {
 // Hàm phụ để xác định trang mặc định nếu không có redirect
 function getDefaultRedirect() {
   if (store.getters.isAdmin) return "/admin/products";
-  if (store.getters.isStaff) return "/staff/products";
+  if (store.getters.isStaff) return "/admin/products";
   if (store.getters.isCustomer) return "/client/home";
   return "/"; // fallback
 }
@@ -383,7 +390,7 @@ p[style*="color: red"] {
 }
 
 .forgot-password-link {
-  color: rgba(248, 3, 3, 0.85);
+  color: rgb(3, 220, 248);
   text-decoration: underline;
   font-weight: bold;
   font-size: 0.9rem; /* Giữ nguyên */
@@ -419,5 +426,9 @@ p[style*="color: red"] {
   color: #1abc9c; /* Màu khi hover */
   text-decoration: underline;
   background: rgba(26, 188, 156, 0.1); /* Nền mờ khi hover */
+}
+
+input.form-control[type="text"], [type="password"] {
+  color: #ffffff !important;
 }
 </style>

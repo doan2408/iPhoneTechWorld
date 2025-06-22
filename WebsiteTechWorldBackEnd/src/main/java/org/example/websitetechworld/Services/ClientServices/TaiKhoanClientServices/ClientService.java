@@ -47,7 +47,7 @@ public class ClientService {
         clientResponse.setTongDiem(khachHang.getTongDiem());
         clientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
         clientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
-        clientResponse.setTrangThai(khachHang.getTrangThai().name());
+        clientResponse.setTrangThai(khachHang.getTrangThai());
 
         // Lọc địa chỉ chính
         DiaChi diaChiChinh = khachHang.getDiaChis().stream()
