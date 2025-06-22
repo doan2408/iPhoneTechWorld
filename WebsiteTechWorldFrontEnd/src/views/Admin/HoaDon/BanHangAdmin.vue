@@ -177,10 +177,10 @@
 
                         <div class="pagination-controls">
                             <button @click="goToImeiPage(imeiCurrentPage - 1)"
-                                :disabled="imeiCurrentPage === 1">Trước</button>
+                                :disabled="imeiCurrentPage === 0">Trước</button>
                             <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
                             <button @click="goToImeiPage(imeiCurrentPage + 1)"
-                                :disabled="imeiCurrentPage === imeiTotalPages">Sau</button>
+                                :disabled="imeiCurrentPage+1 === imeiTotalPages">Sau</button>
                         </div>
 
                         <div class="modal-footer">
@@ -750,8 +750,12 @@ const fetchImeis = async (productId, page, size) => {
 
 // xử lý phân trang imei
 const goToImeiPage = async (page) => {
-    if (page > 0 && page <= imeiTotalPages.value) {
+    console.log('page: ', page);
+    if (page >= 0 && page <= imeiTotalPages.value) {
+        console.log('page: ',page);
+        console.log('imeiTotalPages: ', imeiTotalPages.value);
         imeiCurrentPage.value = page;
+        console.log('imeiCurrentPage: ', imeiCurrentPage.value);
         await fetchImeis(selectedProductForImei.value.id, imeiCurrentPage.value, imeiPageSize.value);
     }
 };
