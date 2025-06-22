@@ -63,7 +63,7 @@ public class SanPhamChiTietResponse {
     private String doSang;
     private String chatLieuKinh;
 
-    private String PhienBanHeDieuHanh;
+    private String phienBanHeDieuHanh;
     private String nhaPhatTrien;
     private String giaoDienNguoiDung;
 

@@ -32,7 +32,7 @@
           {{ trangThaiSanPhamMap[row.trangThaiSanPham] || 'Không rõ' }}
         </template>
       </el-table-column>
-      <el-table-column prop="giaBan" label="Giá bán" />
+      <!-- <el-table-column prop="giaBan" label="Giá bán" />/ -->
       <el-table-column label="Thao tác" width="180">
         <template #default="{ row }">
           <div class="action-buttons-horizontal">
