@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -53,6 +55,27 @@ public class ImeiAdminService {
     public Page<ImeiAdminResponse> getAllImei(Pageable pageable) {
         Page<Imei> imeiList = imeiReposiory.findAll(pageable);
         return imeiList.map(this::convert);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> checkImeiDuplicates(List<String> imeis) {
+        if (imeis == null || imeis.isEmpty()) {
+            throw new BusinessException("Danh sách IMEI không được để trống");
+        }
+
+        // Lọc các IMEI hợp lệ (15 chữ số)
+        List<String> validImeis = imeis.stream()
+                .filter(imei -> imei != null && imei.matches("^\\d{15}$"))
+                .collect(Collectors.toList());
+
+        if (validImeis.isEmpty()) {
+            throw new BusinessException("Không có IMEI hợp lệ trong danh sách");
+        }
+
+        // Kiểm tra trùng lặp
+        return imeiReposiory.findBySoImeiIn(validImeis).stream()
+                .map(Imei::getSoImei)
+                .collect(Collectors.toList());
     }
 
     public Page<ImeiAdminResponse> getAllImei(Pageable pageable, String keyword) {

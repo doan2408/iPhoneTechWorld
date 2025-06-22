@@ -29,7 +29,7 @@ export const logout = async () => {
     localStorage.removeItem('user')  // nếu có lưu thông tin user
     window.location.href = '/login';
     // Tự động làm mới sau 0,5 giây
-    setTimeout(() => window.location.reload(), 500);
+    setTimeout(() => window.location.reload(), 1000);
     return response.data
   } catch (error) {
     if (error.response && error.response.data) {

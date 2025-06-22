@@ -97,9 +97,11 @@ CREATE TABLE hoa_don (
                          so_tien_giam DECIMAL(10,2),
                          thanh_tien DECIMAL(10,2),
                          ngay_tao_hoa_don DATE,
+                         ngay_tao_don_hang DATE, -- new
                          loai_hoa_don NVARCHAR(50),
                          ngay_thanh_toan DATE,
                          trang_thai_thanh_toan NVARCHAR(50),
+                         is_delete BIT,
                          trang_thai_don_hang NVARCHAR(50)
 );
 
@@ -433,23 +435,23 @@ VALUES
     (N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED');
 
 -- Table hoa_don
-INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan)
+INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan,is_delete)
 VALUES
-    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111'),
-    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222'),
-    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333'),
-    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444'),
-    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555'),
-    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666'),
-    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777'),
-    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888'),
-    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999'),
-    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000'),
-    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112'),
-    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223'),
-    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334'),
-    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445'),
-    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556');
+    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0),
+    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0),
+    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0),
+    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0),
+    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0),
+    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0),
+    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0),
+    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0),
+    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0),
+    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0),
+    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0),
+    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0),
+    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0),
+    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0),
+    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0);
 
 -- Table lich_su_hoa_don
 INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don, hanh_dong, thoi_gian_thay_doi, mo_ta)
@@ -498,7 +500,7 @@ VALUES
     (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
     (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
     (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1),
-    (1, 'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
+    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
     (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'Quận 3', N'TP.HCM', 0),
     (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'Thanh Khê', N'Đà Nẵng', 0),
     (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'Phong Điền', N'Huế', 0),
@@ -888,7 +890,6 @@ VALUES
     (13, '123456789012357', '543210987654333', 'AVAILABLE', 'Viettel'),
     (14, '123456789012358', '543210987654334', 'AVAILABLE', 'Mobifone'),
     (15, '123456789012359', '543210987654335', 'AVAILABLE', 'Vinaphone');
-
 
 -- Table hinh_anh
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)

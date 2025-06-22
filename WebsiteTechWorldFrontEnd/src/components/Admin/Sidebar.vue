@@ -52,13 +52,15 @@ function toggleOrderMenu() {
   showOrders.value = !showOrders.value
 }
 
+
+
 </script>
 
 <template>
   <div class="admin-sidebar">
     <div>
       <div class="logo">
-          <img src="/src/components/images/LogoTechWorld-removebg-preview.png" alt="TechWorld">
+        <img src="/src/components/images/LogoTechWorld-removebg-preview.png" alt="TechWorld">
       </div>
       <div class="user-info" v-if="isLoggedIn">
         <p class="username">👤 {{ user?.fullName }}</p>
@@ -69,6 +71,9 @@ function toggleOrderMenu() {
           <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
 
           <li><router-link to="/admin/statistical" class="icon stats-icon">Thống Kê </router-link></li>
+
+          <li><router-link to="/admin/ban-hang">Bán hàng</router-link></li>
+
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
@@ -114,7 +119,8 @@ function toggleOrderMenu() {
           </ul>
 
           <li><router-link to="/admin/promotions">Quản lý khuyến mãi</router-link></li>
-          <li><router-link to="/admin/reports">Báo cáo</router-link></li>
+          <li><router-link to="/admin/staff/infor">Thông tin cá nhân</router-link></li>
+
         </ul>
       </nav>
     </div>
@@ -124,7 +130,7 @@ function toggleOrderMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login">Đăng nhập</router-link>
+      <router-link to="/login" @click.prevent="handleLogout">Đăng nhập</router-link>
     </div>
   </div>
 </template>

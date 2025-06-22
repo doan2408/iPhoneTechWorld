@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,6 +22,7 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
     Imei findBySoImei(String soImei);
     List<Imei> findAllBySoImeiIn(List<String> soImeis);
+    List<Imei> findBySoImeiIn(List<String> soImeis);
 
     @Query("SELECT imei FROM Imei imei WHERE " +
             "LOWER(imei.soImei) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -39,5 +41,10 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     @Modifying
     @Query("DELETE FROM Imei imei WHERE imei.idSanPhamChiTiet = :sanPhamChiTiet")
     void deleteByIdSanPhamChiTiet(SanPhamChiTiet sanPhamChiTiet);
+
+
+    boolean existsBySoImei(String soImei);
+
+    Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImei(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei, Pageable pageable);
 
 }

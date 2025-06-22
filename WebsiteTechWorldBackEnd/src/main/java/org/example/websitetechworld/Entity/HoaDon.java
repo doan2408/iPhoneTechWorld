@@ -49,16 +49,16 @@ public class HoaDon {
 
     // Xóa thuộc tính diaChi
 
-    @Column(name = "phi_ship", precision = 10, scale = 2)
+    @Column(name = "phi_ship", precision = 19, scale = 2)
     private BigDecimal phiShip;
 
-    @Column(name = "tong_tien", precision = 10, scale = 2)
+    @Column(name = "tong_tien", precision = 19, scale = 2)
     private BigDecimal tongTien;
 
-    @Column(name = "so_tien_giam", precision = 10, scale = 2)
+    @Column(name = "so_tien_giam", precision = 19, scale = 2)
     private BigDecimal soTienGiam;
 
-    @Column(name = "thanh_tien", precision = 10, scale = 2)
+    @Column(name = "thanh_tien", precision = 19, scale = 2)
     private BigDecimal thanhTien;
 
     @Enumerated(EnumType.STRING)
@@ -108,6 +108,9 @@ public class HoaDon {
 
     @Column(name = "ngay_tao_hoa_don")
     private LocalDate ngayTaoHoaDon;
+
+    @Column(name = "is_delete")
+    private Boolean isDelete;
 
     @Enumerated(EnumType.STRING)
     @Nationalized

@@ -1,8 +1,10 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.TabHoaDonAdminResponse;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class LichSuHoaDonAdminServices {
@@ -39,7 +42,7 @@ public class LichSuHoaDonAdminServices {
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setIdNhanVien(nhanVien);
         lichSuHoaDon.setIdHoaDon(hoaDon);
-        lichSuHoaDon.setHanhDong("Tạo hóa đơn");
+        lichSuHoaDon.setHanhDong(HanhDongLichSuHoaDon.CREATE);
         lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
         lichSuHoaDon.setMoTa("Tạo hóa đơn rỗng");
 
@@ -48,5 +51,8 @@ public class LichSuHoaDonAdminServices {
 
         return saved;
 
+    }
+    public List<TabHoaDonAdminResponse> findMaHoaDonPendingByNhanVien(Integer nhanVienId) {
+        return lichSuHoaDonRepository.findMaHoaDonPendingByNhanVien(nhanVienId);
     }
 }
