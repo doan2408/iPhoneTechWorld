@@ -74,8 +74,7 @@ export const fetchImeisJs = (productId,page,size) => {
         params: {
             productId: productId,
             page: page ,
-            size: size,
-            status: 'AVAILABLE' // Chỉ lấy IMEI có sẵn
+            size: size
         }
     });
      

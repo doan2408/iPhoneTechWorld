@@ -178,7 +178,7 @@
                         <div class="pagination-controls">
                             <button @click="goToImeiPage(imeiCurrentPage - 1)"
                                 :disabled="imeiCurrentPage === 1">Trước</button>
-                            <span>Trang {{ imeiCurrentPage }} / {{ imeiTotalPages }}</span>
+                            <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
                             <button @click="goToImeiPage(imeiCurrentPage + 1)"
                                 :disabled="imeiCurrentPage === imeiTotalPages">Sau</button>
                         </div>
@@ -717,7 +717,7 @@ const openImeiModal = async (product) => {
         selectedProductForImei.value = product;
 
         selectedImeis.value = []; // Reset các IMEI đã chọn trước đó
-        imeiCurrentPage.value = 1; // Luôn bắt đầu từ trang 1
+        imeiCurrentPage.value = 0; // Luôn bắt đầu từ trang 1
         quantityToSelect.value = 1; // <-- Reset về null khi mở modal mới để input trống
 
         // 1. Tải IMEI từ backend
