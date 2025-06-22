@@ -147,7 +147,6 @@ public class SanPhamAdminService {
             Imei firstImei = chiTiet.getImeis().iterator().next();
             ImeiAdminResponse imeiResponse = new ImeiAdminResponse();
             imeiResponse.setSoImei(firstImei.getSoImei());
-            imeiResponse.setNhaMang(firstImei.getNhaMang());
             imeiResponse.setTrangThaiImei(firstImei.getTrangThaiImei());
             response.setImeis(new LinkedHashSet<>(Collections.singletonList(imeiResponse)));
         } else {
@@ -609,7 +608,6 @@ public class SanPhamAdminService {
                                 Imei newImei = new Imei();
                                 newImei.setSoImei(imeiDto.getSoImei().trim());
                                 newImei.setTrangThaiImei(imeiDto.getTrangThaiImei());
-                                newImei.setNhaMang(imeiDto.getNhaMang());
                                 newImei.setIdSanPhamChiTiet(chiTietSaved);
                                 return newImei;
                             })
@@ -811,7 +809,6 @@ public class SanPhamAdminService {
                                 Imei newImei = new Imei();
                                 newImei.setSoImei(imeiDto.getSoImei().trim());
                                 newImei.setTrangThaiImei(imeiDto.getTrangThaiImei());
-                                newImei.setNhaMang(imeiDto.getNhaMang());
                                 newImei.setIdSanPhamChiTiet(chiTietSaved);
                                 return newImei;
                             })
