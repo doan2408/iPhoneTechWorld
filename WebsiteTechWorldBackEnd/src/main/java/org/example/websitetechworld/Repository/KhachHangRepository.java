@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -37,4 +39,12 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
             "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<KhachHang> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT k FROM KhachHang k WHERE NOT EXISTS (SELECT h FROM HoaDon h WHERE h.idKhachHang = k)")
+    List<KhachHang> findNewCustomers();
+
+    @Query("SELECT k FROM KhachHang k WHERE EXISTS (SELECT h.id FROM HoaDon h WHERE h.idKhachHang = k)")
+    List<KhachHang> findOldCustomers();
+
+    @Query("SELECT k FROM KhachHang k WHERE LOWER(k.tenKhachHang) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<KhachHang> findByTenKhachHangContainingIgnoreCase(@RequestParam("search") String search, Pageable pageable);
 }

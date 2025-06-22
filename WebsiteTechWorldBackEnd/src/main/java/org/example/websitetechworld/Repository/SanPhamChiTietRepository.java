@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.springframework.data.domain.Page;
@@ -33,5 +34,13 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(String tenSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
 
     Page<SanPhamChiTiet> findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+//    @Query("""
+//        select new org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse(
+//            sp.maSanPham,
+//
+//        ) from SanPhamChiTiet spct
+//        join spct.idSanPham sp
+//""")
+
 
 }

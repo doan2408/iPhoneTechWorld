@@ -10,13 +10,14 @@ const sanPhamAdminRouters: RouteRecordRaw[] = [
       { path: "manHinh", component: () => import("@/views/Admin/SanPham/ManHinhAdmin.vue") },
       { path: "nhaCungCap", component: () => import("@/views/Admin/SanPham/NhaCungCapAdmin.vue") },
       { path: "loai", component: () => import("@/views/Admin/SanPham/LoaiAdmin.vue") },
-      { path: "imei", component: () => import("@/views/Admin/SanPham/IemiAdmin.vue") },
+      { path: "imei", component: () => import("@/views/Admin/SanPham/ImeiAdmin.vue") },
       { path: "heDieuHanh", component: () => import("@/views/Admin/SanPham/HeDieuHanhAdmin.vue") },
       { path: "cpu", component: () => import("@/views/Admin/SanPham/CpuAdmin.vue") },
       { path: "cameraTruoc", component: () => import("@/views/Admin/SanPham/CameraTruocAdmin.vue") },
       { path: "cameraSau", component: () => import("@/views/Admin/SanPham/CameraSauAdmin.vue") },
       { path: "products", component: () => import("@/views/Admin/SanPham/ProductAdmin.vue"), meta: { title: 'Products Manage'} },
       { path: "products/:id", component: () => import("@/views/Admin/SanPham/PoductAdminDetail.vue"), meta: { title: 'Product Detail'} },
+      { path: "products/view/:id", component: () => import("@/views/Admin/SanPham/ProductAdminView.vue"), meta: { title: 'Product View'} },
 ];
 
 export default sanPhamAdminRouters;

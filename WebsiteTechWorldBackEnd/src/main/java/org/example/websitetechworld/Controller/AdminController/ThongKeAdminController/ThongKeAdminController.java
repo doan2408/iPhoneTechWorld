@@ -3,10 +3,17 @@ package org.example.websitetechworld.Controller.AdminController.ThongKeAdminCont
 import org.example.websitetechworld.Dto.Response.AdminResponse.ThongKeAdminResponse.DashboardAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.ThongKeAdminResponse.ThongKeDonhangAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.ThongkeAdminService.ThongKeAdminService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,11 +108,33 @@ public class ThongKeAdminController {
     }
 
 
-    @GetMapping("/top-san-pham-ban-chay")
-    public List<Map<String, Object>> topSanPhamBanChay () {
+//    @GetMapping("/top-san-pham-ban-chay")
+//    public ResponseEntity<?> topSanPhamBanChay(
+//            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(value = "page", defaultValue = "1") int page,
+//            @RequestParam(value = "limit", defaultValue = "10") int limit
+//    ) {
+//        if (limit <= 0 || page <= 0) {
+//            return ResponseEntity.badRequest().body(Map.of("message", "Page và limit phải lớn hơn 0"));
+//        }
+//
+//        try {
+//            // Lưu ý: cộng thêm 1 ngày cho endDate để so sánh kiểu `ngay_tao < endDate + 1`
+//            Map<String, Object> result = thongKeAdminService.getTopSanPhamBanChay(
+//                    startDate,
+//                    endDate.plusDays(1),
+//                    page,
+//                    limit
+//            );
+//
+//            return ResponseEntity.ok(result);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("message", "Lỗi khi lấy dữ liệu: " + e.getMessage()));
+//        }
+//    }
 
-        return thongKeAdminService.topSanPhamBanChay();
-    }
 
     @GetMapping("/san-pham-ton-kho")
     public List<Map<String, Object>> sanPhamTonKhoNhieu () {

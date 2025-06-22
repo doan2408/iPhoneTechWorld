@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,6 +129,44 @@ public class HoaDonAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Xóa thất bại: " + e.getMessage());
         }
+    }
+
+    // Xoa hoa don
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<?> hoaDonSoftDelete (@PathVariable Integer id){
+        try {
+            hoaDonAdminService.hoaDonSoftDelete(id);
+            return ResponseEntity.ok("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Xóa thất bại: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/hard-delete/{id}")
+    public ResponseEntity<?> hoaDonHardDelete (@PathVariable Integer id){
+        try {
+            hoaDonAdminService.hoaDonHardDelete(id);
+            return ResponseEntity.ok("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Xóa thất bại: " + e.getMessage());
+        }
+    }
+
+    //So hoa don cho xy ly
+    @GetMapping("/count/pending")
+    public ResponseEntity<Integer> countHoaDonPending () {
+        Integer count = hoaDonAdminService.countHoaDonPending();
+        return ResponseEntity.ok(count);
+
+    }
+
+    //Doanh thu thang
+    @GetMapping("/doanh-thu-thang")
+    public ResponseEntity<BigDecimal> doangThuThang () {
+        BigDecimal doanhThu = hoaDonAdminService.doangThuThang();
+        return ResponseEntity.ok(doanhThu);
     }
 
     @PutMapping("/{idHoaDon}/khach-hang")

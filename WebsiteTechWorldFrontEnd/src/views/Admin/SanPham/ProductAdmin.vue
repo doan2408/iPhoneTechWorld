@@ -1,118 +1,137 @@
 <template>
   <div class="container mt-4">
-
     <el-row :gutter="20" class="mb-4 justify-content-center">
       <el-col :span="6">
-        <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
+        <el-input v-model="searchQuery" placeholder="Tìm kiếm sản phẩm" clearable @input="handleSearch" />
       </el-col>
       <el-col :span="3">
-        <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
+        <el-button type="primary" size="default" class="w-100" @click="handleSearch">Tìm kiếm</el-button>
       </el-col>
     </el-row>
 
     <div class="mb-3" style="display: flex; justify-content: flex-end;">
-      <el-link type="success" :underline="false" href="products/create">
-        <el-button type="success">Thêm sản phẩm mới</el-button>
-      </el-link>
+      <router-link to="/admin/products/create" class="el-link--success">
+        <el-button type="success" size="default">Thêm sản phẩm mới</el-button>
+      </router-link>
     </div>
 
-    <el-skeleton v-if="isLoading" :rows="5" animated />
+    <h2>Danh sách sản phẩm</h2>
+    <el-table :data="sanPhamList" style="width: 100%" border>
+      <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
+      <el-table-column label="Hình ảnh" width="120">
+        <template #default="{ row }">
+          <img :src="row.url || '/placeholder.jpg'" alt="Ảnh sản phẩm" style="width: 60px; height: auto;" />
+        </template>
+      </el-table-column>
+      <el-table-column prop="maSanPham" label="Mã sản phẩm" />
+      <el-table-column prop="tenSanPham" label="Tên sản phẩm" />
+      <el-table-column prop="tenLoai" label="Tên loại" />
+      <el-table-column prop="soLuong" label="Số lượng" />
+      <el-table-column label="Trạng thái">
+        <template #default="{ row }">
+          {{ trangThaiSanPhamMap[row.trangThaiSanPham] || 'Không rõ' }}
+        </template>
+      </el-table-column>
+      <!-- <el-table-column prop="giaBan" label="Giá bán" />/ -->
+      <el-table-column label="Thao tác" width="180">
+        <template #default="{ row }">
+          <div class="action-buttons-horizontal">
+            <router-link :to="`/admin/products/${row.id}`">
+              <el-button size="small" type="primary" :icon="Edit" circle />
+            </router-link>
+            <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+            <router-link :to="`/admin/products/view/${row.id}`">
+              <el-button size="small" type="info" :icon="View" circle />
+            </router-link>
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <template v-else>
-      <h2>Danh sách sản phẩm</h2>
-      <el-table :data="sanPhamList" style="width: 100%" border>
-        <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
-        <!-- <el-table-column prop="id" label="ID" width="80" /> -->
-        <el-table-column label="Hình ảnh" width="120">
-          <template #default="{ row }">
-            <img :src="row.url" alt="Ảnh sản phẩm" style="width: 60px; height: auto;" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="maSanPham" label="Mã sản phẩm" />
-        <el-table-column prop="tenSanPham" label="Tên sản phẩm" />
-        <el-table-column prop="tenLoai" label="Tên loại" />
-        <el-table-column prop="soLuong" label="Số lượng" />
-        <el-table-column prop="giaBan" label="Giá bán" />
-        <el-table-column label="Thao tác" width="180">
-          <template #default="{ row }">
-            <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="Edit" circle />
-              </router-link>
-
-              <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-
-              <router-link :to="`/admin/products/detail/${row.id}`">
-                <el-button size="small" type="info" :icon="View" circle />
-              </router-link>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-fixed">
-        <div class="d-flex justify-content-center align-items-center gap-3" style="margin-top: 30px;">
-          <el-pagination background layout="prev, pager, next" :page-size="pageSize" :current-page="currentPage"
-            :total="totalItems" :pager-count="7" prev-text="< Trước" next-text="Sau >"
-            @current-change="handlePageChange" />
-        </div>
+    <div class="pagination-fixed">
+      <div class="d-flex justify-content-center align-items-center gap-3" style="margin-top: 30px;">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          :total="totalItems"
+          :pager-count="7"
+          prev-text="< Trước"
+          next-text="Sau >"
+          @current-change="handlePageChange"
+        />
       </div>
-
-    </template>
+    </div>
 
     <el-alert v-if="error" :title="error" type="error" show-icon class="mt-3" />
   </div>
 </template>
 
-<!-- npm install @element-plus/icons-vue -->
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { Edit, Delete, View } from '@element-plus/icons-vue'
-import { getAllSanPham } from "@/Service/Adminservice/Products/ProductAdminService";
-import { ElMessageBox } from 'element-plus'
+import { ref, onMounted, computed, watch } from 'vue';
+import { Edit, Delete, View } from '@element-plus/icons-vue';
+import { getAllSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { debounce } from 'lodash'; // Cần cài đặt: npm install lodash
 
+// State
 const sanPhamList = ref([]);
-const isLoading = ref(false);
-const error = ref("");
+const isFetching = ref(false); // Ngăn gọi API lặp
+const error = ref('');
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5;
+const searchQuery = ref('');
 
 const loadSanPham = async () => {
+  if (isFetching.value) return; // Ngăn gọi API lặp
   try {
-    isLoading.value = true;
-    const response = await getAllSanPham(currentPage.value - 1, pageSize);
-    console.log("Dữ liệu trả về từ api", response);
-    sanPhamList.value = response.content;
-    totalPages.value = response.totalPages;
-    totalItems.value = response.totalElements;
+    isFetching.value = true;
+    console.log('Đang tải sản phẩm, trang:', currentPage.value, 'Tìm kiếm:', searchQuery.value);
+    const response = await getAllSanPham(currentPage.value - 1, pageSize, searchQuery.value);
+    console.log('Dữ liệu API:', response);
+    sanPhamList.value = response.content || [];
+    totalPages.value = response.totalPages || 1;
+    totalItems.value = response.totalElements || 0;
   } catch (err) {
-    error.value = err.message || "Lỗi khi tải sản phẩm";
+    error.value = err.message || 'Lỗi khi tải sản phẩm';
+    console.error('Lỗi API:', err);
+    ElMessage.error(error.value);
   } finally {
-    isLoading.value = false;
+    isFetching.value = false;
   }
 };
 
-const handleDelete = (id) => {
-  ElMessageBox.confirm(
-    'Bạn có chắc chắn muốn xoá sản phẩm này?',
-    'Xác nhận',
-    {
-      confirmButtonText: 'Xoá',
-      cancelButtonText: 'Huỷ',
-      type: 'warning',
-    }
-  )
-    .then(() => {
-      // Gọi API xoá sản phẩm tại đây
-      console.log('Đã xoá:', id)
-    })
-    .catch(() => {
-      console.log('Đã huỷ xoá')
-    })
-}
+// Hàm tìm kiếm với debounce
+const handleSearch = debounce(async () => {
+  currentPage.value = 1; // Reset về trang 1 khi tìm kiếm
+  await loadSanPham();
+}, 300);
 
+// Hàm xóa sản phẩm
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm(
+      'Bạn có chắc chắn muốn xóa sản phẩm này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+    // await deleteSanPham(id); // Bỏ comment khi có API xóa
+    ElMessage.success('Xóa sản phẩm thành công');
+    await loadSanPham(); // Tải lại danh sách sau khi xóa
+  } catch (err) {
+    console.log('Đã hủy xóa hoặc lỗi:', err);
+    ElMessage.error('Lỗi khi xóa sản phẩm: ' + (err.message || 'Không rõ'));
+  }
+};
+
+// Tính toán phân trang
 const fromRecord = computed(() => {
   return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
 });
@@ -123,361 +142,373 @@ const toRecord = computed(() => {
 
 const indexMethod = (index) => {
   return (currentPage.value - 1) * pageSize + index + 1;
-}
-
-const handlePageChange = (newPage) => {
-  currentPage.value = newPage;
 };
 
+// Xử lý thay đổi trang
+const handlePageChange = async (newPage) => {
+  currentPage.value = newPage;
+  await loadSanPham(); // Gọi loadSanPham khi chuyển trang
+};
+
+// Ánh xạ trạng thái sản phẩm
+const trangThaiSanPhamMap = {
+  ACTIVE: 'Đang kinh doanh',
+  DISCONTINUED: 'Ngừng kinh doanh',
+  COMING_SOON: 'Sắp ra mắt',
+  TEMPORARILY_UNAVAILABLE: 'Tạm ngừng bán',
+  OUT_OF_STOCK: 'Hết hàng',
+};
+
+// Theo dõi thay đổi tìm kiếm
+watch(searchQuery, () => {
+  handleSearch();
+});
+
+// Tải dữ liệu khi component được mount
 onMounted(() => {
   loadSanPham();
 });
 </script>
 
 <style scoped>
-/* ===== SIMPLE DASHBOARD STYLE ===== */
-
-/* Reset và Base Styles */
+/* Giữ style gốc, nhưng bỏ transition để tránh nhảy */
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-/* Dashboard Container */
 .container {
-    min-height: 100vh;
-    background: #f8f9fa;
-    padding: 24px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 1400px;
-    margin: 0 auto;
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 24px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.mt-4 { margin-top: 24px; }
-.mb-4 { margin-bottom: 32px; }
-.mb-3 { margin-bottom: 24px; }
-.w-100 { width: 100%; }
+.mt-4 {
+  margin-top: 24px;
+}
 
-/* ===== SEARCH SECTION ===== */
+.mb-4 {
+  margin-bottom: 32px;
+}
+
+.mb-3 {
+  margin-bottom: 24px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
 :deep(.el-row) {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 24px;
-    margin-bottom: 24px;
-    border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
 }
 
-/* Input Styling */
 :deep(.el-input__wrapper) {
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background: white;
-    transition: border-color 0.2s ease;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  transition: border-color 0.2s ease;
 }
 
 :deep(.el-input__wrapper:hover) {
-    border-color: #9ca3af;
+  border-color: #9ca3af;
 }
 
 :deep(.el-input__wrapper.is-focus) {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 :deep(.el-input__inner) {
-    font-size: 14px;
-    color: #374151;
+  font-size: 14px;
+  color: #374151;
 }
 
-/* ===== BUTTON STYLES ===== */
 :deep(.el-button) {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border: 1px solid;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid;
 }
 
 :deep(.el-button:hover) {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 :deep(.el-button--primary) {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: white;
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
 }
 
 :deep(.el-button--primary:hover) {
-    background: #2563eb;
-    border-color: #2563eb;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 :deep(.el-button--success) {
-    background: #10b981;
-    border-color: #10b981;
-    color: white;
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
 }
 
 :deep(.el-button--success:hover) {
-    background: #059669;
-    border-color: #059669;
+  background: #059669;
+  border-color: #059669;
 }
 
 :deep(.el-button--danger) {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: white;
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
 }
 
-
 :deep(.el-button--danger:hover) {
-    background: #dc2626;
-    border-color: #dc2626;
+  background: #dc2626;
+  border-color: #dc2626;
 }
 
 :deep(.el-button--info) {
-    background: #6b7280;
-    border-color: #6b7280;
-    color: white;
+  background: #6b7280;
+  border-color: #6b7280;
+  color: white;
 }
 
 :deep(.el-button--info:hover) {
-    background: #4b5563;
-    border-color: #4b5563;
+  background: #4b5563;
+  border-color: #4b5563;
 }
 
-/* Add Product Section */
 .mb-3 {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px 24px;
-    border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px 24px;
+  border: 1px solid #e5e7eb;
 }
 
-/* ===== TITLE STYLING ===== */
 h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 24px 0;
-    color: #1f2937;
-    text-align: center;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  color: #1f2937;
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
 }
 
-/* ===== SIMPLE TABLE STYLING - NO STRIPE ===== */
 :deep(.el-table) {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  /* Bỏ transition để tránh nhảy */
 }
 
 :deep(.el-table__header th) {
-    background: #f9fafb !important;
-    color: #374151 !important;
-    font-weight: 600;
-    font-size: 14px;
-    border-bottom: 1px solid #e5e7eb !important;
-    padding: 12px 16px;
+  background: #f9fafb !important;
+  color: #374151 !important;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 12px 16px;
 }
 
-/* Remove all striped and hover effects */
 :deep(.el-table__body tr) {
-    background: white !important;
+  background: white !important;
 }
 
 :deep(.el-table__body tr:hover) {
-    background: white !important;
+  background: white !important;
 }
 
 :deep(.el-table__body tr.el-table__row--striped) {
-    background: white !important;
+  background: white !important;
 }
 
 :deep(.el-table__body tr.el-table__row--striped:hover) {
-    background: white !important;
+  background: white !important;
 }
 
 :deep(.el-table td) {
-    padding: 12px 16px;
-    font-size: 14px;
-    color: #374151;
-    border-color: #f3f4f6;
-    background: white !important;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #374151;
+  border-color: #f3f4f6;
+  background: white !important;
 }
 
-/* Image Styling */
 :deep(.el-table td img) {
-    width: 50px !important;
-    height: 50px !important;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
+  width: 50px !important;
+  height: 50px !important;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
 }
 
-/* ===== HORIZONTAL ACTION BUTTONS ===== */
 .action-buttons-horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
-/* Action Buttons in Table */
 :deep(.el-table td .el-button) {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border-radius: 6px;
-    flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
-/* ===== PAGINATION SECTION ===== */
 .pagination-fixed {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-top: 24px;
-    border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 24px;
+  border: 1px solid #e5e7eb;
 }
 
-.d-flex { display: flex; }
-.justify-content-center { justify-content: center; }
-.align-items-center { align-items: center; }
-.gap-3 { gap: 12px; }
+.d-flex {
+  display: flex;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.gap-3 {
+  gap: 12px;
+}
 
 :deep(.el-pagination button) {
-    background: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-    font-size: 14px;
-    border-radius: 6px;
-    margin: 0 2px;
-    padding: 6px 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 0 2px;
+  padding: 6px 12px;
 }
 
 :deep(.el-pagination button:hover) {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 :deep(.el-pagination .el-pager li) {
-    background: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-    font-size: 14px;
-    border-radius: 6px;
-    margin: 0 2px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 0 2px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :deep(.el-pagination .el-pager li:hover) {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 :deep(.el-pagination .el-pager li.is-active) {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: white;
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
 }
 
-/* ===== SKELETON LOADING ===== */
-:deep(.el-skeleton) {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 24px;
-    border: 1px solid #e5e7eb;
-}
-
-/* ===== ALERT ===== */
 :deep(.el-alert) {
-    border-radius: 8px;
-    margin-top: 24px;
+  border-radius: 8px;
+  margin-top: 24px;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-    .container {
-        padding: 16px;
-    }
+  .container {
+    padding: 16px;
+  }
 
-    h2 {
-        font-size: 20px;
-    }
+  h2 {
+    font-size: 20px;
+  }
 
-    :deep(.el-row) {
-        padding: 16px;
-    }
+  :deep(.el-row) {
+    padding: 16px;
+  }
 
-    :deep(.el-table td) {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
+  :deep(.el-table td) {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 
-    :deep(.el-table td img) {
-        width: 40px !important;
-        height: 40px !important;
-    }
+  :deep(.el-table td img) {
+    width: 40px !important;
+    height: 40px !important;
+  }
 
-    .action-buttons-horizontal {
-        gap: 4px;
-    }
+  .action-buttons-horizontal {
+    gap: 4px;
+  }
 
-    :deep(.el-table td .el-button) {
-        width: 28px;
-        height: 28px;
-    }
+  :deep(.el-table td .el-button) {
+    width: 28px;
+    height: 28px;
+  }
 
-    .pagination-fixed {
-        padding: 16px;
-    }
+  .pagination-fixed {
+    padding: 16px;
+  }
 
-    :deep(.el-pagination button) {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
+  :deep(.el-pagination button) {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 
-    :deep(.el-pagination .el-pager li) {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
-    }
+  :deep(.el-pagination .el-pager li) {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
 }
 
-/* ===== UTILITIES ===== */
 ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 li {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 1.1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.1rem;
 }
 
 .error {
-    color: #dc2626;
-    font-size: 1rem;
+  color: #dc2626;
+  font-size: 1rem;
 }
 
-/* ===== LINK STYLING ===== */
 :deep(.el-link) {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 :deep(.el-link:hover) {
-    text-decoration: none;
+  text-decoration: none;
 }
 </style>

@@ -56,7 +56,7 @@ public class HoaDonAdminService {
 
     public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return hoaDonRepository.findAll(pageable).map(GetAllHoaDonAdminResponse::convertDto);
+        return hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull(pageable).map(GetAllHoaDonAdminResponse::convertDto);
     }
 
     public HoaDonAdminResponse findById(Integer id){
@@ -143,5 +143,22 @@ public class HoaDonAdminService {
         return response;
     }
 
+    public void hoaDonSoftDelete (Integer id){
+        HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+        hoaDon.setIsDelete(true);
+        hoaDonRepository.save(hoaDon);
+    }
 
+    public void hoaDonHardDelete (Integer id){
+        HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+        hoaDonRepository.delete(hoaDon);
+    }
+
+    public Integer countHoaDonPending () {
+        return hoaDonRepository.countByTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
+    }
+
+    public BigDecimal doangThuThang () {
+        return hoaDonRepository.doanhThuThang();
+    }
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.PinAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.PinAdminResponse;
 import org.example.websitetechworld.Entity.Pin;
-import org.example.websitetechworld.Entity.Rom;
 import org.example.websitetechworld.Repository.PinRepository;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -12,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class PinAdminService {
         return modelMapper.map(pin, PinAdminResponse.class);
     }
 
-    private List<PinAdminResponse> convertList(List<Pin> pin) {
-        return pin.stream()
+    private List<PinAdminResponse> convertList(List<Pin> pins) {
+        return pins.stream()
                 .map(this::convert)
                 .toList();
     }
@@ -41,34 +41,57 @@ public class PinAdminService {
         return pins.map(this::convert);
     }
 
+    public Page<PinAdminResponse> searchPins(String search, Pageable pageable) {
+        Page<Pin> pinPage;
+        if (StringUtils.hasText(search)) {
+            pinPage = pinRepository.findByPhienBanContainingIgnoreCaseOrCongSuatSacContainingIgnoreCase(search, search, pageable);
+        } else {
+            pinPage = pinRepository.findAll(pageable);
+        }
+        return pinPage.map(this::convert);
+    }
+
     @Transactional
     public PinAdminResponse createPin(PinAdminRequest pinAdminRequest) {
-        Pin pin = pinRepository.save(modelMapper.map(pinAdminRequest, Pin.class));
-        return convert(pin);
+        if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
+            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+        }
+        Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
+        Pin saved = pinRepository.save(pin);
+        return convert(saved);
     }
 
     @Transactional
     public PinAdminResponse updatePin(Integer id, PinAdminRequest pinAdminRequest) {
         Pin pin = pinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Pin ID: " + id));
+        if (pinRepository.existsByPhienBanAndIdNot(pinAdminRequest.getPhienBan(), id)) {
+            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+        }
         modelMapper.map(pinAdminRequest, pin);
-        pinRepository.save(pin);
-
-        return convert(pin);
+        Pin saved = pinRepository.save(pin);
+        return convert(saved);
     }
 
     @Transactional
     public PinAdminResponse deletePin(Integer id) {
         Pin pin = pinRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy pin ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Pin ID: " + id));
         pinRepository.deleteById(id);
-
         return convert(pin);
     }
 
     public PinAdminResponse detailPin(Integer id) {
         Pin pin = pinRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy pin ID:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Pin ID: " + id));
         return convert(pin);
+    }
+
+    public boolean existsByPhienBan(String phienBan) {
+        return pinRepository.existsByPhienBan(phienBan);
+    }
+
+    public boolean existsByPhienBanAndIdNot(String phienBan, Integer id) {
+        return pinRepository.existsByPhienBanAndIdNot(phienBan, id);
     }
 }

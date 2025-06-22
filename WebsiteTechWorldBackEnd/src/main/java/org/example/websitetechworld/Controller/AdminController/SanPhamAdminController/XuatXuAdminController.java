@@ -1,21 +1,23 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.XuatXuAdminResponse;
-import org.example.websitetechworld.Entity.XuatXu;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.XuatXuAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-    @RequestMapping("/admin/xuatXu")
+@RequestMapping("/admin/xuatXu")
 public class XuatXuAdminController {
     private final XuatXuAdminService xuatXuAdminService;
 
@@ -33,6 +35,15 @@ public class XuatXuAdminController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<XuatXuAdminResponse>> searchXuatXu(
+            @RequestParam(required = false) String search,
+            @PageableDefault(page = 0, size = 5) Pageable pageable
+    ) {
+        Page<XuatXuAdminResponse> xuatXus = xuatXuAdminService.searchXuatXu(search, pageable);
+        return ResponseEntity.ok(xuatXus);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<XuatXuAdminResponse> detailXuatXu(@PathVariable Integer id) {
         XuatXuAdminResponse detail = xuatXuAdminService.detailXuatXu(id);
@@ -40,13 +51,16 @@ public class XuatXuAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<XuatXuAdminResponse> createXuatXu(@RequestBody XuatXuAdminRequest xuatXuAdminRequest) {
+    public ResponseEntity<?> createXuatXu(@Valid @RequestBody XuatXuAdminRequest xuatXuAdminRequest) {
         XuatXuAdminResponse save = xuatXuAdminService.createXuatXu(xuatXuAdminRequest);
         return ResponseEntity.ok(save);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<XuatXuAdminResponse> updateXuatXu(@PathVariable Integer id, @RequestBody XuatXuAdminRequest xuatXuAdminRequest) {
+    public ResponseEntity<?> updateXuatXu(
+            @PathVariable Integer id,
+            @Valid @RequestBody XuatXuAdminRequest xuatXuAdminRequest
+    ) {
         XuatXuAdminResponse update = xuatXuAdminService.updateXuatXu(id, xuatXuAdminRequest);
         return ResponseEntity.ok(update);
     }

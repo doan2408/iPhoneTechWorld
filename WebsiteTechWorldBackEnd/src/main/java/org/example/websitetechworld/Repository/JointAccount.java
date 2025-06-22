@@ -1,5 +1,7 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
+
 public interface JointAccount {
      Integer getId();
      String tai_khoan();
@@ -8,4 +10,5 @@ public interface JointAccount {
      String getFullName();
      String getEmail();
      String getSdt();
+     String getTrangThai();
 }
