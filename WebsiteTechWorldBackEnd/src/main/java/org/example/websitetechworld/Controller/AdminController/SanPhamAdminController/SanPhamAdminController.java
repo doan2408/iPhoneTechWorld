@@ -11,7 +11,6 @@ import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,6 +39,11 @@ public class SanPhamAdminController {
     @GetMapping("/{id}")
     public ResponseEntity<SanPhamAdminUpdateResponse> getSanPhamById(@PathVariable("id") int id) {
         return ResponseEntity.ok(sanPhamAdminService.getSanPhamById(id));
+    }
+
+    @GetMapping("/viewSanPham/{id}")
+    public ResponseEntity<SanPhamAdminResponse> getViewSanPham(@PathVariable("id") int id) {
+        return ResponseEntity.ok( sanPhamAdminService.getViewSanPham(id));
     }
 
     @PostMapping

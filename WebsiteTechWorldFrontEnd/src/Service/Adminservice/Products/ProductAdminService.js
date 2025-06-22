@@ -112,6 +112,7 @@ export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${
 export const postSanPham = (data) => postData('/product', data);
 export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
 export const getSanPhamById = (id) => fetchData(`/product/${id}`);
+export const getViewSanPham = (id) => fetchData(`/product/viewSanPham/${id}`);
 
 
 export const getAllXuatXuPage = (page = 0, size = 5, search = '') => fetchData(`/xuatXu/search?search=${search}&page=${page}&size=${size}`);
@@ -225,7 +226,6 @@ export const getAllHDHList = () => fetchData('/heDieuHanh/listHDH');
 export const getAllCpuList = () => fetchData('/cpu/listCpu');
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
-
 
 export const loadCategory = (pageNo, pageSize) =>{
   const urlProduct = '/admin/product'

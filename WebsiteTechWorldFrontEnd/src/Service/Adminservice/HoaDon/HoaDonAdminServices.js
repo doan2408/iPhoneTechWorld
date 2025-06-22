@@ -67,3 +67,16 @@ export const deleteDetailInvoice = (idChiTietHoaDon) => {
     const url = url_base + '/hdct/' + idChiTietHoaDon ;
     return axios.delete(url)
 }
+
+export const fetchImeisJs = (productId,page,size) => {
+    const url = '/admin/imei/available'
+    return axios.get(url, {
+        params: {
+            productId: productId,
+            page: page ,
+            size: size,
+            status: 'AVAILABLE' // Chỉ lấy IMEI có sẵn
+        }
+    });
+     
+}
