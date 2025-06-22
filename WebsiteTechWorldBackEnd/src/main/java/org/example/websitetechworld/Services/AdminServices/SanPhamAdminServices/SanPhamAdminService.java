@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -881,6 +882,20 @@ public class SanPhamAdminService {
 
         return sanPhamAdminResponse;
     }
+
+
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(tenSanPham, TrangThaiSanPham.ACTIVE, pageable);
+
+        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+    }
+
+    public Page<String> getProductNameCategory(int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("ten_dong_san_pham").ascending());
+        return sanPhamRepo.findTenDongSanPham(pageable);
+    }
+
 
 }
 

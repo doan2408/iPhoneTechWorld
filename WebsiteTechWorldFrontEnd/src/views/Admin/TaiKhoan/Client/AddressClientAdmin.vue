@@ -51,7 +51,7 @@ const goToEdit = (addressId) => {
 };
 
 const back = () => {
-  router.back();
+  router.push("/admin/client")
 };
 
 onMounted(() => {

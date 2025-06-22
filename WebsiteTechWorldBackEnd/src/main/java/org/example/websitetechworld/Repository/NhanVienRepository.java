@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,13 +30,18 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     @Query("UPDATE NhanVien n SET n.matKhau = :password WHERE n.email = :email")
     int updatePasswordByEmail(@Param("email") String email, @Param("password") String hashedPassword);
 
+    //get nhan vien not include admin role
+    @Query("select nv from NhanVien nv where nv.chucVu != :chucVu")
+    Page<NhanVien> findByNotChucVu(@Param("chucVu") NhanVienChucVu chucVu, Pageable pageable);
+
     // Tìm kiếm theo tên, email, số điện thoại, chức vụ
-    @Query("SELECT nv FROM NhanVien nv WHERE " +
+    @Query("SELECT nv FROM NhanVien nv WHERE nv.chucVu != :chucVu And " +
             "LOWER(nv.tenNhanVien) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(nv.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(nv.chucVu) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(nv.taiKhoan) LIKE LOWER(CONCAT('%', :keyword, '%'))" )
-    Page<NhanVien> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+    Page<NhanVien> findByKeyword(@Param("keyword") String keyword,
+                                 @Param("chucVu") NhanVienChucVu chucVu,
+                                 Pageable pageable);
 
 }

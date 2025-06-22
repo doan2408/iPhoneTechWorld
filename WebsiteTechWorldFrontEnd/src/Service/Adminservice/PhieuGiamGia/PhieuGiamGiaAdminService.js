@@ -14,8 +14,7 @@ export const getAll = async (params) => {
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách phiếu giảm giá:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy danh sách phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách phiếu giảm giá');
   }
 };
 
@@ -25,8 +24,7 @@ export const detail = async (id) => {
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi lấy chi tiết phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy chi tiết phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy chi tiết phiếu giảm giá');
   }
 };
 
@@ -36,8 +34,7 @@ export const add = async (data) => {
     return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm phiếu giảm giá:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi thêm phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi thêm phiếu giảm giá');
   }
 };
 
@@ -47,8 +44,7 @@ export const update = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi cập nhật phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi cập nhật phiếu giảm giá');
   }
 };
 
@@ -58,8 +54,7 @@ export const deletePhieuGiamGia = async (id) => {
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi xóa phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi xóa phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi xóa phiếu giảm giá');
   }
 };
 
@@ -69,7 +64,6 @@ export const getAllKhachHang = async () => {
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách khách hàng:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách khách hàng');
   }
 };

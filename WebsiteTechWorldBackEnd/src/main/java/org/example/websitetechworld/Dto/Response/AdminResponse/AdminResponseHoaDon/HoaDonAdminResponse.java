@@ -18,6 +18,7 @@ public class HoaDonAdminResponse {
     private Integer idHoaDon;
 
     private String maHoaDon;
+    private String maVanDon;
 
     private Integer idKhachHang;
     private String maKhachHang;
@@ -31,6 +32,7 @@ public class HoaDonAdminResponse {
     private String tenNguoiNhan;
 
     private String sdtNguoiMua;
+    private String sdtNguoiNhan;
 
     private BigDecimal phiShip;
 
@@ -41,11 +43,14 @@ public class HoaDonAdminResponse {
     private BigDecimal thanhTien;
 
     private LocalDate ngayTao;
+    private LocalDate ngayDatHang;
+
+    private String diaChiGiaoHang;
 
     private String loaiHoaDon;
 
     private LocalDate ngayThanhToan;
-
+    private String trangThaiDonHang;
     private String trangThaiThanhToan;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
@@ -56,6 +61,7 @@ public class HoaDonAdminResponse {
         HoaDonAdminResponse hoaDonAdminResponse = new HoaDonAdminResponse();
         hoaDonAdminResponse.setIdHoaDon(hoaDon.getId());
         hoaDonAdminResponse.setMaHoaDon(hoaDon.getMaHoaDon());
+        hoaDonAdminResponse.setMaVanDon(hoaDon.getMaVanDon());
         if (hoaDon.getIdKhachHang() != null){
             hoaDonAdminResponse.setIdKhachHang(hoaDon.getIdKhachHang().getId());
             hoaDonAdminResponse.setMaKhachHang(hoaDon.getIdKhachHang().getMaKhachHang());
@@ -68,29 +74,24 @@ public class HoaDonAdminResponse {
         }
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
-//        hoaDonAdminResponse.setDiaChi(hoaDon.getDiaChi());
+        hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
+        hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiMua());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());
         hoaDonAdminResponse.setThanhTien(hoaDon.getThanhTien());
         hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTaoHoaDon());
+        hoaDonAdminResponse.setNgayDatHang(hoaDon.getNgayDatHang());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
         hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );
+        hoaDonAdminResponse.setTrangThaiDonHang(hoaDon.getTrangThaiDonHang() != null ? hoaDon.getTrangThaiDonHang().getDisplayName() : null );
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
         }
-//        if (hoaDon.getChiTietThanhToans() != null){
-//            hoaDonAdminResponse.setChiTietThanhToanAdminResponseList(hoaDon.getChiTietThanhToans().stream()
-//                    .map(ChiTietThanhToanAdminResponse::convertDto).collect(Collectors.toList()));
-//        }
-//        if (hoaDon.getLichSuHoaDons() != null){
-//            hoaDonAdminResponse.setLichSuHoaDonAdminResponseList(hoaDon.getLichSuHoaDons().stream()
-//                    .map(LichSuHoaDonAdminResponse::convertDto).toList());
-//        }
         return hoaDonAdminResponse;
     }
 }

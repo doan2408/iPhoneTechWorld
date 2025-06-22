@@ -41,7 +41,7 @@ public class LichSuHoaDonAdminResponse {
             response.setIdHoaDon(lichSuHoaDon.getIdHoaDon().getId());
             response.setMaHoaDon(lichSuHoaDon.getIdHoaDon().getMaHoaDon());
         }
-        response.setHanhDong(lichSuHoaDon.getHanhDong());
+        response.setHanhDong(lichSuHoaDon.getHanhDong().getDisplayName());
         response.setThoiGianThayDoi(lichSuHoaDon.getThoiGianThayDoi());
         response.setMoTa(lichSuHoaDon.getMoTa());
 

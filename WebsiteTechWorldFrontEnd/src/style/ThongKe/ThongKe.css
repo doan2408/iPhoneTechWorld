@@ -1,0 +1,225 @@
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  background-color: #faf9fb;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 15px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-title {
+  font-size: 14px;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 4px;
+  color: #333;
+}
+
+/* === CHART WRAPPER CHUNG === */
+.charts-flex-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+
+.chart-container,
+.product-chart-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #ced0d1;
+  /* Viền rõ hơn */
+  box-shadow: 0 6px 20px rgba(21, 20, 20, 0.08);
+  /* Đổ bóng mạnh hơn */
+  flex: 1 1 30%;
+  min-width: 300px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-container:hover,
+.product-chart-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+
+/* === CHART TITLE CHUNG === */
+.header,
+.chart-header {
+  margin-bottom: 1rem;
+}
+
+.title,
+.chart-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.subtitle,
+.chart-subtitle {
+  font-size: 14px;
+  color: #718096;
+  font-style: italic;
+}
+
+/* CHART BLOCK */
+.chart,
+.chart-wrapper {
+  margin: 20px 0;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #666;
+}
+/* sản phẩm bán chạy */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+}
+
+th {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  font-weight: bold;
+  text-align: left;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #1565c0;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+/* Bộ lọc */
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.filter-container label {
+  font-weight: 500;
+  color: #333;
+}
+
+.filter-container input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.filter-container input[type="date"]:focus {
+  border-color: #007bff;
+}
+
+.filter-container button {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.filter-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Phân trang */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 6px 14px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #c0c0c0;
+}
+
+.pagination button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination span {
+  font-weight: 500;
+  color: #333;
+}

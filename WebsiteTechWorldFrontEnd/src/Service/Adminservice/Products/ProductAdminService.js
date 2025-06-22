@@ -43,6 +43,18 @@ const postData = async (url, data) => {
   }
 };
 
+export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/ten-san-pham';
+  return axios.get(url, {
+    params: {
+      tenSanPham,
+      pageNo,
+      pageSize
+    }
+  }
+  )
+}
 const postDataSpct = async (url, data) => {
   try {
 
@@ -94,8 +106,8 @@ const deleteData = async (url) => {
   }
 };
 
+export const getAllSanPhamChiTiet = (pageNo, pageSize) => fetchData(`/sanPhamChiTiet?page=${page}&size=${size}`);
 // export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
-
 export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${page}&size=${size}`);
 export const postSanPham = (data) => postData('/product', data);
 export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
@@ -215,3 +227,23 @@ export const getAllCpuList = () => fetchData('/cpu/listCpu');
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
 
+export const loadCategory = (pageNo, pageSize) =>{
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/category';
+  return axios.get(url,{
+    params:{
+      pageNo,
+      pageSize
+    }
+  })
+
+}
+export const loadSanPhamChiTiet = (pageNo,pageSize) => {
+  const urlProduct = '/admin/sanPhamChiTiet'
+  return axios.get(urlProduct, {
+    params: {
+      pageNo,
+      pageSize
+    }
+  })
+}
