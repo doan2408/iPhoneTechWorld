@@ -54,24 +54,31 @@ public class HoaDonChiTietAdminServices {
     //ham tao chi tiet hoa donn ( them san pham )
     @Transactional
     public ChiTietHoaDon createChiTietHoaDon(ChiTietHoaDonAdminRequest request){
+        //check  ton tai
         HoaDon hoaDon = hoaDonRepository.findById(request.getIdHoaDon())
                 .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
-
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
 
+        //check de cap nhat so neu neu ton tai
         ChiTietHoaDon cthdCheck = chiTietHoaDonRepository.findByIdHoaDon_IdAndIdSanPhamChiTiet_Id(request.getIdHoaDon(), request.getIdSanPhamChiTiet());
 
         BigDecimal donGia = sanPhamChiTiet.getGiaBan();
         int soLuong = request.getSoLuong();
         List<String> imeiIdsFromRequest = request.getImeiIds();
 
+        int updatedRows = sanPhamChiTietRepository.giamSoLuongTon(sanPhamChiTiet.getId(), soLuong);
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("Sản phẩm " + sanPhamChiTiet.getIdSanPham().getTenSanPham() +
+                    " (ID: " + sanPhamChiTiet.getId() + ") không đủ số lượng tồn kho (yêu cầu: " + soLuong + ").");
+        }
         if (cthdCheck != null){
             hoaDonChiTiet_imeiAdminServices.tangSoLuong(cthdCheck,soLuong);
             cthdCheck.setSoLuong(cthdCheck.getSoLuong()+soLuong);
             return chiTietHoaDonRepository.save(cthdCheck);
         }
 
+        //kiem tra imei
         if (imeiIdsFromRequest == null || imeiIdsFromRequest.isEmpty()) {
             throw new IllegalArgumentException("Vui lòng chọn ít nhất một IMEI cho sản phẩm này.");
         }
@@ -125,12 +132,15 @@ public class HoaDonChiTietAdminServices {
 
 
 
-
-
     //ham xoa hoa don chi tiet khoi hoa don
     public void deleleHdct(Integer hdctId){
         ChiTietHoaDon cthdCanXoa = chiTietHoaDonRepository.findById(hdctId).orElseThrow();
         List<ImeiDaBan> imeiDaBanList = cthdCanXoa.getImeiDaBans().stream().toList();
+
+        Integer idSanPhamChiTietDeHoanTra = cthdCanXoa.getIdSanPhamChiTiet().getId(); // Lấy ID của SanPhamChiTiet
+        int soLuongHoanTra = cthdCanXoa.getSoLuong();
+        sanPhamChiTietRepository.tangSoLuongTon(idSanPhamChiTietDeHoanTra, soLuongHoanTra);
+
         // Lấy danh sách Imei từ soImei trong imeiDaBan
         List<String> soImeis = imeiDaBanList.stream()
                 .map(ImeiDaBan::getSoImei)

@@ -585,6 +585,7 @@ const removeFromCart = async () => {
         const res = await deleteDetailInvoice(itemToDelete.value.idHoaDonChiTiet);
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
+        await loadProducts({ tenSanPham: selectedCategory.value });
     } catch (err) {
         console.error("Xóa thất bại", err);
     }
@@ -825,6 +826,7 @@ const confirmImeiSelection = async () => {
     if (selectedImeis.value.length === quantityToSelect.value ) {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
+        await loadProducts({ tenSanPham: selectedCategory.value });
     } else {
         alert(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
