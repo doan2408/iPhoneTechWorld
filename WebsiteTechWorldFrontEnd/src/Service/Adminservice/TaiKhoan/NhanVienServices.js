@@ -1,9 +1,6 @@
-import axios from "axios";
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/admin/staff",
-  withCredentials: true, // ❗ Gửi cookie (JSESSIONID) qua CORS
-});
+const baseURL = "/admin/staff",
 
 export const getAllStaff = async (page = 0, keyword = null) => {
   try {
@@ -12,7 +9,7 @@ export const getAllStaff = async (page = 0, keyword = null) => {
     if (keyword && keyword.trim() !== "") {
       params.keyword = keyword.trim();
     }
-    const response = await axiosInstance.get("", { params });
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -28,7 +25,7 @@ export const getAllStaff = async (page = 0, keyword = null) => {
 
 export const detailStaff = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await api.get(`${baseURL}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Có lỗi khi Detail Staff phía admin:", error);
@@ -38,7 +35,7 @@ export const detailStaff = async (id) => {
 
 export const updateStaff = async (id, staffRequest) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, staffRequest);
+    const response = await api.put(`${baseURL}/${id}`, staffRequest);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -59,7 +56,7 @@ export const updateStaff = async (id, staffRequest) => {
 
 export const addStaff = async (staffRequest) => {
   try {
-    const response = await axiosInstance.post(``, staffRequest);
+    const response = await api.post(`${baseURL}`, staffRequest);
     return response.data;
   } catch (error) {
     console.error(

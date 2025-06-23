@@ -1,9 +1,6 @@
-import axios from "axios";
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/admin/client",
-  withCredentials: true, // ❗ Gửi cookie (JSESSIONID) qua CORS
-});
+const baseURL =  "/admin/client",
 
 // params: { page }, // <- Đây là shorthand của { page: page }
 export const getAllClient = async (page = 0, keyword = null) => {
@@ -13,7 +10,7 @@ export const getAllClient = async (page = 0, keyword = null) => {
     if (keyword && keyword.trim() !== "") {
       params.keyword = keyword.trim();
     }
-    const response = await axiosInstance.get("", { params });
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (err) {
     console.error(
@@ -26,7 +23,7 @@ export const getAllClient = async (page = 0, keyword = null) => {
 
 export const detailClient = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await api.get(`${baseURL}/${id}`);
     return response.data;
   } catch (err) {
     console.error("Có lỗi khi Detail Client phía admin:", error);
@@ -36,7 +33,7 @@ export const detailClient = async (id) => {
 
 export const updateClient = async (id, clientRequest) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, clientRequest);
+    const response = await api.put(`${baseURL}/${id}`, clientRequest);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -57,7 +54,7 @@ export const updateClient = async (id, clientRequest) => {
 
 export const addClient = async (clientRequest) => {
   try {
-    const response = await axiosInstance.post(``, clientRequest);
+    const response = await api.post(`${baseURL}`, clientRequest);
     return response.data;
   } catch (error) {
     console.error(
@@ -71,7 +68,7 @@ export const addClient = async (clientRequest) => {
 //xem các địa chỉ của 1 khách
 export const getAdressesClient = async (id) => {
   try {
-    const response = await axiosInstance.get(`/addresses/${id}`);
+    const response = await api.get(`${baseURL}/addresses/${id}`);
     return response.data;
   } catch (err) {
     console.log(
@@ -85,7 +82,7 @@ export const getAdressesClient = async (id) => {
 //xem từng địa chỉ của khách hàng (trang chỉnh sửa)
 export const getAdress = async (id) => {
   try {
-    const response = await axiosInstance.get(`/address/${id}`);
+    const response = await api.get(`${baseURL}/address/${id}`);
     return response.data;
   } catch (err) {
     console.log(
@@ -99,7 +96,7 @@ export const getAdress = async (id) => {
 //update 1 địa chỉ
 export const updateAddress = async (id, addressRequest) => {
   try {
-    const response = await axiosInstance.put(`/address/${id}`, addressRequest);
+    const response = await api.put(`${baseURL}/address/${id}`, addressRequest);
     return response.data;
   } catch (err) {
     if (err.response) {
@@ -121,7 +118,7 @@ export const updateAddress = async (id, addressRequest) => {
 
 export const getAdressListOfClient = async (clientId) => {
   try {
-    const response = await axios.get(`/admin/address/${clientId}`);
+    const response = await api.get(`/admin/address/${clientId}`);
     return response.data;
   } catch (err) {
     console.log(

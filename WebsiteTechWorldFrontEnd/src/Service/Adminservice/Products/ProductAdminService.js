@@ -1,20 +1,17 @@
-import axios from 'axios';
+import api from '@/Service/LoginService/axiosInstance';
 import { da } from 'element-plus/es/locales.mjs';
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/admin',
-  withCredentials: true // ❗ Gửi cookie (JSESSIONID) qua CORS
-});
+ const baseURL= '/admin';
 
 
 // Hàm chung lấy dữ liệu từ API
 const fetchData = async (url) => {
   try {
-    const response = await axiosInstance.get(url);
+    const response = await api.get(`${baseURL}${url}`);
     return response.data; // trả về data từ server
   } catch (error) {
-    console.error(`Lỗi lấy dữ liệu từ ${url}:`, error);
-    throw error.response?.data || `Lỗi lấy dữ liệu từ ${url}`;
+    console.error(`Lỗi lấy dữ liệu từ ${baseURL} + ${url}:`, error);
+    throw error.response?.data || `Lỗi lấy dữ liệu từ ${baseURL} + ${url}`;
   }
 }
 
@@ -30,7 +27,7 @@ const fetchData = async (url) => {
 
 const postData = async (url, data) => {
   try {
-    const response = await axiosInstance.post(url, data);
+    const response = await api.post(`${baseURL}${url}`, data);
     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
   } catch (error) {
     console.error('Lỗi gửi dữ liệu tới /admin/product:', {
@@ -46,7 +43,7 @@ const postData = async (url, data) => {
 export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
   const urlProduct = '/admin/product'
   const url = urlProduct + '/ten-san-pham';
-  return axios.get(url, {
+  return api.get(url, {
     params: {
       tenSanPham,
       pageNo,
@@ -58,22 +55,22 @@ export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
 const postDataSpct = async (url, data) => {
   try {
 
-    const response = await axiosInstance.post(url, data, {
+    const response = await api.post(`${baseURL}${url}`, data, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
     return response.data;
   } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
-    throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
+    console.error(`Lỗi gửi dữ liệu tới ${baseURL}${url}:`, error);
+    throw error.response?.data || `Lỗi gửi dữ liệu tới ${baseURL}${url}`;
   }
 };
 
 
 // const postDataSpct = async (url, data) => {
 //   try {
-//     const response = await axiosInstance.post(url, data, {
+//     const response = await api.post(url, data, {
 //       headers: {
 //         'Content-Type': 'application/json',
 //       },
@@ -87,22 +84,22 @@ const postDataSpct = async (url, data) => {
 
 const putData = async (url, data) => {
   try {
-    const response = await axiosInstance.put(url, data);
+    const response = await api.put(`${baseURL}${url}`, data);
     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
   } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
-    throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
+    console.error(`Lỗi gửi dữ liệu tới ${baseURL}${url}:`, error);
+    throw error.response?.data || `Lỗi gửi dữ liệu tới ${baseURL}${url}`;
   }
 };
 
 
 const deleteData = async (url) => {
   try {
-    const response = await axiosInstance.delete(url);
+    const response = await api.delete(`${baseURL}${url}`);
     return response.data; // hoặc response.data.content tùy backend
   } catch (error) {
-    console.error(`Lỗi xóa dữ liệu tại ${url}:`, error);
-    throw error.response?.data || `Lỗi xóa dữ liệu tại ${url}`;
+    console.error(`Lỗi xóa dữ liệu tại ${baseURL}${url}:`, error);
+    throw error.response?.data || `Lỗi xóa dữ liệu tại ${baseURL}${url}`;
   }
 };
 
@@ -230,7 +227,7 @@ export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
 export const loadCategory = (pageNo, pageSize) =>{
   const urlProduct = '/admin/product'
   const url = urlProduct + '/category';
-  return axios.get(url,{
+  return api.get(url,{
     params:{
       pageNo,
       pageSize
@@ -240,7 +237,7 @@ export const loadCategory = (pageNo, pageSize) =>{
 }
 export const loadSanPhamChiTiet = (pageNo,pageSize) => {
   const urlProduct = '/admin/sanPhamChiTiet'
-  return axios.get(urlProduct, {
+  return api.get(urlProduct, {
     params: {
       pageNo,
       pageSize

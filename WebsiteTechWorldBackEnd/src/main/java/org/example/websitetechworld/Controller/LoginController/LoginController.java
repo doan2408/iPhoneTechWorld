@@ -1,5 +1,7 @@
 package org.example.websitetechworld.Controller.LoginController;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserLoginRequestDTO;
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserTokenRequestDTO;
@@ -22,10 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -63,6 +62,8 @@ public class LoginController {
                         Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(request.getTaiKhoan(), request.getMatKhau())
                         );
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
 
                         CustomUserDetails taiKhoan = (CustomUserDetails) authentication.getPrincipal();
 
@@ -157,29 +158,37 @@ public class LoginController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody UserTokenRequestDTO request) {
         String refreshToken = request.getRefreshToken();
-
-        //Tìm token trong DB
         Optional<UserToken> tokenOptional = userTokenService.findByToken(refreshToken);
         if (tokenOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Refresh token không hợp lệ hoặc không tồn tại"));
         }
-
         UserToken token = tokenOptional.get();
-
-        //Lấy thông tin người dùng từ token
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey("techworld1234567890techworld1234567890")
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+            if (!"refresh".equals(claims.get("type"))) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Token không phải refresh token"));
+            }
+            if (claims.getExpiration().before(new Date())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Refresh token đã hết hạn"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Refresh token không hợp lệ", "message", e.getMessage()));
+        }
         CustomUserDetails userDetails = userTokenService.loadUserByToken(token);
-
-        //Sinh access token mới
         String newAccessToken = tokenService.generateAccessToken(userDetails);
-
         UserTokenResponseDTO responseDTO = new UserTokenResponseDTO(
                 newAccessToken,
-                refreshToken, // dùng lại refresh token cũ
-                Instant.now().plus(2, ChronoUnit.HOURS), // hoặc đọc thời gian từ JWT nếu bạn thích
+                refreshToken,
+                Instant.now().plus(2, ChronoUnit.HOURS),
                 token.getExpiresAt()
         );
-
         return ResponseEntity.ok(responseDTO);
     }
 

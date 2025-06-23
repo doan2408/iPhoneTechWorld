@@ -1,16 +1,12 @@
-import axios from 'axios';
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/admin/phieu-giam-gia',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+
+const baseURL= '/admin/phieu-giam-gia',
+
 
 export const getAll = async (params) => {
   try {
-    const response = await axiosInstance.get('', { params });
+    const response = await api.get(baseURL, { params });
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách phiếu giảm giá:', error);
@@ -20,7 +16,7 @@ export const getAll = async (params) => {
 
 export const detail = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await api.get( baseURL +`/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi lấy chi tiết phiếu giảm giá với ID ${id}:`, error);
@@ -30,7 +26,7 @@ export const detail = async (id) => {
 
 export const add = async (data) => {
   try {
-    const response = await axiosInstance.post('', data);
+    const response = await api.post(baseURL, data);
     return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm phiếu giảm giá:', error);
@@ -40,7 +36,7 @@ export const add = async (data) => {
 
 export const update = async (id, data) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, data);
+    const response = await api.put( baseURL +`/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật phiếu giảm giá với ID ${id}:`, error);
@@ -50,7 +46,7 @@ export const update = async (id, data) => {
 
 export const deletePhieuGiamGia = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/${id}`);
+    const response = await api.delete( baseURL +`/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi xóa phiếu giảm giá với ID ${id}:`, error);
@@ -60,7 +56,7 @@ export const deletePhieuGiamGia = async (id) => {
 
 export const getAllKhachHang = async () => {
   try {
-    const response = await axiosInstance.get('/khach-hang');
+    const response = await api.get(baseURL +'/khach-hang');
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách khách hàng:', error);

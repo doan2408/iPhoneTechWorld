@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Config;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,7 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/api/auth/")) {
+        System.out.println("Request Path: " + requestPath);
+        if (requestPath.startsWith("/api/auth/") && !requestPath.equals("/api/auth/me")) {
             System.out.println("Bỏ qua xác thực cho: " + requestPath);
             filterChain.doFilter(request, response);
             return;
@@ -39,29 +41,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("Không tìm thấy token trong header");
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Thiếu token xác thực\"}");
             return;
         }
 
         String jwt = authHeader.substring(7);
         try {
             String username = jwtService.extractUsername(jwt);
+            System.out.println("Username từ token: " + username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtService.isTokenValid(jwt)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails, null, userDetails.getAuthorities()
                             );
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    System.out.println("Xác thực thành công cho: " + username);
+                } else {
+                    System.out.println("Token không hợp lệ hoặc hết hạn");
                 }
             }
             filterChain.doFilter(request, response);
         } catch (SignatureException e) {
-            System.err.println("Lỗi xác minh token: " + e.getMessage());
+            System.err.println("Lỗi xác minh chữ ký: " + e.getMessage());
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Token không hợp lệ\", \"message\": \"" + e.getMessage() + "\"}");
+            return;
+        } catch (ExpiredJwtException e) {
+            System.err.println("Token hết hạn: " + e.getMessage());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token hết hạn\", \"message\": \"" + e.getMessage() + "\"}");
+            return;
         } catch (Exception e) {
             System.err.println("Lỗi khác: " + e.getMessage());
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

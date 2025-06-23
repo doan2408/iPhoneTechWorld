@@ -799,7 +799,7 @@ VALUES
 INSERT INTO chi_tiet_hoa_don (id_hoa_don, id_san_pham_chi_tiet, ten_san_pham, mo_ta, so_luong, don_gia)
 VALUES
     (1, 1, N'iPhone 16', N'Ip16', 1, 20000000.00),
-    (2, 2, N'iPhone 16 Pro', N'Ip16Pro', 1, 25000000.00),
+    (2, 2, N'iPhone 16', N'Ip16Pro', 1, 25000000.00),
     (3, 3, N'iPhone 15', N'ip15', 1, 15000000.00),
     (4, 4, N'iPhone 14', N'ip14', 1, 12000000.00),
     (5, 5, N'iPhone 13', N'ip13', 1, 10000000.00),

@@ -3,11 +3,15 @@ package org.example.websitetechworld.Services.LoginServices;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Repository.JointAccount;
 import org.example.websitetechworld.Repository.TokenService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -15,10 +19,23 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class TokenServiceImpl implements TokenService {
 
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // hoặc dùng @Value cấu hình ngoài
+    @Value("${jwt.secret}")
+    private String secretKey;// hoặc dùng @Value cấu hình ngoài
 
     private static final long ACCESS_TOKEN_EXP_MS = 2 * 60 * 60 * 1000;
     private static final long REFRESH_TOKEN_EXP_MS = 7 * 24 * 60 * 60 * 1000;
+
+
+    @PostConstruct
+    public void init() {
+        System.out.println("TokenService Secret: " + secretKey);
+        if (secretKey == null || secretKey.isEmpty()) {
+            throw new IllegalStateException("JWT_SECRET không được cấu hình!");
+        }
+    }
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     @Override
     public String generateAccessToken(CustomUserDetails user) {
@@ -34,7 +51,7 @@ public class TokenServiceImpl implements TokenService {
                 .claim("trangThai", account.getTrangThai())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP_MS))
-                .signWith(key)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -45,7 +62,7 @@ public class TokenServiceImpl implements TokenService {
                 .claim("type", "refresh")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP_MS))
-                .signWith(key)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 }
