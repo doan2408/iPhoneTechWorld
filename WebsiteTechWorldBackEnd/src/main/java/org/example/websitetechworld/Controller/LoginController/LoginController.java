@@ -95,7 +95,7 @@ public class LoginController {
 
 //                        String roles = authentication.getAuthorities().toString();
 
-                        // ✅ Mới - đúng format JSON array
+                        //đúng format JSON array
                         List<String> roles = authentication.getAuthorities()
                                 .stream()
                                 .map(authority -> authority.getAuthority())
