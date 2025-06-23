@@ -1,13 +1,10 @@
-import axios from 'axios';
+import api from "../LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080',
-  withCredentials: true // ❗ Gửi cookie (JSESSIONID) qua CORS
-});
+ const baseURL = '/home';
 
 export const getAllSanPham = async () => {
   try {
-    const response = await axiosInstance.get('/home');
+    const response = await api.get(`${baseURL}`);
     return response.data;
   } catch (error) {
     console.error('Có lỗi khi lấy sản phẩm:', error);

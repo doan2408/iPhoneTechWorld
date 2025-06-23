@@ -4,8 +4,8 @@ import { reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 
-const tai_khoan = ref("");
-const mat_khau = ref("");
+const taiKhoan = ref("");
+const matKhau = ref("");
 const confirm_mat_khau = ref("");
 const errors = reactive({})
 const isLoading = ref(false);
@@ -15,15 +15,15 @@ const store = useStore();
 const emit = defineEmits(["switchToRegister"]);
 
 const handleLogin = async () => {
-  if (!tai_khoan.value.trim() || !mat_khau.value.trim()) {
+  if (!taiKhoan.value.trim() || !matKhau.value.trim()) {
     error.value = "Vui lòng nhập tài khoản và mật khẩu";
     return;
   }
   try {
     isLoading.value = true;
     await store.dispatch("login", {
-      tai_khoan: tai_khoan.value,
-      mat_khau: mat_khau.value,
+      taiKhoan: taiKhoan.value,
+      matKhau: matKhau.value,
     });
 
     // 👇 Lấy đường dẫn muốn quay về (nếu có)
@@ -75,9 +75,9 @@ function getDefaultRedirect() {
 
 const isLogin = ref(true); // true: đăng nhập, false: đăng ký
 
-watch([tai_khoan, mat_khau], () => {
-  delete errors.tai_khoan;
-  delete errors.mat_khau;
+watch([taiKhoan, matKhau], () => {
+  delete errors.taiKhoan;
+  delete errors.matKhau;
   delete errors.server;
 });
 </script>
@@ -90,27 +90,27 @@ watch([tai_khoan, mat_khau], () => {
         <div>
           <label>Tài khoản:</label>
           <input
-            v-model.trim="tai_khoan"
+            v-model.trim="taiKhoan"
             type="text"
             placeholder="Nhập tài khoản"
             class="form-control"
             required
           />
-          <div v-if="errors.tai_khoan" class="text-danger mb-1">
-            {{ errors.tai_khoan }}
+          <div v-if="errors.taiKhoan" class="text-danger mb-1">
+            {{ errors.taiKhoan }}
           </div>
         </div>
         <div>
           <label>Mật khẩu:</label>
           <input
-            v-model.trim="mat_khau"
+            v-model.trim="matKhau"
             type="password"
             placeholder="Nhập mật khẩu"
             class="form-control"
             required
           />
-          <div v-if="errors.mat_khau" class="text-danger mb-1">
-            {{ errors.mat_khau }}
+          <div v-if="errors.matKhau" class="text-danger mb-1">
+            {{ errors.matKhau }}
           </div>
         </div>
         <div v-if="errors.server" class="text-danger mb-1">
