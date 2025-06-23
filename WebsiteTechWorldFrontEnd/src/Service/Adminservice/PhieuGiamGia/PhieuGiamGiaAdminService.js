@@ -1,7 +1,7 @@
 import api from "@/Service/LoginService/axiosInstance";
 
 
-const baseURL= '/admin/phieu-giam-gia',
+const baseURL= '/admin/phieu-giam-gia';
 
 
 export const getAll = async (params) => {

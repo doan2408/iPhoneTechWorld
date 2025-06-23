@@ -1,22 +1,36 @@
+import { ElMessage } from "element-plus";
 import api from "./axiosInstance";
 
 const login = async (taiKhoan, matKhau) => {
   try {
-    console.log("Gửi payload:", { taiKhoan, matKhau });
     const response = await api.post(`/api/auth/login`, { taiKhoan, matKhau });
-    console.log("Phản hồi từ server:", response.data);
     const { accessToken, refreshToken, fullName, id, roles, message } = response.data;
+
     if (!accessToken || !refreshToken) {
       throw new Error("Phản hồi thiếu accessToken hoặc refreshToken");
     }
+
     let parsedRoles = Array.isArray(roles) ? roles : [roles.role || roles];
     return { message, roles: parsedRoles, accessToken, refreshToken, fullName, id };
+
   } catch (error) {
     console.error("Lỗi trong LoginService.login:", error);
-    const errorMessage = error.response?.data?.message || error.message || "Lỗi server không xác định";
-    throw [{ field: "server", message: errorMessage }];
+
+    const res = error.response?.data;
+
+    if (Array.isArray(res)) {
+      throw res;
+    }
+
+    // Nếu backend trả về lỗi object
+    throw [{
+      field: "server",
+      message: res?.message || error.message || "Đăng nhập thất bại",
+    }];
   }
 };
+
+
 
 const getCurrentUser = async () => {
   try {
@@ -40,12 +54,51 @@ const refreshToken = async (refreshToken) => {
   }
 };
 
+// const logout = async () => {
+//   try {
+//     const refreshToken = localStorage.getItem("refreshToken");
+
+//     await api.post(`/api/auth/logout`, {
+//       refreshToken, // gửi trong body
+//     });
+
+//     // Xóa local token
+//     localStorage.removeItem("accessToken");
+//     localStorage.removeItem("refreshToken");
+
+//     ElMessage.success("Đăng xuất thành công. Đang chuyển hướng...");
+
+//     // Chuyển hướng về trang login
+//     setTimeout(() => {
+//       window.location.href = "/login";
+
+//       // Sau khi chuyển hướng xong → reload lại sau 1 giây
+//       setTimeout(() => {
+//         window.location.reload();
+//       }, 1000);
+//     }, 300); // Delay 1 giây để tránh đụng context cũ
+//   } catch (error) {
+//     console.error("Lỗi đăng xuất:", error);
+//   }
+// };
+
+
 const logout = async () => {
   try {
-    await api.post(`/api/auth/logout`);
+    await api.post("/api/auth/logout", {
+      refreshToken: localStorage.getItem("refreshToken"),
+    });
   } catch (error) {
-    console.error("Lỗi đăng xuất:", error);
+    console.error("Logout fail:", error);
+  } finally {
+    // Dọn token trước khi reload
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // Xong rồi mới reload lại trang đăng nhập
+    window.location.href = "/login";
   }
 };
+
 
 export default { login, getCurrentUser, refreshToken, logout };

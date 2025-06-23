@@ -1,6 +1,6 @@
 import api from "@/Service/LoginService/axiosInstance";
 
-const baseURL = "/admin/staff",
+const baseURL = "/admin/staff";
 
 export const getAllStaff = async (page = 0, keyword = null) => {
   try {

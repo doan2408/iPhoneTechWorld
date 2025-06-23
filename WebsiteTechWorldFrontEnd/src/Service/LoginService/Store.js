@@ -54,8 +54,14 @@ const store = createStore({
   actions: {
     async login({ commit, dispatch }, { taiKhoan, matKhau }) {
       try {
-        const { message, roles, accessToken, refreshToken, fullName, id } = await LoginService.login(taiKhoan, matKhau);
-        console.log("Đăng nhập thành công:", { message, roles, accessToken, refreshToken });
+        const { message, roles, accessToken, refreshToken, fullName, id } =
+          await LoginService.login(taiKhoan, matKhau);
+        console.log("Đăng nhập thành công:", {
+          message,
+          roles,
+          accessToken,
+          refreshToken,
+        });
         commit("setRoles", roles);
         commit("setTokens", { accessToken, refreshToken });
         commit("setLoggedIn", true);

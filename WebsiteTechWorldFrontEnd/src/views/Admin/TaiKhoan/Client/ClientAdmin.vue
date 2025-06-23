@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref, watch } from "vue";
 import { getAllClient, addClient, updateClient, detailClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElIcon } from "element-plus";
 import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue";
 
 const clientList = ref([]);
@@ -33,17 +33,9 @@ const clientRequest = ref({
 const errors = reactive({});
 const formRef = ref(null);
 
-// Validation rules
+// // Validation rules
 const rules = ref({
   tenKhachHang: [{ required: true, message: "Vui lòng nhập tên khách hàng", trigger: "blur" }],
-  taiKhoan: [{ required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" }],
-
-  email: [
-    { required: true, message: "Vui lòng nhập email", trigger: "blur" },
-    { type: "email", message: "Email không hợp lệ", trigger: "blur" }
-  ],
-  sdt: [{ required: true, message: "Vui lòng nhập số điện thoại", trigger: "blur" }],
-  ngaySinh: [{ required: true, message: "Vui lòng chọn năm sinh", trigger: "change" }]
 });
 
 // Load client
@@ -170,8 +162,8 @@ const handleAddClient = async () => {
   isSubmitting.value = true;
 
   try {
-    await formRef.value.validate(async (valid) => {
-      if (valid) {
+    const isValid = await formRef.value.validate();
+      if (isValid) {
         if (isEditMode.value) {
           const payload = { ...clientRequest.value };
           if (!payload.matKhau) {
@@ -185,8 +177,7 @@ const handleAddClient = async () => {
         }
         closeModal();
         loadClient(currentPage.value, searchKeyword.value || null);
-      }
-    });
+      };
   } catch (err) {
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
@@ -244,7 +235,7 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
-      <el-loading-spinner />
+      <el-icon :icon="Loading" />
       <p>Đang tải dữ liệu...</p>
     </div>
 

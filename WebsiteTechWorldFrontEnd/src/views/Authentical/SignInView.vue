@@ -4,10 +4,10 @@ import { reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 
-const taiKhoan = ref("");
-const matKhau = ref("");
+const tai_khoan = ref("");
+const mat_khau = ref("");
 const confirm_mat_khau = ref("");
-const errors = reactive({})
+const errors = reactive({});
 const isLoading = ref(false);
 const router = useRouter();
 const route = useRoute(); // Khai báo useRoute để lấy route.query
@@ -15,15 +15,15 @@ const store = useStore();
 const emit = defineEmits(["switchToRegister"]);
 
 const handleLogin = async () => {
-  if (!taiKhoan.value.trim() || !matKhau.value.trim()) {
-    error.value = "Vui lòng nhập tài khoản và mật khẩu";
+  if (!tai_khoan.value.trim() || !mat_khau.value.trim()) {
+    ElMessage.error("Vui lòng nhập tài khoản và mật khẩu");
     return;
   }
   try {
     isLoading.value = true;
     await store.dispatch("login", {
-      taiKhoan: taiKhoan.value,
-      matKhau: matKhau.value,
+      taiKhoan: tai_khoan.value,
+      matKhau: mat_khau.value,
     });
 
     // 👇 Lấy đường dẫn muốn quay về (nếu có)
@@ -51,12 +51,11 @@ const handleLogin = async () => {
     console.log("Error:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
-        if(field === "trang_thai") {
+        if (field === "trang_thai") {
           ElMessage.error(message);
+        } else {
+          errors[field] = message; //lỗi cấm tài khoản
         }
-        else [
-          errors[field] = message //lỗi cấm tài khoản
-        ]
       });
     }
   } finally {
@@ -72,12 +71,11 @@ function getDefaultRedirect() {
   return "/"; // fallback
 }
 
-
 const isLogin = ref(true); // true: đăng nhập, false: đăng ký
 
-watch([taiKhoan, matKhau], () => {
-  delete errors.taiKhoan;
-  delete errors.matKhau;
+watch([tai_khoan, mat_khau], () => {
+  delete errors.tai_khoan;
+  delete errors.mat_khau;
   delete errors.server;
 });
 </script>
@@ -90,41 +88,43 @@ watch([taiKhoan, matKhau], () => {
         <div>
           <label>Tài khoản:</label>
           <input
-            v-model.trim="taiKhoan"
+            v-model.trim="tai_khoan"
             type="text"
             placeholder="Nhập tài khoản"
             class="form-control"
-            required
           />
-          <div v-if="errors.taiKhoan" class="text-danger mb-1">
-            {{ errors.taiKhoan }}
+          <div v-if="errors.tai_khoan" class="text-danger mb-1">
+            {{ errors.tai_khoan }}
           </div>
         </div>
         <div>
           <label>Mật khẩu:</label>
           <input
-            v-model.trim="matKhau"
+            v-model.trim="mat_khau"
             type="password"
             placeholder="Nhập mật khẩu"
             class="form-control"
-            required
           />
-          <div v-if="errors.matKhau" class="text-danger mb-1">
-            {{ errors.matKhau }}
+          <div v-if="errors.mat_khau" class="text-danger mb-1">
+            {{ errors.mat_khau }}
           </div>
         </div>
         <div v-if="errors.server" class="text-danger mb-1">
           {{ errors.server }}
         </div>
         <div class="forgot-password-wrapper">
-          <router-link to="/forgot-password" class="forgot-password-link">Quên mật khẩu?</router-link>
+          <router-link to="/forgot-password" class="forgot-password-link"
+            >Quên mật khẩu?</router-link
+          >
         </div>
         <button type="submit" :disabled="isLoading" class="btn btn-primary">
           {{ isLoading ? "Đang xử lý..." : "Đăng nhập" }}
         </button>
         <p class="switch-mode">
           Chưa có tài khoản?
-          <span @click="emit('switchToRegister')" class="switch-link">Tạo tài khoản</span>
+          <span @click="emit('switchToRegister')" class="switch-link"
+            >Tạo tài khoản</span
+          >
         </p>
       </form>
     </div>
@@ -176,11 +176,12 @@ watch([taiKhoan, matKhau], () => {
 
 /* Animation gradient cho chữ */
 @keyframes gradientShift {
-  0%, 100% { 
-    background-position: 0% 50%; 
+  0%,
+  100% {
+    background-position: 0% 50%;
     transform: scale(1);
   }
-  50% { 
+  50% {
     background-position: 100% 50%;
     transform: scale(1.02);
   }
@@ -188,24 +189,31 @@ watch([taiKhoan, matKhau], () => {
 
 /* Gạch chân đẹp cho tiêu đề */
 .login-container h2::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #1ed6ff, #00bfff, #1ed6ff, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #1ed6ff,
+    #00bfff,
+    #1ed6ff,
+    transparent
+  );
   border-radius: 3px;
   animation: underlineGlow 2s ease-in-out infinite alternate;
 }
 
 @keyframes underlineGlow {
-  0% { 
+  0% {
     box-shadow: 0 0 5px rgba(30, 214, 255, 0.5);
     opacity: 0.8;
   }
-  100% { 
+  100% {
     box-shadow: 0 0 15px rgba(30, 214, 255, 0.8);
     opacity: 1;
   }
@@ -428,7 +436,8 @@ p[style*="color: red"] {
   background: rgba(26, 188, 156, 0.1); /* Nền mờ khi hover */
 }
 
-input.form-control[type="text"], [type="password"] {
+input.form-control[type="text"],
+[type="password"] {
   color: #ffffff !important;
 }
 </style>

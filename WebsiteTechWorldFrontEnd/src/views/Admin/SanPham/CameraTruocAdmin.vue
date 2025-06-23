@@ -234,7 +234,7 @@ const submitForm = async () => {
 
 const openDetail = (row) => {
   isEditMode.value = true;
-  Object.assign(formData, data);
+  Object.assign(formData, row);
   dialogVisible.value = true;
 };
 

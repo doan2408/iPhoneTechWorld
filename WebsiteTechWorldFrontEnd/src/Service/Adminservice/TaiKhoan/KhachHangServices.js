@@ -1,6 +1,6 @@
 import api from "@/Service/LoginService/axiosInstance";
 
-const baseURL =  "/admin/client",
+const baseURL =  "/admin/client";
 
 // params: { page }, // <- Đây là shorthand của { page: page }
 export const getAllClient = async (page = 0, keyword = null) => {

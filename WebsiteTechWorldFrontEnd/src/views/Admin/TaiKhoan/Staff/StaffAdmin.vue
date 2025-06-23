@@ -235,7 +235,7 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
-      <el-loading-spinner />
+      <el-icon :icon="Loading" />
       <p>Đang tải dữ liệu...</p>
     </div>
 
