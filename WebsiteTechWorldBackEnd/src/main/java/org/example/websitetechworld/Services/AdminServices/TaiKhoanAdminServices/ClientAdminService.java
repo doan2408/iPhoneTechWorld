@@ -215,7 +215,7 @@ public class ClientAdminService {
             if(!errors.isEmpty()) {
                 throw new ValidationException(errors);
             }
-
+            existing.setTaiKhoan(khachHangRequest.getTaiKhoan());
             existing.setTenKhachHang(khachHangRequest.getTenKhachHang());
             existing.setSdt(khachHangRequest.getSdt());
             existing.setEmail(khachHangRequest.getEmail());
