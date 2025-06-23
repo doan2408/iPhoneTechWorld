@@ -1,6 +1,11 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
-import { getAllClient, addClient, updateClient, detailClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { onMounted, reactive, ref, watch, nextTick } from "vue";
+import {
+  getAllClient,
+  addClient,
+  updateClient,
+  detailClient,
+} from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
 import { ElMessage, ElIcon } from "element-plus";
 import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue";
 
@@ -27,16 +32,48 @@ const clientRequest = ref({
   sdt: "",
   trangThai: "ACTIVE",
   gioiTinh: true,
-  ngaySinh: ""
+  ngaySinh: "",
 });
 
 const errors = reactive({});
 const formRef = ref(null);
+const formKey = ref(0);
 
-// // Validation rules
+// Validation rules
 const rules = ref({
-  tenKhachHang: [{ required: true, message: "Vui lòng nhập tên khách hàng", trigger: "blur" }],
+  tenKhachHang: [
+    {
+      required: true,
+      message: "Vui lòng nhập tên khách hàng",
+      trigger: "blur",
+    },
+  ],
 });
+
+// Error handling utilities
+const setError = (field, message) => {
+  errors[field] = message;
+};
+
+const clearError = (field) => {
+  if (errors.hasOwnProperty(field)) {
+    delete errors[field];
+  }
+};
+
+const clearAllErrors = () => {
+  const keys = [...Object.keys(errors)];
+  keys.forEach((key) => {
+    clearError(key);
+  });
+
+  // Force reactivity update
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.clearValidate();
+    }
+  });
+};
 
 // Load client
 const loadClient = async (page = 0, keyword = null) => {
@@ -47,7 +84,8 @@ const loadClient = async (page = 0, keyword = null) => {
     currentPage.value = page;
     totalPages.value = response.totalPages;
   } catch (err) {
-    error.value = err.message || "An error was thrown while loading the clients";
+    error.value =
+      err.message || "An error was thrown while loading the clients";
   } finally {
     isLoading.value = false;
   }
@@ -109,15 +147,33 @@ const openAddModal = () => {
   isEditMode.value = false;
   editingClientId.value = null;
   resetForm();
-  resetErrors();
+  clearAllErrors();
+  formKey.value += 1; // Force re-render form
+
+  // Reset Element Plus form validation
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.resetFields();
+      formRef.value.clearValidate();
+    }
+  });
 };
 
 const openEditModal = async (clientId) => {
   showModal.value = true;
   isEditMode.value = true;
   editingClientId.value = clientId;
-  resetErrors();
-  
+  clearAllErrors();
+  formKey.value += 1; // Force re-render form
+
+  // Reset validation trước khi load data
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.resetFields();
+      formRef.value.clearValidate();
+    }
+  });
+
   try {
     isLoading.value = true;
     const response = await detailClient(clientId);
@@ -134,9 +190,15 @@ const openEditModal = async (clientId) => {
 const closeModal = () => {
   showModal.value = false;
   resetForm();
-  resetErrors();
+  clearAllErrors();
   isEditMode.value = false;
   editingClientId.value = null;
+
+  // Reset Element Plus form validation
+  if (formRef.value) {
+    formRef.value.resetFields();
+    formRef.value.clearValidate();
+  }
 };
 
 const resetForm = () => {
@@ -148,43 +210,43 @@ const resetForm = () => {
     sdt: "",
     trangThai: "ACTIVE",
     gioiTinh: true,
-    ngaySinh: ""
+    ngaySinh: "",
   };
-};
-
-const resetErrors = () => {
-  Object.keys(errors).forEach((key) => delete errors[key]);
 };
 
 // Handle submit
 const handleAddClient = async () => {
-  resetErrors();
+  clearAllErrors();
   isSubmitting.value = true;
 
   try {
     const isValid = await formRef.value.validate();
-      if (isValid) {
-        if (isEditMode.value) {
-          const payload = { ...clientRequest.value };
-          if (!payload.matKhau) {
-            delete payload.matKhau; // Không gửi matKhau nếu rỗng
-          }
-          await updateClient(editingClientId.value, payload);
-          ElMessage.success("Cập nhật khách hàng thành công");
-        } else {
-          await addClient(clientRequest.value);
-          ElMessage.success("Thêm khách hàng thành công");
+    if (isValid) {
+      if (isEditMode.value) {
+        const payload = { ...clientRequest.value };
+        if (!payload.matKhau) {
+          delete payload.matKhau; // Không gửi matKhau nếu rỗng
         }
-        closeModal();
-        loadClient(currentPage.value, searchKeyword.value || null);
-      };
+        await updateClient(editingClientId.value, payload);
+        ElMessage.success("Cập nhật khách hàng thành công");
+      } else {
+        await addClient(clientRequest.value);
+        ElMessage.success("Thêm khách hàng thành công");
+      }
+      closeModal();
+      loadClient(currentPage.value, searchKeyword.value || null);
+    }
   } catch (err) {
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
-        errors[field] = message;
+        setError(field, message);
       });
     } else {
-      ElMessage.error(isEditMode.value ? "Cập nhật khách hàng thất bại" : "Thêm khách hàng thất bại");
+      ElMessage.error(
+        isEditMode.value
+          ? "Cập nhật khách hàng thất bại"
+          : "Thêm khách hàng thất bại"
+      );
     }
   } finally {
     isSubmitting.value = false;
@@ -200,11 +262,7 @@ onMounted(() => {
   <div class="client-container">
     <!-- Add Client Button -->
     <div>
-      <el-button 
-        type="primary" 
-        @click="openAddModal"
-        class="add-client-btn"
-      >
+      <el-button type="primary" @click="openAddModal" class="add-client-btn">
         <el-icon><Plus /></el-icon>
         Thêm khách hàng
       </el-button>
@@ -265,14 +323,28 @@ onMounted(() => {
     <div v-if="clientList.length > 0">
       <h2>Danh sách khách hàng</h2>
       <el-table :data="clientList" style="width: 100%" stripe>
-        <el-table-column type="index" label="STT" width="60" :index="(index) => index + 1 + (currentPage * 10)" />
+        <el-table-column
+          type="index"
+          label="STT"
+          width="60"
+          :index="(index) => index + 1 + currentPage * 10"
+        />
         <el-table-column prop="maKhachHang" label="Mã khách hàng" width="120" />
-        <el-table-column prop="tenKhachHang" label="Tên khách hàng" width="150" />
+        <el-table-column
+          prop="tenKhachHang"
+          label="Tên khách hàng"
+          width="150"
+        />
         <el-table-column prop="taiKhoan" label="Tên đăng nhập" width="130" />
         <el-table-column prop="email" label="Email" width="180" />
         <el-table-column label="Địa chỉ" width="250">
           <template #default="scope">
-            <template v-if="scope.row.diaChi && scope.row.diaChi.find((dc) => dc.diaChiChinh)">
+            <template
+              v-if="
+                scope.row.diaChi &&
+                scope.row.diaChi.find((dc) => dc.diaChiChinh)
+              "
+            >
               {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).soNha }},
               {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
               {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
@@ -289,11 +361,11 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="Trạng thái" width="100">
           <template #default="scope">
-            <el-tag 
+            <el-tag
               :type="scope.row.trangThai === 'ACTIVE' ? 'success' : 'danger'"
               size="small"
             >
-              {{ scope.row.trangThai === 'ACTIVE' ? 'Hoạt động' : 'Ngừng' }}
+              {{ scope.row.trangThai === "ACTIVE" ? "Hoạt động" : "Ngừng" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -304,21 +376,25 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="Năm sinh" width="100">
           <template #default="scope">
-            {{ scope.row.ngaySinh ? new Date(scope.row.ngaySinh).getFullYear() : "Không" }}
+            {{
+              scope.row.ngaySinh
+                ? new Date(scope.row.ngaySinh).getFullYear()
+                : "Không"
+            }}
           </template>
         </el-table-column>
         <el-table-column label="Thao tác" width="150" fixed="right">
           <template #default="scope">
-            <el-button 
-              type="primary" 
-              size="small" 
-              :icon="Edit" 
+            <el-button
+              type="primary"
+              size="small"
+              :icon="Edit"
               @click="openEditModal(scope.row.id)"
               title="Chỉnh sửa"
             />
-            <el-button 
-              type="warning" 
-              size="small" 
+            <el-button
+              type="warning"
+              size="small"
               @click="$router.push(`/admin/client/addresses/${scope.row.id}`)"
               title="Xem địa chỉ"
             >
@@ -341,31 +417,39 @@ onMounted(() => {
     <!-- Client Modal (Add/Edit) -->
     <el-dialog
       v-model="showModal"
-      :title="isEditMode ? 'Cập nhật thông tin khách hàng' : 'Thêm khách hàng mới'"
+      :title="
+        isEditMode ? 'Cập nhật thông tin khách hàng' : 'Thêm khách hàng mới'
+      "
       width="800px"
       :before-close="closeModal"
     >
-      <el-form 
-        :model="clientRequest" 
-        :rules="rules"
+      <el-form
+        :model="clientRequest"
         ref="formRef"
-        label-width="140px" 
+        :key="formKey"
+        label-width="140px"
         label-position="left"
         @submit.prevent="handleAddClient"
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="Tên khách hàng" prop="tenKhachHang" :error="errors.tenKhachHang">
-              <el-input 
+            <el-form-item
+              label="Tên khách hàng"
+              :error="errors.tenKhachHang"
+            >
+              <el-input
                 v-model="clientRequest.tenKhachHang"
                 placeholder="Nhập tên khách hàng"
               />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
-            <el-form-item label="Tên đăng nhập" prop="taiKhoan" :error="errors.taiKhoan">
-              <el-input 
+            <el-form-item
+              label="Tên đăng nhập"
+              :error="errors.taiKhoan"
+            >
+              <el-input
                 v-model.trim="clientRequest.taiKhoan"
                 placeholder="Nhập tên đăng nhập"
               />
@@ -375,8 +459,8 @@ onMounted(() => {
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="Email" prop="email" :error="errors.email">
-              <el-input 
+            <el-form-item label="Email"  :error="errors.email">
+              <el-input
                 v-model.trim="clientRequest.email"
                 placeholder="Nhập email"
               />
@@ -384,8 +468,8 @@ onMounted(() => {
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="Số điện thoại" prop="sdt" :error="errors.sdt">
-              <el-input 
+            <el-form-item label="Số điện thoại"  :error="errors.sdt">
+              <el-input
                 v-model.trim="clientRequest.sdt"
                 placeholder="Nhập số điện thoại"
               />
@@ -394,10 +478,12 @@ onMounted(() => {
         </el-row>
 
         <el-row :gutter="20">
-
           <el-col :span="12">
             <el-form-item label="Trạng thái">
-              <el-select v-model="clientRequest.trangThai" placeholder="Chọn trạng thái">
+              <el-select
+                v-model="clientRequest.trangThai"
+                placeholder="Chọn trạng thái"
+              >
                 <el-option label="Hoạt động" value="ACTIVE" />
                 <el-option label="Ngừng hoạt động" value="INACTIVE" />
               </el-select>
@@ -405,7 +491,10 @@ onMounted(() => {
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="Năm sinh" prop="ngaySinh" :error="errors.ngaySinh">
+            <el-form-item
+              label="Năm sinh"
+              :error="errors.ngaySinh"
+            >
               <el-date-picker
                 v-model="clientRequest.ngaySinh"
                 type="date"
@@ -416,13 +505,15 @@ onMounted(() => {
               />
             </el-form-item>
           </el-col>
-
         </el-row>
 
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Giới tính">
-              <el-select v-model="clientRequest.gioiTinh" placeholder="Chọn giới tính">
+              <el-select
+                v-model="clientRequest.gioiTinh"
+                placeholder="Chọn giới tính"
+              >
                 <el-option label="Nam" :value="true" />
                 <el-option label="Nữ" :value="false" />
               </el-select>
@@ -436,12 +527,12 @@ onMounted(() => {
           <el-button @click="closeModal" :disabled="isSubmitting">
             Hủy
           </el-button>
-          <el-button 
-            type="primary" 
+          <el-button
+            type="primary"
             @click="handleAddClient"
             :loading="isSubmitting"
           >
-            {{ isEditMode ? 'Cập nhật' : 'Thêm khách hàng' }}
+            {{ isEditMode ? "Cập nhật" : "Thêm khách hàng" }}
           </el-button>
         </div>
       </template>
@@ -450,7 +541,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.staff-container {
+.client-container {
   padding: 24px;
   background: #f5f7fa;
   min-height: 100vh;
@@ -598,10 +689,10 @@ h2 {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .staff-container {
+  .client-container {
     padding: 16px;
   }
-  
+
   :deep(.el-dialog) {
     width: 95% !important;
     margin: 5vh auto !important;
