@@ -128,19 +128,19 @@ public class ClientAdminService {
     public KhachHang addClient(AdminClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
-        if(request.getTaiKhoan() != null) {
+        if(request.getTaiKhoan() != null && !request.getTaiKhoan().isEmpty()) {
             if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan().trim()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan().trim())) {
                 errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
             }
         }
 
-        if(request.getEmail() != null) {
+        if(request.getEmail() != null && !request.getEmail().isEmpty()) {
             if (khachHangRepository.existsByEmail(request.getEmail().trim()) || nhanVienRepository.existsByEmail(request.getEmail().trim())) {
                 errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
             }
         }
 
-        if(request.getSdt() != null) {
+        if(request.getSdt() != null && !request.getSdt().isEmpty()) {
             if (khachHangRepository.existsBySdt(request.getSdt().trim()) || nhanVienRepository.existsBySdt(request.getSdt().trim())) {
                 errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
             }
@@ -215,7 +215,7 @@ public class ClientAdminService {
             if(!errors.isEmpty()) {
                 throw new ValidationException(errors);
             }
-
+            existing.setTaiKhoan(khachHangRequest.getTaiKhoan());
             existing.setTenKhachHang(khachHangRequest.getTenKhachHang());
             existing.setSdt(khachHangRequest.getSdt());
             existing.setEmail(khachHangRequest.getEmail());

@@ -1,11 +1,9 @@
-import axios from 'axios';
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/admin/thong-ke' 
-});
+const baseURL= '/admin/thong-ke' 
 export const getDashboardAdmin = async (params) => {
   try {
-    const response = await axiosInstance.get('/tong-quan', { params });
+    const response = await api.get(`${baseURL}`+'/tong-quan', { params });
     return response.data;
   } catch (error) {
     console.error('Có lỗi khi lấy thống kê tổng quan:', error);
@@ -14,7 +12,7 @@ export const getDashboardAdmin = async (params) => {
 };
 export const getDoanhThuTheoThang = async (params) => {
   try {
-    const response = await axiosInstance.get('/doanh-thu-theo-thang', { params });
+    const response = await api.get(`${baseURL}`+'/doanh-thu-theo-thang', { params });
     return response.data;
   } catch (error) {
     console.error('Có lỗi khi lấy thống kê tổng quan:', error);
@@ -23,7 +21,7 @@ export const getDoanhThuTheoThang = async (params) => {
 };
 export const getSanPhamBanChay = async (params) => {
   try {
-    const response = await axiosInstance.get('/san-pham-ban-chay', { params });
+    const response = await api.get(`${baseURL}`+'/san-pham-ban-chay', { params });
     return response.data;
   } catch (error) {
     console.error('Có lỗi khi lấy thống kê tổng quan:', error);
@@ -33,7 +31,7 @@ export const getSanPhamBanChay = async (params) => {
 // api/thongke.js
 // export const getSanPhamBanChay = async ({ startDate, endDate, page = 1, limit = 10 }) => {
 //   try {
-//     const response = await axiosInstance.get('/san-pham-ban-chay', {
+//     const response = await api.get(`${baseURL}`+'/san-pham-ban-chay', {
 //       params: {
 //         startDate,
 //         endDate,

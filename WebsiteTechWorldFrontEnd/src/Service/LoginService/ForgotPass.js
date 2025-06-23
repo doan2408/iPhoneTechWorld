@@ -1,18 +1,12 @@
 // src/services/ForgotPass.js
-import axios from "axios";
+import api from "./axiosInstance";
 
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api/auth',
-  withCredentials: true, // gửi kèm cookie nếu backend có session/cors cần
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const BASE_PATH = "/api/auth";
 
 //sending code to email
 export const sendForgotPasswordEmail = async (email) => {
   try {
-    const response = await apiClient.post('/forgot-password', { email });
+    const response = await api.post(`${BASE_PATH}/forgot-password`, { email });
     return response.data;
   } catch (error) {
     // ném lỗi để component xử lý
@@ -23,7 +17,7 @@ export const sendForgotPasswordEmail = async (email) => {
 //verifycode from email
 export const verifycode = async (email, code) => {
   try {
-    const response = await apiClient.post('/verify-code', { email, code});
+    const response = await api.post(`${BASE_PATH}/verify-code`, { email, code });
     return response.data;
   }
   catch (err) {
@@ -34,7 +28,7 @@ export const verifycode = async (email, code) => {
 //reset password
 export const resetPassword = async (email, newPassword) => {
   try {
-    const response = await apiClient.post('/reset-password', { email, newPassword });
+    const response = await api.post(`${BASE_PATH}/reset-password`, { email, newPassword });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

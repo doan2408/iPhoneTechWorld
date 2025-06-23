@@ -31,12 +31,12 @@ const staffRequest = ref({
   trangThai: "ENABLE",
   chucVu: "STAFF",
   gioiTinh: true,
-  namSinh: ""
+  namSinh: "",
 });
 
 const errors = reactive({});
 
-//load staff - GIỮ NGUYÊN LOGIC CŨ
+//load staff
 const loadStaff = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
@@ -51,29 +51,29 @@ const loadStaff = async (page = 0, keyword = null) => {
   }
 };
 
-//search staff - GIỮ NGUYÊN LOGIC CŨ
+//search staff
 const performSearch = () => {
   //clear old timeout if has
-  if(searchTimeout.value) {
+  if (searchTimeout.value) {
     clearTimeout(searchTimeout.value);
   }
 
   //create new timeout -- delay 500ms after user stop typing
   searchTimeout.value = setTimeout(() => {
     currentPage.value = 0; //reset from first page when searching
-    loadStaff(0, searchKeyword.value || null)
+    loadStaff(0, searchKeyword.value || null);
   }, 500);
-}
+};
 
 const clearSearch = () => {
-    searchKeyword.value = ""
-}
+  searchKeyword.value = "";
+};
 
 watch(searchKeyword, () => {
   performSearch();
-})
+});
 
-//previous page - GIỮ NGUYÊN LOGIC CŨ
+//previous page
 const previousPage = () => {
   if (currentPage.value > 0) {
     currentPage.value -= 1;
@@ -83,7 +83,7 @@ const previousPage = () => {
   loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
-//next page - GIỮ NGUYÊN LOGIC CŨ
+//next page
 const nextPage = () => {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value += 1;
@@ -99,10 +99,11 @@ const firstPage = () => {
   loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
-const lastPage = () => { // Renamed from latePage to lastPage for clarity
+const lastPage = () => {
+  // Renamed from latePage to lastPage for clarity
   const lastPage = totalPages.value - 1;
   currentPage.value = lastPage;
-  loadStaff(currentPage.value, searchKeyword.value || null); 
+  loadStaff(currentPage.value, searchKeyword.value || null);
 };
 
 // Modal functions
@@ -119,7 +120,7 @@ const openEditModal = async (staffId) => {
   isEditMode.value = true;
   editingStaffId.value = staffId;
   resetErrors();
-  
+
   try {
     isLoading.value = true;
     const response = await detailStaff(staffId);
@@ -151,7 +152,7 @@ const resetForm = () => {
     trangThai: "ENABLE",
     chucVu: "STAFF",
     gioiTinh: true,
-    namSinh: ""
+    namSinh: "",
   };
 };
 
@@ -159,7 +160,7 @@ const resetErrors = () => {
   Object.keys(errors).forEach((key) => delete errors[key]);
 };
 
-// Handle submit - GIỮ NGUYÊN LOGIC CŨ
+// Handle submit
 const handleSubmit = async () => {
   resetErrors();
   isSubmitting.value = true;
@@ -174,7 +175,7 @@ const handleSubmit = async () => {
       await addStaff(staffRequest.value);
       ElMessage.success("Thêm nhân viên thành công");
     }
-    
+
     closeModal();
     loadStaff(currentPage.value, searchKeyword.value || null); // Reload current page
   } catch (err) {
@@ -183,7 +184,11 @@ const handleSubmit = async () => {
         errors[field] = message;
       });
     } else {
-      ElMessage.error(isEditMode.value ? "Cập nhật nhân viên thất bại" : "Thêm nhân viên thất bại");
+      ElMessage.error(
+        isEditMode.value
+          ? "Cập nhật nhân viên thất bại"
+          : "Thêm nhân viên thất bại"
+      );
     }
   } finally {
     isSubmitting.value = false;
@@ -199,16 +204,12 @@ onMounted(() => {
   <div class="staff-container">
     <!-- Add Staff Button -->
     <div>
-      <el-button 
-        type="primary" 
-        @click="openAddModal"
-        class="add-staff-btn"
-      >
+      <el-button type="primary" @click="openAddModal" class="add-staff-btn">
         <el-icon><Plus /></el-icon>
         Thêm nhân viên
       </el-button>
     </div>
-    
+
     <el-divider />
 
     <!-- Search Section -->
@@ -235,7 +236,7 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
-      <el-loading-spinner />
+      <el-icon :icon="Loading" />
       <p>Đang tải dữ liệu...</p>
     </div>
 
@@ -265,7 +266,12 @@ onMounted(() => {
     <div v-if="staffList.length > 0">
       <h2>Danh sách nhân viên</h2>
       <el-table :data="staffList" style="width: 100%" stripe>
-        <el-table-column type="index" label="STT" width="60" :index="(index) => index + 1 + (currentPage * 10)" />
+        <el-table-column
+          type="index"
+          label="STT"
+          width="60"
+          :index="(index) => index + 1 + currentPage * 10"
+        />
         <el-table-column prop="maNhanVien" label="Mã nhân viên" width="120" />
         <el-table-column prop="tenNhanVien" label="Tên nhân viên" width="150" />
         <el-table-column prop="taiKhoan" label="Tên đăng nhập" width="130" />
@@ -274,21 +280,21 @@ onMounted(() => {
         <el-table-column prop="diaChi" label="Địa chỉ" width="150" />
         <el-table-column label="Trạng thái" width="100">
           <template #default="scope">
-            <el-tag 
+            <el-tag
               :type="scope.row.trangThai === 'ENABLE' ? 'success' : 'danger'"
               size="small"
             >
-              {{ scope.row.trangThai === 'ENABLE' ? 'Đang làm' : 'Nghỉ' }}
+              {{ scope.row.trangThai === "ENABLE" ? "Đang làm" : "Nghỉ" }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="Chức vụ" width="100">
           <template #default="scope">
-            <el-tag 
+            <el-tag
               :type="scope.row.chucVu === 'ADMIN' ? 'primary' : 'info'"
               size="small"
             >
-              {{ scope.row.chucVu === 'ADMIN' ? 'Quản lý' : 'Nhân viên' }}
+              {{ scope.row.chucVu === "ADMIN" ? "Quản lý" : "Nhân viên" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -304,10 +310,10 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="Thao tác" width="100" fixed="right">
           <template #default="scope">
-            <el-button 
-              type="primary" 
-              size="small" 
-              :icon="Edit" 
+            <el-button
+              type="primary"
+              size="small"
+              :icon="Edit"
               @click="openEditModal(scope.row.id)"
               title="Chỉnh sửa"
             />
@@ -328,29 +334,31 @@ onMounted(() => {
     <!-- Staff Modal (Add/Edit) -->
     <el-dialog
       v-model="showModal"
-      :title="isEditMode ? 'Cập nhật thông tin nhân viên' : 'Thêm nhân viên mới'"
+      :title="
+        isEditMode ? 'Cập nhật thông tin nhân viên' : 'Thêm nhân viên mới'
+      "
       width="800px"
       :before-close="closeModal"
     >
-      <el-form 
-        :model="staffRequest" 
-        label-width="140px" 
+      <el-form
+        :model="staffRequest"
+        label-width="140px"
         label-position="left"
         @submit.prevent="handleSubmit"
       >
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Tên nhân viên" :error="errors.tenNhanVien">
-              <el-input 
+              <el-input
                 v-model="staffRequest.tenNhanVien"
                 placeholder="Nhập tên nhân viên"
               />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="Tên đăng nhập" :error="errors.taiKhoan">
-              <el-input 
+              <el-input
                 v-model.trim="staffRequest.taiKhoan"
                 placeholder="Nhập tên đăng nhập"
               />
@@ -361,18 +369,22 @@ onMounted(() => {
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Mật khẩu" :error="errors.matKhau">
-              <el-input 
+              <el-input
                 v-model.trim="staffRequest.matKhau"
                 type="password"
-                :placeholder="isEditMode ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'"
+                :placeholder="
+                  isEditMode
+                    ? 'Để trống nếu không đổi mật khẩu'
+                    : 'Nhập mật khẩu'
+                "
                 show-password
               />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="Email" :error="errors.email">
-              <el-input 
+              <el-input
                 v-model.trim="staffRequest.email"
                 placeholder="Nhập email"
               />
@@ -383,16 +395,16 @@ onMounted(() => {
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Số điện thoại" :error="errors.sdt">
-              <el-input 
+              <el-input
                 v-model.trim="staffRequest.sdt"
                 placeholder="Nhập số điện thoại"
               />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="Địa chỉ" :error="errors.diaChi">
-              <el-input 
+              <el-input
                 v-model="staffRequest.diaChi"
                 placeholder="Nhập địa chỉ"
               />
@@ -403,16 +415,22 @@ onMounted(() => {
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Trạng thái">
-              <el-select v-model="staffRequest.trangThai" placeholder="Chọn trạng thái">
+              <el-select
+                v-model="staffRequest.trangThai"
+                placeholder="Chọn trạng thái"
+              >
                 <el-option label="Đang làm" value="ENABLE" />
                 <el-option label="Nghỉ" value="DISABLE" />
               </el-select>
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="Chức vụ">
-              <el-select v-model="staffRequest.chucVu" placeholder="Chọn chức vụ">
+              <el-select
+                v-model="staffRequest.chucVu"
+                placeholder="Chọn chức vụ"
+              >
                 <el-option label="Nhân viên" value="STAFF" />
                 <!-- <el-option label="Quản lý" value="ADMIN" /> -->
               </el-select>
@@ -423,13 +441,16 @@ onMounted(() => {
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Giới tính">
-              <el-select v-model="staffRequest.gioiTinh" placeholder="Chọn giới tính">
+              <el-select
+                v-model="staffRequest.gioiTinh"
+                placeholder="Chọn giới tính"
+              >
                 <el-option label="Nam" :value="true" />
                 <el-option label="Nữ" :value="false" />
               </el-select>
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="Năm sinh" :error="errors.namSinh">
               <el-date-picker
@@ -450,12 +471,12 @@ onMounted(() => {
           <el-button @click="closeModal" :disabled="isSubmitting">
             Hủy
           </el-button>
-          <el-button 
-            type="primary" 
+          <el-button
+            type="primary"
             @click="handleSubmit"
             :loading="isSubmitting"
           >
-            {{ isEditMode ? 'Cập nhật' : 'Thêm nhân viên' }}
+            {{ isEditMode ? "Cập nhật" : "Thêm nhân viên" }}
           </el-button>
         </div>
       </template>
@@ -615,7 +636,7 @@ h2 {
   .staff-container {
     padding: 16px;
   }
-  
+
   :deep(.el-dialog) {
     width: 95% !important;
     margin: 5vh auto !important;

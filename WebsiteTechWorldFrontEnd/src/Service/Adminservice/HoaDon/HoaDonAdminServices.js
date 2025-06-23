@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "@/Service/LoginService/axiosInstance";
 import { ref } from "vue";
 
 const url_base = "/admin/hoa-don"
 
 // api getAll hoadon
 export const hoaDonGetAll = (pageNo = 0 ,pageSize = 10 ) => {
-    return axios.get(url_base,{
+    return api.get(url_base,{
         params:{
             pageNo,
             pageSize
@@ -16,13 +16,13 @@ export const hoaDonGetAll = (pageNo = 0 ,pageSize = 10 ) => {
 //api detail hoa don
 export const hoaDonDetail = (id) => {
     const url = url_base+ '/' + id;
-    return axios.get(url)
+    return api.get(url)
 }
 
 // api view lich su hoa don
 export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
     const url = url_base + '/' + id +'/lich-su';
-    return axios.get(url,{
+    return api.get(url,{
             params: {
                 pageNo,
                 pageSize
@@ -35,42 +35,42 @@ export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
 //api hien thi cac hoa don theo id nhan vien ..
 export const loadHoaDonByIdNhanVien = () => {
     const url = url_base + '/all-name-hoa-don';
-    return axios.get(url)
+    return api.get(url)
 }
 
 export const hoaDonSoftDelete = (id) => {
     const url = url_base+ '/soft-delete/' + id;
-    return axios.delete(url)
+    return api.delete(url)
 }
 
 export const hoaDonHardDelete = (id) => {
     const url = url_base+ '/hard-delete/' + id;
-    return axios.delete(url)
+    return api.delete(url)
 }
 
 export const doanhThuTheoThang = () => {
     const url = url_base+ '/doanh-thu-thang';
-    return axios.get(url)
+    return api.get(url)
 }
 
 export const countHoaDonPending = () => {
     const url = url_base+ '/count/pending';
-    return axios.get(url)
+    return api.get(url)
 }
 
 export const addProductIntoInvoice = (idHoaDon,requestData) => {
     const url =url_base +'/'+idHoaDon +'/them-san-pham';
-    return axios.post(url,requestData)
+    return api.post(url,requestData)
 }
 
 export const deleteDetailInvoice = (idChiTietHoaDon) => {
     const url = url_base + '/hdct/' + idChiTietHoaDon ;
-    return axios.delete(url)
+    return api.delete(url)
 }
 
 export const fetchImeisJs = (productId,page,size) => {
     const url = '/admin/imei/available'
-    return axios.get(url, {
+    return api.get(url, {
         params: {
             productId: productId,
             page: page ,
