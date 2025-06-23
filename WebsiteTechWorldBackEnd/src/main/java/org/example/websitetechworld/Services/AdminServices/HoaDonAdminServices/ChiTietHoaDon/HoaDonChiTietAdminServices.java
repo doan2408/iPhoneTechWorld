@@ -122,10 +122,14 @@ public class HoaDonChiTietAdminServices {
         Integer soLuongMoi = request.getSoLuong();
         chiTietHoaDon.setSoLuong(request.getSoLuong());
         if (soLuongCu > soLuongMoi){
+            int soLuongTG = soLuongCu - soLuongMoi;
+            sanPhamChiTietRepository.tangSoLuongTon(chiTietHoaDon.getIdSanPhamChiTiet().getId(), soLuongTG);
             hoaDonChiTiet_imeiAdminServices.giamSoLuong(chiTietHoaDon,soLuongCu - soLuongMoi);
         }
         if (soLuongCu<soLuongMoi){
-           hoaDonChiTiet_imeiAdminServices.tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
+            int soLuongTG = soLuongMoi-soLuongCu;
+            sanPhamChiTietRepository.giamSoLuongTon(chiTietHoaDon.getIdSanPhamChiTiet().getId(), soLuongTG);
+            hoaDonChiTiet_imeiAdminServices.tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
         }
         chiTietHoaDonRepository.save(chiTietHoaDon);
     }
