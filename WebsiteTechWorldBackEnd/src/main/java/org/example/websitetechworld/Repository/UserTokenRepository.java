@@ -21,6 +21,6 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Integer> {
     // Tìm token refresh của 1 khách hàng
     List<UserToken> findByIdKhachHangAndTokenType(KhachHang idKhachHang, String tokenType);
 
-    // Có thể thêm xoá token cũ nếu cần:
+    // xoá token cũ nếu cần:
     void deleteByToken(String token);
 }

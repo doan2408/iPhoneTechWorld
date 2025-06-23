@@ -7,9 +7,10 @@ import org.example.websitetechworld.Dto.Request.TokenRequest.UserLoginRequestDTO
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserTokenRequestDTO;
 import org.example.websitetechworld.Dto.Response.TokenResponse.UserTokenResponseDTO;
 import org.example.websitetechworld.Entity.UserToken;
+import org.example.websitetechworld.Repository.UserTokenRepository;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.Repository.TokenService;
-import org.example.websitetechworld.Services.LoginServices.UserTokenService;
+import org.example.websitetechworld.Repository.UserTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,9 +37,10 @@ public class LoginController {
 
     private final TokenService tokenService;
     private final UserTokenService userTokenService;
+    private final UserTokenRepository userTokenRepository;
 
 
-        //check role
+    //check role
         public boolean hasRole(Authentication auth, String role) {
             return auth.getAuthorities().stream()
                     .anyMatch(authority -> authority.getAuthority().equals(role));
@@ -71,7 +73,7 @@ public class LoginController {
                         if(hasRole(authentication, "ROLE_STAFF") || hasRole(authentication, "ROLE_ADMIN")) {
                             if(!"ENABLE".equalsIgnoreCase(taiKhoan.getTrangThai())) {
                                 System.out.println(taiKhoan.getTrangThai());
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                                         List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
                                 );
                             }
@@ -79,7 +81,7 @@ public class LoginController {
                         else {
                             if(!"ACTIVE".equalsIgnoreCase(taiKhoan.getTrangThai())) {
                                 System.out.println(taiKhoan.getTrangThai());
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                                         List.of(Map.of("field", "trang_thai", "message", "Tài khoản đã bị vô hiệu hóa"))
                                 );
                             }
@@ -117,7 +119,7 @@ public class LoginController {
 
                 // Trả về mảng lỗi nếu có
                 if (!errors.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
                 }
 
                 // Trường hợp không có lỗi nhưng cũng không xác thực được (hiếm)
@@ -192,6 +194,41 @@ public class LoginController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody UserTokenRequestDTO request) {
+        String refreshToken = request.getRefreshToken();
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Refresh token không được để trống"));
+        }
+
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey("techworld1234567890techworld1234567890")
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+
+            if (!"refresh".equals(claims.get("type"))) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Token không phải refresh token"));
+            }
+
+            Optional<UserToken> tokenOptional = userTokenService.findByToken(refreshToken);
+
+            if (tokenOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Refresh token không tồn tại trong hệ thống"));
+            }
+
+            userTokenRepository.delete(tokenOptional.get());
+
+            return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công, token đã bị xoá"));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Token không hợp lệ", "error", e.getMessage()));
+        }
+    }
 
 }
 

@@ -52,11 +52,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
                 .formLogin().disable()        // ❌ Tắt login mặc định bằng form
                 .httpBasic().disable()        // ❌ Tắt Basic Auth
-                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
-                        .logoutUrl("/api/auth/logout")
-                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
-                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
-                )
+//                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
+//                        .logoutUrl("/api/auth/logout")
+//                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
+//                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
+//                )
+                .logout().disable() //tắt đăng xuất thủ công
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

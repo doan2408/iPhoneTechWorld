@@ -1,6 +1,7 @@
-package org.example.websitetechworld.Services.LoginServices;
+package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.UserToken;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 
 import java.util.Optional;
 
