@@ -71,17 +71,17 @@ public class XuatXuAdminController {
         return ResponseEntity.ok(delete);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<XuatXuAdminResponse> deleteXuatXu2(@PathVariable Integer id) {
-        XuatXuAdminResponse delete = xuatXuAdminService.deleteXuatXu(id);
-        return ResponseEntity.ok(delete);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<XuatXuAdminResponse> deleteXuatXu3(@PathVariable Integer id) {
-        XuatXuAdminResponse delete = xuatXuAdminService.deleteXuatXu(id);
-        return ResponseEntity.ok(delete);
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<XuatXuAdminResponse> deleteXuatXu2(@PathVariable Integer id) {
+//        XuatXuAdminResponse delete = xuatXuAdminService.deleteXuatXu(id);
+//        return ResponseEntity.ok(delete);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<XuatXuAdminResponse> deleteXuatXu3(@PathVariable Integer id) {
+//        XuatXuAdminResponse delete = xuatXuAdminService.deleteXuatXu(id);
+//        return ResponseEntity.ok(delete);
+//    }
 
 
 

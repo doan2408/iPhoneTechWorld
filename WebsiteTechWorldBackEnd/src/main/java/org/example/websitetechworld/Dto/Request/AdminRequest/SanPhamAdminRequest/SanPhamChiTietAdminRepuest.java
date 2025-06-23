@@ -31,35 +31,38 @@ public class SanPhamChiTietAdminRepuest {
     @NotNull(message = "Màu sắc không được để trống")
     private Integer idMau;
 
-    @NotNull(message = "RAM không được để trống")
-    private Integer idRam;
+//    @NotNull(message = "RAM không được để trống")
+//    private Integer idRam;
 
     @NotNull(message = "ROM không được để trống")
     private Integer idRom;
 
-    @NotNull(message = "Màn hình không được để trống")
-    private Integer idManHinh;
+    @NotNull(message = "id_model_san_pham không được để trống")
+    private Integer id_model_san_pham;
 
-    @NotNull(message = "Hệ điều hành không được để trống")
-    private Integer idHeDieuHanh;
-
-    @NotNull(message = "Pin không được để trống")
-    private Integer idPin;
-
-    @NotNull(message = "CPU không được để trống")
-    private Integer idCpu;
-
-    @NotNull(message = "Camera trước không được để trống")
-    private Integer idCameraTruoc;
-
-    @NotNull(message = "Camera sau không được để trống")
-    private Integer idCameraSau;
-
-    @NotNull(message = "Xuất xứ không được để trống")
-    private Integer idXuatXu;
-
-    @NotNull(message = "Loại sản phẩm không được để trống")
-    private Integer idLoai;
+//    @NotNull(message = "Màn hình không được để trống")
+//    private Integer idManHinh;
+//
+//    @NotNull(message = "Hệ điều hành không được để trống")
+//    private Integer idHeDieuHanh;
+//
+//    @NotNull(message = "Pin không được để trống")
+//    private Integer idPin;
+//
+//    @NotNull(message = "CPU không được để trống")
+//    private Integer idCpu;
+//
+//    @NotNull(message = "Camera trước không được để trống")
+//    private Integer idCameraTruoc;
+//
+//    @NotNull(message = "Camera sau không được để trống")
+//    private Integer idCameraSau;
+//
+//    @NotNull(message = "Xuất xứ không được để trống")
+//    private Integer idXuatXu;
+//
+//    @NotNull(message = "Loại sản phẩm không được để trống")
+//    private Integer idLoai;
 
     @NotNull(message = "Số lượng không được để trống")
     @Min(value = 1, message = "Số lượng phải lớn hơn 0")
