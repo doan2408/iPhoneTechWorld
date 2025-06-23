@@ -23,7 +23,7 @@ public class CustomUserDetails implements UserDetails {
         return account.getFullName();
     }
 
-    public String gettrangThai() {
+    public String getTrangThai() {
         return account.getTrangThai();
     }
 
@@ -51,5 +51,3 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
 }
-
-
