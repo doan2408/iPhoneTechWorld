@@ -27,8 +27,7 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     @Query("SELECT imei FROM Imei imei WHERE " +
             "LOWER(imei.soImei) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(imei.soImei2) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(imei.trangThaiImei) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(imei.nhaMang) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(imei.trangThaiImei) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Imei> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT COUNT(i) FROM Imei i WHERE COALESCE(i.soImei, '') = COALESCE(:soImei, '')")

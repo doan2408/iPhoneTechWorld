@@ -5,7 +5,7 @@
       <el-col :span="8">
         <el-input
           v-model="searchKeyword"
-          placeholder="Tìm kiếm theo số imei, trạng thái, nhà mạng..."
+          placeholder="Tìm kiếm theo số imei, trạng thái..."
           clearable
           prefix-icon="Search"
           @clear="clearSearch"
@@ -62,7 +62,6 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="nhaMang" label="Nhà mạng" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
@@ -160,25 +159,6 @@
               </el-select>
             </el-form-item>
           </el-col>
-
-          <el-col :span="12">
-            <el-form-item label="Nhà mạng" prop="nhaMang">
-              <el-select
-                v-model="formData.nhaMang"
-                placeholder="Chọn nhà mạng"
-                style="width: 100%"
-                filterable
-                allow-create
-              >
-                <el-option
-                  v-for="carrier in nhaMangOptions"
-                  :key="carrier"
-                  :label="carrier"
-                  :value="carrier"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
         </el-row>
 
         <el-row justify="end" style="margin-top: 30px">
@@ -225,7 +205,6 @@ const formData = reactive({
   soImei: "",
   soImei2: "",
   trangThaiImei: "",
-  nhaMang: "",
 });
 
 // Options cho trạng thái IMEI
@@ -238,15 +217,15 @@ const trangThaiOptions = [
   { value: "BLACKLISTED", label: "Bị chặn" },
 ];
 
-// Options cho nhà mạng
-const nhaMangOptions = [
-  "Viettel",
-  "VNPT (VinaPhone)",
-  "MobiFone",
-  "Vietnamobile",
-  "iTelecom",
-  "Gmobile",
-];
+// // Options cho nhà mạng
+// const nhaMangOptions = [
+//   "Viettel",
+//   "VNPT (VinaPhone)",
+//   "MobiFone",
+//   "Vietnamobile",
+//   "iTelecom",
+//   "Gmobile",
+// ];
 
 // Validation rules
 const rules = {
@@ -268,14 +247,6 @@ const rules = {
   ],
   trangThaiImei: [
     { required: true, message: "Vui lòng chọn trạng thái", trigger: "change" },
-  ],
-  nhaMang: [
-    { required: true, message: "Vui lòng chọn nhà mạng", trigger: "change" },
-    {
-      max: 50,
-      message: "Tên nhà mạng không được vượt quá 50 ký tự",
-      trigger: "blur",
-    },
   ],
 };
 
@@ -434,7 +405,6 @@ const resetForm = () => {
   formData.soImei = "";
   formData.soImei2 = "";
   formData.trangThaiImei = "";
-  formData.nhaMang = "";
 
   // Reset form validation
   if (formRef.value) {

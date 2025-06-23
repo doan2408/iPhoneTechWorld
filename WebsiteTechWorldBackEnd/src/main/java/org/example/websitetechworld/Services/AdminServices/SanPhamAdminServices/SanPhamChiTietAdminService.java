@@ -188,7 +188,6 @@ public class SanPhamChiTietAdminService {
             Imei firstImei = entity.getImeis().iterator().next();
             ImeiAdminResponse imeiResponse = new ImeiAdminResponse();
             imeiResponse.setSoImei(firstImei.getSoImei());
-            imeiResponse.setNhaMang(firstImei.getNhaMang());
             imeiResponse.setTrangThaiImei(firstImei.getTrangThaiImei());
             response.setImeis(new LinkedHashSet<>(Collections.singletonList(imeiResponse)));
         } else {
