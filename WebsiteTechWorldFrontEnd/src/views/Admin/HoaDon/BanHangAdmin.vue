@@ -168,7 +168,7 @@
                         <div class="modal-body">
                             <div class="imei-list">
                                 <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
-                                    <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
+                                    <input type="checkbox" :id="`imei-${imei.id}`" :value="imei" 
                                         v-model="selectedImeis" />
                                     <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
                                 </div>
@@ -831,8 +831,6 @@ const confirmImeiSelection = async () => {
         alert(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
 };
-
-
 
 // them vao gio hang
 const addToCartWithImeis = async (product, imeiList) => {

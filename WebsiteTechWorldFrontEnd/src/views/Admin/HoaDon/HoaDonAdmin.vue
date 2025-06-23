@@ -1016,7 +1016,7 @@ import Swal from "sweetalert2";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
-const pageSize = ref(6);
+const pageSize = ref(1);
 const totalPage = ref(0);
 const totalElement = ref(0);
 const viewMode = ref("table"); // nếu view là table sẽ hiển thị dưới dạng table còn ko hiển thị grid
