@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.XuatXuAdminResponse;
@@ -11,9 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,21 +43,39 @@ public class XuatXuAdminService {
         return convertList(xuatXus);
     }
 
-    @Transactional
-    public XuatXuAdminResponse createXuatXu(XuatXuAdminRequest xuatXuAdminRequest) {
-        XuatXu xuatXu = xuatXuRepo.save(modelMapper.map(xuatXuAdminRequest, XuatXu.class));
+    public Page<XuatXuAdminResponse> searchXuatXu(String search, Pageable pageable) {
+        Page<XuatXu> xuatXuPage;
+        if (StringUtils.hasText(search)) {
+            xuatXuPage = xuatXuRepo.findByMaXuatXuContainingIgnoreCaseOrTenQuocGiaContainingIgnoreCase(search, search, pageable);
+        } else {
+            xuatXuPage = xuatXuRepo.findAll(pageable);
+        }
+        return xuatXuPage.map(this::convert);
+    }
 
-        return convert(xuatXu);
+    @Transactional
+    public XuatXuAdminResponse createXuatXu(@Valid XuatXuAdminRequest xuatXuAdminRequest) {
+        if (xuatXuRepo.existsByMaXuatXu(xuatXuAdminRequest.getMaXuatXu())) {
+            throw new IllegalArgumentException("Mã xuất xứ đã tồn tại");
+        }
+        XuatXu xuatXu = modelMapper.map(xuatXuAdminRequest, XuatXu.class);
+        XuatXu saved = xuatXuRepo.save(xuatXu);
+        return modelMapper.map(saved, XuatXuAdminResponse.class);
     }
 
     @Transactional
     public XuatXuAdminResponse updateXuatXu(Integer id, XuatXuAdminRequest xuatXuAdminRequest) {
         XuatXu update = xuatXuRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xuất xứ ID: " + id));
-        modelMapper.map(xuatXuAdminRequest, update);
-        xuatXuRepo.save(update);
 
-        return convert(update);
+        if (!update.getMaXuatXu().equals(xuatXuAdminRequest.getMaXuatXu()) &&
+                xuatXuRepo.existsByMaXuatXuAndIdNot(xuatXuAdminRequest.getMaXuatXu(), id)) {
+            throw new IllegalArgumentException("Mã xuất xứ đã tồn tại");
+        }
+
+        modelMapper.map(xuatXuAdminRequest, update);
+        XuatXu saved = xuatXuRepo.save(update);
+        return convert(saved);
     }
 
     @Transactional

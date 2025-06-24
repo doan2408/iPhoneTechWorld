@@ -26,15 +26,14 @@ public class AdminClientRequest {
     @Pattern(regexp = "^$|0\\d{9}", message = "Số điện thoại không hợp lệ")
     private String sdt;
 
-    @Size(min = 5, max = 50, message = "Tài khoản phải từ 5 đến 50 ký tự")
+//    @Size(min = 5, max = 50, message = "Tài khoản phải từ 5 đến 50 ký tự")
     private String taiKhoan;
 
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+//    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String matKhau;
 
-    @Email(message = "Email không đúng định dạng")
     @Pattern(
-            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            regexp = "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
             message = "Email không đúng định dạng"
     )
     private String email;

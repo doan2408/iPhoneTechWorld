@@ -9,10 +9,12 @@ const store = createStore({
   //chẳng hạn như dữ liệu người dùng, cài đặt, hoặc trạng thái giao diện.
   state() {
     return {
-      isLoggedIn: localStorage.getItem("isLoggedIn") === "true",//trạng thái đăng nhập
-      user: null, // Thông tin người dùng
-      roles: [], // Vai trò của người dùng
-      registrationStatus: null, //trạng thái đăng kí
+      isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
+      user: JSON.parse(localStorage.getItem("user")) || null,
+      roles: [],
+      accessToken: localStorage.getItem("accessToken") || null,
+      refreshToken: localStorage.getItem("refreshToken") || null,
+      registrationStatus: null,
     };
   },
   //mutations là các hàm đồng bộ (synchronous) dùng để thay đổi trạng thái (state) trong store.
@@ -24,36 +26,87 @@ const store = createStore({
     setRoles(state, roles) {
       state.roles = roles; // Cập nhật vai trò
     },
+    setTokens(state, { accessToken, refreshToken }) {
+      state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+    },
     clearUser(state) {
       state.user = null;
       state.roles = []; // Xóa thông tin người dùng
-      state.isLoggedIn = false
+      state.isLoggedIn = false;
+      state.accessToken = null;
+      state.refreshToken = null;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("isLoggedIn");
     },
     setLoggedIn(state, status) {
       state.isLoggedIn = status;
+      localStorage.setItem("isLoggedIn", status);
     },
     setRegistrationStatus(state, status) {
       state.registrationStatus = status;
     },
   },
   actions: {
-    async login({ commit }, { tai_khoan, mat_khau }) {
+    async login({ commit, dispatch }, { taiKhoan, matKhau }) {
       try {
-        const { message, roles } = await LoginService.login(
-          tai_khoan,
-          mat_khau
-        );
-        commit("setUser", { tai_khoan });
+        const { message, roles, accessToken, refreshToken, fullName, id } =
+          await LoginService.login(taiKhoan, matKhau);
+        console.log("Đăng nhập thành công:", {
+          message,
+          roles,
+          accessToken,
+          refreshToken,
+        });
         commit("setRoles", roles);
-        commit("setLoggedIn", "true"); //update state
-        localStorage.setItem("isLoggedIn", "true"); // Lưu trạng thái đăng nhập
+        commit("setTokens", { accessToken, refreshToken });
+        commit("setLoggedIn", true);
+        localStorage.setItem("isLoggedIn", "true");
+
+        // ⬇ Gọi API /me để lấy full user
+        const user = await LoginService.getCurrentUser();
+        commit("setUser", user);
+        localStorage.setItem("user", JSON.stringify(user)); // nếu muốn giữ khi reload
+
+        console.log("localStorage sau đăng nhập:", {
+          accessToken: localStorage.getItem("accessToken"),
+          refreshToken: localStorage.getItem("refreshToken"),
+          user: localStorage.getItem("user"),
+          isLoggedIn: localStorage.getItem("isLoggedIn"),
+        });
+
         return message;
       } catch (error) {
         if (Array.isArray(error)) {
-        throw error; // Ném mảng lỗi từ LoginService
-      } else {
-        throw [{ field: "server", message: error.message || "Lỗi đăng nhập" }]; // Chuẩn hóa thành mảng
+          throw error;
+        } else {
+          throw [
+            { field: "server", message: error.message || "Lỗi đăng nhập" },
+          ];
+        }
       }
+    },
+    async refreshToken({ commit, state }) {
+      try {
+        const refreshToken = state.refreshToken;
+        if (!refreshToken) {
+          throw new Error("Không có refreshToken");
+        }
+        console.log("Thử làm mới token với refreshToken:", refreshToken);
+        const { accessToken } = await LoginService.refreshToken(refreshToken);
+        commit("setTokens", { accessToken, refreshToken });
+        console.log("Token đã làm mới:", accessToken);
+        return accessToken;
+      } catch (error) {
+        console.error("Lỗi làm mới token:", error);
+        commit("clearUser");
+        throw [
+          { field: "server", message: error.message || "Lỗi làm mới token" },
+        ];
       }
     },
     async logout({ commit }) {
@@ -71,6 +124,7 @@ const store = createStore({
         const userData = await LoginService.getCurrentUser(); // Lấy thông tin người dùng
         commit("setUser", userData);
         commit("setRoles", userData.roles || []);
+        localStorage.setItem("user", JSON.stringify(userData));
       } catch (error) {
         commit("clearUser");
         throw error.response?.data || "Lỗi lấy thông tin người dùng";
@@ -86,10 +140,12 @@ const store = createStore({
       } catch (error) {
         commit("setRegistrationStatus", "error");
         if (Array.isArray(error)) {
-        throw error; // Ném mảng lỗi từ LoginService
-      } else {
-        throw [{ field: "server", message: error.message || "Đăng ký thất bại" }]; // Chuẩn hóa thành mảng
-      }
+          throw error; // Ném mảng lỗi từ LoginService
+        } else {
+          throw [
+            { field: "server", message: error.message || "Đăng ký thất bại" },
+          ]; // Chuẩn hóa thành mảng
+        }
       }
     },
   },

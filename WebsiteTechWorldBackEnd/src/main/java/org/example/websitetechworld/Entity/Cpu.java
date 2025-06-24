@@ -20,6 +20,11 @@ public class Cpu {
 
     @Size(max = 50)
     @Nationalized
+    @Column(name = "chip_xu_ly", length = 50)
+    private String chipXuLy;
+
+    @Size(max = 50)
+    @Nationalized
     @Column(name = "hang_san_xuat", length = 50)
     private String hangSanXuat;
 
@@ -27,9 +32,6 @@ public class Cpu {
     @Nationalized
     @Column(name = "so_nhan", length = 50)
     private String soNhan;
-
-    @Column(name = "so_luong")
-    private Integer soLuong;
 
     @Size(max = 50)
     @Nationalized

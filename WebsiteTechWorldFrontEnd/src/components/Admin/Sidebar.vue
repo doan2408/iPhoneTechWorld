@@ -1,64 +1,85 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import LoginService from '@/Service/LoginService/Login'
-import { useStore } from 'vuex'
+import { ref, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import LoginService from "@/Service/LoginService/Login";
+import { useStore } from "vuex";
 
 const store = useStore();
 // Biến lưu trạng thái đăng nhập
-const isLoggedIn = ref<boolean>(false)
-const router = useRouter()
-const user = ref<{fullName : String } | null>(null); // JSON trả về phải có trường tương ứng (fullName)
+const isLoggedIn = ref<boolean>(false);
+const router = useRouter();
+const user = ref<{ fullName: String } | null>(null); // JSON trả về phải có trường tương ứng (fullName)
 // Kiểm tra trạng thái đăng nhập khi trang được tải
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
 onMounted(async () => {
   try {
     const currentUser = await LoginService.getCurrentUser();
-    store.commit('setUser', currentUser);  // Lưu thông tin vào store
-    store.commit('setRoles', currentUser.roles || []);  // Lấy thông tin người dùng
+    store.commit("setUser", currentUser); // Lưu thông tin vào store
+    store.commit("setRoles", currentUser.roles || []); // Lấy thông tin người dùng
     //user.value chỉ chấp nhận một đối tượng có duy nhất một trường fullName: string, hoặc null
     user.value = {
-      fullName : currentUser.fullName  // Lưu thông tin người dùng vào biến user
-    }
-    isLoggedIn.value = true;  // Đánh dấu người dùng đã đăng nhập
+      fullName: currentUser.fullName, // Lưu thông tin người dùng vào biến user
+    };
+    isLoggedIn.value = true; // Đánh dấu người dùng đã đăng nhập
   } catch (err) {
-    isLoggedIn.value = false;  // Người dùng chưa đăng nhập
+    isLoggedIn.value = false; // Người dùng chưa đăng nhập
   }
-})
-
+});
 
 // Xử lý đăng xuất
 const handleLogout = async () => {
   try {
-    await LoginService.logout()  // Gọi API đăng xuất
-    isLoggedIn.value = false
-    router.push('/login')  // Điều hướng về trang đăng nhập
+    await LoginService.logout(); // Gọi API đăng xuất
+    isLoggedIn.value = false;
+    router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
-    console.error('Lỗi đăng xuất:', err)
+    console.error("Lỗi đăng xuất:", err);
   }
-}
+};
 
-const showProductMenu = ref(false)
+const showProductMenu = ref(false);
 function toggleProductMenu() {
-  showProductMenu.value = !showProductMenu.value
+  showProductMenu.value = !showProductMenu.value;
 }
 
-const showUsers = ref(false)
+const showUsers = ref(false);
 function toggleUserstMenu() {
-  showUsers.value = !showUsers.value
+  showUsers.value = !showUsers.value;
 }
 
-const showOrders = ref(false)
+const showOrders = ref(false);
 function toggleOrderMenu() {
-  showOrders.value = !showOrders.value
+  showOrders.value = !showOrders.value;
 }
-
 </script>
 
 <template>
   <div class="admin-sidebar">
     <div>
       <div class="logo">
-          <img src="/src/components/images/LogoTechWorld-removebg-preview.png" alt="TechWorld">
+        <img
+          src="/src/components/images/LogoTechWorld-removebg-preview.png"
+          alt="TechWorld"
+        />
       </div>
       <div class="user-info" v-if="isLoggedIn">
         <p class="username">👤 {{ user?.fullName }}</p>
@@ -68,54 +89,88 @@ function toggleOrderMenu() {
         <ul>
           <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
 
-          <li><router-link to="/admin/statistical" class="icon stats-icon">Thống Kê </router-link></li>
+          <li>
+            <router-link to="/admin/statistical" class="icon stats-icon"
+              >Thống Kê
+            </router-link>
+          </li>
+
+          <li><router-link to="/admin/ban-hang">Bán hàng</router-link></li>
+
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
-            <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="
+                showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
+              "
+            ></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
-
             <li><router-link to="/admin/products">Sản phẩm</router-link></li>
             <li><router-link to="/admin/xuatXu">Xuất xứ</router-link></li>
             <li><router-link to="/admin/rom">Rom</router-link></li>
             <li><router-link to="/admin/ram">Ram</router-link></li>
             <li><router-link to="/admin/pin">Pin</router-link></li>
             <li><router-link to="/admin/mauSac">Màu sắc</router-link></li>
-            <li><router-link to="/admin/nhaCungCap">Nhà cung cấp</router-link></li>
+            <li>
+              <router-link to="/admin/nhaCungCap">Nhà cung cấp</router-link>
+            </li>
             <li><router-link to="/admin/manHinh">Màn hình</router-link></li>
             <li><router-link to="/admin/loai">Loại</router-link></li>
             <li><router-link to="/admin/imei">Imei</router-link></li>
-            <li><router-link to="/admin/heDieuHanh">Hệ điều hành</router-link></li>
+            <li>
+              <router-link to="/admin/heDieuHanh">Hệ điều hành</router-link>
+            </li>
             <li><router-link to="/admin/cpu">Cpu</router-link></li>
-            <li><router-link to="/admin/cameraTruoc">Camera trước</router-link></li>
+            <li>
+              <router-link to="/admin/cameraTruoc">Camera trước</router-link>
+            </li>
             <li><router-link to="/admin/cameraSau">Camera sau</router-link></li>
-            <li><router-link to="/admin/products/add">Thêm sản phẩm</router-link></li>
+            <li>
+              <router-link to="/admin/products/add">Thêm sản phẩm</router-link>
+            </li>
             <li><router-link to="/admin/categories">Danh mục</router-link></li>
           </ul>
 
-
-          <li @click="toggleUserstMenu" class="menu-toggle">
+          <li @click="toggleUserstMenu" v-if="isAdmin" class="menu-toggle">
             Quản lý người dùng
-            <i :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
+            ></i>
           </li>
           <ul v-if="showUsers" class="submenu">
-            <li><router-link to="/admin/staff">Quản lý nhân viên</router-link></li>
-            <li><router-link to="/admin/client">Quản lý khách hàng</router-link></li>
+            <li>
+              <router-link to="/admin/staff">Quản lý nhân viên</router-link>
+            </li>
+            <li>
+              <router-link to="/admin/client">Quản lý khách hàng</router-link>
+            </li>
           </ul>
+
+          <li>
+            <router-link v-if="isStaff" to="/admin/client">Quản lý khách hàng</router-link>
+          </li>
 
           <li @click="toggleOrderMenu" class="menu-toggle">
             Quản lý đơn hàng
-            <i :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
+            ></i>
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <li><router-link to="/admin/shipping">Quản lý giao hàng</router-link></li>
-            <li><router-link to="/admin/ban-hang">Bán hàng</router-link></li>
+            <li>
+              <router-link to="/admin/shipping">Quản lý giao hàng</router-link>
+            </li>
           </ul>
 
-          <li><router-link to="/admin/promotions">Quản lý khuyến mãi</router-link></li>
-          <li><router-link to="/admin/reports">Báo cáo</router-link></li>
+          <li>
+            <router-link to="/admin/promotions">Quản lý khuyến mãi</router-link>
+          </li>
+          <li>
+            <router-link to="/admin/staff/infor">Thông tin cá nhân</router-link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -125,17 +180,24 @@ function toggleOrderMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login">Đăng nhập</router-link>
+      <router-link to="/login" @click.prevent="handleLogout"
+        >Đăng nhập</router-link
+      >
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .admin-sidebar {
   width: 220px;
   height: 100vh;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 30%, #1e40af 70%, #1e3a8a 100%);
+  background: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #3b82f6 30%,
+    #1e40af 70%,
+    #1e3a8a 100%
+  );
   color: white;
   position: fixed;
   top: 0;
@@ -152,18 +214,29 @@ function toggleOrderMenu() {
 
 /* Hiệu ứng sao nhỏ cho sidebar */
 .admin-sidebar::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.6), transparent),
+  background-image: radial-gradient(
+      1px 1px at 20px 30px,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    ),
     radial-gradient(1px 1px at 40px 70px, rgba(147, 197, 253, 0.5), transparent),
     radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(191, 219, 254, 0.6), transparent),
-    radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.5), transparent);
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(191, 219, 254, 0.6),
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 160px 120px,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
   background-repeat: repeat;
   background-size: 200px 150px;
   animation: sidebarStars 6s ease-in-out infinite alternate;
@@ -172,8 +245,12 @@ function toggleOrderMenu() {
 }
 
 @keyframes sidebarStars {
-  0% { opacity: 0.5; }
-  100% { opacity: 0.8; }
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.8;
+  }
 }
 
 .logo {
@@ -344,7 +421,11 @@ nav a.router-link-exact-active {
 
 .submenu {
   padding-left: 15px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4) 0%, rgba(96, 165, 250, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.4) 0%,
+    rgba(96, 165, 250, 0.3) 100%
+  );
   margin-top: 5px;
   border-left: 3px solid #60a5fa;
   border-radius: 10px;
@@ -410,12 +491,12 @@ nav a.router-link-exact-active {
     margin-left: 180px;
     width: calc(100% - 180px);
   }
-  
+
   .menu-toggle {
     font-size: 12px;
     padding: 6px 10px;
   }
-  
+
   .submenu a {
     font-size: 11px;
     padding: 5px 8px;

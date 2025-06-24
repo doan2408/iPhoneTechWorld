@@ -1,12 +1,16 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +33,26 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             "WHERE s.id = :id")
     Optional<SanPhamChiTiet> findFullById(@Param("id") Integer id);
 
-    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContaining(String tenSanPham, Pageable pageable);
+    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(String tenSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+
+    Page<SanPhamChiTiet> findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+//    @Query("""
+//        select new org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse(
+//            sp.maSanPham,
+//
+//        ) from SanPhamChiTiet spct
+//        join spct.idSanPham sp
+//""")
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE SanPhamChiTiet spct SET spct.soLuong = spct.soLuong - :soLuongGiam WHERE spct.id = :idSanPhamChiTiet AND spct.soLuong >= :soLuongGiam")
+    int giamSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongGiam") int soLuongGiam);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE SanPhamChiTiet spct SET spct.soLuong = spct.soLuong + :soLuongTang WHERE spct.id = :idSanPhamChiTiet")
+    int tangSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongTang") int soLuongTang);
 
 
 }

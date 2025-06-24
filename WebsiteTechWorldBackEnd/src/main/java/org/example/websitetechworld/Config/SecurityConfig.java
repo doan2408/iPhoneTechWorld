@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,7 +32,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf().disable()
                 .cors(Customizer.withDefaults()) // ✅ Kích hoạt CORS dùng config bên dưới
@@ -39,7 +40,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/css/**", "/js/**",
-
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -49,16 +49,17 @@ public class SecurityConfig {
                         .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                         .anyRequest().permitAll()
                 )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
                 .formLogin().disable()        // ❌ Tắt login mặc định bằng form
                 .httpBasic().disable()        // ❌ Tắt Basic Auth
-                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
-                        .logoutUrl("/api/auth/logout")
-                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
-                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Dùng session khi cần
-                );
+//                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
+//                        .logoutUrl("/api/auth/logout")
+//                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
+//                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
+//                )
+                .logout().disable() //tắt đăng xuất thủ công
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -83,10 +84,11 @@ public class SecurityConfig {
 
         configuration.addAllowedMethod("*"); // Cho phép mọi phương thức HTTP
         configuration.addAllowedHeader("*"); // Cho phép mọi header
-        configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://localhost:5173"); // Chỉ cho phép frontend từ cổng 5173
 //        configuration.addAllowedOriginPattern("*"); // KHÔNG nên dùng cùng lúc với addAllowedOrigin()
-        configuration.setAllowCredentials(true); // Cho phép gửi cookie (nếu cần)
+        configuration.setAllowCredentials(false); // tắt gửi cookie (nếu cần)
+        configuration.addExposedHeader("Authorization"); // 👈 Nếu muốn đọc lại token từ header
+
 
         // Đăng ký cấu hình CORS cho tất cả các đường dẫn
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

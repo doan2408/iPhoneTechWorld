@@ -1,61 +1,104 @@
-import axios from 'axios'
+import { ElMessage } from "element-plus";
+import api from "./axiosInstance";
 
-export const API_URL = 'http://localhost:8080/api/auth' 
-
-// Đăng nhập
-const login = async (tai_khoan, mat_khau) => {
+const login = async (taiKhoan, matKhau) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, { tai_khoan, mat_khau }, { withCredentials: true });
-    const { message, roles } = response.data;
-    return { message, roles };
-  } catch (error) {
-    if (error.response && error.response.data) {
-      throw error.response.data;
-    } else if (error.request) {
-      throw [{ field: "network", message: "Lỗi kết nối mạng" }];
-    } else {
-      throw [{ field: "request", message: "Có lỗi xảy ra khi gửi yêu cầu đăng nhập" }];
+    const response = await api.post(`/api/auth/login`, { taiKhoan, matKhau });
+    const { accessToken, refreshToken, fullName, id, roles, message } = response.data;
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("Phản hồi thiếu accessToken hoặc refreshToken");
     }
-  }
-}
 
-// Đăng xuất
-export const logout = async () => {
-  try {
-    const response = await axios.post(`${API_URL}/logout`, {}, {
-      withCredentials: true
-    })
-    // Đăng xuất thành công → xóa localStorage / Vuex state nếu có
-    localStorage.removeItem('user')  // nếu có lưu thông tin user
-    window.location.href = '/login';
-    // Tự động làm mới sau 0,5 giây
-    setTimeout(() => window.location.reload(), 500);
-    return response.data
+    let parsedRoles = Array.isArray(roles) ? roles : [roles.role || roles];
+    return { message, roles: parsedRoles, accessToken, refreshToken, fullName, id };
+
   } catch (error) {
-    if (error.response && error.response.data) {
-      throw error.response.data;
-    } else if (error.request) {
-      throw [{ field: "network", message: "Lỗi kết nối mạng" }];
-    } else {
-      throw [{ field: "request", message: "Có lỗi xảy ra khi gửi yêu cầu đăng nhập" }];
+    console.error("Lỗi trong LoginService.login:", error);
+
+    const res = error.response?.data;
+
+    if (Array.isArray(res)) {
+      throw res;
     }
-  }
-}
 
-// Lấy thông tin người dùng hiện tại
-export const getCurrentUser = async () => {
+    // Nếu backend trả về lỗi object
+    throw [{
+      field: "server",
+      message: res?.message || error.message || "Đăng nhập thất bại",
+    }];
+  }
+};
+
+
+
+const getCurrentUser = async () => {
   try {
-    const response = await axios.get(`${API_URL}/me`, {
-      withCredentials: true
-    })
-    return response.data  // Trả về thông tin người dùng
+    const response = await api.get(`/api/auth/me`);
+    console.log("Thông tin người dùng:", response.data);
+    return response.data;
   } catch (error) {
-    throw error.response?.data || 'Lỗi lấy thông tin người dùng'
+    console.error("Lỗi lấy thông tin người dùng:", error);
+    throw error.response?.data || "Lỗi lấy thông tin người dùng";
   }
-}
+};
 
-export default {
-  login,
-  logout,
-  getCurrentUser
-}
+const refreshToken = async (refreshToken) => {
+  try {
+    const response = await api.post(`/api/auth/refresh`, { refreshToken });
+    console.log("Phản hồi refresh token:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi trong LoginService.refreshToken:", error);
+    throw error.response?.data || "Lỗi làm mới token";
+  }
+};
+
+// const logout = async () => {
+//   try {
+//     const refreshToken = localStorage.getItem("refreshToken");
+
+//     await api.post(`/api/auth/logout`, {
+//       refreshToken, // gửi trong body
+//     });
+
+//     // Xóa local token
+//     localStorage.removeItem("accessToken");
+//     localStorage.removeItem("refreshToken");
+
+//     ElMessage.success("Đăng xuất thành công. Đang chuyển hướng...");
+
+//     // Chuyển hướng về trang login
+//     setTimeout(() => {
+//       window.location.href = "/login";
+
+//       // Sau khi chuyển hướng xong → reload lại sau 1 giây
+//       setTimeout(() => {
+//         window.location.reload();
+//       }, 1000);
+//     }, 300); // Delay 1 giây để tránh đụng context cũ
+//   } catch (error) {
+//     console.error("Lỗi đăng xuất:", error);
+//   }
+// };
+
+
+const logout = async () => {
+  try {
+    await api.post("/api/auth/logout", {
+      refreshToken: localStorage.getItem("refreshToken"),
+    });
+  } catch (error) {
+    console.error("Logout fail:", error);
+  } finally {
+    // Dọn token trước khi reload
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // Xong rồi mới reload lại trang đăng nhập
+    window.location.href = "/login";
+  }
+};
+
+
+export default { login, getCurrentUser, refreshToken, logout };

@@ -108,5 +108,9 @@ public class NhanVien implements JointAccount {
         return this.sdt;
     }
 
+    @Override
+    public String getTrangThai() {
+        return String.valueOf(this.trangThai);
+    }
 
 }

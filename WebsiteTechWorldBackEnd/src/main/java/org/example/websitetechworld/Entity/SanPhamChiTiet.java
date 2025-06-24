@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "san_pham_chi_tiet")
+@ToString
 public class SanPhamChiTiet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -83,7 +85,6 @@ public class SanPhamChiTiet {
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
-
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<ChiTietHoaDon> chiTietHoaDons = new LinkedHashSet<>();

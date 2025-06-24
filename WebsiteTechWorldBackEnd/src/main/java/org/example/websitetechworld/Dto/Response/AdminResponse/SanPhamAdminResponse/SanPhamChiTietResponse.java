@@ -9,11 +9,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Entity.NhaCungCap;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,6 +32,7 @@ public class SanPhamChiTietResponse {
     private String maSanPham;
     private String tenSanPham;
     private String thuongHieu;
+    private TrangThaiSanPham trangThaiSanPham;
 //    private Integer soLuongTonKho;
 
     private String tenNhaCungCap;
@@ -37,6 +41,7 @@ public class SanPhamChiTietResponse {
     private String email;
 
     private String tenMau;
+    private String maMau;
 
     private String dungLuongRam;
     private String loaiRam;
@@ -58,7 +63,7 @@ public class SanPhamChiTietResponse {
     private String doSang;
     private String chatLieuKinh;
 
-    private String PhienBanHeDieuHanh;
+    private String phienBanHeDieuHanh;
     private String nhaPhatTrien;
     private String giaoDienNguoiDung;
 
@@ -70,7 +75,7 @@ public class SanPhamChiTietResponse {
     //Cpu
     private String hangSanXuat;
     private String soNhan;
-    private Integer soLuongCpu;
+    private String chipXuLy;
     private String xungNhip;
     private String congNgheSanXuat;
     private String boNhoDem;
@@ -89,13 +94,13 @@ public class SanPhamChiTietResponse {
     private String loaiZoomCameraSau;
     private String cheDoChupCameraSau;
 
-    private String xuatXu;
+    private String maXuatXu;
     private String tenQuocGia;
 
     private String tenLoai;
 
-    private String imei;
+    private Set<ImeiAdminResponse> imeis;
 
-    private String url;
+    private Set<HinhAnhAdminResponse> hinhAnhs;
 
 }

@@ -5,7 +5,7 @@ import {
   getAdress,
   updateAddress,
 } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElNotification } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { h } from "vue";
 import { de } from "element-plus/es/locales.mjs";
 
@@ -24,55 +24,6 @@ const address = ref({
 const route = useRoute();
 const router = useRouter();
 const errors = reactive({});
-
-//thông báo
-function showCustomNotification({
-  messageText,
-  type = "success",
-  duration = 2000,
-}) {
-  ElNotification({
-    title: "",
-    message: h("div", [
-      h("span", messageText),
-      h(
-        "div",
-        {
-          style: `
-                    position: relative;
-                    height: 4px;
-                    background-color: #e0e0e0;
-                    margin-top: 8px;
-                    border-radius: 2px;
-                    overflow: hidden;
-                `,
-        },
-        [
-          h("div", {
-            style: `
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        height: 100%;
-                        background-color: ${
-                          type === "success"
-                            ? "#28a745"
-                            : type === "error"
-                            ? "#dc3545"
-                            : "#007bff"
-                        };
-                        width: 100%;
-                        animation: progressBar ${duration}ms linear forwards;
-                    `,
-          }),
-        ]
-      ),
-    ]),
-    duration: duration,
-    type: type,
-    position: "top-right",
-  });
-}
 
 // Lưu trạng thái ban đầu của địa chỉ chính
 const originalPrimaryStatus = ref(false);
@@ -98,11 +49,7 @@ function handleTogglePrimary(event) {
   if (originalPrimaryStatus.value === true && address.value.diaChiChinh === false) {
     // Khôi phục lại trạng thái true
     address.value.diaChiChinh = true;
-    showCustomNotification({
-      messageText: "Không thể bỏ trạng thái địa chỉ chính. Mỗi khách hàng phải có ít nhất một địa chỉ chính.",
-      type: "error",
-      duration: 3000,
-    });
+    ElMessage.error("Không thể bỏ trạng thái địa chỉ chính. Mỗi khách hàng phải có ít nhất một địa chỉ chính.")
   }
 }
 
@@ -112,12 +59,7 @@ const updateHandle = async () => {
     const response = await updateAddress(idUpdate, address.value);
     console.log(response);
 
-    // Thêm mới thành công
-    showCustomNotification({
-      messageText: "Cập nhật thành công!",
-      type: "success",
-      duration: 2000,
-    });
+    ElMessage.success("Cập nhật địa chỉ thành công");
     setTimeout(() => {
       router.push(`/admin/client/addresses/${route.params.idClient}`);
     }, 1000);
@@ -127,11 +69,7 @@ const updateHandle = async () => {
         errors[field] = message;
       });
     } else {
-      showCustomNotification({
-        messageText: "Cập nhật thất bại!",
-        type: "error",
-        duration: 2000,
-      });
+      ElMessage.error("Cập nhật địa chỉ thất bại")
     }
   }
 };

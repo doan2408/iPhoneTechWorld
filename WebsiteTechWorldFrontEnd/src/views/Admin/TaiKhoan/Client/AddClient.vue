@@ -1,58 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { addClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElNotification } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { h } from "vue";
 import { useRouter } from "vue-router";
 
-//thông báo
-function showCustomNotification({
-  messageText,
-  type = "success",
-  duration = 2000,
-}) {
-  ElNotification({
-    title: "",
-    message: h("div", [
-      h("span", messageText),
-      h(
-        "div",
-        {
-          style: `
-                    position: relative;
-                    height: 4px;
-                    background-color: #e0e0e0;
-                    margin-top: 8px;
-                    border-radius: 2px;
-                    overflow: hidden;
-                `,
-        },
-        [
-          h("div", {
-            style: `
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        height: 100%;
-                        background-color: ${
-                          type === "success"
-                            ? "#28a745"
-                            : type === "error"
-                            ? "#dc3545"
-                            : "#007bff"
-                        };
-                        width: 100%;
-                        animation: progressBar ${duration}ms linear forwards;
-                    `,
-          }),
-        ]
-      ),
-    ]),
-    duration: duration,
-    type: type,
-    position: "top-right",
-  });
-}
 const errors = reactive({});
 const router = useRouter()
 
@@ -73,12 +25,7 @@ const handleAddClient = async () => {
       trangThai: "ACTIVE", //Mặc định là đang làm
       gioiTinh: true,
     };
-    // Thêm mới thành công
-    showCustomNotification({
-      messageText: "Thêm mới thành công!",
-      type: "success",
-      duration: 2000,
-    });
+    ElMessage.success("Thêm khách hàng thành công")
     router.push(`/admin/client`);
   } catch (err) {
     const errorData = err?.response?.data;
@@ -90,11 +37,7 @@ const handleAddClient = async () => {
     }
     else {
     console.error("Unexpected error format:", err);
-    showCustomNotification({
-      messageText: "Có lỗi xảy ra!",
-      type: "error",
-      duration: 2000,
-    });
+    ElMessage.error("Thêm khách hàng thất bại")
   } 
   }
 };

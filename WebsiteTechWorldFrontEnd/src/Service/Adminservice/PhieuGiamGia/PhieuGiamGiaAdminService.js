@@ -1,75 +1,65 @@
-import axios from 'axios';
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/admin/phieu-giam-gia',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+
+const baseURL= '/admin/phieu-giam-gia';
+
 
 export const getAll = async (params) => {
   try {
-    const response = await axiosInstance.get('', { params });
+    const response = await api.get(baseURL, { params });
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách phiếu giảm giá:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy danh sách phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách phiếu giảm giá');
   }
 };
 
 export const detail = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await api.get( baseURL +`/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi lấy chi tiết phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy chi tiết phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy chi tiết phiếu giảm giá');
   }
 };
 
 export const add = async (data) => {
   try {
-    const response = await axiosInstance.post('', data);
+    const response = await api.post(baseURL, data);
     return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm phiếu giảm giá:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi thêm phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi thêm phiếu giảm giá');
   }
 };
 
 export const update = async (id, data) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, data);
+    const response = await api.put( baseURL +`/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi cập nhật phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi cập nhật phiếu giảm giá');
   }
 };
 
 export const deletePhieuGiamGia = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/${id}`);
+    const response = await api.delete( baseURL +`/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi xóa phiếu giảm giá với ID ${id}:`, error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi xóa phiếu giảm giá';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi xóa phiếu giảm giá');
   }
 };
 
 export const getAllKhachHang = async () => {
   try {
-    const response = await axiosInstance.get('/khach-hang');
+    const response = await api.get(baseURL +'/khach-hang');
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách khách hàng:', error);
-    const errorMessage = error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng';
-    throw new Error(errorMessage);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách khách hàng');
   }
 };

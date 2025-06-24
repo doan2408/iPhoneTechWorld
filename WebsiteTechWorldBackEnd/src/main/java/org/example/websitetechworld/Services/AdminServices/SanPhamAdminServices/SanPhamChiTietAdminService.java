@@ -3,18 +3,22 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamChiTietAdminRepuest;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.BaoHanhAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -140,8 +144,8 @@ public class SanPhamChiTietAdminService {
         Cpu cpu = entity.getIdCpu();
         if (cpu != null) {
             response.setHangSanXuat(cpu.getHangSanXuat());
+            response.setChipXuLy(cpu.getChipXuLy());
             response.setSoNhan(cpu.getSoNhan());
-            response.setSoLuongCpu(cpu.getSoLuong());
             response.setXungNhip(cpu.getXungNhip());
             response.setCongNgheSanXuat(cpu.getCongNgheSanXuat());
             response.setBoNhoDem(cpu.getBoNhoDem());
@@ -170,7 +174,7 @@ public class SanPhamChiTietAdminService {
 
         XuatXu xuatXu = entity.getIdXuatXu();
         if (xuatXu != null) {
-            response.setXuatXu(xuatXu.getMaXuatXu());
+            response.setMaXuatXu(xuatXu.getMaXuatXu());
             response.setTenQuocGia(xuatXu.getTenQuocGia());
 
         }
@@ -182,12 +186,23 @@ public class SanPhamChiTietAdminService {
 
         if (entity.getImeis() != null && !entity.getImeis().isEmpty()) {
             Imei firstImei = entity.getImeis().iterator().next();
-            response.setImei(firstImei.getSoImei()); // sửa theo tên field thực tế
+            ImeiAdminResponse imeiResponse = new ImeiAdminResponse();
+            imeiResponse.setSoImei(firstImei.getSoImei());
+            imeiResponse.setTrangThaiImei(firstImei.getTrangThaiImei());
+            response.setImeis(new LinkedHashSet<>(Collections.singletonList(imeiResponse)));
+        } else {
+            response.setImeis(new LinkedHashSet<>());
         }
 
+        // Ánh xạ hinhAnhs (chỉ lấy phần tử đầu tiên)
         if (entity.getHinhAnhs() != null && !entity.getHinhAnhs().isEmpty()) {
             HinhAnh firstImage = entity.getHinhAnhs().iterator().next();
-            response.setUrl(firstImage.getUrl()); // sửa theo tên field thực tế
+            HinhAnhAdminResponse hinhAnhResponse = new HinhAnhAdminResponse();
+            hinhAnhResponse.setUrl(firstImage.getUrl());
+            hinhAnhResponse.setImagePublicId(firstImage.getImagePublicId());
+            response.setHinhAnhs(new LinkedHashSet<>(Collections.singletonList(hinhAnhResponse)));
+        } else {
+            response.setHinhAnhs(new LinkedHashSet<>());
         }
 
         return response;
@@ -228,6 +243,11 @@ public class SanPhamChiTietAdminService {
         SanPhamChiTiet save = sanPhamChiTietRepo.save(sanPhamChiTiet);
 
         return mapEntityToResponse(save);
+    }
+
+    public Page<SanPhamChiTietHienThiResponse> getAllSanPhamChiTiet(int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        return sanPhamChiTietRepo.findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable).map(SanPhamChiTietHienThiResponse::converDto);
     }
 
 
