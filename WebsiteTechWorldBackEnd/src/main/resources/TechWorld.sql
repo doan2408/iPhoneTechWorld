@@ -47,6 +47,20 @@ CREATE TABLE khach_hang (
                             trang_thai NVARCHAR(50)
 );
 
+CREATE TABLE user_tokens (
+                             id INT IDENTITY(1,1) PRIMARY KEY,
+                             token VARCHAR(255) NOT NULL,
+                             token_type VARCHAR(50),           -- 'access', 'refresh'
+                             expires_at DATETIME,
+                             created_at DATETIME DEFAULT GETDATE(),
+
+                             id_nhan_vien INT NULL,
+                             id_khach_hang INT NULL,
+
+                             CONSTRAINT FK_Token_NhanVien FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id_nhan_vien),
+                             CONSTRAINT FK_Token_KhachHang FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang)
+);
+
 CREATE TABLE phieu_giam_gia (
                                 id_phieu_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
                                 ma_giam_gia AS (
@@ -92,10 +106,10 @@ CREATE TABLE hoa_don (
                          sdt_nguoi_nhan NVARCHAR(10),
                          dia_chi_giao_hang NVARCHAR(100),
                          ngay_dat_hang DATE,
-                         phi_ship DECIMAL(10,2),
-                         tong_tien DECIMAL(10,2),
-                         so_tien_giam DECIMAL(10,2),
-                         thanh_tien DECIMAL(10,2),
+                         phi_ship DECIMAL(19,2),
+                         tong_tien DECIMAL(19,2),
+                         so_tien_giam DECIMAL(19,2),
+                         thanh_tien DECIMAL(19,2),
                          ngay_tao_hoa_don DATE,
                          ngay_tao_don_hang DATE, -- new
                          loai_hoa_don NVARCHAR(50),
@@ -413,6 +427,30 @@ VALUES
     (N'Lê Thị Thảo', '0965432108', N'thao_lt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'thao.lt@example.com', '1993-07-07', 0, 'thao.jpg', 700.00, 350.00, N'SILVER', N'ACTIVE'),
     (N'Phạm Văn Tâm', '0954321097', N'tam_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'tam.pv@example.com', '1991-04-04', 1, 'tam.jpg', 1800.00, 900.00, N'GOLD', N'ACTIVE'),
     (N'Hoàng Thị Vân', '0943210986', N'van_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'van.ht@example.com', '1995-10-10', 0, 'van.jpg', 900.00, 450.00, N'GOLD', N'ACTIVE');
+
+-- 8 bản ghi cho nhân viên
+--INSERT INTO user_tokens (token, token_type, expires_at, id_nhan_vien) VALUES
+--('nv-token-001', 'access', DATEADD(HOUR, 2, GETDATE()), 1),
+--('nv-token-002', 'access', DATEADD(HOUR, 2, GETDATE()), 2),
+--('nv-token-003', 'refresh', DATEADD(DAY, 7, GETDATE()), 3),
+--('nv-token-004', 'access', DATEADD(HOUR, 2, GETDATE()), 4),
+--('nv-token-005', 'refresh', DATEADD(DAY, 7, GETDATE()), 5),
+--('nv-token-006', 'access', DATEADD(HOUR, 2, GETDATE()), 6),
+--('nv-token-007', 'access', DATEADD(HOUR, 2, GETDATE()), 7),
+--('nv-token-008', 'refresh', DATEADD(DAY, 7, GETDATE()), 8);
+
+-- 7 bản ghi cho khách hàng
+--INSERT INTO user_tokens (token, token_type, expires_at, id_khach_hang) VALUES
+--('kh-token-001', 'access', DATEADD(HOUR, 2, GETDATE()), 1),
+--('kh-token-002', 'access', DATEADD(HOUR, 2, GETDATE()), 2),
+--('kh-token-003', 'refresh', DATEADD(DAY, 7, GETDATE()), 3),
+--('kh-token-004', 'access', DATEADD(HOUR, 2, GETDATE()), 4),
+--('kh-token-005', 'refresh', DATEADD(DAY, 7, GETDATE()), 5),
+--('kh-token-006', 'access', DATEADD(HOUR, 2, GETDATE()), 6),
+--('kh-token-007', 'access', DATEADD(HOUR, 2, GETDATE()), 7);
+
+
+
 
 -- Table phieu_giam_gia
 INSERT INTO phieu_giam_gia (ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai)
@@ -799,7 +837,7 @@ VALUES
 INSERT INTO chi_tiet_hoa_don (id_hoa_don, id_san_pham_chi_tiet, ten_san_pham, mo_ta, so_luong, don_gia)
 VALUES
     (1, 1, N'iPhone 16', N'Ip16', 1, 20000000.00),
-    (2, 2, N'iPhone 16', N'Ip16Pro', 1, 25000000.00),
+    (2, 2, N'iPhone 16 Pro', N'Ip16Pro', 1, 25000000.00),
     (3, 3, N'iPhone 15', N'ip15', 1, 15000000.00),
     (4, 4, N'iPhone 14', N'ip14', 1, 12000000.00),
     (5, 5, N'iPhone 13', N'ip13', 1, 10000000.00),
@@ -1071,6 +1109,7 @@ SELECT * FROM imei_da_ban;
 
 -- 31. phuong_thuc_thanh_toan
 SELECT * FROM phuong_thuc_thanh_toan;
+
 
 -- 32. chi_tiet_thanh_toan
 SELECT * FROM chi_tiet_thanh_toan;
