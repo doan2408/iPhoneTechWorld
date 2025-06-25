@@ -180,8 +180,7 @@ function toggleOrderMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login" @click.prevent="handleLogout"
-        >Đăng nhập</router-link
+      <router-link to="/login" @click.prevent="handleLogout">Đăng nhập</router-link
       >
     </div>
   </div>
