@@ -82,7 +82,11 @@ function toggleOrderMenu() {
         />
       </div>
       <div class="user-info" v-if="isLoggedIn">
-        <p class="username">👤 {{ user?.fullName }}</p>
+        <router-link to="/admin/staff/infor">
+          <span class="username"
+            ><i class="bi-person-lines-fill"></i> {{ user?.fullName }}</span
+          >
+        </router-link>
       </div>
 
       <nav>
@@ -149,7 +153,9 @@ function toggleOrderMenu() {
           </ul>
 
           <li>
-            <router-link v-if="isStaff" to="/admin/client">Quản lý khách hàng</router-link>
+            <router-link v-if="isStaff" to="/admin/client"
+              >Quản lý khách hàng</router-link
+            >
           </li>
 
           <li @click="toggleOrderMenu" class="menu-toggle">
@@ -168,9 +174,6 @@ function toggleOrderMenu() {
           <li>
             <router-link to="/admin/promotions">Quản lý khuyến mãi</router-link>
           </li>
-          <li>
-            <router-link to="/admin/staff/infor">Thông tin cá nhân</router-link>
-          </li>
         </ul>
       </nav>
     </div>
@@ -180,7 +183,8 @@ function toggleOrderMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login" @click.prevent="handleLogout">Đăng nhập</router-link
+      <router-link to="/login" @click.prevent="handleLogout"
+        >Đăng nhập</router-link
       >
     </div>
   </div>
@@ -314,12 +318,24 @@ function toggleOrderMenu() {
 }
 
 .username {
-  font-weight: 600;
-  margin-bottom: 0px;
+  text-decoration: none;
   color: #f1f5f9;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  font-size: 14px; /* Giảm font size */
+  font-weight: 600;
+  font-size: 14px;
 }
+
+.username:hover {
+  text-decoration: none;
+}
+
+.user-info a {
+  text-decoration: none;
+}
+
+.user-info a:hover {
+  text-decoration: none;
+}
+
 
 nav {
   position: relative;

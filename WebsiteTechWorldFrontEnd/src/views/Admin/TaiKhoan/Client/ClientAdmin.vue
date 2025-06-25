@@ -135,10 +135,15 @@ const firstPage = () => {
   loadClient(currentPage.value, searchKeyword.value || null);
 };
 
-const latePage = () => {
+const lastPage = () => {
   const latePage = totalPages.value - 1;
   currentPage.value = latePage;
   loadClient(currentPage.value, searchKeyword.value || null);
+};
+
+const handlePageChange = async (newPage) => {
+  currentPage.value = newPage - 1; // Điều chỉnh về index 0-based
+  await loadClient(currentPage.value, searchKeyword.value || null);
 };
 
 // Modal functions
@@ -339,19 +344,21 @@ onMounted(() => {
         <el-table-column prop="email" label="Email" width="180" />
         <el-table-column label="Địa chỉ" width="250">
           <template #default="scope">
-            <template
-              v-if="
-                scope.row.diaChi &&
-                scope.row.diaChi.find((dc) => dc.diaChiChinh)
-              "
-            >
-              {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).soNha }},
-              {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
-              {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
-              {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
-              {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
-            </template>
-            <template v-else>Không có</template>
+            <span style="white-space: normal; word-break: break-word">
+              <template
+                v-if="
+                  scope.row.diaChi &&
+                  scope.row.diaChi.find((dc) => dc.diaChiChinh)
+                "
+              >
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).soNha }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
+              </template>
+              <template v-else>Không có</template>
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="sdt" label="Số điện thoại" width="120">
@@ -405,12 +412,42 @@ onMounted(() => {
       </el-table>
 
       <!-- Pagination -->
-      <div class="pagination">
-        <button @click="firstPage">Trang đầu</button>
-        <button @click="previousPage">Trang trước</button>
-        <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-        <button @click="nextPage">Trang sau</button>
-        <button @click="latePage">Trang cuối</button>
+      <div class="pagination-fixed">
+        <div
+          class="d-flex justify-content-center align-items-center gap-3"
+          style="margin-top: 30px"
+        >
+          <!-- Nút Đầu -->
+          <el-button
+            :disabled="currentPage === 0"
+            @click="firstPage"
+            type="default"
+          >
+            «
+          </el-button>
+
+          <!-- el-pagination -->
+          <el-pagination
+            background
+            layout="prev, pager, next"
+            :page-size="10"
+            :current-page="currentPage + 1"
+            :total="totalPages * 10"
+            :pager-count="7"
+            prev-text="‹"
+            next-text="›"
+            @current-change="handlePageChange"
+          />
+
+          <!-- Nút Cuối -->
+          <el-button
+            :disabled="currentPage === totalPages - 1"
+            @click="lastPage"
+            type="default"
+          >
+            »
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -429,6 +466,7 @@ onMounted(() => {
         :key="formKey"
         label-width="140px"
         label-position="left"
+        :rules="rules"
         @submit.prevent="handleAddClient"
       >
         <el-row :gutter="20">
@@ -436,6 +474,7 @@ onMounted(() => {
             <el-form-item
               label="Tên khách hàng"
               :error="errors.tenKhachHang"
+              prop="tenKhachHang"
             >
               <el-input
                 v-model="clientRequest.tenKhachHang"
@@ -445,10 +484,7 @@ onMounted(() => {
           </el-col>
 
           <el-col :span="12">
-            <el-form-item
-              label="Tên đăng nhập"
-              :error="errors.taiKhoan"
-            >
+            <el-form-item label="Tên đăng nhập" :error="errors.taiKhoan">
               <el-input
                 v-model.trim="clientRequest.taiKhoan"
                 placeholder="Nhập tên đăng nhập"
@@ -459,7 +495,7 @@ onMounted(() => {
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="Email"  :error="errors.email">
+            <el-form-item label="Email" :error="errors.email">
               <el-input
                 v-model.trim="clientRequest.email"
                 placeholder="Nhập email"
@@ -468,7 +504,7 @@ onMounted(() => {
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="Số điện thoại"  :error="errors.sdt">
+            <el-form-item label="Số điện thoại" :error="errors.sdt">
               <el-input
                 v-model.trim="clientRequest.sdt"
                 placeholder="Nhập số điện thoại"
@@ -491,10 +527,7 @@ onMounted(() => {
           </el-col>
 
           <el-col :span="12">
-            <el-form-item
-              label="Năm sinh"
-              :error="errors.ngaySinh"
-            >
+            <el-form-item label="Năm sinh" :error="errors.ngaySinh">
               <el-date-picker
                 v-model="clientRequest.ngaySinh"
                 type="date"
@@ -602,43 +635,70 @@ h2 {
   font-weight: 600;
 }
 
-/* Pagination */
-.pagination {
-  margin-top: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
+/* Pagination - Sử dụng style từ ProductAdmin.vue */
+.pagination-fixed {
   background: white;
-  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 24px;
+  border: 1px solid #e5e7eb;
 }
 
-.pagination button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  cursor: pointer;
+.d-flex {
+  display: flex;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+:deep(.el-pagination button) {
   background: white;
-  color: #495057;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.pagination button:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.pagination span {
-  font-weight: 500;
-  color: #495057;
+  border: 1px solid #d1d5db;
+  color: #374151;
   font-size: 14px;
-  padding: 8px 16px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  margin: 0 2px;
+  padding: 6px 12px;
+}
+
+:deep(.el-pagination button:hover) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+:deep(.el-pagination .el-pager li) {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 0 2px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.el-pagination .el-pager li:hover) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+:deep(.el-pagination .el-pager li.is-active) {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
 }
 
 /* Dialog customizations */
@@ -696,6 +756,38 @@ h2 {
   :deep(.el-dialog) {
     width: 95% !important;
     margin: 5vh auto !important;
+  }
+}
+/* Đảm bảo tất cả các dòng trong table có cùng chiều cao và font-size */
+:deep(.el-table tr) {
+  height: 48px !important; /* Đặt chiều cao cố định */
+  transition: none !important; /* Loại bỏ hiệu ứng chuyển đổi không mong muốn */
+}
+
+:deep(.el-table td) {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #374151;
+  border-color: #f3f4f6;
+  background: white !important;
+  vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
+}
+
+:deep(.el-table .cell) {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: nowrap !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  :deep(.el-table tr) {
+    height: 40px !important; /* Giảm chiều cao trên mobile */
+  }
+
+  :deep(.el-table td) {
+    padding: 8px 12px;
+    font-size: 13px;
   }
 }
 </style>
