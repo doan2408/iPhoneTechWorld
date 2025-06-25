@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.example.websitetechworld.Entity.KhachHang;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -79,4 +80,23 @@ public class JwtService {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public String generateAccessToken(KhachHang khachHang) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", khachHang.getId());
+        claims.put("email", khachHang.getEmail());
+        claims.put("fullName", khachHang.getTenKhachHang());
+        claims.put("role", khachHang.getRole()); // Nếu có role
+        claims.put("trangThai", khachHang.getTrangThai());
+
+        return buildToken(claims, khachHang.getTaiKhoan(), 1000 * 60 * 60 * 2); // 2 giờ
+    }
+
+    public String generateRefreshToken(KhachHang khachHang) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return buildToken(claims, khachHang.getTaiKhoan(), 1000 * 60 * 60 * 24 * 7); // 7 ngày
+    }
+
+
 }

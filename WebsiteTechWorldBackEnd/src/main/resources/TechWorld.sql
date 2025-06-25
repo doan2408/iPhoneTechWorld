@@ -327,7 +327,6 @@ CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
                       so_imei VARCHAR(70),
-                      so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
 );
 
@@ -910,36 +909,36 @@ VALUES
     (15, '2025-06-11', NULL, N'Lỗi sạc không dây', N'IN_REPAIR');
 
 -- Table imei
-INSERT INTO imei (id_san_pham_chi_tiet, so_imei, so_imei_2, trang_thai_imei)
+INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
 VALUES
-    (1, '123456789012345', '543210987654321', 'AVAILABLE'),
-    (2, '123456789012346', '543210987654322', 'AVAILABLE'),
-    (3, '123456789012347', '543210987654323', 'AVAILABLE'),
-    (4, '123456789012348', '543210987654324', 'AVAILABLE'),
-    (5, '123456789012349', '543210987654325', 'AVAILABLE'),
-    (6, '123456789012350', '543210987654326', 'AVAILABLE'),
-    (7, '123456789012351', '543210987654327', 'AVAILABLE'),
-    (8, '123456789012352', '543210987654328', 'AVAILABLE'),
-    (9, '123456789012353', '543210987654329', 'AVAILABLE'),
-    (10, '123456789012354', '543210987654330', 'AVAILABLE'),
-    (11, '123456789012355', '543210987654331', 'AVAILABLE'),
-    (12, '123456789012356', '543210987654332', 'AVAILABLE'),
-    (13, '123456789012357', '543210987654333', 'AVAILABLE'),
-    (14, '123456789012358', '543210987654334', 'AVAILABLE'),
-    (15, '123456789012359', '543210987654335', 'AVAILABLE');
+    (1, '123456789012345', 'AVAILABLE'),
+    (2, '123456789012346', 'AVAILABLE'),
+    (3, '123456789012347', 'AVAILABLE'),
+    (4, '123456789012348', 'AVAILABLE'),
+    (5, '123456789012349', 'AVAILABLE'),
+    (6, '123456789012350', 'AVAILABLE'),
+    (7, '123456789012351', 'AVAILABLE'),
+    (8, '123456789012352', 'AVAILABLE'),
+    (9, '123456789012353', 'AVAILABLE'),
+    (10, '123456789012354', 'AVAILABLE'),
+    (11, '123456789012355', 'AVAILABLE'),
+    (12, '123456789012356', 'AVAILABLE'),
+    (13, '123456789012357', 'AVAILABLE'),
+    (14, '123456789012358', 'AVAILABLE'),
+    (15, '123456789012359', 'AVAILABLE');
 
 -- Table hinh_anh
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
 VALUES
-    (1, 'https://example.com/images/iphone16_black.jpg', 'iphone16_black_001'),
-    (2, 'https://example.com/images/iphone16pro_white.jpg', 'iphone16pro_white_002'),
-    (3, 'https://example.com/images/iphone15_gold.jpg', 'iphone15_gold_003'),
-    (4, 'https://example.com/images/iphone14_blue.jpg', 'iphone14_blue_004'),
-    (5, 'https://example.com/images/iphone13_pink.jpg', 'iphone13_pink_005'),
-    (6, 'https://example.com/images/iphone16plus_gray.jpg', 'iphone16plus_gray_006'),
-    (7, 'https://example.com/images/iphone15pro_silver.jpg', 'iphone15pro_silver_007'),
-    (8, 'https://example.com/images/iphone14pro_green.jpg', 'iphone14pro_green_008'),
-    (9, 'https://example.com/images/iphone13pro_red.jpg', 'iphone13pro_red_009'),
+    (1, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'),
+    (2, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'),
+    (3, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'),
+    (4, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'),
+    (5, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'),
+    (6, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'),
+    (7, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'),
+    (8, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'),
+    (9, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'),
     (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
     (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
     (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
@@ -1119,3 +1118,6 @@ SELECT * FROM loai_bao_hanh
 
 --34. lich_su_bao_hanh
 SELECT * FROM lich_su_bao_hanh
+
+--35. user_tokens
+SELECT * FROM user_tokens

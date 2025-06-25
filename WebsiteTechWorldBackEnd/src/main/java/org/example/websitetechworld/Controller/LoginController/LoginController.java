@@ -9,6 +9,7 @@ import org.example.websitetechworld.Dto.Request.TokenRequest.UserLoginRequestDTO
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserTokenRequestDTO;
 import org.example.websitetechworld.Dto.Response.TokenResponse.UserTokenResponseDTO;
 import org.example.websitetechworld.Entity.UserToken;
+import org.example.websitetechworld.Repository.JointAccount;
 import org.example.websitetechworld.Repository.UserTokenRepository;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.Repository.TokenService;
@@ -150,14 +151,18 @@ public class LoginController {
         Object principal = authentication.getPrincipal(); // là CustomUserDetails
 
         if (principal instanceof CustomUserDetails userDetails) {
-            return ResponseEntity.ok(Map.of(
-                    "tai_khoan", userDetails.getUsername(),
-                    "roles", userDetails.getAuthorities(),
-                    "fullName", userDetails.getFullName(),
-                    "email", userDetails.getAccount().getEmail(),
-                    "sdt", userDetails.getAccount().getSdt(),
-                    "id", userDetails.getId()
-            ));
+            JointAccount acc = userDetails.getAccount();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tai_khoan", userDetails.getUsername());
+            response.put("roles", userDetails.getAuthorities());
+            response.put("id", userDetails.getId());
+            response.put("fullName", Optional.ofNullable(acc.getFullName()).orElse(""));
+            response.put("email", Optional.ofNullable(acc.getEmail()).orElse(""));
+            response.put("sdt", Optional.ofNullable(acc.getSdt()).orElse(""));
+            response.put("trang_thai", Optional.ofNullable(acc.getTrangThai()).orElse(""));
+
+            return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể lấy thông tin người dùng");
     }
