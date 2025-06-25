@@ -1,7 +1,9 @@
 package org.example.websitetechworld.Controller.LoginController;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserLoginRequestDTO;
 import org.example.websitetechworld.Dto.Request.TokenRequest.UserTokenRequestDTO;
@@ -11,6 +13,7 @@ import org.example.websitetechworld.Repository.UserTokenRepository;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.Repository.TokenService;
 import org.example.websitetechworld.Repository.UserTokenService;
+import org.example.websitetechworld.Services.LoginServices.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +25,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +43,7 @@ public class LoginController {
     private final TokenService tokenService;
     private final UserTokenService userTokenService;
     private final UserTokenRepository userTokenRepository;
+    private final JwtService jwtService;
 
 
     //check role
@@ -167,10 +173,8 @@ public class LoginController {
         }
         UserToken token = tokenOptional.get();
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey("techworld1234567890techworld1234567890")
-                    .parseClaimsJws(refreshToken)
-                    .getBody();
+            Claims claims = jwtService.extractAllClaims(refreshToken);
+
             if (!"refresh".equals(claims.get("type"))) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Token không phải refresh token"));
@@ -197,38 +201,119 @@ public class LoginController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody UserTokenRequestDTO request) {
         String refreshToken = request.getRefreshToken();
+        System.out.println("🔍 Logout request - Refresh token: " + (refreshToken != null ? refreshToken.substring(0, 20) + "..." : "null"));
 
         if (refreshToken == null || refreshToken.isBlank()) {
+            System.out.println("❌ Refresh token is null or blank");
             return ResponseEntity.badRequest().body(Map.of("message", "Refresh token không được để trống"));
         }
 
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey("techworld1234567890techworld1234567890")
-                    .parseClaimsJws(refreshToken)
-                    .getBody();
+            // 1. Verify token format và signature
+            Claims claims = jwtService.extractAllClaims(refreshToken);
+
+            System.out.println("✅ Token parsed successfully");
+            System.out.println("🔍 Token type: " + claims.get("type"));
+            System.out.println("🔍 Token subject: " + claims.getSubject());
 
             if (!"refresh".equals(claims.get("type"))) {
+                System.out.println("❌ Token is not refresh type");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("message", "Token không phải refresh token"));
             }
 
+            // 2. Find token in database
+            System.out.println("🔍 Searching token in database...");
             Optional<UserToken> tokenOptional = userTokenService.findByToken(refreshToken);
 
             if (tokenOptional.isEmpty()) {
+                System.out.println("❌ Token not found in database");
+
+                // Debug: Kiểm tra xem có token nào của user này không
+                String username = claims.getSubject();
+                System.out.println("🔍 Checking all tokens for user: " + username);
+                // Nếu có method findByUsername thì uncomment dòng dưới
+                // List<UserToken> userTokens = userTokenService.findByUsername(username);
+                // System.out.println("🔍 User has " + userTokens.size() + " tokens in DB");
+
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("message", "Refresh token không tồn tại trong hệ thống"));
             }
 
-            userTokenRepository.delete(tokenOptional.get());
+            // 3. Delete token
+            UserToken tokenToDelete = tokenOptional.get();
+            System.out.println("✅ Token found in database");
+            System.out.println("🔍 Token ID: " + tokenToDelete.getId());
+            System.out.println("🔍 Token User: " + tokenToDelete.getId());
+            System.out.println("🔍 About to delete token...");
+
+            // Sử dụng deleteById để chắc chắn
+            userTokenRepository.deleteById(tokenToDelete.getId());
+
+            // Hoặc flush để force commit ngay lập tức
+            // userTokenRepository.delete(tokenToDelete);
+            // userTokenRepository.flush();
+
+            System.out.println("✅ Token deleted successfully");
+
+            // 4. Verify deletion (Optional - for debugging)
+            Optional<UserToken> verifyDeletion = userTokenService.findByToken(refreshToken);
+            if (verifyDeletion.isEmpty()) {
+                System.out.println("✅ Verified: Token no longer exists in database");
+            } else {
+                System.out.println("⚠️ Warning: Token still exists in database after deletion!");
+            }
 
             return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công, token đã bị xoá"));
 
+        } catch (ExpiredJwtException e) {
+            System.out.println("❌ Token expired: " + e.getMessage());
+
+            // Token hết hạn nhưng vẫn cố gắng xóa khỏi DB nếu tồn tại
+            try {
+                Optional<UserToken> tokenOptional = userTokenService.findByToken(refreshToken);
+                if (tokenOptional.isPresent()) {
+                    userTokenRepository.deleteById(tokenOptional.get().getId());
+                    System.out.println("✅ Expired token deleted from database");
+                }
+            } catch (Exception deleteEx) {
+                System.out.println("❌ Error deleting expired token: " + deleteEx.getMessage());
+            }
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Token đã hết hạn", "error", e.getMessage()));
+
         } catch (Exception e) {
+            System.out.println("❌ General error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Token không hợp lệ", "error", e.getMessage()));
         }
     }
+
+    // Optional: Thêm method để xóa tất cả token của user (logout from all devices)
+//    @PostMapping("/logout-all")
+//    public ResponseEntity<?> logoutAll(Authentication authentication) {
+//        try {
+//            String username = authentication.getName();
+//            System.out.println("🔍 Logging out all devices for user: " + username);
+//
+//            // Assuming you have this method in your service
+//            int deletedCount = userTokenService.deleteAllTokensByUsername(username);
+//
+//            System.out.println("✅ Deleted " + deletedCount + " tokens");
+//
+//            return ResponseEntity.ok(Map.of(
+//                    "message", "Đăng xuất khỏi tất cả thiết bị thành công",
+//                    "deletedTokens", deletedCount
+//            ));
+//
+//        } catch (Exception e) {
+//            System.out.println("❌ Error in logout-all: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("message", "Lỗi khi đăng xuất", "error", e.getMessage()));
+//        }
+//    }
 
 }
 

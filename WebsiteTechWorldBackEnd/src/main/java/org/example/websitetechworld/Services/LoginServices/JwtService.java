@@ -7,12 +7,10 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,17 +21,18 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    private SecretKey key;
+
     @PostConstruct
     public void init() {
-        System.out.println("JWT Secret: " + secretKey);
         if (secretKey == null || secretKey.isEmpty()) {
             throw new IllegalStateException("JWT_SECRET không được cấu hình!");
         }
+        key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        System.out.println("🔐 Secret key init thành công.");
     }
 
     public Claims extractAllClaims(String token) {
-        System.out.println("Token nhận được: " + token);
-        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -47,7 +46,7 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+        return extractClaim(token, Claims::getSubject);
     }
 
     private boolean isTokenExpired(String token) {
@@ -62,24 +61,22 @@ public class JwtService {
     public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2)) // 2 hours
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        return buildToken(claims, username, 1000 * 60 * 60 * 2); // 2 giờ
     }
 
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "refresh");
+        return buildToken(claims, username, 1000 * 60 * 60 * 24 * 7); // 7 ngày
+    }
+
+    private String buildToken(Map<String, Object> claims, String subject, long expirationMillis) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 days
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 }

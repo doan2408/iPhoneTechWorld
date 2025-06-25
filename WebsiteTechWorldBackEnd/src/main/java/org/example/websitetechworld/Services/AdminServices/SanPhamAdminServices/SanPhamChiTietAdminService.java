@@ -213,7 +213,6 @@ public class SanPhamChiTietAdminService {
         return sanPhamChiTietRepo.findFullById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm với ID: " + id));
     }
 
-
     //detail
     public SanPhamChiTietResponse getSanPhamChiTiet(SanPhamChiTiet entity) {
 
@@ -221,7 +220,6 @@ public class SanPhamChiTietAdminService {
 
         return response;
     }
-
 
     @Transactional
     public SanPhamChiTietResponse createSanPhamChiTiet(SanPhamChiTietAdminRepuest req) {
