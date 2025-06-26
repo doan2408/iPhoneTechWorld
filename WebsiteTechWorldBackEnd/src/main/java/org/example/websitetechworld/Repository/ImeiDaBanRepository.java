@@ -12,4 +12,6 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
 
     List<ImeiDaBan> findByIdHoaDonChiTiet_Id(Integer idHoaDonChiTiet_Id);
 
+    List<ImeiDaBan> findByIdHoaDonChiTiet_IdAndSoImeiIn(Integer hdctId, List<String> soImeis);
+
 }

@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
@@ -196,6 +197,23 @@ public class HoaDonAdminController {
             tabList = lichSuHoaDonAdminServices.findMaHoaDonPendingByNhanVien(nhanVienId);
         }
         return ResponseEntity.ok(tabList);
+    }
+
+    @PatchMapping("/{hoaDonId}/chi-tiet/{hdctId}/remove-imeis")
+    public ResponseEntity<?> removeImeisFromChiTietHoaDon(
+            @PathVariable Integer hoaDonId,
+            @PathVariable Integer hdctId,
+            @RequestBody CthdGiamSoLuong request) {
+        try {
+            hoaDonChiTietAdminServices.removeImeisAndUpdateSoLuong(hoaDonId, hdctId, request);
+            return ResponseEntity.ok("IMEI đã được loại bỏ và chi tiết hóa đơn cập nhật thành công.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Lỗi khi loại bỏ IMEI và cập nhật chi tiết hóa đơn: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
+        }
     }
 
 

@@ -79,3 +79,20 @@ export const fetchImeisJs = (productId,page,size) => {
     });
      
 }
+
+export const loadImeiDaBan = (idCthd) => {
+    const url = '/admin/imei-da-ban'
+    return api.get(url, {
+        params: {
+            idCthd: idCthd
+        }
+    })
+  }
+
+export const updateSoLuongAndTrangThai = (idHd, idCthd, imeisToReturn) => {
+    const url = '/admin/hoa-don/' + idHd + '/chi-tiet/' + idCthd + '/remove-imeis'
+    const requestBody = {
+        imeisToReturn: imeisToReturn // Đây là key mà backend của bạn mong đợi
+    };
+    return api.patch(url,requestBody)
+}

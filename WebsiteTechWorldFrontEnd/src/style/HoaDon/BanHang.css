@@ -1565,3 +1565,484 @@
 .quantity-input-group input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0; }
+
+.modal-content-imei {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.imei-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 15px 0;
+}
+
+.imei-item {
+    margin-bottom: 10px;
+}
+
+.imei-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.imei-checkbox:hover {
+    background-color: #f5f5f5;
+}
+
+.imei-checkbox input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+}
+
+.imei-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.imei-code {
+    font-weight: 600;
+    color: #333;
+    font-family: monospace;
+}
+
+.imei-status {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.imei-status.active {
+    color: #28a745;
+}
+
+.selection-summary {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.selection-summary p {
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #eee;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+/* Modal transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.3s;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;     }
+
+/* General Modal Overlay */
+.delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Slightly darker overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+    /* Subtle blur effect */
+}
+
+/* Modal Content Container */
+.delete-modal-content-2 {
+    background-color: #ffffff;
+    border-radius: 12px;
+    /* More rounded corners */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    /* Stronger shadow for depth */
+    padding: 30px;
+    /* Increased padding */
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    transform: translateY(-20px);
+    /* Slightly lift for a subtle animation feel */
+    opacity: 0;
+    /* Start hidden for fade-in */
+    animation: fadeInSlideUp 0.3s ease-out forwards;
+    /* Apply animation */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* Space between elements */
+}
+
+/* Animation for fade-in and slide-up */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal Title */
+.delete-modal-content-2 h2 {
+    color: #d32f2f;
+    /* Red color for warning */
+    font-size: 1.8em;
+    /* Larger font size */
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Paragraph Text */
+.delete-modal-content-2 p {
+    color: #555;
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.delete-modal-content-2 p strong {
+    color: #333;
+    font-weight: 700;
+}
+
+/* IMEI List Container */
+.delete-imei-list-container {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    max-height: 250px;
+    /* Max height for scrollability */
+    overflow-y: auto;
+    /* Enable scrolling */
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+    /* Align text to the left within the container */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Inner shadow for depth */
+}
+
+/* Scrollbar styling for Webkit browsers */
+.delete-imei-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.delete-imei-list-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.delete-imei-list-container::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    border-radius: 4px;
+}
+
+/* Select All Checkbox Label */
+.delete-imei-select-all {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.delete-imei-select-all input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+    /* Slightly larger checkbox */
+}
+
+/* IMEI List */
+.delete-imei-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.delete-imei-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed #e0e0e0;
+    /* Dashed separator */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Space out IMEI and status */
+}
+
+.delete-imei-list li:last-child {
+    border-bottom: none;
+}
+
+.delete-imei-list li label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-grow: 1;
+    /* Allow label to take available space */
+}
+
+.delete-imei-list li input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.1);
+    /* Slightly larger checkbox */
+}
+
+.delete-imei-list li span {
+    color: #444;
+    font-size: 1em;
+}
+
+/* IMEI Status Styling */
+.imei-status-available {
+    color: #28a745;
+    /* Green for available */
+    font-weight: 500;
+    margin-left: 15px;
+    /* Space from IMEI number */
+    font-size: 0.9em;
+}
+
+.imei-status-sold {
+    color: #dc3545;
+    /* Red for sold */
+    font-weight: 500;
+    margin-left: 15px;
+    font-size: 0.9em;
+}
+
+.imei-status-damaged {
+    color: #ffc107;
+    /* Orange/Yellow for damaged */
+    font-weight: 500;
+    margin-left: 15px;
+    font-size: 0.9em;
+}
+
+/* No IMEI Message */
+.delete-imei-list li[v-if="imeisForCurrentItem.length === 0"] {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Modal Actions (Buttons) */
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    /* Center the buttons */
+    gap: 15px;
+    /* Space between buttons */
+    margin-top: 25px;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: #d32f2f;
+    /* Red primary action */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #c62828;
+    /* Darker red on hover */
+    transform: translateY(-2px);
+    /* Slight lift on hover */
+}
+
+.btn-primary:disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #b0b0b0;
+    transform: translateY(-2px);
+}
+
+/* Transition for the modal (Vue transition `delete-modal-fade`) */
+.delete-modal-fade-enter-active,
+.delete-modal-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.delete-modal-fade-enter,
+.delete-modal-fade-leave-to
+
+/* status imei doan tra */
+.imei-status-co-san {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.imei-status-da-dat-truoc {
+    background-color: #ffc107;
+}
+
+.imei-status-da-ban {
+    background-color: #dc3545;
+    font-weight: bold;
+}
+
+.imei-status-da-tra-lai {
+    background-color: #6f42c1;
+}
+
+.imei-status-tan-trang {
+    background-color: #007bff;
+}
+
+.imei-status-bi-chan {
+    color: #343a40;
+    background-color: #f8f9fa;
+    text-decoration: line-through;
+    padding: 2px 5px;
+    border-radius: 3px; }

@@ -11,6 +11,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CthdUpdateSoLuongAdminRequest {
-    Integer soLuong;
+public class CthdGiamSoLuong {
+    private List<String> imeisToReturn;
 }
