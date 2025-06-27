@@ -208,22 +208,11 @@ export default {
     };
 
     const onModelChange = () => {
-      console.log('onModelChange triggered with idModelSanPham:', sanPham.idModelSanPham);
       errors.idModelSanPham = '';
-      console.log('Cleared error for idModelSanPham:', errors.idModelSanPham);
-
       const selectedModel = modelSanPhams.value.find(m => m.idModelSanPham === sanPham.idModelSanPham);
-      console.log('Selected model:', selectedModel);
-
       if (selectedModel) {
-        console.log('Before updating tenSanPham:', {
-          currentTenSanPham: sanPham.tenSanPham,
-          selectedTenModel: selectedModel.tenModel
-        });
-        sanPham.tenSanPham = selectedModel.tenModel; // Luôn gán tenModel mới
-        console.log('After updating tenSanPham:', sanPham.tenSanPham);
-      } else {
-        console.warn('No model found for idModelSanPham:', sanPham.idModelSanPham);
+        sanPham.tenSanPham = sanPham.tenSanPham || selectedModel.tenModel;
+        sanPham.thuongHieu = sanPham.thuongHieu || selectedModel.thuongHieu || '';
       }
     };
 
@@ -626,194 +615,28 @@ export default {
 </script>
 
 <style scoped>
-/* Container chính của form */
-.el-form {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  background: var(--el-bg-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Tiêu đề chính */
-h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-/* Tiêu đề phụ */
-h3 {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--el-text-color-regular);
-  margin: 24px 0 16px;
-  border-bottom: 1px solid var(--el-border-color-light);
-  padding-bottom: 8px;
-}
-
-/* Form item */
-.el-form-item {
-  margin-bottom: 24px;
-}
-
-.el-form-item__label {
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-/* Input và select */
-.el-input,
-.el-select {
-  width: 100%;
-}
-
-.el-input__inner,
-.el-select .el-input__inner {
-  border-radius: 6px;
-  transition: border-color 0.2s;
-}
-
-.el-input__inner:focus,
-.el-select .el-input__inner:focus {
-  border-color: var(--el-color-primary);
-  box-shadow: 0 0 0 1px var(--el-color-primary);
-}
-
-/* Button */
-.el-button {
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-weight: 500;
-  transition: all 0.3s;
-}
-
-.el-button--primary {
-  background-color: var(--el-color-primary);
-  border-color: var(--el-color-primary);
-}
-
-.el-button--primary:hover {
-  background-color: var(--el-color-primary-light-3);
-  border-color: var(--el-color-primary-light-3);
-}
-
-.el-button--success {
-  background-color: var(--el-color-success);
-  border-color: var(--el-color-success);
-}
-
-.el-button--success:hover {
-  background-color: var(--el-color-success-light-3);
-  border-color: var(--el-color-success-light-3);
-}
-
-.el-button--danger {
-  background-color: var(--el-color-danger);
-  border-color: var(--el-color-danger);
-}
-
-.el-button--danger:hover {
-  background-color: var(--el-color-danger-light-3);
-  border-color: var(--el-color-danger-light-3);
-}
-
-/* Table */
 .el-table {
   cursor: pointer;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.el-table th {
-  background-color: var(--el-fill-color-light);
-  color: var(--el-text-color-primary);
-  font-weight: 600;
-}
-
-.el-table tr:hover {
-  background-color: var(--el-fill-color-blank);
 }
 
 .error-row {
-  background-color: var(--el-color-danger-light-9);
+  background-color: #fff1f0;
 }
 
-/* Card */
-.el-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+.el-form-item.is-error .el-form-item__error {
+  color: #F56C6C;
 }
 
-.el-card h4 {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 16px;
-}
-
-/* Upload */
-.el-upload {
-  width: 100%;
-}
-
-.el-upload .el-button {
-  width: 100%;
-  text-align: center;
-}
-
-.el-upload-list--picture .el-upload-list__item {
-  border-radius: 6px;
-  transition: all 0.3s;
-}
-
-.el-upload-list--picture .el-upload-list__item:hover {
-  transform: scale(1.02);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* IMEI status */
 .imei-status {
   font-size: 14px;
-  color: var(--el-text-color-regular);
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
+  color: #606266;
 }
 
 .valid-message {
-  color: var(--el-color-success);
-  font-weight: 500;
+  color: #67C23A;
 }
 
 .error-message {
-  color: var(--el-color-danger);
-  font-weight: 500;
+  color: #F56C6C;
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .el-form {
-    padding: 16px;
-  }
-
-  .el-row {
-    flex-direction: column;
-  }
-
-  .el-col {
-    width: 100%;
-    margin-bottom: 16px;
-  }
-
-  .el-button {
-    width: 100%;
-  }
-}
-
-
 </style>

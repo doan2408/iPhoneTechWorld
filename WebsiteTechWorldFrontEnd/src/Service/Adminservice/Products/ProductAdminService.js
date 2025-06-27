@@ -210,7 +210,6 @@ export const postCameraSau = (dataCameraSau) => postData('/cameraSau',dataCamera
 export const putCameraSau = (id, dataCameraSau) => putData(`/cameraSau/${id}`, dataCameraSau);
 export const deleteCameraSau = (idCameraSau) => deleteData(`/cameraSau/${idCameraSau}`);
 
-
 export const getAllNhaCungCapList = () => fetchData('/nhaCungCap/listNCC');
 export const postNhaCungCapList = (data) => postData('/nhaCungCap/quick-create', data)
 
@@ -226,6 +225,14 @@ export const getAllHDHList = () => fetchData('/heDieuHanh/listHDH');
 export const getAllCpuList = () => fetchData('/cpu/listCpu');
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
+
+
+export const getAllModelSanPhamList = () => fetchData('/modelSanPham/listModelSanPham');
+export const getAllPageModelSanPham = (page = 0, size = 5) => fetchData(`/modelSanPham?page=${page}&size=${size}`);
+export const postModelSanPham = (data) => postData('/modelSanPham', data);
+export const putModelSanPham = (id, data) => putData(`/modelSanPham/${id}`, data);
+export const deleteModelSanPham = (idModelSanPham) => deleteData(`/modelSanPham/${idModelSanPham}`);
+export const finByIdModelSanPham = (idModelSanPham) => fetchData(`/modelSanPham/${idModelSanPham}`);
 
 export const loadCategory = (pageNo, pageSize) =>{
   const urlProduct = '/admin/product'
