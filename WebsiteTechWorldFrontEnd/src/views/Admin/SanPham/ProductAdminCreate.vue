@@ -133,7 +133,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getAllMauSacList, getAllModelSanPhamList, getAllNhaCungCapList, getAllRomList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { debounce } from 'chart.js/helpers';
-import axios from 'axios';
+import api from "@/Service/LoginService/axiosInstance";
 
 export default {
   setup() {
@@ -391,7 +391,7 @@ export default {
         }
         const formData = new FormData();
         formData.append('file', file.raw);
-        const response = await axios.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
+        const response = await api.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         sanPham.sanPhamChiTiets[index].hinhAnhs = fileList.map(item => {
