@@ -37,9 +37,6 @@ public class SanPhamChiTietAdminRepuest {
     @NotNull(message = "ROM không được để trống")
     private Integer idRom;
 
-    @NotNull(message = "id_model_san_pham không được để trống")
-    private Integer id_model_san_pham;
-
 //    @NotNull(message = "Màn hình không được để trống")
 //    private Integer idManHinh;
 //

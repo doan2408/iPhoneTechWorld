@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -11,19 +12,15 @@ import java.util.Date;
 @NoArgsConstructor
 public class ModelSanPhamAdminRequest {
 
-    private Integer id_model_san_pham;
+    private Integer idModelSanPham;
 
-    private String ma_model_san_pham;
+    private String tenModel;
 
-    private String ten_model;
+    private LocalDate namRaMat;
 
-    private Date nam_ra_mat;
+    private String moTa;
 
-    private String mo_ta;
-
-    private String trang_thai;
-
-    private Integer idSanPham;
+    private String trangThai;
 
     private Integer idRam;
 

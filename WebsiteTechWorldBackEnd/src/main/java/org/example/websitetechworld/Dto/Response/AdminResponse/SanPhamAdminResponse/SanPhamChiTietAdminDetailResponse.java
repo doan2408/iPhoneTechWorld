@@ -14,8 +14,8 @@ public class SanPhamChiTietAdminDetailResponse {
     private Integer id;
     private String maSanPhamChiTiet;
     private Integer idMau;
-    private Integer idRam;
-//    private Integer idRom;
+//    private Integer idRam;
+    private Integer idRom;
 //    private Integer idManHinh;
 //    private Integer idHeDieuHanh;
 //    private Integer idPin;

@@ -75,21 +75,20 @@ public class SanPhamChiTietAdminService {
             response.setGiaBan(entity.getGiaBan());
         }
 
-        SanPham sanPham = entity.getIdSanPham();
-        if (sanPham != null) {
-            response.setMaSanPham(sanPham.getMaSanPham());
-            response.setTenSanPham(sanPham.getTenSanPham());
-            response.setThuongHieu(sanPham.getThuongHieu());
-//            response.setSoLuongTonKho(sanPham.getSoLuongTonKho());
-
-            NhaCungCap ncc = sanPham.getIdNhaCungCap();
-            if (ncc != null) {
-                response.setTenNhaCungCap(ncc.getTenNhaCungCap());
-                response.setDiaChi(ncc.getDiaChi());
-                response.setSdt(ncc.getSdt());
-                response.setEmail(ncc.getEmail());
-            }
-        }
+//        SanPham sanPham = entity.getIdSanPham();
+//        if (sanPham != null) {
+//            response.setMaSanPham(sanPham.getMaSanPham());
+//            response.setTenSanPham(sanPham.getTenSanPham());
+//            response.setThuongHieu(sanPham.getThuongHieu());
+//
+//            NhaCungCap ncc = sanPham.getIdNhaCungCap();
+//            if (ncc != null) {
+//                response.setTenNhaCungCap(ncc.getTenNhaCungCap());
+//                response.setDiaChi(ncc.getDiaChi());
+//                response.setSdt(ncc.getSdt());
+//                response.setEmail(ncc.getEmail());
+//            }
+//        }
 
         MauSac mauSac = entity.getIdMau();
         if (mauSac != null) {

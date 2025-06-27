@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -42,6 +45,12 @@ public class SanPham {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nha_cung_cap")
     private NhaCungCap idNhaCungCap;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "id_model_san_pham")
+    private ModelSanPham idModelSanPham;
+
 
     @OneToMany(mappedBy = "idSanPham", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SanPhamChiTiet> sanPhamChiTiets = new LinkedHashSet<>();

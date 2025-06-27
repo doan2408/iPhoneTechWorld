@@ -38,10 +38,6 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_mau")
     private MauSac idMau;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_model_san_pham")
-    private ModelSanPham id_model_san_pham;
-
     //chitiet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_rom")

@@ -2,10 +2,7 @@ package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -14,18 +11,24 @@ public class ModelSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    private Integer id_model_san_pham;
-    private String ma_model_san_pham;
-    private String ten_model;
-    private Date nam_ra_mat;
-    private String mo_ta;
-    private String trang_thai;
+    @Column(name = "id_model_san_pham")
+    private Integer idModelSanPham;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "id_san_pham")
-    private SanPham idSanPham;
+    @Column(name = "ma_model_san_pham", insertable = false, updatable = false)
+    private String maModelSanPham;
 
+    @Column(name = "ten_model")
+    private String tenModel;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "nam_ra_mat")
+    private LocalDate namRaMat;
+
+    @Column(name = "mo_ta")
+    private String moTa;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ram")
