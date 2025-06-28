@@ -13,7 +13,6 @@ import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 public class ImeiAdminResponse {
     private Integer id;
     private String soImei;
-    private String soImei2;
     private TrangThaiImei trangThaiImei;
     private Integer idSanPhamChiTiet;
     private String maSanPhamChiTiet;

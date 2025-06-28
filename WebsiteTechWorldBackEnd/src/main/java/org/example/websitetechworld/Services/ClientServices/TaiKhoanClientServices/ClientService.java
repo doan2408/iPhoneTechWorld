@@ -13,6 +13,7 @@ import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
+import org.example.websitetechworld.Services.LoginServices.JwtService;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ClientService {
     private final KhachHangRepository khachHangRepository;
     private final NhanVienRepository nhanVienRepository;
     private final DiaChiRepository diaChiRepository;
+    private final JwtService jwtService;
 
     //convert
     private TaiKhoanClientReponse convert(KhachHang khachHang) {
@@ -93,7 +95,7 @@ public class ClientService {
     }
 
     //SignUp, add mới
-    public KhachHang addClient(ClientRequest request) {
+    public Map<String, Object> addClient(ClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
         if(request.getTaiKhoan() != null) {
@@ -142,9 +144,19 @@ public class ClientService {
         diaChi.setIdKhachHang(khachHangAdd);
         diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
         diaChiRepository.save(diaChi);
+        khachHangRepository.save(khachHangAdd);
 
-        //lưu id khách hàng và giỏ hàng cũng sẽ được lưu theo Cascade
-        return khachHangRepository.save(khachHangAdd);
+        // ✅ Tạo token dựa trên KhachHang
+        String accessToken = jwtService.generateAccessToken(khachHangAdd);
+        String refreshToken = jwtService.generateRefreshToken(khachHangAdd);
+
+        return Map.of(
+                "accessToken", accessToken,
+                "refreshToken", refreshToken,
+                "message", "Đăng ký thành công!",
+                "roles", List.of(khachHangAdd.getRole()) // nếu có role
+        );
+
     }
 
     public Optional<TaiKhoanClientReponse> hienThi(Integer id) {

@@ -118,3 +118,10 @@ export const addKhachHang = (data) => {
     const url = url_base + '/add-khach-hang';
     return api.post(url, data)
 }
+
+
+export const getTinhThanh = () => {
+    const url = '/admin/tinh-thanh'
+    return api.get(url)
+}
+

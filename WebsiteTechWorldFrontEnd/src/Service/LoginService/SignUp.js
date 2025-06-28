@@ -7,8 +7,7 @@ const API_URL = '/api/auth'
 const register = async (userData) => {
   try {
     const response = await api.post(API_URL + `/register`,
-       userData ,
-       { withCredentials: true });
+       userData );
     const { message, roles } = response.data;
     return { message, roles };
   } catch (error) {
@@ -24,7 +23,6 @@ const register = async (userData) => {
     }
   }
 };
-
 
 
 

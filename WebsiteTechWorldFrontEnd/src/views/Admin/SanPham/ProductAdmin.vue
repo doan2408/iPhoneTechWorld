@@ -9,9 +9,13 @@
       </el-col>
     </el-row>
 
-    <div class="mb-3" style="display: flex; justify-content: flex-end;">
+    <div class="mb-3" style="display: flex; justify-content: flex-end; gap: 12px;">
       <router-link to="/admin/products/create" class="el-link--success">
         <el-button type="success" size="default">Thêm sản phẩm mới</el-button>
+      </router-link>
+
+      <router-link to="/admin/products/create/modelSanPham" class="el-link--success">
+        <el-button type="success" size="default">Thêm mẫu sản phẩm</el-button>
       </router-link>
     </div>
 
@@ -50,17 +54,9 @@
 
     <div class="pagination-fixed">
       <div class="d-flex justify-content-center align-items-center gap-3" style="margin-top: 30px;">
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          :total="totalItems"
-          :pager-count="7"
-          prev-text="< Trước"
-          next-text="Sau >"
-          @current-change="handlePageChange"
-        />
+        <el-pagination background layout="prev, pager, next" :page-size="pageSize" :current-page="currentPage"
+          :total="totalItems" :pager-count="7" prev-text="< Trước" next-text="Sau >"
+          @current-change="handlePageChange" />
       </div>
     </div>
 

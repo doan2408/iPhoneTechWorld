@@ -28,12 +28,10 @@ public class SanPhamAdminResponse {
     @Enumerated(EnumType.STRING)
     private TrangThaiSanPham trangThaiSanPham;
 
-    private Integer idNhaCungCap;
+    private NhaCungCapAdminResponse nhaCungCapAdminResponse;
 
-//    private String url;
+    private ModelSanPhamAdminResponse modelSanPhamAdminResponse;
 
     private Set<SanPhamChiTietResponse> sanPhamChiTiets;
-
-
 
 }

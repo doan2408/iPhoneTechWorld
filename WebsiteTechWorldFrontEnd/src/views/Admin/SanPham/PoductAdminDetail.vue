@@ -24,6 +24,7 @@
                 :value="ncc.id"></el-option>
             </el-select>
           </el-form-item>
+          
         </el-col>
         <el-col :span="12">
           <el-form-item label="Trạng thái" prop="trangThaiSanPham">
@@ -44,11 +45,11 @@
             {{ getMauSacLabel(row.idMau) }}
           </template>
         </el-table-column>
-        <el-table-column label="RAM" prop="idRam">
+        <!-- <el-table-column label="RAM" prop="idRam">
           <template #default="{ row }">
             {{ getRamLabel(row.idRam) }}
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="ROM" prop="idRom">
           <template #default="{ row }">
             {{ getRomLabel(row.idRom) }}
@@ -76,7 +77,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <!-- <el-col :span="8">
             <el-form-item label="RAM" :prop="`sanPhamChiTiets.${selectedChiTiet}.idRam`"
               :rules="[{ required: true, message: 'Vui lòng chọn RAM' }]">
               <el-select v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idRam" placeholder="Chọn RAM"
@@ -84,7 +85,7 @@
                 <el-option v-for="ram in rams" :key="ram.id" :label="ram.dungLuong" :value="ram.id"></el-option>
               </el-select>
             </el-form-item>
-          </el-col>
+          </el-col> -->
           <el-col :span="8">
             <el-form-item label="ROM" :prop="`sanPhamChiTiets.${selectedChiTiet}.idRom`"
               :rules="[{ required: true, message: 'Vui lòng chọn ROM' }]">
@@ -97,7 +98,7 @@
         </el-row>
 
         <el-row :gutter="20">
-          <el-col :span="8">
+          <!-- <el-col :span="8">
             <el-form-item label="Màn hình" :prop="`sanPhamChiTiets.${selectedChiTiet}.idManHinh`"
               :rules="[{ required: true, message: 'Vui lòng chọn màn hình' }]">
               <el-select v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idManHinh" placeholder="Chọn màn hình"
@@ -175,7 +176,7 @@
                 <el-option v-for="loai in loais" :key="loai.id" :label="loai.tenLoai" :value="loai.id"></el-option>
               </el-select>
             </el-form-item>
-          </el-col>
+          </el-col> -->
           <el-col :span="8">
             <el-form-item label="Giá bán" :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`"
               :rules="[{ required: true, message: 'Vui lòng nhập giá bán', type: 'number' }]">
@@ -254,16 +255,16 @@ const error = ref('');
 const selectedChiTiet = ref(null);
 const nhaCungCaps = ref([]);
 const maus = ref([]);
-const rams = ref([]);
+// const rams = ref([]);
 const roms = ref([]);
-const manHinhs = ref([]);
-const heDieuHanhs = ref([]);
-const pins = ref([]);
-const cpus = ref([]);
-const cameraTruocs = ref([]);
-const cameraSaus = ref([]);
-const xuatXus = ref([]);
-const loais = ref([]);
+// const manHinhs = ref([]);
+// const heDieuHanhs = ref([]);
+// const pins = ref([]);
+// const cpus = ref([]);
+// const cameraTruocs = ref([]);
+// const cameraSaus = ref([]);
+// const xuatXus = ref([]);
+// const loais = ref([]);
 
 const danhSachTrangThaiSanPham = [
   { label: 'Đang kinh doanh', value: 'ACTIVE' },
@@ -291,16 +292,16 @@ const fetchSanPham = async (id) => {
     sanPhamModel.sanPhamChiTiets = response.sanPhamChiTiets.map(chiTiet => ({
       id: chiTiet.id,
       idMau: chiTiet.idMau,
-      idRam: chiTiet.idRam,
+      // idRam: chiTiet.idRam,
       idRom: chiTiet.idRom,
-      idManHinh: chiTiet.idManHinh,
-      idHeDieuHanh: chiTiet.idHeDieuHanh,
-      idPin: chiTiet.idPin,
-      idCpu: chiTiet.idCpu,
-      idCameraTruoc: chiTiet.idCameraTruoc,
-      idCameraSau: chiTiet.idCameraSau,
-      idXuatXu: chiTiet.idXuatXu,
-      idLoai: chiTiet.idLoai,
+      // idManHinh: chiTiet.idManHinh,
+      // idHeDieuHanh: chiTiet.idHeDieuHanh,
+      // idPin: chiTiet.idPin,
+      // idCpu: chiTiet.idCpu,
+      // idCameraTruoc: chiTiet.idCameraTruoc,
+      // idCameraSau: chiTiet.idCameraSau,
+      // idXuatXu: chiTiet.idXuatXu,
+      // idLoai: chiTiet.idLoai,
       soLuong: chiTiet.soLuong,
       giaBan: chiTiet.giaBan,
       imeisInput: chiTiet.imeis?.map(i => i.soImei).join(', ') || '',
@@ -326,29 +327,29 @@ const fetchDanhMuc = async () => {
     const responses = await Promise.all([
       getAllNhaCungCapList(),
       getAllMauSacList(),
-      getAllRamList(),
+      // getAllRamList(),
       getAllRomList(),
-      getAllManHinhList(),
-      getAllHDHList(),
-      getAllPinList(),
-      getAllCpuList(),
-      getAllCameraTruocList(),
-      getAllCameraSauList(),
-      getAllXuatXuList(),
-      getAllLoaiList()
+      // getAllManHinhList(),
+      // getAllHDHList(),
+      // getAllPinList(),
+      // getAllCpuList(),
+      // getAllCameraTruocList(),
+      // getAllCameraSauList(),
+      // getAllXuatXuList(),
+      // getAllLoaiList()
     ]);
     nhaCungCaps.value = responses[0];
     maus.value = responses[1];
-    rams.value = responses[2];
-    roms.value = responses[3];
-    manHinhs.value = responses[4];
-    heDieuHanhs.value = responses[5];
-    pins.value = responses[6];
-    cpus.value = responses[7];
-    cameraTruocs.value = responses[8];
-    cameraSaus.value = responses[9];
-    xuatXus.value = responses[10];
-    loais.value = responses[11];
+    // rams.value = responses[2];
+    roms.value = responses[2];
+    // manHinhs.value = responses[4];
+    // heDieuHanhs.value = responses[5];
+    // pins.value = responses[6];
+    // cpus.value = responses[7];
+    // cameraTruocs.value = responses[8];
+    // cameraSaus.value = responses[9];
+    // xuatXus.value = responses[10];
+    // loais.value = responses[11];
   } catch (err) {
     error.value = err.message || 'Lỗi khi tải danh mục';
     ElMessage.error(error.value);
@@ -430,7 +431,7 @@ const removeChiTiet = (index) => {
 };
 
 const getMauSacLabel = (idMau) => maus.value.find(m => m.id === idMau)?.tenMau || 'Không rõ';
-const getRamLabel = (idRam) => rams.value.find(r => r.id === idRam)?.dungLuong || 'Không rõ';
+// const getRamLabel = (idRam) => rams.value.find(r => r.id === idRam)?.dungLuong || 'Không rõ';
 const getRomLabel = (idRom) => roms.value.find(r => r.id === idRom)?.dungLuong || 'Không rõ';
 
 const indexMethod = (index) => index + 1;
@@ -452,16 +453,16 @@ const submitForm = async () => {
         return {
           id: chiTiet.id || null,
           idMau: chiTiet.idMau,
-          idRam: chiTiet.idRam,
+          // idRam: chiTiet.idRam,
           idRom: chiTiet.idRom,
-          idManHinh: chiTiet.idManHinh,
-          idHeDieuHanh: chiTiet.idHeDieuHanh,
-          idPin: chiTiet.idPin,
-          idCpu: chiTiet.idCpu,
-          idCameraTruoc: chiTiet.idCameraTruoc,
-          idCameraSau: chiTiet.idCameraSau,
-          idXuatXu: chiTiet.idXuatXu,
-          idLoai: chiTiet.idLoai,
+          // idManHinh: chiTiet.idManHinh,
+          // idHeDieuHanh: chiTiet.idHeDieuHanh,
+          // idPin: chiTiet.idPin,
+          // idCpu: chiTiet.idCpu,
+          // idCameraTruoc: chiTiet.idCameraTruoc,
+          // idCameraSau: chiTiet.idCameraSau,
+          // idXuatXu: chiTiet.idXuatXu,
+          // idLoai: chiTiet.idLoai,
           soLuong: chiTiet.soLuong,
           giaBan: chiTiet.giaBan,
           imeis: imeis.map(i => ({ soImei: i })),

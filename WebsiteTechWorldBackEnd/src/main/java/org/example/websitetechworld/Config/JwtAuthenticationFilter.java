@@ -21,8 +21,8 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final JwtService jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -30,20 +30,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String requestPath = request.getRequestURI();
         System.out.println("Request Path: " + requestPath);
-        if (requestPath.startsWith("/api/auth/") && !requestPath.equals("/api/auth/me")) {
+
+        boolean requireAuth = requestPath.startsWith("/client/") ||
+                requestPath.startsWith("/admin/") ||
+                requestPath.startsWith("/api/auth/me");
+
+        if (!requireAuth) {
+            // Không cần xác thực → đi thẳng
             System.out.println("Bỏ qua xác thực cho: " + requestPath);
             filterChain.doFilter(request, response);
             return;
         }
+
+//        if (requestPath.startsWith("/api/auth/") && !requestPath.equals("/api/auth/me")) {
+//            System.out.println("Bỏ qua xác thực cho: " + requestPath);
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+
 
         String authHeader = request.getHeader("Authorization");
         System.out.println("Authorization Header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("Không tìm thấy token trong header");
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Thiếu token xác thực\"}");
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Thiếu token xác thực");
             return;
         }
 
@@ -62,28 +73,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     System.out.println("Xác thực thành công cho: " + username);
                 } else {
                     System.out.println("Token không hợp lệ hoặc hết hạn");
+                    sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Token không hợp lệ");
+                    return;
                 }
             }
             filterChain.doFilter(request, response);
         } catch (SignatureException e) {
             System.err.println("Lỗi xác minh chữ ký: " + e.getMessage());
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Token không hợp lệ\", \"message\": \"" + e.getMessage() + "\"}");
-            return;
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Token không hợp lệ", e.getMessage());
         } catch (ExpiredJwtException e) {
             System.err.println("Token hết hạn: " + e.getMessage());
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Token hết hạn\", \"message\": \"" + e.getMessage() + "\"}");
-            return;
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Token hết hạn", e.getMessage());
         } catch (Exception e) {
             System.err.println("Lỗi khác: " + e.getMessage());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Lỗi server\", \"message\": \"" + e.getMessage() + "\"}");
+            sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi server", e.getMessage());
+        }
+    }
+
+    // ✅ Helper method để tránh lỗi "getOutputStream() has already been called"
+    private void sendErrorResponse(HttpServletResponse response, HttpStatus status, String error) throws IOException {
+        sendErrorResponse(response, status, error, null);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, HttpStatus status, String error, String message) throws IOException {
+        if (response.isCommitted()) {
+            System.err.println("Response đã được commit, không thể ghi thêm");
             return;
         }
+
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String jsonResponse;
+        if (message != null) {
+            jsonResponse = String.format("{\"error\": \"%s\", \"message\": \"%s\"}", error, message);
+        } else {
+            jsonResponse = String.format("{\"error\": \"%s\"}", error);
+        }
+
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
     }
 }
 
