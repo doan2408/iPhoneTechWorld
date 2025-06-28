@@ -13,7 +13,7 @@ const searchKhachHang = ref("");
 
 const currentPage = ref(0);
 const totalPages = ref(0);
-const pageSize = ref(5);
+const pageSize = ref(6);
 
 const search = ref("");
 const trangThaiFilter = ref(null);
@@ -450,7 +450,7 @@ onMounted(() => {
           <tr v-if="phieuGiamGias.length === 0">
             <td colspan="10" class="text-center">Không có phiếu giảm giá nào.</td>
           </tr>
-          <tr v-else v-for="(phieuGiamGia, index) in phieuGiamGias" :key="index">
+          <tr v-else v-for="(phieuGiamGia, index) in phieuGiamGias" :key="phieuGiamGia.id">
             <template v-if="phieuGiamGia">
               <td class="col-1">{{ index + 1 + currentPage * pageSize }}</td>
               <td class="col-2">{{ phieuGiamGia.maGiamGia }}</td>
@@ -474,6 +474,9 @@ onMounted(() => {
                 </button>
               </td>
             </template>
+          </tr>
+          <tr v-for="i in (6 - phieuGiamGias.length)" :key="i">
+            <td colspan="100">&nbsp;</td>
           </tr>
         </tbody>
       </table>
@@ -522,9 +525,11 @@ onMounted(() => {
             <div v-if="errors.giaTriDonHangToiThieu" class="text-danger mt-1">{{ errors.giaTriDonHangToiThieu }}</div>
           </div>
           <div class="col-md-6">
-            <label for="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" class="form-label">Giá trị khuyến mãi tối đa</label>
-            <input id="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" v-model.number="formData.giaTriKhuyenMaiToiDa" type="number"
-              class="form-control" min="0" />
+            <label for="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" class="form-label">Giá trị
+              khuyến
+              mãi tối đa</label>
+            <input id="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'"
+              v-model.number="formData.giaTriKhuyenMaiToiDa" type="number" class="form-control" min="0" />
             <div v-if="errors.giaTriKhuyenMaiToiDa" class="text-danger mt-1">{{ errors.giaTriKhuyenMaiToiDa }}</div>
           </div>
           <div class="col-md-6">
@@ -538,30 +543,32 @@ onMounted(() => {
             <div v-if="errors.ngayKetThuc" class="text-danger mt-1">{{ errors.ngayKetThuc }}</div>
           </div>
           <div class="col-md-6">
-            <label for="hangToiThieu" class="form-label">Hạng tối thiểu</label>
-            <select id="hangToiThieu" v-model="formData.hangToiThieu" class="form-select">
-              <option value="MEMBER">Thành viên</option>
-              <option value="SILVER">Bạc</option>
-              <option value="GOLD">Vàng</option>
-              <option value="DIAMOND">Kim cương</option>
-            </select>
+            <label for="soLuong" class="form-label">Số lượng <span class="text-danger">*</span></label>
+            <input id="soLuong" v-model.number="formData.soLuong" type="number" class="form-control" min="0" />
+            <div v-if="errors.soLuong" class="text-danger mt-1">{{ errors.soLuong }}</div>
           </div>
+
           <div class="col-md-6">
             <label for="soDiemCanDeDoi" class="form-label">Số điểm cần để đổi</label>
             <input id="soDiemCanDeDoi" v-model.number="formData.soDiemCanDeDoi" type="number" class="form-control"
               min="0" />
             <div v-if="errors.soDiemCanDeDoi" class="text-danger mt-1">{{ errors.soDiemCanDeDoi }}</div>
           </div>
-          <div class="col-md-6">
-            <label for="soLuong" class="form-label">Số lượng <span class="text-danger">*</span></label>
-            <input id="soLuong" v-model.number="formData.soLuong" type="number" class="form-control" min="0" />
-            <div v-if="errors.soLuong" class="text-danger mt-1">{{ errors.soLuong }}</div>
-          </div>
+
           <div class="col-md-6">
             <label for="isGlobal" class="form-label">Loại phiếu</label>
             <select id="isGlobal" v-model="formData.isGlobal" class="form-select">
               <option :value="true">Công khai</option>
               <option :value="false">Riêng tư</option>
+            </select>
+          </div>
+          <div class="col-md-6" v-if="formData.isGlobal == false">
+            <label for="hangToiThieu" class="form-label">Hạng tối thiểu</label>
+            <select id="hangToiThieu" v-model="formData.hangToiThieu" class="form-select">
+              <option value="MEMBER">Thành viên</option>
+              <option value="SILVER">Bạc</option>
+              <option value="GOLD">Vàng</option>
+              <option value="DIAMOND">Kim cương</option>
             </select>
           </div>
           <div v-if="!formData.isGlobal" class="col-md-6">

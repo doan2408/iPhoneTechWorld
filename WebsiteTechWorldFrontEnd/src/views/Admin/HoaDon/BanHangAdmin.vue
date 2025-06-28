@@ -93,7 +93,7 @@
                             class="search-input" @keydown.f4.prevent="focusCustomerSearch" @blur="searchCustomer" />
                     </div>
                     <div class="customer-actions">
-                        <button @click="showCustomerModal = true" class="customer-btn" title="Thêm khách hàng">
+                        <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
                             <Plus class="btn-icon" />
                         </button>
                         <button class="customer-btn" title="Danh sách khách hàng">
@@ -226,7 +226,7 @@
             <!-- Cart items (if any) : san pham da chon -->
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
-                    <span>Sản phẩm đã chọn ({{ currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                    <span><b v-if="currentInvoiceDetail">{{ currentInvoiceDetail.maKhachHang }}: {{ currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{ currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -263,7 +263,8 @@
                                 <p>Bạn muốn xóa sản phẩm này như thế nào?</p>
                                 <div class="modal-actions">
                                     <button @click="removeFromCart" class="btn btn-danger">Trả toàn phần</button>
-                                    <button @click="() => handleRemovePartial(itemToDelete)" class="btn btn-warning">Trả một
+                                    <button @click="() => handleRemovePartial(itemToDelete)" class="btn btn-warning">Trả
+                                        một
                                         phần</button>
                                     <button @click="closeModal" class="btn btn-secondary">Hủy</button>
                                 </div>
@@ -331,7 +332,7 @@
 
     <!-- Customer Modal -->
     <div v-if="showCustomerModal" class="modal-overlay" @click="showCustomerModal = false">
-        <div class="modal-content" @click.stop>
+        <div class="modal-content" @click.stop style="height: 600px;">
             <div class="modal-header">
                 <h3>Thêm khách hàng mới</h3>
                 <button @click="showCustomerModal = false" class="close-modal-btn">
@@ -351,14 +352,63 @@
                     <label>Email</label>
                     <input v-model="newCustomer.email" type="email" class="form-input" />
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label>Địa chỉ</label>
                     <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
-                </div>
+                </div> -->
             </div>
             <div class="modal-footer">
                 <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
                 <button @click="addCustomer" class="save-btn">Lưu</button>
+            </div>
+        </div>
+    </div> 
+    <div v-if="showCustomerTable" class="modal-overlay" @click="showCustomerTable = false">
+        <div class="modal-content" @click.stop style="height: 600px;">
+            <div class="modal-close" style="display: flex; justify-content: flex-end;">
+                <button @click="showCustomerTable = false" class="close-button">&times;</button>
+            </div>
+
+            <div class="modal-header" style="margin-bottom: 0;">
+                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2>
+                <div class="search-box">
+                    <Search class="search-icon" />
+                    <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
+                </div>
+
+            </div>
+
+            <div class="modal-body" style="margin-bottom: 0; padding-bottom: 0;">
+                <div class="custome-list">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Stt</th>
+                                <th>Mã khách hàng</th>
+                                <th>Tên khách hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(khachHang, index) in khachHangs" :key="khachHang.id"
+                                @click="selectedKhachHang(khachHang)" class="custome-item">
+                                <td>{{ pageKhachHang * 5 + index + 1 }}</td>
+                                <td>{{ khachHang.maKhachHang || "N/A" }}</td>
+                                <td>{{ khachHang.tenKhachHang }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination-controls" style="margin-top: 0;">
+                <button @click="previousPage()" :disabled="pageKhachHang === 0">Trước</button>
+                <span>Trang {{ pageKhachHang + 1 }} / {{ totalPages }}</span>
+                <button @click="nextPageKH()" :disabled="pageKhachHang >= totalPages - 1">Sau</button>
+            </div>
+
+            <div class="modal-footer">
+                <button @click="showCustomerTable = false, showCustomerModal = true " class="btn confirm-btn">Thêm khách hàng mới</button>
+                <button @click="showCustomerTable = false" class="btn cancel-btn">Hủy</button>
             </div>
         </div>
     </div>
@@ -382,6 +432,9 @@ import { loadImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices
 import { deleteDetailInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { addProductIntoInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { getListKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { selectKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { addKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 // Search queries
@@ -513,6 +566,7 @@ const addOrUpdateInvoice = (invoice) => {
 let nextInvoiceId = 2
 
 // Customer modal
+const showCustomerTable = ref(false)
 const showCustomerModal = ref(false)
 const newCustomer = reactive({
     name: '',
@@ -634,7 +688,15 @@ const addCustomer = () => {
     if (!newCustomer.name || !newCustomer.phone) return
 
     currentInvoice.value.customer = { ...newCustomer }
-    customerSearchQuery.value = newCustomer.phone
+    // customerSearchQuery.value = newCustomer.phone
+
+    const data = {
+        tenKhachHang: newCustomer.name,
+        sdt: newCustomer.phone,
+        email: newCustomer.email
+    }
+
+    add(data)
 
     // Reset form
     Object.assign(newCustomer, { name: '', phone: '', email: '', address: '' })
@@ -795,6 +857,12 @@ const closeImeiModal = () => {
     quantityToSelect.value = null; // Reset về null khi đóng
 };
 
+// dong modal Customer
+const closeCustomerModal = () => {
+    showCustomerModal.value = false;
+
+};
+
 // hàm xác nhận
 const confirmImeiSelection = async () => {
     if (selectedImeis.value.length === quantityToSelect.value) {
@@ -858,9 +926,9 @@ const handleRemovePartial = async (item) => {
             imeisForCurrentItem.value = fetchedImeisData
                 .map(imeiData => ({
                     imei: imeiData.soImei,
-                    trangThaiImei: imeiData.trangThaiImei || 'Lỗi' 
+                    trangThaiImei: imeiData.trangThaiImei || 'Lỗi'
                 }));
-                console.log(imeisForCurrentItem.value)
+            console.log(imeisForCurrentItem.value)
         } else {
             console.warn('API did not return an array for IMEIs:', fetchedImeisData);
             imeisForCurrentItem.value = []; // Đảm bảo là mảng rỗng nếu dữ liệu không hợp lệ
@@ -986,9 +1054,74 @@ onMounted(async () => {
     selectedCategory.value = 'all';
     await loadProducts({ tenSanPham: 'all' });
     loadTabHoaDon();
-}); 
+});
+
+//Khach hang
+const khachHangs = ref([])
+const pageKhachHang = ref(0)
+const totalPages = ref(0)
+const searchKhachHang = ref(null)
+
+const listKhachHang = async (page) => {
+    showCustomerTable.value = true
+    try {
+        const response = await getListKhachHang(searchKhachHang.value, page, 5)
+        khachHangs.value = response.data.content;
+        totalPages.value = response.data.totalPages;
+        pageKhachHang.value = page;
+    } catch (err) {
+        console.error(err || "Lỗi lấy danh sách khách hàng");
+    }
+};
+
+const nextPageKH = () => {
+    if (pageKhachHang.value < totalPages.value - 1) {
+        listKhachHang(pageKhachHang.value + 1);
+    }
+};
+
+const previousPage = () => {
+    if (pageKhachHang.value > 0) {
+        listKhachHang(pageKhachHang.value - 1);
+    }
+};
+
+const selectedKhachHang = async (khachHang) => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    if (!storedId) {
+        console.warn("Không tìm thấy ID hóa đơn trong localStorage.");
+        return;
+    }
+    const selected = {
+        khachHangId: khachHang.id
+    }
+    try {
+        await selectKhachHang(storedId, selected); 
+
+        const response = await hoaDonDetail(storedId);
+        if (response?.data) {
+            addOrUpdateInvoice(response.data);           
+            currentInvoiceDetail.value = response.data;  
+        }
+    } catch (err) {
+        console.error("Thêm khách hàng vào hóa đơn thất bại:", err);
+    }
+    showCustomerTable.value = false;
+}
+
+const add = async (data) => {
+    try {
+        const response = await addKhachHang(data); 
+        selectedKhachHang(response.data)
+    } catch (err) {
+        console.error("Thêm khách hàng thất bại:", err);
+    }
+    showCustomerModal.value = false;
+}
+
+watch(searchKhachHang, () => {
+    listKhachHang(0);
+});
 </script>
 
-<style scoped src="@/style/HoaDon/BanHang.css">
-
-</style>
+<style scoped src="@/style/HoaDon/BanHang.css"></style>
