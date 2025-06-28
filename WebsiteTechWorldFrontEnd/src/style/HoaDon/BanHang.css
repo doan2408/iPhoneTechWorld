@@ -2217,3 +2217,7 @@ textarea.input-field {
     text-decoration: line-through;
     padding: 2px 5px;
     border-radius: 3px; }
+
+.table-hover tbody tr td {
+    cursor: pointer;
+}

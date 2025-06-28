@@ -275,12 +275,12 @@ public class PhieuGiamGiaAdminServices {
         return "Đã xóa thành công phiếu giảm giá có id = " + id;
     }
 
-    public Page<KhachHangGiamGiaResponse> getAllKhachHang(String search, int page, int size) {
+    public Page<KhachHangGiamGiaResponse> getAllKhachHang (String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> khachHangPage = (search == null || search.isEmpty()) ?
-                khachHangRepository.findAll(pageable) :
-                khachHangRepository.findByTenKhachHangContainingIgnoreCase(search, pageable);
-        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(), kh.getTenKhachHang()));
+                khachHangRepository.findTrangThai_Active(pageable) :
+                khachHangRepository.findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(search, pageable);
+        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getTenKhachHang()));
     }
 
     private void createNewKhachHangGiamGia(PhieuGiamGia phieuGiamGia, KhachHang khachHang) {

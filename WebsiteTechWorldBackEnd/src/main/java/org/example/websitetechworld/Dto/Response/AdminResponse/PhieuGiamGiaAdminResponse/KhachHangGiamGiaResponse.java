@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class KhachHangGiamGiaResponse {
 
     private Integer id;
+    private String maKhachHang;
     private String tenKhachHang;
 }

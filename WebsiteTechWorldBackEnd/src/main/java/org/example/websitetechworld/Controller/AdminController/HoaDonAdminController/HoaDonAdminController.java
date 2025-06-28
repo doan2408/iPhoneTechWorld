@@ -6,8 +6,10 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
@@ -168,6 +170,22 @@ public class HoaDonAdminController {
     public ResponseEntity<BigDecimal> doangThuThang () {
         BigDecimal doanhThu = hoaDonAdminService.doangThuThang();
         return ResponseEntity.ok(doanhThu);
+    }
+
+    //Khach hang
+    @GetMapping ("/list-khach-hang")
+    public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Page<KhachHangGiamGiaResponse> khachHangList = hoaDonAdminService.getAllKhachHang(search, page, size);
+        return ResponseEntity.ok(khachHangList);
+    }
+
+    @PostMapping ("/add-khach-hang")
+    public ResponseEntity<?> addKhachHang (@RequestBody KhachHang khachHang) {
+        KhachHang saved = hoaDonAdminService.addKhachHang(khachHang);
+        return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{idHoaDon}/khach-hang")
