@@ -246,7 +246,7 @@ CREATE TABLE ram (
 CREATE TABLE mau_sac (
                          id_mau_sac INT IDENTITY(1,1) PRIMARY KEY,
                          ten_mau NVARCHAR(50),
-                         hex_color NVARCHAR(7)
+                         hex_color NVARCHAR(10)
 );
 
 CREATE TABLE nha_cung_cap (
