@@ -96,3 +96,9 @@ export const updateSoLuongAndTrangThai = (idHd, idCthd, imeisToReturn) => {
     };
     return api.patch(url,requestBody)
 }
+
+export const getTinhThanh = () => {
+    const url = '/admin/tinh-thanh'
+    return api.get(url)
+}
+
