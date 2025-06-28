@@ -17,8 +17,10 @@
     </el-form-item>
 
     <el-form-item label="Trạng thái" :error="errors.trangThaiSanPham">
-      <el-select v-model="sanPham.trangThaiSanPham" placeholder="Chọn trạng thái" @change="errors.trangThaiSanPham = ''">
-        <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label" :value="tt.value"></el-option>
+      <el-select v-model="sanPham.trangThaiSanPham" placeholder="Chọn trạng thái"
+        @change="errors.trangThaiSanPham = ''">
+        <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label"
+          :value="tt.value"></el-option>
       </el-select>
     </el-form-item>
 
@@ -26,7 +28,8 @@
     <h3>Chọn model sản phẩm</h3>
     <el-form-item label="Model sản phẩm" :error="errors.idModelSanPham">
       <el-select v-model="sanPham.idModelSanPham" placeholder="Chọn model sản phẩm" @change="onModelChange">
-        <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel" :value="model.idModelSanPham"></el-option>
+        <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel"
+          :value="model.idModelSanPham"></el-option>
       </el-select>
     </el-form-item>
 
@@ -45,27 +48,6 @@
           <el-select v-model="selectedRoms" multiple placeholder="Chọn ROM" @change="errors.selectedRoms = ''">
             <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id"></el-option>
           </el-select>
-        </el-form-item>
-      </el-col>
-    </el-row>
-
-    <!-- Thêm ảnh theo màu sắc -->
-    <h3>Ảnh theo màu sắc</h3>
-    <el-row :gutter="20">
-      <el-col :span="24" v-for="mau in selectedMaus" :key="mau">
-        <el-form-item :label="getMauSacLabels(mau)" :error="errorsMauHinhAnh[mau] || ''">
-          <el-upload
-            :file-list="hinhAnhTheoMau[mau] || []"
-            :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
-            :on-remove="(file, fileList) => handleMauFileRemove(file, fileList, mau)"
-            :auto-upload="false"
-            accept="image/jpeg,image/png"
-            list-type="picture"
-            :limit="5"
-            :on-exceed="() => ElMessage.warning('Chỉ được tải lên tối đa 5 ảnh cho mỗi màu!')"
-          >
-            <el-button type="primary">Tải lên ảnh cho {{ getMauSacLabels(mau) }}</el-button>
-          </el-upload>
         </el-form-item>
       </el-col>
     </el-row>
@@ -89,17 +71,6 @@
                 {{ getRomLabels(row.idRom) }}
               </template>
             </el-table-column>
-            <el-table-column label="Ảnh">
-              <template #default="{ row }">
-                <el-image
-                  v-for="hinh in row.hinhAnhs"
-                  :key="hinh.imagePublicId"
-                  :src="hinh.url"
-                  style="width: 50px; height: 50px; margin-right: 5px;"
-                  fit="cover"
-                />
-              </template>
-            </el-table-column>
             <el-table-column label="Hành động" width="100">
               <template #default="{ $index }">
                 <el-button type="danger" size="small" @click.stop="removeChiTiet($index)">Xóa</el-button>
@@ -112,22 +83,39 @@
         <el-card v-if="selectedChiTiet !== null">
           <h4>Thông tin chi tiết {{ selectedChiTiet + 1 }}</h4>
           <el-form-item label="Giá bán" :error="errorsChiTiet[selectedChiTiet]?.giaBan || ''">
-            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :precision="2" :min="1000" @change="errorsChiTiet[selectedChiTiet].giaBan = ''"></el-input-number>
+            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :precision="2" :min="1000"
+              @change="errorsChiTiet[selectedChiTiet].giaBan = ''"></el-input-number>
           </el-form-item>
           <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''">
-            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0" :disabled="true"></el-input-number>
+            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0"
+              :disabled="true"></el-input-number>
           </el-form-item>
           <el-form-item label="IMEI">
-            <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput" placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy" @input="capNhatSoLuong(selectedChiTiet)"></el-input>
-            <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)" accept=".txt,.csv" style="margin-top: 8px;">
+            <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
+              placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy"
+              @input="capNhatSoLuong(selectedChiTiet)"></el-input>
+            <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
+              accept=".txt,.csv" style="margin-top: 8px;">
               <el-button type="primary">Tải lên file IMEI</el-button>
             </el-upload>
-            <div v-if="selectedChiTiet !== null" class="imei-status" style="margin-top: 8px; display: flex; align-items: center;">
+            <div v-if="selectedChiTiet !== null" class="imei-status"
+              style="margin-top: 8px; display: flex; align-items: center;">
               <span>Số lượng IMEI: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
-              <span v-if="errorsChiTiet[selectedChiTiet]?.imeisInput" :class="{ 'valid-message': errorsChiTiet[selectedChiTiet].imeisInput === 'Hợp lệ', 'error-message': errorsChiTiet[selectedChiTiet].imeisInput !== 'Hợp lệ' }" style="margin-left: 20px;">
+              <span v-if="errorsChiTiet[selectedChiTiet]?.imeisInput"
+                :class="{ 'valid-message': errorsChiTiet[selectedChiTiet].imeisInput === 'Hợp lệ', 'error-message': errorsChiTiet[selectedChiTiet].imeisInput !== 'Hợp lệ' }"
+                style="margin-left: 20px;">
                 {{ errorsChiTiet[selectedChiTiet].imeisInput }}
               </span>
             </div>
+          </el-form-item>
+          <el-form-item label="Hình ảnh" :error="errorsChiTiet[selectedChiTiet]?.hinhAnhs || ''">
+            <el-upload :file-list="sanPham.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
+              :on-change="(file, fileList) => handleFileChange(file, fileList, selectedChiTiet)"
+              :on-remove="(file, fileList) => handleFileRemove(file, fileList, selectedChiTiet)" :auto-upload="false"
+              accept="image/jpeg,image/png" list-type="picture" :limit="5"
+              :on-exceed="() => ElMessage.warning('Chỉ được tải lên tối đa 5 ảnh!')">
+              <el-button type="primary">Tải lên hình ảnh</el-button>
+            </el-upload>
           </el-form-item>
         </el-card>
         <el-card v-else>
@@ -166,7 +154,6 @@ export default {
     const roms = ref([]);
     const modelSanPhams = ref([]);
     const selectedChiTiet = ref(null);
-    const hinhAnhTheoMau = reactive({});
     const errors = reactive({
       tenSanPham: '',
       thuongHieu: '',
@@ -177,7 +164,6 @@ export default {
       selectedRoms: ''
     });
     const errorsChiTiet = reactive([]);
-    const errorsMauHinhAnh = reactive({});
 
     const danhSachTrangThaiSanPham = [
       { label: "Đang kinh doanh", value: "ACTIVE" },
@@ -189,6 +175,8 @@ export default {
 
     const fetchDanhMuc = async () => {
       try {
+
+        console.log("nó có đi vào đây k ")
         const responses = await Promise.all([
           getAllNhaCungCapList(),
           getAllMauSacList(),
@@ -200,6 +188,9 @@ export default {
         maus.value = responses[1];
         roms.value = responses[2];
         modelSanPhams.value = responses[3];
+
+        console.log('roms:', roms.value); // Debug dữ liệu
+        console.log('maus:', maus.value); // Debug dữ liệu
 
         const requiredLists = [
           { name: 'Nhà cung cấp', list: nhaCungCaps.value },
@@ -217,10 +208,22 @@ export default {
     };
 
     const onModelChange = () => {
+      console.log('onModelChange triggered with idModelSanPham:', sanPham.idModelSanPham);
       errors.idModelSanPham = '';
+      console.log('Cleared error for idModelSanPham:', errors.idModelSanPham);
+
       const selectedModel = modelSanPhams.value.find(m => m.idModelSanPham === sanPham.idModelSanPham);
+      console.log('Selected model:', selectedModel);
+
       if (selectedModel) {
-        sanPham.tenSanPham = selectedModel.tenModel;
+        console.log('Before updating tenSanPham:', {
+          currentTenSanPham: sanPham.tenSanPham,
+          selectedTenModel: selectedModel.tenModel
+        });
+        sanPham.tenSanPham = selectedModel.tenModel; // Luôn gán tenModel mới
+        console.log('After updating tenSanPham:', sanPham.tenSanPham);
+      } else {
+        console.warn('No model found for idModelSanPham:', sanPham.idModelSanPham);
       }
     };
 
@@ -239,15 +242,8 @@ export default {
         errors.selectedRoms = 'Vui lòng chọn ít nhất một ROM';
         hasError = true;
       }
-      selectedMaus.value.forEach(mau => {
-        if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-          errorsMauHinhAnh[mau] = 'Phải có ít nhất 1 hình ảnh cho màu này';
-          hasError = true;
-        }
-      });
-
       if (hasError) {
-        ElMessage.error('Vui lòng chọn đầy đủ model, thuộc tính và ảnh cho từng màu.');
+        ElMessage.error('Vui lòng chọn đầy đủ model và các thuộc tính để tạo biến thể.');
         return;
       }
 
@@ -269,13 +265,14 @@ export default {
               idRom: rom,
               soLuong: existingVariant?.soLuong || 0,
               giaBan: existingVariant?.giaBan || 0,
-              imeisInput: existingVariant?.imeisInput || '',
-              hinhAnhs: hinhAnhTheoMau[mau] || []
+              hinhAnhs: existingVariant?.hinhAnhs || [],
+              imeisInput: existingVariant?.imeisInput || ''
             });
             errorsChiTiet.push({
               giaBan: '',
               soLuong: 'Số lượng phải lớn hơn 0',
-              imeisInput: 'Phải có ít nhất 1 IMEI'
+              imeisInput: 'Phải có ít nhất 1 IMEI',
+              hinhAnhs: 'Phải có ít nhất 1 hình ảnh'
             });
           }
         });
@@ -355,45 +352,6 @@ export default {
       }
     };
 
-    const handleMauFileChange = async (file, fileList, idMau) => {
-      try {
-        if (!['image/jpeg', 'image/png'].includes(file.raw.type)) {
-          throw new Error('Chỉ chấp nhận file JPEG hoặc PNG');
-        }
-        if (file.raw.size > 5 * 1024 * 1024) {
-          throw new Error('Kích thước ảnh không được vượt quá 5MB');
-        }
-        const formData = new FormData();
-        formData.append('file', file.raw);
-        const response = await api.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        if (!hinhAnhTheoMau[idMau]) {
-          hinhAnhTheoMau[idMau] = [];
-        }
-        hinhAnhTheoMau[idMau] = fileList.map(item => ({
-          name: item.name,
-          url: item.uid === file.uid ? response.data.url : item.url,
-          imagePublicId: item.uid === file.uid ? response.data.imagePublicId : item.imagePublicId
-        }));
-        errorsMauHinhAnh[idMau] = hinhAnhTheoMau[idMau].length > 0 ? '' : 'Phải có ít nhất 1 hình ảnh';
-        ElMessage.success(`Tải ảnh ${file.name} cho màu ${getMauSacLabels(idMau)} thành công!`);
-      } catch (error) {
-        errorsMauHinhAnh[idMau] = 'Lỗi khi tải ảnh: ' + (error.response?.data?.message || error.message);
-        ElMessage.error(errorsMauHinhAnh[idMau]);
-      }
-    };
-
-    const handleMauFileRemove = (file, fileList, idMau) => {
-      hinhAnhTheoMau[idMau] = fileList.map(item => ({
-        name: item.name,
-        url: item.url,
-        imagePublicId: item.imagePublicId
-      }));
-      errorsMauHinhAnh[idMau] = hinhAnhTheoMau[idMau].length > 0 ? '' : 'Phải có ít nhất 1 hình ảnh';
-      ElMessage.success(`Đã xóa ảnh ${file.name} của màu ${getMauSacLabels(idMau)}`);
-    };
-
     const removeChiTiet = (index) => {
       sanPham.sanPhamChiTiets.splice(index, 1);
       errorsChiTiet.splice(index, 1);
@@ -402,6 +360,7 @@ export default {
       } else if (selectedChiTiet.value > index) {
         selectedChiTiet.value--;
       }
+      console.log('Biến thể sau khi xóa:', JSON.stringify(sanPham.sanPhamChiTiets, null, 2));
     };
 
     const selectChiTiet = (row, column, event) => {
@@ -420,6 +379,51 @@ export default {
     const getRomLabels = (idRom) => {
       if (!Array.isArray(idRom)) idRom = [idRom];
       return idRom.map(id => roms.value.find(r => String(r.id) === String(id))?.dungLuong || '').join(', ');
+    };
+
+    const handleFileChange = async (file, fileList, index) => {
+      try {
+        if (!['image/jpeg', 'image/png'].includes(file.raw.type)) {
+          throw new Error('Chỉ chấp nhận file JPEG hoặc PNG');
+        }
+        if (file.raw.size > 5 * 1024 * 1024) {
+          throw new Error('Kích thước ảnh không được vượt quá 5MB');
+        }
+        const formData = new FormData();
+        formData.append('file', file.raw);
+        const response = await api.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        sanPham.sanPhamChiTiets[index].hinhAnhs = fileList.map(item => {
+          if (item.uid === file.uid) {
+            return {
+              name: file.name,
+              url: response.data.url,
+              imagePublicId: response.data.imagePublicId
+            };
+          }
+          return {
+            name: item.name,
+            url: item.url,
+            imagePublicId: item.imagePublicId
+          };
+        });
+        errorsChiTiet[index].hinhAnhs = '';
+        ElMessage.success(`Tải ảnh ${file.name} thành công!`);
+      } catch (error) {
+        errorsChiTiet[index].hinhAnhs = 'Lỗi khi tải ảnh: ' + (error.response?.data?.message || error.message);
+        ElMessage.error(errorsChiTiet[index].hinhAnhs);
+      }
+    };
+
+    const handleFileRemove = (file, fileList, index) => {
+      sanPham.sanPhamChiTiets[index].hinhAnhs = fileList.map(item => ({
+        name: item.name,
+        url: item.url,
+        imagePublicId: item.imagePublicId
+      }));
+      errorsChiTiet[index].hinhAnhs = sanPham.sanPhamChiTiets[index].hinhAnhs.length > 0 ? '' : 'Phải có ít nhất 1 hình ảnh';
+      ElMessage.success(`Đã xóa ảnh ${file.name}`);
     };
 
     const validateForm = () => {
@@ -445,12 +449,6 @@ export default {
         errors.idModelSanPham = 'Vui lòng chọn model sản phẩm';
         hasError = true;
       }
-      selectedMaus.value.forEach(mau => {
-        if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-          errorsMauHinhAnh[mau] = 'Phải có ít nhất 1 hình ảnh cho màu này';
-          hasError = true;
-        }
-      });
 
       sanPham.sanPhamChiTiets.forEach((chiTiet, index) => {
         if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
@@ -459,6 +457,10 @@ export default {
         }
         if (!chiTiet.soLuong) {
           errorsChiTiet[index].soLuong = 'Số lượng phải lớn hơn 0';
+          hasError = true;
+        }
+        if (!chiTiet.hinhAnhs.length) {
+          errorsChiTiet[index].hinhAnhs = 'Phải có ít nhất 1 hình ảnh';
           hasError = true;
         }
       });
@@ -522,8 +524,6 @@ export default {
           selectedMaus.value = [];
           selectedRoms.value = [];
           selectedChiTiet.value = null;
-          Object.keys(hinhAnhTheoMau).forEach(key => delete hinhAnhTheoMau[key]);
-          Object.keys(errorsMauHinhAnh).forEach(key => delete errorsMauHinhAnh[key]);
           errorsChiTiet.length = 0;
           Object.keys(errors).forEach(k => errors[k] = '');
           ElMessage.success('Form đã được làm mới!');
@@ -536,7 +536,6 @@ export default {
           errorsChiTiet.forEach((err, index) => {
             Object.keys(err).forEach(k => err[k] = '');
           });
-          Object.keys(errorsMauHinhAnh).forEach(k => errorsMauHinhAnh[k] = '');
 
           let errorMessages = [];
 
@@ -610,15 +609,13 @@ export default {
       danhSachTrangThaiSanPham,
       errors,
       errorsChiTiet,
-      errorsMauHinhAnh,
-      hinhAnhTheoMau,
       generateVariants,
       removeChiTiet,
       selectChiTiet,
       getMauSacLabels,
       getRomLabels,
-      handleMauFileChange,
-      handleMauFileRemove,
+      handleFileChange,
+      handleFileRemove,
       submitForm,
       capNhatSoLuong,
       handleImeiFileChange,
@@ -629,6 +626,7 @@ export default {
 </script>
 
 <style scoped>
+/* Container chính của form */
 .el-form {
   max-width: 1200px;
   margin: 0 auto;
@@ -638,6 +636,7 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Tiêu đề chính */
 h2 {
   font-size: 24px;
   font-weight: 600;
@@ -646,6 +645,7 @@ h2 {
   text-align: center;
 }
 
+/* Tiêu đề phụ */
 h3 {
   font-size: 18px;
   font-weight: 500;
@@ -655,6 +655,7 @@ h3 {
   padding-bottom: 8px;
 }
 
+/* Form item */
 .el-form-item {
   margin-bottom: 24px;
 }
@@ -664,6 +665,7 @@ h3 {
   color: var(--el-text-color-primary);
 }
 
+/* Input và select */
 .el-input,
 .el-select {
   width: 100%;
@@ -681,6 +683,7 @@ h3 {
   box-shadow: 0 0 0 1px var(--el-color-primary);
 }
 
+/* Button */
 .el-button {
   border-radius: 6px;
   padding: 10px 20px;
@@ -718,6 +721,7 @@ h3 {
   border-color: var(--el-color-danger-light-3);
 }
 
+/* Table */
 .el-table {
   cursor: pointer;
   border-radius: 6px;
@@ -734,6 +738,11 @@ h3 {
   background-color: var(--el-fill-color-blank);
 }
 
+.error-row {
+  background-color: var(--el-color-danger-light-9);
+}
+
+/* Card */
 .el-card {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -747,6 +756,7 @@ h3 {
   margin-bottom: 16px;
 }
 
+/* Upload */
 .el-upload {
   width: 100%;
 }
@@ -766,6 +776,7 @@ h3 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* IMEI status */
 .imei-status {
   font-size: 14px;
   color: var(--el-text-color-regular);
@@ -784,15 +795,7 @@ h3 {
   font-weight: 500;
 }
 
-.mau-hinh-anh {
-  margin-bottom: 16px;
-}
-
-.mau-hinh-anh .el-form-item__label {
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
+/* Responsive */
 @media (max-width: 768px) {
   .el-form {
     padding: 16px;
@@ -811,4 +814,6 @@ h3 {
     width: 100%;
   }
 }
+
+
 </style>

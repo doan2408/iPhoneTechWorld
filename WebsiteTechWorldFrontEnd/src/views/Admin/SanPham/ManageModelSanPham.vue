@@ -353,9 +353,9 @@ export default {
     const generateTenModel = () => {
       const baseName = baseModelName.value?.trim() || '';
       const loai = loais.value.find(l => l.idLoai === modelForm.value.idLoai)?.tenLoai || '';
-      const xuatXu = xuatXus.value.find(x => x.idXuatXu === modelForm.value.idXuatXu)?.maXuatXu || '';
-      console.log('generateTenModel:', { baseName, loai, xuatXu });
-      modelForm.value.tenModel = [baseName, loai, xuatXu].filter(Boolean).join(' ').trim();
+      // const xuatXu = xuatXus.value.find(x => x.idXuatXu === modelForm.value.idXuatXu)?.maXuatXu || '';
+      // console.log('generateTenModel:', { baseName, loai, xuatXu });
+      modelForm.value.tenModel = [baseName, loai].filter(Boolean).join(' ').trim();
       console.log('tenModel updated:', modelForm.value.tenModel);
     };
 
@@ -363,7 +363,7 @@ export default {
     watch([() => modelForm.value.idLoai, () => modelForm.value.idXuatXu], () => {
       console.log('idLoai or idXuatXu changed:', {
         idLoai: modelForm.value.idLoai,
-        idXuatXu: modelForm.value.idXuatXu
+        // idXuatXu: modelForm.value.idXuatXu
       });
       generateTenModel();
     });
@@ -374,13 +374,13 @@ export default {
       // Chỉ lấy phần tên gốc, loại bỏ loai và xuatXu nếu có
       let baseName = newTenModel?.trim() || '';
       const loai = loais.value.find(l => l.idLoai === modelForm.value.idLoai)?.tenLoai || '';
-      const xuatXu = xuatXus.value.find(x => x.idXuatXu === modelForm.value.idXuatXu)?.maXuatXu || '';
+      // const xuatXu = xuatXus.value.find(x => x.idXuatXu === modelForm.value.idXuatXu)?.maXuatXu || '';
       if (loai) {
         baseName = baseName.replace(new RegExp(`\\b${loai}\\b`, 'i'), '').trim();
       }
-      if (xuatXu) {
-        baseName = baseName.replace(new RegExp(`\\b${xuatXu}\\b`, 'i'), '').trim();
-      }
+      // if (xuatXu) {
+      //   baseName = baseName.replace(new RegExp(`\\b${xuatXu}\\b`, 'i'), '').trim();
+      // }
       baseModelName.value = baseName;
       console.log('baseModelName updated:', baseModelName.value);
     });
