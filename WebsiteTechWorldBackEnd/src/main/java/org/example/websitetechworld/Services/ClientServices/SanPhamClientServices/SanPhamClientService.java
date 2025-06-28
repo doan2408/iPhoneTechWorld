@@ -23,9 +23,9 @@ public class SanPhamClientService {
         sanPhamAdminRespone.setTenSanPham(productEntity.getTenSanPham());
         sanPhamAdminRespone.setThuongHieu(productEntity.getThuongHieu());
 //        sanPhamAdminRespone.setSoLuongTonKho(productEntity.getSoLuongTonKho());
-        if(productEntity.getIdNhaCungCap() != null) {
-            sanPhamAdminRespone.setIdNhaCungCap(Integer.valueOf(productEntity.getIdNhaCungCap().getTenNhaCungCap()));
-        }
+//        if(productEntity.getIdNhaCungCap() != null) {
+//            sanPhamAdminRespone.setIdNhaCungCap(Integer.valueOf(productEntity.getIdNhaCungCap().getTenNhaCungCap()));
+//        }
         return sanPhamAdminRespone;
     }
 

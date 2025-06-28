@@ -54,7 +54,6 @@
           width="80"
         />
         <el-table-column prop="soImei" label="Số IMEI 1" />
-        <el-table-column prop="soImei2" label="Số IMEI 2" />
         <el-table-column label="Trạng thái">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.trangThaiImei)">
@@ -130,20 +129,6 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="Số IMEI 2" prop="soImei2">
-              <el-input
-                v-model="formData.soImei2"
-                placeholder="Nhập số IMEI 2 (tùy chọn)"
-                maxlength="15"
-                show-word-limit
-                autocomplete="off"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
             <el-form-item label="Trạng thái" prop="trangThaiImei">
               <el-select
                 v-model="formData.trangThaiImei"
@@ -160,6 +145,7 @@
             </el-form-item>
           </el-col>
         </el-row>
+
 
         <el-row justify="end" style="margin-top: 30px">
           <el-button @click="handleClose" style="margin-right: 10px"
@@ -203,7 +189,6 @@ const searchKeyword = ref("");
 const formData = reactive({
   id: null,
   soImei: "",
-  soImei2: "",
   trangThaiImei: "",
 });
 
@@ -234,14 +219,6 @@ const rules = {
     {
       pattern: /^\d{15}$/,
       message: "Số IMEI phải có đúng 15 chữ số",
-      trigger: "blur",
-    },
-  ],
-  soImei2: [
-    {required : true, message: "Vui lòng nhập số IMEI 2", trigger: "blur"},
-    {
-      pattern: /^\d{15}$/,
-      message: "Số IMEI 2 phải có đúng 15 chữ số (nếu có)",
       trigger: "blur",
     },
   ],
@@ -403,7 +380,6 @@ const indexMethod = (index) => {
 const resetForm = () => {
   formData.id = null;
   formData.soImei = "";
-  formData.soImei2 = "";
   formData.trangThaiImei = "";
 
   // Reset form validation

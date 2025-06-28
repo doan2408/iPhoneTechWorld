@@ -31,37 +31,37 @@ public class SecurityConfig {
         this.accountDetailService = accountDetailService;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http
-                .csrf().disable()
-                .cors(Customizer.withDefaults()) // ✅ Kích hoạt CORS dùng config bên dưới
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/css/**", "/js/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/index.html"
-                        ).permitAll()
-                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-                        .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
-                        .anyRequest().permitAll()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
-                .formLogin().disable()        // ❌ Tắt login mặc định bằng form
-                .httpBasic().disable()        // ❌ Tắt Basic Auth
-//                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
-//                        .logoutUrl("/api/auth/logout")
-//                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
-//                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
-//                )
-                .logout().disable() //tắt đăng xuất thủ công
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            http
+                    .csrf().disable()
+                    .cors(Customizer.withDefaults()) // ✅ Kích hoạt CORS dùng config bên dưới
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(
+                                    "/api/auth/**",
+                                    "/css/**", "/js/**",
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui/**",
+                                    "/swagger-ui.html",
+                                    "/swagger-ui/index.html"
+                            ).permitAll()
+                            .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
+                            .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+                            .anyRequest().permitAll()
+                    )
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
+                    .formLogin().disable()        // ❌ Tắt login mặc định bằng form
+                    .httpBasic().disable()        // ❌ Tắt Basic Auth
+    //                .logout(logout -> logout      // ✅ Logout thủ công nếu cần
+    //                        .logoutUrl("/api/auth/logout")
+    //                        .deleteCookies("JSESSIONID") // 👈 giúp frontend sạch session
+    //                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
+    //                )
+                    .logout().disable() //tắt đăng xuất thủ công
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+            return http.build();
+        }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http,

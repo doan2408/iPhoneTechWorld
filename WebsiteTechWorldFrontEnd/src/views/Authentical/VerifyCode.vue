@@ -63,7 +63,7 @@ onUnmounted(() => {
   <div class="verify-code-container">
     <h2>Xác minh mã xác thực</h2>
     <p>
-      Nhập mã gồm 6 chữ số đã gửi đến email: <b>{{ email }}</b>
+      Nhập mã gồm 6 chữ số đã gửi đến email: <b>{{ email }} <i class="bi bi-person-check-fill"></i></b>
     </p>
     <p class="timer" v-bind:class="{ expired: timerExpired }">
       {{

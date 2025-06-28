@@ -31,8 +31,6 @@ public class SanPhamBanHangAdminResponse {
     private BigDecimal giaBan;
 
 
-
-
     public static SanPhamBanHangAdminResponse converDto(SanPhamChiTiet sanPhamChiTiet){
         SanPhamBanHangAdminResponse response = new SanPhamBanHangAdminResponse();
         response.setId(sanPhamChiTiet.getId());

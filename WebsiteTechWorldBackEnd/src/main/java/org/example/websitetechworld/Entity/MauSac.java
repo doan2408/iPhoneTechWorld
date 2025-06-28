@@ -23,6 +23,6 @@ public class MauSac {
 
     @Size(max = 7)
     @Nationalized
-    @Column(name = "hex_color", length = 7)
+    @Column(name = "hex_color", length = 10)
     private String maMau;
 }

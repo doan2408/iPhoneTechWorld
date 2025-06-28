@@ -36,16 +36,16 @@ public class ImeiAdminService {
 
     public void checkDuplicateImei(ImeiAdminRequest request) {
         Integer count1 = imeiReposiory.countSoImei(request.getSoImei());
-        Integer count2 = imeiReposiory.countSoImei2(request.getSoImei2());
+//        Integer count2 = imeiReposiory.countSoImei2(request.getSoImei2());
 
         List<Map<String, String>> errors = new ArrayList<>();
 
         if (count1 != null && count1 > 0) {
             errors.add(Map.of("field", "soImei", "message", "IMEI đã tồn tại"));
         }
-        if (count2 != null && count2 > 0) {
-            errors.add(Map.of("field", "soImei2", "message", "IMEI 2 đã tồn tại"));
-        }
+//        if (count2 != null && count2 > 0) {
+//            errors.add(Map.of("field", "soImei2", "message", "IMEI 2 đã tồn tại"));
+//        }
 
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
@@ -109,11 +109,16 @@ public class ImeiAdminService {
         boolean unchangeImei1 =
                 Objects.equals(req.getSoImei(), imeiOld.getSoImei());
 
-        boolean unchangeImei2 =
-                Objects.equals(req.getSoImei2(), imeiOld.getSoImei2());
+//        boolean unchangeImei2 =
+//                Objects.equals(req.getSoImei2(), imeiOld.getSoImei2());
 
         // Nếu cả hai đều không thay đổi → không cần kiểm tra trùng lặp → trả về luôn
-        if (unchangeImei1 && unchangeImei2) {
+//        if (unchangeImei1 && unchangeImei2) {
+//            return convert(imeiOld);
+//        }
+
+        //imei 1 k thay đổi -> k kiểm tra trùng -> trả về dữ liệu
+        if (unchangeImei1) {
             return convert(imeiOld);
         }
 
@@ -125,12 +130,12 @@ public class ImeiAdminService {
             }
         }
 
-        if (!unchangeImei2) {
-            Integer count2 = imeiReposiory.countSoImei2(req.getSoImei2());
-            if (count2 != null && count2 > 0) {
-                errors.add(Map.of("field", "soImei2", "message", "IMEI 2 đã tồn tại"));
-            }
-        }
+//        if (!unchangeImei2) {
+//            Integer count2 = imeiReposiory.countSoImei2(req.getSoImei2());
+//            if (count2 != null && count2 > 0) {
+//                errors.add(Map.of("field", "soImei2", "message", "IMEI 2 đã tồn tại"));
+//            }
+//        }
 
         // Nếu có lỗi → ném ngoại lệ
         if (!errors.isEmpty()) {
@@ -138,7 +143,7 @@ public class ImeiAdminService {
         }
 
         imeiOld.setSoImei(req.getSoImei());
-        imeiOld.setSoImei2(req.getSoImei2());
+//        imeiOld.setSoImei2(req.getSoImei2());
         imeiOld.setTrangThaiImei(req.getTrangThaiImei());
         imeiOld.setIdSanPhamChiTiet(sanPhamChiTietRepo.findById(req.getIdSanPhamChiTiet()).orElse(null));
 
