@@ -14,9 +14,9 @@ import java.util.Set;
 @NoArgsConstructor
 @ToString
 public class SanPhamChiTietHienThiResponse {
-    private Integer id;
+    private Integer idSanPhamChiTiet;
 
-    private String maSanPham;
+    private String maSanPhamChiTiet;
 
     private String tenSanPham;
 
@@ -32,9 +32,9 @@ public class SanPhamChiTietHienThiResponse {
 
     public static SanPhamChiTietHienThiResponse converDto(SanPhamChiTiet sanPhamChiTiet){
         SanPhamChiTietHienThiResponse response = new SanPhamChiTietHienThiResponse();
-        response.setId(sanPhamChiTiet.getId());
+        response.setIdSanPhamChiTiet(sanPhamChiTiet.getId());
         if (sanPhamChiTiet.getIdSanPham() != null){
-            response.setMaSanPham(sanPhamChiTiet.getIdSanPham().getMaSanPham());
+            response.setMaSanPhamChiTiet(sanPhamChiTiet.getIdSanPham().getMaSanPham());
             response.setTenSanPham(sanPhamChiTiet.getIdSanPham().getTenSanPham());
         }
         if (sanPhamChiTiet.getIdMau() != null){

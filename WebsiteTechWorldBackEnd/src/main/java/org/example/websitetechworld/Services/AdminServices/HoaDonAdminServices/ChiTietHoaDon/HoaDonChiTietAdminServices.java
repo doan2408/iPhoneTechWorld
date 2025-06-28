@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -122,14 +123,52 @@ public class HoaDonChiTietAdminServices {
         Integer soLuongMoi = request.getSoLuong();
         chiTietHoaDon.setSoLuong(request.getSoLuong());
         if (soLuongCu > soLuongMoi){
+            int soLuongTG = soLuongCu - soLuongMoi;
+            sanPhamChiTietRepository.tangSoLuongTon(chiTietHoaDon.getIdSanPhamChiTiet().getId(), soLuongTG);
             hoaDonChiTiet_imeiAdminServices.giamSoLuong(chiTietHoaDon,soLuongCu - soLuongMoi);
         }
         if (soLuongCu<soLuongMoi){
-           hoaDonChiTiet_imeiAdminServices.tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
+            int soLuongTG = soLuongMoi-soLuongCu;
+            sanPhamChiTietRepository.giamSoLuongTon(chiTietHoaDon.getIdSanPhamChiTiet().getId(), soLuongTG);
+            hoaDonChiTiet_imeiAdminServices.tangSoLuong(chiTietHoaDon,soLuongMoi-soLuongCu);
         }
         chiTietHoaDonRepository.save(chiTietHoaDon);
     }
 
+    @Transactional
+    public void removeImeisAndUpdateSoLuong(Integer hoaDonId, Integer hdctId, CthdGiamSoLuong request) {
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại với ID: " + hoaDonId));
+        ChiTietHoaDon chiTietHoaDon = chiTietHoaDonRepository.findById(hdctId)
+                .orElseThrow(() -> new IllegalArgumentException("Chi tiết hóa đơn không tồn tại với ID: " + hdctId));
+
+        List<String> imeisToReturn = request.getImeisToReturn();
+
+        if (imeisToReturn == null || imeisToReturn.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách IMEI cần loại bỏ không được rỗng.");
+        }
+        hoaDonChiTiet_imeiAdminServices.giamSoLuong(chiTietHoaDon, imeisToReturn);
+
+        if (chiTietHoaDon.getIdSanPhamChiTiet() == null) {
+            throw new IllegalStateException("Sản phẩm chi tiết của hóa đơn không được tìm thấy.");
+        }
+        sanPhamChiTietRepository.tangSoLuongTon(chiTietHoaDon.getIdSanPhamChiTiet().getId(), imeisToReturn.size());
+
+        List<ImeiDaBan> currentLinkedImeiDaBans = imeiDaBanRepository.findByIdHoaDonChiTiet_Id(chiTietHoaDon.getId());
+        Integer soLuongMoi = currentLinkedImeiDaBans.size();
+
+        if (soLuongMoi < 0) {
+            soLuongMoi = 0;
+        }
+
+        if (soLuongMoi == 0) {
+            // chua xu ly ( xoa chi tiet neu so luong ve 0 )
+        }
+
+        chiTietHoaDon.setSoLuong(soLuongMoi);
+        chiTietHoaDonRepository.save(chiTietHoaDon);
+
+    }
 
 
     //ham xoa hoa don chi tiet khoi hoa don

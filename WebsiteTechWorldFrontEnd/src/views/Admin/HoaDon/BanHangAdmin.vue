@@ -126,7 +126,7 @@
                 <!-- Products grid -->
                 <div class="products-section">
                     <div class="products-grid">
-                        <div v-for="product in products" :key="product.id" @click="openImeiModal(product)"
+                        <div v-for="product in products" :key="product.idSanPhamChiTiet" @click="openImeiModal(product)"
                             class="product-card">
                             <div class="product-image">
                                 <img :src="product.url" :alt="product.tenSanPham" />
@@ -180,11 +180,12 @@
                                 :disabled="imeiCurrentPage === 0">Trước</button>
                             <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
                             <button @click="goToImeiPage(imeiCurrentPage + 1)"
-                                :disabled="imeiCurrentPage+1 === imeiTotalPages">Sau</button>
+                                :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
                         </div>
 
                         <div class="modal-footer">
-                            <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{ quantityToSelect || 0 }} IMEI)
+                            <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{
+                                quantityToSelect || 0 }} IMEI)
                             </button>
                             <button @click="confirmImeiSelection" class="btn confirm-btn">
                                 Xác nhận ({{ selectedImeis.length }} / {{ quantityToSelect || 0 }} IMEI)
@@ -242,11 +243,11 @@
                             <span class="item-price">{{ formatCurrency(item.donGia) }}</span>
                         </div>
                         <div class="cart-item-controls">
-                            <button @click="decreaseQuantity(item)" class="qty-btn">
+                            <button @click="handleRemovePartial(item)" class="qty-btn">
                                 <Minus class="qty-icon" />
                             </button>
                             <span class="quantity">{{ item.soLuong }}</span>
-                            <button @click="increaseQuantity(item)" class="qty-btn">
+                            <button @click="openImeiModal(item)" class="qty-btn">
                                 <Plus class="qty-icon" />
                             </button>
                         </div>
@@ -254,45 +255,64 @@
                         <button @click="confirmRemoveFromCart(item)" class="remove-item-btn">
                             <Undo class="remove-icon" />
                         </button>
-
-                        <Transition name="modal-fade">
-                            <div v-if="showDeleteConfirmModal" class="modal-overlay">
-                                <div class="modal-content-2">
-                                    <h2>Xác nhận xóa sản phẩm</h2>
-                                    <p>Bạn muốn xóa sản phẩm này như thế nào?</p>
-                                    <div class="modal-actions">
-                                        <button @click="removeFromCart" class="btn btn-danger">Trả toàn phần</button>
-                                        <button @click="handleRemovePartial" class="btn btn-warning">Trả một
-                                            phần</button>
-                                        <button @click="closeModal" class="btn btn-secondary">Hủy</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Transition>
-
-                        <Transition name="modal-fade">
-                            <div v-if="showPartialDeleteModal" class="modal-overlay">
-                                <div class="modal-content-2">
-                                    <h2>Xóa một phần sản phẩm</h2>
-                                    <p>Bạn muốn xóa bao nhiêu sản phẩm của <strong>{{ itemToDelete ?
-                                            itemToDelete.ten_san_pham : '' }}</strong>?</p>
-
-                                    <div class="quantity-input-group">
-                                        <label for="quantity-to-remove">Số lượng:</label>
-                                        <input type="number" id="quantity-to-remove" v-model.number="quantityToRemove"
-                                            :min="1" :max="maxQuantity" @input="validateQuantity" />
-                                        <span>/ {{ maxQuantity }}</span>
-                                    </div>
-
-                                    <div class="modal-actions">
-                                        <button @click="confirmPartialRemove" class="btn btn-primary">Xác nhận
-                                            xóa</button>
-                                        <button @click="closePartialModal" class="btn btn-secondary">Hủy</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Transition>
                     </div>
+                    <Transition name="modal-fade">
+                        <div v-if="showDeleteConfirmModal" class="modal-overlay">
+                            <div class="modal-content-2">
+                                <h2>Xác nhận xóa sản phẩm</h2>
+                                <p>Bạn muốn xóa sản phẩm này như thế nào?</p>
+                                <div class="modal-actions">
+                                    <button @click="removeFromCart" class="btn btn-danger">Trả toàn phần</button>
+                                    <button @click="() => handleRemovePartial(itemToDelete)" class="btn btn-warning">Trả một
+                                        phần</button>
+                                    <button @click="closeModal" class="btn btn-secondary">Hủy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Transition>
+
+                    <Transition name="delete-modal-fade">
+                        <div v-if="showRemoveImeiModal" class="delete-modal-overlay">
+                            <div class="delete-modal-content-2">
+                                <h2>Trả một phần sản phẩm</h2>
+                                <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
+                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
+                                </p>
+
+                                <div class="delete-imei-list-container">
+                                    <label class="delete-imei-select-all">
+                                        <input type="checkbox" v-model="selectAllImeis">
+                                        Chọn tất cả ({{ selectedImeisChon.length }} / {{ imeisForCurrentItem.length
+                                        }})
+                                    </label>
+                                    <ul class="delete-imei-list">
+                                        <li v-for="imei_item in imeisForCurrentItem" :key="imei_item.imei">
+                                            <label>
+                                                <input type="checkbox" :value="imei_item.imei"
+                                                    v-model="selectedImeisChon">
+                                                <span>{{ imei_item.imei }}</span>
+                                                <span v-if="imei_item.trangThaiImei"
+                                                    :class="getImeiStatusClass(imei_item.trangThaiImei)">
+                                                    ({{ imei_item.trangThaiImei }})
+                                                </span>
+                                            </label>
+                                        </li>
+                                        <li v-if="imeisForCurrentItem.length === 0">Không có IMEI nào để hiển thị.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="modal-actions">
+                                    <button @click="confirmPartialRemove" class="btn btn-primary"
+                                        :disabled="selectedImeisChon.length === 0">
+                                        Xác nhận xóa ({{ selectedImeisChon.length }})
+                                    </button>
+                                    <button @click="closePartialModal" class="btn btn-secondary">Hủy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </Transition>
                 </div>
             </div>
 
@@ -357,6 +377,8 @@ import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdmin
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { fetchImeisJs } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { updateSoLuongAndTrangThai } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { loadImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { deleteDetailInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { addProductIntoInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
@@ -509,11 +531,6 @@ const currentInvoice = computed(() => {
     return invoice;
 });
 
-
-
-
-
-
 // ham chon hoa don tab
 const selectInvoice = async (id) => {
     currentInvoiceId.value = id;
@@ -588,49 +605,6 @@ const removeFromCart = async () => {
         await loadProducts({ tenSanPham: selectedCategory.value });
     } catch (err) {
         console.error("Xóa thất bại", err);
-    }
-}
-
-// hàm nhập ssố lượng tra 1 phần
-const handleRemovePartial = () => {
-    if (!itemToDelete.value) return;
-
-    closeModal();
-
-    // maxQuantity.value = itemToDelete.value.soLuong || 1;
-    // quantityToRemove.value = 1; 
-
-    showPartialDeleteModal.value = true;
-};
-
-// hàm đóng modal trả 1 phần
-const closePartialModal = () => {
-    showPartialDeleteModal.value = false;
-    quantityToRemove.value = 1;
-    itemToDelete.value = null;
-    maxQuantity.value = 0;
-};
-
-//ham xac nhan modal tra 1 phan
-const confirmPartialRemove = async () => {
-    showPartialDeleteModal.value = false;
-}
-
-
-const increaseQuantity = (item) => {
-    const product = products.value.find(p => p.id === item.id)
-    if (item.quantity < product.stock) {
-        item.quantity++
-        // calculateTotal()
-    }
-}
-
-const decreaseQuantity = (item) => {
-    if (item.quantity > 1) {
-        item.quantity--
-        // calculateTotal()
-    } else {
-        removeFromCart(item)
     }
 }
 
@@ -715,14 +689,14 @@ const quantityToSelect = ref(1); // lưu số lượng
 // mở modal imei
 const openImeiModal = async (product) => {
     if (product) {
-        selectedProductForImei.value = product;
+        selectedProductForImei.value = product
 
         selectedImeis.value = []; // Reset các IMEI đã chọn trước đó
         imeiCurrentPage.value = 0; // Luôn bắt đầu từ trang 1
         quantityToSelect.value = 1; // <-- Reset về null khi mở modal mới để input trống
 
         // 1. Tải IMEI từ backend
-        await fetchImeis(product.id, imeiCurrentPage.value, imeiPageSize.value);
+        await fetchImeis(product.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
 
         // 2. Mở modal sau khi tải xong (đảm bảo data đã có)
         isImeiModalOpen.value = true;
@@ -737,7 +711,7 @@ const openImeiModal = async (product) => {
 // --- Hàm để lấy danh sách IMEI từ backend ---
 const fetchImeis = async (productId, page, size) => {
     try {
-        const response = await fetchImeisJs(productId,page,size)
+        const response = await fetchImeisJs(productId, page, size)
         availableImeis.value = response.data.content;
         imeiTotalItems.value = response.data.totalElements;
         imeiTotalPages.value = response.data.totalPages;
@@ -753,29 +727,29 @@ const fetchImeis = async (productId, page, size) => {
 const goToImeiPage = async (page) => {
     console.log('page: ', page);
     if (page >= 0 && page <= imeiTotalPages.value) {
-        console.log('page: ',page);
+        console.log('page: ', page);
         console.log('imeiTotalPages: ', imeiTotalPages.value);
         imeiCurrentPage.value = page;
         console.log('imeiCurrentPage: ', imeiCurrentPage.value);
-        await fetchImeis(selectedProductForImei.value.id, imeiCurrentPage.value, imeiPageSize.value);
+        await fetchImeis(selectedProductForImei.value.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
     }
 };
 
 // Hàm xử lý khi input số lượng thay đổi
 const handleQuantityInputChange = () => {
     if (quantityToSelect.value === null || isNaN(quantityToSelect.value)) {
-        selectedImeis.value = []; 
+        selectedImeis.value = [];
         return;
     }
     quantityToSelect.value = parseInt(quantityToSelect.value);
     if (quantityToSelect.value > imeiTotalItems.value) {
         quantityToSelect.value = imeiTotalItems.value;
     }
-    if (quantityToSelect.value <= 0) { 
-        quantityToSelect.value = 0; 
+    if (quantityToSelect.value <= 0) {
+        quantityToSelect.value = 0;
     }
 
-    selectedImeis.value = []; 
+    selectedImeis.value = [];
 };
 
 // chọn bỏ chọn imei bằng check box
@@ -823,7 +797,7 @@ const closeImeiModal = () => {
 
 // hàm xác nhận
 const confirmImeiSelection = async () => {
-    if (selectedImeis.value.length === quantityToSelect.value ) {
+    if (selectedImeis.value.length === quantityToSelect.value) {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
@@ -832,18 +806,16 @@ const confirmImeiSelection = async () => {
     }
 };
 
-
-
 // them vao gio hang
 const addToCartWithImeis = async (product, imeiList) => {
     const storedId = localStorage.getItem("selectedInvoiceId");
 
     const data = {
         idHoaDon: storedId,
-        idSanPhamChiTiet: product.id,
+        idSanPhamChiTiet: product.idSanPhamChiTiet,
         tenSanPham: product.tenSanPham,
-        moTa: product.moTa,
-        soLuong: imeiList.length, 
+        // moTa: product.moTa,
+        soLuong: imeiList.length,
         imeiIds: imeiList.map(imei => imei.imei)
     };
 
@@ -856,25 +828,121 @@ const addToCartWithImeis = async (product, imeiList) => {
     // calculateTotal()
 }
 
-
-const processPayment = () => {
-    if (currentInvoice.value.items.length === 0) return
-
-    console.log('Processing payment for invoice:', currentInvoice.value)
-    alert('Chuyển đến trang thanh toán...')
-}
-
-const focusProductSearch = () => {
-    document.querySelector('.search-input').focus()
-}
-
-const focusCustomerSearch = () => {
-    document.querySelector('.customer-search .search-input').focus()
-}
-
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
+
+
+//logic tra san pham
+const showRemoveImeiModal = ref(false);
+const itemToDeleteImei = ref(null);            // Sản phẩm đang được chọn để thao tác
+const imeisForCurrentItem = ref([]);       // Danh sách IMEI của sản phẩm trong hóa đơn/giỏ hàng
+const selectedImeisChon = ref([]);             // Các IMEI được chọn để xóa
+
+
+// --- Hàm mở Modal (handleRemovePartial) ---
+const handleRemovePartial = async (item) => {
+    // Đảm bảo item tồn tại
+    if (!item) return;
+    console.log(item);
+    itemToDeleteImei.value = item;
+    imeisForCurrentItem.value = [];
+    selectedImeisChon.value = [];
+
+    try {
+        const response = await loadImeiDaBan(item.idHoaDonChiTiet);
+
+        const fetchedImeisData = response.data;
+
+        if (Array.isArray(fetchedImeisData)) {
+            imeisForCurrentItem.value = fetchedImeisData
+                .map(imeiData => ({
+                    imei: imeiData.soImei,
+                    trangThaiImei: imeiData.trangThaiImei || 'Lỗi' 
+                }));
+                console.log(imeisForCurrentItem.value)
+        } else {
+            console.warn('API did not return an array for IMEIs:', fetchedImeisData);
+            imeisForCurrentItem.value = []; // Đảm bảo là mảng rỗng nếu dữ liệu không hợp lệ
+        }
+
+        // Mặc định chọn tất cả IMEI sau khi tải xong
+        // selectedImeisChon.value = imeisForCurrentItem.value.map(imei_item => imei_item.imei);
+
+        // Hiển thị modal
+        showRemoveImeiModal.value = true;
+
+    } catch (error) {
+        console.error('Lỗi khi tải IMEI từ API:', error);
+        alert('Không thể tải danh sách IMEI. Vui lòng thử lại sau.');
+        showRemoveImeiModal.value = false; // Đóng modal nếu có lỗi
+    }
+};
+
+// --- Hàm đóng Modal (closePartialModal) ---
+const closePartialModal = () => {
+    showRemoveImeiModal.value = false; // Sử dụng tên biến mới
+    itemToDeleteImei.value = null;
+    imeisForCurrentItem.value = [];
+    selectedImeisChon.value = []; // Reset cả IMEI đã chọn
+};
+
+// --- Hàm xác nhận Modal (confirmPartialRemove) ---
+const confirmPartialRemove = async () => {
+    // ... (kiểm tra ban đầu)
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    const hdctId = itemToDeleteImei.value.idHoaDonChiTiet;
+    const imeisToReturn = selectedImeisChon.value; // Danh sách IMEI từ checkbox đã chọn
+
+    try {
+        // Gọi hàm service đã sửa đổi với tất cả các tham số cần thiết
+        const message = await updateSoLuongAndTrangThai(storedId, hdctId, imeisToReturn);
+
+        alert('Cập nhật thành công'); // Hiển thị thông báo thành công
+
+        // ... (cập nhật UI sau khi thành công)
+        closePartialModal();
+
+    } catch (error) {
+        console.error('Lỗi khi xác nhận loại bỏ IMEI:', error);
+        alert(`Đã xảy ra lỗi: ${error.message}`);
+    }
+};
+
+
+// --- Computed property cho "Chọn tất cả" ---
+const selectAllImeis = computed({
+    get() {
+        return selectedImeisChon.value.length === imeisForCurrentItem.value.length && imeisForCurrentItem.value.length > 0;
+    },
+    set(value) {
+        if (value) {
+            selectedImeisChon.value = imeisForCurrentItem.value.map(item => item.imei);
+        } else {
+            selectedImeisChon.value = [];
+        }
+    }
+});
+
+
+// change status vie css
+const getImeiStatusClass = (status) => {
+    if (!status) return "status-default";
+
+    const statusMap = {
+        'Có sẵn': 'imei-status-co-san',
+        "Đã đặt trước": 'imei-status-da-dat-truoc',
+        'Đã bán': 'imei-status-da-ban',
+        'Đã trả lại': 'imei-status-da-tra-lai',
+        'Tân trang': 'imei-status-tan-trang',
+        'Bị chặn': 'imei-status-bi-chan',
+    };
+    // **Bỏ .toLowerCase() ở đây**
+    return statusMap[status] || "status-default";
+};
+console.log("tra ve", getImeiStatusClass("Đã đặt trước"))
+
 
 watch(currentInvoiceId, async (newId) => {
     if (!newId) return;
@@ -896,7 +964,6 @@ watch(currentInvoiceId, async (newId) => {
         currentInvoiceDetail.value = selected;
     }
 });
-
 // Watcher để tự động xóa lựa chọn khi chuyển trang
 watch(imeiCurrentPage, async () => {
     selectedImeis.value = []; // Xóa các lựa chọn khi chuyển trang
@@ -922,4 +989,6 @@ onMounted(async () => {
 }); 
 </script>
 
-<style scoped src="@/style/HoaDon/BanHang.css"></style>
+<style scoped src="@/style/HoaDon/BanHang.css">
+
+</style>
