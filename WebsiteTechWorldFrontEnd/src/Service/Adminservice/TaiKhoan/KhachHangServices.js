@@ -3,13 +3,21 @@ import api from "@/Service/LoginService/axiosInstance";
 const baseURL =  "/admin/client";
 
 // params: { page }, // <- Đây là shorthand của { page: page }
-export const getAllClient = async (page = 0, keyword = null) => {
+export const getAllClient = async ({
+  page = 0, 
+  keyword = null,
+  gioiTinh = null,
+  trangThai = null
+} = {} ) => {
   try {
     const params = { page };
     //only add keyword if it is provided
     if (keyword && keyword.trim() !== "") {
       params.keyword = keyword.trim();
     }
+    if (gioiTinh !==null) params.gioiTinh = gioiTinh;
+    if(trangThai !==null) params.trangThai = trangThai
+    
     const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (err) {
