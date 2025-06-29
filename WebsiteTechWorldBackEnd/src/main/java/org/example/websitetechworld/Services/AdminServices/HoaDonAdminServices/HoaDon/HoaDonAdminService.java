@@ -3,10 +3,12 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThongTinNguoiNhanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
@@ -160,5 +162,22 @@ public class HoaDonAdminService {
 
     public BigDecimal doangThuThang () {
         return hoaDonRepository.doanhThuThang();
+    }
+
+    public Page<KhachHangGiamGiaResponse> getAllKhachHang (String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> khachHangPage = (search == null || search.isEmpty()) ?
+                khachHangRepository.findTrangThai_Active(pageable) :
+                khachHangRepository.findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(search, pageable);
+        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getTenKhachHang()));
+    }
+
+    public KhachHang addKhachHang  (KhachHang khachHang) {
+        KhachHang saved = new KhachHang();
+        saved.setTenKhachHang(khachHang.getTenKhachHang());
+        saved.setSdt(khachHang.getSdt());
+        saved.setEmail(khachHang.getEmail());
+        saved.setTrangThai(TrangThaiKhachHang.ACTIVE);
+        return khachHangRepository.save(saved);
     }
 }
