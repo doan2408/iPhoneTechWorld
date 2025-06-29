@@ -121,7 +121,33 @@ export const addKhachHang = (data) => {
 
 
 export const getTinhThanh = () => {
-    const url = '/admin/tinh-thanh'
+    const url = '/admin/tinh-thanh/provinces'
     return api.get(url)
 }
+export const getHuyen = (code) => {
+    const url = '/admin/tinh-thanh/districts/'+ code
+    return api.get(url)
+}
+export const getXa = (code) => {
+    const url = '/admin/tinh-thanh/wards/'+ code
+    return api.get(url)
+}
+export const getLatLon = (address) => {
+    return api.get('/admin/tinh-thanh/geo', {
+        params: {
+            address: address
+        }
+    })
+}
 
+// Tính khoảng cách giữa hai tọa độ
+export const getDistance = (from, to) => {
+    return api.get('/admin/tinh-thanh/distance', {
+        params: {
+            fromLat: from.lat,
+            fromLon: from.lon,
+            toLat: to.lat,
+            toLon: to.lon
+        }
+    })
+}

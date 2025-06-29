@@ -1135,6 +1135,24 @@ textarea.input-field {
     font-style: italic;
     padding: 15px 0;
 }
+.address-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.address-form label {
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.select-box {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    min-width: 180px; }
 
 /* Modal */
 .modal-overlay {
