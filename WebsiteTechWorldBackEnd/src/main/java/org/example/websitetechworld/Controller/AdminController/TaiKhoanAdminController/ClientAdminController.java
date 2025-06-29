@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminDiaChiRequest;
+import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.ClientAdminService;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.DiaChiAdminService;
 import org.example.websitetechworld.exception.ValidationException;
@@ -27,9 +28,12 @@ public class ClientAdminController {
 
     @GetMapping
     public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page,
-                                           @RequestParam(value = "keyword", required = false) String keyWord) {
+                                           @RequestParam(value = "keyword", required = false) String keyWord,
+                                           @RequestParam(value = "gioiTinh", required = false) Boolean gioiTinh,
+                                           @RequestParam(value = "trangThai", required = false)TrangThaiKhachHang trangThai
+                                           ) {
         int pageSize = 10;
-        return ResponseEntity.ok(clientAdminService.getAllClient(page, pageSize, keyWord));
+        return ResponseEntity.ok(clientAdminService.getAllClient(page, pageSize, keyWord, gioiTinh, trangThai));
     }
 
     @GetMapping("/{id}")

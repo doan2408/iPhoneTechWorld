@@ -107,11 +107,25 @@ public class ClientAdminService {
     }
 
     //search
-    public Page<AdminClientResponse> getAllClient(int page, int size, String keyWord) {
+    public Page<AdminClientResponse> getAllClient(int page, int size, String keyword, Boolean gioiTinh, TrangThaiKhachHang trangThai) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // Làm sạch keyword
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
+
+        boolean isFiltering =
+                (keyword != null && !keyword.trim().isEmpty())
+                        || gioiTinh != null || trangThai != null;
+
         Page<KhachHang> pageResult;
-        if(keyWord !=null && !keyWord.isEmpty()){
-            pageResult = khachHangRepository.findByKeyword(keyWord.trim(), pageable);
+
+        if(isFiltering) {
+            pageResult = khachHangRepository.findByFilters(keyword, gioiTinh, trangThai, pageable);
         }
         else {
             pageResult = khachHangRepository.findAll(pageable);

@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,11 +34,31 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
     int updatePasswordByEmail(@Param("email") String email, @Param("password") String hashedPassword);
 
     // Tìm kiếm theo tên, email, số điện thoại
-    @Query("SELECT nv FROM KhachHang nv WHERE " +
-            "LOWER(nv.tenKhachHang) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(nv.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<KhachHang> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+//    @Query("SELECT nv FROM KhachHang nv WHERE " +
+//            "LOWER(nv.tenKhachHang) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+//            "LOWER(nv.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+//            "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+//    Page<KhachHang> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("""
+                SELECT kh FROM KhachHang kh
+                WHERE (:gioiTinh IS NULL OR kh.gioiTinh = :gioiTinh)
+                AND (:trangThai IS NULL OR kh.trangThai = :trangThai)
+                AND
+                (
+                :keyword IS NULL OR
+                    LOWER(kh.tenKhachHang) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+                    LOWER(kh.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+                    LOWER(kh.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                )
+            """)
+    Page<KhachHang> findByFilters(
+            @Param("keyword") String keyword,
+            @Param("gioiTinh") Boolean gioiTinh,
+            @Param("trangThai") TrangThaiKhachHang trangThai,
+            Pageable pageable
+    );
+
 
     @Query("SELECT k FROM KhachHang k WHERE NOT EXISTS (SELECT h FROM HoaDon h WHERE h.idKhachHang = k)")
     List<KhachHang> findNewCustomers();
