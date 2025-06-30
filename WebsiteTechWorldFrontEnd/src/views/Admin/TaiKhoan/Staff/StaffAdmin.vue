@@ -11,6 +11,7 @@ const staffList = ref([]);
 const isLoading = ref(false);
 const currentPage = ref(0);
 const totalPages = ref(0);
+const totalFilteredCount = ref(0);
 const searchKeyword = ref("");
 const searchTimeout = ref(null);
 const error = ref("");
@@ -57,6 +58,7 @@ const loadStaff = async (page = 0, keyword = null) => {
     staffList.value = response.content || [];
     currentPage.value = page;
     totalPages.value = response.totalPages || 0;
+    totalFilteredCount.value = response.totalElements;
   } catch (err) {
     console.error("Error loading staff:", err);
     error.value = err.message || "Có lỗi xảy ra khi tải danh sách nhân viên";
@@ -314,7 +316,7 @@ onMounted(() => {
         <!-- Hiển thị số kết quả -->
         <div class="result-count" v-if="!isLoading">
           <el-text size="small" type="info">
-            Tổng: {{ staffList.length }} nhân viên
+            Tổng: {{ totalFilteredCount  }} nhân viên
             <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
               (đã lọc)
             </span>

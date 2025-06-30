@@ -14,6 +14,7 @@ const isLoading = ref(false);
 const error = ref("");
 const currentPage = ref(0);
 const totalPages = ref(0);
+const totalFilteredCount = ref(0);
 const searchKeyword = ref("");
 const searchTimeout = ref(null);
 
@@ -94,6 +95,7 @@ const loadClient = async (page = 0, keyword = null) => {
     clientList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
+    totalFilteredCount.value = response.totalElements;
   } catch (err) {
     error.value =
       err.message || "An error was thrown while loading the clients";
@@ -370,7 +372,7 @@ onMounted(() => {
         <!-- Hiển thị số kết quả -->
         <div class="result-count" v-if="!isLoading">
           <el-text size="small" type="info">
-            Tổng: {{ clientList.length }} khách hàng
+            Tổng: {{ totalFilteredCount }} khách hàng
             <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
               (đã lọc)
             </span>

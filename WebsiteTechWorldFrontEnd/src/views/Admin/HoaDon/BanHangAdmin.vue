@@ -519,6 +519,7 @@ import { addKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -749,6 +750,7 @@ const removeFromCart = async () => {
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
+
     } catch (err) {
         console.error("Xóa thất bại", err);
     }
@@ -889,6 +891,24 @@ const goToImeiPage = async (page) => {
     }
 };
 
+let warningMessageInstance = null;
+
+const showWarningOnce = (message) => {
+  // k cho spam message
+  if (warningMessageInstance) return;
+
+  warningMessageInstance = ElMessage({
+    message,
+    type: 'warning',
+    duration: 3000,
+    showClose: true,
+    grouping: true,
+    onClose: () => {
+      warningMessageInstance = null; // Reset lại cho tbao lần sau
+    },
+  });
+};
+
 // Hàm xử lý khi input số lượng thay đổi
 const handleQuantityInputChange = () => {
     if (quantityToSelect.value === null || isNaN(quantityToSelect.value)) {
@@ -898,9 +918,11 @@ const handleQuantityInputChange = () => {
     quantityToSelect.value = parseInt(quantityToSelect.value);
     if (quantityToSelect.value > imeiTotalItems.value) {
         quantityToSelect.value = imeiTotalItems.value;
+        showWarningOnce(`Chỉ còn ${imeiTotalItems.value} IMEI có sẵn.`);
     }
     if (quantityToSelect.value <= 0) {
         quantityToSelect.value = 0;
+        showWarningOnce(`Số lượng phải lớn hơn 0.`);
     }
 
     selectedImeis.value = [];
@@ -982,8 +1004,10 @@ const addToCartWithImeis = async (product, imeiList) => {
     try {
         const response = await addProductIntoInvoice(storedId, data);
         await loadTabHoaDon(); // Tải lại dữ liệu hóa đơn sau khi thêm
+        ElMessage.success("Thêm sản phẩm thành công")
     } catch (err) {
         console.error("Thêm sản phẩm và IMEI thất bại:", err);
+        ElMessage.error("Thêm sản phẩm thất bại")
     }
     // calculateTotal()
 }
@@ -1467,6 +1491,7 @@ const selectedKhachHang = async (khachHang) => {
             currentInvoiceDetail.value = response.data;
         }
     } catch (err) {
+        ElMessage.error("Thêm khách hàng vào hóa đơn thất bại")
         console.error("Thêm khách hàng vào hóa đơn thất bại:", err);
     }
     showCustomerTable.value = false;
