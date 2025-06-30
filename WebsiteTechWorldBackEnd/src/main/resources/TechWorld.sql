@@ -113,6 +113,7 @@ CREATE TABLE hoa_don (
                          dia_chi_giao_hang NVARCHAR(100),
                          ngay_dat_hang DATE,
                          is_shipping BIT,
+                         shipping_method NVARCHAR(50),
                          id_tinh_thanh INT REFERENCES tinh_thanh(id),
                          phi_ship DECIMAL(19,2),
                          tong_tien DECIMAL(19,2),

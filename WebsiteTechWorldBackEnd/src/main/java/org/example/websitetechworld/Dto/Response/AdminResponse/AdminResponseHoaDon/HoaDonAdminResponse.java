@@ -46,6 +46,7 @@ public class HoaDonAdminResponse {
     private LocalDate ngayDatHang;
 
     private String diaChiGiaoHang;
+    private String shippingMethod;
 
     private String loaiHoaDon;
     private Boolean isShipping;
@@ -93,6 +94,7 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
         hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );
         hoaDonAdminResponse.setTrangThaiDonHang(hoaDon.getTrangThaiDonHang() != null ? hoaDon.getTrangThaiDonHang().getDisplayName() : null );
+        hoaDonAdminResponse.setShippingMethod(hoaDon.getShippingMethod() != null ? hoaDon.getShippingMethod().getCode() : null);
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));

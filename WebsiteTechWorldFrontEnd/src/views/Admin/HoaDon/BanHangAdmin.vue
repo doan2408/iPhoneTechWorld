@@ -227,8 +227,8 @@
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
                     <span><b v-if="currentInvoiceDetail">{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
-                        currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                        currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                                currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -279,7 +279,7 @@
                             <div class="delete-modal-content-2">
                                 <h2>Trả một phần sản phẩm</h2>
                                 <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                        itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
                                 <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
                                 </p>
 
@@ -323,79 +323,92 @@
             <div class="footer-container">
                 <div class="total-section">
                     <span class="total-label">Tổng tiền hàng:</span>
-                    <span class="total-amount">{{ totalAmount }} dang loi</span>
+                    <span class="total-amount">{{ totalAmount }} VNĐ</span>
                 </div>
 
                 <div class="action-section">
                     <div class="switch-container">
                         <label class="switch">
-                            <input type="checkbox" v-model="isShipping">
+                            <input type="checkbox" v-model="isShipping" @change="toggleShipping">
                             <span class="slider round"></span>
                         </label>
                         <span class="label-text">GIAO HÀNG</span>
                     </div>
 
-                    <div v-if="isShipping" class="shipping-details-section">
-                        <h4>Thông tin Giao hàng</h4>
-
-                        <!-- Hình thức giao hàng -->
-                        <div class="shipping-method-options">
-                            <label class="radio-label">
-                                <input type="radio" v-model="shippingInfo.shippingMethod" value="express">
-                                <span>Giao hàng gấp (Nhân viên)</span>
-                            </label>
-                            <label class="radio-label disabled-option">
-                                <input type="radio" v-model="shippingInfo.shippingMethod" value="economy" disabled>
-                                <span>Giao hàng tiết kiệm (Sắp ra mắt)</span>
-                            </label>
-                        </div>
-
-                        <div v-if="shippingInfo.shippingMethod === 'express'" class="express-shipping-fields">
-                            <input type="text" v-model="shippingInfo.tenNguoiNhan" placeholder="Tên người nhận"
-                                class="input-field" required>
-                            <input type="tel" v-model="shippingInfo.sdtNguoiNhan" placeholder="Số điện thoại"
-                                class="input-field" required>
-                            <textarea v-model="shippingInfo.diaChiChiTiet" placeholder="Số nhà, tên đường..."
-                                class="input-field" rows="2" required></textarea>
-
-                            <!-- Tỉnh thành -->
-                            <!-- <select v-model="shippingInfo.idTinhThanh" class="input-field" required
-                                @change="updatePhiShip">
-                                <option disabled value="">-- Chọn tỉnh thành --</option>
-                                <option v-for="province in tinhThanhList" :key="province.id" :value="province.id.toString()">
-                                    {{ province.ten }}
-                                </option>
-                            </select> -->
-                            <div class="address-form">
-                                <label>Chọn tỉnh:</label>
-                                <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
-                                    <option disabled value="">-- Tỉnh/Thành phố --</option>
-                                    <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}</option>
-                                </select>
-
-                                <label>Chọn huyện:</label>
-                                <select v-model="selectedHuyen" @change="onHuyenChange" class="select-box"
-                                    :disabled="!selectedTinh">
-                                    <option disabled value="">-- Quận/Huyện --</option>
-                                    <option v-for="h in huyenList" :key="h.code" :value="h">{{ h.name }}</option>
-                                </select>
-
-                                <label>Chọn xã:</label>
-                                <select v-model="selectedXa" @change="updatePhiShip" class="select-box"
-                                    :disabled="!selectedHuyen">
-                                    <option disabled value="">-- Phường/Xã --</option>
-                                    <option v-for="x in xaList" :key="x.code" :value="x">{{ x.name }}</option>
-                                </select>
+                    <div class="shipping-discount-container">
+                        <div v-if="isShipping" class="shipping-section">
+                            <h4>Thông tin Giao hàng</h4>
+                            <div class="shipping-info-display">
+                                <p><strong>Tên người nhận:</strong> {{ shippingInfo.tenNguoiNhan || 'Chưa cập nhật' }}
+                                </p>
+                                <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
+                                </p>
+                                <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
+                                <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
+                                    shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
+                                ' VNĐ' : 'Chưa tính' }}</p>
+                                <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
+                                    hàng</button>
                             </div>
 
-                            <div class="shipping-fee-display" v-if="shippingInfo.phiShip !== null">
-                                Phí giao hàng:
-                                <span class="fee-amount">{{ shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                            <!-- Popup for updating shipping info -->
+                            <div v-if="showShippingPopup" class="popup-overlay">
+                                <div class="popup-content">
+                                    <h4>Cập nhật thông tin giao hàng</h4>
+                                    <div class="popup-form">
+                                        <input type="text" v-model="shippingInfo.tenNguoiNhan"
+                                            placeholder="Tên người nhận" class="input-field" required>
+                                        <input type="tel" v-model="shippingInfo.sdtNguoiNhan"
+                                            placeholder="Số điện thoại" class="input-field" required>
+                                        <div class="address-form">
+                                            <label>Chọn tỉnh:</label>
+                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
+                                                <option disabled value="">-- Tỉnh/Thành phố --</option>
+                                                <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
+                                                </option>
+                                            </select>
+
+                                            <label>Chọn huyện:</label>
+                                            <select v-model="selectedHuyen" @change="onHuyenChange" class="select-box"
+                                                :disabled="!selectedTinh">
+                                                <option disabled value="">-- Quận/Huyện --</option>
+                                                <option v-for="h in huyenList" :key="h.code" :value="h">{{ h.name }}
+                                                </option>
+                                            </select>
+
+                                            <label>Chọn Xã:</label>
+                                            <select v-model="selectedXa" @change="onXaChange" class="select-box"
+                                                :disabled="!selectedHuyen">
+                                                <option disabled value="">-- Phường/Xã --</option>
+                                                <option v-for="x in xaList" :key="x.code" :value="x">{{ x.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <textarea v-model="shippingInfo.diaChiChiTiet"
+                                            placeholder="Số nhà, tên đường..." class="input-field" rows="2"
+                                            required></textarea>
+                                        <div class="shipping-fee-display"
+                                            v-if="shippingInfo.phiShip !== null && shippingInfo.phiShip !== undefined">
+                                            Phí giao hàng: <span class="fee-amount">{{
+                                                shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                                        </div>
+                                    </div>
+                                    <div class="popup-actions">
+                                        <button @click="confirmShippingInfo" class="confirm-btn">Xác nhận</button>
+                                        <button @click="closeShippingPopup" class="cancel-btn">Hủy</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div v-else-if="shippingInfo.shippingMethod === 'economy'" class="economy-shipping-fields">
-                            <p>Tính năng Giao hàng tiết kiệm sẽ có mặt sớm! Vui lòng chọn Giao hàng gấp.</p>
+                        <div class="discount-section">
+                            <h4>Chọn phiếu giảm giá</h4>
+                            <label>Chọn phiếu giảm giá:</label>
+                            <select v-model="selectedDiscount" class="select-box">
+                                <option disabled value="">-- Chọn phiếu giảm giá --</option>
+                                <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
+                                    discount.name }}</option>
+                            </select>
                         </div>
                     </div>
 
@@ -691,6 +704,7 @@ const selectInvoice = async (id) => {
             if (res.data) {
                 addOrUpdateInvoice(res.data);
             }
+            loadHoaDon()
         } catch (error) {
             console.error("Lỗi khi load chi tiết hóa đơn:", error);
         }
@@ -1109,7 +1123,9 @@ const shippingInfo = ref({
     sdtNguoiNhan: '',
     diaChiChiTiet: '',
     phiShip: null,
-    shippingMethod: 'express'
+    shippingMethod: 'express', // Đảm bảo khớp với 'express' thay vì 'EXPRESS'
+    maVanDon: '',
+    isShipping: false
 });
 
 const getTinhList = async () => {
@@ -1137,7 +1153,7 @@ const onTinhChange = async () => {
             console.error("Lỗi khi lấy danh sách huyện:", error);
         }
     }
-    updatePhiShip();
+    // updatePhiShip();
 };
 
 // Xử lý khi Quận/Huyện thay đổi
@@ -1154,7 +1170,16 @@ const onHuyenChange = async () => {
             console.error("Lỗi khi lấy danh sách xã:", error);
         }
     }
-    updatePhiShip();
+    // updatePhiShip();
+};
+
+const onXaChange = async () => {
+    console.log("Xã được chọn:", selectedXa.value);
+    shippingInfo.value.phiShip = null;
+    if (selectedXa.value) {
+        console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
+        await updatePhiShip();
+    }
 };
 
 watch(isShipping, (newVal) => {
@@ -1180,70 +1205,152 @@ watch(isShipping, (newVal) => {
 
 // ham update phi ship 
 const updatePhiShip = async () => {
+    console.log("Debug updatePhiShip:");
+    console.log("  isShipping:", isShipping.value);
+    console.log("  shippingMethod:", shippingInfo.value.shippingMethod);
+    console.log("  selectedTinh.name:", selectedTinh.value?.name);
+    console.log("  selectedHuyen.name:", selectedHuyen.value?.name);
+    console.log("  selectedXa.name:", selectedXa.value?.name);
     if (!isShipping.value ||
         shippingInfo.value.shippingMethod !== 'express' ||
-        !shippingInfo.value.diaChiChiTiet ||
         !selectedTinh.value?.name ||
         !selectedHuyen.value?.name ||
         !selectedXa.value?.name
     ) {
+        console.warn("Điều kiện không thỏa mãn:");
+        if (!isShipping.value) console.warn("  - isShipping là false");
+        if (shippingInfo.value.shippingMethod !== 'express') console.warn("  - shippingMethod không phải 'express'");
+        if (!selectedTinh.value?.name) console.warn("  - selectedTinh.name rỗng");
+        if (!selectedHuyen.value?.name) console.warn("  - selectedHuyen.name rỗng");
+        if (!selectedXa.value?.name) console.warn("  - selectedXa.name rỗng");
         shippingInfo.value.phiShip = null;
         console.warn("Chưa đủ thông tin địa chỉ hoặc giao hàng không được bật/chọn phương thức express. Phí ship: null.");
         return;
     }
 
-
-    const fullAddress = `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
+    const fullAddress = `${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
 
     console.log("Địa chỉ người nhận đầy đủ (fullAddress):", fullAddress);
     console.log("Địa chỉ cửa hàng (storeAddress):", storeAddress);
 
     try {
         const [from, to] = await Promise.all([
-            getLatLonFromAddress(storeAddress),
-            getLatLonFromAddress(fullAddress)
+            getLatLonFromAddress(storeAddress, selectedTinh, selectedHuyen, selectedXa),
+            getLatLonFromAddress(fullAddress, selectedTinh, selectedHuyen, selectedXa),
         ]);
 
+        console.log("Tọa độ cửa hàng (from):", from);
+        console.log("Tọa độ người nhận (to):", to);
+
         if (!from || !to) {
-            shippingInfo.value.phiShip = null;
-            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Phí ship: null.");
+            shippingInfo.value.phiShip = 30000; // Phí mặc định
+            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Áp dụng phí mặc định: 30,000 VNĐ.");
             return;
         }
 
-
         const distance = await getDistanceInKm(from, to);
+        console.log("Khoảng cách tính được:", distance);
 
-        shippingInfo.value.phiShip = calcPhiShip(distance);
-        console.log(`Khoảng cách: ${distance} km, Phí ship: ${shippingInfo.value.phiShip.toLocaleString('vi-VN')} VNĐ`);
+        const maxDistance = 50;
+        let adjustedDistance = distance;
+        if (distance > maxDistance) {
+            console.warn(`Khoảng cách quá lớn (${distance} km), giới hạn về ${maxDistance} km.`);
+            adjustedDistance = maxDistance;
+        }
 
+        shippingInfo.value.phiShip = calcPhiShip(adjustedDistance);
+        console.log(
+            `Khoảng cách: ${adjustedDistance} km, Phí ship: ${shippingInfo.value.phiShip.toLocaleString('vi-VN')} VNĐ`
+        );
     } catch (err) {
         console.error("Lỗi khi tính phí ship:", err);
-        shippingInfo.value.phiShip = null;
+        shippingInfo.value.phiShip = 30000; // Phí mặc định
+        console.log("Áp dụng phí mặc định do lỗi: 30,000 VNĐ");
     }
 };
 
 
 // Hàm lấy tọa độ từ địa chỉ
-const getLatLonFromAddress = async (address) => {
+const getLatLonFromAddress = async (address, selectedTinh, selectedHuyen, selectedXa) => {
     console.log("Đang gọi API lấy tọa độ cho:", address);
     try {
+        // Thử địa chỉ gốc
         const res = await getLatLon(address);
-
         const parsedData = res.data;
+        console.log("Phản hồi từ API /geo (địa chỉ gốc):", parsedData);
 
-        console.log("Phản hồi từ API /geo (đã parse):", parsedData);
-
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-            return {
+        if (Array.isArray(parsedData) && parsedData.length > 0 && parsedData[0].lat && parsedData[0].lon) {
+            const coords = {
                 lat: parseFloat(parsedData[0].lat),
-                lon: parseFloat(parsedData[0].lon)
+                lon: parseFloat(parsedData[0].lon),
             };
+            console.log(`Tọa độ trả về cho ${address}:`, coords);
+            return coords;
         }
-        console.warn('Không tìm thấy tọa độ hợp lệ cho địa chỉ (parsedData rỗng hoặc không đúng định dạng):', address, parsedData);
-        return null;
 
+        // Thử định dạng thay thế (xóa dấu phẩy thừa)
+        const cleanAddress = address.replace(/^,\s*/, '').trim();
+        console.log("Thử định dạng thay thế:", cleanAddress);
+        const altRes = await getLatLon(cleanAddress);
+        const altParsedData = altRes.data;
+        console.log("Phản hồi từ API /geo (thay thế):", altParsedData);
+
+        if (Array.isArray(altParsedData) && altParsedData.length > 0 && altParsedData[0].lat && altParsedData[0].lon) {
+            const coords = {
+                lat: parseFloat(altParsedData[0].lat),
+                lon: parseFloat(altParsedData[0].lon),
+            };
+            console.log(`Tọa độ trả về cho ${cleanAddress}:`, coords);
+            return coords;
+        }
+
+        // Thử cấp huyện
+        if (selectedHuyen?.value?.name && selectedTinh?.value?.name) {
+            const huyenAddress = `${selectedHuyen.value.name}, ${selectedTinh.value.name}, Việt Nam`;
+            console.log("Thử tìm theo huyện:", huyenAddress);
+            const huyenRes = await getLatLon(huyenAddress);
+            const huyenParsedData = huyenRes.data;
+            console.log("Phản hồi từ API /geo (huyện):", huyenParsedData);
+
+            if (Array.isArray(huyenParsedData) && huyenParsedData.length > 0 && huyenParsedData[0].lat && huyenParsedData[0].lon) {
+                const coords = {
+                    lat: parseFloat(huyenParsedData[0].lat),
+                    lon: parseFloat(huyenParsedData[0].lon),
+                };
+                console.log(`Tọa độ trả về cho ${huyenAddress}:`, coords);
+                return coords;
+            }
+        } else {
+            console.warn("Không thể thử cấp huyện do thiếu selectedHuyen hoặc selectedTinh:", {
+                selectedHuyen: selectedHuyen?.value,
+                selectedTinh: selectedTinh?.value,
+            });
+        }
+
+        // Thử cấp tỉnh
+        if (selectedTinh?.value?.name) {
+            const tinhAddress = `${selectedTinh.value.name}, Việt Nam`;
+            console.log("Thử tìm theo tỉnh:", tinhAddress);
+            const tinhRes = await getLatLon(tinhAddress);
+            const tinhParsedData = tinhRes.data;
+            console.log("Phản hồi từ API /geo (tỉnh):", tinhParsedData);
+
+            if (Array.isArray(tinhParsedData) && tinhParsedData.length > 0 && tinhParsedData[0].lat && tinhParsedData[0].lon) {
+                const coords = {
+                    lat: parseFloat(tinhParsedData[0].lat),
+                    lon: parseFloat(tinhParsedData[0].lon),
+                };
+                console.log(`Tọa độ trả về cho ${tinhAddress}:`, coords);
+                return coords;
+            }
+        } else {
+            console.warn("Không thể thử cấp tỉnh do thiếu selectedTinh:", selectedTinh?.value);
+        }
+
+        console.warn("Không tìm thấy tọa độ hợp lệ cho địa chỉ:", address, parsedData);
+        return null;
     } catch (error) {
-        console.error('Lỗi khi lấy tọa độ cho địa chỉ:', address, error);
+        console.error("Lỗi khi lấy tọa độ cho địa chỉ:", address, error);
         return null;
     }
 };
@@ -1251,7 +1358,7 @@ const getLatLonFromAddress = async (address) => {
 const getDistanceInKm = async (from, to) => {
     try {
         const res = await getDistance(from, to);
-        const parsedData = JSON.parse(res.data);
+        const parsedData = res.data;
         const distanceInMeters = parsedData?.routes?.[0]?.distance;
 
         if (distanceInMeters != null) {
@@ -1269,8 +1376,19 @@ const getDistanceInKm = async (from, to) => {
 
 
 const calcPhiShip = (km) => {
-    if (km <= 2) return 15000;
-    return 15000 + (km - 2) * 3000;
+    const baseFee = 15000;
+    const additionalFeePerKm = 2000; // Giảm từ 3000 xuống 2000
+    const maxFee = 50000; // Giới hạn phí tối đa 50,000 VNĐ
+
+    if (km <= 2) return baseFee;
+
+    const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
+    if (calculatedFee > maxFee) {
+        console.warn(`Phí vận chuyển (${calculatedFee} VNĐ) vượt quá giới hạn, sử dụng phí tối đa: ${maxFee} VNĐ`);
+        return maxFee;
+    }
+
+    return calculatedFee;
 };
 
 // load thong tin hoa don
@@ -1286,24 +1404,24 @@ const loadHoaDon = async () => {
         const hoaDon = response.data;
 
         if (hoaDon) {
-            hoaDonList.value = hoaDon; 
+            hoaDonList.value = hoaDon;
 
             if (hoaDon.isShipping) {
                 isShipping.value = true;
                 shippingInfo.value = {
                     tenNguoiNhan: hoaDon.tenNguoiNhan || '',
                     sdtNguoiNhan: hoaDon.sdtNguoiNhan || '',
-                    diaChiChiTiet: hoaDon.diaChiGiaoHang || '', 
+                    diaChiChiTiet: hoaDon.diaChiGiaoHang || '',
                     phiShip: hoaDon.phiShip || null,
-                    shippingMethod: 'express' 
+                    shippingMethod: 'express'
                 };
 
                 if (tinhList.value.length === 0) {
-                    await getTinhList(); 
+                    await getTinhList();
                 }
                 console.log("Danh sách tỉnh đã có:", tinhList.value);
 
-                if (hoaDon.maTinh) { 
+                if (hoaDon.maTinh) {
                     const foundTinh = tinhList.value.find(tinh => tinh.code === hoaDon.maTinh);
                     if (foundTinh) {
                         selectedTinh.value = foundTinh;
@@ -1315,8 +1433,8 @@ const loadHoaDon = async () => {
                 } else {
                     console.log("Không có mã tỉnh trong hóa đơn.");
                 }
-                if (hoaDon.maHuyen) { 
-                    await new Promise(resolve => setTimeout(resolve, 50)); 
+                if (hoaDon.maHuyen) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
                     if (huyenList.value.length > 0) {
                         const foundHuyen = huyenList.value.find(huyen => huyen.code === hoaDon.maHuyen);
                         if (foundHuyen) {
@@ -1333,8 +1451,8 @@ const loadHoaDon = async () => {
                     console.log("Không có mã huyện trong hóa đơn.");
                 }
 
-                if (hoaDon.maXa) { 
-                    await new Promise(resolve => setTimeout(resolve, 50)); 
+                if (hoaDon.maXa) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
                     if (xaList.value.length > 0) {
                         const foundXa = xaList.value.find(xa => xa.code === hoaDon.maXa);
                         if (foundXa) {
@@ -1367,6 +1485,7 @@ const loadHoaDon = async () => {
                 xaList.value = [];
             }
         }
+
     } catch (error) {
         console.error("Lỗi khi tải thông tin hóa đơn chi tiết:", error);
     }
@@ -1485,6 +1604,64 @@ const add = async (data) => {
 watch(searchKhachHang, () => {
     listKhachHang(0);
 });
+
+
+// popup cap nhat thong tin giao hang
+const showShippingPopup = ref(false);
+const openShippingPopup = () => {
+    showShippingPopup.value = true;
+};
+
+const closeShippingPopup = () => {
+    showShippingPopup.value = false;
+};
+
+const confirmShippingInfo = async () => {
+    if (selectedTinh.value && selectedHuyen.value && selectedXa.value && shippingInfo.value.diaChiChiTiet) {
+        shippingInfo.value.diaChiChiTiet = `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
+    }
+
+    try {
+        const response = await fetch('/api/update-invoice', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tenNguoiNhan: shippingInfo.value.tenNguoiNhan,
+                sdtNguoiNhan: shippingInfo.value.sdtNguoiNhan,
+                diaChiGiaoHang: shippingInfo.value.diaChiChiTiet,
+                phiShip: shippingInfo.value.phiShip
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to update invoice');
+        console.log('Invoice updated successfully');
+    } catch (error) {
+        console.error('Error updating invoice:', error);
+        alert('Có lỗi xảy ra khi cập nhật thông tin giao hàng.');
+    }
+
+    showShippingPopup.value = false;
+};
+
+const toggleShipping = () => {
+    if (!isShipping.value) {
+        console.log('Tắt giao hàng, xóa thông tin giao hàng');
+        shippingInfo.value = {
+            tenNguoiNhan: '',
+            sdtNguoiNhan: '',
+            diaChiChiTiet: '',
+            phiShip: null,
+            shippingMethod: 'express'
+        };
+        selectedTinh.value = null;
+        selectedHuyen.value = null;
+        selectedXa.value = null;
+        huyenList.value = [];
+        xaList.value = [];
+    } else {
+        console.log('Đã bật giao hàng');
+    }
+};
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>

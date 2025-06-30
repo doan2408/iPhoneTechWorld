@@ -5,12 +5,14 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
+import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -232,6 +234,21 @@ public class HoaDonAdminController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
         }
+    }
+
+    @PutMapping("/update-invoice")
+    public ResponseEntity<String> updateInvoice(@RequestBody InvoiceRequest request) {
+        ShippingMethod method = ShippingMethod.fromCode(request.getShippingMethod());
+        int distanceInKm = calculateDistanceFromAddress(request.getDiaChiGiaoHang()); // Hàm tính khoảng cách
+        int shippingFee = method.calculateShippingFee(distanceInKm);
+
+        // Lưu vào cơ sở dữ liệu hoặc trả về
+        return ResponseEntity.ok("Invoice updated with shipping fee: " + shippingFee);
+    }
+
+    private int calculateDistanceFromAddress(String address) {
+        // Logic tính khoảng cách (gọi API hoặc sử dụng logic hiện tại)
+        return 5; // Ví dụ trả về 5km
     }
 
 
