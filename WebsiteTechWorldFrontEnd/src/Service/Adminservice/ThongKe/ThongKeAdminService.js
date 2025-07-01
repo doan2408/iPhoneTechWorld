@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 
 const axiosInstance = axios.create({
@@ -30,25 +31,39 @@ export const getSanPhamBanChay = async (params) => {
     throw error.response?.data || 'Lỗi lấy thống kê tổng quan';
   }
 };
-// api/thongke.js
-// export const getSanPhamBanChay = async ({ startDate, endDate, page = 1, limit = 10 }) => {
-//   try {
-//     const response = await axiosInstance.get('/san-pham-ban-chay', {
-//       params: {
-//         startDate,
-//         endDate,
-//         page,
-//         limit
-//       }
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error('Lỗi khi lấy sản phẩm bán chạy:', error);
-//     throw error.response?.data?.message || 'Lỗi không xác định khi lấy sản phẩm bán chạy';
-//   }
-// };
-
-
-
-
-
+export const getKhachHangTrungThanh = async (params) => {
+  try {
+    const response = await axiosInstance.get('/khach-hang-trung-thanh', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Có lỗi khi lấy danh sách khách hàng trung thành:', error);
+    throw error.response?.data || 'Lỗi lấy danh sách khách hàng trung thành';
+  }
+};
+export const getSanPhamSapHetHang = async (params) => {
+  try {
+    const response = await axiosInstance.get('/san-pham-sap-het-hang', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Có lỗi khi lấy danh sách khách hàng trung thành:', error);
+    throw error.response?.data || 'Lỗi lấy danh sách khách hàng trung thành';
+  }
+};
+export const getTopSanPhamBanChay = async (startDate, endDate) => {
+  try {
+    const response = await axiosInstance.get('/top-san-pham-ban-chay', { startDate, endDate });
+    return response.data;
+  } catch (error) {
+    console.error('Có lỗi khi lấy thống kê tổng quan:', error);
+    throw error.response?.data || 'Lỗi lấy thống kê tổng quan';
+  }
+};
+export const getDonHangHuy = async (params) => {
+  try {
+    const response = await axiosInstance.get('/don-huy-theo-thang', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Có lỗi khi lấy thống kê tổng quan:', error);
+    throw error.response?.data || 'Lỗi lấy thống kê tổng quan';
+  }
+};
