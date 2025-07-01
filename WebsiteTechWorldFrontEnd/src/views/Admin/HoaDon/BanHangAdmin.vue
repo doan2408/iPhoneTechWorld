@@ -227,8 +227,8 @@
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
                     <span><b v-if="currentInvoiceDetail">{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
-                                currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                        currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -279,7 +279,7 @@
                             <div class="delete-modal-content-2">
                                 <h2>Trả một phần sản phẩm</h2>
                                 <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                        itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
                                 <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
                                 </p>
 
@@ -323,7 +323,19 @@
             <div class="footer-container">
                 <div class="total-section">
                     <span class="total-label">Tổng tiền hàng:</span>
-                    <span class="total-amount">{{ totalAmount }} VNĐ</span>
+                    <span class="total-amount">{{ totalProductAmount }} VNĐ</span>
+                </div>
+                <div class="shipping-fee-section">
+                    <span class="shipping-fee-label">Phí giao hàng:</span>
+                    <span class="shipping-fee-amount">{{ shippingFee }} VNĐ</span>
+                </div>
+                <div class="discount-section" v-if="discountAmount > 0">
+                    <span class="discount-label">Giảm giá:</span>
+                    <span class="discount-amount">- {{ discountAmount }} VNĐ</span>
+                </div>
+                <div class="grand-total-section">
+                    <span class="grand-total-label">Tổng thanh toán:</span>
+                    <span class="grand-total-amount">{{ grandTotal }} VNĐ</span>
                 </div>
 
                 <div class="action-section">
@@ -346,7 +358,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                ' VNĐ' : 'Chưa tính' }}</p>
+                                    ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>

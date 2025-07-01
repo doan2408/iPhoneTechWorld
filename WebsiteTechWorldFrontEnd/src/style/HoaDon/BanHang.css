@@ -2297,3 +2297,179 @@ input:checked+.slider:before {
 .table-hover tbody tr td {
     cursor: pointer;
 }
+
+.total-summary-container {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.total-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee; /* Đường kẻ phân cách */
+}
+
+.total-section:last-of-type {
+    border-bottom: none; /* Bỏ đường kẻ ở dòng cuối cùng */
+}
+
+.total-label {
+    font-size: 16px;
+    font-weight: 500; /* Medium weight */
+    color: #555;
+}
+
+.total-amount {
+    font-size: 16px;
+    font-weight: 600; /* Semi-bold */
+    color: #333;
+    text-align: right;
+}
+
+/* Specific styles for discount */
+.discount-section .total-amount.discount-amount {
+    color: #e74c3c; /* Màu đỏ cho số tiền giảm */
+    font-weight: 700; /* Bold */
+}
+
+/* Specific styles for the final amount */
+.final-amount-section {
+    margin-top: 15px; /* Khoảng cách với các phần trên */
+    padding-top: 15px;
+    border-top: 2px solid #ddd; /* Đường kẻ đậm hơn */
+}
+
+.final-amount-section .grand-total-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50; /* Màu đậm hơn cho nhãn "Thành tiền" */
+}
+
+.final-amount-section .grand-total-amount {
+    font-size: 22px; /* Cỡ chữ lớn hơn cho số tiền cuối cùng */
+    font-weight: 800; /* Extra bold */
+    color: #27ae60; /* Màu xanh lá cây nổi bật cho số tiền cuối cùng */
+}
+.total-section,
+.shipping-fee-section,
+.discount-section,
+.grand-total-section {
+    display: flex;
+    justify-content: space-between;
+    /* Đẩy nội dung ra hai bên */
+    align-items: center;
+    padding: 8px 0;
+    /* Khoảng cách trên dưới */
+    border-bottom: 1px solid #eee;
+    /* Đường kẻ dưới để phân tách */
+}
+
+/* Kiểu chữ cho nhãn (ví dụ: "Tổng tiền hàng:") */
+.total-label,
+.shipping-fee-label,
+.discount-label,
+.grand-total-label {
+    font-weight: 500;
+    /* Đậm vừa phải */
+    color: #333;
+}
+
+/* Kiểu chữ cho số tiền */
+.total-amount,
+.shipping-fee-amount,
+.discount-amount,
+.grand-total-amount {
+    font-weight: 600;
+    /* Đậm hơn */
+    color: #000;
+}
+
+/* Kiểu đặc biệt cho tổng cuối cùng */
+.grand-total-section {
+    border-top: 1px solid #ccc;
+    /* Đường kẻ đậm hơn phía trên */
+    margin-top: 15px;
+    /* Khoảng cách với các mục trên */
+    padding-top: 15px;
+    /* Khoảng cách bên trong */
+    font-size: 1.2em;
+    /* Chữ lớn hơn */
+}
+
+.grand-total-label,
+.grand-total-amount {
+    font-weight: 700;
+    /* Rất đậm */
+    color: #d9534f;
+    /* Màu đỏ nổi bật cho tổng tiền */
+}
+
+/* Tùy chỉnh màu cho phần giảm giá */
+.discount-amount {
+    color: #5cb85c;
+    /* Màu xanh lá cây cho giảm giá */
+}
+.total-section,
+.shipping-fee-section,
+.discount-section,
+.grand-total-section {
+    display: flex;
+    justify-content: space-between;
+    /* Đẩy nội dung ra hai bên */
+    align-items: center;
+    padding: 8px 0;
+    /* Khoảng cách trên dưới */
+    border-bottom: 1px solid #eee;
+    /* Đường kẻ dưới để phân tách */
+}
+
+/* Kiểu chữ cho nhãn (ví dụ: "Tổng tiền hàng:") */
+.total-label,
+.shipping-fee-label,
+.discount-label,
+.grand-total-label {
+    font-weight: 500;
+    /* Đậm vừa phải */
+    color: #333;
+}
+
+/* Kiểu chữ cho số tiền */
+.total-amount,
+.shipping-fee-amount,
+.discount-amount,
+.grand-total-amount {
+    font-weight: 600;
+    /* Đậm hơn */
+    color: #000;
+}
+
+/* Kiểu đặc biệt cho tổng cuối cùng */
+.grand-total-section {
+    border-top: 1px solid #ccc;
+    /* Đường kẻ đậm hơn phía trên */
+    margin-top: 15px;
+    /* Khoảng cách với các mục trên */
+    padding-top: 15px;
+    /* Khoảng cách bên trong */
+    font-size: 1.2em;
+    /* Chữ lớn hơn */
+}
+
+.grand-total-label,
+.grand-total-amount {
+    font-weight: 700;
+    /* Rất đậm */
+    color: #d9534f;
+    /* Màu đỏ nổi bật cho tổng tiền */
+}
+
+.discount-amount {
+    color: #5cb85c;
+}
