@@ -81,6 +81,11 @@ public class ThongKeAdminController {
 
         return thongKeAdminService.doanhThuTheoThang();
     }
+    @GetMapping("/don-huy-theo-thang")
+    public List<Map<String, Object>> donHuyTheoThang () {
+
+        return thongKeAdminService.donHuyTheoThang();
+    }
 
     @GetMapping("/doanh-thu-theo-khach-hang")
     public List<Map<String, Object>> thongKeTheoKhachHang () {
@@ -108,32 +113,6 @@ public class ThongKeAdminController {
     }
 
 
-//    @GetMapping("/top-san-pham-ban-chay")
-//    public ResponseEntity<?> topSanPhamBanChay(
-//            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-//            @RequestParam(value = "page", defaultValue = "1") int page,
-//            @RequestParam(value = "limit", defaultValue = "10") int limit
-//    ) {
-//        if (limit <= 0 || page <= 0) {
-//            return ResponseEntity.badRequest().body(Map.of("message", "Page và limit phải lớn hơn 0"));
-//        }
-//
-//        try {
-//            // Lưu ý: cộng thêm 1 ngày cho endDate để so sánh kiểu `ngay_tao < endDate + 1`
-//            Map<String, Object> result = thongKeAdminService.getTopSanPhamBanChay(
-//                    startDate,
-//                    endDate.plusDays(1),
-//                    page,
-//                    limit
-//            );
-//
-//            return ResponseEntity.ok(result);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("message", "Lỗi khi lấy dữ liệu: " + e.getMessage()));
-//        }
-//    }
 
 
     @GetMapping("/san-pham-ton-kho")
@@ -152,5 +131,12 @@ public class ThongKeAdminController {
     public ThongKeDonhangAdminResponse thongKeDonHang () {
 
         return thongKeAdminService.thongKeDonhangAdminResponse();
+    }
+    @GetMapping("/top-san-pham-ban-chay")
+    public List<Map<String, Object>> getSanPhamBanChayTheoNgay(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        return thongKeAdminService.getSanPhamBanChayTheoNgay(startDate, endDate);
     }
 }
