@@ -130,11 +130,11 @@ export const getTinhThanh = () => {
     return api.get(url)
 }
 export const getHuyen = (code) => {
-    const url = '/admin/tinh-thanh/districts/'+ code
+    const url = '/admin/tinh-thanh/districts/' + code
     return api.get(url)
 }
 export const getXa = (code) => {
-    const url = '/admin/tinh-thanh/wards/'+ code
+    const url = '/admin/tinh-thanh/wards/' + code
     return api.get(url)
 }
 export const getLatLon = (address) => {
@@ -155,4 +155,17 @@ export const getDistance = (from, to) => {
             toLon: to.lon
         }
     })
+}
+
+//cap nhat thong tin giao hang
+export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping) => {
+    return api.put(`/admin/hoa-don/update-invoice/${id}`, {
+        tenNguoiNhan: shippingInfo.tenNguoiNhan,
+        sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
+        diaChiGiaoHang: fullAddressForDB,
+        phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
+        isShipping: isShipping,
+        maVanDon: null,
+        thanhTien: null
+    });
 }

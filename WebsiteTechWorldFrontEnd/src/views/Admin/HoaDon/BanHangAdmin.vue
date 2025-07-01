@@ -519,7 +519,7 @@ import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdmin
 import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { createPendingInvoice, hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { fetchImeisJs } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { fetchImeisJs, updateTTShipping } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { getTinhThanh, getHuyen, getXa, getLatLon, getDistance } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { updateSoLuongAndTrangThai } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { loadImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
@@ -533,6 +533,7 @@ import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
+import { v4 as uuidv4 } from 'uuid';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -1770,30 +1771,56 @@ const closeShippingPopup = () => {
 };
 
 const confirmShippingInfo = async () => {
-    if (selectedTinh.value && selectedHuyen.value && selectedXa.value && shippingInfo.value.diaChiChiTiet) {
-        shippingInfo.value.diaChiChiTiet = `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+
+    console.log("Bắt đầu xác nhận thông tin giao hàng:");
+    console.log("  shippingInfo:", shippingInfo.value);
+    console.log("  isShipping:", isShipping.value);
+    console.log("  selectedTinh:", selectedTinh.value);
+    console.log("  selectedHuyen:", selectedHuyen.value);
+    console.log("  selectedXa:", selectedXa.value);
+    console.log("  invoiceId:", storedId);
+
+
+    // Kiểm tra dữ liệu bắt buộc
+    if (!selectedTinh.value?.name || !selectedHuyen.value?.name || !selectedXa.value?.name) {
+        alert('Vui lòng chọn đầy đủ Tỉnh, Huyện, Xã.');
+        return;
     }
+
+    if (!shippingInfo.value.tenNguoiNhan || !shippingInfo.value.sdtNguoiNhan) {
+        alert('Vui lòng nhập đầy đủ Tên người nhận và Số điện thoại.');
+        return;
+    }
+
+    if (!storedId) {
+        alert('Không tìm thấy ID hóa đơn.');
+        return;
+    }
+
+    // Tạo địa chỉ đầy đủ cho DB
+    const fullAddressForDB = shippingInfo.value.diaChiChiTiet
+        ? `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`
+        : `${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
 
     try {
-        const response = await fetch('/api/update-invoice', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tenNguoiNhan: shippingInfo.value.tenNguoiNhan,
-                sdtNguoiNhan: shippingInfo.value.sdtNguoiNhan,
-                diaChiGiaoHang: shippingInfo.value.diaChiChiTiet,
-                phiShip: shippingInfo.value.phiShip
-            })
-        });
+        const response = await updateTTShipping(storedId,shippingInfo.value,fullAddressForDB,isShipping.value)
 
-        if (!response.ok) throw new Error('Failed to update invoice');
-        console.log('Invoice updated successfully');
+        console.log('Phản hồi từ API /update-invoice:', response.data);
+        alert('Cập nhật thông tin giao hàng thành công!');
+        showShippingPopup.value = false;
     } catch (error) {
-        console.error('Error updating invoice:', error);
-        alert('Có lỗi xảy ra khi cập nhật thông tin giao hàng.');
+        console.error('Lỗi khi cập nhật hóa đơn:', error);
+        if (error.response?.status === 401) {
+            // Interceptor sẽ xử lý refresh token và thử lại hoặc chuyển hướng đến /login
+            alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+        } else if (error.response?.status === 500) {
+            alert('Lỗi server: ' + (error.response.data.message || 'Không thể cập nhật hóa đơn.'));
+        } else {
+            alert('Có lỗi xảy ra khi cập nhật thông tin giao hàng: ' + error.message);
+        }
     }
-
-    showShippingPopup.value = false;
 };
 
 const toggleShipping = () => {
