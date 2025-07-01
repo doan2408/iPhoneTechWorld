@@ -47,16 +47,16 @@ public class SanPhamChiTietAdminService {
 
         entity.setIdSanPham(sanPhamRepo.findById(req.getIdSanPham()).orElse(null));
         entity.setIdMau(mauSacRepo.findById(req.getIdMau()).orElse(null));
-        entity.setIdRam(ramRepo.findById(req.getIdRam()).orElse(null));
+//        entity.setIdRam(ramRepo.findById(req.getIdRam()).orElse(null));
         entity.setIdRom(romRepo.findById(req.getIdRom()).orElse(null));
-        entity.setIdManHinh(manHinhRepo.findById(req.getIdManHinh()).orElse(null));
-        entity.setIdHeDieuHanh(heDieuHanhRepo.findById(req.getIdHeDieuHanh()).orElse(null));
-        entity.setIdPin(pinRepo.findById(req.getIdPin()).orElse(null));
-        entity.setIdCpu(cpuRepo.findById(req.getIdCpu()).orElse(null));
-        entity.setIdCameraTruoc(cameraTruocRepo.findById(req.getIdCameraTruoc()).orElse(null));
-        entity.setIdCameraSau(cameraSauRepo.findById(req.getIdCameraSau()).orElse(null));
-        entity.setIdXuatXu(xuatXuRepo.findById(req.getIdXuatXu()).orElse(null));
-        entity.setIdLoai(loaiRepo.findById(req.getIdLoai()).orElse(null));
+//        entity.setIdManHinh(manHinhRepo.findById(req.getIdManHinh()).orElse(null));
+//        entity.setIdHeDieuHanh(heDieuHanhRepo.findById(req.getIdHeDieuHanh()).orElse(null));
+//        entity.setIdPin(pinRepo.findById(req.getIdPin()).orElse(null));
+//        entity.setIdCpu(cpuRepo.findById(req.getIdCpu()).orElse(null));
+//        entity.setIdCameraTruoc(cameraTruocRepo.findById(req.getIdCameraTruoc()).orElse(null));
+//        entity.setIdCameraSau(cameraSauRepo.findById(req.getIdCameraSau()).orElse(null));
+//        entity.setIdXuatXu(xuatXuRepo.findById(req.getIdXuatXu()).orElse(null));
+//        entity.setIdLoai(loaiRepo.findById(req.getIdLoai()).orElse(null));
     }
 
 
@@ -75,35 +75,34 @@ public class SanPhamChiTietAdminService {
             response.setGiaBan(entity.getGiaBan());
         }
 
-        SanPham sanPham = entity.getIdSanPham();
-        if (sanPham != null) {
-            response.setMaSanPham(sanPham.getMaSanPham());
-            response.setTenSanPham(sanPham.getTenSanPham());
-            response.setThuongHieu(sanPham.getThuongHieu());
-//            response.setSoLuongTonKho(sanPham.getSoLuongTonKho());
-
-            NhaCungCap ncc = sanPham.getIdNhaCungCap();
-            if (ncc != null) {
-                response.setTenNhaCungCap(ncc.getTenNhaCungCap());
-                response.setDiaChi(ncc.getDiaChi());
-                response.setSdt(ncc.getSdt());
-                response.setEmail(ncc.getEmail());
-            }
-        }
+//        SanPham sanPham = entity.getIdSanPham();
+//        if (sanPham != null) {
+//            response.setMaSanPham(sanPham.getMaSanPham());
+//            response.setTenSanPham(sanPham.getTenSanPham());
+//            response.setThuongHieu(sanPham.getThuongHieu());
+//
+//            NhaCungCap ncc = sanPham.getIdNhaCungCap();
+//            if (ncc != null) {
+//                response.setTenNhaCungCap(ncc.getTenNhaCungCap());
+//                response.setDiaChi(ncc.getDiaChi());
+//                response.setSdt(ncc.getSdt());
+//                response.setEmail(ncc.getEmail());
+//            }
+//        }
 
         MauSac mauSac = entity.getIdMau();
         if (mauSac != null) {
             response.setTenMau(mauSac.getTenMau());
         }
 
-        Ram ram = entity.getIdRam();
-        if (ram != null) {
-            response.setDungLuongRam(ram.getDungLuong());
-            response.setLoaiRam(ram.getLoai());
-            response.setTocDoDocGhiRam(ram.getTocDoDocGhi());
-            response.setNhaSanXuatRam(ram.getNhaSanXuat());
-            response.setNamRaMatRam(ram.getNamRaMat());
-        }
+//        Ram ram = entity.getIdRam();
+//        if (ram != null) {
+//            response.setDungLuongRam(ram.getDungLuong());
+//            response.setLoaiRam(ram.getLoai());
+//            response.setTocDoDocGhiRam(ram.getTocDoDocGhi());
+//            response.setNhaSanXuatRam(ram.getNhaSanXuat());
+//            response.setNamRaMatRam(ram.getNamRaMat());
+//        }
 
         Rom rom = entity.getIdRom();
         if (rom != null) {
@@ -114,75 +113,75 @@ public class SanPhamChiTietAdminService {
             response.setNamRaMatRom(rom.getNamRaMat());
         }
 
-        ManHinh manHinh = entity.getIdManHinh();
-        if (manHinh != null) {
-            response.setTenManHinh(manHinh.getTenManHinh());
-            response.setKichThuoc(manHinh.getKichThuoc());
-            response.setLoaiManHinh(manHinh.getLoaiManHinh());
-            response.setDoPhanGiaiManHinh(manHinh.getDoPhanGiai());
-            response.setTanSoQuet(manHinh.getTanSoQuet());
-            response.setDoSang(manHinh.getDoSang());
-            response.setChatLieuKinh(manHinh.getChatLieuKinh());
-        }
-
-        HeDieuHanh heDieuHanh = entity.getIdHeDieuHanh();
-        if (heDieuHanh != null) {
-            response.setPhienBanHeDieuHanh(heDieuHanh.getPhienBan());
-            response.setNhaPhatTrien(heDieuHanh.getNhaPhatTrien());
-            response.setGiaoDienNguoiDung(heDieuHanh.getGiaoDienNguoiDung());
-
-        }
-
-        Pin pin = entity.getIdPin();
-        if (pin != null) {
-            response.setPhienBanPin(pin.getPhienBan());
-            response.setCongSuatSac(pin.getCongSuatSac());
-            response.setThoiGianSuDung(pin.getThoiGianSuDung());
-            response.setSoLanSacToiDa(pin.getSoLanSacToiDa());
-        }
-
-        Cpu cpu = entity.getIdCpu();
-        if (cpu != null) {
-            response.setHangSanXuat(cpu.getHangSanXuat());
-            response.setChipXuLy(cpu.getChipXuLy());
-            response.setSoNhan(cpu.getSoNhan());
-            response.setXungNhip(cpu.getXungNhip());
-            response.setCongNgheSanXuat(cpu.getCongNgheSanXuat());
-            response.setBoNhoDem(cpu.getBoNhoDem());
-            response.setTieuThuDienNang(cpu.getTieuThuDienNang());
-            response.setNamRaMat(cpu.getNamRaMat());
-        }
-
-        // Xử lý Camera Trước
-        CameraTruoc cameraTruoc = entity.getIdCameraTruoc();
-        if (cameraTruoc != null) {
-            response.setLoaiCameraTruoc(cameraTruoc.getLoaiCamera());
-            response.setDoPhanGiaiCameraTruoc(cameraTruoc.getDoPhanGiai());
-            response.setKhauDoCameraTruoc(cameraTruoc.getKhauDo());
-            response.setLoaiZoomCameraTruoc(cameraTruoc.getLoaiZoom());
-            response.setCheDoChupCameraTruoc(cameraTruoc.getCheDoChup());
-        }
-
-        CameraSau cameraSau = entity.getIdCameraSau();
-        if (cameraSau != null) {
-            response.setLoaiCameraSau(cameraSau.getLoaiCamera());
-            response.setDoPhanGiaiCameraSau(cameraSau.getDoPhanGiai());
-            response.setKhauDoCameraSau(cameraSau.getKhauDo());
-            response.setLoaiZoomCameraSau(cameraSau.getLoaiZoom());
-            response.setCheDoChupCameraSau(cameraSau.getCheDoChup());
-        }
-
-        XuatXu xuatXu = entity.getIdXuatXu();
-        if (xuatXu != null) {
-            response.setMaXuatXu(xuatXu.getMaXuatXu());
-            response.setTenQuocGia(xuatXu.getTenQuocGia());
-
-        }
-
-        Loai loai = entity.getIdLoai();
-        if (loai != null) {
-            response.setTenLoai(loai.getTenLoai());
-        }
+//        ManHinh manHinh = entity.getIdManHinh();
+//        if (manHinh != null) {
+//            response.setTenManHinh(manHinh.getTenManHinh());
+//            response.setKichThuoc(manHinh.getKichThuoc());
+//            response.setLoaiManHinh(manHinh.getLoaiManHinh());
+//            response.setDoPhanGiaiManHinh(manHinh.getDoPhanGiai());
+//            response.setTanSoQuet(manHinh.getTanSoQuet());
+//            response.setDoSang(manHinh.getDoSang());
+//            response.setChatLieuKinh(manHinh.getChatLieuKinh());
+//        }
+//
+//        HeDieuHanh heDieuHanh = entity.getIdHeDieuHanh();
+//        if (heDieuHanh != null) {
+//            response.setPhienBanHeDieuHanh(heDieuHanh.getPhienBan());
+//            response.setNhaPhatTrien(heDieuHanh.getNhaPhatTrien());
+//            response.setGiaoDienNguoiDung(heDieuHanh.getGiaoDienNguoiDung());
+//
+//        }
+//
+//        Pin pin = entity.getIdPin();
+//        if (pin != null) {
+//            response.setPhienBanPin(pin.getPhienBan());
+//            response.setCongSuatSac(pin.getCongSuatSac());
+//            response.setThoiGianSuDung(pin.getThoiGianSuDung());
+//            response.setSoLanSacToiDa(pin.getSoLanSacToiDa());
+//        }
+//
+//        Cpu cpu = entity.getIdCpu();
+//        if (cpu != null) {
+//            response.setHangSanXuat(cpu.getHangSanXuat());
+//            response.setChipXuLy(cpu.getChipXuLy());
+//            response.setSoNhan(cpu.getSoNhan());
+//            response.setXungNhip(cpu.getXungNhip());
+//            response.setCongNgheSanXuat(cpu.getCongNgheSanXuat());
+//            response.setBoNhoDem(cpu.getBoNhoDem());
+//            response.setTieuThuDienNang(cpu.getTieuThuDienNang());
+//            response.setNamRaMat(cpu.getNamRaMat());
+//        }
+//
+//        // Xử lý Camera Trước
+//        CameraTruoc cameraTruoc = entity.getIdCameraTruoc();
+//        if (cameraTruoc != null) {
+//            response.setLoaiCameraTruoc(cameraTruoc.getLoaiCamera());
+//            response.setDoPhanGiaiCameraTruoc(cameraTruoc.getDoPhanGiai());
+//            response.setKhauDoCameraTruoc(cameraTruoc.getKhauDo());
+//            response.setLoaiZoomCameraTruoc(cameraTruoc.getLoaiZoom());
+//            response.setCheDoChupCameraTruoc(cameraTruoc.getCheDoChup());
+//        }
+//
+//        CameraSau cameraSau = entity.getIdCameraSau();
+//        if (cameraSau != null) {
+//            response.setLoaiCameraSau(cameraSau.getLoaiCamera());
+//            response.setDoPhanGiaiCameraSau(cameraSau.getDoPhanGiai());
+//            response.setKhauDoCameraSau(cameraSau.getKhauDo());
+//            response.setLoaiZoomCameraSau(cameraSau.getLoaiZoom());
+//            response.setCheDoChupCameraSau(cameraSau.getCheDoChup());
+//        }
+//
+//        XuatXu xuatXu = entity.getIdXuatXu();
+//        if (xuatXu != null) {
+//            response.setMaXuatXu(xuatXu.getMaXuatXu());
+//            response.setTenQuocGia(xuatXu.getTenQuocGia());
+//
+//        }
+//
+//        Loai loai = entity.getIdLoai();
+//        if (loai != null) {
+//            response.setTenLoai(loai.getTenLoai());
+//        }
 
         if (entity.getImeis() != null && !entity.getImeis().isEmpty()) {
             Imei firstImei = entity.getImeis().iterator().next();
@@ -213,7 +212,6 @@ public class SanPhamChiTietAdminService {
         return sanPhamChiTietRepo.findFullById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm với ID: " + id));
     }
 
-
     //detail
     public SanPhamChiTietResponse getSanPhamChiTiet(SanPhamChiTiet entity) {
 
@@ -221,7 +219,6 @@ public class SanPhamChiTietAdminService {
 
         return response;
     }
-
 
     @Transactional
     public SanPhamChiTietResponse createSanPhamChiTiet(SanPhamChiTietAdminRepuest req) {

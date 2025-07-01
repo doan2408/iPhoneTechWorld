@@ -24,6 +24,15 @@
       </el-select>
     </el-form-item>
 
+    <!-- Chọn model_san_pham -->
+    <h3>Chọn model sản phẩm</h3>
+    <el-form-item label="Model sản phẩm" :error="errors.idModelSanPham">
+      <el-select v-model="sanPham.idModelSanPham" placeholder="Chọn model sản phẩm" @change="onModelChange">
+        <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel"
+          :value="model.idModelSanPham"></el-option>
+      </el-select>
+    </el-form-item>
+
     <!-- Chọn thuộc tính để tạo biến thể -->
     <h3>Tạo biến thể sản phẩm</h3>
     <el-row :gutter="20">
@@ -31,13 +40,6 @@
         <el-form-item label="Màu sắc" :error="errors.selectedMaus">
           <el-select v-model="selectedMaus" multiple placeholder="Chọn màu sắc" @change="errors.selectedMaus = ''">
             <el-option v-for="mau in maus" :key="mau.id" :label="mau.tenMau" :value="mau.id"></el-option>
-          </el-select>
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="RAM" :error="errors.selectedRams">
-          <el-select v-model="selectedRams" multiple placeholder="Chọn RAM" @change="errors.selectedRams = ''">
-            <el-option v-for="ram in rams" :key="ram.id" :label="ram.dungLuong" :value="ram.id"></el-option>
           </el-select>
         </el-form-item>
       </el-col>
@@ -58,15 +60,10 @@
         <el-card>
           <h4>Danh sách chi tiết</h4>
           <el-table :data="sanPham.sanPhamChiTiets" style="margin-top: 10px" @row-click="selectChiTiet">
-            <el-table-column label="Chi tiết" type="index" width="80"></el-table-column>
+            <el-table-column label="Chi tiết" type="index" width="60"></el-table-column>
             <el-table-column label="Màu sắc">
               <template #default="{ row }">
                 {{ getMauSacLabels(row.idMau) }}
-              </template>
-            </el-table-column>
-            <el-table-column label="RAM">
-              <template #default="{ row }">
-                {{ getRamLabels(row.idRam) }}
               </template>
             </el-table-column>
             <el-table-column label="ROM">
@@ -85,63 +82,14 @@
       <el-col :span="14">
         <el-card v-if="selectedChiTiet !== null">
           <h4>Thông tin chi tiết {{ selectedChiTiet + 1 }}</h4>
-          <el-form-item label="Màn hình" :error="errorsChiTiet[selectedChiTiet]?.idManHinh || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idManHinh" placeholder="Chọn màn hình"
-              @change="errorsChiTiet[selectedChiTiet].idManHinh = ''">
-              <el-option v-for="mh in manHinhs" :key="mh.id" :label="mh.kichThuoc" :value="mh.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Hệ điều hành" :error="errorsChiTiet[selectedChiTiet]?.idHeDieuHanh || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idHeDieuHanh" placeholder="Chọn hệ điều hành"
-              @change="errorsChiTiet[selectedChiTiet].idHeDieuHanh = ''">
-              <el-option v-for="hdh in heDieuHanhs" :key="hdh.id" :label="hdh.phienBan" :value="hdh.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Pin" :error="errorsChiTiet[selectedChiTiet]?.idPin || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idPin" placeholder="Chọn pin"
-              @change="errorsChiTiet[selectedChiTiet].idPin = ''">
-              <el-option v-for="pin in pins" :key="pin.id" :label="pin.congSuatSac" :value="pin.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="CPU" :error="errorsChiTiet[selectedChiTiet]?.idCpu || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCpu" placeholder="Chọn CPU"
-              @change="errorsChiTiet[selectedChiTiet].idCpu = ''">
-              <el-option v-for="cpu in cpus" :key="cpu.id" :label="cpu.xungNhip" :value="cpu.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Camera trước" :error="errorsChiTiet[selectedChiTiet]?.idCameraTruoc || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraTruoc" placeholder="Chọn camera trước"
-              @change="errorsChiTiet[selectedChiTiet].idCameraTruoc = ''">
-              <el-option v-for="cam in cameraTruocs" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Camera sau" :error="errorsChiTiet[selectedChiTiet]?.idCameraSau || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idCameraSau" placeholder="Chọn camera sau"
-              @change="errorsChiTiet[selectedChiTiet].idCameraSau = ''">
-              <el-option v-for="cam in cameraSaus" :key="cam.id" :label="cam.doPhanGiai" :value="cam.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Xuất xứ" :error="errorsChiTiet[selectedChiTiet]?.idXuatXu || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idXuatXu" placeholder="Chọn xuất xứ"
-              @change="errorsChiTiet[selectedChiTiet].idXuatXu = ''">
-              <el-option v-for="xx in xuatXus" :key="xx.id" :label="xx.maXuatXu" :value="xx.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Loại" :error="errorsChiTiet[selectedChiTiet]?.idLoai || ''">
-            <el-select v-model="sanPham.sanPhamChiTiets[selectedChiTiet].idLoai" placeholder="Chọn loại"
-              @change="errorsChiTiet[selectedChiTiet].idLoai = ''">
-              <el-option v-for="loai in loais" :key="loai.id" :label="loai.tenLoai" :value="loai.id"></el-option>
-            </el-select>
-          </el-form-item>
           <el-form-item label="Giá bán" :error="errorsChiTiet[selectedChiTiet]?.giaBan || ''">
-            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :precision="2"
+            <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].giaBan" :precision="2" :min="1000"
               @change="errorsChiTiet[selectedChiTiet].giaBan = ''"></el-input-number>
           </el-form-item>
           <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''">
             <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0"
               :disabled="true"></el-input-number>
           </el-form-item>
-
           <el-form-item label="IMEI">
             <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
               placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy"
@@ -160,7 +108,6 @@
               </span>
             </div>
           </el-form-item>
-
           <el-form-item label="Hình ảnh" :error="errorsChiTiet[selectedChiTiet]?.hinhAnhs || ''">
             <el-upload :file-list="sanPham.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
               :on-change="(file, fileList) => handleFileChange(file, fileList, selectedChiTiet)"
@@ -184,7 +131,7 @@
 <script>
 import { onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getAllCameraSauList, getAllCameraTruocList, getAllCpuList, getAllHDHList, getAllLoaiList, getAllManHinhList, getAllMauSacList, getAllNhaCungCapList, getAllPinList, getAllRamList, getAllRomList, getAllXuatXuList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
+import { getAllMauSacList, getAllModelSanPhamList, getAllNhaCungCapList, getAllRomList, postSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { debounce } from 'chart.js/helpers';
 import axios from 'axios';
 
@@ -195,33 +142,25 @@ export default {
       thuongHieu: '',
       idNhaCungCap: '',
       trangThaiSanPham: '',
+      idModelSanPham: null,
       sanPhamChiTiets: []
     });
 
     const sanPhamForm = ref(null);
     const selectedMaus = ref([]);
-    const selectedRams = ref([]);
     const selectedRoms = ref([]);
     const nhaCungCaps = ref([]);
     const maus = ref([]);
-    const rams = ref([]);
     const roms = ref([]);
-    const manHinhs = ref([]);
-    const heDieuHanhs = ref([]);
-    const pins = ref([]);
-    const cpus = ref([]);
-    const cameraTruocs = ref([]);
-    const cameraSaus = ref([]);
-    const xuatXus = ref([]);
-    const loais = ref([]);
+    const modelSanPhams = ref([]);
     const selectedChiTiet = ref(null);
     const errors = reactive({
       tenSanPham: '',
       thuongHieu: '',
       idNhaCungCap: '',
       trangThaiSanPham: '',
+      idModelSanPham: '',
       selectedMaus: '',
-      selectedRams: '',
       selectedRoms: ''
     });
     const errorsChiTiet = reactive([]);
@@ -236,47 +175,28 @@ export default {
 
     const fetchDanhMuc = async () => {
       try {
+
+        console.log("nó có đi vào đây k ")
         const responses = await Promise.all([
           getAllNhaCungCapList(),
           getAllMauSacList(),
-          getAllRamList(),
           getAllRomList(),
-          getAllManHinhList(),
-          getAllHDHList(),
-          getAllPinList(),
-          getAllCpuList(),
-          getAllCameraTruocList(),
-          getAllCameraSauList(),
-          getAllXuatXuList(),
-          getAllLoaiList()
+          getAllModelSanPhamList()
         ]);
 
         nhaCungCaps.value = responses[0];
         maus.value = responses[1];
-        rams.value = responses[2];
-        roms.value = responses[3];
-        manHinhs.value = responses[4];
-        heDieuHanhs.value = responses[5];
-        pins.value = responses[6];
-        cpus.value = responses[7];
-        cameraTruocs.value = responses[8];
-        cameraSaus.value = responses[9];
-        xuatXus.value = responses[10];
-        loais.value = responses[11];
+        roms.value = responses[2];
+        modelSanPhams.value = responses[3];
+
+        console.log('roms:', roms.value); // Debug dữ liệu
+        console.log('maus:', maus.value); // Debug dữ liệu
 
         const requiredLists = [
           { name: 'Nhà cung cấp', list: nhaCungCaps.value },
           { name: 'Màu sắc', list: maus.value },
-          { name: 'RAM', list: rams.value },
           { name: 'ROM', list: roms.value },
-          { name: 'Màn hình', list: manHinhs.value },
-          { name: 'Hệ điều hành', list: heDieuHanhs.value },
-          { name: 'Pin', list: pins.value },
-          { name: 'CPU', list: cpus.value },
-          { name: 'Camera trước', list: cameraTruocs.value },
-          { name: 'Camera sau', list: cameraSaus.value },
-          { name: 'Xuất xứ', list: xuatXus.value },
-          { name: 'Loại', list: loais.value }
+          { name: 'Model sản phẩm', list: modelSanPhams.value }
         ];
         const emptyLists = requiredLists.filter(item => !item.list.length);
         if (emptyLists.length) {
@@ -287,16 +207,24 @@ export default {
       }
     };
 
+    const onModelChange = () => {
+      errors.idModelSanPham = '';
+      const selectedModel = modelSanPhams.value.find(m => m.idModelSanPham === sanPham.idModelSanPham);
+      if (selectedModel) {
+        sanPham.tenSanPham = sanPham.tenSanPham || selectedModel.tenModel;
+        sanPham.thuongHieu = sanPham.thuongHieu || selectedModel.thuongHieu || '';
+      }
+    };
+
     const generateVariants = () => {
       let hasError = false;
 
-      // Kiểm tra dữ liệu đầu vào
-      if (!selectedMaus.value.length) {
-        errors.selectedMaus = 'Vui lòng chọn ít nhất một màu sắc';
+      if (!sanPham.idModelSanPham) {
+        errors.idModelSanPham = 'Vui lòng chọn model sản phẩm';
         hasError = true;
       }
-      if (!selectedRams.value.length) {
-        errors.selectedRams = 'Vui lòng chọn ít nhất một RAM';
+      if (!selectedMaus.value.length) {
+        errors.selectedMaus = 'Vui lòng chọn ít nhất một màu sắc';
         hasError = true;
       }
       if (!selectedRoms.value.length) {
@@ -304,7 +232,7 @@ export default {
         hasError = true;
       }
       if (hasError) {
-        ElMessage.error('Vui lòng chọn đầy đủ các thuộc tính để tạo biến thể.');
+        ElMessage.error('Vui lòng chọn đầy đủ model và các thuộc tính để tạo biến thể.');
         return;
       }
 
@@ -313,62 +241,41 @@ export default {
       errorsChiTiet.length = 0;
 
       selectedMaus.value.forEach(mau => {
-        selectedRams.value.forEach(ram => {
-          selectedRoms.value.forEach(rom => {
-            const combination = `${mau}-${ram}-${rom}`;
-            if (!existingCombinations.has(combination)) {
-              existingCombinations.add(combination);
-              const existingVariant = sanPham.sanPhamChiTiets.find(
-                v => v.idMau === mau && v.idRam === ram && v.idRom === rom
-              );
-              newVariants.push({
-                id: existingVariant?.id || null,
-                idMau: mau,
-                idRam: ram,
-                idRom: rom,
-                idManHinh: existingVariant?.idManHinh || (manHinhs.value[0]?.id || null),
-                idHeDieuHanh: existingVariant?.idHeDieuHanh || (heDieuHanhs.value[0]?.id || null),
-                idPin: existingVariant?.idPin || (pins.value[0]?.id || null),
-                idCpu: existingVariant?.idCpu || (cpus.value[0]?.id || null),
-                idCameraTruoc: existingVariant?.idCameraTruoc || (cameraTruocs.value[0]?.id || null),
-                idCameraSau: existingVariant?.idCameraSau || (cameraSaus.value[0]?.id || null),
-                idXuatXu: existingVariant?.idXuatXu || (xuatXus.value[0]?.id || null),
-                idLoai: existingVariant?.idLoai || (loais.value[0]?.id || null),
-                soLuong: existingVariant?.soLuong || 0,
-                giaBan: existingVariant?.giaBan || 0,
-                hinhAnhs: existingVariant?.hinhAnhs || [],
-                imeisInput: existingVariant?.imeisInput || ''
-              });
-              errorsChiTiet.push({
-                idManHinh: manHinhs.value.length > 0 ? '' : 'Không có màn hình nào để chọn',
-                idHeDieuHanh: heDieuHanhs.value.length > 0 ? '' : 'Không có hệ điều hành nào để chọn',
-                idPin: pins.value.length > 0 ? '' : 'Không có pin nào để chọn',
-                idCpu: cpus.value.length > 0 ? '' : 'Không có CPU nào để chọn',
-                idCameraTruoc: cameraTruocs.value.length > 0 ? '' : 'Không có camera trước nào để chọn',
-                idCameraSau: cameraSaus.value.length > 0 ? '' : 'Không có camera sau nào để chọn',
-                idXuatXu: xuatXus.value.length > 0 ? '' : 'Không có xuất xứ nào để chọn',
-                idLoai: loais.value.length > 0 ? '' : 'Không có loại nào để chọn',
-                giaBan: '',
-                soLuong: 'Số lượng phải lớn hơn 0',
-                imeisInput: 'Phải có ít nhất 1 IMEI',
-                hinhAnhs: 'Phải có ít nhất 1 hình ảnh'
-              });
-            }
-          });
+        selectedRoms.value.forEach(rom => {
+          const combination = `${mau}-${rom}`;
+          if (!existingCombinations.has(combination)) {
+            existingCombinations.add(combination);
+            const existingVariant = sanPham.sanPhamChiTiets.find(
+              v => v.idMau === mau && v.idRom === rom
+            );
+            newVariants.push({
+              id: existingVariant?.id || null,
+              idMau: mau,
+              idRom: rom,
+              soLuong: existingVariant?.soLuong || 0,
+              giaBan: existingVariant?.giaBan || 0,
+              hinhAnhs: existingVariant?.hinhAnhs || [],
+              imeisInput: existingVariant?.imeisInput || ''
+            });
+            errorsChiTiet.push({
+              giaBan: '',
+              soLuong: 'Số lượng phải lớn hơn 0',
+              imeisInput: 'Phải có ít nhất 1 IMEI',
+              hinhAnhs: 'Phải có ít nhất 1 hình ảnh'
+            });
+          }
         });
       });
 
       sanPham.sanPhamChiTiets = newVariants;
 
-      // Gọi capNhatSoLuong cho từng biến thể để cập nhật lỗi
       sanPham.sanPhamChiTiets.forEach((_, index) => {
-        capNhatSoLuong(index, true); // Gọi ngay lập tức, bỏ qua debounce
+        capNhatSoLuong(index, true);
       });
 
       selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
       ElMessage.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
 
-      // Nếu có lỗi ngay sau khi tạo biến thể, hiển thị thông báo
       if (errorsChiTiet.some(err => Object.values(err).some(e => e))) {
         const errorIndex = errorsChiTiet.findIndex(err => Object.values(err).some(e => e));
         selectedChiTiet.value = errorIndex !== -1 ? errorIndex : 0;
@@ -448,7 +355,6 @@ export default {
     const selectChiTiet = (row, column, event) => {
       const index = sanPham.sanPhamChiTiets.indexOf(row);
       selectedChiTiet.value = index;
-      // Reset lỗi khi chọn biến thể mới
       if (errorsChiTiet[index]) {
         Object.keys(errorsChiTiet[index]).forEach(k => errorsChiTiet[index][k] = '');
       }
@@ -457,11 +363,6 @@ export default {
     const getMauSacLabels = (idMau) => {
       if (!Array.isArray(idMau)) idMau = [idMau];
       return idMau.map(id => maus.value.find(m => String(m.id) === String(id))?.tenMau || '').join(', ');
-    };
-
-    const getRamLabels = (idRam) => {
-      if (!Array.isArray(idRam)) idRam = [idRam];
-      return idRam.map(id => rams.value.find(r => String(r.id) === String(id))?.dungLuong || '').join(', ');
     };
 
     const getRomLabels = (idRom) => {
@@ -490,7 +391,6 @@ export default {
               imagePublicId: response.data.imagePublicId
             };
           }
-
           return {
             name: item.name,
             url: item.url,
@@ -518,7 +418,6 @@ export default {
     const validateForm = () => {
       let hasError = false;
 
-      // Kiểm tra thông tin sản phẩm chính
       if (!sanPham.tenSanPham) {
         errors.tenSanPham = 'Vui lòng nhập tên sản phẩm';
         hasError = true;
@@ -535,42 +434,13 @@ export default {
         errors.trangThaiSanPham = 'Vui lòng chọn trạng thái';
         hasError = true;
       }
+      if (!sanPham.idModelSanPham) {
+        errors.idModelSanPham = 'Vui lòng chọn model sản phẩm';
+        hasError = true;
+      }
 
-      // Kiểm tra các biến thể
       sanPham.sanPhamChiTiets.forEach((chiTiet, index) => {
-        if (!chiTiet.idManHinh) {
-          errorsChiTiet[index].idManHinh = 'Vui lòng chọn màn hình';
-          hasError = true;
-        }
-        if (!chiTiet.idHeDieuHanh) {
-          errorsChiTiet[index].idHeDieuHanh = 'Vui lòng chọn hệ điều hành';
-          hasError = true;
-        }
-        if (!chiTiet.idPin) {
-          errorsChiTiet[index].idPin = 'Vui lòng chọn pin';
-          hasError = true;
-        }
-        if (!chiTiet.idCpu) {
-          errorsChiTiet[index].idCpu = 'Vui lòng chọn CPU';
-          hasError = true;
-        }
-        if (!chiTiet.idCameraTruoc) {
-          errorsChiTiet[index].idCameraTruoc = 'Vui lòng chọn camera trước';
-          hasError = true;
-        }
-        if (!chiTiet.idCameraSau) {
-          errorsChiTiet[index].idCameraSau = 'Vui lòng chọn camera sau';
-          hasError = true;
-        }
-        if (!chiTiet.idXuatXu) {
-          errorsChiTiet[index].idXuatXu = 'Vui lòng chọn xuất xứ';
-          hasError = true;
-        }
-        if (!chiTiet.idLoai) {
-          errorsChiTiet[index].idLoai = 'Vui lòng chọn loại';
-          hasError = true;
-        }
-        if (!chiTiet.giaBan || chiTiet.giaBan < 1001) {
+        if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
           errorsChiTiet[index].giaBan = 'Giá bán phải lớn hơn 1000';
           hasError = true;
         }
@@ -594,9 +464,7 @@ export default {
           return;
         }
 
-        // Kiểm tra dữ liệu trước khi gửi
         if (!validateForm()) {
-          // Tự động chọn biến thể đầu tiên có lỗi
           const errorIndex = errorsChiTiet.findIndex(err => Object.values(err).some(e => e));
           if (errorIndex !== -1) {
             selectedChiTiet.value = errorIndex;
@@ -610,6 +478,7 @@ export default {
           thuongHieu: sanPham.thuongHieu,
           idNhaCungCap: sanPham.idNhaCungCap,
           trangThaiSanPham: sanPham.trangThaiSanPham,
+          idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {
             const imeis = chiTiet.imeisInput
               .split(',')
@@ -617,16 +486,7 @@ export default {
               .filter(i => i);
             return {
               idMau: chiTiet.idMau,
-              idRam: chiTiet.idRam,
               idRom: chiTiet.idRom,
-              idManHinh: chiTiet.idManHinh,
-              idHeDieuHanh: chiTiet.idHeDieuHanh,
-              idPin: chiTiet.idPin,
-              idCpu: chiTiet.idCpu,
-              idCameraTruoc: chiTiet.idCameraTruoc,
-              idCameraSau: chiTiet.idCameraSau,
-              idXuatXu: chiTiet.idXuatXu,
-              idLoai: chiTiet.idLoai,
               soLuong: chiTiet.soLuong,
               giaBan: chiTiet.giaBan,
               imeis: imeis.map(i => ({ soImei: i })),
@@ -648,9 +508,9 @@ export default {
           sanPham.thuongHieu = '';
           sanPham.idNhaCungCap = '';
           sanPham.trangThaiSanPham = '';
+          sanPham.idModelSanPham = null;
           sanPham.sanPhamChiTiets = [];
           selectedMaus.value = [];
-          selectedRams.value = [];
           selectedRoms.value = [];
           selectedChiTiet.value = null;
           errorsChiTiet.length = 0;
@@ -710,12 +570,10 @@ export default {
             errorMessages.push('Lỗi xác thực không xác định');
           }
 
-          // Tự động chọn biến thể đầu tiên có lỗi
           const errorIndex = errorsChiTiet.findIndex(err => Object.values(err).some(e => e));
           if (errorIndex !== -1) {
             selectedChiTiet.value = errorIndex;
           }
-
           ElMessage.error(`Lỗi xác thực: ${errorMessages.join('; ')}`);
         } else {
           ElMessage.error('Lỗi hệ thống: ' + (error.message || 'Vui lòng thử lại'));
@@ -732,19 +590,10 @@ export default {
       sanPhamForm,
       nhaCungCaps,
       maus,
-      rams,
       roms,
-      manHinhs,
-      heDieuHanhs,
-      pins,
-      cpus,
-      cameraTruocs,
-      cameraSaus,
-      xuatXus,
-      loais,
+      modelSanPhams,
       selectedChiTiet,
       selectedMaus,
-      selectedRams,
       selectedRoms,
       danhSachTrangThaiSanPham,
       errors,
@@ -753,13 +602,13 @@ export default {
       removeChiTiet,
       selectChiTiet,
       getMauSacLabels,
-      getRamLabels,
       getRomLabels,
       handleFileChange,
       handleFileRemove,
       submitForm,
       capNhatSoLuong,
-      handleImeiFileChange
+      handleImeiFileChange,
+      onModelChange
     };
   }
 };
@@ -785,11 +634,9 @@ export default {
 
 .valid-message {
   color: #67C23A;
-  /* Màu xanh cho "Hợp lệ" */
 }
 
 .error-message {
   color: #F56C6C;
-  /* Màu đỏ cho lỗi */
 }
 </style>

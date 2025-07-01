@@ -277,7 +277,7 @@
                             <div class="delete-modal-content-2">
                                 <h2>Trả một phần sản phẩm</h2>
                                 <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                        itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
                                 <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
                                 </p>
 
@@ -318,16 +318,72 @@
             </div>
 
             <!-- Total tong tien hang -->
-            <div class="total-section">
-                <span class="total-label">Tổng tiền hàng:</span>
-                <span class="total-amount">{{ formatCurrency(invoices.total) }}</span>
+            <div class="footer-container">
+                <div class="total-section">
+                    <span class="total-label">Tổng tiền hàng:</span>
+                    <span class="total-amount">{{ totalAmount }} dang loi</span>
+                </div>
+
+                <div class="action-section">
+                    <div class="switch-container">
+                        <label class="switch">
+                            <input type="checkbox" v-model="isShipping">
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="label-text">GIAO HÀNG</span>
+                    </div>
+
+                    <div v-if="isShipping" class="shipping-details-section">
+                        <h4>Thông tin Giao hàng</h4>
+
+                        <!-- Hình thức giao hàng -->
+                        <div class="shipping-method-options">
+                            <label class="radio-label">
+                                <input type="radio" v-model="shippingInfo.shippingMethod" value="express">
+                                <span>Giao hàng gấp (Nhân viên)</span>
+                            </label>
+                            <label class="radio-label disabled-option">
+                                <input type="radio" v-model="shippingInfo.shippingMethod" value="economy" disabled>
+                                <span>Giao hàng tiết kiệm (Sắp ra mắt)</span>
+                            </label>
+                        </div>
+
+                        <div v-if="shippingInfo.shippingMethod === 'express'" class="express-shipping-fields">
+                            <input type="text" v-model="shippingInfo.tenNguoiNhan" placeholder="Tên người nhận"
+                                class="input-field" required>
+                            <input type="tel" v-model="shippingInfo.sdt" placeholder="Số điện thoại" class="input-field"
+                                required>
+                            <textarea v-model="shippingInfo.diaChi" placeholder="Địa chỉ giao hàng chi tiết"
+                                class="input-field" rows="2" required></textarea>
+
+                            <!-- Tỉnh thành -->
+                            <select v-model="shippingInfo.idTinhThanh" class="input-field" required
+                                @change="updatePhiShip">
+                                <option disabled value="">-- Chọn tỉnh thành --</option>
+                                <option v-for="province in tinhThanhList" :key="province.id" :value="province.id.toString()">
+                                    {{ province.ten }}
+                                </option>
+                            </select>
+
+                            <div class="shipping-fee-display" v-if="shippingInfo.phiShip !== null">
+                                Phí giao hàng:
+                                <span class="fee-amount">{{ shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                            </div>
+                        </div>
+
+                        <div v-else-if="shippingInfo.shippingMethod === 'economy'" class="economy-shipping-fields">
+                            <p>Tính năng Giao hàng tiết kiệm sẽ có mặt sớm! Vui lòng chọn Giao hàng gấp.</p>
+                        </div>
+                    </div>
+
+                    <button @click="processPayment"
+                        :disabled="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length === 0 || (isShipping && !isShippingInfoValid)"
+                        class="payment-btn">
+                        THANH TOÁN
+                    </button>
+                </div>
             </div>
         </div>
-
-        <!-- Payment button -->
-        <!-- <button @click="processPayment" :disabled="currentInvoice.items.length === 0" class="payment-btn">
-            THANH TOÁN
-        </button> -->
     </div>
 
     <!-- Customer Modal -->
@@ -427,6 +483,7 @@ import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdmin
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { fetchImeisJs } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { getTinhThanh } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { updateSoLuongAndTrangThai } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { loadImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { deleteDetailInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
@@ -457,6 +514,8 @@ const currentInvoiceId = ref(null)
 const route = useRoute();
 const router = useRouter();
 const currentInvoiceDetail = ref([]);
+const isShipping = ref(false);
+const tinhThanhList = ref([])
 
 // category san pham 
 const danhMucSanPham = async () => {
@@ -1011,6 +1070,72 @@ const getImeiStatusClass = (status) => {
 };
 console.log("tra ve", getImeiStatusClass("Đã đặt trước"))
 
+// xu ly giao hang
+const shippingInfo = ref({
+    idTinhThanh: '',
+    tenNguoiNhan: '',
+    sdt: '',
+    diaChi: '',
+    phiShip: 0
+})
+
+const getListTinhThanh = async () =>{
+    try {
+        const response = await getTinhThanh() // ← Đảm bảo đã proxy hoặc cấu hình baseURL
+        tinhThanhList.value = response.data
+    } catch (error) {
+        console.error("Lỗi khi lấy danh sách tỉnh:", error)
+    }
+}
+
+watch(isShipping, (newVal, oldVal) => {
+    if (newVal) {
+        console.log('Đã bật giao hàng')
+        // Có thể khởi tạo giá trị mặc định nếu cần
+        // hoặc gọi Google Maps API gợi ý địa chỉ
+    } else {
+        console.log('Tắt giao hàng, xóa thông tin giao hàng')
+        // Reset dữ liệu giao hàng nếu muốn
+        shippingInfo.value = {
+            tenNguoiNhan: '',
+            sdt: '',
+            diaChi: '',
+            phiShip: 0
+        }
+    }
+})
+
+// ham update phi ship 
+const updatePhiShip = () => {
+    const tinh = tinhThanhList.value.find(t => t.id.toString() === shippingInfo.value.idTinhThanh)
+    if (tinh) {
+        shippingInfo.value.phiShip = tinh.phiShip
+    } else {
+        shippingInfo.value.phiShip = 0
+    }
+}
+
+// load thong tin hoa don
+const hoaDonList = ref([])
+const loadHoaDon = async () => {
+    const storedId = localStorage.getItem("selectedInvoiceId")
+    const response = await hoaDonDetail(storedId)
+    hoaDonList.value = response.data
+
+    const hoaDon = hoaDonList.value
+
+    if (hoaDon.isShipping) {
+        isShipping.value = true
+        shippingInfo.value = {
+            // shippingMethod: 'express',
+            tenNguoiNhan: hoaDon.tenNguoiNhan,
+            sdt: hoaDon.sdtNguoiNhan,
+            diaChi: hoaDon.diaChiGiaoHang,
+            idTinhThanh: hoaDon.idTinhThanh?.toString() || '',
+            phiShip: hoaDon.phiShip
+        }
+    }
+}
 
 watch(currentInvoiceId, async (newId) => {
     if (!newId) return;
@@ -1054,13 +1179,17 @@ onMounted(async () => {
     selectedCategory.value = 'all';
     await loadProducts({ tenSanPham: 'all' });
     loadTabHoaDon();
-});
+    getListTinhThanh();
+    loadHoaDon();
+
+}); 
 
 //Khach hang
 const khachHangs = ref([])
 const pageKhachHang = ref(0)
 const totalPages = ref(0)
 const searchKhachHang = ref(null)
+
 
 const listKhachHang = async (page) => {
     showCustomerTable.value = true
