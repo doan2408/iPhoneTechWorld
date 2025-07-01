@@ -565,6 +565,7 @@ VALUES
     (N'Yên Bái', 25000);
 
 -- Table hoa_don
+-- Table hoa_don
 INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping, id_tinh_thanh)
 VALUES
     (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0,1,1),
@@ -1054,8 +1055,8 @@ VALUES
     (7, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'),
     (8, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'),
     (9, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'),
-    (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
-    (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
+    (10, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'),
+    (11, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'),
     (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
     (13, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'),
     (14, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'),

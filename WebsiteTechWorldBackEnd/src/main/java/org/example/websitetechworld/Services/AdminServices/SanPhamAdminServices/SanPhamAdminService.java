@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamChiTietAdminRepuest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.BusinessException;
@@ -574,7 +575,8 @@ public class SanPhamAdminService {
                                 }
                                 Imei newImei = new Imei();
                                 newImei.setSoImei(imeiDto.getSoImei().trim());
-                                newImei.setTrangThaiImei(imeiDto.getTrangThaiImei());
+//                                newImei.setTrangThaiImei(imeiDto.getTrangThaiImei());
+                                newImei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
                                 newImei.setIdSanPhamChiTiet(chiTietSaved);
                                 return newImei;
                             })

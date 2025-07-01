@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon;
 
+import jakarta.persistence.EntityManager;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThongTinNguoiNhanAdminRequest;
 import org.example.websitetechworld.Dto.Request.InvoiceRequest;
@@ -44,8 +45,9 @@ public class HoaDonAdminService {
     private final ImeiAdminService imeiAdminService;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
     private final HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_sanPhamAdminServices;
+    private final EntityManager entityManager;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, EntityManager entityManager) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -55,6 +57,7 @@ public class HoaDonAdminService {
         this.imeiAdminService = imeiAdminService;
         this.hoaDonChiTiet_ImeiAdminServices = hoaDonChiTiet_ImeiAdminServices;
         hoaDonChiTiet_sanPhamAdminServices = hoaDonChiTietSanPhamAdminServices;
+        this.entityManager = entityManager;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -83,6 +86,7 @@ public class HoaDonAdminService {
         return chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(ChiTietThanhToanAdminResponse::convertDto).toList();
     }
 
+    @Transactional
     public HoaDon createPendingInvoice(){
 
         HoaDon hoaDon = new HoaDon();
@@ -91,7 +95,10 @@ public class HoaDonAdminService {
         hoaDon.setPhiShip(BigDecimal.ZERO);
         hoaDon.setSoTienGiam(BigDecimal.ZERO);
         hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
-        return hoaDonRepository.save(hoaDon);
+        hoaDon =  hoaDonRepository.save(hoaDon);
+        // Refresh để lấy giá trị maHoaDon từ DB (vì nó là cột computed)
+        entityManager.refresh(hoaDon);
+        return hoaDon;
     }
 
     public void updateTongTien(Integer hoaDonId){

@@ -13,6 +13,8 @@ import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -20,6 +22,7 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.L
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
+import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,22 +57,24 @@ public class HoaDonAdminController {
     }
 
     @GetMapping
-    public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0",value = "pageNo") int pageNo,
-                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize){
-        return hoaDonAdminService.getPageHoaDon(pageNo,pageSize);
+    public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize) {
+        return hoaDonAdminService.getPageHoaDon(pageNo, pageSize);
     }
+
     @GetMapping("/{idHoaDon}")
-    public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon){
+    public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
         return hoaDonAdminService.findById(idHoaDon);
     }
 
     @GetMapping("/{idHoaDon}/lich-su")
-    public Page<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon,pageNo,PAGE_SIZE);
+    public Page<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo) {
+        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon, pageNo, PAGE_SIZE);
     }
+
     @GetMapping("/{idHoaDon}/chi-tiet-thanh-toan")
-    public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
-        return hoaDonAdminService.getPageChiTietThanhToan(idHoaDon,pageNo,PAGE_SIZE);
+    public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo) {
+        return hoaDonAdminService.getPageChiTietThanhToan(idHoaDon, pageNo, PAGE_SIZE);
     }
 //    @GetMapping("/{idHoaDon}/xem-giao-hang")
 //    public List<GiaoHangAdminResponse> getPageGiaoHang(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo){
@@ -76,23 +82,40 @@ public class HoaDonAdminController {
 //    }
 
     @PostMapping
-    public ResponseEntity<?> createPendingInvoice(){
+    public ResponseEntity<?> createPendingInvoice() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails){
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             Integer nhanVienId = customUserDetails.getId();
             try {
+                // limit one staff only created 4 pending invoice
+                List<Map<String, String>> errors = new ArrayList<>();
+                Integer number = lichSuHoaDonAdminServices.countPendingHoaDonByNhanVien(nhanVienId, TrangThaiThanhToan.PENDING
+                );
+                if (number > 4) {
+                    errors.add(Map.of("field", "hoaDon", "message", "Mỗi nhân viên chỉ có thể tạo tối đa 5 hóa đơn chờ"));
+                }
+                if (!errors.isEmpty()) {
+                    throw new ValidationException(errors);
+                }
+
                 HoaDon hoaDon = hoaDonAdminService.createPendingInvoice();
-                LichSuHoaDon lichSuHoaDon = lichSuHoaDonAdminServices.createLSHDWithPendingInvoice(hoaDon.getId(),nhanVienId);
+                System.out.println("id" + hoaDon.getId());
+                System.out.println("maHoaDon" + hoaDon.getMaHoaDon());
+                LichSuHoaDon lichSuHoaDon = lichSuHoaDonAdminServices.createLSHDWithPendingInvoice(hoaDon.getId(), nhanVienId);
                 return ResponseEntity.ok(Map.of(
                         "message", "Hóa đơn chờ rỗng đã được tạo thành công",
                         "messageLichSu", "Lich su duoc tao thanh cong",
                         "hoaDonId", hoaDon.getId(),
+                        "maHoaDon", hoaDon.getMaHoaDon(),
                         "status", hoaDon.getTrangThaiThanhToan(),
                         "lichSuHoaDonId", lichSuHoaDon.getId()
                 ));
-            }catch (Exception e){
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server khi tạo hóa đơn chờ: "+e.getMessage());
+            } catch (ValidationException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Lỗi server khi tạo hóa đơn chờ: " + e.getMessage());
             }
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể xác định thông tin nhân viên");
@@ -100,7 +123,7 @@ public class HoaDonAdminController {
 
     //api them san pham ( tao hdct )
     @PostMapping("/{idHoaDon}/them-san-pham")
-    public ResponseEntity<?> createHoaDonChiTiet(@PathVariable Integer idHoaDon,@RequestBody ChiTietHoaDonAdminRequest request){
+    public ResponseEntity<?> createHoaDonChiTiet(@PathVariable Integer idHoaDon, @RequestBody ChiTietHoaDonAdminRequest request) {
         request.setIdHoaDon(idHoaDon);
         ChiTietHoaDon chiTietHoaDon = hoaDonChiTietAdminServices.createChiTietHoaDon(request);
         hoaDonAdminService.updateTongTien(idHoaDon);
@@ -116,15 +139,15 @@ public class HoaDonAdminController {
     //api update so luong
     @PutMapping("/{idHoaDon}/so-luong/{idCthd}")
     public ResponseEntity<?> updateSoLuong(@PathVariable Integer idHoaDon, @PathVariable Integer idCthd,
-                                           @RequestBody CthdUpdateSoLuongAdminRequest request){
+                                           @RequestBody CthdUpdateSoLuongAdminRequest request) {
         Integer soLuong = request.getSoLuong();
-        hoaDonChiTietAdminServices.updateSoLuong(idHoaDon,idCthd,request);
+        hoaDonChiTietAdminServices.updateSoLuong(idHoaDon, idCthd, request);
         hoaDonAdminService.updateTongTien(idHoaDon);
         return ResponseEntity.ok("Sửa số lượng thành công");
     }
 
     @DeleteMapping("/hdct/{hdctId}")
-    public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable Integer hdctId){
+    public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable Integer hdctId) {
         try {
             ChiTietHoaDon chiTietHoaDon = hoaDonChiTietAdminServices.findById(hdctId);
             hoaDonChiTietAdminServices.deleleHdct(hdctId);
@@ -138,7 +161,7 @@ public class HoaDonAdminController {
 
     // Xoa hoa don
     @DeleteMapping("/soft-delete/{id}")
-    public ResponseEntity<?> hoaDonSoftDelete (@PathVariable Integer id){
+    public ResponseEntity<?> hoaDonSoftDelete(@PathVariable Integer id) {
         try {
             hoaDonAdminService.hoaDonSoftDelete(id);
             return ResponseEntity.ok("Xóa thành công");
@@ -149,7 +172,7 @@ public class HoaDonAdminController {
     }
 
     @DeleteMapping("/hard-delete/{id}")
-    public ResponseEntity<?> hoaDonHardDelete (@PathVariable Integer id){
+    public ResponseEntity<?> hoaDonHardDelete(@PathVariable Integer id) {
         try {
             hoaDonAdminService.hoaDonHardDelete(id);
             return ResponseEntity.ok("Xóa thành công");
@@ -161,7 +184,7 @@ public class HoaDonAdminController {
 
     //So hoa don cho xy ly
     @GetMapping("/count/pending")
-    public ResponseEntity<Integer> countHoaDonPending () {
+    public ResponseEntity<Integer> countHoaDonPending() {
         Integer count = hoaDonAdminService.countHoaDonPending();
         return ResponseEntity.ok(count);
 
@@ -169,13 +192,13 @@ public class HoaDonAdminController {
 
     //Doanh thu thang
     @GetMapping("/doanh-thu-thang")
-    public ResponseEntity<BigDecimal> doangThuThang () {
+    public ResponseEntity<BigDecimal> doangThuThang() {
         BigDecimal doanhThu = hoaDonAdminService.doangThuThang();
         return ResponseEntity.ok(doanhThu);
     }
 
     //Khach hang
-    @GetMapping ("/list-khach-hang")
+    @GetMapping("/list-khach-hang")
     public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -184,16 +207,16 @@ public class HoaDonAdminController {
         return ResponseEntity.ok(khachHangList);
     }
 
-    @PostMapping ("/add-khach-hang")
-    public ResponseEntity<?> addKhachHang (@RequestBody KhachHang khachHang) {
+    @PostMapping("/add-khach-hang")
+    public ResponseEntity<?> addKhachHang(@RequestBody KhachHang khachHang) {
         KhachHang saved = hoaDonAdminService.addKhachHang(khachHang);
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{idHoaDon}/khach-hang")
-    public ResponseEntity<?> selectKhachHang(@PathVariable Integer idHoaDon, @RequestBody SelectKhachHang selectKhachHang){
+    public ResponseEntity<?> selectKhachHang(@PathVariable Integer idHoaDon, @RequestBody SelectKhachHang selectKhachHang) {
         try {
-            hoaDonAdminService.selectKhachHang(idHoaDon,selectKhachHang.getKhachHangId());
+            hoaDonAdminService.selectKhachHang(idHoaDon, selectKhachHang.getKhachHangId());
             return ResponseEntity.ok("Chọn khach hang thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -203,13 +226,13 @@ public class HoaDonAdminController {
 
 
     @PutMapping("/{idHoaDon}/thanh-toan")
-    public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest){
+    public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest) {
         ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all-name-hoa-don")
-    public ResponseEntity<?> getAllNameHoaDon(){
+    public ResponseEntity<?> getAllNameHoaDon() {
         List<TabHoaDonAdminResponse> tabList = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
@@ -245,7 +268,6 @@ public class HoaDonAdminController {
             return ResponseEntity.status(500).body("Error updating invoice: " + e.getMessage());
         }
     }
-
 
 
 }

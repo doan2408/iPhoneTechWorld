@@ -14,6 +14,7 @@ const isLoading = ref(false);
 const error = ref("");
 const currentPage = ref(0);
 const totalPages = ref(0);
+const totalFilteredCount = ref(0);
 const searchKeyword = ref("");
 const searchTimeout = ref(null);
 
@@ -38,6 +39,9 @@ const clientRequest = ref({
 const errors = reactive({});
 const formRef = ref(null);
 const formKey = ref(0);
+
+const filterGender = ref(null); // true / false / null
+const filterStatus = ref(null); // "ACTIVE" / "INACTIVE" / null
 
 // Validation rules
 const rules = ref({
@@ -79,10 +83,19 @@ const clearAllErrors = () => {
 const loadClient = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
-    const response = await getAllClient(page, keyword);
+    error.value = "";
+
+    const response = await getAllClient({
+      page,
+      keyword: keyword || searchKeyword.value || null,
+      gioiTinh: filterGender.value,
+      trangThai: filterStatus.value,
+    });
+
     clientList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
+    totalFilteredCount.value = response.totalElements;
   } catch (err) {
     error.value =
       err.message || "An error was thrown while loading the clients";
@@ -104,10 +117,19 @@ const performSearch = () => {
 
 const clearSearch = () => {
   searchKeyword.value = "";
+  currentPage.value = 0;
+  loadClient(0, null);
 };
 
-watch(searchKeyword, () => {
-  performSearch();
+watch(searchKeyword, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    performSearch();
+  }
+});
+
+watch([filterGender, filterStatus], () => {
+  currentPage.value = 0;
+  loadClient(0, searchKeyword.value?.trim() || null);
 });
 
 // Pagination
@@ -117,7 +139,7 @@ const previousPage = () => {
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 const nextPage = () => {
@@ -126,19 +148,27 @@ const nextPage = () => {
   } else {
     currentPage.value = 0;
   }
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 const firstPage = () => {
   const firstPage = 0;
   currentPage.value = firstPage;
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 const lastPage = () => {
   const latePage = totalPages.value - 1;
   currentPage.value = latePage;
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
+};
+
+const clearFilters = () => {
+  filterGender.value = null;
+  filterStatus.value = null;
+  searchKeyword.value = "";
+  currentPage.value = 0;
+  loadClient(0, null);
 };
 
 const handlePageChange = async (newPage) => {
@@ -302,6 +332,66 @@ onMounted(() => {
       <p>Đang tải dữ liệu...</p>
     </div>
 
+    <!--filter -->
+    <div class="filter-section mb-3">
+      <div class="d-flex gap-2 align-items-center justify-content-between">
+        <div class="d-flex gap-2 align-items-center">
+          <el-select
+            v-model="filterGender"
+            placeholder="Lọc theo giới tính"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Nam" :value="true" />
+            <el-option label="Nữ" :value="false" />
+          </el-select>
+
+          <el-select
+            v-model="filterStatus"
+            placeholder="Lọc theo trạng thái"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Hoạt động" value="ACTIVE" />
+            <el-option label="Ngừng" value="INACTIVE" />
+          </el-select>
+
+          <el-button 
+            size="small" 
+            @click="clearFilters"
+            :disabled="!filterGender && !filterStatus && !searchKeyword"
+          >
+            Xóa bộ lọc
+          </el-button>
+        </div>
+
+        <!-- Hiển thị số kết quả -->
+        <div class="result-count" v-if="!isLoading">
+          <el-text size="small" type="info">
+            Tổng: {{ totalFilteredCount }} khách hàng
+            <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
+              (đã lọc)
+            </span>
+          </el-text>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Error State -->
+    <div v-if="error && !isLoading" class="error-state">
+      <el-alert
+        :title="error"
+        type="error"
+        show-icon
+        :closable="false"
+      />
+    </div>
+
     <!-- Search Result Info -->
     <div v-if="searchKeyword && !isLoading" class="search-result-info">
       <el-alert
@@ -321,6 +411,13 @@ onMounted(() => {
           </span>
           <span v-else>Chưa có khách hàng nào</span>
         </template>
+        <el-button 
+          v-if="searchKeyword || filterGender !== null || filterStatus !== null"
+          type="primary" 
+          @click="clearFilters"
+        >
+          Xóa bộ lọc
+        </el-button>
       </el-empty>
     </div>
 

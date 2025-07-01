@@ -10,7 +10,6 @@ import java.time.LocalDate;
 public class ModelSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_model_san_pham")
     private Integer idModelSanPham;
 
