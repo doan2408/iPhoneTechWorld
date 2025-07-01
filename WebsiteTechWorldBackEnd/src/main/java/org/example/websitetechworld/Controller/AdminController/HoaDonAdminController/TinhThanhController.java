@@ -1,29 +1,18 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import org.example.websitetechworld.Dto.Response.TinhThanhDTO;
-import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.TinhThanhService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
 @RequestMapping("/admin/tinh-thanh")
 public class TinhThanhController {
-    private final TinhThanhService tinhThanhService;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public TinhThanhController(TinhThanhService tinhThanhService) {
-        this.tinhThanhService = tinhThanhService;
-    }
 
-    @GetMapping
-    public List<TinhThanhDTO> getAll() {
-        return tinhThanhService.getAll();
-    }
     @GetMapping("/provinces")
     public ResponseEntity<?> getProvinces() {
         RestTemplate restTemplate = new RestTemplate();

@@ -124,10 +124,6 @@ public class HoaDon {
     @Column(name = "is_shipping")
     private Boolean isShipping;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tinh_thanh")
-    private TinhThanh idTinhThanh;
-
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "shipping_method", length = 50)
