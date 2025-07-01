@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThongTinNguoiNhanAdminRequest;
+import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Entity.*;
@@ -179,5 +180,36 @@ public class HoaDonAdminService {
         saved.setEmail(khachHang.getEmail());
         saved.setTrangThai(TrangThaiKhachHang.ACTIVE);
         return khachHangRepository.save(saved);
+    }
+
+    public void updateInvoice(Integer id, InvoiceRequest request) {
+        HoaDon invoice = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+        invoice.setTenNguoiNhan(request.getTenNguoiNhan());
+        invoice.setSdtNguoiNhan(request.getSdtNguoiNhan());
+        invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang());
+        invoice.setPhiShip(request.getPhiShip());
+        invoice.setIsShipping(request.isShipping());
+        invoice.setMaVanDon(request.getMaVanDon());
+
+        // Cập nhật thanh_tien nếu có phiShip
+        if (request.getPhiShip() != null) {
+            BigDecimal tongTien = invoice.getTongTien() != null ? invoice.getTongTien() : BigDecimal.ZERO;
+            BigDecimal soTienGiam = invoice.getSoTienGiam() != null ? invoice.getSoTienGiam() : BigDecimal.ZERO;
+            BigDecimal thanhTien = tongTien.add(request.getPhiShip()).subtract(soTienGiam);
+            invoice.setThanhTien(thanhTien);
+        }
+
+        hoaDonRepository.updateInvoice(
+                id,
+                invoice.getTenNguoiNhan(),
+                invoice.getSdtNguoiNhan(),
+                invoice.getDiaChiGiaoHang(),
+                invoice.getPhiShip(),
+                invoice.getIsShipping(),
+                invoice.getMaVanDon(),
+                invoice.getThanhTien()
+        );
     }
 }

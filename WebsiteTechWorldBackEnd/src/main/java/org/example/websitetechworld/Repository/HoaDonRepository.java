@@ -5,7 +5,9 @@ import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 
@@ -24,4 +26,17 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                         AND ngay_thanh_toan IS NOT NULL
                     """, nativeQuery = true)
     BigDecimal doanhThuThang();
+
+    @Modifying
+    @Query("UPDATE HoaDon hd SET hd.tenNguoiNhan = :tenNguoiNhan, hd.sdtNguoiNhan = :sdtNguoiNhan, " +
+            "hd.diaChiGiaoHang = :diaChiGiaoHang, hd.phiShip = :phiShip, hd.isShipping = :isShipping, " +
+            "hd.maVanDon = :maVanDon, hd.thanhTien = :thanhTien WHERE hd.id = :id")
+    void updateInvoice(@Param("id") Integer id,
+                       @Param("tenNguoiNhan") String tenNguoiNhan,
+                       @Param("sdtNguoiNhan") String sdtNguoiNhan,
+                       @Param("diaChiGiaoHang") String diaChiGiaoHang,
+                       @Param("phiShip") BigDecimal phiShip,
+                       @Param("isShipping") Boolean isShipping,
+                       @Param("maVanDon") String maVanDon,
+                       @Param("thanhTien") BigDecimal thanhTien);
 }

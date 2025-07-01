@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
@@ -126,5 +127,10 @@ public class HoaDon {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tinh_thanh")
     private TinhThanh idTinhThanh;
+
+    @Enumerated(EnumType.STRING)
+    @Nationalized
+    @Column(name = "shipping_method", length = 50)
+    private ShippingMethod shippingMethod;
 
 }
