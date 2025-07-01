@@ -259,19 +259,14 @@ public class HoaDonAdminController {
         }
     }
 
-    @PutMapping("/update-invoice")
-    public ResponseEntity<String> updateInvoice(@RequestBody InvoiceRequest request) {
-        ShippingMethod method = ShippingMethod.fromCode(request.getShippingMethod());
-        int distanceInKm = calculateDistanceFromAddress(request.getDiaChiGiaoHang()); // Hàm tính khoảng cách
-        int shippingFee = method.calculateShippingFee(distanceInKm);
-
-        // Lưu vào cơ sở dữ liệu hoặc trả về
-        return ResponseEntity.ok("Invoice updated with shipping fee: " + shippingFee);
-    }
-
-    private int calculateDistanceFromAddress(String address) {
-        // Logic tính khoảng cách (gọi API hoặc sử dụng logic hiện tại)
-        return 5; // Ví dụ trả về 5km
+    @PutMapping("/update-invoice/{id}")
+    public ResponseEntity<String> updateInvoice(@PathVariable("id") Integer id, @RequestBody InvoiceRequest request) {
+        try {
+            hoaDonAdminService.updateInvoice(id, request);
+            return ResponseEntity.ok("Invoice updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating invoice: " + e.getMessage());
+        }
     }
 
 

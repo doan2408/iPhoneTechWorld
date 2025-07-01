@@ -7,6 +7,8 @@ import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -190,34 +193,68 @@ public class HoaDonAdminService {
         return khachHangRepository.save(saved);
     }
 
+    @Transactional
     public void updateInvoice(Integer id, InvoiceRequest request) {
         HoaDon invoice = hoaDonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + id));
 
-        invoice.setTenNguoiNhan(request.getTenNguoiNhan());
-        invoice.setSdtNguoiNhan(request.getSdtNguoiNhan());
-        invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang());
-        invoice.setPhiShip(request.getPhiShip());
-        invoice.setIsShipping(request.isShipping());
-        invoice.setMaVanDon(request.getMaVanDon());
+        // Gán giá trị để tránh lỗi validation
+        invoice.setTenNguoiNhan(request.getTenNguoiNhan() != null ? request.getTenNguoiNhan() : "");
+        invoice.setSdtNguoiNhan(request.getSdtNguoiNhan() != null ? request.getSdtNguoiNhan() : "");
+        invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang() != null ? request.getDiaChiGiaoHang() : "");
+        invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
+        invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
 
-        // Cập nhật thanh_tien nếu có phiShip
-        if (request.getPhiShip() != null) {
-            BigDecimal tongTien = invoice.getTongTien() != null ? invoice.getTongTien() : BigDecimal.ZERO;
-            BigDecimal soTienGiam = invoice.getSoTienGiam() != null ? invoice.getSoTienGiam() : BigDecimal.ZERO;
-            BigDecimal thanhTien = tongTien.add(request.getPhiShip()).subtract(soTienGiam);
-            invoice.setThanhTien(thanhTien);
+        // Gán maVanDon
+        String maVanDon = request.getMaVanDon();
+        if (maVanDon == null || maVanDon.trim().isEmpty()) {
+            maVanDon = generateMaVanDon(id);
         }
+        invoice.setMaVanDon(maVanDon);
 
-        hoaDonRepository.updateInvoice(
-                id,
-                invoice.getTenNguoiNhan(),
-                invoice.getSdtNguoiNhan(),
-                invoice.getDiaChiGiaoHang(),
-                invoice.getPhiShip(),
-                invoice.getIsShipping(),
-                invoice.getMaVanDon(),
-                invoice.getThanhTien()
-        );
+        // Gán shippingMethod
+        invoice.setShippingMethod(request.getShippingMethod() != null ?
+                ShippingMethod.valueOf(request.getShippingMethod()) : ShippingMethod.EXPRESS);
+
+
+
+        // Tính thanhTien
+        BigDecimal tongTien = invoice.getTongTien() != null ? invoice.getTongTien() : BigDecimal.ZERO;
+        BigDecimal soTienGiam = invoice.getSoTienGiam() != null ? invoice.getSoTienGiam() : BigDecimal.ZERO;
+        BigDecimal phiShip = invoice.getPhiShip() != null ? invoice.getPhiShip() : BigDecimal.ZERO;
+        BigDecimal thanhTien = tongTien.add(phiShip).subtract(soTienGiam);
+        invoice.setThanhTien(thanhTien);
+
+        try {
+            // Lưu entity để kiểm tra validation
+            hoaDonRepository.save(invoice);
+            // Thực thi query JPQL
+            hoaDonRepository.updateInvoice(
+                    id,
+                    invoice.getTenNguoiNhan(),
+                    invoice.getSdtNguoiNhan(),
+                    invoice.getDiaChiGiaoHang(),
+                    invoice.getPhiShip(),
+                    invoice.getIsShipping(),
+                    invoice.getMaVanDon(),
+                    invoice.getThanhTien(),
+                    invoice.getShippingMethod(),
+                    TrangThaiGiaoHang.PENDING,
+                    invoice.getNgayTaoDonHang()
+            );
+        } catch (Exception e) {
+            System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
+        }
+    }
+    private String generateMaVanDon(Integer invoiceId) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder suffix = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            suffix.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return "VD" + invoiceId + "-" + suffix; // Ví dụ: VD16-AB12
     }
 }
