@@ -8,7 +8,7 @@
           <p class="dashboard-subtitle">Theo dõi và quản lý tất cả hóa đơn</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" @click="handleCreateInvoice">
             <svg
               class="icon"
               fill="none"
@@ -1002,7 +1002,7 @@
 <script setup>
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
-import { hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
+import { createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { hoaDonDetail } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { viewLichSuHoaDon } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import {
@@ -1013,6 +1013,8 @@ import { doanhThuTheoThang } from "@/Service/Adminservice/HoaDon/HoaDonAdminServ
 import { countHoaDonPending } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import router from "@/router";
 import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -1126,6 +1128,28 @@ const loadData = async () => {
     isLoading.value = false;
   }
 };
+
+//create pending hoaDon 
+const handleCreateInvoice = async () => {
+  isLoading.value = true
+  try {
+    const response = await createPendingInvoice()
+    const data = response.data
+
+    if (data.hoaDonId) {
+      localStorage.setItem("selectedInvoiceId", data.hoaDonId)
+
+      ElMessage.success('Tạo hóa đơn thành công!')
+      router.push(`/admin/ban-hang`)
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    const messages = error.response?.data?.map(e => e.message)?.join(' | ') || 'Lỗi hệ thống!'
+    ElMessage.warning(messages)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const deleteHoaDon = async (hoaDon) => {
   const confirmDelete = await Swal.fire({

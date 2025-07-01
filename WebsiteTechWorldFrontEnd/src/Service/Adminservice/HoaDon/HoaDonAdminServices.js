@@ -31,6 +31,11 @@ export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
     )
 }
 
+//create pending invoice
+export const createPendingInvoice = () => {
+    const url = url_base;
+    return api.post(url);
+}
 
 //api hien thi cac hoa don theo id nhan vien ..
 export const loadHoaDonByIdNhanVien = () => {

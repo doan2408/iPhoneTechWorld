@@ -518,7 +518,7 @@ import {
 import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdminService';
 import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
 import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
-import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { createPendingInvoice, hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { fetchImeisJs } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { getTinhThanh, getHuyen, getXa, getLatLon, getDistance } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { updateSoLuongAndTrangThai } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
@@ -597,63 +597,122 @@ const loadProducts = async (category) => {
 const itemsPerPage = 12
 
 //load tab hoa don
+// const loadTabHoaDon = async () => {
+//     invoices.value = []; // Xóa danh sách hóa đơn cũ
+//     currentInvoiceId.value = null; // Reset currentInvoiceId
+
+//     // Bước 1: Load các hóa đơn của nhân viên
+//     const response = await loadHoaDonByIdNhanVien();
+//     response.data.forEach(inv => addOrUpdateInvoice(inv));
+//     tabHoaDon.value = [...invoices.value]; // clone ra nếu cần reactive riêng
+
+//     const queryId = route.query.invoiceId;
+//     const storedId = localStorage.getItem("selectedInvoiceId");
+
+//     // Bước 2: Nếu storedId chưa có trong danh sách → fetch
+//     if (storedId && !invoices.value.find(i => i.id == storedId)) {
+//         try {
+//             const res = await hoaDonDetail(storedId);
+//             if (res.data) addOrUpdateInvoice(res.data);
+//             if (res.data) {
+//                 currentInvoiceDetail.value = res.data;
+//                 console.log(currentInvoiceDetail.value);
+
+//             }
+//         } catch (e) {
+//             console.warn("Không thể tải hóa đơn từ localStorage:", e);
+//             localStorage.removeItem('selectedInvoiceId'); // Xóa storedId nếu không hợp lệ
+//         }
+//     }
+
+//     // Bước 3: Xác định finalId
+//     let finalId = null;
+//     if (queryId && invoices.value.some(i => i.id == queryId)) {
+//         finalId = queryId;
+//     } else if (storedId && invoices.value.some(i => i.id == storedId)) {
+//         finalId = storedId;
+//     } else if (invoices.value.length > 0) {
+//         finalId = invoices.value[0].id;
+//     }
+
+//     // Bước 4: Gán finalId chính xác duy nhất ở đây
+//     if (finalId) {
+//         currentInvoiceId.value = finalId;
+//         localStorage.setItem('selectedInvoiceId', finalId);
+
+//         // Nếu chưa có chi tiết → gọi thêm
+//         const selected = invoices.value.find(i => i.id == finalId);
+//         if (!selected?.chiTietHoaDonAdminResponseList) {
+//             try {
+//                 const res = await hoaDonDetail(finalId);
+//                 if (res.data) addOrUpdateInvoice(res.data);
+//                 if (res.data) {
+//                     currentInvoiceDetail.value = res.data;
+//                     console.log(currentInvoiceDetail.value);
+//                 }
+//             } catch (e) {
+//                 console.error("Không thể load chi tiết:", e);
+//             }
+//         }
+//     }
+
+//     if (queryId) {
+//         router.replace({ query: { ...route.query, invoiceId: undefined } });
+//     }
+// };
+
 const loadTabHoaDon = async () => {
-    // Bước 1: Load các hóa đơn của nhân viên
-    const response = await loadHoaDonByIdNhanVien();
-    response.data.forEach(inv => addOrUpdateInvoice(inv));
-    tabHoaDon.value = [...invoices.value]; // clone ra nếu cần reactive riêng
-
-    const queryId = route.query.invoiceId;
-    const storedId = localStorage.getItem("selectedInvoiceId");
-
-    // Bước 2: Nếu storedId chưa có trong danh sách → fetch
-    if (storedId && !invoices.value.find(i => i.id == storedId)) {
-        try {
-            const res = await hoaDonDetail(storedId);
-            if (res.data) addOrUpdateInvoice(res.data);
-            if (res.data) {
-                currentInvoiceDetail.value = res.data;
-                console.log(currentInvoiceDetail.value);
-
+    try {
+        const response = await loadHoaDonByIdNhanVien();
+        console.log('Danh sách hóa đơn từ backend:', response.data);
+        //Load các hóa đơn của nhân viên
+        // Cập nhật danh sách hóa đơn từ backend, tránh thêm trùng lặp
+        response.data.forEach(inv => {
+            const existingIndex = invoices.value.findIndex(i => i.id === inv.id);
+            if (existingIndex === -1) {
+                addOrUpdateInvoice(inv);
             }
-        } catch (e) {
-            console.warn("Không thể tải hóa đơn từ localStorage:", e);
+        });
+        tabHoaDon.value = [...invoices.value];
+
+        const queryId = route.query.invoiceId;
+        const storedId = localStorage.getItem("selectedInvoiceId");
+
+//     // Xác định finalId
+        let finalId = null;
+
+        // Ưu tiên storedId nếu nó hợp lệ
+        if (storedId && invoices.value.some(i => i.id == storedId)) {
+            finalId = storedId;
+        } else if (queryId && invoices.value.some(i => i.id == queryId)) {
+            finalId = queryId;
+        } else if (invoices.value.length > 0) {
+            finalId = invoices.value[0].id;
         }
-    }
 
-    // Bước 3: Xác định finalId
-    let finalId = null;
-    if (queryId && invoices.value.some(i => i.id == queryId)) {
-        finalId = queryId;
-    } else if (storedId && invoices.value.some(i => i.id == storedId)) {
-        finalId = storedId;
-    } else if (invoices.value.length > 0) {
-        finalId = invoices.value[0].id;
-    }
+        //Gán finalId chính xác duy nhất ở đây
+        if (finalId) {
+            currentInvoiceId.value = finalId;
+            localStorage.setItem('selectedInvoiceId', finalId);
 
-    // Bước 4: Gán finalId chính xác duy nhất ở đây
-    if (finalId) {
-        currentInvoiceId.value = finalId;
-        localStorage.setItem('selectedInvoiceId', finalId);
-
-        // Nếu chưa có chi tiết → gọi thêm
-        const selected = invoices.value.find(i => i.id == finalId);
-        if (!selected?.chiTietHoaDonAdminResponseList) {
-            try {
+            // Nếu chưa có chi tiết → gọi thêm
+            const selected = invoices.value.find(i => i.id == finalId);
+            if (selected && !selected.chiTietHoaDonAdminResponseList) {
                 const res = await hoaDonDetail(finalId);
-                if (res.data) addOrUpdateInvoice(res.data);
                 if (res.data) {
+                    addOrUpdateInvoice(res.data);
                     currentInvoiceDetail.value = res.data;
-                    console.log(currentInvoiceDetail.value);
                 }
-            } catch (e) {
-                console.error("Không thể load chi tiết:", e);
+            } else {
+                currentInvoiceDetail.value = selected || {};
             }
         }
-    }
 
-    if (queryId) {
-        router.replace({ query: { ...route.query, invoiceId: undefined } });
+        if (queryId) {
+            router.replace({ query: { ...route.query, invoiceId: undefined } });
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải danh sách hóa đơn:', error);
     }
 };
 
@@ -714,17 +773,74 @@ const selectInvoice = async (id) => {
 
 
 
-const addNewInvoice = () => {
+// const addNewInvoice = () => {
+//     // const newInvoice = {
+//     //     id: nextInvoiceId++,
+//     //     name: `Hóa đơn ${nextInvoiceId - 1}`,
+//     //     items: [],
+//     //     customer: { name: '', phone: '', email: '', address: '' },
+//     //     notes: '',
+//     //     total: 0
+//     // }
+//     // invoices.value.push(newInvoice)
+//     // currentInvoiceId.value = newInvoice.id
+
+    
+// }   
+
+
+
+const isLoading = ref(false)
+const errorMessage = ref('')
+//add pending invoice
+const addNewInvoice = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    const response = await createPendingInvoice()
+    const data = response.data
+    console.log('Response data:', data)
+
     const newInvoice = {
-        id: nextInvoiceId++,
-        name: `Hóa đơn ${nextInvoiceId - 1}`,
-        items: [],
-        customer: { name: '', phone: '', email: '', address: '' },
-        notes: '',
-        total: 0
+      id: data.hoaDonId,
+      maHoaDon: data.maHoaDon || `HD${data.hoaDonId}`,
+      name: `Hóa đơn ${data.hoaDonId}`,
+      status: data.status,
+      lichSuHoaDonId: data.lichSuHoaDonId,
+      items: [],
+      customer: { name: '', phone: '', email: '', address: '' },
+      notes: '',
+      total: 0,
+      chiTietHoaDonAdminResponseList: []
     }
+
     invoices.value.push(newInvoice)
     currentInvoiceId.value = newInvoice.id
+    localStorage.setItem('selectedInvoiceId', newInvoice.id)
+    ElMessage.success('Tạo hóa đơn mới thành công!')
+    
+  } catch (error) {
+    console.error('Error creating invoice:', error)
+  console.log('Error response:', error.response)
+  console.log('Error response data:', error.response?.data)
+
+  if (error.response?.status === 400 && Array.isArray(error.response?.data)) {
+  const messages = error.response.data
+    .map(err => err.message)
+    .filter(Boolean)
+    .join(' | ')
+
+  if (messages) {
+    showWarningOnce(messages)
+  }
+}
+ else {
+    ElMessage.error('Đã xảy ra lỗi khi tạo hóa đơn mới!')
+  }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const closeInvoice = (id) => {
@@ -908,7 +1024,7 @@ const goToImeiPage = async (page) => {
 let warningMessageInstance = null;
 
 const showWarningOnce = (message) => {
-  // k cho spam message
+  // k cho spam message 
   if (warningMessageInstance) return;
 
   warningMessageInstance = ElMessage({
@@ -1551,6 +1667,18 @@ watch(quantityToSelect, (newValue, oldValue) => {
 
 // Initialize
 onMounted(async () => {
+    // Làm sạch trạng thái trước khi tải dữ liệu
+    // invoices.value = [];
+    // currentInvoiceId.value = null;
+    // currentInvoiceDetail.value = null;
+    // localStorage.removeItem('selectedInvoiceId'); // Xóa storedId từ phiên trước
+
+    // console.log('onMounted - Trạng thái ban đầu sau khi làm sạch:', {
+    //     invoices: invoices.value,
+    //     currentInvoiceId: currentInvoiceId.value,
+    //     storedId: localStorage.getItem('selectedInvoiceId')
+    // });
+
     // calculateTotal();
     await danhMucSanPham();
     selectedCategory.value = 'all';
