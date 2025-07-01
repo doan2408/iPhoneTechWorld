@@ -2,26 +2,25 @@ package org.example.websitetechworld.Controller.AdminController.PhieuGiamGiaAdmi
 
 import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
-import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
-import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminServices;
+import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/phieu-giam-gia")
 public class PhieuGiamGiaAdminController {
 
-    private final PhieuGiamGiaAdminServices phieuGiamGiaAdminServices;
+    private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
 
-    public PhieuGiamGiaAdminController(PhieuGiamGiaAdminServices phieuGiamGiaAdminServices) {
-        this.phieuGiamGiaAdminServices = phieuGiamGiaAdminServices;
+    public PhieuGiamGiaAdminController(PhieuGiamGiaAdminService phieuGiamGiaAdminService) {
+        this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
     }
 
     @GetMapping
@@ -31,46 +30,46 @@ public class PhieuGiamGiaAdminController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayBatDau,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayKetThuc,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "3") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
-        phieuGiamGiaAdminServices.updateTrangThaiPhieuGiamGia();
-        Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminServices.getPagePhieuGiamGia(
+        phieuGiamGiaAdminService.capNhatTrangThaiPhieuGiamGia();
+        Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminService.layDanhSachPhieuGiamGia(
                 search, trangThai, ngayBatDau, ngayKetThuc, page, size, sortBy, direction);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PhieuGiamGiaAdminResponse> getPhieuGiamGia(@PathVariable int id) {
-        PhieuGiamGiaAdminResponse response = phieuGiamGiaAdminServices.getPhieuGiamGia(id);
+        PhieuGiamGiaAdminResponse response = phieuGiamGiaAdminService.layPhieuGiamGiaTheoId(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<PhieuGiamGiaAdminResponse> addPhieuGiamGia(@Valid @RequestBody PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
-        PhieuGiamGiaAdminResponse created = phieuGiamGiaAdminServices.addPhieuGiamGia(phieuGiamGiaAdminRequest);
+        PhieuGiamGiaAdminResponse created = phieuGiamGiaAdminService.themPhieuGiamGia(phieuGiamGiaAdminRequest);
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PhieuGiamGiaAdminResponse> updatePhieuGiamGia(
             @PathVariable int id, @Valid @RequestBody PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
-        PhieuGiamGiaAdminResponse updated = phieuGiamGiaAdminServices.updatePhieuGiamGia(id, phieuGiamGiaAdminRequest);
+        PhieuGiamGiaAdminResponse updated = phieuGiamGiaAdminService.capNhatPhieuGiamGia(id, phieuGiamGiaAdminRequest);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePhieuGiamGia(@PathVariable int id) {
-        String result = phieuGiamGiaAdminServices.deletePhieuGiamGia(id);
+        String result = phieuGiamGiaAdminService.xoaPhieuGiamGia(id);
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/khach-hang")
-    public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<KhachHangGiamGiaResponse> khachHangList = phieuGiamGiaAdminServices.getAllKhachHang(search, page, size);
-        return ResponseEntity.ok(khachHangList);
-    }
+//    @GetMapping("/san-pham")
+//    public ResponseEntity<Page<SanPhamChiTietResponse>> getAllKhachHang(
+//            @RequestParam(required = false) String search,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "5") int size) {
+//        Page<SanPhamChiTietResponse> danhSachSanPham = phieuGiamGiaAdminService.layDanhSachSanPham(search, page, size);
+//        return ResponseEntity.ok(danhSachSanPham);
+//    }
 }

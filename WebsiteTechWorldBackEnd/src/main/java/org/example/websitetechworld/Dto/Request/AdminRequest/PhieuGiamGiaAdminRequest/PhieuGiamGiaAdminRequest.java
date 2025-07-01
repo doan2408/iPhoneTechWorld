@@ -1,15 +1,14 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest;
 
-import jakarta.persistence.ElementCollection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 
 import jakarta.validation.constraints.*;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -65,13 +64,8 @@ public class PhieuGiamGiaAdminRequest {
     private BigDecimal soDiemCanDeDoi;
 
     @NotNull(message = "Trạng thái isGlobal không được để trống")
-    private Boolean isGlobal;
-
-    private List<Integer> khachHangIds;
-
-    private Boolean khachHangMoi = false; // Thêm trường mới
-    private Boolean khachHangCu = false;  // Thêm trường mới
+    private Boolean congKhai;
 
     @NotNull(message = "Trạng thái không được để trống")
-    private TrangThaiPGG trangThai;
+    private TrangThaiPhatHanh trangThaiPhatHanh;
 }

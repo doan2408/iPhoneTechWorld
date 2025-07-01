@@ -54,12 +54,12 @@ export const deletePhieuGiamGia = async (id) => {
   }
 };
 
-export const getAllKhachHang = async () => {
+export const getAllSanPham = async (params) => {
   try {
-    const response = await api.get(baseURL + '/khach-hang');
+    const response = await api.get(baseURL + '/san-pham', { params });
     return response.data;
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách khách hàng:', error);
-    throw error.response?.data || new Error('Lỗi khi lấy danh sách khách hàng');
+    console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách sản phẩm');
   }
 };
