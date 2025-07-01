@@ -63,13 +63,7 @@ CREATE TABLE user_tokens (
 
 CREATE TABLE phieu_giam_gia (
                                 id_phieu_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
-                                ma_giam_gia AS (
-        'VC' + CASE
-            WHEN id_phieu_giam_gia < 10 THEN '00' + CAST(id_phieu_giam_gia AS VARCHAR)
-            WHEN id_phieu_giam_gia < 100 THEN '0' + CAST(id_phieu_giam_gia AS VARCHAR)
-            ELSE CAST(id_phieu_giam_gia AS VARCHAR)
-        END
-    ) PERSISTED,
+                                ma_giam_gia NVARCHAR(50),
                                 ten_khuyen_mai NVARCHAR(50),
                                 loai_khuyen_mai NVARCHAR(50),
                                 gia_tri_khuyen_mai DECIMAL(10,2),
@@ -82,14 +76,10 @@ CREATE TABLE phieu_giam_gia (
                                 so_luong INT,
                                 so_diem_can_de_doi DECIMAL(10,2),
                                 is_global BIT,
-                                trang_thai NVARCHAR(50)
+                                trang_thai_phieu_giam_gia NVARCHAR(50),
+                                trang_thai_phat_hanh NVARCHAR(50)
 );
 
-CREATE TABLE tinh_thanh (
-                            id INT PRIMARY KEY IDENTITY,
-                            ten NVARCHAR(100),
-                            phi_ship DECIMAL(19,2)
-);
 
 CREATE TABLE hoa_don (
                          id_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
@@ -110,11 +100,10 @@ CREATE TABLE hoa_don (
                          sdt_nguoi_mua NVARCHAR(10),
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan NVARCHAR(10),
-                         dia_chi_giao_hang NVARCHAR(100),
+                         dia_chi_giao_hang NVARCHAR(255),
                          ngay_dat_hang DATE,
                          is_shipping BIT,
                          shipping_method NVARCHAR(50),
-                         id_tinh_thanh INT REFERENCES tinh_thanh(id),
                          phi_ship DECIMAL(19,2),
                          tong_tien DECIMAL(19,2),
                          so_tien_giam DECIMAL(19,2),
@@ -480,109 +469,42 @@ VALUES
 
 
 -- Table phieu_giam_gia
-INSERT INTO phieu_giam_gia (ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai)
+INSERT INTO phieu_giam_gia (ma_giam_gia, ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 1000000.00, 200000.00, '2025-05-01', '2025-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 100.00, 1, N'ACTIVE'),
-    (N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-05-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED'),
-    (N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-06-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED'),
-    (N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED'),
-    (N'Giảm 5% iPhone 16', N'Phần trăm', 5.00, 1000000.00, 100000.00, '2025-05-10', '2025-05-20', N'Áp dụng iPhone 16', N'GOLD', 150, 80.00, 1, N'EXPIRED'),
-    (N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED'),
-    (N'Giảm 300K iPhone Pro', N'Cố định', 300000.00, 3000000.00, 300000.00, '2025-05-20', '2025-06-20', N'Đơn iPhone Pro từ 3 triệu', N'GOLD', 60, 250.00, 0, N'ACTIVE'),
-    (N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED'),
-    (N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED'),
-    (N'Giảm 8% iPhone 15', N'Phần trăm', 8.00, 1200000.00, 150000.00, '2025-06-10', '2025-06-20', N'Áp dụng iPhone 15', N'GOLD', 180, 90.00, 1, N'NOT_STARTED'),
-    (N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE'),
-    (N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE'),
-    (N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED'),
-    (N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED'),
-    (N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED');
-
---Table tinh_thanh
-INSERT INTO tinh_thanh (ten, phi_ship)
-VALUES
-    (N'Hà Nội', 20000),
-    (N'Hồ Chí Minh', 30000),
-    (N'Bắc Giang', 25000),
-    (N'Bắc Kạn', 25000),
-    (N'Bạc Liêu', 30000),
-    (N'Bắc Ninh', 25000),
-    (N'Bến Tre', 30000),
-    (N'Bình Định', 30000),
-    (N'Bình Dương', 30000),
-    (N'Bình Phước', 30000),
-    (N'Bình Thuận', 30000),
-    (N'Cà Mau', 30000),
-    (N'Cần Thơ', 30000),
-    (N'Cao Bằng', 25000),
-    (N'Đà Nẵng', 30000),
-    (N'Đắk Lắk', 30000),
-    (N'Đắk Nông', 30000),
-    (N'Điện Biên', 25000),
-    (N'Đồng Nai', 30000),
-    (N'Đồng Tháp', 30000),
-    (N'Gia Lai', 30000),
-    (N'Hà Giang', 25000),
-    (N'Hà Nam', 25000),
-    (N'Hà Tĩnh', 25000),
-    (N'Hải Dương', 25000),
-    (N'Hải Phòng', 25000),
-    (N'Hậu Giang', 30000),
-    (N'Hòa Bình', 25000),
-    (N'Hưng Yên', 25000),
-    (N'Khánh Hòa', 30000),
-    (N'Kiên Giang', 30000),
-    (N'Kon Tum', 30000),
-    (N'Lai Châu', 25000),
-    (N'Lâm Đồng', 30000),
-    (N'Lạng Sơn', 25000),
-    (N'Lào Cai', 25000),
-    (N'Long An', 30000),
-    (N'Nam Định', 25000),
-    (N'Nghệ An', 25000),
-    (N'Ninh Bình', 25000),
-    (N'Ninh Thuận', 30000),
-    (N'Phú Thọ', 25000),
-    (N'Phú Yên', 30000),
-    (N'Quảng Bình', 25000),
-    (N'Quảng Nam', 30000),
-    (N'Quảng Ngãi', 30000),
-    (N'Quảng Ninh', 25000),
-    (N'Quảng Trị', 25000),
-    (N'Sóc Trăng', 30000),
-    (N'Sơn La', 25000),
-    (N'Tây Ninh', 30000),
-    (N'Thái Bình', 25000),
-    (N'Thái Nguyên', 25000),
-    (N'Thanh Hóa', 25000),
-    (N'Thừa Thiên Huế', 30000),
-    (N'Tiền Giang', 30000),
-    (N'TP Hồ Chí Minh', 30000),
-    (N'Trà Vinh', 30000),
-    (N'Tuyên Quang', 25000),
-    (N'Vĩnh Long', 30000),
-    (N'Vĩnh Phúc', 25000),
-    (N'Yên Bái', 25000);
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 1000000.00, 200000.00, '2025-05-01', '2025-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 100.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-05-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-06-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC005', N'Giảm 5% iPhone 16', N'Phần trăm', 5.00, 1000000.00, 100000.00, '2025-05-10', '2025-05-20', N'Áp dụng iPhone 16', N'GOLD', 150, 80.00, 1, N'EXPIRED', N'ISSUED'),
+    (N'VC006', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 300K iPhone Pro', N'Cố định', 300000.00, 3000000.00, 300000.00, '2025-05-20', '2025-06-20', N'Đơn iPhone Pro từ 3 triệu', N'GOLD', 60, 250.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC008', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC009', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC0010', N'Giảm 8% iPhone 15', N'Phần trăm', 8.00, 1200000.00, 150000.00, '2025-06-10', '2025-06-20', N'Áp dụng iPhone 15', N'GOLD', 180, 90.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC0011', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC0012', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC0013', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED', N'ISSUED'),
+	(N'VC0014', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC0015', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED', N'ISSUED');
 
 -- Table hoa_don
--- Table hoa_don
-INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping, id_tinh_thanh)
+INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping)
 VALUES
-    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0,1,1),
-    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0,0,null),
-    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1,1),
-    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1,1),
-    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0,null),
-    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1,1),
-    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1,1),
-    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0,null),
-    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0,null),
-    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1,1),
-    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0,null),
-    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1,1),
-    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1,1),
-    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0,null),
-    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1,1);
+    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0,1),
+    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0,0),
+    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1),
+    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1),
+    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0),
+    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
+    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
+    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
+    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
+    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
+    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
+    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
+    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
+    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
+    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
 
 
 -- Table lich_su_hoa_don
@@ -911,21 +833,21 @@ VALUES
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
 VALUES
-    (N'iPhone 6', N'Apple', 1, N'OUT_OF_STOCK', 1),
-    (N'iPhone 16', N'Apple', 2, N'DISCONTINUED', 2),
-    (N'iPhone 15', N'Apple', 3, N'COMING_SOON', 3),
-    (N'iPhone 14', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
-    (N'iPhone 13', N'Apple', 5, N'OUT_OF_STOCK', 5),
-    (N'iPhone 16', N'Apple', 6, N'ACTIVE', 6),
-    (N'iPhone 15', N'Apple', 7, N'DISCONTINUED', 7),
-    (N'iPhone 14', N'Apple', 8, N'COMING_SOON', 8),
-    (N'iPhone 13', N'Apple', 9, N'TEMPORARILY_UNAVAILABLE', 9),
-    (N'iPhone 12', N'Apple', 10, N'OUT_OF_STOCK', 10),
-    (N'iPhone 16', N'Apple', 11, N'ACTIVE', 11),
-    (N'iPhone 15', N'Apple', 12, N'DISCONTINUED', 12),
-    (N'iPhone 14', N'Apple', 13, N'COMING_SOON', 13),
-    (N'iPhone 13', N'Apple', 14, N'TEMPORARILY_UNAVAILABLE', 14),
-    (N'iPhone 12', N'Apple', 15, N'OUT_OF_STOCK', 15);
+    (N'iPhone 6 Thường', N'Apple', 1, N'OUT_OF_STOCK', 1),
+    (N'iPhone 16 Thường', N'Apple', 2, N'DISCONTINUED', 2),
+    (N'iPhone 16 Pro', N'Apple', 3, N'COMING_SOON', 3),
+    (N'iPhone 15 Thường', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
+    (N'iPhone 14 Thường', N'Apple', 5, N'OUT_OF_STOCK', 5),
+    (N'iPhone 13 Thường', N'Apple', 6, N'ACTIVE', 6),
+    (N'iPhone 16 Plus', N'Apple', 7, N'DISCONTINUED', 7),
+    (N'iPhone 15 Pro', N'Apple', 8, N'COMING_SOON', 8),
+    (N'iPhone 14 Pro', N'Apple', 9, N'TEMPORARILY_UNAVAILABLE', 9),
+    (N'iPhone 13 Pro', N'Apple', 10, N'OUT_OF_STOCK', 10),
+    (N'iPhone 12 Thường', N'Apple', 11, N'ACTIVE', 11),
+    (N'iPhone 16 Pro Max', N'Apple', 12, N'DISCONTINUED', 12),
+    (N'iPhone 15 Pro Max', N'Apple', 13, N'COMING_SOON', 13),
+    (N'iPhone 14 Plus', N'Apple', 14, N'TEMPORARILY_UNAVAILABLE', 14),
+    (N'iPhone 13 Mini', N'Apple', 15, N'OUT_OF_STOCK', 15);
 
 -- Table san_pham_chi_tiet
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
@@ -1240,6 +1162,3 @@ SELECT * FROM user_tokens
 
 --36. model_san_pham
 SELECT * FROM model_san_pham
-
---37. tinh_thanh
-SELECT * FROM tinh_thanh

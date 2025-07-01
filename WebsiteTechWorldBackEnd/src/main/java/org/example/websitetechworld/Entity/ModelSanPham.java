@@ -1,7 +1,10 @@
 package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.Nationalized;
+
 import java.time.LocalDate;
 
 @Entity
@@ -16,6 +19,8 @@ public class ModelSanPham {
     @Column(name = "ma_model_san_pham", insertable = false, updatable = false)
     private String maModelSanPham;
 
+    @Nationalized
+    @Size(max = 50)
     @Column(name = "ten_model")
     private String tenModel;
 

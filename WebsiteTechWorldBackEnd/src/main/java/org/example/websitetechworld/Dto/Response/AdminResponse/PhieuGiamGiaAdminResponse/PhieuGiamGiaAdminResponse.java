@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,9 +28,7 @@ public class PhieuGiamGiaAdminResponse {
     private String hangToiThieu;
     private Integer soLuong;
     private BigDecimal soDiemCanDeDoi;
-    private Boolean isGlobal;
-    private List<Integer> khachHangIds;
-    private Boolean khachHangMoi; // Thêm trường mới
-    private Boolean khachHangCu;  // Thêm trường mới
-    private TrangThaiPGG trangThai;
+    private Boolean congKhai;
+    private TrangThaiPGG trangThaiPhieuGiamGia;
+    private TrangThaiPhatHanh trangThaiPhatHanh;
 }
