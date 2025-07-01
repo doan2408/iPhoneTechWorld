@@ -99,9 +99,9 @@ public class HoaDon {
     @Column(name = "sdt_nguoi_nhan", length = 10)
     private String sdtNguoiNhan;
 
-    @Size(max = 100)
+    @Size(max = 255)
     @Nationalized
-    @Column(name = "dia_chi_giao_hang", length = 100)
+    @Column(name = "dia_chi_giao_hang", length = 255)
     private String diaChiGiaoHang;
 
     @Column(name = "ngay_dat_hang")
