@@ -18,12 +18,12 @@ public class XuatXu {
 
     @Size(max = 10)
     @Nationalized
-    @Column(name = "ma_xuat_xu", length = 10)
+    @Column(name = "ma_xuat_xu", length = 10, nullable = false)
     private String maXuatXu;
 
     @Size(max = 50)
     @Nationalized
-    @Column(name = "ten_quoc_gia", length = 50)
+    @Column(name = "ten_quoc_gia", length = 50, nullable = false)
     private String tenQuocGia;
 
 }

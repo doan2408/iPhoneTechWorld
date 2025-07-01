@@ -5,12 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.CheckValidation.CreateGroups;
 import org.example.websitetechworld.CheckValidation.UpdateGroups;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminNhanVienResponse;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.NhanVienAdminService;
 import org.example.websitetechworld.exception.ValidationException;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,12 +27,20 @@ import java.util.stream.Collectors;
 public class NhanVienAdminController {
     private final NhanVienAdminService nhanVienAdminService;
 
-    @GetMapping()
-    public ResponseEntity<?> getStaff(@RequestParam(value = "page",defaultValue = "0") int page,
-                                      @RequestParam(value = "keyword", required = false) String keyword) {
+    @GetMapping
+    public ResponseEntity<Page<AdminNhanVienResponse>> getStaff(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "gioiTinh", required = false) Boolean gioiTinh,
+            @RequestParam(value = "trangThai", required = false) NhanVienTrangThai trangThai
+    ) {
         int pageSize = 10;
-        return ResponseEntity.ok(nhanVienAdminService.getNhanVienList(page, pageSize, keyword));
+        Page<AdminNhanVienResponse> result = nhanVienAdminService.getNhanVienList(
+                page, pageSize, keyword, gioiTinh, trangThai
+        );
+        return ResponseEntity.ok(result);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getStaffDetail(@PathVariable int id) {

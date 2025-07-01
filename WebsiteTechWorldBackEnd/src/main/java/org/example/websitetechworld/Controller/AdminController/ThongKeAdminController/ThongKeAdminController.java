@@ -113,8 +113,6 @@ public class ThongKeAdminController {
     }
 
 
-
-
     @GetMapping("/san-pham-ton-kho")
     public List<Map<String, Object>> sanPhamTonKhoNhieu () {
 

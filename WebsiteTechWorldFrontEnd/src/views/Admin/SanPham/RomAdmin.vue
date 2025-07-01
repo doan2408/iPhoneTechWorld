@@ -2,34 +2,28 @@
     <div class="container mt-4">
 
         <el-row :gutter="20" class="mb-4 justify-content-center">
-
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
-
         </el-row>
 
-        <el-row :gutter="20" class="mb-2" justify="end" >
-
+        <el-row :gutter="20" class="mb-2" justify="end">
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
-
         </el-row>
 
-            <h2>Danh sách rom</h2>
+        <h2>Danh sách rom</h2>
         <div class="table-responsive mb-4" style="margin-top: 20px;">
             <el-table :data="tableRom" border style="width: 100%">
                 <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
-                <el-table-column prop="dungLuong" label="Dung lượng"  width="180" />
+                <el-table-column prop="dungLuong" label="Dung lượng" width="180" />
                 <el-table-column prop="loai" label="Loại" />
                 <el-table-column prop="tocDoDocGhi" label="Tốc độ đọc ghi" />
                 <el-table-column prop="nhaSanXuat" label="Nhà sản xuất" />
@@ -37,15 +31,14 @@
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            <router-link :to="`/admin/products/${row.id}`">
-                                <el-button size="small" type="primary" :icon="Edit" circle />
-                            </router-link>
+
+                            <el-button size="small" type="primary" :icon="Edit" circle @click="openDetail(row)" />
 
                             <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-
+                            <!-- 
                             <router-link :to="`/admin/products/detail/${row.id}`">
                                 <el-button size="small" type="info" :icon="View" circle />
-                            </router-link>
+                            </router-link> -->
                         </div>
                     </template>
                 </el-table-column>
@@ -60,14 +53,66 @@
             </div>
         </div>
 
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa rom' : 'Thêm mới rom'" width="900px"
+            :close-on-click-modal="false" :destroy-on-close="true">
+            <el-form :model="formData" ref="formRef" label-width="140px" label-position="left" class="hdh-form">
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Dung lượng" prop="dungLuong" :error="errors.dungLuong">
+                            <el-input v-model="formData.dungLuong" placeholder="Nhập dung lượng (ví dụ: 128GB)"
+                                autocomplete="on" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Loại" prop="loai" :error="errors.loai">
+                            <el-input v-model="formData.loai" placeholder="Nhập loại bộ nhớ (ví dụ: NVMe)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat" :error="errors.nhaSanXuat">
+                            <el-input v-model="formData.nhaSanXuat"
+                                placeholder="Nhập tên nhà sản xuất (ví dụ: Apple)" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Năm ra mắt" prop="namRaMat" :error="errors.namRaMat">
+                            <el-date-picker v-model="formData.namRaMat" type="date" value-format="YYYY-MM-DD"
+                                placeholder="Chọn ngày ra mắt" style="width: 100%;" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col>
+                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi" :error="errors.tocDoDocGhi">
+                            <el-input v-model="formData.tocDoDocGhi"
+                                placeholder="Nhập tốc độ đọc/ghi (ví dụ: 3500MB/s)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row justify="end" style="margin-top: 30px;">
+                    <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                </el-row>
+            </el-form>
+        </el-dialog>
+
     </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { getAllRomPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ref, onMounted, watch, computed, reactive } from 'vue';
+import { deleteRom, getAllRomPage, postRom, putRom } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { ro } from 'element-plus/es/locales.mjs';
 
 const tableRom = ref([]);
 const currentPage = ref(1);
@@ -75,10 +120,39 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5;
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null);
+
+// const rules = {
+//     dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng', trigger: 'blur' }],
+//     loai: [{ required: true, message: 'Vui lòng nhập loại', trigger: 'blur' }],
+//     nhaSanXuat: [{ required: true, message: 'Vui lòng nhập nhà sản xuất', trigger: 'blur' }],
+//     namRaMat: [{ required: true, message: 'Vui lòng chọn năm ra mắt', trigger: 'change' }],
+//     tocDoDocGhi: [{ required: true, message: 'Vui nhập tốc độ đọc ghi', trigger: 'change' }]
+// };
+
+const formData = reactive({
+    id: null,
+    dungLuong: '',
+    loai: '',
+    tocDoDocGhi: '',
+    nhaSanXuat: '',
+    namRaMat: null,
+})
+
+const errors = reactive({
+    dungLuong: '',
+    loai: '',
+    tocDoDocGhi: '',
+    nhaSanXuat: '',
+    namRaMat: null,
+})
+
 
 const loadData = async () => {
     try {
-        const response = await getAllRomPage(currentPage.value - 1, pageSize);
+        const response = await getAllRomPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
         tableRom.value = response.content;
         totalPages.value = response.totalPages;
         totalItems.value = response.totalElements;
@@ -86,6 +160,89 @@ const loadData = async () => {
         console.error('Không thể load dữ liệu:', error);
     }
 };
+
+
+const resetForm = () => {
+    formData.id = null;
+    formData.dungLuong = '';
+    formData.loai = '';
+    formData.tocDoDocGhi = '';
+    formData.nhaSanXuat = '';
+    formData.namRaMat = '';
+    errors.dungLuong = '';
+    errors.loai = '';
+    errors.tocDoDocGhi = '';
+    errors.nhaSanXuat = '';
+    errors.namRaMat = '';
+}
+
+const resetErrors = () => {
+    errors.dungLuong = '';
+    errors.loai = '';
+    errors.tocDoDocGhi = '';
+    errors.nhaSanXuat = '';
+    errors.namRaMat = '';
+}
+
+
+const submitForm = async () => {
+    if (!formRef.value) return;
+
+    try {
+        // await formRef.value.validate();
+
+        if (isEditMode.value) {
+            await putRom(formData.id, formData);
+            ElMessage.success('Cập nhật rom thành công!');
+        } else {
+            await postRom(formData);
+            ElMessage.success('Thêm mới rom thành công!');
+        }
+        resetForm();
+        dialogVisible.value = false;
+        loadData();
+    } catch (error) {
+        errors.dungLuong = error.message.dungLuong || ''
+        errors.loai = error.message.loai || ''
+        errors.tocDoDocGhi = error.message.tocDoDocGhi || ''
+        errors.nhaSanXuat = error.message.nhaSanXuat || ''
+        errors.namRaMat = error.message.namRaMat || ''
+
+        const errorMessages = [];
+        if (errors.dungLuong) errorMessages.push(errors.dungLuong);
+        if (errors.loai) errorMessages.push(errors.loai);
+        if (errors.tocDoDocGhi) errorMessages.push(errors.tocDoDocGhi);
+        if (errors.nhaSanXuat) errorMessages.push(errors.nhaSanXuat);
+        if (errors.namRaMat) errorMessages.push(errors.namRaMat);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
+    }
+}
+
+const handleDelete = async (id) => {
+    try {
+        await ElMessageBox.confirm(
+            'Bạn có chắc chắn muốn xoá rom này không?',
+            'Xác nhận xoá',
+            {
+                confirmButtonText: 'Xoá',
+                cancelButtonText: 'Huỷ',
+                type: 'warning',
+            }
+        );
+        await deleteRom(id);
+        ElMessage.success('Xoá thành công!');
+        loadData(); // tải lại danh sách sau khi xoá
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+        }
+    }
+}
 
 const fromRecord = computed(() => {
     return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
@@ -98,6 +255,40 @@ const handlePageChange = (newPage) => {
     currentPage.value = newPage;
 };
 
+
+const handleSearch = () => {
+    currentPage.value = 1;
+    loadData();
+};
+
+const handleRefresh = () => {
+    searchQuery.value = '';
+    currentPage.value = 1;
+    loadData();
+};
+
+
+const handleCreate = () => {
+    resetForm();
+    dialogVisible.value = true;
+    isEditMode.value = false;
+}
+
+const handleClose = () => {
+    dialogVisible.value = false;
+}
+
+const openDetail = (row) => {
+    isEditMode.value = true;
+    Object.assign(formData, row);
+    dialogVisible.value = true;
+    resetErrors()
+};
+
+const indexMethod = (index) => {
+    return (currentPage.value - 1) * pageSize + index + 1;
+}
+
 onMounted(() => {
     loadData();
 });
@@ -105,25 +296,6 @@ onMounted(() => {
 watch([currentPage, searchQuery], () => {
     loadData();
 });
-
-const handleSearch = () => {
-    currentPage.value = 1; // Về trang 1 khi tìm kiếm
-    // loadData() đã được gọi tự động bởi watch
-};
-
-const handleRefresh = () => {
-    searchQuery.value = '';
-    currentPage.value = 1;
-    // loadData() sẽ gọi theo watch
-};
-
-const handleCreate = () => {
-    console.log('Tạo mới');
-};
-
-const indexMethod = (index) => {
-    return (currentPage.value - 1) * pageSize + index + 1;
-}
 
 
 </script>

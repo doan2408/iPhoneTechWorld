@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
@@ -49,16 +50,16 @@ public class HoaDon {
 
     // Xóa thuộc tính diaChi
 
-    @Column(name = "phi_ship", precision = 10, scale = 2)
+    @Column(name = "phi_ship", precision = 19, scale = 2)
     private BigDecimal phiShip;
 
-    @Column(name = "tong_tien", precision = 10, scale = 2)
+    @Column(name = "tong_tien", precision = 19, scale = 2)
     private BigDecimal tongTien;
 
-    @Column(name = "so_tien_giam", precision = 10, scale = 2)
+    @Column(name = "so_tien_giam", precision = 19, scale = 2)
     private BigDecimal soTienGiam;
 
-    @Column(name = "thanh_tien", precision = 10, scale = 2)
+    @Column(name = "thanh_tien", precision = 19, scale = 2)
     private BigDecimal thanhTien;
 
     @Enumerated(EnumType.STRING)
@@ -98,9 +99,9 @@ public class HoaDon {
     @Column(name = "sdt_nguoi_nhan", length = 10)
     private String sdtNguoiNhan;
 
-    @Size(max = 100)
+    @Size(max = 255)
     @Nationalized
-    @Column(name = "dia_chi_giao_hang", length = 100)
+    @Column(name = "dia_chi_giao_hang", length = 255)
     private String diaChiGiaoHang;
 
     @Column(name = "ngay_dat_hang")
@@ -109,9 +110,23 @@ public class HoaDon {
     @Column(name = "ngay_tao_hoa_don")
     private LocalDate ngayTaoHoaDon;
 
+    @Column(name = "is_delete")
+    private Boolean isDelete;
+
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_don_hang", length = 50)
     private TrangThaiGiaoHang trangThaiDonHang;
+
+    @Column(name = "ngay_tao_don_hang")
+    private LocalDate ngayTaoDonHang;
+
+    @Column(name = "is_shipping")
+    private Boolean isShipping;
+
+    @Enumerated(EnumType.STRING)
+    @Nationalized
+    @Column(name = "shipping_method", length = 50)
+    private ShippingMethod shippingMethod;
 
 }

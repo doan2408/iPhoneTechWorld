@@ -20,7 +20,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     FROM hoa_don 
     WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE())
       AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())
-      AND trang_thai_don_hang = 'COMPLETE'
+      AND trang_thai_thanh_toan = 'COMPLETED'
     """, nativeQuery = true)
     BigDecimal doanhThuThang();
 
@@ -29,7 +29,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     FROM hoa_don 
     WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE())
       AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())
-      AND trang_thai_don_hang = 'COMPLETE'
+      AND trang_thai_thanh_toan = 'COMPLETED'
     """, nativeQuery = true)
     Integer dashboardSoDonHang();
 
@@ -37,7 +37,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     SELECT SUM(cthd.so_luong) AS tong_so_san_pham_da_ban
     FROM chi_tiet_hoa_don cthd
     JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
-    WHERE hd.trang_thai_don_hang = 'COMPLETE'
+    WHERE hd.trang_thai_thanh_toan = 'COMPLETED'
     """, nativeQuery = true)
     Integer dashboardSoSanPham();
 
@@ -53,7 +53,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
     JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
     JOIN san_pham sp ON spct.id_san_pham = sp.id_san_pham
-    WHERE hd.trang_thai_don_hang = 'COMPLETE'
+    WHERE hd.trang_thai_thanh_toan = 'COMPLETED'
     GROUP BY sp.ma_san_pham, sp.ten_san_pham
     ORDER BY tong_so_luong_ban DESC
     """, nativeQuery = true)
@@ -127,7 +127,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     LEFT JOIN hoa_don hd 
         ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
        AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
-      AND hd.trang_thai_don_hang = 'COMPLETE'
+      AND hd.trang_thai_thanh_toan = 'COMPLETED'
     GROUP BY FORMAT(dau_thang, 'yyyy-MM')
     ORDER BY thang
     OPTION (MAXRECURSION 100)
@@ -149,7 +149,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     LEFT JOIN hoa_don hd 
         ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
        AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
-       AND hd.trang_thai_don_hang = 'CANCELLED'
+       AND hd.trang_thai_don_hang = 'RETURNED'
     GROUP BY FORMAT(dau_thang, 'yyyy-MM')
     ORDER BY thang
     OPTION (MAXRECURSION 100)

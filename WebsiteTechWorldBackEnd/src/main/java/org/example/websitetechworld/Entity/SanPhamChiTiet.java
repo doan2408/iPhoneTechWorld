@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "san_pham_chi_tiet")
+@ToString
 public class SanPhamChiTiet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,49 +33,15 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_san_pham")
     private SanPham idSanPham;
 
+    //chitiet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_mau")
     private MauSac idMau;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ram")
-    private Ram idRam;
-
+    //chitiet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_rom")
     private Rom idRom;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_man_hinh")
-    private ManHinh idManHinh;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_he_dieu_hanh")
-    private HeDieuHanh idHeDieuHanh;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_pin")
-    private Pin idPin;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cpu")
-    private Cpu idCpu;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_camera_truoc")
-    private CameraTruoc idCameraTruoc;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_camera_sau")
-    private CameraSau idCameraSau;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_xuat_xu")
-    private XuatXu idXuatXu;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_loai")
-    private Loai idLoai;
 
     @Column(name = "so_luong")
     private Integer soLuong;
@@ -83,7 +51,6 @@ public class SanPhamChiTiet {
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
-
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<ChiTietHoaDon> chiTietHoaDons = new LinkedHashSet<>();

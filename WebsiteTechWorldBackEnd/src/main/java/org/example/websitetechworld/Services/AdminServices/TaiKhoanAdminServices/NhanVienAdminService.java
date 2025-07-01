@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminStaffRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminNhanVienResponse;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienChucVu;
+import org.example.websitetechworld.Enum.NhanVien.NhanVienTrangThai;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
 import org.example.websitetechworld.exception.ValidationException;
@@ -33,7 +35,7 @@ public class NhanVienAdminService {
         adminNhanVienResponse.setEmail(nhanVien.getEmail());
         adminNhanVienResponse.setSdt(nhanVien.getSdt());
         adminNhanVienResponse.setDiaChi(nhanVien.getDiaChi());
-        adminNhanVienResponse.setTrangThai(nhanVien.getTrangThai());
+        adminNhanVienResponse.setTrangThai(NhanVienTrangThai.valueOf(nhanVien.getTrangThai()));
         adminNhanVienResponse.setChucVu(nhanVien.getChucVu());
         adminNhanVienResponse.setGioiTinh(nhanVien.getGioiTinh());
         adminNhanVienResponse.setNamSinh(nhanVien.getNgaySinh());
@@ -50,7 +52,7 @@ public class NhanVienAdminService {
         dto.setEmail(nv.getEmail());
         dto.setSdt(nv.getSdt());
         dto.setDiaChi(nv.getDiaChi());
-        dto.setTrangThai(nv.getTrangThai());
+        dto.setTrangThai(NhanVienTrangThai.valueOf(nv.getTrangThai()));
         dto.setChucVu(nv.getChucVu());
         dto.setGioiTinh(nv.getGioiTinh());
         dto.setNamSinh(nv.getNgaySinh());
@@ -95,21 +97,61 @@ public class NhanVienAdminService {
     }
 
     // Hiển thị nhân viên với search và phân trang
-    public Page<AdminNhanVienResponse> getNhanVienList(int page, int size, String keyword) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<NhanVien> pageResult;
+//    public Page<AdminNhanVienResponse> getNhanVienList(int page, int size, String keyword) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<NhanVien> pageResult;
+//
+//        if (keyword != null && !keyword.trim().isEmpty()) {
+//            // Nếu có từ khóa search, tìm kiếm theo nhiều trường
+//            pageResult = nhanVienRepository.findByKeyword(keyword.trim(), NhanVienChucVu.ADMIN, pageable);
+//        } else {
+//            // Nếu không có từ khóa, lấy tất cả
+//            pageResult = nhanVienRepository.findByNotChucVu(NhanVienChucVu.ADMIN, pageable);
+//        }
+//
+//        // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
+//        return pageResult.map(this::convertToResponse);
+//    }
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            // Nếu có từ khóa search, tìm kiếm theo nhiều trường
-            pageResult = nhanVienRepository.findByKeyword(keyword.trim(), pageable);
-        } else {
-            // Nếu không có từ khóa, lấy tất cả
-            pageResult = nhanVienRepository.findAll(pageable);
+    public Page<AdminNhanVienResponse> getNhanVienList(
+            int page,
+            int size,
+            String keyword,
+            Boolean gioiTinh,
+            NhanVienTrangThai trangThai
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Làm sạch keyword
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
         }
 
-        // Chuyển đổi dữ liệu từ NhanVien thành AdminNhanVienResponse
+        boolean isFiltering =
+                (keyword != null && !keyword.trim().isEmpty())
+                        || gioiTinh != null || trangThai != null;
+
+        Page<NhanVien> pageResult;
+
+        if (isFiltering) {
+            pageResult = nhanVienRepository.searchAdvanced(
+                    NhanVienChucVu.ADMIN, // loại bỏ admin
+                    gioiTinh,
+                    trangThai,
+                    keyword,
+                    pageable
+            );
+        } else {
+            // Không có filter gì cả → chỉ cần lấy danh sách nhân viên thường
+            pageResult = nhanVienRepository.findByNotChucVu(NhanVienChucVu.ADMIN, pageable);
+        }
+
         return pageResult.map(this::convertToResponse);
     }
+
 
     //detail nhan vien
     public Optional<AdminNhanVienResponse> getStaffById(Integer id) {
@@ -169,6 +211,13 @@ public class NhanVienAdminService {
 
         if (khachHangRepository.existsBySdt(staffRequest.getSdt()) || nhanVienRepository.existsBySdt(staffRequest.getSdt())) {
             errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
+        }
+
+        if (staffRequest.getMatKhau() != null && !staffRequest.getMatKhau().isBlank()) {
+            String rawPassword = staffRequest.getMatKhau();
+            if (rawPassword.length() < 6 || rawPassword.length() > 20) {
+                errors.add(Map.of("field", "matKhau", "message", "Mật khẩu phải từ 6 đến 20 ký tự"));
+            }
         }
 
         if (!errors.isEmpty()) {

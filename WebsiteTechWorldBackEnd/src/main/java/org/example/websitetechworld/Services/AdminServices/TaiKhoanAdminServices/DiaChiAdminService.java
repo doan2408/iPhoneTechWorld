@@ -32,6 +32,9 @@ public class DiaChiAdminService {
         adminDiaChiRequest.setQuanHuyen(diaChi.getQuanHuyen());
         adminDiaChiRequest.setTinhThanhPho(diaChi.getTinhThanhPho());
         adminDiaChiRequest.setDiaChiChinh(diaChi.getDiaChiChinh());
+        if(diaChi.getIdKhachHang() != null) {
+            adminDiaChiRequest.setIdKhachHang(diaChi.getIdKhachHang().getId());
+        }
         return adminDiaChiRequest;
     }
 
@@ -46,6 +49,9 @@ public class DiaChiAdminService {
         adminDiaChiRequest.setQuanHuyen(diaChi.getQuanHuyen());
         adminDiaChiRequest.setTinhThanhPho(diaChi.getTinhThanhPho());
         adminDiaChiRequest.setDiaChiChinh(diaChi.getDiaChiChinh());
+        if(diaChi.getIdKhachHang() != null) {
+            adminDiaChiRequest.setIdKhachHang(diaChi.getIdKhachHang().getId());
+        }
         return adminDiaChiRequest;
     }
 
@@ -59,8 +65,15 @@ public class DiaChiAdminService {
         diaChi.setQuanHuyen(adminDiaChiRequest.getQuanHuyen());
         diaChi.setTinhThanhPho(adminDiaChiRequest.getTinhThanhPho());
         diaChi.setDiaChiChinh(adminDiaChiRequest.getDiaChiChinh());
+        if (adminDiaChiRequest.getIdKhachHang() != null) {
+            // Ép kiểu idKhachHang -> entity
+            KhachHang khachHang = khachHangRepository.findById(adminDiaChiRequest.getIdKhachHang())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khách hàng với ID = " + adminDiaChiRequest.getIdKhachHang()));
+            diaChi.setIdKhachHang(khachHang);
+        }
     }
 
+    //get all dia chi theo id khach hang
     public List<AdminDiaChiResponse> getAllDiaChi(int idKhachHang) {
         return diaChiRepository.getAllDiaChi(idKhachHang);
     }
@@ -101,6 +114,22 @@ public class DiaChiAdminService {
         convertToDiaChiEntity(diaChiExisting, adminDiaChiRequest);
         DiaChi diaChiUpdate = diaChiRepository.save(diaChiExisting);
         return convertToRequest(diaChiUpdate);
+    }
+
+
+    @Transactional
+    public AdminDiaChiRequest addDiaChi(AdminDiaChiRequest adminDiaChiRequest) {
+        DiaChi diaChi = new DiaChi();
+
+        if (Boolean.TRUE.equals(adminDiaChiRequest.getDiaChiChinh())) {
+            if(adminDiaChiRequest.getIdKhachHang() == null) {
+                throw new IllegalArgumentException("Client does not exist");
+            }
+            diaChiRepository.updateAllDiaChiPhu(adminDiaChiRequest.getIdKhachHang(), null);
+        }
+        convertToDiaChiEntity(diaChi, adminDiaChiRequest);
+        DiaChi diaChiAdd = diaChiRepository.save(diaChi);
+        return convertToRequest(diaChiAdd);
     }
 
 

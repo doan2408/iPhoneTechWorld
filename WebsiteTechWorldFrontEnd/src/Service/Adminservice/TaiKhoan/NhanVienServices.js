@@ -1,31 +1,30 @@
-import axios from "axios";
+import api from "@/Service/LoginService/axiosInstance";
 
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/admin/staff",
-  withCredentials: true, // ❗ Gửi cookie (JSESSIONID) qua CORS
-});
+const baseURL = "/admin/staff";
 
-export const getAllStaff = async (page = 0, keyword = null) => {
+export const getAllStaff = async ({
+  page = 0,
+  keyword = null,
+  gioiTinh = null,
+  trangThai = null
+} = {}) => {
   try {
     const params = { page };
-    //only add keyword if it is provided
-    if (keyword && keyword.trim() !== "") {
-      params.keyword = keyword.trim();
-    }
-    const response = await axiosInstance.get("", { params });
+
+    if (keyword && keyword.trim() !== "") params.keyword = keyword.trim();
+    if (gioiTinh !== null) params.gioiTinh = gioiTinh;
+    if (trangThai !== null) params.trangThai = trangThai;
+
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (error) {
-    console.error(
-      "An error was thrown while loading the staff of admin: ",
-      error
-    );
-    throw error.response?.data || "Error getting staff";
+    console.error("Error:", error);
   }
 };
 
 export const detailStaff = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await api.get(`${baseURL}/${id}`);
     return response.data;
   } catch (error) {
     console.error("Có lỗi khi Detail Staff phía admin:", error);
@@ -35,7 +34,7 @@ export const detailStaff = async (id) => {
 
 export const updateStaff = async (id, staffRequest) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, staffRequest);
+    const response = await api.put(`${baseURL}/${id}`, staffRequest);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -56,7 +55,7 @@ export const updateStaff = async (id, staffRequest) => {
 
 export const addStaff = async (staffRequest) => {
   try {
-    const response = await axiosInstance.post(``, staffRequest);
+    const response = await api.post(`${baseURL}`, staffRequest);
     return response.data;
   } catch (error) {
     console.error(

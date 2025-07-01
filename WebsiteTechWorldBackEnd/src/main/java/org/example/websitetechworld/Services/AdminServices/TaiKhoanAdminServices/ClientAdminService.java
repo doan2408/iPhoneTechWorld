@@ -53,7 +53,7 @@ public class ClientAdminService {
         adminClientResponse.setTongDiem(khachHang.getTongDiem());
         adminClientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
         adminClientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
-        adminClientResponse.setTrangThai(khachHang.getTrangThai().name());
+        adminClientResponse.setTrangThai(khachHang.getTrangThai());
 
         // Tạo danh sách địa chỉ
         List<AdminDiaChiResponse> diaChiResponses = khachHang.getDiaChis().stream()
@@ -107,11 +107,25 @@ public class ClientAdminService {
     }
 
     //search
-    public Page<AdminClientResponse> getAllClient(int page, int size, String keyWord) {
+    public Page<AdminClientResponse> getAllClient(int page, int size, String keyword, Boolean gioiTinh, TrangThaiKhachHang trangThai) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // Làm sạch keyword
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.isEmpty()) {
+                keyword = null;
+            }
+        }
+
+        boolean isFiltering =
+                (keyword != null && !keyword.trim().isEmpty())
+                        || gioiTinh != null || trangThai != null;
+
         Page<KhachHang> pageResult;
-        if(keyWord !=null && !keyWord.isEmpty()){
-            pageResult = khachHangRepository.findByKeyword(keyWord.trim(), pageable);
+
+        if(isFiltering) {
+            pageResult = khachHangRepository.findByFilters(keyword, gioiTinh, trangThai, pageable);
         }
         else {
             pageResult = khachHangRepository.findAll(pageable);
@@ -128,20 +142,20 @@ public class ClientAdminService {
     public KhachHang addClient(AdminClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
-        if(request.getTaiKhoan() != null) {
-            if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan())) {
+        if(request.getTaiKhoan() != null && !request.getTaiKhoan().isEmpty()) {
+            if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan().trim()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan().trim())) {
                 errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
             }
         }
 
-        if(request.getEmail() != null) {
-            if (khachHangRepository.existsByEmail(request.getEmail()) || nhanVienRepository.existsByEmail(request.getEmail())) {
+        if(request.getEmail() != null && !request.getEmail().isEmpty()) {
+            if (khachHangRepository.existsByEmail(request.getEmail().trim()) || nhanVienRepository.existsByEmail(request.getEmail().trim())) {
                 errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
             }
         }
 
-        if(request.getSdt() != null) {
-            if (khachHangRepository.existsBySdt(request.getSdt()) || nhanVienRepository.existsBySdt(request.getSdt())) {
+        if(request.getSdt() != null && !request.getSdt().isEmpty()) {
+            if (khachHangRepository.existsBySdt(request.getSdt().trim()) || nhanVienRepository.existsBySdt(request.getSdt().trim())) {
                 errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
             }
         }
@@ -151,7 +165,7 @@ public class ClientAdminService {
         }
 
         if(request.getMatKhau() != null) {
-            String hashedPassword = passwordEncoder.encode(request.getMatKhau());
+            String hashedPassword = passwordEncoder.encode(request.getMatKhau().trim());
             request.setMatKhau(hashedPassword);
         }
 
@@ -215,7 +229,7 @@ public class ClientAdminService {
             if(!errors.isEmpty()) {
                 throw new ValidationException(errors);
             }
-
+            existing.setTaiKhoan(khachHangRequest.getTaiKhoan());
             existing.setTenKhachHang(khachHangRequest.getTenKhachHang());
             existing.setSdt(khachHangRequest.getSdt());
             existing.setEmail(khachHangRequest.getEmail());

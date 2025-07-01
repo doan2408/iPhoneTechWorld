@@ -2,46 +2,39 @@
   <div class="container mt-4">
 
     <el-row :gutter="20" class="mb-4 justify-content-center">
-
       <el-col :span="6">
         <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
       </el-col>
-
       <el-col :span="3">
         <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
       </el-col>
-
     </el-row>
 
-    <el-row :gutter="20" class="mb-2" justify="end" >
-
+    <el-row :gutter="20" class="mb-2" justify="end">
       <el-col :span="3">
         <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
       </el-col>
-
       <el-col :span="3">
         <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
       </el-col>
-
     </el-row>
     <h2>Danh sách xuất xứ</h2>
     <div class="table-responsive mb-4" style="margin-top: 20px;">
       <el-table :data="tableData" border style="width: 100%">
-        <el-table-column type="index" :index="indexMethod" label="STT" width="80"/>
+        <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
         <el-table-column prop="maXuatXu" label="Mã xuất xứ" />
         <el-table-column prop="tenQuocGia" label="Tên quốc gia" />
         <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
-              <router-link :to="`/admin/products/${row.id}`">
-                <el-button size="small" type="primary" :icon="Edit" circle />
-              </router-link>
+
+              <el-button size="small" type="primary" :icon="Edit" circle @click="openDetail(row)" />
 
               <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-
+              <!-- 
               <router-link :to="`/admin/products/detail/${row.id}`">
                 <el-button size="small" type="info" :icon="View" circle />
-              </router-link>
+              </router-link> -->
             </div>
           </template>
         </el-table-column>
@@ -56,14 +49,39 @@
       </div>
     </div>
 
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa xuất xứ' : 'Thêm mới xuất xứ'" width="900px"
+      :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form :model="formData" ref="formRef" label-width="140px" label-position="left" class="hdh-form">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Mã xuất xứ" prop="maXuatXu" :error="errors.maXuatXu">
+              <el-input v-model="formData.maXuatXu" placeholder="Nhập mã xuất xứ..." autocomplete="on" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Tên quốc gia" prop="tenQuocGia" :error="errors.tenQuocGia">
+              <el-input v-model="formData.tenQuocGia" placeholder="Nhập tên quốc gia..." />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row justify="end" style="margin-top: 30px;">
+          <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+          <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+        </el-row>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { getAllXuatXuPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ref, onMounted, watch, computed, reactive } from 'vue';
+import { deleteXuatXu, getAllXuatXuPage, postXuatXu, putXuatXu } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableData = ref([]);
 const currentPage = ref(1);
@@ -71,11 +89,43 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5; // Số bản ghi trên 1 trang
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null);
+
+// const rules = {
+//   maXuatXu: [{ required: true, message: 'Vui lòng nhập mã xuất xứ', trigger: 'blur' }],
+//   tenQuocGia: [{ required: true, message: 'Vui lòng nhập tên quốc gia', trigger: 'blur' }],
+// };
+
+const formData = reactive({
+  id: null,
+  maXuatXu: '',
+  tenQuocGia: '',
+})
+
+const resetForm = () => {
+  formData.id = null;
+  formData.maXuatXu = '';
+  formData.tenQuocGia = '';
+  errors.maXuatXu = '';
+  errors.tenQuocGia = ''
+}
+
+const resetErrors = () => {
+  errors.maXuatXu = '';
+  errors.tenQuocGia = ''
+}
+
+const errors = reactive({
+  maXuatXu: '',
+  tenQuocGia: ''
+})
 
 
 const loadData = async () => {
   try {
-    const response = await getAllXuatXuPage(currentPage.value - 1, pageSize);
+    const response = await getAllXuatXuPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
     tableData.value = response.content;
     totalPages.value = response.totalPages;
     totalItems.value = response.totalElements;
@@ -83,6 +133,61 @@ const loadData = async () => {
     console.error('Không thể load dữ liệu:', error);
   }
 };
+
+const submitForm = async () => {
+
+  if (!formRef.value) return;
+
+  try {
+    // await formRef.value.validate();
+
+    if (isEditMode.value) {
+      await putXuatXu(formData.id, formData);
+      ElMessage.success('Cập nhật xuất xứ thành công!');
+    } else {
+      await postXuatXu(formData);
+      ElMessage.success('Thêm mới xuất xứ thành công!');
+    }
+    resetForm();
+    dialogVisible.value = false;
+    loadData();
+  } catch (error) {
+
+    errors.maXuatXu = error.message.maXuatXu || ''
+    errors.tenQuocGia = error.message.tenQuocGia || ''
+
+    const errorMessages = [];
+    if (errors.maXuatXu) errorMessages.push(errors.maXuatXu);
+    if (errors.tenQuocGia) errorMessages.push(errors.tenQuocGia);
+
+    if (errorMessages.length > 0) {
+      ElMessage.error('Đã xảy ra lỗi không xác định');
+    } else {
+      ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+    }
+  }
+}
+
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm(
+      'Bạn có chắc chắn muốn xoá xuất xứ này không?',
+      'Xác nhận xoá',
+      {
+        confirmButtonText: 'Xoá',
+        cancelButtonText: 'Huỷ',
+        type: 'warning',
+      }
+    );
+    await deleteXuatXu(id);
+    ElMessage.success('Xoá thành công!');
+    loadData(); // tải lại danh sách sau khi xoá
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+    }
+  }
+}
 
 const fromRecord = computed(() => {
   return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
@@ -109,15 +214,26 @@ const handleRefresh = () => {
 };
 
 const handleCreate = () => {
-  console.log('Tạo mới');
-};
+  resetForm();
+  dialogVisible.value = true;
+  isEditMode.value = false;
+}
 
+const handleClose = () => {
+  dialogVisible.value = false;
+  resetForm()
+}
+
+const openDetail = (row) => {
+  isEditMode.value = true;
+  Object.assign(formData, row);
+  dialogVisible.value = true;
+  resetErrors()
+};
 
 const indexMethod = (index) => {
   return (currentPage.value - 1) * pageSize + index + 1;
 };
-
-
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;

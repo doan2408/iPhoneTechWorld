@@ -209,11 +209,19 @@
                                         {{ delivery.trangThaiDonHang }}
                                     </span>
                                 </td>
-                                <td class="table-td">
-                                    <button @click.stop="viewDeliveryDetail(delivery)" class="btn btn-primary btn-sm">
-                                        Xem chi tiết
+                                <td class="table-td flex gap-2">
+                                    <!-- Button -->
+                                    <button @click.stop="viewDeliveryDetail(delivery)"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+
+                                    <button @click="devliveryProcessing(delivery)"
+                                        class="btn btn-sm btn-outline-success">
+                                        <i class="fa-solid fa-gear"></i>
                                     </button>
                                 </td>
+
                             </tr>
                         </tbody>
                     </table>
@@ -267,8 +275,13 @@
                             </div>
 
                             <div class="card-footer">
-                                <button @click.stop="viewDeliveryDetail(delivery)" class="btn btn-primary btn-sm">
-                                    Xem chi tiết
+                                <button @click.stop="viewDeliveryDetail(delivery)"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+
+                                <button @click="devliveryProcessing(delivery)" class="btn btn-sm btn-outline-success">
+                                    <i class="fa-solid fa-gear"></i>
                                 </button>
                             </div>
                         </div>
@@ -497,6 +510,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { giaoHangGetAll } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { giaoHangDetail } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import router from '@/router'
 
 
 // State reactive
@@ -616,6 +630,12 @@ const viewDeliveryDetail = async (delivery) =>{
         isLoading.value = false;
     }
 }
+const devliveryProcessing = async (delivery) => {
+    router.push({
+        name: 'GiaoHangProcessing',
+        params: {id :delivery.idGiaoHang},
+    });
+}
 
 function backToList() {
     selectedDelivery.value = null
@@ -656,7 +676,7 @@ function getStatusClass(status) {
     const statusClasses = {
         'chờ xử lý': 'status-pending',
         'đang giao': 'status-shipping',
-        'đã giao': 'status-dlivered',
+        'đã giao': 'status-delivered',
         'giao thất bại': 'status-failed',
         'đã hoàn tiền': 'status-returned',
         'đã đóng gói': 'status-packed',

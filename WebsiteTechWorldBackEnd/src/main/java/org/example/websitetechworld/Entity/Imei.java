@@ -33,9 +33,4 @@ public class Imei {
     @Column(name = "trang_thai_imei", length = 50)
     private TrangThaiImei trangThaiImei;
 
-    @Size(max = 50)
-    @Nationalized
-    @Column(name = "nha_mang", length = 50)
-    private String nhaMang;
-
 }

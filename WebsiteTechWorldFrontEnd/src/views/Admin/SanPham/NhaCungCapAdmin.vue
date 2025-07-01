@@ -4,7 +4,6 @@
             <el-col :span="6">
                 <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
             </el-col>
@@ -14,13 +13,12 @@
             <el-col :span="3">
                 <el-button type="primary" @click="handleCreate" class="w-100">Tạo mới</el-button>
             </el-col>
-
             <el-col :span="3">
                 <el-button type="primary" @click="handleRefresh" class="w-100">Làm mới</el-button>
             </el-col>
         </el-row>
 
-        <h2>Danh sách pin</h2>
+        <h2>Danh nhà cung cấp</h2>
         <div class="table-responsive mb-4" style="margin-top: 20px;">
             <el-table :data="tableNCC" border style="width: 100%">
                 <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
@@ -31,13 +29,11 @@
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            <router-link :to="`/admin/products/${row.id}`">
-                                <el-button size="small" type="primary" :icon="Edit" circle />
-                            </router-link>
+                            <el-button size="small" type="primary" :icon="Edit" @click="openDetail(row)" circle />
                             <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-                            <router-link :to="`/admin/products/detail/${row.id}`">
+                            <!-- <router-link :to="`/admin/products/detail/${row.id}`">
                                 <el-button size="small" type="info" :icon="View" circle />
-                            </router-link>
+                            </router-link> -->
                         </div>
                     </template>
                 </el-table-column>
@@ -52,13 +48,55 @@
             </div>
         </div>
 
+        <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa nhà cung cấp' : 'Thêm mới nhà cung cấp'"
+            width="900px" :close-on-click-modal="false" :destroy-on-close="true">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+                class="hdh-form">
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Tên nhà cung cấp" prop="tenNhaCungCap" :error="errors.tenNhaCungCap">
+                            <el-input v-model="formData.tenNhaCungCap"
+                                placeholder="Nhập tên nhà cung cấp (ví dụ: Công ty ABC)" autocomplete="on" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Địa chỉ" prop="diaChi" :error="errors.diaChi">
+                            <el-input v-model="formData.diaChi"
+                                placeholder="Nhập địa chỉ (ví dụ: 123 Lê Lợi, Q.1, TP.HCM)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="Số điện thoại" prop="sdt" :error="errors.sdt">
+                            <el-input v-model="formData.sdt" placeholder="Nhập số điện thoại (ví dụ: 0901234567)" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :span="12">
+                        <el-form-item label="Email" prop="email" :error="errors.email">
+                            <el-input v-model="formData.email" placeholder="Nhập email (ví dụ: example@gmail.com)" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row justify="end" style="margin-top: 30px;">
+                    <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
+                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                </el-row>
+            </el-form>
+        </el-dialog>
+
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { getAllNhaCungCapPage } from '@/Service/Adminservice/Products/ProductAdminService';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
+import { deleteNCC, getAllNhaCungCapPage, postNCC, putNCC } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const tableNCC = ref([]);
 const currentPage = ref(1);
@@ -66,8 +104,53 @@ const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = 5;
 const searchQuery = ref('');
+const dialogVisible = ref(false);
+const isEditMode = ref(false);
+const formRef = ref(null);
 
-// Tính số bản ghi hiển thị từ đâu đến đâu
+const rules = {
+    tenNhaCungCap: [
+        { required: true, message: 'Vui lòng nhập tên nhà cung cấp', trigger: 'blur' },
+        { min: 2, max: 100, message: 'Tên phải từ 2 đến 100 ký tự', trigger: 'blur' }
+    ],
+    diaChi: [
+        { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' },
+        { max: 200, message: 'Địa chỉ tối đa 200 ký tự', trigger: 'blur' }
+    ],
+    sdt: [
+        { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
+        {
+            pattern: /^(0|\+84)[0-9]{9,10}$/,
+            message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)',
+            trigger: 'blur'
+        }
+    ],
+    email: [
+        { required: true, message: 'Vui lòng nhập email', trigger: 'blur' },
+        {
+            type: 'email',
+            message: 'Email không đúng định dạng',
+            trigger: ['blur', 'change']
+        }
+    ]
+};
+
+
+const formData = reactive({
+    id: null,
+    tenNhaCungCap: '',
+    diaChi: '',
+    sdt: '',
+    email: '',
+})
+
+const errors = reactive({
+    tenNhaCungCap: '',
+    diaChi: '',
+    sdt: '',
+    email: '',
+})
+
 const fromRecord = computed(() => {
     return totalItems.value === 0 ? 0 : (currentPage.value - 1) * pageSize + 1;
 });
@@ -75,7 +158,6 @@ const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
 
-// Gọi API dữ liệu phân trang và tìm kiếm
 const loadData = async () => {
     try {
         const response = await getAllNhaCungCapPage(currentPage.value - 1, pageSize, searchQuery.value);
@@ -87,13 +169,20 @@ const loadData = async () => {
     }
 };
 
-onMounted(() => {
-    loadData();
-});
+const resetForm = () => {
+    formData.id = null;
+    formData.tenNhaCungCap = '';
+    formData.diaChi = '';
+    formData.sdt = '';
+    formData.email = '';
+};
 
-watch([currentPage, searchQuery], () => {
-    loadData();
-});
+const resetErrors = () => {
+    errors.tenNhaCungCap = '';
+    errors.diaChi = '';
+    errors.sdt = '';
+    errors.email = '';
+};
 
 const handleSearch = () => {
     currentPage.value = 1;
@@ -104,28 +193,102 @@ const handleRefresh = () => {
     currentPage.value = 1;
 };
 
+const submitForm = async () => {
+    if (!formRef.value) return;
+
+    try {
+        await formRef.value.validate();
+        if (isEditMode.value) {
+            await putNCC(formData.id, formData);
+            ElMessage.success('Cập nhật nhà cung cấp thành công!');
+        } else {
+            await postNCC(formData);
+            ElMessage.success('Thêm mới nhà cung cấp thành công!');
+        }
+
+        resetForm();
+        dialogVisible.value = false;
+        loadData();
+    } catch (error) {
+        errors.tenNhaCungCap = error.message.tenNhaCungCap || ''
+        errors.diaChi = error.message.diaChi || ''
+        errors.sdt = error.message.sdt || ''
+        errors.email = error.message.email || ''
+
+        const errorMessages = [];
+        if (errors.tenNhaCungCap) errorMessages.push(errors.tenNhaCungCap);
+        if (errors.diaChi) errorMessages.push(errors.diaChi);
+        if (errors.sdt) errorMessages.push(errors.sdt);
+        if (errors.email) errorMessages.push(errors.email);
+
+        if (errorMessages.length > 0) {
+            ElMessage.error('Đã xảy ra lỗi không xác định');
+        } else {
+            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        }
+    }
+}
+
+const openDetail = (row) => {
+    isEditMode.value = true;
+    Object.assign(formData, row);
+    dialogVisible.value = true;
+    resetErrors()
+};
+
 const handleCreate = () => {
-    console.log('Tạo mới nhà cung cấp');
+    resetForm();
+    dialogVisible.value = true;
+};
+
+const handleClose = () => {
+    dialogVisible.value = false;
+};
+
+
+const handleDelete = async (id) => {
+    try {
+        await ElMessageBox.confirm(
+            'Bạn có chắc chắn muốn xoá nhà cung cấp này không?',
+            'Xác nhận xoá',
+            {
+                confirmButtonText: 'Xoá',
+                cancelButtonText: 'Huỷ',
+                type: 'warning',
+            }
+        );
+        await deleteNCC(id);
+        ElMessage.success('Xoá thành công!');
+        loadData(); // tải lại danh sách sau khi xoá
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+        }
+    }
 };
 
 const indexMethod = (index) => {
     return (currentPage.value - 1) * pageSize + index + 1;
 };
 
-const handleDelete = (id) => {
-    console.log('Xoá nhà cung cấp', id);
-};
-
 const handlePageChange = (newPage) => {
     currentPage.value = newPage;
 };
+
+onMounted(() => {
+    loadData();
+});
+
+watch([currentPage, searchQuery], () => {
+    loadData();
+});
+
 </script>
 
 
 
 
 <style scoped>
-
 ::v-deep(.el-pagination button) {
     font-size: 16px;
     padding: 8px 16px;

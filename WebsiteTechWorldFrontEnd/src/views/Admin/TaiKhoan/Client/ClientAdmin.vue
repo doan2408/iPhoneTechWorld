@@ -1,76 +1,291 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
-import { getAllClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { updateClient } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { onMounted, reactive, ref, watch, nextTick } from "vue";
+import {
+  getAllClient,
+  addClient,
+  updateClient,
+  detailClient,
+} from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
+import { ElMessage, ElIcon } from "element-plus";
+import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue";
 
 const clientList = ref([]);
 const isLoading = ref(false);
 const error = ref("");
-
 const currentPage = ref(0);
 const totalPages = ref(0);
-
+const totalFilteredCount = ref(0);
 const searchKeyword = ref("");
-const searchTimeout = ref(null) // status of searching
+const searchTimeout = ref(null);
 
-//load client
-// nếu người dùng không truyền page khi gọi hàm
-//  → nó sẽ tự động dùng 0.
+// Modal state
+const showModal = ref(false);
+const isEditMode = ref(false);
+const editingClientId = ref(null);
+const isSubmitting = ref(false);
+
+// Client form data
+const clientRequest = ref({
+  tenKhachHang: "",
+  taiKhoan: "",
+  matKhau: "",
+  email: "",
+  sdt: "",
+  trangThai: "ACTIVE",
+  gioiTinh: true,
+  ngaySinh: "",
+});
+
+const errors = reactive({});
+const formRef = ref(null);
+const formKey = ref(0);
+
+const filterGender = ref(null); // true / false / null
+const filterStatus = ref(null); // "ACTIVE" / "INACTIVE" / null
+
+// Validation rules
+const rules = ref({
+  tenKhachHang: [
+    {
+      required: true,
+      message: "Vui lòng nhập tên khách hàng",
+      trigger: "blur",
+    },
+  ],
+});
+
+// Error handling utilities
+const setError = (field, message) => {
+  errors[field] = message;
+};
+
+const clearError = (field) => {
+  if (errors.hasOwnProperty(field)) {
+    delete errors[field];
+  }
+};
+
+const clearAllErrors = () => {
+  const keys = [...Object.keys(errors)];
+  keys.forEach((key) => {
+    clearError(key);
+  });
+
+  // Force reactivity update
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.clearValidate();
+    }
+  });
+};
+
+// Load client
 const loadClient = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
-    const response = await getAllClient(page, keyword);
+    error.value = "";
+
+    const response = await getAllClient({
+      page,
+      keyword: keyword || searchKeyword.value || null,
+      gioiTinh: filterGender.value,
+      trangThai: filterStatus.value,
+    });
+
     clientList.value = response.content;
     currentPage.value = page;
     totalPages.value = response.totalPages;
+    totalFilteredCount.value = response.totalElements;
   } catch (err) {
-    error.value = err.message || "An error was thrown while loading the satff";
+    error.value =
+      err.message || "An error was thrown while loading the clients";
   } finally {
     isLoading.value = false;
   }
 };
 
-//search client
+// Search client
 const performSearch = () => {
-  //clear old timeout if has
-  if(searchTimeout.value) {
+  if (searchTimeout.value) {
     clearTimeout(searchTimeout.value);
   }
-
-  //create new timeout --delay 500ms after user stop typing 
   searchTimeout.value = setTimeout(() => {
-    currentPage.value  = 0;
+    currentPage.value = 0;
     loadClient(0, searchKeyword.value || null);
   }, 500);
-  
-}
+};
 
 const clearSearch = () => {
-  searchKeyword.value = ""
-}
+  searchKeyword.value = "";
+  currentPage.value = 0;
+  loadClient(0, null);
+};
 
-watch(searchKeyword, () => { 
-  performSearch();
-})
+watch(searchKeyword, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    performSearch();
+  }
+});
 
-//previous page
+watch([filterGender, filterStatus], () => {
+  currentPage.value = 0;
+  loadClient(0, searchKeyword.value?.trim() || null);
+});
+
+// Pagination
 const previousPage = () => {
   if (currentPage.value > 0) {
     currentPage.value -= 1;
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
-//next page
 const nextPage = () => {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value += 1;
   } else {
     currentPage.value = 0;
   }
-  loadClient(currentPage.value, searchKeyword.value || null);
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
+};
+
+const firstPage = () => {
+  const firstPage = 0;
+  currentPage.value = firstPage;
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
+};
+
+const lastPage = () => {
+  const latePage = totalPages.value - 1;
+  currentPage.value = latePage;
+  loadClient(currentPage.value, searchKeyword.value?.trim() || null);
+};
+
+const clearFilters = () => {
+  filterGender.value = null;
+  filterStatus.value = null;
+  searchKeyword.value = "";
+  currentPage.value = 0;
+  loadClient(0, null);
+};
+
+const handlePageChange = async (newPage) => {
+  currentPage.value = newPage - 1; // Điều chỉnh về index 0-based
+  await loadClient(currentPage.value, searchKeyword.value || null);
+};
+
+// Modal functions
+const openAddModal = () => {
+  showModal.value = true;
+  isEditMode.value = false;
+  editingClientId.value = null;
+  resetForm();
+  clearAllErrors();
+  formKey.value += 1; // Force re-render form
+
+  // Reset Element Plus form validation
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.resetFields();
+      formRef.value.clearValidate();
+    }
+  });
+};
+
+const openEditModal = async (clientId) => {
+  showModal.value = true;
+  isEditMode.value = true;
+  editingClientId.value = clientId;
+  clearAllErrors();
+  formKey.value += 1; // Force re-render form
+
+  // Reset validation trước khi load data
+  nextTick(() => {
+    if (formRef.value) {
+      formRef.value.resetFields();
+      formRef.value.clearValidate();
+    }
+  });
+
+  try {
+    isLoading.value = true;
+    const response = await detailClient(clientId);
+    Object.assign(clientRequest.value, response);
+    clientRequest.value.matKhau = ""; // Đặt lại mật khẩu rỗng khi chỉnh sửa
+  } catch (err) {
+    ElMessage.error(err.message || "Lỗi khi tải thông tin khách hàng");
+    showModal.value = false;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  resetForm();
+  clearAllErrors();
+  isEditMode.value = false;
+  editingClientId.value = null;
+
+  // Reset Element Plus form validation
+  if (formRef.value) {
+    formRef.value.resetFields();
+    formRef.value.clearValidate();
+  }
+};
+
+const resetForm = () => {
+  clientRequest.value = {
+    tenKhachHang: "",
+    taiKhoan: "",
+    matKhau: "",
+    email: "",
+    sdt: "",
+    trangThai: "ACTIVE",
+    gioiTinh: true,
+    ngaySinh: "",
+  };
+};
+
+// Handle submit
+const handleAddClient = async () => {
+  clearAllErrors();
+  isSubmitting.value = true;
+
+  try {
+    const isValid = await formRef.value.validate();
+    if (isValid) {
+      if (isEditMode.value) {
+        const payload = { ...clientRequest.value };
+        if (!payload.matKhau) {
+          delete payload.matKhau; // Không gửi matKhau nếu rỗng
+        }
+        await updateClient(editingClientId.value, payload);
+        ElMessage.success("Cập nhật khách hàng thành công");
+      } else {
+        await addClient(clientRequest.value);
+        ElMessage.success("Thêm khách hàng thành công");
+      }
+      closeModal();
+      loadClient(currentPage.value, searchKeyword.value || null);
+    }
+  } catch (err) {
+    if (Array.isArray(err)) {
+      err.forEach(({ field, message }) => {
+        setError(field, message);
+      });
+    } else {
+      ElMessage.error(
+        isEditMode.value
+          ? "Cập nhật khách hàng thất bại"
+          : "Thêm khách hàng thất bại"
+      );
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 onMounted(() => {
@@ -80,564 +295,596 @@ onMounted(() => {
 
 <template>
   <div class="client-container">
+    <!-- Add Client Button -->
     <div>
-      <RouterLink :to="`/admin/client/add`" class="btn-success"
-        >Thêm khách hàng</RouterLink
-      >
+      <el-button type="primary" @click="openAddModal" class="add-client-btn">
+        <el-icon><Plus /></el-icon>
+        Thêm khách hàng
+      </el-button>
     </div>
-    <hr />
+    <el-divider />
 
-    <!-- Thanh tìm kiếm -->
+    <!-- Search Section -->
     <div class="search-section">
       <div class="search-container">
         <div class="search-input-group">
           <div class="search-input-wrapper">
-            <i class="bi bi-search search-icon"></i>
-            <input
+            <el-input
               v-model="searchKeyword"
-              type="text"
-              class="form-control search-input"
               placeholder="Tìm kiếm theo tên, email, số điện thoại, tên tài khoản..."
+              prefix-icon="Search"
+              clearable
+              @clear="clearSearch"
+              class="search-input"
             />
-            <button 
-              @click="clearSearch" 
-              class="btn-clear-inline"
-              v-if="searchKeyword"
-              title="Xóa tìm kiếm"
-            >
-              <i class="bi bi-x-circle"></i>
-            </button>
           </div>
           <div class="search-status" v-if="isLoading">
-            <i class="bi bi-arrow-repeat spin"></i>
+            <el-icon class="is-loading"><Loading /></el-icon>
             Đang tìm kiếm...
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Hiển thị khi đang tải -->
+    <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
+      <el-icon :icon="Loading" />
       <p>Đang tải dữ liệu...</p>
     </div>
 
+    <!--filter -->
+    <div class="filter-section mb-3">
+      <div class="d-flex gap-2 align-items-center justify-content-between">
+        <div class="d-flex gap-2 align-items-center">
+          <el-select
+            v-model="filterGender"
+            placeholder="Lọc theo giới tính"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Nam" :value="true" />
+            <el-option label="Nữ" :value="false" />
+          </el-select>
 
-    <!-- Hiển thị kết quả tìm kiếm -->
-    <div v-if="searchKeyword && !isLoading" class="search-result-info">
-      <p>
-        <i class="bi bi-info-circle"></i>
-        Kết quả tìm kiếm cho: "<strong>{{ searchKeyword }}</strong>"
-        ({{ clientList.length }} khách hàng)
-      </p>
-    </div>
+          <el-select
+            v-model="filterStatus"
+            placeholder="Lọc theo trạng thái"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Hoạt động" value="ACTIVE" />
+            <el-option label="Ngừng" value="INACTIVE" />
+          </el-select>
 
-     <!-- Hiển thị khi không có dữ liệu -->
-    <div v-if="!isLoading && clientList.length === 0" class="no-data">
-      <p v-if="searchKeyword">
-        <i class="bi bi-search"></i>
-        Không tìm thấy khách hàng nào với từ khóa "{{ searchKeyword }}"
-      </p>
-      <p v-else>
-        <i class="bi bi-inbox"></i>
-        Chưa có khách hàng nào
-      </p>
-    </div>
+          <el-button 
+            size="small" 
+            @click="clearFilters"
+            :disabled="!filterGender && !filterStatus && !searchKeyword"
+          >
+            Xóa bộ lọc
+          </el-button>
+        </div>
 
-    <h2>Danh sách khách hàng</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Mã khách hàng</th>
-          <th>Tên khách hàng</th>
-          <th>Tên đăng nhập</th>
-          <th>Email</th>
-          <th>Địa chỉ</th>
-          <th>Số điện thoại</th>
-          <th>Trạng thái</th>
-          <th>Giới tính</th>
-          <th>Năm sinh</th>
-          <th colspan="2" style="text-align: center">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="client in clientList" :key="client.id">
-          <td>{{ client.maKhachHang }}</td>
-          <td>{{ client.tenKhachHang }}</td>
-          <td>{{ client.taiKhoan }}</td>
-          <td>{{ client.email }}</td>
-          <td>
-            <template
-              v-if="client.diaChi && client.diaChi.find((dc) => dc.diaChiChinh)"
-            >
-              {{ client.diaChi.find((dc) => dc.diaChiChinh).soNha }},
-              {{ client.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
-              {{ client.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
-              {{ client.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
-              {{ client.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
-            </template>
-            <template v-else>Không có</template>
-          </td>
-
-          <td>
-            {{ client.sdt ? client.sdt : "Không có" }}
-          </td>
-
-          <!-- Cột Trạng thái -->
-          <td>
-            <span
-              class="badge"
-              :class="{
-                'badge-active': client.trangThai === 'ACTIVE',
-                'badge-inactive': client.trangThai === 'INACTIVE',
-              }"
-            >
-              {{ client.trangThai }}
+        <!-- Hiển thị số kết quả -->
+        <div class="result-count" v-if="!isLoading">
+          <el-text size="small" type="info">
+            Tổng: {{ totalFilteredCount }} khách hàng
+            <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
+              (đã lọc)
             </span>
-          </td>
-          <td>{{ client.gioiTinh ? "Nam" : "Nữ" }}</td>
-          <td>
+          </el-text>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Error State -->
+    <div v-if="error && !isLoading" class="error-state">
+      <el-alert
+        :title="error"
+        type="error"
+        show-icon
+        :closable="false"
+      />
+    </div>
+
+    <!-- Search Result Info -->
+    <div v-if="searchKeyword && !isLoading" class="search-result-info">
+      <el-alert
+        :title="`Kết quả tìm kiếm cho: '${searchKeyword}' (${clientList.length} khách hàng)`"
+        type="info"
+        :closable="false"
+        show-icon
+      />
+    </div>
+
+    <!-- No Data State -->
+    <div v-if="!isLoading && clientList.length === 0" class="no-data">
+      <el-empty>
+        <template #description>
+          <span v-if="searchKeyword">
+            Không tìm thấy khách hàng nào với từ khóa "{{ searchKeyword }}"
+          </span>
+          <span v-else>Chưa có khách hàng nào</span>
+        </template>
+        <el-button 
+          v-if="searchKeyword || filterGender !== null || filterStatus !== null"
+          type="primary" 
+          @click="clearFilters"
+        >
+          Xóa bộ lọc
+        </el-button>
+      </el-empty>
+    </div>
+
+    <!-- Client Table -->
+    <div v-if="clientList.length > 0">
+      <h2>Danh sách khách hàng</h2>
+      <el-table :data="clientList" style="width: 100%" stripe>
+        <el-table-column
+          type="index"
+          label="STT"
+          width="60"
+          :index="(index) => index + 1 + currentPage * 10"
+        />
+        <el-table-column prop="maKhachHang" label="Mã khách hàng" width="120" />
+        <el-table-column
+          prop="tenKhachHang"
+          label="Tên khách hàng"
+          width="150"
+        />
+        <el-table-column prop="taiKhoan" label="Tên đăng nhập" width="130" />
+        <el-table-column prop="email" label="Email" width="180" />
+        <el-table-column label="Địa chỉ" width="250">
+          <template #default="scope">
+            <span style="white-space: normal; word-break: break-word">
+              <template
+                v-if="
+                  scope.row.diaChi &&
+                  scope.row.diaChi.find((dc) => dc.diaChiChinh)
+                "
+              >
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).soNha }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
+                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
+              </template>
+              <template v-else>Không có</template>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sdt" label="Số điện thoại" width="120">
+          <template #default="scope">
+            {{ scope.row.sdt ? scope.row.sdt : "Không có" }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Trạng thái" width="100">
+          <template #default="scope">
+            <el-tag
+              :type="scope.row.trangThai === 'ACTIVE' ? 'success' : 'danger'"
+              size="small"
+            >
+              {{ scope.row.trangThai === "ACTIVE" ? "Hoạt động" : "Ngừng" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="Giới tính" width="80">
+          <template #default="scope">
+            {{ scope.row.gioiTinh ? "Nam" : "Nữ" }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Năm sinh" width="100">
+          <template #default="scope">
             {{
-              client.ngaySinh
-                ? new Date(client.ngaySinh).getFullYear()
+              scope.row.ngaySinh
+                ? new Date(scope.row.ngaySinh).getFullYear()
                 : "Không"
             }}
-          </td>
-          <td>
-            <RouterLink
-              :to="`/admin/client/${client.id}`"
-              class="btn btn-primary btn-sm"
+          </template>
+        </el-table-column>
+        <el-table-column label="Thao tác" width="150" fixed="right">
+          <template #default="scope">
+            <el-button
+              type="primary"
+              size="small"
+              :icon="Edit"
+              @click="openEditModal(scope.row.id)"
               title="Chỉnh sửa"
-            >
-              <i class="bi bi-pencil-square"></i>
-            </RouterLink>
-          </td>
-          <td>
-            <RouterLink
-              :to="`/admin/client/addresses/${client.id}`"
-              class="btn btn-warning btn-sm"
+            />
+            <el-button
+              type="warning"
+              size="small"
+              @click="$router.push(`/admin/client/addresses/${scope.row.id}`)"
               title="Xem địa chỉ"
             >
               <i class="bi bi-geo-alt"></i>
-            </RouterLink>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- Nút phân trang -->
-    <div class="pagination">
-      <button @click="previousPage">Trang trước</button>
-      <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-      <button @click="nextPage">Trang sau</button>
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- Pagination -->
+      <div class="pagination-fixed">
+        <div
+          class="d-flex justify-content-center align-items-center gap-3"
+          style="margin-top: 30px"
+        >
+          <!-- Nút Đầu -->
+          <el-button
+            :disabled="currentPage === 0"
+            @click="firstPage"
+            type="default"
+          >
+            «
+          </el-button>
+
+          <!-- el-pagination -->
+          <el-pagination
+            background
+            layout="prev, pager, next"
+            :page-size="10"
+            :current-page="currentPage + 1"
+            :total="totalPages * 10"
+            :pager-count="7"
+            prev-text="‹"
+            next-text="›"
+            @current-change="handlePageChange"
+          />
+
+          <!-- Nút Cuối -->
+          <el-button
+            :disabled="currentPage === totalPages - 1"
+            @click="lastPage"
+            type="default"
+          >
+            »
+          </el-button>
+        </div>
+      </div>
     </div>
+
+    <!-- Client Modal (Add/Edit) -->
+    <el-dialog
+      v-model="showModal"
+      :title="
+        isEditMode ? 'Cập nhật thông tin khách hàng' : 'Thêm khách hàng mới'
+      "
+      width="800px"
+      :before-close="closeModal"
+    >
+      <el-form
+        :model="clientRequest"
+        ref="formRef"
+        :key="formKey"
+        label-width="140px"
+        label-position="left"
+        :rules="rules"
+        @submit.prevent="handleAddClient"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="Tên khách hàng"
+              :error="errors.tenKhachHang"
+              prop="tenKhachHang"
+            >
+              <el-input
+                v-model="clientRequest.tenKhachHang"
+                placeholder="Nhập tên khách hàng"
+              />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Tên đăng nhập" :error="errors.taiKhoan">
+              <el-input
+                v-model.trim="clientRequest.taiKhoan"
+                placeholder="Nhập tên đăng nhập"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Email" :error="errors.email">
+              <el-input
+                v-model.trim="clientRequest.email"
+                placeholder="Nhập email"
+              />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Số điện thoại" :error="errors.sdt">
+              <el-input
+                v-model.trim="clientRequest.sdt"
+                placeholder="Nhập số điện thoại"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Trạng thái">
+              <el-select
+                v-model="clientRequest.trangThai"
+                placeholder="Chọn trạng thái"
+              >
+                <el-option label="Hoạt động" value="ACTIVE" />
+                <el-option label="Ngừng hoạt động" value="INACTIVE" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="Năm sinh" :error="errors.ngaySinh">
+              <el-date-picker
+                v-model="clientRequest.ngaySinh"
+                type="date"
+                placeholder="Chọn năm sinh"
+                format="DD/MM/YYYY"
+                value-format="YYYY-MM-DD"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Giới tính">
+              <el-select
+                v-model="clientRequest.gioiTinh"
+                placeholder="Chọn giới tính"
+              >
+                <el-option label="Nam" :value="true" />
+                <el-option label="Nữ" :value="false" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeModal" :disabled="isSubmitting">
+            Hủy
+          </el-button>
+          <el-button
+            type="primary"
+            @click="handleAddClient"
+            :loading="isSubmitting"
+          >
+            {{ isEditMode ? "Cập nhật" : "Thêm khách hàng" }}
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <style scoped>
 .client-container {
-  margin-left: 10px;
-  padding: 30px;
-  width: 99%;
-  box-sizing: border-box;
-  background: #f8f9fa;
+  padding: 24px;
+  background: #f5f7fa;
   min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.client-container h3 {
-  margin-bottom: 25px;
-  font-weight: 600;
-  color: #495057;
-  font-size: 24px;
-  text-align: center;
+.add-client-btn {
+  margin-bottom: 16px;
 }
 
-.client-container h2 {
-  margin-bottom: 20px;
-  font-weight: 600;
-  color: #495057;
-  font-size: 22px;
-  text-align: center;
-  margin-top: 30px;
+.search-section {
+  margin-bottom: 24px;
 }
 
-/* Button styling - match với tone xanh trong ảnh */
-.btn-success {
-  background: #17a2b8;
-  border: none;
-  padding: 12px 30px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 15%;
-  margin-left: 85%;
-  transition: all 0.2s ease;
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.btn-success:hover {
-  background: #138496;
-}
-
-/* Table styling - tối giản như trong ảnh */
-.table {
-  margin-top: 30px;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #dee2e6;
-  width: 100%;
-}
-
-/* Table header - màu trắng như trong ảnh */
-.table thead {
-  background: white;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.table thead th {
-  color: #495057 !important;
-  font-weight: 500 !important;
-  padding: 16px 12px !important;
-  border: none !important;
-  font-size: 14px !important;
-  text-align: left !important;
-  background: white !important;
-  border-bottom: 1px solid #dee2e6 !important;
-}
-
-/* Bỏ striped, table trắng hết */
-.table tbody tr {
-  background: white !important;
-  transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-  background-color: #f8f9fa !important;
-}
-
-.table th,
-.table td {
-  vertical-align: middle !important;
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
-  font-size: 14px;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Action buttons - tone xanh tối giản */
-.btn-primary {
-  background: #007bff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-  margin-right: 5px;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #0056b3;
-}
-
-.btn-warning {
-  background: #ffc107;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-  color: #212529;
-}
-
-.btn-warning:hover {
-  background: #e0a800;
-}
-
-/* Pagination - tối giản */
-.pagination {
-  margin-top: 30px;
+.search-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 15px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.pagination button {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  cursor: pointer;
-  background: white;
-  color: #495057;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.pagination button:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.pagination span {
-  font-weight: 500;
-  color: #495057;
-  font-size: 14px;
-  padding: 8px 16px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-}
-
-/* Loading state */
-.text-center p {
-  font-size: 16px;
-  color: #6c757d;
-  font-weight: 500;
-  padding: 40px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* HR styling */
-hr {
-  border: none;
-  height: 1px;
-  background: #dee2e6;
-  margin: 20px 0;
-}
-
-/* Address cell styling */
-.table td:nth-child(5) {
-  max-width: 200px;
-  word-wrap: break-word;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-/* Action buttons container */
-.table td:nth-last-child(-n + 2) {
-  text-align: center;
-  padding: 10px 5px;
-}
-
-/* Form controls */
-.form-control,
-.form-select {
-  border-radius: 4px;
-  border: 1px solid #ced4da;
-  padding: 8px 12px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
-  background: white;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: #80bdff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-  background: white;
-  outline: none;
-}
-
-/* Button styling - viền xám, chỉ icon có màu */
-.btn-primary,
-.btn-warning {
-  background: white;
-  border: 1px solid #dee2e6;
-  padding: 6px 10px;
-  border-radius: 4px;
-}
-
-.btn-primary:hover,
-.btn-warning:hover {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-}
-
-/* Icon có màu riêng */
-.btn-primary .bi {
-  color: #007bff;
-}
-
-.btn-warning .bi {
-  color: #ffc107;
-}
-
-.btn-primary:hover .bi {
-  color: #007bff;
-}
-
-.btn-warning:hover .bi {
-  color: #ffc107;
-}
-
-/* Badge styling theo mẫu trong ảnh */
-.badge {
-  padding: 6px 12px !important;
-  border-radius: 4px !important;
-  font-size: 11px !important;
-  font-weight: bold 600 !important;
-  text-transform: uppercase !important;
-  display: inline-block !important;
-  text-align: center !important;
-  min-width: 80px !important;
-  letter-spacing: 0.5px !important;
-}
-
-/* Hoạt động - giống HOÀN THÀNH (xanh lá) */
-.badge-active {
-  background-color: #e9f6f0 !important; /* Nền xanh lá nhạt */
-  color: #1cae6a !important; /* Chữ xanh lá đậm */
-}
-
-/* Không hoạt động - giống ĐÃ HỦY (đỏ) */
-.badge-inactive {
-  background-color: #f7e7e7 !important; /* Nền đỏ nhạt */
-  color: #ed0e0e !important; /* Chữ đỏ đậm */
 }
 
 .search-input-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 600px;
 }
 
 .search-input-wrapper {
-  position: relative;
   width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 16px;
-  color: #6c757d;
-  font-size: 16px;
-  z-index: 2;
 }
 
 .search-input {
-  flex: 1;
-  padding: 12px 16px 12px 45px;
-  border: 2px solid #dee2e6;
-  border-radius: 25px;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  background: #f8f9fa;
-  padding-right: 50px;
-}
-
-.search-input:focus {
-  border-color: #17a2b8;
-  box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
-  outline: none;
-  background: white;
-}
-
-.btn-clear-inline {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-.btn-clear-inline:hover {
-  color: #dc3545;
-  background: rgba(220, 53, 69, 0.1);
+  width: 100%;
 }
 
 .search-status {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #17a2b8;
+  margin-top: 8px;
+  color: #409eff;
   font-size: 14px;
-  font-weight: 500;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  justify-content: center;
 }
 
 .search-result-info {
-  background: white;
-  padding: 15px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  border-left: 4px solid #17a2b8;
-}
-
-.search-result-info p {
-  margin: 0;
-  color: #495057;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.search-result-info i {
-  color: #17a2b8;
+  margin-bottom: 16px;
 }
 
 .no-data {
-  background: white;
-  padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  margin: 20px 0;
+  margin: 40px 0;
 }
 
-.no-data p {
-  margin: 0;
-  color: #6c757d;
-  font-size: 16px;
+.text-center {
+  text-align: center;
+  padding: 40px;
+}
+
+h2 {
+  margin: 24px 0 16px 0;
+  color: #303133;
+  font-weight: 600;
+}
+
+/* Pagination - Sử dụng style từ ProductAdmin.vue */
+.pagination-fixed {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+:deep(.el-pagination button) {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 0 2px;
+  padding: 6px 12px;
+}
+
+:deep(.el-pagination button:hover) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+:deep(.el-pagination .el-pager li) {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  border-radius: 6px;
+  margin: 0 2px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
 }
 
-.no-data i {
-  font-size: 20px;
+:deep(.el-pagination .el-pager li:hover) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+:deep(.el-pagination .el-pager li.is-active) {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* Dialog customizations */
+:deep(.el-dialog) {
+  border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px 20px 10px 20px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Form customizations */
+:deep(.el-form-item__label) {
+  color: #606266;
+  font-weight: 500;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 6px;
+}
+
+:deep(.el-select) {
+  width: 100%;
+}
+
+/* Table customizations */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background: #fafafa;
+  color: #606266;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .client-container {
+    padding: 16px;
+  }
+
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 5vh auto !important;
+  }
+}
+/* Đảm bảo tất cả các dòng trong table có cùng chiều cao và font-size */
+:deep(.el-table tr) {
+  height: 48px !important; /* Đặt chiều cao cố định */
+  transition: none !important; /* Loại bỏ hiệu ứng chuyển đổi không mong muốn */
+}
+
+:deep(.el-table td) {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #374151;
+  border-color: #f3f4f6;
+  background: white !important;
+  vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
+}
+
+:deep(.el-table .cell) {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: nowrap !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  :deep(.el-table tr) {
+    height: 40px !important; /* Giảm chiều cao trên mobile */
+  }
+
+  :deep(.el-table td) {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 </style>

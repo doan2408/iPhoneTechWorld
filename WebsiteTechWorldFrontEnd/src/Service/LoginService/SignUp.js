@@ -1,13 +1,13 @@
-import axios from 'axios'
+import api from "./axiosInstance"
 
-export const API_URL = 'http://localhost:8080/api/auth' 
+
+const API_URL = '/api/auth' 
 
 // Đăng ký
 const register = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}/register`,
-       userData ,
-       { withCredentials: true });
+    const response = await api.post(API_URL + `/register`,
+       userData );
     const { message, roles } = response.data;
     return { message, roles };
   } catch (error) {
@@ -26,11 +26,10 @@ const register = async (userData) => {
 
 
 
-
 // Đăng xuất
 export const logout = async () => {
   try {
-    const response = await axios.post(`${API_URL}/logout`, {}, {
+    const response = await api.post(API_URL + `/logout`, {}, {
       withCredentials: true
     })
     return response.data  // Thông báo đăng xuất thành công
@@ -42,7 +41,7 @@ export const logout = async () => {
 // Lấy thông tin người dùng hiện tại
 export const getCurrentUser = async () => {
   try {
-    const response = await axios.get(`${API_URL}/me`, {
+    const response = await api.get(API_URL + `/me`, {
       withCredentials: true
     })
     return response.data  // Trả về thông tin người dùng

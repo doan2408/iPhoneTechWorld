@@ -66,7 +66,7 @@ public class NhanVien implements JointAccount {
     @Column(name = "gioi_tinh")
     private Boolean gioiTinh;
 
-    @Column(name = "ngaySinh")
+    @Column(name = "ngay_sinh")
     private LocalDate ngaySinh;
 
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
@@ -108,5 +108,9 @@ public class NhanVien implements JointAccount {
         return this.sdt;
     }
 
+    @Override
+    public String getTrangThai() {
+        return String.valueOf(this.trangThai);
+    }
 
 }
