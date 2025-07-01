@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
@@ -23,9 +24,9 @@ public class PhieuGiamGia {
     @Column(name = "id_phieu_giam_gia", nullable = false)
     private Integer id;
 
-    @Size(max = 34)
-    @ColumnDefault("'VC'+case when [id_phieu_giam_gia]<10 then '00'+CONVERT([varchar],[id_phieu_giam_gia]) when [id_phieu_giam_gia]<100 then '0'+CONVERT([varchar],[id_phieu_giam_gia]) else CONVERT([varchar],[id_phieu_giam_gia]) end")
-    @Column(name = "ma_giam_gia", length = 34, insertable = false, updatable = false)
+    @Size(max = 50)
+    @Nationalized
+    @Column(name = "ma_giam_gia", length = 34)
     private String maGiamGia;
 
     @Size(max = 50)
@@ -70,17 +71,22 @@ public class PhieuGiamGia {
     private BigDecimal soDiemCanDeDoi;
 
     @Column(name = "is_global")
-    private Boolean isGlobal;
+    private Boolean congKhai;
 
     @Enumerated(EnumType.STRING)
     @Nationalized
-    @Column(name = "trang_thai", length = 50)
-    private TrangThaiPGG trangThai;
+    @Column(name = "trang_thai_phieu_giam_gia", length = 50)
+    private TrangThaiPGG trangThaiPhieuGiamGia;
+
+    @Enumerated(EnumType.STRING)
+    @Nationalized
+    @Column(name = "trang_thai_phat_hanh", length = 50)
+    private TrangThaiPhatHanh trangThaiPhatHanh;
 
     @OneToMany(mappedBy = "idPhieuGiamGia",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "idPhieuGiamGia",cascade = CascadeType.ALL,orphanRemoval = true)
-    private Set<KhachHangGiamGia> khachHangGiamGias = new LinkedHashSet<>();
+//    @OneToMany(mappedBy = "idPhieuGiamGia",cascade = CascadeType.ALL,orphanRemoval = true)
+//    private Set<KhachHangGiamGia> khachHangGiamGias = new LinkedHashSet<>();
 
 }

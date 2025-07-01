@@ -1,13 +1,12 @@
 package org.example.websitetechworld.Enum.PhieuGiamGia;
 
-public enum TrangThaiPGG {
-    NOT_STARTED("Chưa bắt đầu"),
-    ACTIVE("Đang hoạt động"),
-    EXPIRED("Đã hết hạn");
+public enum TrangThaiPhatHanh {
+    NOT_ISSUED("Chưa phát hành"),
+    ISSUED("Đã phát hành");
 
     private final String displayName;
 
-    TrangThaiPGG(String displayName) {
+    TrangThaiPhatHanh(String displayName) {
         this.displayName = displayName;
     }
 

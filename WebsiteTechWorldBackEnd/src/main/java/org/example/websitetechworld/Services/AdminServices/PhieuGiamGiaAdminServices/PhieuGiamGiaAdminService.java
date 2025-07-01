@@ -1,26 +1,25 @@
 package org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices;
 
-import jakarta.persistence.EntityManager;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
-import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.KhachHangGiamGia;
-import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
-import org.example.websitetechworld.Repository.KhachHangGiamGiaRepository;
-import org.example.websitetechworld.Repository.KhachHangRepository;
-import org.example.websitetechworld.Repository.PhieuGiamGiaRepository;
+import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.LoginServices.MailService;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -33,99 +32,114 @@ public class PhieuGiamGiaAdminService {
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     private final KhachHangRepository khachHangRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ModelMapper modelMapper;
+    private final MailService mailService;
 
-    // Cấu hình ModelMapper trong constructor
     public PhieuGiamGiaAdminService(PhieuGiamGiaRepository phieuGiamGiaRepository,
                                     KhachHangGiamGiaRepository khachHangGiamGiaRepository,
                                     KhachHangRepository khachHangRepository,
                                     ModelMapper modelMapper,
-                                    EntityManager entityManager) {
+                                    SanPhamChiTietRepository sanPhamChiTietRepository, MailService mailService) {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
         this.khachHangRepository = khachHangRepository;
+        this.sanPhamChiTietRepository = sanPhamChiTietRepository;
         this.modelMapper = modelMapper;
+        this.mailService = mailService;
         cauHinhModelMapper();
     }
 
-    // Cấu hình ánh xạ DTO-Entity
-    private void cauHinhModelMapper() {
-        modelMapper.typeMap(PhieuGiamGiaAdminRequest.class, PhieuGiamGia.class)
-                .addMappings(mapper -> {
-                    mapper.skip(PhieuGiamGia::setKhachHangGiamGias);
-                });
+    private void cauHinhModelMapper () {
+        modelMapper.typeMap(PhieuGiamGiaAdminRequest.class, PhieuGiamGia.class);
         modelMapper.typeMap(PhieuGiamGia.class, PhieuGiamGiaAdminResponse.class);
     }
 
-    /**
-     * Lấy danh sách phiếu giảm giá theo phân trang và bộ lọc.
-     */
     public Page<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGia (String timKiem, TrangThaiPGG trangThai,
                                                                   LocalDate ngayBatDau, LocalDate ngayKetThuc,
                                                                   int trang, int kichThuoc, String sapXepTheo, String huongSapXep) {
         Sort sapXep = huongSapXep.equalsIgnoreCase("desc") ? Sort.by(sapXepTheo).descending() : Sort.by(sapXepTheo).ascending();
         Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
         Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.findAll(timKiem, trangThai, ngayBatDau, ngayKetThuc, phanTrang);
-        return trangPhieuGiamGia.map(this::anhXaSangPhanHoi);
+        return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
     }
 
-    /**
-     * Lấy thông tin chi tiết của phiếu giảm giá theo ID.
-     */
     public PhieuGiamGiaAdminResponse layPhieuGiamGiaTheoId (Integer id) {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
-    /**
-     * Thêm mới phiếu giảm giá.
-     */
     @Transactional
     public PhieuGiamGiaAdminResponse themPhieuGiamGia (PhieuGiamGiaAdminRequest request) {
         kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
-        kiemTraPhieuRiengTu(request);
+//        kiemTraPhieuChoSp(request);
 
         PhieuGiamGia phieuGiamGia = modelMapper.map(request, PhieuGiamGia.class);
-        phieuGiamGia.setKhachHangGiamGias(new HashSet<>());
-        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
+//        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
 
-        if (!phieuGiamGia.getCongKhai()) {
-            xuLyKhachHangGiamGia(phieuGiamGia, layDanhSachIdKhachHangTuYeuCau(request));
-        }
+//        if (!phieuGiamGia.getCongKhai()) {
+//            xuLyKhachHangGiamGia(phieuGiamGia, layDanhSachIdKhachHangTuYeuCau(request));
+//        }
 
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
-    /**
-     * Cập nhật phiếu giảm giá.
-     */
     @Transactional
-    public PhieuGiamGiaAdminResponse capNhatPhieuGiamGia (Integer id, PhieuGiamGiaAdminRequest request) {
+    public PhieuGiamGiaAdminResponse capNhatPhieuGiamGia(Integer id, PhieuGiamGiaAdminRequest request) {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
 
-        kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
-        kiemTraPhieuRiengTu(request);
+        LocalDate currentDate = LocalDate.now();
+        boolean hasStarted = !currentDate.isBefore(phieuGiamGia.getNgayBatDau());
 
-        modelMapper.map(request, phieuGiamGia);
-
-        if (phieuGiamGia.getCongKhai()) {
-            xoaKhachHangGiamGiaChuaSuDung(phieuGiamGia);
-        } else {
-            xuLyKhachHangGiamGia(phieuGiamGia, layDanhSachIdKhachHangTuYeuCau(request));
+        if (hasStarted && isTrangThaiPhatHanhModified(phieuGiamGia, request)) {
+            throw new IllegalStateException("Không thể sửa trạng thái phát hành của phiếu giảm giá đã bắt đầu.");
         }
+
+        boolean isSavedByCustomers = khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+
+        if (isSavedByCustomers && isHangToiThieuModified(phieuGiamGia, request)) {
+            notifyAffectedCustomers(phieuGiamGia);
+        } else if (isHangToiThieuModified(phieuGiamGia, request)) {
+            phieuGiamGia.setHangToiThieu(request.getHangToiThieu());
+        }
+
+        kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
+
+        if (!hasStarted) {
+            modelMapper.map(request, phieuGiamGia);
+        } else {
+
+            phieuGiamGia.setTenKhuyenMai(request.getTenKhuyenMai());
+            phieuGiamGia.setSoLuong(request.getSoLuong());
+            phieuGiamGia.setSoDiemCanDeDoi(request.getSoDiemCanDeDoi());
+            phieuGiamGia.setDieuKienApDung(request.getDieuKienApDung());
+        }
+
+        phieuGiamGia.setId(id);
+
+        xoaKhachHangGiamGiaChuaSuDung(phieuGiamGia);
 
         return modelMapper.map(phieuGiamGiaRepository.save(phieuGiamGia), PhieuGiamGiaAdminResponse.class);
     }
 
-    /**
-     * Xóa phiếu giảm giá.
-     */
     @Transactional
-    public String xoaPhieuGiamGia (Integer id) {
+    public String xoaPhieuGiamGia(Integer id) {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
+
+        LocalDate currentDate = LocalDate.now();
+        boolean hasStarted = !currentDate.isBefore(phieuGiamGia.getNgayBatDau());
+
+        if (hasStarted) {
+            throw new IllegalStateException("Không thể xóa phiếu giảm giá đã bắt đầu.");
+        }
+
+        boolean isSavedByCustomers = khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+        if (isSavedByCustomers) {
+            notifyAffectedCustomers(phieuGiamGia);
+        }
 
         if (khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIsUser(phieuGiamGia, true)) {
             throw new IllegalStateException("Không thể xóa phiếu giảm giá đã được sử dụng");
@@ -136,57 +150,118 @@ public class PhieuGiamGiaAdminService {
         return "Đã xóa thành công phiếu giảm giá với ID: " + id;
     }
 
-
-    public Page<KhachHangGiamGiaResponse> layDanhSachKhachHang (String timKiem, int trang, int kichThuoc) {
-        Pageable phanTrang = PageRequest.of(trang, kichThuoc);
-        Page<KhachHang> trangKhachHang = (timKiem == null || timKiem.isEmpty()) ?
-                khachHangRepository.findTrangThai_Active(phanTrang) :
-                khachHangRepository.findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(timKiem, phanTrang);
-        return trangKhachHang.map(khachHang -> new KhachHangGiamGiaResponse(
-                khachHang.getId(), khachHang.getMaKhachHang(), khachHang.getTenKhachHang()));
+    private boolean isTrangThaiPhatHanhModified(PhieuGiamGia existing, PhieuGiamGiaAdminRequest request) {
+        return existing.getTrangThaiPhatHanh() != request.getTrangThaiPhatHanh();
     }
+
+    private boolean isHangToiThieuModified(PhieuGiamGia existing, PhieuGiamGiaAdminRequest request) {
+        return (existing.getHangToiThieu() != null && !existing.getHangToiThieu().equals(request.getHangToiThieu())) ||
+                (existing.getHangToiThieu() == null && request.getHangToiThieu() != null);
+    }
+
+    @Async
+    public void notifyAffectedCustomers(PhieuGiamGia phieuGiamGia) {
+        List<KhachHangGiamGia> savedVouchers = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+        for (KhachHangGiamGia khachHangGiamGia : savedVouchers) {
+            KhachHang khachHang = khachHangGiamGia.getIdKhachHang();
+            String emailContent = String.format(
+                    """
+                            Kính gửi %s,
+                            
+                            Chúng tôi xin lỗi vì phiếu giảm giá %s đã được cập nhật hoặc hủy bỏ. \
+                            Vui lòng kiểm tra thông tin mới nhất trên hệ thống của chúng tôi.
+                            
+                            Trân trọng,
+                            TechWorld""",
+                    khachHang.getTenKhachHang(), phieuGiamGia.getTenKhuyenMai()
+            );
+            mailService.sendMail(khachHang.getEmail(), "Thông báo về phiếu giảm giá", emailContent);
+        }
+    }
+
+
+//    public Page<SanPhamChiTietResponse> layDanhSachSanPham (String timKiem, int trang, int kichThuoc) {
+//        Pageable phanTrang = PageRequest.of(trang, kichThuoc);
+//        Page<SanPhamChiTiet> sanphamChiTiets = (timKiem == null || timKiem.isEmpty()) ?
+//                sanPhamChiTietRepository.findAll(phanTrang) :
+//                sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContaining(timKiem, phanTrang);
+//        return sanphamChiTiets.map(spct -> {
+//            SanPhamChiTietResponse res = new SanPhamChiTietResponse();
+//            res.setId(spct.getId());
+//            res.setMaSanPhamChiTiet(spct.getMaSanPhamChiTiet());
+//            res.setTenSanPham(spct.getIdSanPham().getTenSanPham());
+//            res.setTenMau(spct.getIdMau().getTenMau());
+//            res.setGiaBan(spct.getGiaBan());
+//            return res;
+//        });
+//
+//    }
 
     @Transactional
     public void capNhatTrangThaiPhieuGiamGia () {
         LocalDate hienTai = LocalDate.now();
-        List<PhieuGiamGia> danhSachPhieu = phieuGiamGiaRepository.findAll(); // Tối ưu truy vấn
+        List<PhieuGiamGia> danhSachPhieu = phieuGiamGiaRepository.findAll();
         for (PhieuGiamGia phieu : danhSachPhieu) {
             TrangThaiPGG trangThaiMoi = xacDinhTrangThaiPhieu(phieu, hienTai);
-            if (phieu.getTrangThai() != trangThaiMoi) {
-                phieu.setTrangThai(trangThaiMoi);
+            if (phieu.getTrangThaiPhieuGiamGia() != trangThaiMoi) {
+                phieu.setTrangThaiPhieuGiamGia(trangThaiMoi);
                 phieuGiamGiaRepository.save(phieu);
             }
         }
     }
 
-    // --- Các phương thức hỗ trợ ---
+//    @Transactional
+//    public void themKhuyenMaiSanPham (PhieuGiamGia phieuGiamGia, List<Integer> danhSachIdSanPham) {
+//
+//        if (phieuGiamGia == null) {
+//            throw new IllegalArgumentException("Phiếu giảm giá không được null");
+//        }
+//
+//        if (danhSachIdSanPham == null || danhSachIdSanPham.isEmpty()) {
+//            throw new IllegalArgumentException("Danh sách ID sản phẩm không được rỗng");
+//        }
+//
+//        List<Integer> idSanPhamKhongHopLe = danhSachIdSanPham.stream()
+//                .filter(id -> !sanPhamChiTietRepository.existsById(id))
+//                .toList();
+//        if (!idSanPhamKhongHopLe.isEmpty()) {
+//            throw new IllegalArgumentException("Các ID sản phẩm không tồn tại: " + idSanPhamKhongHopLe);
+//        }
+//
+//        List<KhuyenMaiSanPham> list = new ArrayList<>();
+//
+//        for (Integer idSanPham : danhSachIdSanPham) {
+//            KhuyenMaiSanPham khuyenMaiSanPham = new KhuyenMaiSanPham();
+//            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(idSanPham)
+//                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + idSanPham));
+//
+//            khuyenMaiSanPham.setPhieuGiamGia(phieuGiamGia);
+//            khuyenMaiSanPham.setSanPhamChiTiet(sanPhamChiTiet);
+//            khuyenMaiSanPham.setTenSanPham(sanPhamChiTiet.getIdSanPham().getTenSanPham());
+//            khuyenMaiSanPham.setGiaGoc(sanPhamChiTiet.getGiaBan());
+//            khuyenMaiSanPham.setGiaKhuyenMai(tinhGiaKhuyenMai(sanPhamChiTiet, phieuGiamGia));
+//            khuyenMaiSanPham.setNgayCap(LocalDate.now());
+//            list.add(khuyenMaiSanPham);
+//        }
+//        khuyenMaiSanPhamRepository.saveAll(list);
+//
+//    }
 
-    /**
-     * Kiểm tra tính hợp lệ của ngày bắt đầu và ngày kết thúc.
-     */
+
     private void kiemTraNgayHopLe (LocalDate ngayBatDau, LocalDate ngayKetThuc) {
         if (ngayBatDau.isAfter(ngayKetThuc)) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
     }
 
-    /**
-     * Kiểm tra logic cho phiếu giảm giá riêng tư.
-     */
-    private void kiemTraPhieuRiengTu (PhieuGiamGiaAdminRequest request) {
-        if (!request.getCongKhai() && (request.getKhachHangIds() == null || request.getKhachHangIds().isEmpty())) {
-            throw new IllegalArgumentException("Phiếu giảm giá riêng tư phải có ít nhất một khách hàng hoặc nhóm khách hàng được chọn");
-        }
-    }
+//    private void kiemTraPhieuChoSp (PhieuGiamGiaAdminRequest request) {
+//        if (!request.getLoaiApDung() && (request.getSanPhamIds() == null || request.getSanPhamIds().isEmpty())) {
+//            throw new IllegalArgumentException("Phiếu giảm giá cho sản phẩm phải có ít nhất một sản phẩm được chọn");
+//        }
+//    }
 
-    /**
-     * Lấy danh sách ID khách hàng từ yêu cầu.
-     */
     private Set<Integer> layDanhSachIdKhachHangTuYeuCau (PhieuGiamGiaAdminRequest request) {
         Set<Integer> danhSachIdKhachHang = new HashSet<>();
-        if (request.getKhachHangIds() != null) {
-            danhSachIdKhachHang.addAll(request.getKhachHangIds());
-        }
         if (request.getHangToiThieu() != null) {
             danhSachIdKhachHang.addAll(khachHangRepository.findByHangKhachHang(HangKhachHang.valueOf(request.getHangToiThieu()))
                     .stream()
@@ -197,9 +272,6 @@ public class PhieuGiamGiaAdminService {
         return danhSachIdKhachHang;
     }
 
-    /**
-     * Kiểm tra tính hợp lệ của danh sách ID khách hàng.
-     */
     private void kiemTraIdKhachHangHopLe (Set<Integer> danhSachIdKhachHang) {
         List<Integer> idKhongHopLe = danhSachIdKhachHang.stream()
                 .filter(id -> !khachHangRepository.existsById(id))
@@ -209,9 +281,6 @@ public class PhieuGiamGiaAdminService {
         }
     }
 
-    /**
-     * Xử lý danh sách khách hàng cho phiếu giảm giá riêng tư.
-     */
     private void xuLyKhachHangGiamGia (PhieuGiamGia phieuGiamGia, Set<Integer> danhSachIdKhachHang) {
         xoaKhachHangGiamGiaChuaSuDung(phieuGiamGia);
         for (Integer idKhachHang : danhSachIdKhachHang) {
@@ -223,31 +292,20 @@ public class PhieuGiamGiaAdminService {
         }
     }
 
-    /**
-     * Xóa các bản ghi KhachHangGiamGia chưa được sử dụng.
-     */
     private void xoaKhachHangGiamGiaChuaSuDung (PhieuGiamGia phieuGiamGia) {
         List<KhachHangGiamGia> banGhiChuaSuDung = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
         khachHangGiamGiaRepository.deleteAll(banGhiChuaSuDung);
-        phieuGiamGia.getKhachHangGiamGias().clear();
     }
 
-    /**
-     * turnout mới bản ghi KhachHangGiamGia.
-     */
     private void taoKhachHangGiamGia (PhieuGiamGia phieuGiamGia, KhachHang khachHang) {
         KhachHangGiamGia khachHangGiamGia = new KhachHangGiamGia();
         khachHangGiamGia.setIdPhieuGiamGia(phieuGiamGia);
         khachHangGiamGia.setIdKhachHang(khachHang);
         khachHangGiamGia.setIsUser(false);
         khachHangGiamGia.setNgayCap(LocalDate.now());
-        phieuGiamGia.getKhachHangGiamGias().add(khachHangGiamGia);
         khachHangGiamGiaRepository.save(khachHangGiamGia);
     }
 
-    /**
-     * Xác định trạng thái của phiếu giảm giá dựa trên ngày hiện tại.
-     */
     private TrangThaiPGG xacDinhTrangThaiPhieu (PhieuGiamGia phieu, LocalDate hienTai) {
         if (hienTai.isBefore(phieu.getNgayBatDau())) {
             return TrangThaiPGG.NOT_STARTED;
@@ -257,10 +315,39 @@ public class PhieuGiamGiaAdminService {
         return TrangThaiPGG.ACTIVE;
     }
 
-    /**
-     * Ánh xạ entity sang DTO response.
-     */
-    private PhieuGiamGiaAdminResponse anhXaSangPhanHoi (PhieuGiamGia phieuGiamGia) {
+    private PhieuGiamGiaAdminResponse anhXaPhieuGiamGia (PhieuGiamGia phieuGiamGia) {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
+
+//    private BigDecimal tinhGiaKhuyenMai(SanPhamChiTiet sanPhamChiTiet, PhieuGiamGia phieuGiamGia) {
+//        BigDecimal giaGoc = sanPhamChiTiet.getGiaBan();
+//        BigDecimal giaTriKhuyenMai = phieuGiamGia.getGiaTriKhuyenMai();
+//
+//        if (giaGoc == null || giaTriKhuyenMai == null) {
+//            throw new IllegalArgumentException("Giá gốc hoặc giá trị khuyến mãi không được null");
+//        }
+//
+//        if (giaTriKhuyenMai.compareTo(BigDecimal.ZERO) < 0) {
+//            throw new IllegalArgumentException("Giá trị khuyến mãi không được âm");
+//        }
+//
+//        boolean laKhuyenMaiPhanTram = phieuGiamGia.getLoaiKhuyenMai().equalsIgnoreCase("Phần trăm");
+//        if (laKhuyenMaiPhanTram && giaTriKhuyenMai.compareTo(BigDecimal.valueOf(100)) > 0) {
+//            throw new IllegalArgumentException("Giá trị khuyến mãi phần trăm không được vượt quá 100");
+//        }
+//
+//        BigDecimal giaKhuyenMai;
+//        if (laKhuyenMaiPhanTram) {
+//            // Tính giá khuyến mãi theo phần trăm: giaGoc * (1 - giaTriKhuyenMai/100)
+//            BigDecimal tyLeGiam = giaTriKhuyenMai.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+//            BigDecimal soTienGiam = giaGoc.multiply(tyLeGiam);
+//            giaKhuyenMai = giaGoc.subtract(soTienGiam);
+//        } else {
+//            // Tính giá khuyến mãi cố định: giaGoc - giaTriKhuyenMai
+//            giaKhuyenMai = giaGoc.subtract(giaTriKhuyenMai);
+//        }
+//
+//        // Đảm bảo giá không âm và làm tròn đến 2 chữ số thập phân
+//        return giaKhuyenMai.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : giaKhuyenMai.setScale(2, RoundingMode.HALF_UP);
+//    }
 }

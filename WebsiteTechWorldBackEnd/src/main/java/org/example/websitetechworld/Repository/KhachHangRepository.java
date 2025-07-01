@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,15 +42,18 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
             "LOWER(nv.sdt) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<KhachHang> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT k FROM KhachHang k WHERE NOT EXISTS (SELECT h FROM HoaDon h WHERE h.idKhachHang = k)")
-    List<KhachHang> findNewCustomers();
-
-    @Query("SELECT k FROM KhachHang k WHERE EXISTS (SELECT h.id FROM HoaDon h WHERE h.idKhachHang = k)")
-    List<KhachHang> findOldCustomers();
+//    @Query("SELECT k FROM KhachHang k WHERE NOT EXISTS (SELECT h FROM HoaDon h WHERE h.idKhachHang = k)")
+//    List<KhachHang> findNewCustomers();
+//
+//    @Query("SELECT k FROM KhachHang k WHERE EXISTS (SELECT h.id FROM HoaDon h WHERE h.idKhachHang = k)")
+//    List<KhachHang> findOldCustomers();
 
     @Query("SELECT k FROM KhachHang k WHERE k.trangThai = 'ACTIVE'")
     Page<KhachHang> findTrangThai_Active (Pageable pageable);
 
     @Query("SELECT k FROM KhachHang k WHERE k.trangThai = 'ACTIVE' AND LOWER(k.tenKhachHang) LIKE LOWER(CONCAT('%', :search, '%'))")
     Page<KhachHang> findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(@RequestParam("search") String search, Pageable pageable);
+
+    @Query("SELECT k FROM KhachHang k WHERE k.hangKhachHang = :hangKhachHang")
+    List<KhachHang> findByHangKhachHang(HangKhachHang hangKhachHang);
 }
