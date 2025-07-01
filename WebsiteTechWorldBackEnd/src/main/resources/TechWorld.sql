@@ -63,13 +63,7 @@ CREATE TABLE user_tokens (
 
 CREATE TABLE phieu_giam_gia (
                                 id_phieu_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
-                                ma_giam_gia AS (
-        'VC' + CASE
-            WHEN id_phieu_giam_gia < 10 THEN '00' + CAST(id_phieu_giam_gia AS VARCHAR)
-            WHEN id_phieu_giam_gia < 100 THEN '0' + CAST(id_phieu_giam_gia AS VARCHAR)
-            ELSE CAST(id_phieu_giam_gia AS VARCHAR)
-        END
-    ) PERSISTED,
+                                ma_giam_gia NVARCHAR(50),
                                 ten_khuyen_mai NVARCHAR(50),
                                 loai_khuyen_mai NVARCHAR(50),
                                 gia_tri_khuyen_mai DECIMAL(10,2),
@@ -82,7 +76,8 @@ CREATE TABLE phieu_giam_gia (
                                 so_luong INT,
                                 so_diem_can_de_doi DECIMAL(10,2),
                                 is_global BIT,
-                                trang_thai NVARCHAR(50)
+                                trang_thai_phieu_giam_gia NVARCHAR(50),
+                                trang_thai_phat_hanh NVARCHAR(50)
 );
 
 CREATE TABLE tinh_thanh (
@@ -480,23 +475,23 @@ VALUES
 
 
 -- Table phieu_giam_gia
-INSERT INTO phieu_giam_gia (ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai)
+INSERT INTO phieu_giam_gia (ma_giam_gia, ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 1000000.00, 200000.00, '2025-05-01', '2025-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 100.00, 1, N'ACTIVE'),
-    (N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-05-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED'),
-    (N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-06-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED'),
-    (N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED'),
-    (N'Giảm 5% iPhone 16', N'Phần trăm', 5.00, 1000000.00, 100000.00, '2025-05-10', '2025-05-20', N'Áp dụng iPhone 16', N'GOLD', 150, 80.00, 1, N'EXPIRED'),
-    (N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED'),
-    (N'Giảm 300K iPhone Pro', N'Cố định', 300000.00, 3000000.00, 300000.00, '2025-05-20', '2025-06-20', N'Đơn iPhone Pro từ 3 triệu', N'GOLD', 60, 250.00, 0, N'ACTIVE'),
-    (N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED'),
-    (N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED'),
-    (N'Giảm 8% iPhone 15', N'Phần trăm', 8.00, 1200000.00, 150000.00, '2025-06-10', '2025-06-20', N'Áp dụng iPhone 15', N'GOLD', 180, 90.00, 1, N'NOT_STARTED'),
-    (N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE'),
-    (N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE'),
-    (N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED'),
-    (N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED'),
-    (N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED');
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 1000000.00, 200000.00, '2025-05-01', '2025-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 100.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-05-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-06-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC005', N'Giảm 5% iPhone 16', N'Phần trăm', 5.00, 1000000.00, 100000.00, '2025-05-10', '2025-05-20', N'Áp dụng iPhone 16', N'GOLD', 150, 80.00, 1, N'EXPIRED', N'ISSUED'),
+    (N'VC006', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 300K iPhone Pro', N'Cố định', 300000.00, 3000000.00, 300000.00, '2025-05-20', '2025-06-20', N'Đơn iPhone Pro từ 3 triệu', N'GOLD', 60, 250.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC008', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC009', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC0010', N'Giảm 8% iPhone 15', N'Phần trăm', 8.00, 1200000.00, 150000.00, '2025-06-10', '2025-06-20', N'Áp dụng iPhone 15', N'GOLD', 180, 90.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC0011', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC0012', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC0013', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED', N'ISSUED'),
+	(N'VC0014', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC0015', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED', N'ISSUED');
 
 --Table tinh_thanh
 INSERT INTO tinh_thanh (ten, phi_ship)
