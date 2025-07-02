@@ -56,6 +56,8 @@ public class LoginController {
         @PostMapping("/login")
         public ResponseEntity<?> login(@RequestBody UserLoginRequestDTO request) {
             List<Map<String, String>> errors = new ArrayList<>();
+            System.out.println(request.getTaiKhoan());
+            System.out.println(request.getMatKhau());
 
             try {
                 // Kiểm tra tài khoản
