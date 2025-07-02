@@ -72,8 +72,8 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
     @Query("SELECT k FROM KhachHang k WHERE k.trangThai = 'ACTIVE'")
     Page<KhachHang> findTrangThai_Active (Pageable pageable);
 
-    @Query("SELECT k FROM KhachHang k WHERE k.trangThai = 'ACTIVE' AND LOWER(k.tenKhachHang) LIKE LOWER(CONCAT('%', :search, '%'))")
-    Page<KhachHang> findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(@RequestParam("search") String search, Pageable pageable);
+    @Query("SELECT k FROM KhachHang k WHERE k.trangThai = 'ACTIVE' AND (LOWER(k.maKhachHang) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(k.sdt) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(k.tenKhachHang) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<KhachHang> findByTenKhachHangContainingIgnoreCaseOrMaKhachHangContainingIgnoreCaseOrSdtContainingIgnoreCaseAndTrangThai_Active (@RequestParam("search") String search, Pageable pageable);
 
     @Query("SELECT k FROM KhachHang k WHERE k.hangKhachHang = :hangKhachHang")
     List<KhachHang> findByHangKhachHang(HangKhachHang hangKhachHang);
