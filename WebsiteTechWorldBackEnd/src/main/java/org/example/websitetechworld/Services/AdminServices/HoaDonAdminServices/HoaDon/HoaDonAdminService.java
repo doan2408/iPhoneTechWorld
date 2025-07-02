@@ -180,8 +180,8 @@ public class HoaDonAdminService {
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> khachHangPage = (search == null || search.isEmpty()) ?
                 khachHangRepository.findTrangThai_Active(pageable) :
-                khachHangRepository.findByTenKhachHangContainingIgnoreCaseAndTrangThai_Active(search, pageable);
-        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getTenKhachHang()));
+                khachHangRepository.findByTenKhachHangContainingIgnoreCaseOrMaKhachHangContainingIgnoreCaseOrSdtContainingIgnoreCaseAndTrangThai_Active(search, pageable);
+        return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getSdt(), kh.getTenKhachHang()));
     }
 
     public KhachHang addKhachHang  (KhachHang khachHang) {

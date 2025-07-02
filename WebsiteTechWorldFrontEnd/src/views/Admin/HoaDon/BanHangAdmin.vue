@@ -226,9 +226,9 @@
             <!-- Cart items (if any) : san pham da chon -->
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
-                    <span><b v-if="currentInvoiceDetail">{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
-                        currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                    <span><b v-if="currentInvoiceDetail.maKhachHang">{{ currentInvoiceDetail.maKhachHang }}: {{
+                        currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                                currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -279,7 +279,7 @@
                             <div class="delete-modal-content-2">
                                 <h2>Trả một phần sản phẩm</h2>
                                 <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                        itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
                                 <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
                                 </p>
 
@@ -325,9 +325,9 @@
                     <span class="total-label">Tổng tiền hàng:</span>
                     <span class="total-amount">{{ totalProductAmount }} VNĐ</span>
                 </div>
-                <div class="shipping-fee-section">
+                <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ shippingFee }} VNĐ</span>
+                    <span class="shipping-fee-amount">{{ shippingFee.toLocaleString('vi-VN') + ' VNĐ' }}</span>
                 </div>
                 <div class="discount-section" v-if="discountAmount > 0">
                     <span class="discount-label">Giảm giá:</span>
@@ -358,7 +358,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -413,13 +413,13 @@
                             </div>
                         </div>
 
-                        <div class="discount-section">
+                        <div class="discount-section" style="padding-top: 0;">
                             <h4>Chọn phiếu giảm giá</h4>
-                            <label>Chọn phiếu giảm giá:</label>
+                            <label>Chọn phiếu giảm giá</label>
                             <select v-model="selectedDiscount" class="select-box">
                                 <option disabled value="">-- Chọn phiếu giảm giá --</option>
                                 <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
-                                    discount.name }}</option>
+                                    discount.tenKhuyenMai }}</option>
                             </select>
                         </div>
                     </div>
@@ -479,7 +479,6 @@
                     <Search class="search-icon" />
                     <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
                 </div>
-
             </div>
 
             <div class="modal-body" style="margin-bottom: 0; padding-bottom: 0;">
@@ -489,6 +488,7 @@
                             <tr>
                                 <th>Stt</th>
                                 <th>Mã khách hàng</th>
+                                <th>Số điện thoại</th>
                                 <th>Tên khách hàng</th>
                             </tr>
                         </thead>
@@ -497,6 +497,7 @@
                                 @click="selectedKhachHang(khachHang)" class="custome-item">
                                 <td>{{ pageKhachHang * 5 + index + 1 }}</td>
                                 <td>{{ khachHang.maKhachHang || "N/A" }}</td>
+                                <td>{{ khachHang.sdt }}</td>
                                 <td>{{ khachHang.tenKhachHang }}</td>
                             </tr>
                         </tbody>
@@ -541,6 +542,7 @@ import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdmi
 import { getListKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { selectKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { addKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { getAllPhieuGiamGia } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
@@ -576,6 +578,85 @@ const selectedTinh = ref('')
 const selectedHuyen = ref('')
 const selectedXa = ref('')
 const storeAddress = 'Ngọc liệp, Quốc Oai, Hà Nội';
+
+//thanhToan
+const totalProductAmount = ref(0)
+const shippingFee = ref(0)
+const discountAmount = ref(0)
+const grandTotal = ref(0)
+
+//discount
+const discountList = ref([])
+const selectedDiscount = ref(null)
+const search = ref('')
+
+//
+const shippingInfo = ref({
+    tenNguoiNhan: '',
+    sdtNguoiNhan: '',
+    diaChiChiTiet: '',
+    phiShip: null,
+    shippingMethod: 'express', // Đảm bảo khớp với 'express' thay vì 'EXPRESS'
+    maVanDon: '',
+    isShipping: false
+});
+
+const calculateTotal = () => {
+    totalProductAmount.value = 0;
+    if (currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList?.length) {
+        for (const hd of currentInvoiceDetail.value.chiTietHoaDonAdminResponseList) {
+            totalProductAmount.value += hd.soLuong * hd.donGia;
+        }
+    }
+
+    if (selectedDiscount.value?.loaiKhuyenMai === 'Phần trăm') {
+        discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriKhuyenMai / 100;
+    } else if (selectedDiscount.value?.giaTriKhuyenMai) {
+        discountAmount.value = selectedDiscount.value.giaTriKhuyenMai;
+    } else {
+        discountAmount.value = 0;
+    }
+
+    if (shippingInfo.value.phiShip) {
+        shippingFee.value = shippingInfo.value.phiShip
+    }
+
+    grandTotal.value = totalProductAmount.value + shippingFee.value - discountAmount.value
+}
+
+
+const loadDiscountList = async () => {
+    try {
+        const response = await getAllPhieuGiamGia(search.value, currentInvoiceDetail.value.idKhachHang)
+        discountList.value = response.data
+    } catch (err) {
+        console.error(err || "Lỗi lấy danh sách phiếu giảm giá");
+    }
+}
+
+watch(
+  () => currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList,
+  () => {
+    calculateTotal()
+    loadDiscountList()
+  },
+  { immediate: true, deep: true }
+);
+
+watch(
+  () => selectedDiscount.value,
+  () => {
+    calculateTotal()
+  }
+)
+
+watch(
+  () => shippingInfo.value.phiShip,
+  () => {
+    calculateTotal()
+  }
+)
+
 
 // category san pham 
 const danhMucSanPham = async () => {
@@ -691,7 +772,7 @@ const loadTabHoaDon = async () => {
         const queryId = route.query.invoiceId;
         const storedId = localStorage.getItem("selectedInvoiceId");
 
-//     // Xác định finalId
+        //     // Xác định finalId
         let finalId = null;
 
         // Ưu tiên storedId nếu nó hợp lệ
@@ -798,7 +879,7 @@ const selectInvoice = async (id) => {
 //     // invoices.value.push(newInvoice)
 //     // currentInvoiceId.value = newInvoice.id
 
-    
+
 // }   
 
 
@@ -807,53 +888,53 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 //add pending invoice
 const addNewInvoice = async () => {
-  isLoading.value = true
-  errorMessage.value = ''
-  
-  try {
-    const response = await createPendingInvoice()
-    const data = response.data
-    console.log('Response data:', data)
+    isLoading.value = true
+    errorMessage.value = ''
 
-    const newInvoice = {
-      id: data.hoaDonId,
-      maHoaDon: data.maHoaDon || `HD${data.hoaDonId}`,
-      name: `Hóa đơn ${data.hoaDonId}`,
-      status: data.status,
-      lichSuHoaDonId: data.lichSuHoaDonId,
-      items: [],
-      customer: { name: '', phone: '', email: '', address: '' },
-      notes: '',
-      total: 0,
-      chiTietHoaDonAdminResponseList: []
+    try {
+        const response = await createPendingInvoice()
+        const data = response.data
+        console.log('Response data:', data)
+
+        const newInvoice = {
+            id: data.hoaDonId,
+            maHoaDon: data.maHoaDon || `HD${data.hoaDonId}`,
+            name: `Hóa đơn ${data.hoaDonId}`,
+            status: data.status,
+            lichSuHoaDonId: data.lichSuHoaDonId,
+            items: [],
+            customer: { name: '', phone: '', email: '', address: '' },
+            notes: '',
+            total: 0,
+            chiTietHoaDonAdminResponseList: []
+        }
+
+        invoices.value.push(newInvoice)
+        currentInvoiceId.value = newInvoice.id
+        localStorage.setItem('selectedInvoiceId', newInvoice.id)
+        ElMessage.success('Tạo hóa đơn mới thành công!')
+
+    } catch (error) {
+        console.error('Error creating invoice:', error)
+        console.log('Error response:', error.response)
+        console.log('Error response data:', error.response?.data)
+
+        if (error.response?.status === 400 && Array.isArray(error.response?.data)) {
+            const messages = error.response.data
+                .map(err => err.message)
+                .filter(Boolean)
+                .join(' | ')
+
+            if (messages) {
+                showWarningOnce(messages)
+            }
+        }
+        else {
+            ElMessage.error('Đã xảy ra lỗi khi tạo hóa đơn mới!')
+        }
+    } finally {
+        isLoading.value = false
     }
-
-    invoices.value.push(newInvoice)
-    currentInvoiceId.value = newInvoice.id
-    localStorage.setItem('selectedInvoiceId', newInvoice.id)
-    ElMessage.success('Tạo hóa đơn mới thành công!')
-    
-  } catch (error) {
-    console.error('Error creating invoice:', error)
-  console.log('Error response:', error.response)
-  console.log('Error response data:', error.response?.data)
-
-  if (error.response?.status === 400 && Array.isArray(error.response?.data)) {
-  const messages = error.response.data
-    .map(err => err.message)
-    .filter(Boolean)
-    .join(' | ')
-
-  if (messages) {
-    showWarningOnce(messages)
-  }
-}
- else {
-    ElMessage.error('Đã xảy ra lỗi khi tạo hóa đơn mới!')
-  }
-  } finally {
-    isLoading.value = false
-  }
 }
 
 const closeInvoice = (id) => {
@@ -1037,19 +1118,19 @@ const goToImeiPage = async (page) => {
 let warningMessageInstance = null;
 
 const showWarningOnce = (message) => {
-  // k cho spam message 
-  if (warningMessageInstance) return;
+    // k cho spam message 
+    if (warningMessageInstance) return;
 
-  warningMessageInstance = ElMessage({
-    message,
-    type: 'warning',
-    duration: 3000,
-    showClose: true,
-    grouping: true,
-    onClose: () => {
-      warningMessageInstance = null; // Reset lại cho tbao lần sau
-    },
-  });
+    warningMessageInstance = ElMessage({
+        message,
+        type: 'warning',
+        duration: 3000,
+        showClose: true,
+        grouping: true,
+        onClose: () => {
+            warningMessageInstance = null; // Reset lại cho tbao lần sau
+        },
+    });
 };
 
 // Hàm xử lý khi input số lượng thay đổi
@@ -1271,15 +1352,7 @@ const getImeiStatusClass = (status) => {
 console.log("tra ve", getImeiStatusClass("Đã đặt trước"))
 
 // xu ly giao hang
-const shippingInfo = ref({
-    tenNguoiNhan: '',
-    sdtNguoiNhan: '',
-    diaChiChiTiet: '',
-    phiShip: null,
-    shippingMethod: 'express', // Đảm bảo khớp với 'express' thay vì 'EXPRESS'
-    maVanDon: '',
-    isShipping: false
-});
+// 593
 
 const getTinhList = async () => {
     try {
@@ -1700,6 +1773,7 @@ onMounted(async () => {
     // getListTinhThanh();
     await loadHoaDon();
     await getTinhList();
+    await loadDiscountList();
 });
 
 //Khach hang
@@ -1817,7 +1891,7 @@ const confirmShippingInfo = async () => {
         : `${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
 
     try {
-        const response = await updateTTShipping(storedId,shippingInfo.value,fullAddressForDB,isShipping.value)
+        const response = await updateTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
 
         console.log('Phản hồi từ API /update-invoice:', response.data);
         alert('Cập nhật thông tin giao hàng thành công!');

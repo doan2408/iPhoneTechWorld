@@ -119,6 +119,17 @@ export const addKhachHang = (data) => {
     return api.post(url, data)
 }
 
+//Phieu giam gia
+export const getAllPhieuGiamGia = (search, idKhachHang) => {
+    const url = url_base + '/list-phieu-giam-gia'
+    return api.get(url, {
+        params: {
+            search: search,
+            idKhachHang: idKhachHang
+        }
+    })
+}
+
 
 export const getTinhThanh = () => {
     const url = '/admin/tinh-thanh/provinces'

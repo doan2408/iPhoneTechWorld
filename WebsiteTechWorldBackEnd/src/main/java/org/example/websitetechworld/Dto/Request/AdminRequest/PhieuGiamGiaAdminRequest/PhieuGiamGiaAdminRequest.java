@@ -42,11 +42,9 @@ public class PhieuGiamGiaAdminRequest {
     private BigDecimal giaTriKhuyenMaiToiDa;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
-    @FutureOrPresent(message = "Ngày bắt đầu phải là hôm nay hoặc trong tương lai")
     private LocalDate ngayBatDau;
 
     @NotNull(message = "Ngày kết thúc không được để trống")
-    @Future(message = "Ngày kết thúc phải trong tương lai")
     private LocalDate ngayKetThuc;
 
     @Size(max = 100, message = "Điều kiện áp dụng không được vượt quá 100 ký tự")

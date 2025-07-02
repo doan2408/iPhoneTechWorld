@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.LoginServices.MailService;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
@@ -111,8 +112,12 @@ public class PhieuGiamGiaAdminService {
             modelMapper.map(request, phieuGiamGia);
         } else {
 
+            if (phieuGiamGia.getNgayKetThuc().equals(request.getNgayKetThuc())) {
+                notifyAffectedCustomers(phieuGiamGia);
+            }
             phieuGiamGia.setTenKhuyenMai(request.getTenKhuyenMai());
             phieuGiamGia.setSoLuong(request.getSoLuong());
+            phieuGiamGia.setNgayKetThuc(request.getNgayKetThuc());
             phieuGiamGia.setSoDiemCanDeDoi(request.getSoDiemCanDeDoi());
             phieuGiamGia.setDieuKienApDung(request.getDieuKienApDung());
         }
@@ -350,4 +355,40 @@ public class PhieuGiamGiaAdminService {
 //        // Đảm bảo giá không âm và làm tròn đến 2 chữ số thập phân
 //        return giaKhuyenMai.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : giaKhuyenMai.setScale(2, RoundingMode.HALF_UP);
 //    }
+
+    //Hoa don
+    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang) {
+
+        Set<PhieuGiamGia> phieuGiamGiaGop = new HashSet<>();
+
+        List<PhieuGiamGia> phieuCongKhai = phieuGiamGiaRepository
+                .findBySoDiemCanDeDoiAndTrangThaiPhatHanhAndCongKhaiAndTrangThaiPhieuGiamGiaAndMaGiamGiaContainingIgnoreCase(
+                        BigDecimal.ZERO,
+                        TrangThaiPhatHanh.ISSUED,
+                        true,
+                        TrangThaiPGG.ACTIVE,
+                        timKiem
+                );
+        phieuGiamGiaGop.addAll(phieuCongKhai);
+
+        if (idKhachHang != null) {
+            List<KhachHangGiamGia> khachHangGiamGias = khachHangGiamGiaRepository.findByIdKhachHang_Id(idKhachHang);
+
+            List<PhieuGiamGia> phieuRiengTu = khachHangGiamGias
+                    .stream()
+                    .filter(khgg -> !khgg.getIsUser())
+                    .map(KhachHangGiamGia::getIdPhieuGiamGia)
+                    .filter(pgg -> pgg.getTrangThaiPhatHanh() == TrangThaiPhatHanh.ISSUED
+                            && pgg.getTrangThaiPhieuGiamGia() == TrangThaiPGG.ACTIVE
+                            && pgg.getMaGiamGia().toLowerCase().contains(timKiem == null ? "" : timKiem.toLowerCase()))
+                    .toList();
+            phieuGiamGiaGop.addAll(phieuRiengTu);
+        }
+
+        return phieuGiamGiaGop
+                .stream()
+                .map(this::anhXaPhieuGiamGia)
+                .collect(Collectors.toList());
+    }
+
 }
