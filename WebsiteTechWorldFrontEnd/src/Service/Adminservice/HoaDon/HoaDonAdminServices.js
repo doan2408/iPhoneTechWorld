@@ -121,7 +121,52 @@ export const addKhachHang = (data) => {
 
 
 export const getTinhThanh = () => {
-    const url = '/admin/tinh-thanh'
+    const url = '/admin/tinh-thanh/provinces'
     return api.get(url)
 }
+export const getHuyen = (code) => {
+    const url = '/admin/tinh-thanh/districts/' + code
+    return api.get(url)
+}
+export const getXa = (code) => {
+    const url = '/admin/tinh-thanh/wards/' + code
+    return api.get(url)
+}
+export const getLatLon = (address) => {
+    return api.get('/admin/tinh-thanh/geo', {
+        params: {
+            address: address
+        }
+    })
+}
 
+// Tính khoảng cách giữa hai tọa độ
+export const getDistance = (from, to) => {
+    return api.get('/admin/tinh-thanh/distance', {
+        params: {
+            fromLat: from.lat,
+            fromLon: from.lon,
+            toLat: to.lat,
+            toLon: to.lon
+        }
+    })
+}
+
+//cap nhat thong tin giao hang
+export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping) => {
+    return api.put(`/admin/hoa-don/update-invoice/${id}`, {
+        tenNguoiNhan: shippingInfo.tenNguoiNhan,
+        sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
+        diaChiGiaoHang: fullAddressForDB,
+        phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
+        isShipping: isShipping,
+        maVanDon: null,
+        thanhTien: null
+    });
+}
+
+//create pending invoice
+export const createPendingInvoice = () => {
+    const url = url_base;
+    return api.post(url);
+}

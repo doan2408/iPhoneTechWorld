@@ -4,17 +4,22 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuHoaDon;
 import org.example.websitetechworld.Entity.NhanVien;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
+import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.LichSuHoaDonRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
+import org.example.websitetechworld.exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LichSuHoaDonAdminServices {
@@ -30,6 +35,17 @@ public class LichSuHoaDonAdminServices {
     }
 
     public LichSuHoaDon createLSHDWithPendingInvoice(Integer hoaDonId, Integer nhanVienId) {
+        List<Map<String, String>> errors = new ArrayList<>();
+        Integer number = countPendingHoaDonByNhanVien(nhanVienId, TrangThaiThanhToan.PENDING);
+        System.out.println();
+        if (number > 4) {
+            errors.add(Map.of("message", "Mỗi nhân viên chỉ có thể tạo tối đa 4 hóa đơn chờ"));
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
         logger.info("Bắt đầu tạo lịch sử hóa đơn: nhân viên ID = {}, hóa đơn ID = {}", nhanVienId, hoaDonId);
 
         NhanVien nhanVien = nhanVienRepository.findById(nhanVienId).orElseThrow(
@@ -48,11 +64,17 @@ public class LichSuHoaDonAdminServices {
 
         LichSuHoaDon saved = lichSuHoaDonRepository.save(lichSuHoaDon);
         logger.info("Tạo lịch sử hóa đơn thành công với ID: {}", saved.getId());
-
         return saved;
-
     }
+
+
     public List<TabHoaDonAdminResponse> findMaHoaDonPendingByNhanVien(Integer nhanVienId) {
         return lichSuHoaDonRepository.findMaHoaDonPendingByNhanVien(nhanVienId);
     }
+
+    //count pending hoaDon created by one staff member
+    public Integer countPendingHoaDonByNhanVien(Integer nhanVienId, TrangThaiThanhToan trangThaiThanhToan) {
+        return lichSuHoaDonRepository.countPendingHoaDonByNhanVien(nhanVienId, trangThaiThanhToan);
+    }
+
 }

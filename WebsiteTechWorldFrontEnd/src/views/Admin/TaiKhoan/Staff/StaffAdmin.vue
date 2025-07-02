@@ -5,14 +5,16 @@ import { addStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { updateStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { detailStaff } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
 import { ElMessage } from "element-plus";
-import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue"; // Thêm import Edit, Plus, Search, Loading
+import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue";
 
 const staffList = ref([]);
 const isLoading = ref(false);
 const currentPage = ref(0);
 const totalPages = ref(0);
+const totalFilteredCount = ref(0);
 const searchKeyword = ref("");
 const searchTimeout = ref(null);
+const error = ref("");
 
 // Modal state
 const showModal = ref(false);
@@ -36,74 +38,103 @@ const staffRequest = ref({
 
 const errors = reactive({});
 
-//load staff
+const filterGender = ref(null);     // true / false / null
+const filterStatus = ref(null);     // "ENABLE" / "DISABLE" / null 
+
+// loadStaff để xử lý filter 
 const loadStaff = async (page = 0, keyword = null) => {
   try {
     isLoading.value = true;
-    const response = await getAllStaff(page, keyword);
-    staffList.value = response.content;
+    error.value = ""; // Reset error
+    
+    // Truyền các tham số filter 
+    const response = await getAllStaff({
+      page, 
+      keyword: keyword || searchKeyword.value || null, 
+      gioiTinh: filterGender.value, 
+      trangThai: filterStatus.value
+  });
+    
+    staffList.value = response.content || [];
     currentPage.value = page;
-    totalPages.value = response.totalPages;
+    totalPages.value = response.totalPages || 0;
+    totalFilteredCount.value = response.totalElements;
   } catch (err) {
-    err.value = err.message || "An error was thrown while loading the staff";
+    console.error("Error loading staff:", err);
+    error.value = err.message || "Có lỗi xảy ra khi tải danh sách nhân viên";
+    ElMessage.error(error.value);
+    staffList.value = [];
   } finally {
     isLoading.value = false;
   }
 };
 
-//search staff
 const performSearch = () => {
-  //clear old timeout if has
+  // Clear old timeout if exists
   if (searchTimeout.value) {
     clearTimeout(searchTimeout.value);
   }
 
-  //create new timeout -- delay 500ms after user stop typing
+  // Create new timeout - delay 300ms after user stops typing (giảm từ 500ms)
   searchTimeout.value = setTimeout(() => {
-    currentPage.value = 0; //reset from first page when searching
-    loadStaff(0, searchKeyword.value || null);
+    currentPage.value = 0; // Reset to first page when searching
+    loadStaff(0, searchKeyword.value?.trim() || null);
   }, 500);
 };
 
 const clearSearch = () => {
   searchKeyword.value = "";
+  currentPage.value = 0;
+  loadStaff(0, null);
 };
 
-watch(searchKeyword, () => {
-  performSearch();
+watch(searchKeyword, (newVal, oldVal) => {
+  // Chỉ search khi có thay đổi thực sự
+  if (newVal !== oldVal) {
+    performSearch();
+  }
 });
 
-//previous page
+watch([filterGender, filterStatus], () => {
+  currentPage.value = 0;
+  loadStaff(0, searchKeyword.value?.trim() || null);
+});
+
+// Pagination functions
 const previousPage = () => {
   if (currentPage.value > 0) {
     currentPage.value -= 1;
   } else {
     currentPage.value = totalPages.value - 1;
   }
-  loadStaff(currentPage.value, searchKeyword.value || null);
+  loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
-//next page
 const nextPage = () => {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value += 1;
   } else {
     currentPage.value = 0;
   }
-  loadStaff(currentPage.value, searchKeyword.value || null);
+  loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 const firstPage = () => {
-  const firstPage = 0;
-  currentPage.value = firstPage;
-  loadStaff(currentPage.value, searchKeyword.value || null);
+  currentPage.value = 0;
+  loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 const lastPage = () => {
-  // Renamed from latePage to lastPage for clarity
-  const lastPage = totalPages.value - 1;
-  currentPage.value = lastPage;
-  loadStaff(currentPage.value, searchKeyword.value || null);
+  currentPage.value = totalPages.value - 1;
+  loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
+};
+
+const clearFilters = () => {
+  filterGender.value = null;
+  filterStatus.value = null;
+  searchKeyword.value = "";
+  currentPage.value = 0;
+  loadStaff(0, null);
 };
 
 // Modal functions
@@ -126,6 +157,7 @@ const openEditModal = async (staffId) => {
     const response = await detailStaff(staffId);
     Object.assign(staffRequest.value, response);
   } catch (err) {
+    console.error("Error loading staff details:", err);
     ElMessage.error(err.message || "Lỗi khi tải thông tin nhân viên");
     showModal.value = false;
   } finally {
@@ -167,18 +199,17 @@ const handleSubmit = async () => {
 
   try {
     if (isEditMode.value) {
-      // Update staff
       await updateStaff(editingStaffId.value, staffRequest.value);
       ElMessage.success("Cập nhật nhân viên thành công");
     } else {
-      // Add staff
       await addStaff(staffRequest.value);
       ElMessage.success("Thêm nhân viên thành công");
     }
 
     closeModal();
-    loadStaff(currentPage.value, searchKeyword.value || null); // Reload current page
+    loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
   } catch (err) {
+    console.error("Error submitting staff:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
         errors[field] = message;
@@ -196,8 +227,8 @@ const handleSubmit = async () => {
 };
 
 const handlePageChange = async (newPage) => {
-  currentPage.value = newPage - 1; // Điều chỉnh về index 0-based
-  await loadStaff(currentPage.value, searchKeyword.value || null);
+  currentPage.value = newPage - 1;
+  await loadStaff(currentPage.value, searchKeyword.value?.trim() || null);
 };
 
 onMounted(() => {
@@ -224,7 +255,7 @@ onMounted(() => {
           <div class="search-input-wrapper">
             <el-input
               v-model="searchKeyword"
-              placeholder="Tìm kiếm theo tên, email, số điện thoại, chức vụ..."
+              placeholder="Tìm kiếm theo tên, email, số điện thoại..."
               prefix-icon="Search"
               clearable
               @clear="clearSearch"
@@ -245,8 +276,68 @@ onMounted(() => {
       <p>Đang tải dữ liệu...</p>
     </div>
 
+    <!--filter -->
+    <div class="filter-section mb-3">
+      <div class="d-flex gap-2 align-items-center justify-content-between">
+        <div class="d-flex gap-2 align-items-center">
+          <el-select
+            v-model="filterGender"
+            placeholder="Lọc theo giới tính"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Nam" :value="true" />
+            <el-option label="Nữ" :value="false" />
+          </el-select>
+
+          <el-select
+            v-model="filterStatus"
+            placeholder="Lọc theo trạng thái"
+            clearable
+            size="small"
+            @clear="clearFilters"
+            style="width: 150px"
+          >
+            <el-option label="Đang làm" value="ENABLE" />
+            <el-option label="Nghỉ" value="DISABLE" />
+          </el-select>
+
+          <el-button 
+            size="small" 
+            @click="clearFilters"
+            :disabled="!filterGender && !filterStatus && !searchKeyword"
+          >
+            Xóa bộ lọc
+          </el-button>
+        </div>
+
+        <!-- Hiển thị số kết quả -->
+        <div class="result-count" v-if="!isLoading">
+          <el-text size="small" type="info">
+            Tổng: {{ totalFilteredCount  }} nhân viên
+            <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
+              (đã lọc)
+            </span>
+          </el-text>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Error State -->
+    <div v-if="error && !isLoading" class="error-state">
+      <el-alert
+        :title="error"
+        type="error"
+        show-icon
+        :closable="false"
+      />
+    </div>
+
     <!-- Search Result Info -->
-    <div v-if="searchKeyword && !isLoading" class="search-result-info">
+    <div v-if="searchKeyword && !isLoading && !error" class="search-result-info">
       <el-alert
         :title="`Kết quả tìm kiếm cho: '${searchKeyword}' (${staffList.length} nhân viên)`"
         type="info"
@@ -256,19 +347,26 @@ onMounted(() => {
     </div>
 
     <!-- No Data State -->
-    <div v-if="!isLoading && staffList.length === 0" class="no-data">
+    <div v-if="!isLoading && !error && staffList.length === 0" class="no-data">
       <el-empty>
         <template #description>
-          <span v-if="searchKeyword">
-            Không tìm thấy nhân viên nào với từ khóa "{{ searchKeyword }}"
+          <span v-if="searchKeyword || filterGender !== null || filterStatus !== null">
+            Không tìm thấy nhân viên nào phù hợp với bộ lọc
           </span>
           <span v-else>Chưa có nhân viên nào</span>
         </template>
+        <el-button 
+          v-if="searchKeyword || filterGender !== null || filterStatus !== null"
+          type="primary" 
+          @click="clearFilters"
+        >
+          Xóa bộ lọc
+        </el-button>
       </el-empty>
     </div>
 
     <!-- Staff Table -->
-    <div v-if="staffList.length > 0">
+    <div v-if="!isLoading && !error && staffList.length > 0">
       <h2>Danh sách nhân viên</h2>
       <el-table :data="staffList" style="width: 100%" stripe>
         <el-table-column
@@ -333,7 +431,7 @@ onMounted(() => {
       </el-table>
 
       <!-- Pagination -->
-      <div class="pagination-fixed">
+      <div class="pagination-fixed" v-if="totalPages > 1">
         <div
           class="d-flex justify-content-center align-items-center gap-3"
           style="margin-top: 30px"
@@ -414,9 +512,7 @@ onMounted(() => {
                 v-model.trim="staffRequest.matKhau"
                 type="password"
                 :placeholder="
-                  isEditMode
-                    ? 'Chỉ đổi khi nhân viên nghỉ'
-                    : 'Nhập mật khẩu'
+                  isEditMode ? 'Chỉ đổi khi nhân viên nghỉ' : 'Nhập mật khẩu'
                 "
                 show-password
               />
@@ -568,7 +664,24 @@ onMounted(() => {
   justify-content: center;
 }
 
+.filter-section {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.result-count {
+  font-size: 13px;
+  color: #666;
+}
+
 .search-result-info {
+  margin-bottom: 16px;
+}
+
+.error-state {
   margin-bottom: 16px;
 }
 
@@ -587,7 +700,11 @@ h2 {
   font-weight: 600;
 }
 
-/* Pagination - Sử dụng style từ ProductAdmin.vue */
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+/* Pagination */
 .pagination-fixed {
   background: white;
   border-radius: 8px;
@@ -605,8 +722,16 @@ h2 {
   justify-content: center;
 }
 
+.justify-content-between {
+  justify-content: space-between;
+}
+
 .align-items-center {
   align-items: center;
+}
+
+.gap-2 {
+  gap: 8px;
 }
 
 .gap-3 {
@@ -687,7 +812,7 @@ h2 {
   width: 100%;
 }
 
-/* Table customizations - Đảm bảo đồng đều kích thước */
+/* Table customizations */
 :deep(.el-table) {
   border-radius: 8px;
   overflow: hidden;
@@ -700,8 +825,8 @@ h2 {
 }
 
 :deep(.el-table tr) {
-  height: 48px !important; /* Đặt chiều cao cố định */
-  transition: none !important; /* Loại bỏ hiệu ứng chuyển đổi */
+  height: 48px !important;
+  transition: none !important;
 }
 
 :deep(.el-table td) {
@@ -710,7 +835,7 @@ h2 {
   color: #374151;
   border-color: #f3f4f6;
   background: white !important;
-  vertical-align: middle; /* Căn giữa nội dung */
+  vertical-align: middle;
 }
 
 :deep(.el-table .cell) {
@@ -730,13 +855,24 @@ h2 {
     padding: 16px;
   }
 
+  .filter-section .d-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .filter-section .d-flex:first-child {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
   :deep(.el-dialog) {
     width: 95% !important;
     margin: 5vh auto !important;
   }
 
   :deep(.el-table tr) {
-    height: 40px !important; /* Giảm chiều cao trên mobile */
+    height: 40px !important;
   }
 
   :deep(.el-table td) {
