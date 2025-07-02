@@ -181,3 +181,11 @@ export const createPendingInvoice = () => {
     const url = url_base;
     return api.post(url);
 }
+
+export const loadPaymentMethod = () => {
+    return api.get('/admin/payment-methods');
+}
+
+export const thanhToan = (id, paymentPayload) => {
+    return api.put('/admin/hoa-don/' +id + '/thanh-toan',paymentPayload)
+}
