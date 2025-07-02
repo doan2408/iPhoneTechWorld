@@ -9,7 +9,7 @@
       </el-col>
     </el-row>
 
-    <div class="mb-3" style="display: flex; justify-content: flex-end; gap: 12px;">
+    <div class="mb-3" v-if="isAdmin" style="display: flex; justify-content: flex-end; gap: 12px;">
       <router-link to="/admin/products/create" class="el-link--success">
         <el-button type="success" size="default">Thêm sản phẩm mới</el-button>
       </router-link>
@@ -40,10 +40,10 @@
       <el-table-column label="Thao tác" width="180">
         <template #default="{ row }">
           <div class="action-buttons-horizontal">
-            <router-link :to="`/admin/products/${row.id}`">
+            <router-link :to="`/admin/products/${row.id}`" v-if="isAdmin">
               <el-button size="small" type="primary" :icon="Edit" circle />
             </router-link>
-            <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
+            <el-button v-if="isAdmin" size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
             <router-link :to="`/admin/products/view/${row.id}`">
               <el-button size="small" type="info" :icon="View" circle />
             </router-link>
@@ -69,7 +69,8 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { getAllSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+import store from '@/Service/LoginService/Store';
 
 // State
 const sanPhamList = ref([]);
@@ -158,6 +159,26 @@ const trangThaiSanPhamMap = {
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
   handleSearch();
+});
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
 });
 
 // Tải dữ liệu khi component được mount

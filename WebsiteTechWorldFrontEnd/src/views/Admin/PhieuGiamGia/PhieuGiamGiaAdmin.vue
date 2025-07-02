@@ -2,10 +2,11 @@
   <div class="container">
     <div class="header-content">
       <h3><b>Quản lý khuyến mãi</b></h3>
-      <el-button type="primary" style="font-size: 16px; padding: 18px 20px;" @click="openDialog">
+      <el-button type="primary" style="font-size: 16px; padding: 18px 20px;" @click="openDialog" v-if="isAdmin">
         <el-icon style="margin-right: 5px;">
           <Plus />
-        </el-icon>Tạo khuyến mãi</el-button>
+        </el-icon>Tạo khuyến mãi
+      </el-button>
     </div>
 
     <!-- Bộ lọc -->
@@ -76,14 +77,18 @@
           {{ scope.row.congKhai ? 'Công khai' : 'Riêng tư' }}
         </template>
       </el-table-column>
-      <el-table-column label="Thao tác" width="140">
+      <el-table-column label="Thao tác" width="140"v-if="isAdmin">
         <template #default="scope">
-          <el-button size="small" type="primary" @click="viewUpdate(scope.row.id)"><el-icon>
+          <el-button size="small" type="primary" @click="viewUpdate(scope.row.id)">
+            <el-icon>
               <Edit />
-            </el-icon></el-button>
-          <el-button size="small" type="danger" @click="handleDeletePhieuGiamGia(scope.row.id)"><el-icon>
+            </el-icon>
+          </el-button>
+          <el-button size="small" type="danger" @click="handleDeletePhieuGiamGia(scope.row.id)">
+            <el-icon>
               <Delete />
-            </el-icon></el-button>
+            </el-icon>
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -167,11 +172,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive } from "vue";
+import { ref, onMounted, watch, reactive, computed } from "vue";
 import { getAll, detail, add, update, deletePhieuGiamGia, getAllSanPham } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { Edit } from "lucide-vue-next";
+import store from "@/Service/LoginService/Store";
 
 const isLoading = ref(false);
 const phieuGiamGias = ref([]);
@@ -512,6 +518,26 @@ watch(phieuGiamGiaDialogVisible, (visible) => {
   } else {
     dialog.value?.close();
   }
+});
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
 });
 
 onMounted(() => {
