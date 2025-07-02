@@ -881,6 +881,7 @@ const removeFromCart = async () => {
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
+        ElMessage.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
         console.error("Xóa thất bại", err);
