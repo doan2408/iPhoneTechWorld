@@ -44,12 +44,13 @@ public class NhanVienAdminController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getStaffDetail(@PathVariable int id) {
-        return nhanVienAdminService.getStaffById(id).map(ResponseEntity :: ok)
+        return nhanVienAdminService.getStaffById(id).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStaff(@PathVariable("id") Integer id, @RequestBody @Validated({Default.class,UpdateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
+    public ResponseEntity<?> updateStaff(@PathVariable("id") Integer id, @RequestBody @Validated({Default.class, UpdateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<Map<String, String>> errors = bindingResult.getFieldErrors()
                     .stream()
@@ -79,8 +80,9 @@ public class NhanVienAdminController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
-    public ResponseEntity<?> addStaff(@RequestBody @Validated({Default.class,CreateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
+    public ResponseEntity<?> addStaff(@RequestBody @Validated({Default.class, CreateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<Map<String, String>> errors = bindingResult.getFieldErrors()
                     .stream()
@@ -110,6 +112,7 @@ public class NhanVienAdminController {
     }
 
     //không nên xóa tk nhân viên
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStaff(@PathVariable Integer id) {
         nhanVienAdminService.deleteStaff(id);

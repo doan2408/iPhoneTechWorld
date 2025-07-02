@@ -1,7 +1,5 @@
 package org.example.websitetechworld.Config;
 
-
-import jakarta.servlet.http.HttpServletResponse;
 import org.example.websitetechworld.Services.LoginServices.AccountDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +24,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final AccountDetailService accountDetailService;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(AccountDetailService accountDetailService) {
+    public SecurityConfig(AccountDetailService accountDetailService, CustomAccessDeniedHandler accessDeniedHandler) {
         this.accountDetailService = accountDetailService;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
         @Bean
@@ -49,6 +49,7 @@ public class SecurityConfig {
                             .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                             .anyRequest().permitAll()
                     )
+                    .exceptionHandling(exeption -> exeption.accessDeniedHandler(this.accessDeniedHandler))
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
                     .formLogin().disable()        // ❌ Tắt login mặc định bằng form
                     .httpBasic().disable()        // ❌ Tắt Basic Auth
