@@ -1,8 +1,11 @@
 package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -14,13 +17,14 @@ public class ModelSanPhamAdminRequest {
 
     private Integer idModelSanPham;
 
+    private String modelSanPham;
+
     private String tenModel;
 
     private LocalDate namRaMat;
 
-    private String moTa;
-
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
     private Integer idRam;
 

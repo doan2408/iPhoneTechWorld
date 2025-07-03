@@ -1,19 +1,21 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ModelSanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.NotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -38,14 +40,15 @@ public class ModelSanPhamService {
     private final LoaiRepository loaiRepo;
     private final ModelSanPhamRepository modelSanPhamRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
 
         entity.setTenModel(req.getTenModel());
+        entity.setMaModelSanPham(req.getModelSanPham());
         entity.setNamRaMat(req.getNamRaMat());
-        entity.setMoTa(req.getMoTa());
-        entity.setTrangThai(req.getTrangThai());
-
-//        entity.setIdSanPham(sanPhamRepo.findById(req.getIdSanPham()).orElse(null));
+        entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
         entity.setIdRam(ramRepo.findById(req.getIdRam()).orElse(null));
         entity.setIdManHinh(manHinhRepo.findById(req.getIdManHinh()).orElse(null));
         entity.setIdHeDieuHanh(heDieuHanhRepo.findById(req.getIdHeDieuHanh()).orElse(null));
@@ -60,37 +63,13 @@ public class ModelSanPhamService {
     private ModelSanPhamAdminResponse mapEntityToResponse(ModelSanPham entity) {
         ModelSanPhamAdminResponse response = new ModelSanPhamAdminResponse();
 
-//        entity.setMa_model_san_pham(response.getMa_model_san_pham());
-//        entity.setTen_model(response.getTen_model());
-//        entity.setNam_ra_mat(response.getNam_ra_mat());
-//        entity.setMo_ta(response.getMo_ta());
-//        entity.setTrang_thai(response.getTrang_thai());
-
-
         if (entity != null) {
             response.setIdModelSanPham(entity.getIdModelSanPham());
             response.setMaModelSanPham(entity.getMaModelSanPham());
             response.setTenModel(entity.getTenModel());
             response.setNamRaMat(entity.getNamRaMat());
-            response.setMoTa(entity.getMoTa());
-            response.setTrangThai(entity.getTrangThai());
+            response.setTrangThaiSanPhamModel(entity.getTrangThaiSanPhamModel());
         }
-
-//        SanPham sanPham = entity.getIdSanPham();
-//        if (sanPham != null) {
-//            response.setMaSanPham(sanPham.getMaSanPham());
-//            response.setTenSanPham(sanPham.getTenSanPham());
-//            response.setThuongHieu(sanPham.getThuongHieu());
-//            response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
-//
-//            NhaCungCap ncc = sanPham.getIdNhaCungCap();
-//            if (ncc != null) {
-//                response.setTenNhaCungCap(ncc.getTenNhaCungCap());
-//                response.setDiaChi(ncc.getDiaChi());
-//                response.setSdt(ncc.getSdt());
-//                response.setEmail(ncc.getEmail());
-//            }
-//        }
 
         Ram ram = entity.getIdRam();
         if (ram != null) {
@@ -213,7 +192,9 @@ public class ModelSanPhamService {
             msp.setIdRam((Integer) object[4]);
             msp.setIdXuatXu((Integer) object[5]);
             msp.setNamRaMat(((java.sql.Date) object[6]).toLocalDate());
-            msp.setTrangThai((String) object[7]);
+            String trangThaiModel = (String) object[7];
+            TrangThaiSanPhamModel setTrangThai = TrangThaiSanPhamModel.valueOf(trangThaiModel);
+            msp.setTrangThaiSanPhamModel(setTrangThai);
             modelSanPham.add(msp);
         }
         return new PageImpl<>(modelSanPham, pageable, modelSanPhamsPage.getTotalElements());
@@ -221,9 +202,18 @@ public class ModelSanPhamService {
 
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
+        System.out.println("Request nhận vào: " + request); // Yêu cầu ModelSanPhamAdminRequest phải override toString()
+
         ModelSanPham model = new ModelSanPham();
         mapRequestToEntity(request, model);
         ModelSanPham savedModel = modelSanPhamRepository.save(model);
+
+        entityManager.flush();
+        entityManager.refresh(savedModel);
+
+        ModelSanPhamAdminResponse response = mapEntityToResponse(savedModel);
+        System.out.println("Đối tượng sau khi lưu: " + savedModel);
+        System.out.println("Response trả về: " + response);
         return mapEntityToResponse(savedModel);
     }
 
@@ -240,7 +230,8 @@ public class ModelSanPhamService {
     public void deleteModelSanPham(Integer id) {
         ModelSanPham model = modelSanPhamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Model sản phẩm không tồn tại"));
-        modelSanPhamRepository.delete(model);
+        model.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.DELETED);
+        modelSanPhamRepository.save(model);
     }
 
     @Transactional
@@ -250,5 +241,10 @@ public class ModelSanPhamService {
         return mapEntityToResponse(model);
     }
 
+    public Page<ModelSanPhamAdminResponse> searchModelSanPham(int page, int size, String search, Integer idLoai, Integer idRam, Integer idXuatXu) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ModelSanPham> modelPage = modelSanPhamRepository.findByFiltersNative(search, idLoai, idRam, idXuatXu, pageable);
+        return modelPage.map(this::mapEntityToResponse);
+    }
 
 }

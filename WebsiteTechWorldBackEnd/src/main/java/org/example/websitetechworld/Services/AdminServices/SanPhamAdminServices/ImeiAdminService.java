@@ -1,11 +1,18 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ImeiAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SaveImeiRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
 import org.example.websitetechworld.Entity.Imei;
+import org.example.websitetechworld.Entity.SanPham;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
+import org.example.websitetechworld.Repository.SanPhamRepository;
 import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
@@ -14,7 +21,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +39,8 @@ public class ImeiAdminService {
     private final SanPhamChiTietRepository sanPhamChiTietRepo;
 
     private final ModelMapper modelMapper;
+    private final SanPhamRepository sanPhamRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
     public ImeiAdminResponse convert(Imei imei) {
         return modelMapper.map(imei, ImeiAdminResponse.class);
@@ -165,5 +177,63 @@ public class ImeiAdminService {
         Imei imei = imeiReposiory.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Imei ID: " + id));
         return convert(imei);
+    }
+
+
+    public void importImeiFromExcel(MultipartFile file, Integer idSanPhamChiTiet) {
+        try {
+            List<SaveImeiRequest> imeiDtos = readExcelToDto(file.getInputStream());
+
+            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(idSanPhamChiTiet)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết"));
+
+            List<Imei> imeis = imeiDtos.stream().map(dto -> {
+                Imei imei = new Imei();
+                imei.setSoImei(dto.getSoImei());
+                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                imei.setIdSanPhamChiTiet(spct); // 👈 dùng chung ID
+                return imei;
+            }).collect(Collectors.toList());
+
+            imeiReposiory.saveAll(imeis);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi đọc file Excel");
+        }
+    }
+
+    /**
+     * Hàm đọc file Excel và convert thành danh sách DTO
+     */
+    private List<SaveImeiRequest> readExcelToDto(InputStream inputStream) throws IOException {
+        List<SaveImeiRequest> imeiList = new ArrayList<>();
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null || row.getCell(0) == null) continue;
+
+            String soImei = getCellStringValue(row.getCell(0));
+            SaveImeiRequest dto = new SaveImeiRequest();
+            dto.setSoImei(soImei);
+            imeiList.add(dto);
+        }
+
+        workbook.close();
+        return imeiList;
+    }
+
+
+
+
+    private String getCellStringValue(Cell cell) {
+        if (cell == null) return null;
+
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf(new java.math.BigDecimal(cell.getNumericCellValue()).toBigInteger()); // để không bị mất số 0 ở đầu
+            default -> throw new IllegalArgumentException("Không thể đọc giá trị IMEI từ ô Excel.");
+        };
     }
 }
