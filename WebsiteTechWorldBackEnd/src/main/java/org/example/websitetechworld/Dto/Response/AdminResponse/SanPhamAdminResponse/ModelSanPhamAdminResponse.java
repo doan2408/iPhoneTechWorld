@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -18,8 +19,8 @@ public class ModelSanPhamAdminResponse {
     private String maModelSanPham;
     private String tenModel;
     private LocalDate namRaMat;
-    private String moTa;
-    private String trangThai;
+    @Enumerated(EnumType.STRING)
+    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
     private Integer idRam;
     private String dungLuongRam;

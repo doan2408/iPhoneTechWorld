@@ -4,11 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ImeiAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.LoaiAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SaveImeiRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ViewImeiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.LoaiAdminResponse;
 import org.example.websitetechworld.Entity.Imei;
+import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Repository.ImeiReposiory;
+import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
 import org.example.websitetechworld.exception.ValidationException;
@@ -20,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +38,8 @@ import java.util.stream.Collectors;
 public class ImeiAdminController {
     private final ImeiAdminService imeiAdminService;
     private final HoaDonChiTiet_ImeiAdminServices imeiAdminServices;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final ImeiReposiory imeiReposiory;
 
     @GetMapping
     public ResponseEntity<Page<ImeiAdminResponse>> getAllImei(
@@ -144,6 +152,19 @@ public class ImeiAdminController {
         return ResponseEntity.ok(imeisPage);
     }
 
+    @PostMapping("/import-excel")
+    public ResponseEntity<?> importExcel(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(name = "idSanPhamChiTiet", required = false) Integer idSanPhamChiTiet // 👈 lấy từ client
+    ) {
+        try {
+            imeiAdminService.importImeiFromExcel(file, idSanPhamChiTiet);
+            return ResponseEntity.ok("Import IMEI thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Import thất bại: " + e.getMessage());
+        }
+    }
 
 
 }

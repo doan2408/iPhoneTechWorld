@@ -2,6 +2,8 @@ package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
+
 import java.time.LocalDate;
 
 @Entity
@@ -24,11 +26,9 @@ public class ModelSanPham {
     @Column(name = "nam_ra_mat")
     private LocalDate namRaMat;
 
-    @Column(name = "mo_ta")
-    private String moTa;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private String trangThai;
+    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ram")

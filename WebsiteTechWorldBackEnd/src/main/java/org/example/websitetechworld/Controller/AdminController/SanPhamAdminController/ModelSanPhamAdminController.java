@@ -35,7 +35,7 @@ public class ModelSanPhamAdminController {
 
         return ResponseEntity.ok(responses);
     }
-
+//(produces = "application/json; charset=UTF-8")
     @PostMapping
     public ResponseEntity<ModelSanPhamAdminResponse> createModelSanPham(@RequestBody ModelSanPhamAdminRequest request) {
         ModelSanPhamAdminResponse response = modelSanPhamService.createModelSanPham(request);
@@ -58,5 +58,17 @@ public class ModelSanPhamAdminController {
     public ResponseEntity<ModelSanPhamAdminResponse> findByIdModelSanPham(@PathVariable Integer id) {
         ModelSanPhamAdminResponse response =  modelSanPhamService.findByIdModelSanPham(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ModelSanPhamAdminResponse>> getAllPageModelSanPham(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer idLoai,
+            @RequestParam(required = false) Integer idRam,
+            @RequestParam(required = false) Integer idXuatXu) {
+        Page<ModelSanPhamAdminResponse> result = modelSanPhamService.searchModelSanPham(page, size, search, idLoai, idRam, idXuatXu);
+        return ResponseEntity.ok(result);
     }
 }
