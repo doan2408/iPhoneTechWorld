@@ -213,17 +213,14 @@
             <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''"
               class="error-container">
               <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
-                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)"
-                :rows="4"
+                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)" :rows="4"
                 :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].isFileUploaded"
                 @input="handleImeiInput(selectedChiTiet)" />
               <div class="action-buttons">
-                <el-upload
-                  :auto-upload="false"
-                  :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
-                  accept=".xlsx,.xls"
-                  :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
-                  <el-button type="primary" plain :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
+                <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
+                  accept=".xlsx,.xls" :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
+                  <el-button type="primary" plain
+                    :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
                     <Upload class="el-icon" /> Tải file IMEI
                   </el-button>
                 </el-upload>
@@ -459,6 +456,7 @@ export default {
               giaBan: giaBanChung.value || existingVariant?.giaBan || null,
               imeisInput: existingVariant?.imeisInput || "",
               isFileUploaded: existingVariant?.isFileUploaded || false,
+              imeis: existingVariant?.imeis || [], // Giữ lại danh sách IMEI
               hinhAnhs: hinhAnhTheoMau[mau] || [],
             });
             errorsChiTiet.push({
@@ -591,6 +589,7 @@ export default {
         sanPham.sanPhamChiTiets[index].imeisInput = "";
         sanPham.sanPhamChiTiets[index].soLuong = 0;
         sanPham.sanPhamChiTiets[index].isFileUploaded = false;
+        sanPham.sanPhamChiTiets[index].imeis = [];
         errorsChiTiet[index].imeisInput = "";
         errorsChiTiet[index].soLuong = "";
         ElMessage.success("Đã xóa danh sách IMEI!");
@@ -629,8 +628,8 @@ export default {
               throw new Error("Không tìm thấy IMEI hợp lệ trong file");
             }
 
-            // Lưu IMEI nhưng không hiển thị trong textarea
-            sanPham.sanPhamChiTiets[index].imeisInput = "";
+            // Lưu IMEI và đồng bộ vào imeisInput
+            // sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", "); // Đồng bộ danh sách IMEI vào textarea
             sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
             sanPham.sanPhamChiTiets[index].isFileUploaded = true;
             sanPham.sanPhamChiTiets[index].imeis = imeis; // Lưu danh sách IMEI riêng
@@ -745,6 +744,10 @@ export default {
         Object.keys(errorsChiTiet[index]).forEach((k) => (errorsChiTiet[index][k] = ""));
         capNhatSoLuong(index, true); // Kiểm tra lại IMEI khi chọn biến thể
       }
+      // Đồng bộ imeisInput từ imeis nếu là file upload
+      if (sanPham.sanPhamChiTiets[index].isFileUploaded && sanPham.sanPhamChiTiets[index].imeis) {
+        sanPham.sanPhamChiTiets[index].imeisInput = sanPham.sanPhamChiTiets[index].imeis.join(", ");
+      }
     };
 
     // Lấy nhãn màu sắc
@@ -829,8 +832,8 @@ export default {
             .flatMap((ct, i) =>
               i !== index
                 ? (ct.isFileUploaded
-                    ? ct.imeis
-                    : ct.imeisInput.split(",").map((im) => im.trim()).filter((im) => im))
+                  ? ct.imeis
+                  : ct.imeisInput.split(",").map((im) => im.trim()).filter((im) => im))
                 : []
             );
           const duplicateImeis = imeis.filter((im) => allImeis.includes(im));
