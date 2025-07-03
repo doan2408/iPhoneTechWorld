@@ -71,17 +71,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
+          <el-form-item label="Trạng thái model">
+            <!-- <el-input :value="sanPhamModel.modelSanPham?.trangThaiSanPhamModel || ''" readonly></el-input> -->
+            <el-input :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)"
+              readonly></el-input>
+          </el-form-item>
+        </el-col>
+        <!-- <el-col :span="12">
           <el-form-item label="Mô tả">
             <el-input :value="sanPhamModel.modelSanPham?.moTa || ''" readonly></el-input>
           </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Trạng thái model">
-            <el-input :value="sanPhamModel.modelSanPham?.trangThai || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
+        </el-col> -->
       </el-row>
 
       <!-- Thông tin RAM -->
@@ -364,7 +364,8 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="Mã SP chi tiết">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''" readonly></el-input>
+              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''"
+                readonly></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -404,7 +405,8 @@
           </el-col>
         </el-row>
         <el-form-item label="IMEI">
-          <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''" readonly></el-input>
+          <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''"
+            readonly></el-input>
           <div style="margin-top: 8px;">
             Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
           </div>
@@ -415,8 +417,12 @@
         <el-form-item label="Hình ảnh">
           <div class="image-preview">
             <el-image v-for="img in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []" :key="img.url"
-              :src="img.url" :preview-src-list="[img.url]"
+              :src="img.url"
+              :preview-src-list="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.map(h => h.url) || []"
               style="width: 100px; height: 100px; margin-right: 8px; border-radius: 4px;" />
+            <span v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length">
+              Không có hình ảnh nào.
+            </span>
           </div>
         </el-form-item>
       </div>
@@ -473,6 +479,14 @@ const danhSachTrangThaiSanPham = [
   { label: 'Hết hàng', value: 'OUT_OF_STOCK' },
 ];
 
+const danhSachTrangThaiModel = ref([
+  { value: 'ACTIVE', label: 'Đang hoạt động' },
+  { value: 'DISCONTINUED', label: 'Ngừng sản xuất' },
+  { value: 'UPCOMING', label: 'Chờ ra mắt' },
+  { value: 'HIDDEN', label: 'Ẩn' },
+  { value: 'DELETED', label: 'Đã xóa' }
+]);
+
 const fetchSanPham = async (id) => {
   try {
     const response = await getViewSanPham(id);
@@ -507,7 +521,7 @@ const fetchSanPham = async (id) => {
         tenModel: response.modelSanPhamAdminResponse.tenModel || '',
         namRaMat: response.modelSanPhamAdminResponse.namRaMat || '',
         moTa: response.modelSanPhamAdminResponse.moTa || '',
-        trangThai: response.modelSanPhamAdminResponse.trangThai || '',
+        trangThaiSanPhamModel: response.modelSanPhamAdminResponse.trangThaiSanPhamModel || '',
         dungLuongRam: response.modelSanPhamAdminResponse.dungLuongRam || '',
         loaiRam: response.modelSanPhamAdminResponse.loaiRam || '',
         tocDoDocGhiRam: response.modelSanPhamAdminResponse.tocDoDocGhiRam || '',
@@ -596,6 +610,11 @@ const getNhaCungCapLabel = (id) => {
 
 const getTrangThaiLabel = (value) => {
   const result = danhSachTrangThaiSanPham.find((tt) => tt.value === value);
+  return result?.label || 'Không rõ';
+};
+
+const getTrangThaiModelLabel = (value) => {
+  const result = danhSachTrangThaiModel.value.find((tt) => tt.value === value);
   return result?.label || 'Không rõ';
 };
 
@@ -789,11 +808,6 @@ h5 {
   border: 1px solid var(--el-border-color-light);
   border-radius: 6px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.el-image:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Text center */
