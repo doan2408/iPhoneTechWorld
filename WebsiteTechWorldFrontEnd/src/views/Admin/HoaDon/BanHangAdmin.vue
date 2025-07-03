@@ -2014,7 +2014,7 @@ const processPayment = async () => {
     }
 
     const paymentPayload = {
-        hinhThucThanhToan: selectedPaymentMethod.value,
+        hinhThucThanhToan: selectedPaymentMethod.value, 
         soTienKhachDua: currentInvoiceDetail.value.thanhTien
     };
 
