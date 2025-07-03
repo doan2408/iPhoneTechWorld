@@ -145,6 +145,7 @@
         </el-form-item>
         <el-form-item label="Hạng tối thiểu" v-if="!formData.congKhai">
           <el-select v-model="formData.hangToiThieu">
+            <el-option value="MEMBER" label="Thành viên" />
             <el-option value="SILVER" label="Bạc" />
             <el-option value="GOLD" label="Vàng" />
             <el-option value="DIAMOND" label="Kim cương" />
@@ -154,13 +155,8 @@
           <el-input v-model="formData.dieuKienApDung" />
         </el-form-item>
         <el-form-item label="Trạng thái">
-          <el-switch
-  v-model="formData.trangThaiPhatHanh"
-  active-text="Phát hành"
-  inactive-text=""
-  active-value="ISSUED"
-  inactive-value="NOT_ISSUED"
-/>
+          <el-switch v-model="formData.trangThaiPhatHanh" active-text="Phát hành" inactive-text="" active-value="ISSUED"
+            inactive-value="NOT_ISSUED" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -390,7 +386,7 @@ const savePhieuGiamGia = async () => {
 
     const payload = {
       ...formData,
-      hangToiThieu: formData.congKhai ? 'MEMBER' : formData.hangToiThieu,
+      hangToiThieu: formData.congKhai ? null : formData.hangToiThieu,
       giaTriKhuyenMai: formData.giaTriKhuyenMai.toString(),
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
       giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),

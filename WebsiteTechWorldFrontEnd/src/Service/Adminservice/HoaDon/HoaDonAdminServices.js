@@ -31,11 +31,6 @@ export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
     )
 }
 
-//create pending invoice
-export const createPendingInvoice = () => {
-    const url = url_base;
-    return api.post(url);
-}
 
 //api hien thi cac hoa don theo id nhan vien ..
 export const loadHoaDonByIdNhanVien = () => {
@@ -124,6 +119,17 @@ export const addKhachHang = (data) => {
     return api.post(url, data)
 }
 
+//Phieu giam gia
+export const getAllPhieuGiamGia = (search, idKhachHang) => {
+    const url = url_base + '/list-phieu-giam-gia'
+    return api.get(url, {
+        params: {
+            search: search,
+            idKhachHang: idKhachHang
+        }
+    })
+}
+
 
 export const getTinhThanh = () => {
     const url = '/admin/tinh-thanh/provinces'
@@ -168,4 +174,18 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
         maVanDon: null,
         thanhTien: null
     });
+}
+
+//create pending invoice
+export const createPendingInvoice = () => {
+    const url = url_base;
+    return api.post(url);
+}
+
+export const loadPaymentMethod = () => {
+    return api.get('/admin/payment-methods');
+}
+
+export const thanhToan = (id, paymentPayload) => {
+    return api.put('/admin/hoa-don/' +id + '/thanh-toan',paymentPayload)
 }

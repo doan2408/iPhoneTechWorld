@@ -8,10 +8,8 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.
 import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
-import org.example.websitetechworld.Entity.ChiTietHoaDon;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.LichSuHoaDon;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
@@ -19,6 +17,7 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.H
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
+import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanStrategy;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
@@ -43,15 +42,17 @@ public class HoaDonAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final LichSuHoaDonAdminServices lichSuHoaDonAdminServices;
     private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
+    private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
     private final ThanhToanFactory thanhToanFactory;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
 
     private static final int PAGE_SIZE = 4;
 
-    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
+    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, PhieuGiamGiaAdminService phieuGiamGiaAdminService, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.lichSuHoaDonAdminServices = lichSuHoaDonAdminServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
+        this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
     }
@@ -200,7 +201,7 @@ public class HoaDonAdminController {
     //Khach hang
     @GetMapping("/list-khach-hang")
     public ResponseEntity<Page<KhachHangGiamGiaResponse>> getAllKhachHang(
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         Page<KhachHangGiamGiaResponse> khachHangList = hoaDonAdminService.getAllKhachHang(search, page, size);
@@ -222,6 +223,15 @@ public class HoaDonAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Chon khach hang thất bại: " + e.getMessage());
         }
+    }
+
+    //Phieu giam gia
+    @GetMapping("/list-phieu-giam-gia")
+    public ResponseEntity<List<PhieuGiamGiaAdminResponse>> getAllPhieuGiamGia (
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false) Integer idKhachHang) {
+        List<PhieuGiamGiaAdminResponse> phieuGiamGias = phieuGiamGiaAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang);
+        return ResponseEntity.ok(phieuGiamGias);
     }
 
 

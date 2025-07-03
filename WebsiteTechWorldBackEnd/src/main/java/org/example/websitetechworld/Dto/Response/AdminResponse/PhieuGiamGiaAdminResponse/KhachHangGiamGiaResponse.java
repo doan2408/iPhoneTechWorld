@@ -11,5 +11,6 @@ public class KhachHangGiamGiaResponse {
 
     private Integer id;
     private String maKhachHang;
+    private String sdt;
     private String tenKhachHang;
 }
