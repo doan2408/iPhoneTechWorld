@@ -46,12 +46,14 @@ public class HoaDonAdminResponse {
     private LocalDate ngayDatHang;
 
     private String diaChiGiaoHang;
+    private String shippingMethod;
 
     private String loaiHoaDon;
-
+    private Boolean isShipping;
     private LocalDate ngayThanhToan;
     private String trangThaiDonHang;
     private String trangThaiThanhToan;
+    private Integer idTinhThanh;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
 //    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
@@ -72,22 +74,25 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setMaPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getMaGiamGia());
             hoaDonAdminResponse.setTenPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getTenKhuyenMai());
         }
+
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
         hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
-        hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiMua());
+        hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiNhan());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());
         hoaDonAdminResponse.setThanhTien(hoaDon.getThanhTien());
         hoaDonAdminResponse.setNgayTao(hoaDon.getNgayTaoHoaDon());
         hoaDonAdminResponse.setNgayDatHang(hoaDon.getNgayDatHang());
+        hoaDonAdminResponse.setIsShipping(hoaDon.getIsShipping());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
         hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );
         hoaDonAdminResponse.setTrangThaiDonHang(hoaDon.getTrangThaiDonHang() != null ? hoaDon.getTrangThaiDonHang().getDisplayName() : null );
+        hoaDonAdminResponse.setShippingMethod(hoaDon.getShippingMethod() != null ? hoaDon.getShippingMethod().getCode() : null);
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));

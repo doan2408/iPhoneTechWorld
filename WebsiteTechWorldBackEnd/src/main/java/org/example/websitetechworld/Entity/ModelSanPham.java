@@ -1,8 +1,10 @@
 package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 
@@ -12,13 +14,14 @@ import java.time.LocalDate;
 public class ModelSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_model_san_pham")
     private Integer idModelSanPham;
 
     @Column(name = "ma_model_san_pham", insertable = false, updatable = false)
     private String maModelSanPham;
 
+    @Nationalized
+    @Size(max = 50)
     @Column(name = "ten_model")
     private String tenModel;
 

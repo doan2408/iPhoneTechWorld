@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
@@ -49,4 +50,5 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     int tangSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongTang") int soLuongTang);
 
 
+//    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContaining(@Size(max = 50) String idSanPhamTenSanPham, Pageable pageable);
 }

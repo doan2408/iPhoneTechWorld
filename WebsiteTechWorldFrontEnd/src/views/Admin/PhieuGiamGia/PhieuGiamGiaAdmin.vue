@@ -1,28 +1,197 @@
-<script setup>
-import { ref, onMounted, watch, reactive } from "vue";
-import { getAll, detail, add, update, deletePhieuGiamGia, getAllKhachHang } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
-import { ElMessage } from "element-plus";
+<template>
+  <div class="container">
+    <div class="header-content">
+      <h3><b>Quản lý khuyến mãi</b></h3>
+      <el-button type="primary" style="font-size: 16px; padding: 18px 20px;" @click="openDialog" v-if="isAdmin">
+        <el-icon style="margin-right: 5px;">
+          <Plus />
+        </el-icon>Tạo khuyến mãi
+      </el-button>
+    </div>
 
-const phieuGiamGias = ref([]);
+    <!-- Bộ lọc -->
+    <el-card class="box-card" style="margin-top: 16px;">
+      <el-row :gutter="20">
+        <el-col :span="6" style="max-width: 30%;">
+          <el-input v-model="search" placeholder="Tìm kiếm theo mã hoặc tên" clearable />
+        </el-col>
+        <el-col :span="5" style="max-width: 30%;">
+          <el-select v-model="trangThaiFilter" placeholder="Trạng thái" clearable>
+            <el-option label="Tất cả" :value="null"></el-option>
+            <el-option label="Chưa bắt đầu" value="NOT_STARTED"></el-option>
+            <el-option label="Đang hoạt động" value="ACTIVE"></el-option>
+            <el-option label="Đã hết hạn" value="EXPIRED"></el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="5" style="max-width: 30%;">
+          <el-date-picker v-model="ngayBatDauFilter" type="date" placeholder="Ngày bắt đầu" value-format="YYYY-MM-DD"
+            clearable />
+        </el-col>
+        <el-col :span="5" style="max-width: 30%;">
+          <el-date-picker v-model="ngayKetThucFilter" type="date" placeholder="Ngày kết thúc" value-format="YYYY-MM-DD"
+            clearable />
+        </el-col>
+        <el-col :span="3" style="max-width: 30%;">
+          <el-button @click="clear">Làm mới</el-button>
+        </el-col>
+      </el-row>
+    </el-card>
+
+    <!-- Bảng -->
+    <el-table v-loading="isLoading" :data="phieuGiamGias" style="width: 100%; margin-top: 16px;" border>
+      <el-table-column label="STT" width="60">
+        <template #default="scope">
+          {{ scope.$index + 1 + currentPage * pageSize }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="maGiamGia" label="Mã" width="120" />
+      <el-table-column prop="tenKhuyenMai" label="Tên" />
+      <el-table-column label="Giá trị giảm" width="140">
+        <template #default="scope">
+          <span v-if="scope.row.loaiKhuyenMai === 'Phần trăm'">
+            {{ scope.row.giaTriKhuyenMai }}%
+          </span>
+          <span v-else>
+            {{ formatCurrency(scope.row.giaTriKhuyenMai) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Bắt đầu" width="120">
+        <template #default="scope">
+          {{ formatDate(scope.row.ngayBatDau) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="Kết thúc" width="120">
+        <template #default="scope">
+          {{ formatDate(scope.row.ngayKetThuc) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="soLuong" label="Số lượng" width="100" />
+      <el-table-column prop="trangThaiPhieuGiamGia" label="Trạng thái" width="130">
+        <template #default="scope">
+          {{ convertTrangThai(scope.row.trangThaiPhieuGiamGia) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="Loại" width="100">
+        <template #default="scope">
+          {{ scope.row.congKhai ? 'Công khai' : 'Riêng tư' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="Thao tác" width="140"v-if="isAdmin">
+        <template #default="scope">
+          <el-button size="small" type="primary" @click="viewUpdate(scope.row.id)">
+            <el-icon>
+              <Edit />
+            </el-icon>
+          </el-button>
+          <el-button size="small" type="danger" @click="handleDeletePhieuGiamGia(scope.row.id)">
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- Phân trang -->
+    <div class="pagination" style="margin-top: 16px; text-align: center;">
+      <el-pagination background layout="prev, pager, next" :current-page="currentPage + 1" :page-size="pageSize"
+        :total="totalPages * pageSize" @current-change="(p) => loadPhieuGiamGia(p - 1)" />
+    </div>
+
+    <!-- Dialog -->
+    <el-dialog v-model="phieuGiamGiaDialogVisible"
+      :title="formData.id ? 'Chỉnh sửa phiếu giảm giá' : 'Thêm phiếu giảm giá'" width="640px" style="margin-top: 0;">
+      <el-form :model="formData" label-width="200px">
+        <el-form-item label="Mã giảm giá">
+          <el-input v-model="formData.maGiamGia" />
+        </el-form-item>
+        <el-form-item label="Tên khuyến mãi" required :error="errors.tenKhuyenMai">
+          <el-input v-model="formData.tenKhuyenMai" />
+        </el-form-item>
+        <el-form-item label="Loại khuyến mãi">
+          <el-select v-model="formData.loaiKhuyenMai">
+            <el-option value="Phần trăm" />
+            <el-option value="Cố định" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Giá trị khuyến mãi" required :error="errors.giaTriKhuyenMai">
+          <el-input-number v-model="formData.giaTriKhuyenMai" :min="0" />
+        </el-form-item>
+        <el-form-item label="Giá trị đơn hàng tối thiểu" :error="errors.giaTriDonHangToiThieu">
+          <el-input-number v-model="formData.giaTriDonHangToiThieu" :min="0" />
+        </el-form-item>
+        <el-form-item label="Giá trị khuyến mãi tối đa" v-if="formData.loaiKhuyenMai === 'Phần trăm'"
+          :error="errors.giaTriKhuyenMaiToiDa">
+          <el-input-number v-model="formData.giaTriKhuyenMaiToiDa" :min="0" />
+        </el-form-item>
+        <el-form-item label="Ngày bắt đầu" required :error="errors.ngayBatDau">
+          <el-date-picker v-model="formData.ngayBatDau" type="date" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="Ngày kết thúc" required :error="errors.ngayKetThuc">
+          <el-date-picker v-model="formData.ngayKetThuc" type="date" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="Số lượng" required :error="errors.soLuong">
+          <el-input-number v-model="formData.soLuong" :min="1" />
+        </el-form-item>
+        <el-form-item label="Số điểm cần đổi" :error="errors.soDiemCanDeDoi">
+          <el-input-number v-model="formData.soDiemCanDeDoi" :min="0" />
+        </el-form-item>
+        <el-form-item label="Loại phiếu">
+          <el-select v-model="formData.congKhai">
+            <el-option :value="true" label="Công khai" />
+            <el-option :value="false" label="Riêng tư" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Hạng tối thiểu" v-if="!formData.congKhai">
+          <el-select v-model="formData.hangToiThieu">
+            <el-option value="MEMBER" label="Thành viên" />
+            <el-option value="SILVER" label="Bạc" />
+            <el-option value="GOLD" label="Vàng" />
+            <el-option value="DIAMOND" label="Kim cương" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Điều kiện áp dụng" required :error="errors.dieuKienApDung">
+          <el-input v-model="formData.dieuKienApDung" />
+        </el-form-item>
+        <el-form-item label="Trạng thái">
+          <el-switch v-model="formData.trangThaiPhatHanh" active-text="Phát hành" inactive-text="" active-value="ISSUED"
+            inactive-value="NOT_ISSUED" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="phieuGiamGiaDialogVisible = false">Hủy</el-button>
+        <el-button type="primary" @click="savePhieuGiamGia">Lưu</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, watch, reactive, computed } from "vue";
+import { getAll, detail, add, update, deletePhieuGiamGia, getAllSanPham } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Plus } from '@element-plus/icons-vue'
+import { Edit } from "lucide-vue-next";
+import store from "@/Service/LoginService/Store";
+
 const isLoading = ref(false);
-const phieuGiamGiaDialogVisible = ref(false);
-const dialog = ref(null);
-const khachHangList = ref([]);
-const filteredKhachHangList = ref([]);
-const searchKhachHang = ref("");
+const phieuGiamGias = ref([]);
 
 const currentPage = ref(0);
 const totalPages = ref(0);
 const pageSize = ref(5);
-
 const search = ref("");
 const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
 const ngayKetThucFilter = ref(null);
 
+const phieuGiamGiaDialogVisible = ref(false);
+const dialog = ref(null);
+
 const formData = reactive({
   id: null,
-  maGiamGia: "#####",
+  maGiamGia: "",
   tenKhuyenMai: "",
   loaiKhuyenMai: "Phần trăm",
   giaTriKhuyenMai: 0,
@@ -34,11 +203,9 @@ const formData = reactive({
   soDiemCanDeDoi: 0,
   soLuong: 0,
   dieuKienApDung: "",
-  trangThai: "ACTIVE",
-  isGlobal: true,
-  khachHangIds: [],
-  khachHangMoi: false,
-  khachHangCu: false,
+  congKhai: true,
+  trangThaiPhieuGiamGia: "ACTIVE",
+  trangThaiPhatHanh: false
 });
 
 const errors = reactive({
@@ -52,12 +219,11 @@ const errors = reactive({
   soDiemCanDeDoi: "",
   soLuong: "",
   dieuKienApDung: "",
-  khachHangIds: "",
 });
 
 const resetForm = () => {
   formData.id = null;
-  formData.maGiamGia = "#####";
+  formData.maGiamGia = "";
   formData.tenKhuyenMai = "";
   formData.loaiKhuyenMai = "Phần trăm";
   formData.giaTriKhuyenMai = 0;
@@ -69,12 +235,9 @@ const resetForm = () => {
   formData.soDiemCanDeDoi = 0;
   formData.soLuong = 0;
   formData.dieuKienApDung = "";
-  formData.trangThai = "ACTIVE";
-  formData.isGlobal = true;
-  formData.khachHangIds = [];
-  formData.khachHangMoi = false;
-  formData.khachHangCu = false;
-  searchKhachHang.value = "";
+  formData.trangThaiPhieuGiamGia = "ACTIVE";
+  formData.trangThaiPhatHanh = false;
+  formData.congKhai = true;
 };
 
 const resetErrors = () => {
@@ -88,12 +251,22 @@ const resetErrors = () => {
   errors.soDiemCanDeDoi = "";
   errors.soLuong = "";
   errors.dieuKienApDung = "";
-  errors.khachHangIds = "";
 };
 
 const validateForm = () => {
   resetErrors();
   let isValid = true;
+
+  if (!formData.maGiamGia.trim()) {
+    errors.maGiamGia = "Tên khuyến mại là bắt buộc";
+    isValid = false;
+  } else if (formData.maGiamGia.length < 3) {
+    errors.maGiamGia = "Tên khuyến mại phải có ít nhất 3 ký tự";
+    isValid = false;
+  } else if (formData.maGiamGia.length > 50) {
+    errors.maGiamGia = "Tên khuyến mại không được vượt quá 50 ký tự";
+    isValid = false;
+  }
 
   if (!formData.tenKhuyenMai.trim()) {
     errors.tenKhuyenMai = "Tên khuyến mại là bắt buộc";
@@ -143,6 +316,7 @@ const validateForm = () => {
     const startDate = new Date(formData.ngayBatDau);
     const endDate = new Date(formData.ngayKetThuc);
     if (endDate < startDate) {
+      console.log(endDate, startDate)
       errors.ngayKetThuc = "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu";
       isValid = false;
     }
@@ -169,11 +343,6 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (!formData.isGlobal && !formData.khachHangIds.length && !formData.khachHangMoi && !formData.khachHangCu) {
-    errors.khachHangIds = "Phải chọn ít nhất một khách hàng hoặc nhóm khách hàng";
-    isValid = false;
-  }
-
   return isValid;
 };
 
@@ -191,6 +360,7 @@ const loadPhieuGiamGia = async (page) => {
     phieuGiamGias.value = response.content;
     totalPages.value = response.totalPages;
     currentPage.value = page;
+    console.log(phieuGiamGias.value)
   } catch (err) {
     console.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
     ElMessage.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
@@ -199,31 +369,7 @@ const loadPhieuGiamGia = async (page) => {
   }
 };
 
-const loadKhachHang = async () => {
-  try {
-    const response = await getAllKhachHang();
-    khachHangList.value = response.content;
-    filteredKhachHangList.value = response.content;
-    if (!khachHangList.value.length) {
-      ElMessage.warning("Không có khách hàng nào trong hệ thống!");
-    }
-  } catch (err) {
-    console.error(err.message || "Lỗi lấy danh sách khách hàng");
-    ElMessage.error(err.message || "Lỗi lấy danh sách khách hàng");
-  }
-};
-
-const filterKhachHang = () => {
-  if (!searchKhachHang.value) {
-    filteredKhachHangList.value = khachHangList.value;
-  } else {
-    filteredKhachHangList.value = khachHangList.value.filter((khachHang) =>
-      khachHang.tenKhachHang.toLowerCase().includes(searchKhachHang.value.toLowerCase())
-    );
-  }
-};
-
-const createPhieuGiamGia = () => {
+const openDialog = () => {
   resetForm();
   resetErrors();
   phieuGiamGiaDialogVisible.value = true;
@@ -240,12 +386,13 @@ const savePhieuGiamGia = async () => {
 
     const payload = {
       ...formData,
+      hangToiThieu: formData.congKhai ? null : formData.hangToiThieu,
       giaTriKhuyenMai: formData.giaTriKhuyenMai.toString(),
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
       giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),
-      soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
+      soDiemCanDeDoi: formData.soDiemCanDeDoi.toString()
     };
-
+    console.log(payload)
     if (formData.id) {
       await update(formData.id, payload);
       ElMessage.success("Cập nhật phiếu giảm giá thành công!");
@@ -276,15 +423,23 @@ const savePhieuGiamGia = async () => {
 };
 
 const handleDeletePhieuGiamGia = async (id) => {
-  if (!confirm("Bạn có chắc chắn muốn xóa phiếu giảm giá này?")) return;
   try {
+    await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa phiếu giảm giá này?", ' Xác nhận', {
+      confirmButtonText: 'Xoá',
+      cancelButtonText: 'Huỷ',
+      type: 'warning'
+    });
     isLoading.value = true;
     await deletePhieuGiamGia(id);
     ElMessage.success("Xóa phiếu giảm giá thành công!");
     loadPhieuGiamGia(currentPage.value);
   } catch (error) {
-    console.error(error.message || "Lỗi khi xóa phiếu giảm giá");
-    ElMessage.error(error.message || "Lỗi khi xóa phiếu giảm giá");
+    if (error === 'cancel') {
+      ElMessage.info('Đã huỷ xoá');
+    } else {
+      console.error(error.message || "Lỗi khi xóa phiếu giảm giá");
+      ElMessage.error(error.message || "Lỗi khi xóa phiếu giảm giá");
+    }
   } finally {
     isLoading.value = false;
   }
@@ -326,16 +481,16 @@ const viewUpdate = async (id) => {
     const response = await detail(id);
     Object.assign(formData, {
       ...response,
-      khachHangIds: response.khachHangIds || [],
+      sanPhamIds: response.sanPhamIds || [],
       khachHangMoi: response.khachHangMoi || false,
       khachHangCu: response.khachHangCu || false,
     });
     phieuGiamGiaDialogVisible.value = true;
-    filterKhachHang();
   } catch (error) {
     console.error(error.message || "Lỗi khi tải chi tiết phiếu giảm giá");
     ElMessage.error(error.message || "Lỗi khi tải chi tiết phiếu giảm giá");
   }
+  resetErrors()
 };
 
 const formatDate = (dateStr) => {
@@ -361,405 +516,70 @@ watch(phieuGiamGiaDialogVisible, (visible) => {
   }
 });
 
-watch(() => formData.isGlobal, (newIsGlobal) => {
-  if (newIsGlobal) {
-    formData.khachHangIds = [];
-    formData.khachHangMoi = false;
-    formData.khachHangCu = false;
-    searchKhachHang.value = "";
-    filterKhachHang();
-  }
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
 });
 
-watch(searchKhachHang, () => {
-  filterKhachHang();
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
 });
 
 onMounted(() => {
   loadPhieuGiamGia(currentPage.value);
-  loadKhachHang();
 });
 </script>
 
-<template>
-  <div class="container">
-    <div class="header-content">
-      <div class="title-section">
-        <h1 class="dashboard-title">Quản lý khuyến mãi</h1>
-      </div>
-      <div class="header-actions">
-        <button @click="createPhieuGiamGia" class="btn btn-outline-primary">
-          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>Tạo khuyến mãi mới
-        </button>
-      </div>
-    </div>
-
-    <!-- Bộ lọc -->
-    <div class="search-card">
-      <div class="search-content">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <input v-model="search" type="text" placeholder="Tìm kiếm theo mã hoặc tên..." class="form-control" />
-          </div>
-          <div class="col-md-2">
-            <select v-model="trangThaiFilter" class="form-select">
-              <option :value="null">-- Tất cả trạng thái --</option>
-              <option value="NOT_STARTED">Chưa bắt đầu</option>
-              <option value="ACTIVE">Đang hoạt động</option>
-              <option value="EXPIRED">Đã hết hạn</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <input v-model="ngayBatDauFilter" type="date" class="form-control" placeholder="Ngày bắt đầu" />
-          </div>
-          <div class="col-md-2">
-            <input v-model="ngayKetThucFilter" type="date" class="form-control" placeholder="Ngày kết thúc" />
-          </div>
-          <div class="col-md-2">
-            <button @click="clear" class="btn btn-outline-secondary" style="margin: 0 auto;">Làm mới</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bảng phiếu giảm giá -->
-    <div class="table-container">
-      <div v-if="isLoading" class="text-center">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Đang tải...</span>
-        </div>
-      </div>
-      <table v-else class="table table-fixed">
-        <thead>
-          <tr>
-            <th class="col-1">STT</th>
-            <th class="col-2">Mã</th>
-            <th class="col-3">Tên</th>
-            <th class="col-4">Giá trị giảm</th>
-            <th class="col-5">Ngày bắt đầu</th>
-            <th class="col-6">Ngày kết thúc</th>
-            <th class="col-7">Số lượng</th>
-            <th class="col-8">Trạng thái</th>
-            <th class="col-9">Loại</th>
-            <th class="col-10">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="phieuGiamGias.length === 0">
-            <td colspan="10" class="text-center">Không có phiếu giảm giá nào.</td>
-          </tr>
-          <tr v-else v-for="(phieuGiamGia, index) in phieuGiamGias" :key="index">
-            <template v-if="phieuGiamGia">
-              <td class="col-1">{{ index + 1 + currentPage * pageSize }}</td>
-              <td class="col-2">{{ phieuGiamGia.maGiamGia }}</td>
-              <td class="col-3" :title="phieuGiamGia.tenKhuyenMai">{{ phieuGiamGia.tenKhuyenMai }}</td>
-              <td class="col-4">
-                {{ phieuGiamGia.loaiKhuyenMai === 'Phần trăm' ? phieuGiamGia.giaTriKhuyenMai + '%' :
-                  formatCurrency(phieuGiamGia.giaTriKhuyenMai) }}
-              </td>
-              <td class="col-5">{{ formatDate(phieuGiamGia.ngayBatDau) }}</td>
-              <td class="col-6">{{ formatDate(phieuGiamGia.ngayKetThuc) }}</td>
-              <td class="col-7">{{ phieuGiamGia.soLuong }}</td>
-              <td class="col-8">{{ convertTrangThai(phieuGiamGia.trangThai) }}</td>
-              <td class="col-9">{{ phieuGiamGia.isGlobal ? 'Công khai' : 'Riêng tư' }}</td>
-              <td class="col-10">
-                <button class="btn btn-outline-primary btn-sm" title="Chỉnh sửa" @click="viewUpdate(phieuGiamGia.id)">
-                  <i class="bi bi-pencil-square"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-sm" style="margin-left: 5%;"
-                  @click="handleDeletePhieuGiamGia(phieuGiamGia.id)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </template>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Phân trang -->
-    <div class="pagination">
-      <button @click="previousPage" :disabled="currentPage === 0" class="btn btn-outline-primary">Trang trước</button>
-      <span style="margin: auto 10px;">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="btn btn-outline-primary">Trang
-        sau</button>
-    </div>
-
-    <!-- Dialog thêm/sửa -->
-    <dialog ref="dialog" class="dialog p-4 rounded shadow-lg" style="width: 800px; margin: auto;">
-      <form :model="formData" @submit.prevent="savePhieuGiamGia">
-        <h4 class="mb-4">{{ formData.id ? 'Chỉnh sửa Phiếu Giảm Giá' : 'Thêm Phiếu Giảm Giá' }}</h4>
-        <div v-if="formData" class="row g-3">
-          <div class="col-md-6">
-            <label for="maGiamGia" class="form-label">Mã giảm giá</label>
-            <input id="maGiamGia" v-model="formData.maGiamGia" type="text" class="form-control" disabled />
-          </div>
-          <div class="col-md-6">
-            <label for="tenKhuyenMai" class="form-label">Tên khuyến mại <span class="text-danger">*</span></label>
-            <input id="tenKhuyenMai" v-model="formData.tenKhuyenMai" type="text" class="form-control" />
-            <div v-if="errors.tenKhuyenMai" class="text-danger mt-1">{{ errors.tenKhuyenMai }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="loaiKhuyenMai" class="form-label">Loại khuyến mãi</label>
-            <select id="loaiKhuyenMai" v-model="formData.loaiKhuyenMai" class="form-select">
-              <option value="Phần trăm">Phần trăm (%)</option>
-              <option value="Cố định">VNĐ</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="giaTriKhuyenMai" class="form-label">Giá trị khuyến mãi <span
-                class="text-danger">*</span></label>
-            <input id="giaTriKhuyenMai" v-model.number="formData.giaTriKhuyenMai" type="number" class="form-control"
-              min="0" />
-            <div v-if="errors.giaTriKhuyenMai" class="text-danger mt-1">{{ errors.giaTriKhuyenMai }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="giaTriDonHangToiThieu" class="form-label">Giá trị đơn hàng tối thiểu</label>
-            <input id="giaTriDonHangToiThieu" v-model.number="formData.giaTriDonHangToiThieu" type="number"
-              class="form-control" min="0" />
-            <div v-if="errors.giaTriDonHangToiThieu" class="text-danger mt-1">{{ errors.giaTriDonHangToiThieu }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" class="form-label">Giá trị khuyến mãi tối đa</label>
-            <input id="giaTriKhuyenMaiToiDa" v-if="formData.loaiKhuyenMai == 'Phần trăm'" v-model.number="formData.giaTriKhuyenMaiToiDa" type="number"
-              class="form-control" min="0" />
-            <div v-if="errors.giaTriKhuyenMaiToiDa" class="text-danger mt-1">{{ errors.giaTriKhuyenMaiToiDa }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="ngayBatDau" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-            <input id="ngayBatDau" v-model="formData.ngayBatDau" type="date" class="form-control" />
-            <div v-if="errors.ngayBatDau" class="text-danger mt-1">{{ errors.ngayBatDau }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="ngayKetThuc" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-            <input id="ngayKetThuc" v-model="formData.ngayKetThuc" type="date" class="form-control" />
-            <div v-if="errors.ngayKetThuc" class="text-danger mt-1">{{ errors.ngayKetThuc }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="hangToiThieu" class="form-label">Hạng tối thiểu</label>
-            <select id="hangToiThieu" v-model="formData.hangToiThieu" class="form-select">
-              <option value="MEMBER">Thành viên</option>
-              <option value="SILVER">Bạc</option>
-              <option value="GOLD">Vàng</option>
-              <option value="DIAMOND">Kim cương</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="soDiemCanDeDoi" class="form-label">Số điểm cần để đổi</label>
-            <input id="soDiemCanDeDoi" v-model.number="formData.soDiemCanDeDoi" type="number" class="form-control"
-              min="0" />
-            <div v-if="errors.soDiemCanDeDoi" class="text-danger mt-1">{{ errors.soDiemCanDeDoi }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="soLuong" class="form-label">Số lượng <span class="text-danger">*</span></label>
-            <input id="soLuong" v-model.number="formData.soLuong" type="number" class="form-control" min="0" />
-            <div v-if="errors.soLuong" class="text-danger mt-1">{{ errors.soLuong }}</div>
-          </div>
-          <div class="col-md-6">
-            <label for="isGlobal" class="form-label">Loại phiếu</label>
-            <select id="isGlobal" v-model="formData.isGlobal" class="form-select">
-              <option :value="true">Công khai</option>
-              <option :value="false">Riêng tư</option>
-            </select>
-          </div>
-          <div v-if="!formData.isGlobal" class="col-md-6">
-            <label class="form-label">Nhóm khách hàng</label>
-            <div class="form-check">
-              <input id="khachHangMoi" v-model="formData.khachHangMoi" type="checkbox" class="form-check-input" />
-              <label for="khachHangMoi" class="form-check-label">Khách hàng mới</label>
-            </div>
-            <div class="form-check">
-              <input id="khachHangCu" v-model="formData.khachHangCu" type="checkbox" class="form-check-input" />
-              <label for="khachHangCu" class="form-check-label">Khách hàng cũ</label>
-            </div>
-          </div>
-          <div v-if="!formData.isGlobal" class="col-md-6">
-            <label for="khachHangIds" class="form-label">Khách hàng áp dụng <small>(Giữ Ctrl/Cmd để chọn
-                nhiều)</small></label>
-            <input v-model="searchKhachHang" type="text" class="form-control mb-2"
-              placeholder="Tìm kiếm khách hàng..." />
-            <select id="khachHangIds" v-model="formData.khachHangIds" multiple class="form-select" size="5">
-              <option v-for="khachHang in filteredKhachHangList" :key="khachHang.id" :value="khachHang.id">
-                #{{ khachHang.id }} - {{ khachHang.tenKhachHang }}
-              </option>
-            </select>
-            <div v-if="errors.khachHangIds" class="text-danger mt-1">{{ errors.khachHangIds }}</div>
-          </div>
-          <div class="col-md-12">
-            <label for="dieuKienApDung" class="form-label">Mô tả điều kiện áp dụng <span
-                class="text-danger">*</span></label>
-            <input id="dieuKienApDung" v-model="formData.dieuKienApDung" type="text" class="form-control" />
-            <div v-if="errors.dieuKienApDung" class="text-danger mt-1">{{ errors.dieuKienApDung }}</div>
-          </div>
-        </div>
-        <div class="mt-4 d-flex justify-content-end gap-2">
-          <button type="button" @click="phieuGiamGiaDialogVisible = false" class="btn btn-secondary">Hủy</button>
-          <button type="submit" class="btn btn-primary">Lưu</button>
-        </div>
-      </form>
-    </dialog>
-  </div>
-</template>
-
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
 .container {
-  padding: 1.5rem;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-}
-
-.icon {
-  width: 1em;
-  height: 1em;
-  margin-right: 0.5em;
+  padding: 20px;
 }
 
 .header-content {
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.dashboard-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #333333;
-  margin: 0;
-}
-
-.search-card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 1.25rem;
-  margin: 1.5rem 0;
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-.table-fixed {
-  table-layout: fixed;
-  width: 100%;
-  background-color: white;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.table-fixed th,
-.table-fixed td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 0.75rem;
-  vertical-align: middle;
-}
-
-.table-fixed th.col-1,
-.table-fixed td.col-1,
-.table-fixed th.col-7,
-.table-fixed td.col-7,
-.table-fixed th.col-9,
-.table-fixed td.col-9 {
-  text-align: center;
-}
-
-.table-fixed th.col-1,
-.table-fixed td.col-1 {
-  width: 6%;
-}
-
-.table-fixed th.col-2,
-.table-fixed td.col-2 {
-  width: 6%;
-}
-
-.table-fixed th.col-3,
-.table-fixed td.col-3 {
-  width: 15%;
-}
-
-.table-fixed th.col-4,
-.table-fixed td.col-4 {
-  width: 10%;
-}
-
-.table-fixed th.col-5,
-.table-fixed td.col-5 {
-  width: 10%;
-}
-
-.table-fixed th.col-6,
-.table-fixed td.col-6 {
-  width: 11%;
-}
-
-.table-fixed th.col-7,
-.table-fixed td.col-7 {
-  width: 10%;
-}
-
-.table-fixed th.col-8,
-.table-fixed td.col-8 {
-  width: 12%;
-}
-
-.table-fixed th.col-9,
-.table-fixed td.col-9 {
-  width: 10%;
-}
-
-.table-fixed th.col-10,
-.table-fixed td.col-10 {
-  width: 10%;
-}
-
-thead {
-  height: 60px;
-  background-color: #f8f9fa;
+  flex-wrap: wrap;
+  /* cho phép xuống hàng khi thu nhỏ */
+  gap: 10px;
 }
 
 .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin: 1.5rem auto;
-  min-height: 40px;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
-.dialog {
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  background-color: white;
+/* Responsive cho bộ lọc */
+@media (max-width: 900px) {
+  .box-card .el-row {
+    flex-direction: column !important;
+  }
+
+  .box-card .el-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-bottom: 10px;
+  }
+
+  .pagination {
+    text-align: center;
+  }
 }
 
-.form-select {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.form-select[multiple] option {
-  padding: 8px;
-}
-
-.form-select[multiple] option:checked {
-  background-color: #007bff;
-  color: white;
-}
+/* Giữ nguyên chiều cao table */
+/* .el-table {
+  min-height: 300px;
+} */
 </style>

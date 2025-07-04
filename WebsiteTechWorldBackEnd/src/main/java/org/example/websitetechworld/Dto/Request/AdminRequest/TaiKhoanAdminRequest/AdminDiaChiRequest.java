@@ -39,5 +39,7 @@ public class AdminDiaChiRequest {
 
     private Boolean diaChiChinh;
 
+    private Integer idKhachHang;
+
 }
 

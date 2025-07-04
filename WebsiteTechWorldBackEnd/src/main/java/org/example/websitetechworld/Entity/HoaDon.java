@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
@@ -98,9 +100,9 @@ public class HoaDon {
     @Column(name = "sdt_nguoi_nhan", length = 10)
     private String sdtNguoiNhan;
 
-    @Size(max = 100)
+    @Size(max = 255)
     @Nationalized
-    @Column(name = "dia_chi_giao_hang", length = 100)
+    @Column(name = "dia_chi_giao_hang", length = 255)
     private String diaChiGiaoHang;
 
     @Column(name = "ngay_dat_hang")
@@ -123,8 +125,9 @@ public class HoaDon {
     @Column(name = "is_shipping")
     private Boolean isShipping;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tinh_thanh")
-    private TinhThanh idTinhThanh;
+    @Enumerated(EnumType.STRING)
+    @Nationalized
+    @Column(name = "shipping_method", length = 50)
+    private ShippingMethod shippingMethod;
 
 }

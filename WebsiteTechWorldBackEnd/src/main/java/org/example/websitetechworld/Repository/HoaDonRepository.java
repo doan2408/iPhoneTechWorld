@@ -1,13 +1,19 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(Pageable pageable);
@@ -24,4 +30,23 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                         AND ngay_thanh_toan IS NOT NULL
                     """, nativeQuery = true)
     BigDecimal doanhThuThang();
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE HoaDon hd SET hd.tenNguoiNhan = :tenNguoiNhan, hd.sdtNguoiNhan = :sdtNguoiNhan, " +
+            "hd.diaChiGiaoHang = :diaChiGiaoHang, hd.phiShip = :phiShip, hd.isShipping = :isShipping, " +
+            "hd.maVanDon = :maVanDon, hd.thanhTien = :thanhTien, hd.shippingMethod = :shippingMethod, " +
+            "hd.trangThaiDonHang = :trangThaiDonHang, hd.ngayTaoDonHang = :ngayTaoDonHang " +
+            "WHERE hd.id = :id")
+    void updateInvoice(@Param("id") Integer id,
+                       @Param("tenNguoiNhan") String tenNguoiNhan,
+                       @Param("sdtNguoiNhan") String sdtNguoiNhan,
+                       @Param("diaChiGiaoHang") String diaChiGiaoHang,
+                       @Param("phiShip") BigDecimal phiShip,
+                       @Param("isShipping") Boolean isShipping,
+                       @Param("maVanDon") String maVanDon,
+                       @Param("thanhTien") BigDecimal thanhTien,
+                       @Param("shippingMethod") ShippingMethod shippingMethod,
+                       @Param("trangThaiDonHang") TrangThaiGiaoHang trangThaiDonHang,
+                       @Param("ngayTaoDonHang") LocalDate ngayTaoDonHang);
 }

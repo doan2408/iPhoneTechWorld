@@ -467,6 +467,7 @@ public class SanPhamAdminService {
                                 }
                                 Imei newImei = new Imei();
                                 newImei.setSoImei(imeiDto.getSoImei().trim());
+//                                newImei.setTrangThaiImei(imeiDto.getTrangThaiImei());
                                 newImei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
                                 newImei.setIdSanPhamChiTiet(chiTietSaved);
                                 return newImei;

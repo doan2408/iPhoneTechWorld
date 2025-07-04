@@ -207,6 +207,9 @@ import { Edit, Delete, View, Search, Plus, DocumentAdd, Goods, Picture, CircleCh
 import { getAllSanPham, getAllLoaiList, getTrangThaiSanPham, deleteSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from 'lodash';
+import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+import store from '@/Service/LoginService/Store';
+
 
 // State
 const sanPhamList = ref([]);
@@ -367,6 +370,26 @@ const trangThaiSanPhamMap = {
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
   handleSearch();
+});
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
 });
 
 // Tải dữ liệu khi component được mount

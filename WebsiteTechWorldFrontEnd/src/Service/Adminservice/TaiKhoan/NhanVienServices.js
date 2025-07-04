@@ -2,24 +2,23 @@ import api from "@/Service/LoginService/axiosInstance";
 
 const baseURL = "/admin/staff";
 
-export const getAllStaff = async (page = 0, keyword = null) => {
+export const getAllStaff = async ({
+  page = 0,
+  keyword = null,
+  gioiTinh = null,
+  trangThai = null
+} = {}) => {
   try {
     const params = { page };
-    //only add keyword if it is provided
-    if (keyword && keyword.trim() !== "") {
-      params.keyword = keyword.trim();
-    }
+
+    if (keyword && keyword.trim() !== "") params.keyword = keyword.trim();
+    if (gioiTinh !== null) params.gioiTinh = gioiTinh;
+    if (trangThai !== null) params.trangThai = trangThai;
+
     const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Error response:", error.response.data);
-      console.error("Status:", error.response.status);
-    } else if (error.request) {
-      console.error("No response from server:", error.request);
-    } else {
-      console.error("Axios error:", error.message);
-    }
+    console.error("Error:", error);
   }
 };
 
