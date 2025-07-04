@@ -2,13 +2,20 @@ package org.example.websitetechworld.exception;
 
 public class BusinessException extends RuntimeException{
 
-    // xử lý lỗi ngoại lệ
-    public BusinessException(String message) {
-        super(message);
+    private final String messageCode;
+
+    public BusinessException(String messageCode) {
+        super(messageCode); // tạm thời dùng code làm message
+        this.messageCode = messageCode;
     }
 
-    public BusinessException(String message, Throwable cause) {
-        super(message, cause);
+    public BusinessException(String messageCode, Throwable cause) {
+        super(messageCode, cause);
+        this.messageCode = messageCode;
+    }
+
+    public String getMessageCode() {
+        return messageCode;
     }
 
 }
