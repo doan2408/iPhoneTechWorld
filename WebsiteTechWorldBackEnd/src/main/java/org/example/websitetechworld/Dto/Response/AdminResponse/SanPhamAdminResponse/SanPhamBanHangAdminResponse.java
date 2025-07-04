@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @ToString
 public class SanPhamBanHangAdminResponse {
-    private Integer id;
+    private Integer idSanPhamChiTiet;
 
     private String maSanPham;
 
@@ -33,7 +33,7 @@ public class SanPhamBanHangAdminResponse {
 
     public static SanPhamBanHangAdminResponse converDto(SanPhamChiTiet sanPhamChiTiet){
         SanPhamBanHangAdminResponse response = new SanPhamBanHangAdminResponse();
-        response.setId(sanPhamChiTiet.getId());
+        response.setIdSanPhamChiTiet(sanPhamChiTiet.getId());
         if (sanPhamChiTiet.getIdSanPham() != null){
             response.setMaSanPham(sanPhamChiTiet.getIdSanPham().getMaSanPham());
             response.setTenSanPham(sanPhamChiTiet.getIdSanPham().getTenSanPham());

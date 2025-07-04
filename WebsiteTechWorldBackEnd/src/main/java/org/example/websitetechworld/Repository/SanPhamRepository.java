@@ -90,27 +90,17 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     @Query(value = """
         SELECT DISTINCT
-            CASE
-                WHEN ten_san_pham LIKE N'% Pro Max' THEN REPLACE(ten_san_pham, N' Pro Max', N'')
-                WHEN ten_san_pham LIKE N'% Pro' THEN REPLACE(ten_san_pham, N' Pro', N'')
-                WHEN ten_san_pham LIKE N'% Plus' THEN REPLACE(ten_san_pham, N' Plus', N'')
-                WHEN ten_san_pham LIKE N'% Mini' THEN REPLACE(ten_san_pham, N' Mini', N'')
-                WHEN ten_san_pham LIKE N'% SE' THEN REPLACE(ten_san_pham, N' SE', N'')
-                ELSE ten_san_pham
-            END AS ten_dong_san_pham
+            LEFT(ten_san_pham, 
+                CHARINDEX(' ', ten_san_pham + ' ', CHARINDEX(' ', ten_san_pham + ' ') + 1) - 1
+            ) AS ten_dong_san_pham
         FROM san_pham
         """,
             countQuery = """
         SELECT COUNT(*) FROM (
             SELECT DISTINCT
-                CASE
-                    WHEN ten_san_pham LIKE N'% Pro Max' THEN REPLACE(ten_san_pham, N' Pro Max', N'')
-                    WHEN ten_san_pham LIKE N'% Pro' THEN REPLACE(ten_san_pham, N' Pro', N'')
-                    WHEN ten_san_pham LIKE N'% Plus' THEN REPLACE(ten_san_pham, N' Plus', N'')
-                    WHEN ten_san_pham LIKE N'% Mini' THEN REPLACE(ten_san_pham, N' Mini', N'')
-                    WHEN ten_san_pham LIKE N'% SE' THEN REPLACE(ten_san_pham, N' SE', N'')
-                    ELSE ten_san_pham
-                END AS ten_goc
+                LEFT(ten_san_pham, 
+                    CHARINDEX(' ', ten_san_pham + ' ', CHARINDEX(' ', ten_san_pham + ' ') + 1) - 1
+                ) AS ten_dong_san_pham
             FROM san_pham
         ) AS temp
         """,

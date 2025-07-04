@@ -229,6 +229,7 @@ public class HoaDonAdminService {
             // Lưu entity để kiểm tra validation
             hoaDonRepository.save(invoice);
             // Thực thi query JPQL
+            System.out.println("sdt nguoi mua"+invoice.getSdtNguoiNhan());
             hoaDonRepository.updateInvoice(
                     id,
                     invoice.getTenNguoiNhan(),
