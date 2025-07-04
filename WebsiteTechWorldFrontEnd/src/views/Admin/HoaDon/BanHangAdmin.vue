@@ -455,7 +455,6 @@
 
 
                     <button @click="processPayment"
-                        :disabled="!selectedPaymentMethod || !agreedToTerms || currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length === 0"
                         class="payment-btn">
                         THANH TOÁN
                     </button>
@@ -1989,11 +1988,6 @@ const getIconUrl = (code) => {
 
 // Hàm xử lý thanh toán
 const processPayment = async () => {
-    // Đảm bảo currentInvoiceDetail đã có dữ liệu
-    // if (!currentInvoiceDetail.value || !currentInvoiceDetail.value.id) {
-    //     alert('Thông tin hóa đơn chưa sẵn sàng. Vui lòng đợi hoặc làm mới trang.');
-    //     return;
-    // }
     const storedId = localStorage.getItem("selectedInvoiceId");
     if (!selectedPaymentMethod.value) {
         alert('Vui lòng chọn phương thức thanh toán.');
