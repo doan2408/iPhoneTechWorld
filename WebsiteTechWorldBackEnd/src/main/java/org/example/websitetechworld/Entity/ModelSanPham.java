@@ -3,6 +3,7 @@ package org.example.websitetechworld.Entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
@@ -28,11 +29,9 @@ public class ModelSanPham {
     @Column(name = "nam_ra_mat")
     private LocalDate namRaMat;
 
-    @Column(name = "mo_ta")
-    private String moTa;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private String trangThai;
+    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ram")

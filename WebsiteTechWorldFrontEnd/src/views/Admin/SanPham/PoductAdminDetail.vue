@@ -205,14 +205,27 @@
         </el-form-item>
 
         <el-form-item label="Hình ảnh">
-          <el-upload :file-list="sanPhamModel.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
+          <el-upload
+            :file-list="sanPhamModel.sanPhamChiTiets[selectedChiTiet].hinhAnhs"
             :on-change="(file, fileList) => handleFileChange(file, fileList, selectedChiTiet)"
-            :on-remove="(file, fileList) => handleFileRemove(file, fileList, selectedChiTiet)" :auto-upload="false"
-            accept="image/*" list-type="picture" :limit="5"
-            :on-exceed="() => ElMessage.warning('Chỉ được tải lên tối đa 5 ảnh!')">
+            :on-remove="(file, fileList) => handleFileRemove(file, fileList, selectedChiTiet)"
+            :on-preview="handlePreview"
+            :auto-upload="false"
+            accept="image/jpeg,image/png,image/webp"
+            list-type="picture"
+            :limit="5"
+            :on-exceed="() => ElMessage.warning('Chỉ được tải lên tối đa 5 ảnh!')"
+          >
             <el-button type="primary">Tải lên hình ảnh</el-button>
           </el-upload>
+          <el-image-viewer
+            v-if="showPreview"
+            :url-list="previewImages"
+            :initial-index="previewIndex"
+            @close="showPreview = false"
+          />
         </el-form-item>
+
       </div>
       <div v-else class="mt-4">
         <el-alert title="Vui lòng chọn một biến thể để chỉnh sửa" type="info" show-icon />
@@ -237,8 +250,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { Delete } from '@element-plus/icons-vue';
 import { getSanPhamById, getAllNhaCungCapList, getAllMauSacList, getAllRamList, getAllRomList, getAllManHinhList, getAllHDHList, getAllPinList, getAllCpuList, getAllCameraTruocList, getAllCameraSauList, getAllXuatXuList, getAllLoaiList, putDataSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
-import axios from 'axios';
+// import axios from 'axios';
 import { debounce } from 'lodash';
+import api from "@/Service/LoginService/axiosInstance";
 
 const route = useRoute();
 const id = route.params.id;
@@ -265,6 +279,16 @@ const roms = ref([]);
 // const cameraSaus = ref([]);
 // const xuatXus = ref([]);
 // const loais = ref([]);
+
+const showPreview = ref(false);
+const previewImages = ref([]);
+const previewIndex = ref(0);
+
+const handlePreview = (file) => {
+  previewImages.value = sanPhamModel.sanPhamChiTiets[selectedChiTiet.value].hinhAnhs.map(h => h.url);
+  previewIndex.value = sanPhamModel.sanPhamChiTiets[selectedChiTiet.value].hinhAnhs.findIndex(h => h.url === file.url);
+  showPreview.value = true;
+};
 
 const danhSachTrangThaiSanPham = [
   { label: 'Đang kinh doanh', value: 'ACTIVE' },
@@ -397,7 +421,7 @@ const handleFileChange = async (file, fileList, index) => {
   try {
     const formData = new FormData();
     formData.append('file', file.raw);
-    const response = await axios.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
+    const response = await api.post('http://localhost:8080/admin/hinhAnh/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     sanPhamModel.sanPhamChiTiets[index].hinhAnhs.push({
@@ -607,4 +631,5 @@ h4 {
     font-size: 13px;
   }
 }
+
 </style>

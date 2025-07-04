@@ -7,11 +7,17 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminUpdateResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamBanHangAdminResponse;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,10 +30,20 @@ public class SanPhamAdminController {
 
     @GetMapping
     public ResponseEntity<Page<SanPhamHienThiAdminResponse>> getAllSanPham(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer idLoai,
+            @RequestParam(required = false) String trangThai,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        Page<SanPhamHienThiAdminResponse> result = sanPhamAdminService.getAllSanPham(page, size);
+        Page<SanPhamHienThiAdminResponse> result = sanPhamAdminService.getAllSanPham(keyword, idLoai, trangThai ,page, size );
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/trang-thai")
+    public List<Map<String, String>> getTrangThaiSanPham() {
+        return Arrays.stream(TrangThaiSanPham.values())
+                .map(status -> Map.of("value", status.name(), "label", status.getDisplayName()))
+                .collect(Collectors.toList());
     }
 
 //    @GetMapping
@@ -59,9 +75,9 @@ public class SanPhamAdminController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SanPhamAdminResponse> deleteSanPham(@PathVariable Integer id) {
-        SanPhamAdminResponse sanPhamAdminResponse = sanPhamAdminService.deleteSanPhamAdmin(id);
-        return ResponseEntity.ok(sanPhamAdminResponse);
+    public ResponseEntity<?> deleteSanPham(@PathVariable Integer id) {
+        sanPhamAdminService.deleteSanPhamAdmin(id);
+        return ResponseEntity.ok().build();
     }
 
     // ham lay ten san pham

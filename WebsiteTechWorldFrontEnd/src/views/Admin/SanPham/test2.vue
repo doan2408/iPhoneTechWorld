@@ -1,22 +1,13 @@
-```html
+```vue
 <template>
   <el-form :model="sanPham" ref="sanPhamForm" label-width="140px" class="product-form">
     <!-- Thông tin sản phẩm chính -->
     <el-card shadow="hover" class="section-card">
       <template #header>
         <div class="card-header">
-          <span>
-            <Document class="el-icon" /> Thông tin sản phẩm
-          </span>
+          <span><i class="el-icon-document" /> Thông tin sản phẩm</span>
         </div>
       </template>
-      <el-form-item label="Model sản phẩm" prop="idModelSanPham" :error="errors.idModelSanPham">
-        <el-select v-model="sanPham.idModelSanPham" placeholder="Chọn model sản phẩm" clearable filterable
-          @change="onModelChange" style="width: 100%">
-          <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel"
-            :value="model.idModelSanPham" />
-        </el-select>
-      </el-form-item>
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="Tên sản phẩm" prop="tenSanPham" :error="errors.tenSanPham">
@@ -49,15 +40,20 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <el-form-item label="Model sản phẩm" prop="idModelSanPham" :error="errors.idModelSanPham">
+        <el-select v-model="sanPham.idModelSanPham" placeholder="Chọn model sản phẩm" clearable filterable
+          @change="onModelChange" style="width: 100%">
+          <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel"
+            :value="model.idModelSanPham" />
+        </el-select>
+      </el-form-item>
     </el-card>
 
     <!-- Chọn thuộc tính để tạo biến thể -->
     <el-card shadow="hover" class="section-card">
       <template #header>
         <div class="card-header">
-          <span>
-            <Setting class="el-icon" /> Tạo biến thể sản phẩm
-          </span>
+          <span><i class="el-icon-setting" /> Tạo biến thể sản phẩm</span>
         </div>
       </template>
       <el-row :gutter="20">
@@ -84,21 +80,18 @@
     <el-card shadow="hover" class="section-card">
       <template #header>
         <div class="card-header">
-          <span>
-            <Picture class="el-icon" /> Ảnh theo màu sắc
-          </span>
+          <span><i class="el-icon-picture" /> Ảnh theo màu sắc</span>
         </div>
       </template>
       <el-row :gutter="20">
         <el-col :span="24" v-for="mau in selectedMaus" :key="mau">
           <el-form-item :label="getMauSacLabels(mau)" :error="errorsMauHinhAnh[mau] || ''">
-            <el-upload :file-list="hinhAnhTheoMau[mau] || []"
-              :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
+            <el-upload :file-list="hinhAnhTheoMau[mau] || []" :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
               :on-remove="(file, fileList) => handleMauFileRemove(file, fileList, mau)" :auto-upload="false"
               accept="image/jpeg,image/png,image/webp" list-type="picture-card" :limit="5" :on-exceed="handleExceed">
               <template #trigger>
                 <el-button type="primary" plain>
-                  <Upload class="el-icon" /> Tải ảnh
+                  <i class="el-icon-upload" /> Tải ảnh
                 </el-button>
               </template>
               <template #tip>
@@ -116,9 +109,7 @@
     <el-card shadow="hover" class="section-card">
       <template #header>
         <div class="card-header">
-          <span>
-            <Money class="el-icon" /> Nhập giá nhanh
-          </span>
+          <span><i class="el-icon-money" /> Nhập giá nhanh</span>
         </div>
       </template>
       <el-row :gutter="20">
@@ -130,14 +121,14 @@
               :parser="value => value.replace(/\D/g, '')" />
             <el-tooltip content="Áp dụng giá này cho tất cả biến thể" placement="top">
               <el-button type="primary" style="margin-left: 10px" @click="applyGiaBanChung">
-                <Check class="el-icon" /> Áp dụng
+                <i class="el-icon-check" /> Áp dụng
               </el-button>
             </el-tooltip>
           </el-form-item>
         </el-col>
       </el-row>
       <el-button type="primary" :loading="loading.generate" @click="generateVariants">
-        <Plus class="el-icon" /> Tạo biến thể
+        <i class="el-icon-plus" /> Tạo biến thể
       </el-button>
     </el-card>
 
@@ -145,9 +136,7 @@
     <el-card shadow="hover" class="section-card">
       <template #header>
         <div class="card-header">
-          <span>
-            <Tickets class="el-icon" /> Chi tiết sản phẩm
-          </span>
+          <span><i class="el-icon-tickets" /> Chi tiết sản phẩm</span>
         </div>
       </template>
       <el-row :gutter="20">
@@ -172,8 +161,8 @@
             </el-table-column>
             <el-table-column label="Ảnh" width="100">
               <template #default="{ row }">
-                <el-image v-for="(hinh, index) in row.hinhAnhs.slice(0, 2)" :key="hinh.imagePublicId" :src="hinh.url"
-                  :preview-src-list="[hinh.url]" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
+                <el-image v-for="(hinh, index) in row.hinhAnhs.slice(0, 2)" :key="hinh.imagePublicId"
+                  :src="hinh.url" :preview-src-list="[hinh.url]" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
                 <span v-if="row.hinhAnhs.length > 2">+{{ row.hinhAnhs.length - 2 }} ảnh</span>
                 <span v-if="!row.hinhAnhs.length">Chưa có ảnh</span>
               </template>
@@ -181,9 +170,7 @@
             <el-table-column label="Hành động" width="80" align="center" fixed="right">
               <template #default="{ $index }">
                 <el-tooltip content="Xóa biến thể" placement="top">
-                  <el-button type="danger" size="small" @click.stop="removeChiTiet($index)">
-                    <Delete class="el-icon" />
-                  </el-button>
+                  <el-button type="danger" size="small" icon="el-icon-delete" @click.stop="removeChiTiet($index)" />
                 </el-tooltip>
               </template>
             </el-table-column>
@@ -205,43 +192,36 @@
                 :formatter="value => value ? `${value.toLocaleString('vi-VN')} VND` : ''"
                 :parser="value => value.replace(/\D/g, '')" />
             </el-form-item>
-            <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''"
-              class="error-container">
+            <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''" class="error-container">
               <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0" :disabled="true"
                 style="width: 100%" />
             </el-form-item>
-            <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''"
-              class="error-container">
+            <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''" class="error-container">
               <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
-                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)" :rows="4"
-                :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].isFileUploaded"
-                @input="handleImeiInput(selectedChiTiet)" />
+                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)"
+                :rows="4" @input="capNhatSoLuong(selectedChiTiet, true)" />
               <div class="action-buttons">
                 <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
-                  accept=".xlsx,.xls" :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
-                  <el-button type="primary" plain
-                    :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput.length > 0">
-                    <Upload class="el-icon" /> Tải file IMEI
+                  accept=".txt,.csv">
+                  <el-button type="primary" plain>
+                    <i class="el-icon-upload" /> Tải file IMEI
                   </el-button>
                 </el-upload>
                 <el-button type="warning" plain @click="clearImeiInput(selectedChiTiet)">
-                  <Delete class="el-icon" /> Xóa IMEI
+                  <i class="el-icon-delete" /> Xóa IMEI
                 </el-button>
               </div>
               <div class="imei-status">
                 <span>Số lượng IMEI: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
-                <el-tooltip v-if="errorsChiTiet[selectedChiTiet]?.imeisInput === 'Hợp lệ'"
-                  content="Danh sách IMEI hợp lệ" placement="top">
-                  <span class="valid-message">
-                    <Check class="el-icon" /> Hợp lệ
-                  </span>
+                <el-tooltip v-if="errorsChiTiet[selectedChiTiet]?.imeisInput === 'Hợp lệ'" content="Danh sách IMEI hợp lệ" placement="top">
+                  <span class="valid-message"><i class="el-icon-success" /> Hợp lệ</span>
                 </el-tooltip>
               </div>
             </el-form-item>
           </el-card>
           <el-card v-else shadow="hover">
             <div class="empty-state">
-              <InfoFilled class="el-icon" /> Vui lòng chọn hoặc thêm biến thể sản phẩm
+              <i class="el-icon-info" /> Vui lòng chọn hoặc thêm biến thể sản phẩm
             </div>
           </el-card>
         </el-col>
@@ -250,8 +230,8 @@
 
     <!-- Nút lưu sản phẩm -->
     <div class="form-actions">
-      <el-button type="success" :loading="loading.submit" @click="submitForm">
-        <Check class="el-icon" /> Lưu sản phẩm
+      <el-button type="success" :loading="loading.submit" @click="submitForm" icon="el-icon-check">
+        Lưu sản phẩm
       </el-button>
     </div>
   </el-form>
@@ -269,25 +249,9 @@ import {
 } from "@/Service/Adminservice/Products/ProductAdminService";
 import { debounce } from "chart.js/helpers";
 import api from "@/Service/LoginService/axiosInstance";
-import * as XLSX from "xlsx";
-import { Document, Setting, Picture, Money, Upload, Check, Delete, Tickets, InfoFilled, Plus } from "@element-plus/icons-vue";
-import { useRouter } from "vue-router";
 
 export default {
-  components: {
-    Document,
-    Setting,
-    Picture,
-    Money,
-    Upload,
-    Check,
-    Delete,
-    Tickets,
-    InfoFilled,
-    Plus
-  },
   setup() {
-    const router = useRouter(); // Khởi tạo router
     // Dữ liệu chính của sản phẩm
     const sanPham = reactive({
       tenSanPham: "",
@@ -331,10 +295,10 @@ export default {
     // Danh sách trạng thái sản phẩm
     const danhSachTrangThaiSanPham = [
       { label: "Đang kinh doanh", value: "ACTIVE" },
-      // { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
+      { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
       { label: "Sắp ra mắt", value: "COMING_SOON" },
-      // { label: "Tạm ngừng bán", value: "TEMPORARILY_UNAVAILABLE" },
-      // { label: "Hết hàng", value: "OUT_OF_STOCK" },
+      { label: "Tạm ngừng bán", value: "TEMPORARILY_UNAVAILABLE" },
+      { label: "Hết hàng", value: "OUT_OF_STOCK" },
     ];
 
     // Lấy dữ liệu danh mục từ API
@@ -455,8 +419,6 @@ export default {
               soLuong: existingVariant?.soLuong || 0,
               giaBan: giaBanChung.value || existingVariant?.giaBan || null,
               imeisInput: existingVariant?.imeisInput || "",
-              isFileUploaded: existingVariant?.isFileUploaded || false,
-              imeis: existingVariant?.imeis || [], // Giữ lại danh sách IMEI
               hinhAnhs: hinhAnhTheoMau[mau] || [],
             });
             errorsChiTiet.push({
@@ -569,12 +531,6 @@ export default {
       }
     };
 
-    // Xử lý khi nhập IMEI vào textarea
-    const handleImeiInput = (index) => {
-      sanPham.sanPhamChiTiets[index].isFileUploaded = false; // Đặt lại trạng thái file khi nhập tay
-      capNhatSoLuong(index, true);
-    };
-
     // Xóa danh sách IMEI
     const clearImeiInput = (index) => {
       ElMessageBox.confirm(
@@ -588,8 +544,6 @@ export default {
       ).then(() => {
         sanPham.sanPhamChiTiets[index].imeisInput = "";
         sanPham.sanPhamChiTiets[index].soLuong = 0;
-        sanPham.sanPhamChiTiets[index].isFileUploaded = false;
-        sanPham.sanPhamChiTiets[index].imeis = [];
         errorsChiTiet[index].imeisInput = "";
         errorsChiTiet[index].soLuong = "";
         ElMessage.success("Đã xóa danh sách IMEI!");
@@ -599,57 +553,31 @@ export default {
     };
 
     // Xử lý tải file IMEI
-    const handleImeiFileChange = async (file, index) => {
-      const loadingInstance = ElLoading.service({
-        text: "Đang đọc file Excel...",
-        background: "rgba(0, 0, 0, 0.7)",
-      });
+    const handleImeiFileChange = (file, index) => {
       try {
         if (file.raw.size > 1024 * 1024) {
           throw new Error("File quá lớn, vui lòng chọn file dưới 1MB");
         }
-        if (!["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"].includes(file.raw.type)) {
-          throw new Error("Vui lòng chọn file .xlsx hoặc .xls");
+        if (!["text/plain", "text/csv"].includes(file.raw.type)) {
+          throw new Error("Vui lòng chọn file .txt hoặc .csv");
         }
-
         const reader = new FileReader();
         reader.onload = (e) => {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet, { header: ["soImei"], skipHeader: true });
-
-            const imeis = json
-              .map((row) => String(row.soImei).trim())
-              .filter((imei) => imei && /^\d{15}$/.test(imei));
-
-            if (imeis.length === 0) {
-              throw new Error("Không tìm thấy IMEI hợp lệ trong file");
-            }
-
-            // Lưu IMEI và đồng bộ vào imeisInput
-            // sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", "); // Đồng bộ danh sách IMEI vào textarea
-            sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
-            sanPham.sanPhamChiTiets[index].isFileUploaded = true;
-            sanPham.sanPhamChiTiets[index].imeis = imeis; // Lưu danh sách IMEI riêng
-            errorsChiTiet[index].imeisInput = "Hợp lệ";
-            errorsChiTiet[index].soLuong = "";
-            ElMessage.success(`Đã nhập ${imeis.length} IMEI từ file ${file.name}`);
-          } catch (error) {
-            ElMessage.error("Lỗi khi đọc file Excel: " + error.message);
-          } finally {
-            loadingInstance.close();
-          }
+          const content = e.target.result;
+          const imeis = content
+            .split(/[\n,;\s]+/)
+            .map((i) => i.trim())
+            .filter((i) => i);
+          sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", ");
+          capNhatSoLuong(index, true); // Kiểm tra lỗi ngay sau khi tải file
+          ElMessage.success(`Đã tải ${imeis.length} IMEI từ file ${file.name}`);
         };
         reader.onerror = () => {
-          ElMessage.error("Lỗi khi đọc file Excel");
-          loadingInstance.close();
+          throw new Error("Lỗi khi đọc file");
         };
-        reader.readAsArrayBuffer(file.raw);
+        reader.readAsText(file.raw);
       } catch (error) {
         ElMessage.error("Lỗi khi xử lý file IMEI: " + error.message);
-        loadingInstance.close();
       }
     };
 
@@ -744,10 +672,6 @@ export default {
         Object.keys(errorsChiTiet[index]).forEach((k) => (errorsChiTiet[index][k] = ""));
         capNhatSoLuong(index, true); // Kiểm tra lại IMEI khi chọn biến thể
       }
-      // Đồng bộ imeisInput từ imeis nếu là file upload
-      if (sanPham.sanPhamChiTiets[index].isFileUploaded && sanPham.sanPhamChiTiets[index].imeis) {
-        sanPham.sanPhamChiTiets[index].imeisInput = sanPham.sanPhamChiTiets[index].imeis.join(", ");
-      }
     };
 
     // Lấy nhãn màu sắc
@@ -821,20 +745,14 @@ export default {
           errorsChiTiet[index].soLuong = "Số lượng phải lớn hơn 0";
           hasError = true;
         }
-        const imeis = chiTiet.isFileUploaded
-          ? chiTiet.imeis
-          : chiTiet.imeisInput.split(",").map((i) => i.trim()).filter((i) => i);
+        const imeis = chiTiet.imeisInput.split(",").map((i) => i.trim()).filter((i) => i);
         if (imeis.length === 0) {
           errorsChiTiet[index].imeisInput = "Phải có ít nhất 1 IMEI";
           hasError = true;
         } else {
           const allImeis = sanPham.sanPhamChiTiets
             .flatMap((ct, i) =>
-              i !== index
-                ? (ct.isFileUploaded
-                  ? ct.imeis
-                  : ct.imeisInput.split(",").map((im) => im.trim()).filter((im) => im))
-                : []
+              i !== index ? ct.imeisInput.split(",").map((im) => im.trim()).filter((im) => im) : []
             );
           const duplicateImeis = imeis.filter((im) => allImeis.includes(im));
           if (duplicateImeis.length > 0) {
@@ -883,9 +801,10 @@ export default {
           trangThaiSanPham: sanPham.trangThaiSanPham,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {
-            const imeis = chiTiet.isFileUploaded
-              ? chiTiet.imeis
-              : chiTiet.imeisInput.split(",").map((i) => i.trim()).filter((i) => i);
+            const imeis = chiTiet.imeisInput
+              .split(",")
+              .map((i) => i.trim())
+              .filter((i) => i);
             return {
               idMau: chiTiet.idMau,
               idRom: chiTiet.idRom,
@@ -901,8 +820,31 @@ export default {
         };
 
         await postSanPham(payload);
-        ElMessage.success("Sản phẩm đã được lưu thành công!");
-        router.push({ name: "products" }); // Điều hướng đến danh sách sản phẩm
+        ElMessageBox.confirm(
+          "Sản phẩm đã được lưu thành công. Làm mới form?",
+          "Thành công",
+          {
+            confirmButtonText: "Có",
+            cancelButtonText: "Không",
+            type: "success",
+          }
+        ).then(() => {
+          sanPham.tenSanPham = "";
+          sanPham.thuongHieu = "";
+          sanPham.idNhaCungCap = "";
+          sanPham.trangThaiSanPham = "";
+          sanPham.idModelSanPham = null;
+          sanPham.sanPhamChiTiets = [];
+          selectedMaus.value = [];
+          selectedRoms.value = [];
+          selectedChiTiet.value = null;
+          giaBanChung.value = null;
+          Object.keys(hinhAnhTheoMau).forEach((key) => delete hinhAnhTheoMau[key]);
+          Object.keys(errorsMauHinhAnh).forEach((key) => delete errorsMauHinhAnh[key]);
+          errorsChiTiet.length = 0;
+          Object.keys(errors).forEach((k) => (errors[k] = ""));
+          ElMessage.success("Form đã được làm mới!");
+        });
       } catch (error) {
         console.error("Lỗi khi lưu sản phẩm:", error);
         if (error.response?.status === 400) {
@@ -1004,11 +946,9 @@ export default {
       submitForm,
       capNhatSoLuong,
       handleImeiFileChange,
-      handleImeiInput,
       onModelChange,
       handleExceed,
       clearImeiInput,
-      router,
     };
   },
 };
@@ -1043,9 +983,8 @@ export default {
   gap: 8px;
 }
 
-.card-header .el-icon {
+.card-header i {
   font-size: 20px;
-  vertical-align: middle;
 }
 
 .el-form-item {
@@ -1083,17 +1022,9 @@ export default {
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .el-input,
@@ -1129,24 +1060,24 @@ export default {
 }
 
 .el-button--primary {
-  background-color: #409EFF;
+  background-color: #409EFF; /* Màu xanh chủ đạo, rõ ràng hơn */
   color: #fff;
 }
 
 .el-button--primary:hover {
-  background-color: #66B1FF;
+  background-color: #66B1FF; /* Sáng lên khi hover */
   filter: brightness(110%);
 }
 
 .el-button--primary:active {
-  background-color: #3a8ee6;
-  transform: scale(0.98);
+  background-color: #3a8ee6; /* Tối hơn khi nhấn */
+  transform: scale(0.98); /* Hiệu ứng nhấn nhẹ */
 }
 
 .el-button--success {
-  background-color: #67C23A;
+  background-color: #67C23A; /* Màu xanh lá nổi bật cho "Lưu sản phẩm" */
   color: #fff;
-  padding: 12px 24px;
+  padding: 12px 24px; /* Lớn hơn một chút để nổi bật */
 }
 
 .el-button--success:hover {
@@ -1160,7 +1091,7 @@ export default {
 }
 
 .el-button--danger {
-  background-color: #F56C6C;
+  background-color: #F56C6C; /* Màu đỏ cảnh báo */
   color: #fff;
 }
 
@@ -1175,7 +1106,7 @@ export default {
 }
 
 .el-button--warning {
-  background-color: #E6A23C;
+  background-color: #E6A23C; /* Màu vàng cảnh báo cho "Xóa IMEI" */
   color: #fff;
 }
 
@@ -1201,7 +1132,7 @@ export default {
 }
 
 .el-button--primary[plain]:hover {
-  background-color: #ECF5FF;
+  background-color: #ECF5FF; /* Nền nhẹ khi hover */
   color: #66B1FF;
 }
 
@@ -1276,13 +1207,13 @@ export default {
   display: flex;
   gap: 12px;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* Ngăn xuống dòng trên màn hình lớn */
 }
 
 .action-buttons .el-upload,
 .action-buttons .el-button {
   flex: 0 0 auto;
-  width: 150px;
+  width: 150px; /* Kích thước đồng đều */
   height: 36px;
   line-height: 36px;
   padding: 0;
@@ -1312,7 +1243,7 @@ export default {
   gap: 4px;
 }
 
-.valid-message .el-icon {
+.valid-message i {
   font-size: 14px;
 }
 
@@ -1322,7 +1253,7 @@ export default {
 }
 
 .form-actions .el-button--success {
-  width: 180px;
+  width: 180px; /* Nút "Lưu sản phẩm" lớn hơn */
 }
 
 .empty-state {
