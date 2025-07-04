@@ -18,8 +18,6 @@ public class ImeiAdminRequest {
     @Size(max = 50, message = "Số IMEI không được vượt quá 50 ký tự")
     private String soImei;
 
-    @Size(max = 50, message = "Số IMEI 2 không được vượt quá 50 ký tự")
-    private String soImei2;
 
 //    @NotNull(message = "Trạng thái IMEI không được để trống")
     private TrangThaiImei trangThaiImei;

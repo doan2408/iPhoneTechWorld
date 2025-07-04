@@ -1,5 +1,5 @@
 import api from '@/Service/LoginService/axiosInstance';
-import { da } from 'element-plus/es/locales.mjs';
+import { da, pa } from 'element-plus/es/locales.mjs';
 
  const baseURL= '/admin';
 
@@ -15,30 +15,76 @@ const fetchData = async (url) => {
   }
 }
 
-// const fetchDataList = async (url) => {
+// const postData = async (url, data) => {
 //   try {
-//     const response = await axiosInstance.get(url);
-//     return response.data; // trả về data từ server
+//     const response = await api.post(`${baseURL}${url}`, data);
+//     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
 //   } catch (error) {
-//     console.error(`Lỗi lấy dữ liệu từ ${url}:`, error);
-//     throw error.response?.data || `Lỗi lấy dữ liệu từ ${url}`;
+//     console.error('Lỗi gửi dữ liệu tới /admin/product:', {
+//       data,
+//       status: error.response?.status,
+//       responseData: error.response?.data,
+//       message: error.message
+//     });
+//     throw error;
 //   }
-// }
+// };
 
-const postData = async (url, data) => {
+
+export const postData = async (url,payload) => {
   try {
-    const response = await api.post(`${baseURL}${url}`, data);
-    return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
-  } catch (error) {
-    console.error('Lỗi gửi dữ liệu tới /admin/product:', {
-      data,
-      status: error.response?.status,
-      responseData: error.response?.data,
-      message: error.message
+    const res = await api.post(`${baseURL}${url}`, payload, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
-    throw error;
+    console.log('📩 [postModelSanPham] Response:', res);
+    return res.data;
+  } catch (err) {
+    console.error('❌ [postModelSanPham] Error:', err);
+    throw err;
   }
 };
+
+
+
+// export const postData = async (url, data, successMessage = '', showError = true) => {
+//   try {
+//     const response = await api.post(`${baseURL}${url}`, data);
+
+//     if (successMessage) {
+//       ElMessage.success(successMessage);
+//     }
+
+//     return response.data; // có thể là object, array, v.v.
+//   } catch (error) {
+//     if (showError) {
+//       // In thông tin chi tiết ra console để debug
+//       console.error(`❌ POST ${url} failed`, {
+//         dataSent: data,
+//         status: error.response?.status,
+//         responseData: error.response?.data,
+//         errorMessage: error.message
+//       });
+
+//       // Xử lý lỗi validation từ backend
+//       if (error.response?.status === 400 && error.response?.data?.message) {
+//         const messages = error.response.data.message;
+//         if (typeof messages === 'object') {
+//           Object.values(messages).forEach(msg => {
+//             ElMessage.error(msg);
+//           });
+//         } else {
+//           ElMessage.error(messages);
+//         }
+//       } else {
+//         ElMessage.error('Đã xảy ra lỗi khi gửi dữ liệu!');
+//       }
+//     }
+
+//     throw error; // để nơi gọi còn biết mà xử lý tiếp nếu cần
+//   }
+// };
 
 export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
   const urlProduct = '/admin/product'
@@ -52,6 +98,7 @@ export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
   }
   )
 }
+
 const postDataSpct = async (url, data) => {
   try {
 
@@ -67,20 +114,6 @@ const postDataSpct = async (url, data) => {
   }
 };
 
-
-// const postDataSpct = async (url, data) => {
-//   try {
-//     const response = await api.post(url, data, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     return response.data; // hoặc response.data.content tùy backend
-//   } catch (error) {
-//     console.error(`Lỗi gửi dữ liệu tới ${url}:`, error);
-//     throw error.response?.data || `Lỗi gửi dữ liệu tới ${url}`;
-//   }
-// };
 
 const putData = async (url, data) => {
   try {
@@ -105,11 +138,38 @@ const deleteData = async (url) => {
 
 export const getAllSanPhamChiTiet = (pageNo, pageSize) => fetchData(`/sanPhamChiTiet?page=${page}&size=${size}`);
 // export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
-export const getAllSanPham = (page = 0, size = 5) => fetchData(`/product?page=${page}&size=${size}`);
+
+export const getAllSanPham = (page = 0, size = 5, keyword = '', idLoai, trangThai = '') => {
+  const params = new URLSearchParams({
+    keyword,
+    page,
+    size,
+    trangThai
+  });
+  if (idLoai !== null && idLoai !== undefined) {
+    params.append('idLoai', idLoai); // Sửa params26 thành params
+  }
+  const url = `/product?${params.toString()}`;
+  console.log('Request URL:', url);
+  return fetchData(url).then(response => {
+    console.log('API Response:', response);
+    if (!response || response.length === 0) {
+      console.warn('No data returned or empty response');
+    }
+    return response;
+  }).catch(error => {
+    console.error('Fetch error:', error);
+    throw error;
+  });
+};
+
 export const postSanPham = (data) => postData('/product', data);
 export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
 export const getSanPhamById = (id) => fetchData(`/product/${id}`);
+export const deleteSanPham = (id) => deleteData(`/product/${id}`);
 export const getViewSanPham = (id) => fetchData(`/product/viewSanPham/${id}`);
+
+export const getTrangThaiSanPham = (data) => fetchData('/product/trang-thai', data);
 
 
 export const getAllXuatXuPage = (page = 0, size = 5, search = '') => fetchData(`/xuatXu/search?search=${search}&page=${page}&size=${size}`);
@@ -207,7 +267,6 @@ export const postCameraSau = (dataCameraSau) => postData('/cameraSau',dataCamera
 export const putCameraSau = (id, dataCameraSau) => putData(`/cameraSau/${id}`, dataCameraSau);
 export const deleteCameraSau = (idCameraSau) => deleteData(`/cameraSau/${idCameraSau}`);
 
-
 export const getAllNhaCungCapList = () => fetchData('/nhaCungCap/listNCC');
 export const postNhaCungCapList = (data) => postData('/nhaCungCap/quick-create', data)
 
@@ -223,6 +282,29 @@ export const getAllHDHList = () => fetchData('/heDieuHanh/listHDH');
 export const getAllCpuList = () => fetchData('/cpu/listCpu');
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
+
+
+export const getAllModelSanPhamList = () => fetchData('/modelSanPham/listModelSanPham');
+export const getAllPageModelSanPham = (page = 0, size = 5) => fetchData(`/modelSanPham?page=${page}&size=${size}`);
+
+export const postModelSanPham = (data) => postData('/modelSanPham', data);
+
+export const putModelSanPham = (id, data) => putData(`/modelSanPham/${id}`, data);
+export const deleteModelSanPham = (idModelSanPham) => deleteData(`/modelSanPham/${idModelSanPham}`);
+export const finByIdModelSanPham = (idModelSanPham) => fetchData(`/modelSanPham/${idModelSanPham}`);
+
+export const filterModelSanPham = (page = 0, size = 5, search = '', idLoai, idRam, idXuatXu) => {
+  const params = new URLSearchParams();
+
+  params.append('page', page);
+  params.append('size', size);
+  if (search) params.append('search', search);
+  if (idLoai !== null && idLoai !== undefined) params.append('idLoai', idLoai);
+  if (idRam !== null && idRam !== undefined) params.append('idRam', idRam);
+  if (idXuatXu !== null && idXuatXu !== undefined) params.append('idXuatXu', idXuatXu);
+
+  return fetchData(`/modelSanPham/filter?${params.toString()}`);
+}
 
 export const loadCategory = (pageNo, pageSize) =>{
   const urlProduct = '/admin/product'
@@ -244,3 +326,4 @@ export const loadSanPhamChiTiet = (pageNo,pageSize) => {
     }
   })
 }
+

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,28 @@ public class HoaDonChiTiet_ImeiAdminServices {
 
         List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(chiTietHoaDon, imeisAvailable,TrangThaiImei.RESERVED);
         imeiDaBanRepository.saveAll(imeiDaBans);
+    }
+    @Transactional
+    public void giamSoLuong(ChiTietHoaDon chiTietHoaDon, List<String> imeisCanGiam) {
+        if (imeisCanGiam == null || imeisCanGiam.isEmpty()) {
+            return;
+        }
+        List<ImeiDaBan> imeiDaBansToDelete = imeiDaBanRepository.findByIdHoaDonChiTiet_IdAndSoImeiIn(chiTietHoaDon.getId(), imeisCanGiam);
+        if (!imeiDaBansToDelete.isEmpty()) {
+            imeiDaBanRepository.deleteAll(imeiDaBansToDelete);
+        } else {
+            System.out.println("Không tìm thấy ImeiDaBan để xóa cho HDCT ID: " + chiTietHoaDon.getId() + " và IMEI: " + imeisCanGiam);
+        }
+
+        for (String soImei : imeisCanGiam) {
+            Imei imei = imeiReposiory.findBySoImei(soImei);
+            if (imei != null) {
+                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                imeiReposiory.save(imei);
+            } else {
+                System.out.println("Cảnh báo: Không tìm thấy IMEI với số: " + soImei + " để cập nhật trạng thái.");
+            }
+        }
     }
 
     //Doi trang thai imei

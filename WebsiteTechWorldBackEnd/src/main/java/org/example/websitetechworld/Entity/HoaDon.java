@@ -117,4 +117,14 @@ public class HoaDon {
     @Column(name = "trang_thai_don_hang", length = 50)
     private TrangThaiGiaoHang trangThaiDonHang;
 
+    @Column(name = "ngay_tao_don_hang")
+    private LocalDate ngayTaoDonHang;
+
+    @Column(name = "is_shipping")
+    private Boolean isShipping;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tinh_thanh")
+    private TinhThanh idTinhThanh;
+
 }

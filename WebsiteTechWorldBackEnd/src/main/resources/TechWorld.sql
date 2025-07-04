@@ -85,6 +85,12 @@ CREATE TABLE phieu_giam_gia (
                                 trang_thai NVARCHAR(50)
 );
 
+CREATE TABLE tinh_thanh (
+                            id INT PRIMARY KEY IDENTITY,
+                            ten NVARCHAR(100),
+                            phi_ship DECIMAL(19,2)
+);
+
 CREATE TABLE hoa_don (
                          id_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
 
@@ -106,6 +112,8 @@ CREATE TABLE hoa_don (
                          sdt_nguoi_nhan NVARCHAR(10),
                          dia_chi_giao_hang NVARCHAR(100),
                          ngay_dat_hang DATE,
+                         is_shipping BIT,
+                         id_tinh_thanh INT REFERENCES tinh_thanh(id),
                          phi_ship DECIMAL(19,2),
                          tong_tien DECIMAL(19,2),
                          so_tien_giam DECIMAL(19,2),
@@ -158,6 +166,7 @@ CREATE TABLE gio_hang (
                           FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE
 );
 
+
 CREATE TABLE camera_sau (
                             id_camera_sau INT IDENTITY(1,1) PRIMARY KEY,
                             loai_camera NVARCHAR(100),
@@ -166,6 +175,7 @@ CREATE TABLE camera_sau (
                             loai_zoom NVARCHAR(50),
                             che_do_chup NVARCHAR(50)
 );
+
 
 CREATE TABLE camera_truoc (
                               id_camera_truoc INT IDENTITY(1,1) PRIMARY KEY,
@@ -246,7 +256,7 @@ CREATE TABLE ram (
 CREATE TABLE mau_sac (
                          id_mau_sac INT IDENTITY(1,1) PRIMARY KEY,
                          ten_mau NVARCHAR(50),
-                         hex_color NVARCHAR(7)
+                         hex_color NVARCHAR(10)
 );
 
 CREATE TABLE nha_cung_cap (
@@ -255,6 +265,31 @@ CREATE TABLE nha_cung_cap (
                               dia_chi NVARCHAR(50),
                               sdt VARCHAR(10),
                               email VARCHAR(50)
+);
+
+CREATE TABLE model_san_pham (
+                                id_model_san_pham INT IDENTITY(1,1) PRIMARY KEY,
+                                ma_model_san_pham AS (
+        'MSP' + CASE
+            WHEN id_model_san_pham < 10 THEN '00' + CAST(id_model_san_pham AS VARCHAR)
+            WHEN id_model_san_pham < 100 THEN '0' + CAST(id_model_san_pham AS VARCHAR)
+            ELSE CAST(id_model_san_pham AS VARCHAR)
+        END
+    ) PERSISTED,
+
+                                ten_model NVARCHAR(50),
+                                id_cpu INT REFERENCES cpu(id_cpu),
+                                id_man_hinh INT REFERENCES man_hinh(id_man_hinh),
+                                id_camera_sau INT REFERENCES camera_sau(id_camera_sau),
+                                id_camera_truoc INT REFERENCES camera_truoc(id_camera_truoc),
+                                id_pin INT REFERENCES pin(id_pin),
+                                id_he_dieu_hanh INT REFERENCES he_dieu_hanh(id_he_dieu_hanh),
+                                id_xuat_xu INT REFERENCES xuat_xu(id_xuat_xu),
+                                id_loai INT REFERENCES loai(id_loai),
+                                id_ram INT REFERENCES ram(id_ram),
+                                nam_ra_mat DATE,
+                                mo_ta NVARCHAR(255),
+                                trang_thai NVARCHAR(50)
 );
 
 CREATE TABLE san_pham (
@@ -269,7 +304,8 @@ CREATE TABLE san_pham (
                           ten_san_pham NVARCHAR(50),
                           thuong_hieu NVARCHAR(50),
                           trang_thai VARCHAR(50),
-                          id_nha_cung_cap INT REFERENCES nha_cung_cap(id_nha_cung_cap)
+                          id_nha_cung_cap INT REFERENCES nha_cung_cap(id_nha_cung_cap),
+                          id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham) ON DELETE CASCADE
 );
 
 CREATE TABLE san_pham_chi_tiet (
@@ -283,16 +319,7 @@ CREATE TABLE san_pham_chi_tiet (
     ) PERSISTED,
                                    id_san_pham INT REFERENCES san_pham(id_san_pham) ON DELETE CASCADE,
                                    id_mau INT REFERENCES mau_sac(id_mau_sac),
-                                   id_ram INT REFERENCES ram(id_ram),
                                    id_rom INT REFERENCES rom(id_rom),
-                                   id_man_hinh INT REFERENCES man_hinh(id_man_hinh),
-                                   id_he_dieu_hanh INT REFERENCES he_dieu_hanh(id_he_dieu_hanh),
-                                   id_pin INT REFERENCES pin(id_pin),
-                                   id_cpu INT REFERENCES cpu(id_cpu),
-                                   id_camera_truoc INT REFERENCES camera_truoc(id_camera_truoc),
-                                   id_camera_sau INT REFERENCES camera_sau(id_camera_sau),
-                                   id_xuat_xu INT REFERENCES xuat_xu(id_xuat_xu),
-                                   id_loai INT REFERENCES loai(id_loai),
                                    so_luong INT,
                                    gia_ban DECIMAL(10,2)
 );
@@ -327,7 +354,6 @@ CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
                       so_imei VARCHAR(70),
-                      so_imei_2 VARCHAR(70), -- new
                       trang_thai_imei NVARCHAR(50),
 );
 
@@ -471,24 +497,91 @@ VALUES
     (N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED'),
     (N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED');
 
--- Table hoa_don
-INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan,is_delete)
+--Table tinh_thanh
+INSERT INTO tinh_thanh (ten, phi_ship)
 VALUES
-    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0),
-    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0),
-    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0),
-    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0),
-    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0),
-    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0),
-    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0),
-    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0),
-    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0),
-    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0),
-    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0),
-    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0),
-    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0),
-    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0),
-    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0);
+    (N'Hà Nội', 20000),
+    (N'Hồ Chí Minh', 30000),
+    (N'Bắc Giang', 25000),
+    (N'Bắc Kạn', 25000),
+    (N'Bạc Liêu', 30000),
+    (N'Bắc Ninh', 25000),
+    (N'Bến Tre', 30000),
+    (N'Bình Định', 30000),
+    (N'Bình Dương', 30000),
+    (N'Bình Phước', 30000),
+    (N'Bình Thuận', 30000),
+    (N'Cà Mau', 30000),
+    (N'Cần Thơ', 30000),
+    (N'Cao Bằng', 25000),
+    (N'Đà Nẵng', 30000),
+    (N'Đắk Lắk', 30000),
+    (N'Đắk Nông', 30000),
+    (N'Điện Biên', 25000),
+    (N'Đồng Nai', 30000),
+    (N'Đồng Tháp', 30000),
+    (N'Gia Lai', 30000),
+    (N'Hà Giang', 25000),
+    (N'Hà Nam', 25000),
+    (N'Hà Tĩnh', 25000),
+    (N'Hải Dương', 25000),
+    (N'Hải Phòng', 25000),
+    (N'Hậu Giang', 30000),
+    (N'Hòa Bình', 25000),
+    (N'Hưng Yên', 25000),
+    (N'Khánh Hòa', 30000),
+    (N'Kiên Giang', 30000),
+    (N'Kon Tum', 30000),
+    (N'Lai Châu', 25000),
+    (N'Lâm Đồng', 30000),
+    (N'Lạng Sơn', 25000),
+    (N'Lào Cai', 25000),
+    (N'Long An', 30000),
+    (N'Nam Định', 25000),
+    (N'Nghệ An', 25000),
+    (N'Ninh Bình', 25000),
+    (N'Ninh Thuận', 30000),
+    (N'Phú Thọ', 25000),
+    (N'Phú Yên', 30000),
+    (N'Quảng Bình', 25000),
+    (N'Quảng Nam', 30000),
+    (N'Quảng Ngãi', 30000),
+    (N'Quảng Ninh', 25000),
+    (N'Quảng Trị', 25000),
+    (N'Sóc Trăng', 30000),
+    (N'Sơn La', 25000),
+    (N'Tây Ninh', 30000),
+    (N'Thái Bình', 25000),
+    (N'Thái Nguyên', 25000),
+    (N'Thanh Hóa', 25000),
+    (N'Thừa Thiên Huế', 30000),
+    (N'Tiền Giang', 30000),
+    (N'TP Hồ Chí Minh', 30000),
+    (N'Trà Vinh', 30000),
+    (N'Tuyên Quang', 25000),
+    (N'Vĩnh Long', 30000),
+    (N'Vĩnh Phúc', 25000),
+    (N'Yên Bái', 25000);
+
+-- Table hoa_don
+INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping, id_tinh_thanh)
+VALUES
+    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0,1,1),
+    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0,0,null),
+    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1,1),
+    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1,1),
+    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0,null),
+    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1,1),
+    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1,1),
+    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0,null),
+    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0,null),
+    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1,1),
+    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0,null),
+    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1,1),
+    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1,1),
+    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0,null),
+    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1,1);
+
 
 -- Table lich_su_hoa_don
 INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don, hanh_dong, thoi_gian_thay_doi, mo_ta)
@@ -795,43 +888,63 @@ VALUES
     (N'HNam Mobile', N'555 Nguyễn Đình Chiểu, Hà Nội', '0935678901', 'hnam@example.com'),
     (N'Minh Tuấn Mobile', N'666 Lê Lai, TP.HCM', '0946789012', 'minhtuan@example.com');
 
--- Table san_pham
-INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai)
+INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_sau, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, mo_ta, trang_thai)
 VALUES
-    (N'iPhone 16', N'Apple', 1, 'ACTIVE'),
-    (N'iPhone 16 Pro', N'Apple', 2, 'DISCONTINUED'),
-    (N'iPhone 15', N'Apple', 3, 'COMING_SOON'),
-    (N'iPhone 14', N'Apple', 4, 'TEMPORARILY_UNAVAILABLE'),
-    (N'iPhone 13', N'Apple', 5, 'OUT_OF_STOCK'),
-    (N'iPhone 16 Plus', N'Apple', 6, 'ACTIVE'),
-    (N'iPhone 15 Pro', N'Apple', 7, 'DISCONTINUED'),
-    (N'iPhone 14 Pro', N'Apple', 8, 'COMING_SOON'),
-    (N'iPhone 13 Pro', N'Apple', 9, 'TEMPORARILY_UNAVAILABLE'),
-    (N'iPhone 12', N'Apple', 10, 'OUT_OF_STOCK'),
-    (N'iPhone 16 Pro Max', N'Apple', 11, 'ACTIVE'),
-    (N'iPhone 15 Pro Max', N'Apple', 12, 'DISCONTINUED'),
-    (N'iPhone 14 Plus', N'Apple', 13, 'COMING_SOON'),
-    (N'iPhone 13 Mini', N'Apple', 14, 'TEMPORARILY_UNAVAILABLE'),
-    (N'iPhone 12 Pro', N'Apple', 15, 'OUT_OF_STOCK');
+    (N'iPhone 6', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'iPhone 6 với RAM 1GB, màn hình 4.7 inch', N'OUT_OF_STOCK'),
+    (N'iPhone 16', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'iPhone 16 với chip A17 Pro, màn hình 6.1 inch', N'ACTIVE'),
+    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'iPhone 16 Pro với camera nâng cấp', N'DISCONTINUED'),
+    (N'iPhone 15', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'iPhone 15 với hiệu năng mạnh mẽ', N'COMING_SOON'),
+    (N'iPhone 14', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'iPhone 14 tiêu chuẩn', N'TEMPORARILY_UNAVAILABLE'),
+    (N'iPhone 13', 5, 6, 6, 6, 6, 5, 5, 1, 6, '2021-09-01', N'iPhone 13 giá trị cao', N'OUT_OF_STOCK'),
+    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 7, '2024-09-01', N'iPhone 16 Plus màn hình lớn', N'ACTIVE'),
+    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 8, '2023-09-01', N'iPhone 15 Pro cao cấp', N'DISCONTINUED'),
+    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 9, '2022-09-01', N'iPhone 14 Pro với Dynamic Island', N'COMING_SOON'),
+    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 10, '2021-09-01', N'iPhone 13 Pro với camera Pro', N'TEMPORARILY_UNAVAILABLE'),
+    (N'iPhone 12', 10, 11, 11, 11, 11, 6, 10, 1, 11, '2020-09-01', N'iPhone 12 tiêu chuẩn', N'OUT_OF_STOCK'),
+    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 12, '2024-09-01', N'iPhone 16 Pro Max cao cấp', N'ACTIVE'),
+    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 13, '2023-09-01', N'iPhone 15 Pro Max với camera 5x', N'DISCONTINUED'),
+    (N'iPhone 14 Plus', 13, 14, 14, 14, 14, 4, 13, 2, 14, '2022-09-01', N'iPhone 14 Plus màn hình lớn', N'COMING_SOON'),
+    (N'iPhone 13 Mini', 14, 15, 15, 15, 15, 5, 14, 5, 15, '2021-09-01', N'iPhone 13 Mini nhỏ gọn', N'TEMPORARILY_UNAVAILABLE');
+
+-- Table san_pham
+INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
+VALUES
+    (N'iPhone 6', N'Apple', 1, N'OUT_OF_STOCK', 1),
+    (N'iPhone 16', N'Apple', 2, N'DISCONTINUED', 2),
+    (N'iPhone 15', N'Apple', 3, N'COMING_SOON', 3),
+    (N'iPhone 14', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
+    (N'iPhone 13', N'Apple', 5, N'OUT_OF_STOCK', 5),
+    (N'iPhone 16', N'Apple', 6, N'ACTIVE', 6),
+    (N'iPhone 15', N'Apple', 7, N'DISCONTINUED', 7),
+    (N'iPhone 14', N'Apple', 8, N'COMING_SOON', 8),
+    (N'iPhone 13', N'Apple', 9, N'TEMPORARILY_UNAVAILABLE', 9),
+    (N'iPhone 12', N'Apple', 10, N'OUT_OF_STOCK', 10),
+    (N'iPhone 16', N'Apple', 11, N'ACTIVE', 11),
+    (N'iPhone 15', N'Apple', 12, N'DISCONTINUED', 12),
+    (N'iPhone 14', N'Apple', 13, N'COMING_SOON', 13),
+    (N'iPhone 13', N'Apple', 14, N'TEMPORARILY_UNAVAILABLE', 14),
+    (N'iPhone 12', N'Apple', 15, N'OUT_OF_STOCK', 15);
 
 -- Table san_pham_chi_tiet
-INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_ram, id_rom, id_man_hinh, id_he_dieu_hanh, id_pin, id_cpu, id_camera_truoc, id_camera_sau, id_xuat_xu, id_loai, so_luong, gia_ban)
+INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
 VALUES
-    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 20000000.00),
-    (2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 8, 25000000.00),
-    (3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 1, 15, 15000000.00),
-    (4, 4, 4, 4, 4, 3, 4, 4, 4, 4, 4, 1, 12, 12000000.00),
-    (5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 1, 20, 10000000.00),
-    (6, 6, 6, 6, 6, 1, 6, 6, 6, 6, 6, 2, 9, 22000000.00),
-    (7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 3, 7, 27000000.00),
-    (8, 8, 8, 8, 8, 3, 8, 8, 8, 8, 8, 3, 14, 18000000.00),
-    (9, 9, 9, 9, 9, 4, 9, 9, 9, 9, 9, 3, 11, 13000000.00),
-    (10, 10, 10, 10, 10, 5, 10, 10, 10, 10, 10, 1, 18, 11000000.00),
-    (11, 11, 11, 11, 11, 1, 11, 11, 11, 11, 11, 4, 6, 30000000.00),
-    (12, 12, 12, 12, 12, 2, 12, 12, 12, 12, 12, 4, 5, 28000000.00),
-    (13, 13, 13, 13, 13, 3, 13, 13, 13, 13, 13, 2, 13, 16000000.00),
-    (14, 14, 14, 14, 14, 4, 14, 14, 14, 14, 14, 5, 10, 14000000.00),
-    (15, 15, 15, 15, 15, 5, 15, 15, 15, 15, 15, 3, 16, 12000000.00);
+    (1, 1, 1, 10, 5000000.00), -- iPhone 6 16GB
+    (1, 2, 6, 8, 5500000.00), -- iPhone 6 64GB
+    (1, 3, 12, 5, 6000000.00), -- iPhone 6 128GB
+    (2, 1, 2, 10, 20000000.00), -- iPhone 16 128GB
+    (3, 2, 3, 8, 25000000.00), -- iPhone 16 Pro 256GB
+    (4, 3, 4, 15, 15000000.00), -- iPhone 15 512GB
+    (5, 4, 5, 12, 12000000.00), -- iPhone 14 1TB
+    (6, 5, 6, 20, 10000000.00), -- iPhone 13 64GB
+    (7, 6, 7, 9, 22000000.00), -- iPhone 16 Plus 128GB
+    (8, 7, 8, 7, 27000000.00), -- iPhone 15 Pro 256GB
+    (9, 8, 9, 14, 18000000.00), -- iPhone 14 Pro 512GB
+    (10, 9, 10, 11, 13000000.00), -- iPhone 13 Pro 1TB
+    (11, 10, 11, 18, 11000000.00), -- iPhone 12 64GB
+    (12, 11, 12, 6, 30000000.00), -- iPhone 16 Pro Max 128GB
+    (13, 12, 13, 5, 28000000.00), -- iPhone 15 Pro Max 256GB
+    (14, 13, 14, 13, 16000000.00), -- iPhone 14 Plus 512GB
+    (15, 14, 15, 10, 14000000.00); -- iPhone 13 Mini 1TB
 
 -- Table chi_tiet_hoa_don
 INSERT INTO chi_tiet_hoa_don (id_hoa_don, id_san_pham_chi_tiet, ten_san_pham, mo_ta, so_luong, don_gia)
@@ -910,36 +1023,36 @@ VALUES
     (15, '2025-06-11', NULL, N'Lỗi sạc không dây', N'IN_REPAIR');
 
 -- Table imei
-INSERT INTO imei (id_san_pham_chi_tiet, so_imei, so_imei_2, trang_thai_imei)
+INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
 VALUES
-    (1, '123456789012345', '543210987654321', 'AVAILABLE'),
-    (2, '123456789012346', '543210987654322', 'AVAILABLE'),
-    (3, '123456789012347', '543210987654323', 'AVAILABLE'),
-    (4, '123456789012348', '543210987654324', 'AVAILABLE'),
-    (5, '123456789012349', '543210987654325', 'AVAILABLE'),
-    (6, '123456789012350', '543210987654326', 'AVAILABLE'),
-    (7, '123456789012351', '543210987654327', 'AVAILABLE'),
-    (8, '123456789012352', '543210987654328', 'AVAILABLE'),
-    (9, '123456789012353', '543210987654329', 'AVAILABLE'),
-    (10, '123456789012354', '543210987654330', 'AVAILABLE'),
-    (11, '123456789012355', '543210987654331', 'AVAILABLE'),
-    (12, '123456789012356', '543210987654332', 'AVAILABLE'),
-    (13, '123456789012357', '543210987654333', 'AVAILABLE'),
-    (14, '123456789012358', '543210987654334', 'AVAILABLE'),
-    (15, '123456789012359', '543210987654335', 'AVAILABLE');
+    (1, '123456789012345', 'AVAILABLE'),
+    (2, '123456789012346', 'AVAILABLE'),
+    (3, '123456789012347', 'AVAILABLE'),
+    (4, '123456789012348', 'AVAILABLE'),
+    (5, '123456789012349', 'AVAILABLE'),
+    (6, '123456789012350', 'AVAILABLE'),
+    (7, '123456789012351', 'AVAILABLE'),
+    (8, '123456789012352', 'AVAILABLE'),
+    (9, '123456789012353', 'AVAILABLE'),
+    (10, '123456789012354', 'AVAILABLE'),
+    (11, '123456789012355', 'AVAILABLE'),
+    (12, '123456789012356', 'AVAILABLE'),
+    (13, '123456789012357', 'AVAILABLE'),
+    (14, '123456789012358', 'AVAILABLE'),
+    (15, '123456789012359', 'AVAILABLE');
 
 -- Table hinh_anh
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
 VALUES
-    (1, 'https://example.com/images/iphone16_black.jpg', 'iphone16_black_001'),
-    (2, 'https://example.com/images/iphone16pro_white.jpg', 'iphone16pro_white_002'),
-    (3, 'https://example.com/images/iphone15_gold.jpg', 'iphone15_gold_003'),
-    (4, 'https://example.com/images/iphone14_blue.jpg', 'iphone14_blue_004'),
-    (5, 'https://example.com/images/iphone13_pink.jpg', 'iphone13_pink_005'),
-    (6, 'https://example.com/images/iphone16plus_gray.jpg', 'iphone16plus_gray_006'),
-    (7, 'https://example.com/images/iphone15pro_silver.jpg', 'iphone15pro_silver_007'),
-    (8, 'https://example.com/images/iphone14pro_green.jpg', 'iphone14pro_green_008'),
-    (9, 'https://example.com/images/iphone13pro_red.jpg', 'iphone13pro_red_009'),
+    (1, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'),
+    (2, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'),
+    (3, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'),
+    (4, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'),
+    (5, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'),
+    (6, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'),
+    (7, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'),
+    (8, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'),
+    (9, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'),
     (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
     (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
     (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
@@ -1119,3 +1232,12 @@ SELECT * FROM loai_bao_hanh
 
 --34. lich_su_bao_hanh
 SELECT * FROM lich_su_bao_hanh
+
+--35. user_tokens
+SELECT * FROM user_tokens
+
+--36. model_san_pham
+SELECT * FROM model_san_pham
+
+--37. tinh_thanh
+SELECT * FROM tinh_thanh
