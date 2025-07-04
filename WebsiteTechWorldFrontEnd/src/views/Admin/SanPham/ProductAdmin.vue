@@ -207,6 +207,9 @@ import { Edit, Delete, View, Search, Plus, DocumentAdd, Goods, Picture, CircleCh
 import { getAllSanPham, getAllLoaiList, getTrangThaiSanPham, deleteSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from 'lodash';
+import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+import store from '@/Service/LoginService/Store';
+
 
 // State
 const sanPhamList = ref([]);
@@ -223,6 +226,7 @@ const filters = reactive({
   idLoai: null,
   trangThai: ''
 });
+
 
 // Tải danh sách loại sản phẩm
 const loadLoaiSanPham = async () => {

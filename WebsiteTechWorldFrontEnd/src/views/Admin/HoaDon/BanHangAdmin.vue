@@ -558,22 +558,15 @@ import {
     ChevronUp, ChevronDown, Minus, Trash2, History, FileText,
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
 } from 'lucide-vue-next'
-import { findSanPhamBanHang } from '@/Service/Adminservice/Products/ProductAdminService';
-import { loadSanPhamChiTiet } from '@/Service/Adminservice/Products/ProductAdminService';
-import { loadCategory } from '@/Service/Adminservice/Products/ProductAdminService';
-import { createPendingInvoice, hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { fetchImeisJs, updateTTShipping } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { getTinhThanh, getHuyen, getXa, getLatLon, getDistance } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { updateSoLuongAndTrangThai } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { loadImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { deleteDetailInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { addProductIntoInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { loadHoaDonByIdNhanVien } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { getListKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { selectKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { addKhachHang } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { getAllPhieuGiamGia } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { loadPaymentMethod, thanhToan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
+import { 
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory 
+} from '@/Service/Adminservice/Products/ProductAdminService';
+import { 
+    createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
+    , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
+    , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
+    , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, loadPaymentMethod, thanhToan 
+} from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
@@ -634,6 +627,7 @@ const shippingInfo = ref({
     maVanDon: '',
     isShipping: false
 });
+
 
 const calculateTotal = () => {
     totalProductAmount.value = 0;
@@ -1886,6 +1880,7 @@ watch(searchKhachHang, () => {
 const showShippingPopup = ref(false);
 const openShippingPopup = () => {
     showShippingPopup.value = true;
+    shippingInfo.value.diaChiChiTiet = '';
 };
 
 const closeShippingPopup = () => {
@@ -1929,6 +1924,7 @@ const confirmShippingInfo = async () => {
     try {
         const response = await updateTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
 
+        shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
         alert('Cập nhật thông tin giao hàng thành công!');
         showShippingPopup.value = false;

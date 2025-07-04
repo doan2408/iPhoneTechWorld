@@ -9,6 +9,7 @@ import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.NotFoundException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,7 @@ import java.util.List;
 public class ModelSanPhamService {
 
     private final ModelSanPhamRepository modelSanPhamRepo;
-    private final SanPhamRepository sanPhamRepo;
-    private final MauSacRepository mauSacRepo;
     private final RamRepository ramRepo;
-    private final RomRepository romRepo;
     private final ManHinhRepository manHinhRepo;
     private final HeDieuHanhRepository heDieuHanhRepo;
     private final PinRepository pinRepo;
@@ -46,7 +44,8 @@ public class ModelSanPhamService {
     private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
 
         entity.setTenModel(req.getTenModel());
-        entity.setMaModelSanPham(req.getModelSanPham());
+
+        entity.setMaModelSanPham(req.getMaModelSanPham());
         entity.setNamRaMat(req.getNamRaMat());
         entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
         entity.setIdRam(ramRepo.findById(req.getIdRam()).orElse(null));
@@ -202,7 +201,21 @@ public class ModelSanPhamService {
 
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
-        System.out.println("Request nhận vào: " + request); // Yêu cầu ModelSanPhamAdminRequest phải override toString()
+
+        if (modelSanPhamRepository.existsModelWithSameConfig(
+                request.getTenModel().trim(),
+                request.getIdRam(),
+                request.getIdManHinh(),
+                request.getIdHeDieuHanh(),
+                request.getIdPin(),
+                request.getIdCpu(),
+                request.getIdCameraTruoc(),
+                request.getIdCameraSau(),
+                request.getIdXuatXu(),
+                request.getIdLoai()
+                )) {
+            throw new BusinessException("model.duplicate.config");
+        }
 
         ModelSanPham model = new ModelSanPham();
         mapRequestToEntity(request, model);
@@ -247,4 +260,8 @@ public class ModelSanPhamService {
         return modelPage.map(this::mapEntityToResponse);
     }
 
+
+    public void validateBeforeCreate (ModelSanPhamAdminRequest request) {
+
+    }
 }

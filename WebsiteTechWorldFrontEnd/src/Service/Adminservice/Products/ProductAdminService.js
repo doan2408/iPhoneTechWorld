@@ -15,20 +15,76 @@ const fetchData = async (url) => {
   }
 }
 
-const postData = async (url, data) => {
+// const postData = async (url, data) => {
+//   try {
+//     const response = await api.post(`${baseURL}${url}`, data);
+//     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
+//   } catch (error) {
+//     console.error('Lỗi gửi dữ liệu tới /admin/product:', {
+//       data,
+//       status: error.response?.status,
+//       responseData: error.response?.data,
+//       message: error.message
+//     });
+//     throw error;
+//   }
+// };
+
+
+export const postData = async (url,payload) => {
   try {
-    const response = await api.post(`${baseURL}${url}`, data);
-    return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
-  } catch (error) {
-    console.error('Lỗi gửi dữ liệu tới /admin/product:', {
-      data,
-      status: error.response?.status,
-      responseData: error.response?.data,
-      message: error.message
+    const res = await api.post(`${baseURL}${url}`, payload, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
-    throw error;
+    console.log('📩 [postModelSanPham] Response:', res);
+    return res.data;
+  } catch (err) {
+    console.error('❌ [postModelSanPham] Error:', err);
+    throw err;
   }
 };
+
+
+
+// export const postData = async (url, data, successMessage = '', showError = true) => {
+//   try {
+//     const response = await api.post(`${baseURL}${url}`, data);
+
+//     if (successMessage) {
+//       ElMessage.success(successMessage);
+//     }
+
+//     return response.data; // có thể là object, array, v.v.
+//   } catch (error) {
+//     if (showError) {
+//       // In thông tin chi tiết ra console để debug
+//       console.error(`❌ POST ${url} failed`, {
+//         dataSent: data,
+//         status: error.response?.status,
+//         responseData: error.response?.data,
+//         errorMessage: error.message
+//       });
+
+//       // Xử lý lỗi validation từ backend
+//       if (error.response?.status === 400 && error.response?.data?.message) {
+//         const messages = error.response.data.message;
+//         if (typeof messages === 'object') {
+//           Object.values(messages).forEach(msg => {
+//             ElMessage.error(msg);
+//           });
+//         } else {
+//           ElMessage.error(messages);
+//         }
+//       } else {
+//         ElMessage.error('Đã xảy ra lỗi khi gửi dữ liệu!');
+//       }
+//     }
+
+//     throw error; // để nơi gọi còn biết mà xử lý tiếp nếu cần
+//   }
+// };
 
 export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
   const urlProduct = '/admin/product'

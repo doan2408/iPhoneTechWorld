@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ModelSanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ModelSanPhamAdminResponse;
@@ -39,7 +40,7 @@ public class ModelSanPhamAdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ModelSanPhamAdminResponse> createModelSanPham(@RequestBody ModelSanPhamAdminRequest request) {
+    public ResponseEntity<ModelSanPhamAdminResponse> createModelSanPham(@Valid @RequestBody ModelSanPhamAdminRequest request) {
         ModelSanPhamAdminResponse response = modelSanPhamService.createModelSanPham(request);
         return ResponseEntity.ok(response);
     }
