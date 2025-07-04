@@ -227,6 +227,7 @@ const filters = reactive({
   trangThai: ''
 });
 
+
 // Tải danh sách loại sản phẩm
 const loadLoaiSanPham = async () => {
   try {
@@ -370,26 +371,6 @@ const trangThaiSanPhamMap = {
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
   handleSearch();
-});
-
-const isAdmin = computed(() => {
-  const roles = store.state.roles;
-  return (
-    Array.isArray(roles) &&
-    roles
-      .map((role) => (typeof role === "string" ? role : role.authority))
-      .includes("ROLE_ADMIN")
-  );
-});
-
-const isStaff = computed(() => {
-  const roles = store.state.roles;
-  return (
-    Array.isArray(roles) &&
-    roles
-      .map((role) => (typeof role === "string" ? role : role.authority))
-      .includes("ROLE_STAFF")
-  );
 });
 
 // Tải dữ liệu khi component được mount

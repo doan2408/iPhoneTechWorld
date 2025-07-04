@@ -38,9 +38,13 @@ public class ModelSanPhamService {
     private final LoaiRepository loaiRepo;
     private final ModelSanPhamRepository modelSanPhamRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
 
         entity.setTenModel(req.getTenModel());
+
         entity.setMaModelSanPham(req.getMaModelSanPham());
         entity.setNamRaMat(req.getNamRaMat());
         entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
@@ -216,6 +220,13 @@ public class ModelSanPhamService {
         ModelSanPham model = new ModelSanPham();
         mapRequestToEntity(request, model);
         ModelSanPham savedModel = modelSanPhamRepository.save(model);
+
+        entityManager.flush();
+        entityManager.refresh(savedModel);
+
+        ModelSanPhamAdminResponse response = mapEntityToResponse(savedModel);
+        System.out.println("Đối tượng sau khi lưu: " + savedModel);
+        System.out.println("Response trả về: " + response);
         return mapEntityToResponse(savedModel);
     }
 
@@ -248,7 +259,6 @@ public class ModelSanPhamService {
         Page<ModelSanPham> modelPage = modelSanPhamRepository.findByFiltersNative(search, idLoai, idRam, idXuatXu, pageable);
         return modelPage.map(this::mapEntityToResponse);
     }
-
 
 
     public void validateBeforeCreate (ModelSanPhamAdminRequest request) {

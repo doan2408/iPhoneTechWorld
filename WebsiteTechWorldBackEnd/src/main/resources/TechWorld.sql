@@ -278,7 +278,6 @@ CREATE TABLE model_san_pham (
                                 id_loai INT REFERENCES loai(id_loai),
                                 id_ram INT REFERENCES ram(id_ram),
                                 nam_ra_mat DATE,
-                                mo_ta NVARCHAR(255),
                                 trang_thai NVARCHAR(50)
 );
 
@@ -812,38 +811,38 @@ VALUES
     (N'HNam Mobile', N'555 Nguyễn Đình Chiểu, Hà Nội', '0935678901', 'hnam@example.com'),
     (N'Minh Tuấn Mobile', N'666 Lê Lai, TP.HCM', '0946789012', 'minhtuan@example.com');
 
-INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_sau, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, mo_ta, trang_thai)
+INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_sau, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, trang_thai)
 VALUES
-    (N'iPhone 6', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'iPhone 6 với RAM 1GB, màn hình 4.7 inch', N'OUT_OF_STOCK'),
-    (N'iPhone 16', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'iPhone 16 với chip A17 Pro, màn hình 6.1 inch', N'ACTIVE'),
-    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'iPhone 16 Pro với camera nâng cấp', N'DISCONTINUED'),
-    (N'iPhone 15', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'iPhone 15 với hiệu năng mạnh mẽ', N'COMING_SOON'),
-    (N'iPhone 14', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'iPhone 14 tiêu chuẩn', N'TEMPORARILY_UNAVAILABLE'),
-    (N'iPhone 13', 5, 6, 6, 6, 6, 5, 5, 1, 6, '2021-09-01', N'iPhone 13 giá trị cao', N'OUT_OF_STOCK'),
-    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 7, '2024-09-01', N'iPhone 16 Plus màn hình lớn', N'ACTIVE'),
-    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 8, '2023-09-01', N'iPhone 15 Pro cao cấp', N'DISCONTINUED'),
-    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 9, '2022-09-01', N'iPhone 14 Pro với Dynamic Island', N'COMING_SOON'),
-    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 10, '2021-09-01', N'iPhone 13 Pro với camera Pro', N'TEMPORARILY_UNAVAILABLE'),
-    (N'iPhone 12', 10, 11, 11, 11, 11, 6, 10, 1, 11, '2020-09-01', N'iPhone 12 tiêu chuẩn', N'OUT_OF_STOCK'),
-    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 12, '2024-09-01', N'iPhone 16 Pro Max cao cấp', N'ACTIVE'),
-    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 13, '2023-09-01', N'iPhone 15 Pro Max với camera 5x', N'DISCONTINUED'),
-    (N'iPhone 14 Plus', 13, 14, 14, 14, 14, 4, 13, 2, 14, '2022-09-01', N'iPhone 14 Plus màn hình lớn', N'COMING_SOON'),
-    (N'iPhone 13 Mini', 14, 15, 15, 15, 15, 5, 14, 5, 15, '2021-09-01', N'iPhone 13 Mini nhỏ gọn', N'TEMPORARILY_UNAVAILABLE');
+    (N'iPhone 6', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'DELETED'),
+    (N'iPhone 16', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'DISCONTINUED'),
+    (N'iPhone 15', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'UPCOMING'),
+    (N'iPhone 14', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'HIDDEN'),
+    (N'iPhone 13', 5, 6, 6, 6, 6, 5, 5, 1, 6, '2021-09-01', N'DELETED'),
+    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 7, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 8, '2023-09-01', N'DISCONTINUED'),
+    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 9, '2022-09-01', N'UPCOMING'),
+    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 10, '2021-09-01', N'HIDDEN'),
+    (N'iPhone 12', 10, 11, 11, 11, 11, 6, 10, 1, 11, '2020-09-01', N'DELETED'),
+    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 12, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 13, '2023-09-01', N'DISCONTINUED'),
+    (N'iPhone 14 Plus', 13, 14, 14, 14, 14, 4, 13, 2, 14, '2022-09-01', N'UPCOMING'),
+    (N'iPhone 13 Mini', 14, 15, 15, 15, 15, 5, 14, 5, 15, '2021-09-01', N'HIDDEN');
 
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
 VALUES
-    (N'iPhone 6 Thường', N'Apple', 1, N'OUT_OF_STOCK', 1),
-    (N'iPhone 16 Thường', N'Apple', 2, N'DISCONTINUED', 2),
+    (N'iPhone 6', N'Apple', 1, N'OUT_OF_STOCK', 1),
+    (N'iPhone 16', N'Apple', 2, N'DISCONTINUED', 2),
     (N'iPhone 16 Pro', N'Apple', 3, N'COMING_SOON', 3),
-    (N'iPhone 15 Thường', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
-    (N'iPhone 14 Thường', N'Apple', 5, N'OUT_OF_STOCK', 5),
-    (N'iPhone 13 Thường', N'Apple', 6, N'ACTIVE', 6),
+    (N'iPhone 15', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
+    (N'iPhone 14', N'Apple', 5, N'OUT_OF_STOCK', 5),
+    (N'iPhone 13', N'Apple', 6, N'ACTIVE', 6),
     (N'iPhone 16 Plus', N'Apple', 7, N'DISCONTINUED', 7),
     (N'iPhone 15 Pro', N'Apple', 8, N'COMING_SOON', 8),
     (N'iPhone 14 Pro', N'Apple', 9, N'TEMPORARILY_UNAVAILABLE', 9),
     (N'iPhone 13 Pro', N'Apple', 10, N'OUT_OF_STOCK', 10),
-    (N'iPhone 12 Thường', N'Apple', 11, N'ACTIVE', 11),
+    (N'iPhone 12', N'Apple', 11, N'ACTIVE', 11),
     (N'iPhone 16 Pro Max', N'Apple', 12, N'DISCONTINUED', 12),
     (N'iPhone 15 Pro Max', N'Apple', 13, N'COMING_SOON', 13),
     (N'iPhone 14 Plus', N'Apple', 14, N'TEMPORARILY_UNAVAILABLE', 14),

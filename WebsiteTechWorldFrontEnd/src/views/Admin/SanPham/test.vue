@@ -751,7 +751,6 @@ export default {
           if (index !== -1) {
             modelSanPhams.value[index] = { ...modelSanPhams.value[index], ...payload };
           }
-
           ElMessage.success('Cập nhật model thành công!');
         } else {
           const newForm = await postModelSanPham(payload);
@@ -885,7 +884,7 @@ export default {
       deleteModel,
       handlePageChange
     };
-  }
+  },
 };
 </script>
 

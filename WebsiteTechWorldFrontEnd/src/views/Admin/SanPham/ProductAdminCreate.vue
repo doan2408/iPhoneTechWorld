@@ -291,7 +291,7 @@ export default {
     // Dữ liệu chính của sản phẩm
     const sanPham = reactive({
       tenSanPham: "",
-      thuongHieu: "",
+      thuongHieu: "Apple",
       idNhaCungCap: "",
       trangThaiSanPham: "",
       idModelSanPham: null,
@@ -627,6 +627,7 @@ export default {
             if (imeis.length === 0) {
               throw new Error("Không tìm thấy IMEI hợp lệ trong file");
             }
+
 
             // Lưu IMEI và đồng bộ vào imeisInput
             // sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", "); // Đồng bộ danh sách IMEI vào textarea
