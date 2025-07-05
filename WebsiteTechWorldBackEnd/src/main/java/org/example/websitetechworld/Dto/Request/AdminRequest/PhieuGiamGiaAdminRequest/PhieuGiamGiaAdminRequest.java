@@ -38,6 +38,7 @@ public class PhieuGiamGiaAdminRequest {
     private BigDecimal giaTriDonHangToiThieu;
 
     @PositiveOrZero(message = "Giá trị khuyến mãi tối đa phải lớn hơn hoặc bằng 0")
+    @DecimalMin(value = "10000.00", message = "Giá trị khuyến mãi tối đa không được ít hơn 10000.00")
     @DecimalMax(value = "99999999.99", message = "Giá trị khuyến mãi tối đa không được vượt quá 99999999.99")
     private BigDecimal giaTriKhuyenMaiToiDa;
 

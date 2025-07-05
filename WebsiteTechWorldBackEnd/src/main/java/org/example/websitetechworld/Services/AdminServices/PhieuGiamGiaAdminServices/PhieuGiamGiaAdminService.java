@@ -392,13 +392,14 @@ public class PhieuGiamGiaAdminService {
 //    }
 
     //Hoa don
-    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang) {
+    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang, BigDecimal giaTriDonHangToiThieu) {
 
         Set<PhieuGiamGia> phieuGiamGiaGop = new HashSet<>();
 
         List<PhieuGiamGia> phieuCongKhai = phieuGiamGiaRepository
-                .findBySoDiemCanDeDoiAndTrangThaiPhatHanhAndCongKhaiAndTrangThaiPhieuGiamGiaAndMaGiamGiaContainingIgnoreCase(
+                .timPhieuGiamGiaCongKhai(
                         BigDecimal.ZERO,
+                        giaTriDonHangToiThieu,
                         TrangThaiPhatHanh.ISSUED,
                         true,
                         TrangThaiPGG.ACTIVE,
@@ -414,6 +415,7 @@ public class PhieuGiamGiaAdminService {
                     .filter(khgg -> !khgg.getIsUser())
                     .map(KhachHangGiamGia::getIdPhieuGiamGia)
                     .filter(pgg -> pgg.getTrangThaiPhatHanh() == TrangThaiPhatHanh.ISSUED
+                            && pgg.getGiaTriDonHangToiThieu().compareTo(giaTriDonHangToiThieu) <= 0
                             && pgg.getTrangThaiPhieuGiamGia() == TrangThaiPGG.ACTIVE
                             && pgg.getMaGiamGia().toLowerCase().contains(timKiem == null ? "" : timKiem.toLowerCase()))
                     .toList();

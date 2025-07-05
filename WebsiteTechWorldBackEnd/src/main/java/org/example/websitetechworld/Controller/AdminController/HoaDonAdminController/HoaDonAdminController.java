@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
@@ -230,11 +231,17 @@ public class HoaDonAdminController {
     @GetMapping("/list-phieu-giam-gia")
     public ResponseEntity<List<PhieuGiamGiaAdminResponse>> getAllPhieuGiamGia (
             @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "0") BigDecimal giaTriDonHangToiThieu,
             @RequestParam(required = false) Integer idKhachHang) {
-        List<PhieuGiamGiaAdminResponse> phieuGiamGias = phieuGiamGiaAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang);
+        List<PhieuGiamGiaAdminResponse> phieuGiamGias = phieuGiamGiaAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang, giaTriDonHangToiThieu);
         return ResponseEntity.ok(phieuGiamGias);
     }
 
+    @PutMapping("/{idHoaDon}/phieu-giam-gia")
+    public ResponseEntity<?> phieuGiamGia (@PathVariable Integer idHoaDon, @RequestBody PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
+        hoaDonAdminService.xuLyPhieuGiamGia(idHoaDon, phieuGiamGiaAdminRequest);
+        return ResponseEntity.ok("Thêm phiếu giảm giá cho hóa đơn thành công");
+    }
 
     @PutMapping("/{idHoaDon}/thanh-toan")
     public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest) {
