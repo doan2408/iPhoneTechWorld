@@ -21,6 +21,7 @@ public class ModelSanPhamAdminRequest {
 
     private Integer idModelSanPham;
 
+
     private String maModelSanPham;
 
     @NotBlank(message = "{model.name.required}")
@@ -30,6 +31,7 @@ public class ModelSanPhamAdminRequest {
 
     @NotNull(message = "{model.namRaMat.required}")
     private LocalDate namRaMat;
+
 
     @NotNull(message = "{model.trangThai.required}")
     @Enumerated(EnumType.STRING)

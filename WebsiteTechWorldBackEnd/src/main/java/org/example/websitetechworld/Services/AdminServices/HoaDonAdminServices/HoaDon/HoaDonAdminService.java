@@ -24,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -64,9 +66,12 @@ public class HoaDonAdminService {
         return hoaDonRepository.findAll().stream().map(HoaDonAdminResponse::convertDto).collect(Collectors.toList());
     }
 
-    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull(pageable).map(GetAllHoaDonAdminResponse::convertDto);
+    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize, String sortBy, String direction) {
+        Sort.Direction dir = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, sortBy));
+        return hoaDonRepository
+                .findByIsDeleteFalseOrIsDeleteIsNull(pageable)
+                .map(GetAllHoaDonAdminResponse::convertDto);
     }
 
     public HoaDonAdminResponse findById(Integer id){
@@ -204,7 +209,7 @@ public class HoaDonAdminService {
         invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang() != null ? request.getDiaChiGiaoHang() : "");
         invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
-
+        invoice.setNgayDatHang(LocalDate.now());
         // Gán maVanDon
         String maVanDon = request.getMaVanDon();
         if (maVanDon == null || maVanDon.trim().isEmpty()) {
@@ -241,7 +246,7 @@ public class HoaDonAdminService {
                     invoice.getThanhTien(),
                     invoice.getShippingMethod(),
                     TrangThaiGiaoHang.PENDING,
-                    invoice.getNgayTaoDonHang()
+                    invoice.getNgayDatHang()
             );
         } catch (Exception e) {
             System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());

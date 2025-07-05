@@ -9,22 +9,15 @@
         </div>
         <div class="header-actions">
           <button class="btn btn-primary" @click="handleCreateInvoice">
-            <svg
-              class="icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              ></path>
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Tạo hóa đơn mới
           </button>
         </div>
+
+        <ConfirmModal v-if="showModalCreateInvoice" message="Bạn có chắc muốn tạo hóa đơn mới không?" @confirm="onConfirmCreateInvoice"
+          @cancel="onCancelCreate" />
       </div>
     </div>
 
@@ -33,12 +26,9 @@
       <div class="stat-card">
         <div class="stat-icon">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+            </path>
           </svg>
         </div>
         <div class="stat-content">
@@ -50,12 +40,9 @@
       <div class="stat-card">
         <div class="stat-icon">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+            </path>
           </svg>
         </div>
         <div class="stat-content">
@@ -67,12 +54,8 @@
       <div class="stat-card">
         <div class="stat-icon">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div class="stat-content">
@@ -84,12 +67,9 @@
       <div class="stat-card">
         <div class="stat-icon">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
           </svg>
         </div>
         <div class="stat-content">
@@ -105,25 +85,12 @@
     <div class="filters-section">
       <div class="search-container">
         <div class="search-box">
-          <svg
-            class="search-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo mã hóa đơn, tên khách hàng..."
-            class="search-input"
-            v-model="searchQuery"
-          />
+          <input type="text" placeholder="Tìm kiếm theo mã hóa đơn, tên khách hàng..." class="search-input"
+            v-model="searchQuery" />
         </div>
       </div>
 
@@ -145,34 +112,18 @@
 
         <div class="export-actions">
           <button class="btn btn-outline">
-            <svg
-              class="icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              ></path>
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
             </svg>
             Xuất Excel
           </button>
           <button class="btn btn-outline">
-            <svg
-              class="icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-              ></path>
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+              </path>
             </svg>
             In
           </button>
@@ -185,61 +136,28 @@
       <!-- chuyển chế độ xem -->
       <div class="table-header">
         <h2 class="table-title">
-          <svg
-            class="title-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            ></path>
+          <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+            </path>
           </svg>
           Danh sách hóa đơn ({{ hoaDons.length }})
         </h2>
         <div class="view-controls">
           <div class="view-toggle-buttons">
-            <button
-              @click="viewMode = 'table'"
-              class="view-toggle-btn"
-              :class="{ active: viewMode === 'table' }"
-              title="Xem dạng bảng"
-            >
-              <svg
-                class="view-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                ></path>
+            <button @click="viewMode = 'table'" class="view-toggle-btn" :class="{ active: viewMode === 'table' }"
+              title="Xem dạng bảng">
+              <svg class="view-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
               </svg>
             </button>
-            <button
-              @click="viewMode = 'grid'"
-              class="view-toggle-btn"
-              :class="{ active: viewMode === 'grid' }"
-              title="Xem dạng lưới"
-            >
-              <svg
-                class="view-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                ></path>
+            <button @click="viewMode = 'grid'" class="view-toggle-btn" :class="{ active: viewMode === 'grid' }"
+              title="Xem dạng lưới">
+              <svg class="view-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                </path>
               </svg>
             </button>
           </div>
@@ -266,11 +184,7 @@
             </tr>
           </thead>
           <tbody class="table-body">
-            <tr
-              v-for="(hoaDon, index) in hoaDons"
-              :key="hoaDon.id"
-              class="table-row"
-            >
+            <tr v-for="(hoaDon, index) in hoaDons" :key="hoaDon.id" class="table-row">
               <td class="table-td checkbox-column">
                 <input type="checkbox" class="row-checkbox" />
               </td>
@@ -287,11 +201,11 @@
                   <div class="customer-avatar">
                     {{ getInitials(hoaDon.tenNguoiMua) }}
                   </div>
-                  <div class="customer-name">{{ hoaDon.tenNguoiMua }}</div>
+                  <div class="customer-name">{{ hoaDon.tenNguoiMua ?? 'Khách vãng lai' }} </div>
                 </div>
               </td>
               <td class="table-td">
-                <div class="date">{{ hoaDon.sdtNguoiMua }}</div>
+                <div class="date">{{ hoaDon.sdtNguoiMua ?? 'N/A'}}</div>
               </td>
               <td class="table-td">
                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
@@ -300,86 +214,42 @@
                 <div class="amount">{{ formatCurrency(hoaDon.tongTien) }}</div>
               </td>
               <td class="table-td">
-                <span
-                  class="type-badge"
-                  :class="getTypeBadgeClass(hoaDon.loaiHoaDon)"
-                >
+                <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
                   {{ hoaDon.loaiHoaDon }}
                 </span>
               </td>
               <td class="table-td">
-                <span
-                  class="status-badge"
-                  :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)"
-                >
+                <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
                   {{ hoaDon.trangThaiThanhToan }}
                 </span>
               </td>
               <td class="table-td">
                 <div class="action-buttons">
-                  <button
-                    class="action-btn view-btn"
-                    title="Xem chi tiết"
-                    @click="viewInvoiceDetails(hoaDon)"
-                  >
-                    <svg
-                      class="icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      ></path>
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      ></path>
+                  <button class="action-btn view-btn" title="Xem chi tiết" @click="viewInvoiceDetails(hoaDon)">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                      </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa">
-                    <svg
-                      class="icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      ></path>
+                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="goToEdit(hoaDon.idHoaDon)">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                      </path>
                     </svg>
                   </button>
-                  <button 
-                    v-if="isAdmin"
-                    class="action-btn delete-btn"
-                    title="Xóa"
-                    :disabled="
+                  <button v-if="isAdmin" class="action-btn delete-btn" title="Xóa" :disabled="
                       hoaDon.trangThaiThanhToan === 'Hoàn tất' ||
                       hoaDon.trangThaiThanhToan === 'Đã thanh toán' ||
                       hoaDon.trangThaiThanhToan === 'Đã hoàn tiền'
-                    "
-                    @click="deleteHoaDon(hoaDon)"
-                  >
-                    <svg
-                      class="icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      ></path>
+                    " @click="deleteHoaDon(hoaDon)">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                      </path>
                     </svg>
                   </button>
                 </div>
@@ -398,10 +268,7 @@
           <div class="card-content">
             <div class="card-header-row">
               <div class="invoice-code">{{ hoaDon.maHoaDon }}</div>
-              <span
-                class="status-badge"
-                :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)"
-              >
+              <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
                 {{ hoaDon.trangThaiThanhToan }}
               </span>
             </div>
@@ -422,24 +289,18 @@
                   <span class="detail-label">Tổng tiền:</span>
                   <span class="detail-value amount">{{
                     formatCurrency(hoaDon.tongTien)
-                  }}</span>
+                    }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Loại:</span>
-                  <span
-                    class="type-badge"
-                    :class="getTypeBadgeClass(hoaDon.loaiHoaDon)"
-                  >
+                  <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
                     {{ hoaDon.loaiHoaDon }}
                   </span>
                 </div>
               </div>
             </div>
             <div class="card-actions">
-              <button
-                class="card-btn primary"
-                @click="viewInvoiceDetails(hoaDon)"
-              >
+              <button class="card-btn primary" @click="viewInvoiceDetails(hoaDon)">
                 Xem chi tiết
               </button>
               <button class="card-btn secondary">Chỉnh sửa</button>
@@ -455,58 +316,25 @@
           {{ pageNo * pageSize + 5 }} trong tổng số {{ totalElement }} hóa đơn
         </div>
         <div class="pagination-controls">
-          <button
-            class="pagination-btn"
-            :disabled="pageNo === 0"
-            @click="changePage(pageNo - 1)"
-          >
-            <svg
-              class="icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
+          <button class="pagination-btn" :disabled="pageNo === 0" @click="changePage(pageNo - 1)">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
             Trước
           </button>
 
           <div class="page-numbers">
-            <button
-              v-for="pageIndex in visiblePages"
-              :key="pageIndex"
-              class="page-btn"
-              :class="{ active: pageIndex === pageNo }"
-              @click="pageIndex !== -1 && changePage(pageIndex)"
-              :disabled="pageIndex === -1"
-            >
+            <button v-for="pageIndex in visiblePages" :key="pageIndex" class="page-btn"
+              :class="{ active: pageIndex === pageNo }" @click="pageIndex !== -1 && changePage(pageIndex)"
+              :disabled="pageIndex === -1">
               {{ pageIndex === -1 ? "..." : pageIndex + 1 }}
             </button>
           </div>
 
-          <button
-            class="pagination-btn"
-            :disabled="pageNo === totalPage - 1"
-            @click="changePage(pageNo + 1)"
-          >
+          <button class="pagination-btn" :disabled="pageNo === totalPage - 1" @click="changePage(pageNo + 1)">
             Sau
-            <svg
-              class="icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              ></path>
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </button>
         </div>
@@ -518,40 +346,20 @@
           <!-- Header -->
           <div class="modal-header">
             <div class="header-title">
-              <svg
-                class="header-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                ></path>
+              <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
               </svg>
               <h3>
                 <span v-if="isLoading">Đang tải...</span>
-                <span v-else-if="selectedInvoice"
-                  >Chi tiết hóa đơn {{ selectedInvoice.maHoaDon }}</span
-                >
+                <span v-else-if="selectedInvoice">Chi tiết hóa đơn {{ selectedInvoice.maHoaDon }}</span>
                 <span v-else>Chi tiết hóa đơn</span>
               </h3>
             </div>
             <button class="modal-close" @click="closeModal">
-              <svg
-                class="close-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
+              <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
@@ -566,34 +374,17 @@
 
             <!-- Error State -->
             <div v-else-if="error" class="error-container">
-              <svg
-                class="error-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
+              <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <h4>Có lỗi xảy ra</h4>
               <p>{{ error }}</p>
               <button class="retry-btn" @click="retryFetch">
-                <svg
-                  class="retry-icon"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  ></path>
+                <svg class="retry-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                  </path>
                 </svg>
                 Thử lại
               </button>
@@ -604,18 +395,9 @@
               <!-- Invoice Information Card -->
               <div class="info-card">
                 <div class="card-header">
-                  <svg
-                    class="card-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                    ></path>
+                  <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                   </svg>
                   <h4>Thông tin hóa đơn</h4>
                 </div>
@@ -627,51 +409,45 @@
                         <span class="info-label">Mã hóa đơn:</span>
                         <span class="info-value font-semibold">{{
                           selectedInvoice.maHoaDon
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Mã tài khoản mua</span>
                         <span class="info-value">{{
                           selectedInvoice.maKhachHang || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Tên người mua</span>
                         <span class="info-value">{{
                           selectedInvoice.tenNguoiMua || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">SĐT người mua:</span>
                         <span class="info-value">{{
                           selectedInvoice.sdtNguoiMua || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Ngày tạo:</span>
                         <span class="info-value">{{
                           formatDate(selectedInvoice.ngayTao)
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Loại hóa đơn:</span>
-                        <span
-                          class="badge"
-                          :class="getTypeBadgeClass(selectedInvoice.loaiHoaDon)"
-                        >
+                        <span class="badge" :class="getTypeBadgeClass(selectedInvoice.loaiHoaDon)">
                           {{ selectedInvoice.loaiHoaDon || "N/A" }}
                         </span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Trạng thái:</span>
-                        <span
-                          class="badge"
-                          :class="
+                        <span class="badge" :class="
                             getStatusBadgeClass(
                               selectedInvoice.trangThaiThanhToan
                             )
-                          "
-                        >
+                          ">
                           {{ selectedInvoice.trangThaiThanhToan || "N/A" }}
                         </span>
                       </div>
@@ -680,14 +456,14 @@
                         <span class="info-value">{{
                           formatDate(selectedInvoice.ngayThanhToan) ||
                           "Chưa thanh toán"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Mã giảm giá:</span>
                         <span class="info-value">{{
                           selectedInvoice.maPhieuGiamGia ||
                           "Không áp dụng mã giảm gía"
-                        }}</span>
+                          }}</span>
                       </div>
                     </div>
 
@@ -697,44 +473,39 @@
                         <span class="info-label">Tên người nhận:</span>
                         <span class="info-value">{{
                           selectedInvoice.tenNguoiNhan || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label"> SDT Người nhận:</span>
                         <span class="info-value">{{
                           selectedInvoice.sdtNguoiNhan || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
-                      <div
-                        v-if="selectedInvoice.maKhachHang != null"
-                        class="info-row"
-                      >
-                        <span class="info-label"
-                          ><mark
-                            >⚠️Lưu ý: <br />
+                      <div v-if="selectedInvoice.maKhachHang != null" class="info-row">
+                        <span class="info-label"><mark>⚠️Lưu ý: <br />
                             Tên người mua là tên tại thời điểm giao dịch <br />
                             Tên tài khoản mua là tên hiện tại của tài
-                            khoản</mark
-                          ></span
-                        >
+                            khoản</mark></span>
                       </div>
                       <div class="info-row">
                         <span class="info-label"> Địa chỉ giao hàng:</span>
                         <span class="info-value">{{
                           selectedInvoice.diaChiGiaoHang || "N/A"
-                        }}</span>
+                          }}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label"> Ngày đặt hàng:</span>
+                        <span class="info-value">{{
+                          selectedInvoice.ngayDatHang || "N/A"
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label"> Trạng thái đơn hàng:</span>
-                        <span
-                          class="badge"
-                          :class="
+                        <span class="badge" :class="
                             getStatusBadgeClass(
                               selectedInvoice.trangThaiDonHang
                             )
-                          "
-                          >{{ selectedInvoice.trangThaiDonHang || "N/A" }}</span
-                        >
+                          ">{{ selectedInvoice.trangThaiDonHang || "N/A" }}</span>
                       </div>
                       <!-- <div class="info-row">
                                                 <span class="info-label">Địa chỉ:</span>
@@ -750,27 +521,25 @@
                         <span class="info-label">Tổng tiền:</span>
                         <span class="info-value">{{
                           formatCurrency(selectedInvoice.tongTien)
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Phí ship:</span>
                         <span class="info-value">{{
                           formatCurrency(selectedInvoice.phiShip)
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">Số tiền giảm:</span>
-                        <span class="info-value discount"
-                          >-{{
-                            formatCurrency(selectedInvoice.soTienGiam)
-                          }}</span
-                        >
+                        <span class="info-value discount">-{{
+                          formatCurrency(selectedInvoice.soTienGiam)
+                          }}</span>
                       </div>
                       <div class="info-row total-row">
                         <span class="info-label total-label">Thành tiền:</span>
                         <span class="info-value total-value">{{
                           formatCurrency(selectedInvoice.thanhTien)
-                        }}</span>
+                          }}</span>
                       </div>
                     </div>
                   </div>
@@ -780,29 +549,17 @@
               <!-- Product Details Card -->
               <div class="info-card">
                 <div class="card-header">
-                  <svg
-                    class="card-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                    ></path>
+                  <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                   </svg>
                   <h4>Chi tiết sản phẩm</h4>
                 </div>
                 <div class="card-content">
-                  <div
-                    v-if="
+                  <div v-if="
                       selectedInvoice.chiTietHoaDonAdminResponseList &&
                       selectedInvoice.chiTietHoaDonAdminResponseList.length
-                    "
-                    class="table-container"
-                  >
+                    " class="table-container">
                     <table class="product-table">
                       <thead>
                         <tr>
@@ -812,11 +569,8 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr
-                          v-for="item in selectedInvoice.chiTietHoaDonAdminResponseList"
-                          :key="item.idChiTietHoaDon"
-                          class="product-row"
-                        >
+                        <tr v-for="item in selectedInvoice.chiTietHoaDonAdminResponseList" :key="item.idChiTietHoaDon"
+                          class="product-row">
                           <td class="product-name">
                             {{ item.tenSanPham || "N/A" }}
                           </td>
@@ -831,18 +585,10 @@
                     </table>
                   </div>
                   <div v-else class="no-products">
-                    <svg
-                      class="no-products-icon"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                      ></path>
+                    <svg class="no-products-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                      </path>
                     </svg>
                     <p>Không có chi tiết sản phẩm.</p>
                   </div>
@@ -850,59 +596,28 @@
               </div>
               <!-- Action Buttons Section -->
               <div class="invoice-card-actions">
-                <button
-                  class="invoice-action-button invoice-process-button"
-                  @click="devliveryProcessing(selectedInvoice)"
-                >
-                  <svg
-                    class="invoice-btn-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                    ></path>
+                <button class="invoice-action-button invoice-process-button"
+                  @click="devliveryProcessing(selectedInvoice)">
+                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                    </path>
                   </svg>
                   <span>Xử lý đơn hàng</span>
                 </button>
 
-                <button
-                  class="invoice-action-button invoice-history-button"
-                  @click="loadLichSuHoaDon(selectedInvoice)"
-                >
-                  <svg
-                    class="invoice-btn-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
+                <button class="invoice-action-button invoice-history-button" @click="loadLichSuHoaDon(selectedInvoice)">
+                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <span>Xem lịch sử hóa đơn</span>
                 </button>
 
                 <button class="invoice-action-button invoice-payment-button">
-                  <svg
-                    class="invoice-btn-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                    ></path>
+                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                   </svg>
                   <span>Xem chi tiết thanh toán</span>
                 </button>
@@ -910,18 +625,9 @@
               <!-- table xem lich su -->
               <div v-if="showLichSuHoaDon">
                 <div class="invoice-history-header">
-                  <svg
-                    class="invoice-history-icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
+                  <svg class="invoice-history-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <h3>Lịch sử hóa đơn</h3>
                 </div>
@@ -942,9 +648,7 @@
                         <td>15/06/2024</td>
                         <td>250.000 ₫</td>
                         <td>
-                          <span class="invoice-status invoice-status-paid"
-                            >Đã thanh toán</span
-                          >
+                          <span class="invoice-status invoice-status-paid">Đã thanh toán</span>
                         </td>
                       </tr>
                       <tr>
@@ -952,9 +656,7 @@
                         <td>16/06/2024</td>
                         <td>150.000 ₫</td>
                         <td>
-                          <span class="invoice-status invoice-status-pending"
-                            >Đang xử lý</span
-                          >
+                          <span class="invoice-status invoice-status-pending">Đang xử lý</span>
                         </td>
                       </tr>
                       <tr>
@@ -962,9 +664,7 @@
                         <td>17/06/2024</td>
                         <td>350.000 ₫</td>
                         <td>
-                          <span class="invoice-status invoice-status-failed"
-                            >Thất bại</span
-                          >
+                          <span class="invoice-status invoice-status-failed">Thất bại</span>
                         </td>
                       </tr>
                       <!-- Thêm các hàng khác nếu cần -->
@@ -978,18 +678,8 @@
           <!-- Footer -->
           <div class="modal-footer">
             <button class="modal-btn" @click="closeModal">
-              <svg
-                class="btn-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
+              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
               Đóng
             </button>
@@ -1017,6 +707,9 @@ import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import store from "@/Service/LoginService/Store";
+import { fa } from "element-plus/es/locales.mjs";
+import ConfirmModal from "@/views/Popup/ConfirmModal.vue";
+import { useToast } from "vue-toastification";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -1030,6 +723,7 @@ const typeFilter = ref("");
 const dateFilter = ref("");
 const isLoading = ref(false);
 const error = ref(null);
+const showModalCreateInvoice = ref(null);
 // Thêm các ref để quản lý modal
 const showModal = ref(false);
 const selectedInvoice = ref(null);
@@ -1038,6 +732,8 @@ const showLichSuHoaDon = ref(false);
 // Thong ke
 const doanhThuThang = ref(0);
 const choXuLy = ref(0);
+// Toast
+const toast = useToast()
 
 // Hàm mở modal và lấy chi tiết hóa đơn
 const viewInvoiceDetails = async (invoice) => {
@@ -1132,8 +828,12 @@ const loadData = async () => {
 };
 
 //create pending hoaDon 
-const handleCreateInvoice = async () => {
-  isLoading.value = true
+const handleCreateInvoice =  () => {
+  showModalCreateInvoice.value = true
+}
+
+const onConfirmCreateInvoice = async () => {
+  showModalCreateInvoice.value = false
   try {
     const response = await createPendingInvoice()
     const data = response.data
@@ -1141,7 +841,7 @@ const handleCreateInvoice = async () => {
     if (data.hoaDonId) {
       localStorage.setItem("selectedInvoiceId", data.hoaDonId)
 
-      ElMessage.success('Tạo hóa đơn thành công!')
+      toast.success('Tạo hóa đơn thành công!')
       router.push(`/admin/ban-hang`)
     }
   } catch (error) {
@@ -1151,6 +851,10 @@ const handleCreateInvoice = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const onCancelCreate = () => {
+  showModalCreateInvoice.value = false
 }
 
 const deleteHoaDon = async (hoaDon) => {
@@ -1359,6 +1063,10 @@ const isStaff = computed(() => {
       .includes("ROLE_STAFF")
   );
 });
+
+const goToEdit = (id) => {
+  router.push({ name: 'CapNhatHoaDon', params: { id } })
+}
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.hibernate.annotations.Nationalized;
-
 import java.time.LocalDate;
 
 @Entity
@@ -14,6 +13,7 @@ import java.time.LocalDate;
 public class ModelSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "id_model_san_pham")
     private Integer idModelSanPham;
 

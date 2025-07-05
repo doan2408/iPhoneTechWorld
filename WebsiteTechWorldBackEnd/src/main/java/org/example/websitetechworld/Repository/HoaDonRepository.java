@@ -36,7 +36,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     @Query("UPDATE HoaDon hd SET hd.tenNguoiNhan = :tenNguoiNhan, hd.sdtNguoiNhan = :sdtNguoiNhan, " +
             "hd.diaChiGiaoHang = :diaChiGiaoHang, hd.phiShip = :phiShip, hd.isShipping = :isShipping, " +
             "hd.maVanDon = :maVanDon, hd.thanhTien = :thanhTien, hd.shippingMethod = :shippingMethod, " +
-            "hd.trangThaiDonHang = :trangThaiDonHang, hd.ngayTaoDonHang = :ngayTaoDonHang " +
+            "hd.trangThaiDonHang = :trangThaiDonHang, hd.ngayDatHang = :ngayDatHang " +
             "WHERE hd.id = :id")
     void updateInvoice(@Param("id") Integer id,
                        @Param("tenNguoiNhan") String tenNguoiNhan,
@@ -48,5 +48,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("thanhTien") BigDecimal thanhTien,
                        @Param("shippingMethod") ShippingMethod shippingMethod,
                        @Param("trangThaiDonHang") TrangThaiGiaoHang trangThaiDonHang,
-                       @Param("ngayTaoDonHang") LocalDate ngayTaoDonHang);
+                       @Param("ngayDatHang") LocalDate ngayDatHang);
 }

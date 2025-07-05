@@ -455,7 +455,6 @@
 
 
                     <button @click="processPayment"
-                        :disabled="!selectedPaymentMethod || !agreedToTerms || currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length === 0"
                         class="payment-btn">
                         THANH TOÁN
                     </button>
@@ -572,6 +571,8 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
+import { useToast } from "vue-toastification";
+
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -614,6 +615,10 @@ const discountList = ref([])
 const selectedDiscount = ref(null)
 const search = ref('')
 
+//toast message
+const toast = useToast()
+
+//payment
 const paymentMethods = ref([]);
 const selectedPaymentMethod = ref(null);
 const agreedToTerms = ref(false);
@@ -940,7 +945,7 @@ const addNewInvoice = async () => {
         invoices.value.push(newInvoice)
         currentInvoiceId.value = newInvoice.id
         localStorage.setItem('selectedInvoiceId', newInvoice.id)
-        ElMessage.success('Tạo hóa đơn mới thành công!')
+        toast.success('Tạo hóa đơn mới thành công!')
 
     } catch (error) {
         console.error('Error creating invoice:', error)
@@ -958,7 +963,7 @@ const addNewInvoice = async () => {
             }
         }
         else {
-            ElMessage.error('Đã xảy ra lỗi khi tạo hóa đơn mới!')
+            toast.error('Đã xảy ra lỗi khi tạo hóa đơn mới!')
         }
     } finally {
         isLoading.value = false
@@ -1150,14 +1155,11 @@ const showWarningOnce = (message) => {
     // k cho spam message 
     if (warningMessageInstance) return;
 
-    warningMessageInstance = ElMessage({
-        message,
-        type: 'warning',
-        duration: 3000,
-        showClose: true,
-        grouping: true,
+    warningMessageInstance = toast.error(message, {
+        timeout: 3000,
+        closeButton: true,
         onClose: () => {
-            warningMessageInstance = null; // Reset lại cho tbao lần sau
+            warningMessageInstance = null;
         },
     });
 };
@@ -1989,11 +1991,6 @@ const getIconUrl = (code) => {
 
 // Hàm xử lý thanh toán
 const processPayment = async () => {
-    // Đảm bảo currentInvoiceDetail đã có dữ liệu
-    // if (!currentInvoiceDetail.value || !currentInvoiceDetail.value.id) {
-    //     alert('Thông tin hóa đơn chưa sẵn sàng. Vui lòng đợi hoặc làm mới trang.');
-    //     return;
-    // }
     const storedId = localStorage.getItem("selectedInvoiceId");
     if (!selectedPaymentMethod.value) {
         alert('Vui lòng chọn phương thức thanh toán.');
