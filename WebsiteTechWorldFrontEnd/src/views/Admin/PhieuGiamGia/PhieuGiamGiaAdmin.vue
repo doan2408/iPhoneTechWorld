@@ -150,8 +150,9 @@
           <el-input v-model="formData.dieuKienApDung" />
         </el-form-item>
         <el-form-item label="Trạng thái">
-          <el-switch v-model="formData.trangThaiPhatHanh" active-text="Phát hành" inactive-text="" active-value="ISSUED"
-            inactive-value="NOT_ISSUED" />
+          <el-switch v-model="formData.trangThaiPhatHanh" :active-value="switchConfig.activeValue"
+            :inactive-value="switchConfig.inactiveValue" :active-text="switchConfig.activeText"
+            :inactive-text="switchConfig.inactiveText" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -163,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive } from "vue";
+import { ref, onMounted, watch, reactive, computed } from "vue";
 import { getAll, detail, add, update, deletePhieuGiamGia, getAllSanPham } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Plus } from '@element-plus/icons-vue'
@@ -199,7 +200,7 @@ const formData = reactive({
   dieuKienApDung: "",
   congKhai: true,
   trangThaiPhieuGiamGia: "ACTIVE",
-  trangThaiPhatHanh: false
+  trangThaiPhatHanh: "NOT_ISSUED"
 });
 
 const errors = reactive({
@@ -230,7 +231,7 @@ const resetForm = () => {
   formData.soLuong = 0;
   formData.dieuKienApDung = "";
   formData.trangThaiPhieuGiamGia = "ACTIVE";
-  formData.trangThaiPhatHanh = false;
+  formData.trangThaiPhatHanh = "NOT_ISSUED";
   formData.congKhai = true;
 };
 
@@ -251,15 +252,14 @@ const validateForm = () => {
   resetErrors();
   let isValid = true;
 
-  if (!formData.maGiamGia.trim()) {
-    errors.maGiamGia = "Tên khuyến mại là bắt buộc";
-    isValid = false;
-  } else if (formData.maGiamGia.length < 3) {
-    errors.maGiamGia = "Tên khuyến mại phải có ít nhất 3 ký tự";
-    isValid = false;
-  } else if (formData.maGiamGia.length > 50) {
-    errors.maGiamGia = "Tên khuyến mại không được vượt quá 50 ký tự";
-    isValid = false;
+  if (formData.maGiamGia && formData.maGiamGia.trim().length > 0) {
+    if (formData.maGiamGia.length < 3) {
+      errors.maGiamGia = "Mã giảm giá phải có ít nhất 3 ký tự";
+      isValid = false;
+    } else if (formData.maGiamGia.length > 10) {
+      errors.maGiamGia = "Mã giảm giá không được vượt quá 10 ký tự";
+      isValid = false;
+    }
   }
 
   if (!formData.tenKhuyenMai.trim()) {
@@ -301,6 +301,9 @@ const validateForm = () => {
   if (!formData.ngayBatDau) {
     errors.ngayBatDau = "Ngày bắt đầu là bắt buộc";
     isValid = false;
+  } else if (!formData.id && new Date(formData.ngayBatDau) <= new Date()) {
+    errors.ngayBatDau = "Ngày bắt đầu phải sau ngày hiện tại";
+    isValid = false;
   }
 
   if (!formData.ngayKetThuc) {
@@ -310,7 +313,6 @@ const validateForm = () => {
     const startDate = new Date(formData.ngayBatDau);
     const endDate = new Date(formData.ngayKetThuc);
     if (endDate < startDate) {
-      console.log(endDate, startDate)
       errors.ngayKetThuc = "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu";
       isValid = false;
     }
@@ -380,11 +382,11 @@ const savePhieuGiamGia = async () => {
 
     const payload = {
       ...formData,
-      hangToiThieu: formData.congKhai ? null : formData.hangToiThieu,
       giaTriKhuyenMai: formData.giaTriKhuyenMai.toString(),
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
       giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),
-      soDiemCanDeDoi: formData.soDiemCanDeDoi.toString()
+      soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
+      hangToiThieu: formData.congKhai ? null : formData.hangToiThieu,
     };
     console.log(payload)
     if (formData.id) {
@@ -475,10 +477,10 @@ const viewUpdate = async (id) => {
     const response = await detail(id);
     Object.assign(formData, {
       ...response,
-      sanPhamIds: response.sanPhamIds || [],
-      khachHangMoi: response.khachHangMoi || false,
-      khachHangCu: response.khachHangCu || false,
+
+
     });
+    console.log('Hehe', formData)
     phieuGiamGiaDialogVisible.value = true;
   } catch (error) {
     console.error(error.message || "Lỗi khi tải chi tiết phiếu giảm giá");
@@ -486,6 +488,40 @@ const viewUpdate = async (id) => {
   }
   resetErrors()
 };
+
+const getTrangThaiSwitchConfig = (currentStatus) => {
+  let activeValue = "ISSUED";
+  let inactiveValue = "";
+  let activeText = "Phát hành";
+  let inactiveText = "";
+
+  switch (currentStatus) {
+    case "ISSUED":
+      inactiveValue = "STOP_ISSUED";
+      break;
+    case "NOT_ISSUED":
+      inactiveValue = "NOT_ISSUED";
+      break;
+    case "STOP_ISSUED":
+      inactiveValue = "STOP_ISSUED";
+      break;
+    default:
+      inactiveValue = "NOT_ISSUED";
+      break;
+  }
+
+  return {
+    activeValue,
+    inactiveValue,
+    activeText,
+    inactiveText,
+  };
+};
+
+const switchConfig = computed(() => {
+  return getTrangThaiSwitchConfig(formData.trangThaiPhatHanh);
+});
+
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
