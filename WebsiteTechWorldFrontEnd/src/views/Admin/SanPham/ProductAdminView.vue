@@ -1,458 +1,827 @@
+```vue
 <template>
-  <div class="container mt-4">
-    <h2>Chi tiết sản phẩm</h2>
-    <el-form :model="sanPhamModel" label-width="150px">
-      <!-- Thông tin sản phẩm chính -->
-      <h3>Thông tin chung</h3>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Mã sản phẩm">
-            <el-input v-model="sanPhamModel.maSanPham" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Tên sản phẩm">
-            <el-input v-model="sanPhamModel.tenSanPham" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Thương hiệu">
-            <el-input v-model="sanPhamModel.thuongHieu" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Trạng thái">
-            <el-input :value="getTrangThaiLabel(sanPhamModel.trangThaiSanPham)" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Nhà cung cấp">
-            <el-input v-model="sanPhamModel.tenNhaCungCap" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Địa chỉ NCC">
-            <el-input v-model="sanPhamModel.diaChi" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="SĐT NCC">
-            <el-input v-model="sanPhamModel.sdt" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Email NCC">
-            <el-input v-model="sanPhamModel.email" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Tên model">
-            <el-input :value="sanPhamModel.modelSanPham?.tenModel || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Mã model">
-            <el-input :value="sanPhamModel.modelSanPham?.maModelSanPham || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="Năm ra mắt">
-            <el-input :value="sanPhamModel.modelSanPham?.namRaMat || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Trạng thái model">
-            <!-- <el-input :value="sanPhamModel.modelSanPham?.trangThaiSanPhamModel || ''" readonly></el-input> -->
-            <el-input :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)"
-              readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <!-- <el-col :span="12">
-          <el-form-item label="Mô tả">
-            <el-input :value="sanPhamModel.modelSanPham?.moTa || ''" readonly></el-input>
-          </el-form-item>
-        </el-col> -->
-      </el-row>
-
-      <!-- Thông tin RAM -->
-      <h3>Thông tin RAM</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Dung lượng RAM">
-            <el-input :value="sanPhamModel.modelSanPham?.dungLuongRam || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Loại RAM">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiRam || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Tốc độ đọc/ghi">
-            <el-input :value="sanPhamModel.modelSanPham?.tocDoDocGhiRam || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Nhà sản xuất RAM">
-            <el-input :value="sanPhamModel.modelSanPham?.nhaSanXuatRam || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Năm ra mắt RAM">
-            <el-input :value="sanPhamModel.modelSanPham?.namRaMatRam || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin màn hình -->
-      <h3>Thông tin màn hình</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Tên màn hình">
-            <el-input :value="sanPhamModel.modelSanPham?.tenManHinh || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Kích thước">
-            <el-input :value="sanPhamModel.modelSanPham?.kichThuoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Loại màn hình">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiManHinh || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Độ phân giải">
-            <el-input :value="sanPhamModel.modelSanPham?.doPhanGiaiManHinh || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Tần số quét">
-            <el-input :value="sanPhamModel.modelSanPham?.tanSoQuet || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Độ sáng">
-            <el-input :value="sanPhamModel.modelSanPham?.doSang || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Chất liệu kính">
-            <el-input :value="sanPhamModel.modelSanPham?.chatLieuKinh || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin hệ điều hành -->
-      <h3>Thông tin hệ điều hành</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Phiên bản HĐH">
-            <el-input :value="sanPhamModel.modelSanPham?.phienBanHeDieuHanh || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Nhà phát triển">
-            <el-input :value="sanPhamModel.modelSanPham?.nhaPhatTrien || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Giao diện người dùng">
-            <el-input :value="sanPhamModel.modelSanPham?.giaoDienNguoiDung || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin pin -->
-      <h3>Thông tin pin</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Phiên bản pin">
-            <el-input :value="sanPhamModel.modelSanPham?.phienBanPin || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Công suất sạc">
-            <el-input :value="sanPhamModel.modelSanPham?.congSuatSac || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Thời gian sử dụng">
-            <el-input :value="sanPhamModel.modelSanPham?.thoiGianSuDung || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Số lần sạc tối đa">
-            <el-input :value="sanPhamModel.modelSanPham?.soLanSacToiDa || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin CPU -->
-      <h3>Thông tin CPU</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Hãng sản xuất">
-            <el-input :value="sanPhamModel.modelSanPham?.hangSanXuat || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Số nhân">
-            <el-input :value="sanPhamModel.modelSanPham?.soNhan || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Chip xử lý">
-            <el-input :value="sanPhamModel.modelSanPham?.chipXuLy || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Xung nhịp">
-            <el-input :value="sanPhamModel.modelSanPham?.xungNhip || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Công nghệ sản xuất">
-            <el-input :value="sanPhamModel.modelSanPham?.congNgheSanXuat || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Bộ nhớ đệm">
-            <el-input :value="sanPhamModel.modelSanPham?.boNhoDem || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Tiêu thụ điện năng">
-            <el-input :value="sanPhamModel.modelSanPham?.tieuThuDienNang || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Năm ra mắt CPU">
-            <el-input :value="sanPhamModel.modelSanPham?.namRaMatCpu || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin camera trước -->
-      <h3>Thông tin camera trước</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Loại camera">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiCameraTruoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Độ phân giải">
-            <el-input :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraTruoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Khẩu độ">
-            <el-input :value="sanPhamModel.modelSanPham?.khauDoCameraTruoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Loại zoom">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiZoomCameraTruoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Chế độ chụp">
-            <el-input :value="sanPhamModel.modelSanPham?.cheDoChupCameraTruoc || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin camera sau -->
-      <h3>Thông tin camera sau</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Loại camera">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiCameraSau || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Độ phân giải">
-            <el-input :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraSau || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Khẩu độ">
-            <el-input :value="sanPhamModel.modelSanPham?.khauDoCameraSau || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Loại zoom">
-            <el-input :value="sanPhamModel.modelSanPham?.loaiZoomCameraSau || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Chế độ chụp">
-            <el-input :value="sanPhamModel.modelSanPham?.cheDoChupCameraSau || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Thông tin xuất xứ và loại -->
-      <h3>Thông tin xuất xứ và loại</h3>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="Mã xuất xứ">
-            <el-input :value="sanPhamModel.modelSanPham?.maXuatXu || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Quốc gia">
-            <el-input :value="sanPhamModel.modelSanPham?.tenQuocGia || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="Loại sản phẩm">
-            <el-input :value="sanPhamModel.modelSanPham?.tenLoai || ''" readonly></el-input>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- Danh sách sản phẩm chi tiết -->
-      <h3>Danh sách biến thể sản phẩm</h3>
-      <el-table :data="sanPhamModel.sanPhamChiTiets" style="width: 100%" border @row-click="selectChiTiet">
-        <el-table-column type="index" label="STT" width="80" :index="indexMethod" />
-        <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
-        <el-table-column label="Màu sắc" prop="tenMau" />
-        <el-table-column label="ROM" prop="dungLuongRom" />
-        <el-table-column prop="soLuongSPCT" label="Số lượng" width="120" />
-        <el-table-column label="Giá bán" width="120">
-          <template #default="{ row }">
-            {{ formatPrice(row.giaBan) }}
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!-- Chi tiết biến thể sản phẩm được chọn -->
-      <div v-if="selectedChiTiet !== null" class="mt-4">
-        <h4>Chi tiết biến thể {{ selectedChiTiet + 1 }}</h4>
-
-        <!-- Thông tin cơ bản của biến thể -->
-        <h5>Thông tin cơ bản</h5>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="Mã SP chi tiết">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''"
-                readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="Màu sắc">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="Mã màu">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" readonly></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <!-- Thông tin ROM -->
-        <h5>Thông tin ROM</h5>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="Dung lượng ROM">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" readonly></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <!-- IMEI và số lượng -->
-        <h5>Thông tin IMEI</h5>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="Giá bán">
-              <el-input :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" readonly></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="Số lượng">
-              <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" readonly></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="IMEI">
-          <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''"
-            readonly></el-input>
-          <div style="margin-top: 8px;">
-            Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
-          </div>
-        </el-form-item>
-
-        <!-- Hình ảnh -->
-        <h5>Hình ảnh sản phẩm</h5>
-        <el-form-item label="Hình ảnh">
-          <div class="image-preview">
-            <el-image v-for="img in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []" :key="img.url"
-              :src="img.url"
-              :preview-src-list="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.map(h => h.url) || []"
-              style="width: 100px; height: 100px; margin-right: 8px; border-radius: 4px;" />
-            <span v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length">
-              Không có hình ảnh nào.
-            </span>
-          </div>
-        </el-form-item>
+  <div class="product-details-container">
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <el-button 
+          type="primary" 
+          :icon="ArrowLeft" 
+          circle 
+          class="back-btn"
+          @click="handleBackClick"
+        />
+        <div class="header-text">
+          <h1 class="page-title">Chi tiết sản phẩm</h1>
+          <p class="page-subtitle">Xem thông tin chi tiết và thông số kỹ thuật</p>
+        </div>
       </div>
-      <div v-else class="mt-4">
-        <el-alert title="Vui lòng chọn một biến thể để xem chi tiết" type="info" show-icon />
-      </div>
+      <el-tag 
+        :type="getStatusType(sanPhamModel.trangThaiSanPham)" 
+        size="large"
+        class="status-tag"
+      >
+        {{ getTrangThaiLabel(sanPhamModel.trangThaiSanPham) }}
+      </el-tag>
+    </div>
 
-      <!-- Nút quay lại -->
-      <el-row :gutter="20" class="mt-4">
-        <el-col :span="24" class="text-center">
-          <el-button type="default" @click="$router.push('/admin/products')">Quay lại</el-button>
-        </el-col>
-      </el-row>
-    </el-form>
+    <el-row :gutter="24" class="main-content">
+      <!-- Left Column - Main Information -->
+      <el-col :xs="24" :lg="16">
+        <div class="info-sections">
+          <!-- General Information -->
+          <el-card class="info-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <span class="header-title">Thông tin chung</span>
+              </div>
+            </template>
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Mã sản phẩm</label>
+                  <el-input 
+                    v-model="sanPhamModel.maSanPham" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Tên sản phẩm</label>
+                  <el-input 
+                    v-model="sanPhamModel.tenSanPham" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Thương hiệu</label>
+                  <el-input 
+                    v-model="sanPhamModel.thuongHieu" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Trạng thái</label>
+                  <el-input 
+                    :value="getTrangThaiLabel(sanPhamModel.trangThaiSanPham)" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+            </el-row>
+          </el-card>
 
-    <el-alert v-if="error" :title="error" type="error" show-icon class="mt-3" />
+          <!-- Supplier Information -->
+          <el-card class="info-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <el-icon class="header-icon"><OfficeBuilding /></el-icon>
+                <span class="header-title">Thông tin nhà cung cấp</span>
+              </div>
+            </template>
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Nhà cung cấp</label>
+                  <el-input 
+                    v-model="sanPhamModel.tenNhaCungCap" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Địa chỉ</label>
+                  <el-input 
+                    v-model="sanPhamModel.diaChi" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Số điện thoại</label>
+                  <el-input 
+                    v-model="sanPhamModel.sdt" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Email</label>
+                  <el-input 
+                    v-model="sanPhamModel.email" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+            </el-row>
+          </el-card>
+
+          <!-- Model Information -->
+          <el-card class="info-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <el-icon class="header-icon"><Cpu /></el-icon>
+                <span class="header-title">Thông tin model</span>
+              </div>
+            </template>
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Tên model</label>
+                  <el-input 
+                    :value="sanPhamModel.modelSanPham?.tenModel || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Mã model</label>
+                  <el-input 
+                    :value="sanPhamModel.modelSanPham?.maModelSanPham || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Năm ra mắt</label>
+                  <el-input 
+                    :value="sanPhamModel.modelSanPham?.namRaMat || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <div class="form-field">
+                  <label class="field-label">Trạng thái model</label>
+                  <el-input 
+                    :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </el-col>
+            </el-row>
+          </el-card>
+
+          <!-- Technical Specifications Grid -->
+          <el-row :gutter="24">
+            <!-- RAM Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><MagicStick /></el-icon>
+                    <span class="header-title">Thông tin RAM</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Dung lượng RAM</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.dungLuongRam || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Loại RAM</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiRam || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Tốc độ đọc/ghi</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tocDoDocGhiRam || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Nhà sản xuất RAM</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.nhaSanXuatRam || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Năm ra mắt RAM</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.namRaMatRam || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- Display Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><Monitor /></el-icon>
+                    <span class="header-title">Thông tin màn hình</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Tên màn hình</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tenManHinh || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Kích thước</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.kichThuoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Loại màn hình</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiManHinh || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Độ phân giải</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.doPhanGiaiManHinh || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Tần số quét</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tanSoQuet || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Độ sáng</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.doSang || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Chất liệu kính</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.chatLieuKinh || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- Operating System Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><Platform /></el-icon>
+                    <span class="header-title">Thông tin hệ điều hành</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Phiên bản HĐH</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.phienBanHeDieuHanh || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Nhà phát triển</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.nhaPhatTrien || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Giao diện người dùng</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.giaoDienNguoiDung || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- CPU Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><Cpu /></el-icon>
+                    <span class="header-title">Thông tin CPU</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Hãng sản xuất</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.hangSanXuat || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Chip xử lý</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.chipXuLy || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Số nhân</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.soNhan || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Xung nhịp</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.xungNhip || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Công nghệ sản xuất</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.congNgheSanXuat || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Bộ nhớ đệm</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.boNhoDem || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Tiêu thụ điện năng</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tieuThuDienNang || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Năm ra mắt CPU</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.namRaMatCpu || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- Battery Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><Lightning /></el-icon>
+                    <span class="header-title">Thông tin pin</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Phiên bản pin</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.phienBanPin || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Công suất sạc</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.congSuatSac || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Thời gian sử dụng</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.thoiGianSuDung || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Số lần sạc tối đa</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.soLanSacToiDa || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- Origin Information -->
+            <el-col :xs="24" :md="12">
+              <el-card class="spec-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon"><Location /></el-icon>
+                    <span class="header-title">Thông tin xuất xứ</span>
+                  </div>
+                </template>
+                <div class="spec-content">
+                  <div class="form-field">
+                    <label class="field-label">Mã xuất xứ</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.maXuatXu || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Quốc gia</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tenQuocGia || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Loại sản phẩm</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.tenLoai || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <!-- Camera Information -->
+          <el-card class="info-card" shadow="hover">
+            <template #header>
+Cox              <div class="card-header">
+                <el-icon class="header-icon"><Camera /></el-icon>
+                <span class="header-title">Thông tin camera</span>
+              </div>
+            </template>
+            <el-row :gutter="20">
+              <el-col :xs="24" :md="12">
+                <div class="camera-section">
+                  <h4 class="camera-title">Camera trước</h4>
+                  <div class="form-field">
+                    <label class="field-label">Loại camera</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiCameraTruoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Độ phân giải</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraTruoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Khẩu độ</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.khauDoCameraTruoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Loại zoom</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiZoomCameraTruoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Chế độ chụp</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.cheDoChupCameraTruoc || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-col>
+              <el-col :xs="24" :md="12">
+                <div class="camera-section">
+                  <h4 class="camera-title">Camera sau</h4>
+                  <div class="form-field">
+                    <label class="field-label">Loại camera</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiCameraSau || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Độ phân giải</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraSau || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Khẩu độ</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.khauDoCameraSau || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Loại zoom</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.loaiZoomCameraSau || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">Chế độ chụp</label>
+                    <el-input 
+                      :value="sanPhamModel.modelSanPham?.cheDoChupCameraSau || ''" 
+                      readonly 
+                      class="readonly-input"
+                    />
+                  </div>
+                </div>
+              </el-col>
+            </el-row>
+          </el-card>
+        </div>
+      </el-col>
+
+      <!-- Right Column - Variants and Details -->
+      <el-col :xs="24" :lg="8">
+        <div class="sidebar-content">
+          <!-- Product Variants -->
+          <el-card class="variants-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <el-icon class="header-icon"><Grid /></el-icon>
+                <span class="header-title">Biến thể sản phẩm</span>
+              </div>
+            </template>
+            <el-table 
+              :data="sanPhamModel.sanPhamChiTiets" 
+              class="variants-table"
+              @row-click="selectChiTiet"
+              :row-class-name="getRowClassName"
+            >
+              <el-table-column type="index" label="STT" width="60" :index="indexMethod" />
+              <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
+              <el-table-column label="Màu sắc" prop="tenMau">
+                <template #default="{ row }">
+                  <div class="color-cell">
+                    <div 
+                      class="color-dot" 
+                      :style="{ backgroundColor: row.maMau }"
+                    ></div>
+                    <span class="color-name">{{ row.tenMau }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column prop="dungLuongRom" label="ROM" />
+              <el-table-column prop="soLuongSPCT" label="Số lượng" width="120" />
+              <el-table-column label="Giá bán" width="120">
+                <template #default="{ row }">
+                  <span class="price-text">{{ formatPrice(row.giaBan) }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+
+          <!-- Selected Variant Details -->
+          <el-card v-if="selectedChiTiet !== null" class="variant-details-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <el-icon class="header-icon"><View /></el-icon>
+                <span class="header-title">Chi tiết biến thể {{ selectedChiTiet + 1 }}</span>
+              </div>
+            </template>
+            <div class="variant-details">
+              <div class="detail-section">
+                <h5 class="section-title">Thông tin cơ bản</h5>
+                <div class="form-field">
+                  <label class="field-label">Mã sản phẩm chi tiết</label>
+                  <el-input 
+                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Màu sắc</label>
+                  <el-input 
+                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Mã màu</label>
+                  <el-input 
+                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Dung lượng ROM</label>
+                  <el-input 
+                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Giá bán</label>
+                  <el-input 
+                    :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" 
+                    readonly 
+                    class="readonly-input price-input"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Số lượng</label>
+                  <el-input 
+                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" 
+                    readonly 
+                    class="readonly-input"
+                  />
+                </div>
+              </div>
+
+              <el-divider />
+
+              <div class="detail-section">
+                <h5 class="section-title">IMEI</h5>
+                <el-input 
+                  type="textarea" 
+                  :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''" 
+                  readonly 
+                  :rows="4"
+                  class="imei-textarea"
+                />
+                <div class="imei-count">
+                  Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
+                </div>
+              </div>
+
+              <el-divider />
+
+              <div class="detail-section">
+                <h5 class="section-title">Hình ảnh sản phẩm</h5>
+                <div class="image-gallery">
+                  <el-image
+                    v-for="(img, index) in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []"
+                    :key="index"
+                    :src="img.url || defaultImage"
+                    :preview-src-list="previewImageList"
+                    class="gallery-image"
+                    fit="cover"
+                    :preview-teleported="true"
+                    :lazy="true"
+                    @error="handleImageError"
+                  />
+                  <el-empty
+                    v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length"
+                    description="Không có hình ảnh"
+                    :image-size="80"
+                    class="empty-image"
+                  />
+                </div>
+              </div>
+            </div>
+          </el-card>
+
+          <el-alert 
+            v-else 
+            title="Vui lòng chọn một biến thể để xem chi tiết" 
+            type="info" 
+            show-icon 
+            :closable="false"
+            class="select-variant-alert"
+          />
+        </div>
+      </el-col>
+    </el-row>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+      <el-button 
+        type="default" 
+        size="large"
+        @click="handleBackClick"
+        class="back-button"
+      >
+        <el-icon><ArrowLeft /></el-icon>
+        Quay lại
+      </el-button>
+    </div>
+
+    <el-alert 
+      v-if="error" 
+      :title="error" 
+      type="error" 
+      show-icon 
+      class="error-alert" 
+    />
   </div>
 </template>
+
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { 
+  ArrowLeft, 
+  InfoFilled, 
+  OfficeBuilding, 
+  Cpu, 
+  MagicStick, 
+  Monitor, 
+  Lightning, 
+  Camera, 
+  Grid, 
+  View,
+  Platform,
+  Location
+} from '@element-plus/icons-vue'
 import {
   getAllNhaCungCapList,
   getViewSanPham,
-} from '@/Service/Adminservice/Products/ProductAdminService';
+} from '@/Service/Adminservice/Products/ProductAdminService'
 
-const route = useRoute();
-const router = useRouter();
-const id = route.params.id;
+const route = useRoute()
+const router = useRouter()
+const id = route.params.id
+
 const sanPhamModel = reactive({
   id: null,
   maSanPham: '',
@@ -466,10 +835,33 @@ const sanPhamModel = reactive({
   email: '',
   modelSanPham: {},
   sanPhamChiTiets: [],
-});
-const error = ref('');
-const selectedChiTiet = ref(null);
-const nhaCungCaps = ref([]);
+})
+
+const error = ref('')
+const selectedChiTiet = ref(null)
+const nhaCungCaps = ref([])
+
+// Default fallback image
+const defaultImage = 'https://via.placeholder.com/100?text=No+Image'
+
+// Computed property for image preview list
+const previewImageList = computed(() => {
+  if (
+    selectedChiTiet.value !== null &&
+    sanPhamModel.sanPhamChiTiets[selectedChiTiet.value]?.hinhAnhs
+  ) {
+    return sanPhamModel.sanPhamChiTiets[selectedChiTiet.value].hinhAnhs
+      .filter(img => img.url && typeof img.url === 'string')
+      .map(img => img.url)
+  }
+  return []
+})
+
+// Handle image loading errors
+const handleImageError = (event) => {
+  event.target.src = defaultImage
+  ElMessage.warning('Không thể tải hình ảnh, hiển thị ảnh mặc định')
+}
 
 const danhSachTrangThaiSanPham = [
   { label: 'Đang kinh doanh', value: 'ACTIVE' },
@@ -477,7 +869,7 @@ const danhSachTrangThaiSanPham = [
   { label: 'Sắp ra mắt', value: 'COMING_SOON' },
   { label: 'Tạm ngừng bán', value: 'TEMPORARILY_UNAVAILABLE' },
   { label: 'Hết hàng', value: 'OUT_OF_STOCK' },
-];
+]
 
 const danhSachTrangThaiModel = ref([
   { value: 'ACTIVE', label: 'Đang hoạt động' },
@@ -485,32 +877,31 @@ const danhSachTrangThaiModel = ref([
   { value: 'UPCOMING', label: 'Chờ ra mắt' },
   { value: 'HIDDEN', label: 'Ẩn' },
   { value: 'DELETED', label: 'Đã xóa' }
-]);
+])
 
 const fetchSanPham = async (id) => {
   try {
-    const response = await getViewSanPham(id);
-
+    const response = await getViewSanPham(id)
     // Ánh xạ thông tin cơ bản
-    sanPhamModel.id = response.id || null;
-    sanPhamModel.maSanPham = response.maSanPham || '';
-    sanPhamModel.tenSanPham = response.tenSanPham || '';
-    sanPhamModel.thuongHieu = response.thuongHieu || '';
-    sanPhamModel.trangThaiSanPham = response.trangThaiSanPham || '';
-
+    sanPhamModel.id = response.id || null
+    sanPhamModel.maSanPham = response.maSanPham || ''
+    sanPhamModel.tenSanPham = response.tenSanPham || ''
+    sanPhamModel.thuongHieu = response.thuongHieu || ''
+    sanPhamModel.trangThaiSanPham = response.trangThaiSanPham || ''
+    
     // Ánh xạ thông tin nhà cung cấp
     if (response.nhaCungCapAdminResponse) {
-      sanPhamModel.idNhaCungCap = response.nhaCungCapAdminResponse.id || null;
-      sanPhamModel.tenNhaCungCap = response.nhaCungCapAdminResponse.tenNhaCungCap || '';
-      sanPhamModel.diaChi = response.nhaCungCapAdminResponse.diaChi || '';
-      sanPhamModel.sdt = response.nhaCungCapAdminResponse.sdt || '';
-      sanPhamModel.email = response.nhaCungCapAdminResponse.email || '';
+      sanPhamModel.idNhaCungCap = response.nhaCungCapAdminResponse.id || null
+      sanPhamModel.tenNhaCungCap = response.nhaCungCapAdminResponse.tenNhaCungCap || ''
+      sanPhamModel.diaChi = response.nhaCungCapAdminResponse.diaChi || ''
+      sanPhamModel.sdt = response.nhaCungCapAdminResponse.sdt || ''
+      sanPhamModel.email = response.nhaCungCapAdminResponse.email || ''
     } else {
-      sanPhamModel.idNhaCungCap = null;
-      sanPhamModel.tenNhaCungCap = '';
-      sanPhamModel.diaChi = '';
-      sanPhamModel.sdt = '';
-      sanPhamModel.email = '';
+      sanPhamModel.idNhaCungCap = null
+      sanPhamModel.tenNhaCungCap = ''
+      sanPhamModel.diaChi = ''
+      sanPhamModel.sdt = ''
+      sanPhamModel.email = ''
     }
 
     // Ánh xạ thông tin model sản phẩm
@@ -562,9 +953,9 @@ const fetchSanPham = async (id) => {
         maXuatXu: response.modelSanPhamAdminResponse.maXuatXu || '',
         tenQuocGia: response.modelSanPhamAdminResponse.tenQuocGia || '',
         tenLoai: response.modelSanPhamAdminResponse.tenLoai || '',
-      };
+      }
     } else {
-      sanPhamModel.modelSanPham = {};
+      sanPhamModel.modelSanPham = {}
     }
 
     // Ánh xạ sanPhamChiTiets
@@ -582,319 +973,465 @@ const fetchSanPham = async (id) => {
         url: h.url || '',
         imagePublicId: h.imagePublicId || '',
       })) || [],
-    })) || [];
+    })) || []
 
-    selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null;
+    selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null
   } catch (err) {
-    error.value = err.message || 'Lỗi khi tải chi tiết sản phẩm';
-    ElMessage.error(error.value);
-    console.error('❌ ~ Lỗi khi fetchSanPham:', err);
+    error.value = err.message || 'Lỗi khi tải chi tiết sản phẩm'
+    ElMessage.error(error.value)
+    console.error('❌ ~ Lỗi khi fetchSanPham:', err)
   }
-};
+}
 
 const fetchDanhMuc = async () => {
   try {
-    const response = await getAllNhaCungCapList();
-    nhaCungCaps.value = response || [];
+    const response = await getAllNhaCungCapList()
+    nhaCungCaps.value = response || []
   } catch (err) {
-    error.value = err.message || 'Lỗi khi tải danh mục nhà cung cấp';
-    ElMessage.error(error.value);
-    console.error('❌ ~ Lỗi khi fetchDanhMuc:', err);
+    error.value = err.message || 'Lỗi khi tải danh mục nhà cung cấp'
+    ElMessage.error(error.value)
+    console.error('❌ ~ Lỗi khi fetchDanhMuc:', err)
   }
-};
-
-const getNhaCungCapLabel = (id) => {
-  const result = nhaCungCaps.value.find((ncc) => ncc.id === id);
-  return result?.tenNhaCungCap || 'Không rõ';
-};
+}
 
 const getTrangThaiLabel = (value) => {
-  const result = danhSachTrangThaiSanPham.find((tt) => tt.value === value);
-  return result?.label || 'Không rõ';
-};
+  const result = danhSachTrangThaiSanPham.find((tt) => tt.value === value)
+  return result?.label || 'Không rõ'
+}
 
 const getTrangThaiModelLabel = (value) => {
-  const result = danhSachTrangThaiModel.value.find((tt) => tt.value === value);
-  return result?.label || 'Không rõ';
-};
+  const result = danhSachTrangThaiModel.value.find((tt) => tt.value === value)
+  return result?.label || 'Không rõ'
+}
+
+const getStatusType = (value) => {
+  const statusMap = {
+    'ACTIVE': 'success',
+    'DISCONTINUED': 'danger',
+    'COMING_SOON': 'warning',
+    'TEMPORARILY_UNAVAILABLE': 'info',
+    'OUT_OF_STOCK': 'danger'
+  }
+  return statusMap[value] || 'info'
+}
 
 const formatPrice = (value) => {
-  if (!value && value !== 0) return '';
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-};
+  if (!value && value !== 0) return ''
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+}
 
 const selectChiTiet = (row, column, event) => {
-  const index = sanPhamModel.sanPhamChiTiets.indexOf(row);
-  selectedChiTiet.value = index;
-};
+  const index = sanPhamModel.sanPhamChiTiets.indexOf(row)
+  selectedChiTiet.value = index
+}
 
-const indexMethod = (index) => index + 1;
+const getRowClassName = ({ rowIndex }) => {
+  return selectedChiTiet.value === rowIndex ? 'selected-row' : ''
+}
+
+const indexMethod = (index) => index + 1
+
+const handleBackClick = () => {
+  router.push('/admin/products')
+}
 
 onMounted(async () => {
-  await Promise.all([fetchDanhMuc(), fetchSanPham(id)]);
-});
+  await Promise.all([fetchDanhMuc(), fetchSanPham(id)])
+})
 </script>
 
 <style scoped>
-/* Sử dụng biến màu của Element Plus để đảm bảo tính nhất quán */
-:root {
-  --el-color-primary: #409eff;
-  --el-color-success: #67c23a;
-  --el-color-warning: #e6a23c;
-  --el-color-danger: #f56c6c;
-  --el-color-info: #909399;
-  --el-text-color-primary: #303133;
-  --el-text-color-regular: #606266;
-  --el-text-color-secondary: #909399;
-  --el-border-color-base: #dcdfe6;
-  --el-border-color-light: #e4e7ed;
-  --el-bg-color: #ffffff;
-  --el-bg-color-overlay: #f8f9fa;
-}
-
-/* Container chính */
-.container {
+.product-details-container {
   min-height: 100vh;
-  background: var(--el-bg-color-overlay);
-  padding: 32px;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  max-width: 1440px;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 24px;
 }
 
-/* Tiêu đề chính */
-h2 {
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-btn {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
   font-size: 28px;
   font-weight: 700;
-  margin: 0 0 32px;
-  color: var(--el-text-color-primary);
-  text-align: center;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--el-border-color-light);
-  letter-spacing: 0.5px;
+  color: #1a202c;
+  margin: 0;
+  line-height: 1.2;
 }
 
-/* Tiêu đề phụ cấp 1 */
-h3 {
-  font-size: 22px;
+.page-subtitle {
+  font-size: 16px;
+  color: #718096;
+  margin: 4px 0 0 0;
+}
+
+.status-tag {
+  font-size: 14px;
   font-weight: 600;
-  margin: 32px 0 16px;
-  color: var(--el-text-color-primary);
-  position: relative;
-  padding-left: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
 }
 
-h3::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--el-color-primary);
-  border-radius: 2px;
+.main-content {
+  margin-bottom: 32px;
 }
 
-/* Tiêu đề phụ cấp 2 */
-h4 {
+.info-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-card, .spec-card, .variants-card, .variant-details-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover, .spec-card:hover, .variants-card:hover, .variant-details-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  font-size: 20px;
+  color: #409eff;
+}
+
+.header-title {
   font-size: 18px;
   font-weight: 600;
-  margin: 24px 0 12px;
-  color: var(--el-text-color-regular);
+  color: #1a202c;
 }
 
-/* Tiêu đề phụ cấp 3 */
-h5 {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 16px 0 12px;
-  color: var(--el-text-color-regular);
-}
-
-/* Form của Element Plus */
-.el-form-item {
+.form-field {
   margin-bottom: 20px;
 }
 
-.el-form-item__label {
-  color: var(--el-text-color-regular);
-  font-weight: 500;
+.field-label {
+  display: block;
   font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 8px;
 }
 
-.el-input {
-  --el-input-bg-color: var(--el-bg-color);
-  --el-input-border-color: var(--el-border-color-base);
-  --el-input-text-color: var(--el-text-color-primary);
+.readonly-input {
+  --el-input-bg-color: #f7fafc;
+  --el-input-border-color: #e2e8f0;
+  --el-input-text-color: #2d3748;
 }
 
-.el-input__inner {
-  border-radius: 6px;
+.readonly-input :deep(.el-input__wrapper) {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
-.el-input.is-disabled .el-input__inner {
-  background: #f5f7fa;
-  color: var(--el-text-color-regular);
-  cursor: not-allowed;
+.readonly-input :deep(.el-input__wrapper:hover) {
+  border-color: #cbd5e0;
 }
 
-/* Bảng biến thể sản phẩm */
-.el-table {
-  background: var(--el-bg-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--el-border-color-light);
-  margin-top: 16px;
+.spec-card {
+  height: 100%;
 }
 
-.el-table__header th {
-  background: #fafafa;
-  color: var(--el-text-color-primary);
-  font-weight: 600;
-  font-size: 14px;
-  padding: 12px;
-}
-
-.el-table td {
-  padding: 12px;
-  font-size: 14px;
-  color: var(--el-text-color-regular);
-  transition: background 0.2s ease;
-}
-
-.el-table tr:hover td {
-  background: #f5f7fa;
-}
-
-/* Nút */
-.el-button {
-  border-radius: 6px;
-  font-weight: 500;
-  padding: 12px 24px;
-  transition: all 0.3s ease;
-}
-
-.el-button--default {
-  background: var(--el-bg-color);
-  border-color: var(--el-border-color-base);
-  color: var(--el-text-color-regular);
-}
-
-.el-button--default:hover {
-  background: var(--el-border-color-light);
-  border-color: var(--el-border-color-base);
-  color: var(--el-text-color-primary);
-}
-
-/* Alert */
-.el-alert {
-  border-radius: 8px;
-  margin-top: 24px;
-  padding: 12px;
-}
-
-/* Hình ảnh preview */
-.image-preview {
+.spec-content {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.camera-section {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.camera-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.variants-table {
+  --el-table-border-color: #e2e8f0;
+  --el-table-header-bg-color: #f7fafc;
+}
+
+.variants-table :deep(.el-table__header th) {
+  background-color: #f7fafc;
+  color: #4a5568;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.variants-table :deep(.el-table__row) {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.variants-table :deep(.el-table__row:hover) {
+  background-color: #edf2f7;
+}
+
+.variants-table :deep(.selected-row) {
+  background-color: #ebf8ff !important;
+}
+
+.variants-table :deep(.selected-row:hover) {
+  background-color: #bee3f8 !important;
+}
+
+.color-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.color-name {
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.price-text {
+  font-weight: 600;
+  color: #38a169;
+  font-size: 13px;
+}
+
+.variant-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.price-input :deep(.el-input__wrapper) {
+  background-color: #f0fff4;
+  border-color: #9ae6b4;
+}
+
+.imei-textarea :deep(.el-textarea__inner) {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.imei-count {
+  font-size: 12px;
+  color: #718096;
   margin-top: 8px;
+  text-align: right;
 }
 
-.el-image {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 6px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  overflow-x: auto;
 }
 
-/* Text center */
-.text-center {
-  text-align: center;
+.gallery-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  object-fit: cover;
 }
 
-/* Margin top */
-.mt-4 {
+.gallery-image:hover {
+  border-color: #409eff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.empty-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.select-variant-alert {
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.back-button {
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.error-alert {
   margin-top: 24px;
+  border-radius: 12px;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .container {
+  .product-details-container {
     padding: 16px;
   }
-
-  h2 {
-    font-size: 22px;
-    margin-bottom: 24px;
+  
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
   }
-
-  h3 {
-    font-size: 18px;
-    margin: 24px 0 12px;
+  
+  .page-title {
+    font-size: 24px;
   }
-
-  h4 {
-    font-size: 16px;
-  }
-
-  h5 {
+  
+  .page-subtitle {
     font-size: 14px;
   }
-
-  .el-form-item {
-    margin-bottom: 16px;
+  
+  .info-sections {
+    gap: 16px;
   }
-
-  .el-form-item__label {
-    font-size: 13px;
+  
+  .spec-content {
+    gap: 12px;
   }
-
-  .el-table {
-    font-size: 13px;
-  }
-
-  .el-table__header th,
-  .el-table td {
-    padding: 8px;
-  }
-
-  .el-button {
-    padding: 10px 20px;
-  }
-
-  .el-col {
+  
+  .camera-section {
+    padding: 12px;
     margin-bottom: 12px;
+  }
+  
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .gallery-image {
+    width: 100px;
+    height: 100px;
   }
 }
 
-@media (max-width: 576px) {
-  .container {
-    padding: 12px;
-  }
-
-  h2 {
+@media (max-width: 480px) {
+  .page-title {
     font-size: 20px;
   }
-
-  h3 {
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
+  .header-title {
     font-size: 16px;
   }
-
-  .el-form-item__label {
-    font-size: 12px;
-    line-height: 1.5;
+  
+  .field-label {
+    font-size: 13px;
   }
-
-  .el-input__inner {
-    font-size: 12px;
+  
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    padding: 8px;
   }
-
-  .image-preview .el-image {
+  
+  .gallery-image {
     width: 80px;
     height: 80px;
   }
 }
 </style>
+```
