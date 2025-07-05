@@ -1,4 +1,15 @@
 <template>
+  <div class="filter-panel">
+ 
+  <input type="date" v-model="startDate" />
+
+  <input type="date" v-model="endDate" />
+
+
+  <button @click="() => { console.log('Đã click lọc'); fetchDashboardData() }">Lọc</button>
+
+</div>
+
   <div class="stats-container">
     <div class="stat-card">
       <img src="https://img.icons8.com/ios-filled/50/FFA500/doughnut-chart.png" class="icon" />
@@ -60,7 +71,7 @@
       </div>
 
       <div class="chart-wrapper">
-        <canvas id="LetrevenueChart" width="600" height="400"></canvas>
+        <canvas id="LetrevenueChart"></canvas>
       </div>
     </div>
   </div>
@@ -120,23 +131,22 @@
   </div>
 <!-- don hàn hủy -->
  
-<div class="chart-container">
-      <div class="header">
-        <h2 class="title">Tổng Đơn Bị Hủy</h2>
-        <p class="subtitle">Giữa các tháng</p>
-      </div>
-
-      <div class="chart">
-        <div class="chart-placeholder">
-          <canvas id="cancelOrderChart"></canvas>
-        </div>
-      </div>
-      <br>
-      <div class="footer">
-        <p>Updated theo từng tháng</p>
-      </div>
+  <div class="chart-container">
+    <div class="header">
+      <h2 class="title">Tổng Đơn Bị Hủy</h2>
+      <p class="subtitle">Giữa các tháng</p>
     </div>
 
+    <div class="chart">
+      <div class="chart-placeholder">
+        <canvas ref="cancelChart"></canvas>
+      </div>
+    </div>
+    <br>
+    <div class="footer">
+      <p>Updated theo từng tháng</p>
+    </div>
+  </div>
 
 </template>
 
@@ -152,14 +162,19 @@ import { getDonHangHuy } from '@/Service/Adminservice/ThongKe/ThongKeAdminServic
 import Chart from 'chart.js/auto'
 
 const dashboardData = ref(null)
+const startDate = ref('2025-01-01')
+const endDate = ref('')
 
-onMounted(async () => {
+
+const fetchDashboardData = async () => {
   try {
-    dashboardData.value = await getDashboardAdmin()
+    dashboardData.value = await getDashboardAdmin(startDate.value, endDate.value)
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu thống kê:', error)
   }
-})
+}
+onMounted(fetchDashboardData)
+
 const formatCurrency = (value) => {
   if (!value) return '0 VNĐ'
   return Number(value).toLocaleString('vi-VN') + ' VNĐ'
@@ -204,14 +219,14 @@ onMounted(async () => {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: value => value.toLocaleString('vi-VN') + ' đ'
+              callback: value => value.toLocaleString('vi-VN') + 'VNĐ'
             }
           }
         },
         plugins: {
           tooltip: {
             callbacks: {
-              label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString('vi-VN') + ' đ'
+              label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString('vi-VN') + 'VNĐ'
             }
           }
         }
@@ -286,30 +301,79 @@ const valuesCancel = ref([])
 
 const fetchCancelData = async () => {
   try {
-    const data = await getDoanhThuTheoThang()
+    const data = await getDonHangHuy()
+    console.log('Cancel data:', data)
 
     labelsCancel.value = data.map(item => item.thang)
     valuesCancel.value = data.map(item => item.so_don_bi_huy)
 
     if (cancelChartInstance) cancelChartInstance.destroy()
 
-    cancelChartInstance = new Chart(document.getElementById('cancelOrderChart'), {
-      type: 'bar',
-      data: {
-        labels: labelsCancel.value,
-        datasets: [{
-          label: 'Số đơn bị huỷ',
-          data: valuesCancel.value,
-          backgroundColor: '#f87171'
-        }]
+  cancelChartInstance = new Chart(cancelChart.value, {
+  type: 'bar',
+  data: {
+    labels: labelsCancel.value,
+    datasets: [{
+      label: 'Số đơn bị huỷ',
+      data: valuesCancel.value,
+      backgroundColor: '#f87171',
+      borderColor: '#ef4444',
+      borderWidth: 1,
+      borderRadius: 6,
+      barPercentage: 0.5,       // Độ rộng của cột so với ô
+      categoryPercentage: 0.7   // Khoảng cách giữa các cột
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 20
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          font: {
+            size: 12
+          },
+          color: '#4b5563'
+        },
+        grid: {
+          color: '#e5e7eb'
+        }
       },
-      options: {
-        responsive: true,
-        scales: {
-          y: { beginAtZero: true }
+      x: {
+        ticks: {
+          font: {
+            size: 12
+          },
+          color: '#4b5563'
+        },
+        grid: {
+          display: false
         }
       }
-    })
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: '#1f2937',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: '#f87171',
+        titleColor: '#fff',
+        bodyColor: '#fff'
+      }
+    }
+  }
+})
   } catch (error) {
     console.error('Lỗi lấy dữ liệu đơn huỷ:', error)
   }
