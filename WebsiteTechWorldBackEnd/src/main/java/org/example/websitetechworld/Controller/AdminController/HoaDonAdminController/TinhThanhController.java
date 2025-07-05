@@ -16,18 +16,18 @@ public class TinhThanhController {
     @GetMapping("/provinces")
     public ResponseEntity<?> getProvinces() {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "https://provinces.open-api.vn/api/?depth=1";
+        String url = "http://provinces.open-api.vn/api/?depth=1";
         String data = restTemplate.getForObject(url, String.class);
         return ResponseEntity.ok(data);
     }
     @GetMapping("/districts/{code}")
     public ResponseEntity<?> getDistricts(@PathVariable String code) {
-        String url = "https://provinces.open-api.vn/api/p/" + code + "?depth=2";
+        String url = "http://provinces.open-api.vn/api/p/" + code + "?depth=2";
         return ResponseEntity.ok(new RestTemplate().getForObject(url, String.class));
     }
     @GetMapping("/wards/{code}")
     public ResponseEntity<?> getWards(@PathVariable String code) {
-        String url = "https://provinces.open-api.vn/api/d/" + code + "?depth=2";
+        String url = "http://provinces.open-api.vn/api/d/" + code + "?depth=2";
         return ResponseEntity.ok(new RestTemplate().getForObject(url, String.class));
     }
     @GetMapping("/geo")
