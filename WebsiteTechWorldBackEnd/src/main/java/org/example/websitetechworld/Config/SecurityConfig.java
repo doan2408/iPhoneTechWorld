@@ -24,11 +24,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final AccountDetailService accountDetailService;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(AccountDetailService accountDetailService, CustomAccessDeniedHandler accessDeniedHandler) {
+    public SecurityConfig(AccountDetailService accountDetailService) {
         this.accountDetailService = accountDetailService;
-        this.accessDeniedHandler = accessDeniedHandler;
     }
 
         @Bean
@@ -49,7 +47,6 @@ public class SecurityConfig {
                             .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
                             .anyRequest().permitAll()
                     )
-                    .exceptionHandling(exeption -> exeption.accessDeniedHandler(this.accessDeniedHandler))
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa
                     .formLogin().disable()        // ❌ Tắt login mặc định bằng form
                     .httpBasic().disable()        // ❌ Tắt Basic Auth

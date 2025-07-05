@@ -21,6 +21,7 @@ public class ModelSanPhamAdminRequest {
 
     private Integer idModelSanPham;
 
+
     private String maModelSanPham;
 
     @NotBlank(message = "{model.name.required}")

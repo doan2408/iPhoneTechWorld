@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -204,7 +205,7 @@ public class HoaDonAdminService {
         invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang() != null ? request.getDiaChiGiaoHang() : "");
         invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
-
+        invoice.setNgayDatHang(LocalDate.now());
         // Gán maVanDon
         String maVanDon = request.getMaVanDon();
         if (maVanDon == null || maVanDon.trim().isEmpty()) {
@@ -241,7 +242,7 @@ public class HoaDonAdminService {
                     invoice.getThanhTien(),
                     invoice.getShippingMethod(),
                     TrangThaiGiaoHang.PENDING,
-                    invoice.getNgayTaoDonHang()
+                    invoice.getNgayDatHang()
             );
         } catch (Exception e) {
             System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());
