@@ -497,15 +497,17 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
+
+        validateSanPhamRequest(sanPhamAdminRequest);
         // Kiểm tra biến thể trùng lặp
-        Set<String> variantKeySet = new HashSet<>();
-        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-            String variantKey = String.format("%d-%d",
-                    rq.getIdMau(), rq.getIdRom());
-            if (!variantKeySet.add(variantKey)) {
-                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
-            }
-        }
+//        Set<String> variantKeySet = new HashSet<>();
+//        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+//            String variantKey = String.format("%d-%d",
+//                    rq.getIdMau(), rq.getIdRom());
+//            if (!variantKeySet.add(variantKey)) {
+//                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
+//            }
+//        }
 
         // Tìm sản phẩm cần cập nhật
         SanPham sanPham = sanPhamRepo.findById(id)
