@@ -554,6 +554,11 @@ const validateForm = () => {
     }
   }
 
+  if (formData.giaTriKhuyenMaiToiDa <= 10000.00) {
+    errors.giaTriKhuyenMaiToiDa = "Giá trị khuyến mãi tối đa không được ít hơn 10000.00";
+    isValid = false;
+  }
+
   if (formData.soLuong <= 0) {
     errors.soLuong = "Số lượng phải lớn hơn 0";
     isValid = false;

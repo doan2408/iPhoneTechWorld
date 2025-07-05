@@ -323,19 +323,19 @@
             <div class="footer-container">
                 <div class="total-section">
                     <span class="total-label">Tổng tiền hàng:</span>
-                    <span class="total-amount">{{ totalProductAmount }} VNĐ</span>
+                    <span class="total-amount">{{ formatCurrency(totalProductAmount) }}</span>
                 </div>
                 <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ shippingFee.toLocaleString('vi-VN') + ' VNĐ' }}</span>
+                    <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
                 </div>
-                <div class="discount-section" v-if="discountAmount > 0">
+                <div class="discount-section" v-if="discountAmount > 0" style="flex-direction: row; max-height: 40.8px;">
                     <span class="discount-label">Giảm giá:</span>
-                    <span class="discount-amount">- {{ discountAmount }} VNĐ</span>
+                    <span class="discount-amount">- {{ formatCurrency(discountAmount) }}</span>
                 </div>
                 <div class="grand-total-section">
                     <span class="grand-total-label">Tổng thanh toán:</span>
-                    <span class="grand-total-amount">{{ grandTotal }} VNĐ</span>
+                    <span class="grand-total-amount">{{ formatCurrency(grandTotal) }}</span>
                 </div>
 
                 <div class="action-section">
@@ -564,7 +564,7 @@ import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
     , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
-    , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, loadPaymentMethod, thanhToan 
+    , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan 
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -638,6 +638,9 @@ const calculateTotal = () => {
 
     if (selectedDiscount.value?.loaiKhuyenMai === 'Phần trăm') {
         discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriKhuyenMai / 100;
+        if(selectedDiscount.value?.giaTriKhuyenMaiToiDa < discountAmount.value) {
+            discountAmount.value = selectedDiscount.value?.giaTriKhuyenMaiToiDa
+        }
     } else if (selectedDiscount.value?.giaTriKhuyenMai) {
         discountAmount.value = selectedDiscount.value.giaTriKhuyenMai;
     } else {
@@ -654,12 +657,22 @@ const calculateTotal = () => {
 
 const loadDiscountList = async () => {
     try {
-        const response = await getAllPhieuGiamGia(search.value, currentInvoiceDetail.value.idKhachHang)
+        console.log('hehe: ', totalProductAmount.value)
+        const response = await getAllPhieuGiamGia(search.value, currentInvoiceDetail.value.idKhachHang, totalProductAmount.value)
         discountList.value = response.data
     } catch (err) {
         console.error(err || "Lỗi lấy danh sách phiếu giảm giá");
     }
 }
+
+const apPhieuGiamGia = async (idPhieuGiamGia) => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    try {
+        await phieuGiamGia(storedId, {id: idPhieuGiamGia});
+    } catch (error) {
+        console.error('Lỗi khi áp phiếu giảm giá:', error);
+    }
+};
 
 watch(
   () => currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList,
@@ -674,6 +687,7 @@ watch(
   () => selectedDiscount.value,
   () => {
     calculateTotal()
+    apPhieuGiamGia(selectedDiscount.value.id)
   }
 )
 
