@@ -32,24 +32,14 @@ public class SanPhamAdminService {
     private final ModelSanPhamRepository modelSanPhamRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
     private final MauSacRepository mauSacRepository;
-    private final RamRepository ramRepository;
     private final RomRepository romRepository;
-    private final ManHinhRepository manHinhRepository;
-    private final HeDieuHanhRepository heDieuHanhRepository;
-    private final PinRepository pinRepository;
-    private final CpuRepository cpuRepository;
-    private final CameraTruocRepository cameraTruocRepository;
-    private final CameraSauRepository cameraSauRepository;
-    private final XuatXuRepository xuatXuRepository;
-    private final LoaiRepository loaiRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final HinhAnhRepository hinhAnhRepository;
     private final ImeiReposiory imeiReposiory;
     private final SanPhamRepository sanPhamRepository;
 
-
     private final ModelMapper modelMapper;
-
+    private final SanPhamChiTietAdminService sanPhamChiTietAdminService;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -59,32 +49,11 @@ public class SanPhamAdminService {
         response.setSoLuongSPCT(chiTiet.getSoLuong());
         response.setGiaBan(chiTiet.getGiaBan());
 
-//        if (chiTiet.getIdSanPham() != null) {
-//            response.setMaSanPham(chiTiet.getIdSanPham().getMaSanPham());
-//            response.setTenSanPham(chiTiet.getIdSanPham().getTenSanPham());
-//            response.setThuongHieu(chiTiet.getIdSanPham().getThuongHieu());
-//            response.setTrangThaiSanPham(chiTiet.getIdSanPham().getTrangThaiSanPham());
-//
-//            NhaCungCap cungCap = chiTiet.getIdSanPham().getIdNhaCungCap();
-//            if (cungCap != null) {
-//                response.setTenNhaCungCap(cungCap.getTenNhaCungCap());
-//                response.setDiaChi(cungCap.getDiaChi());
-//                response.setSdt(cungCap.getSdt());
-//                response.setEmail(cungCap.getEmail());
-//            }
-//        }
-
         if (chiTiet.getIdMau() != null) {
             response.setTenMau(chiTiet.getIdMau().getTenMau());
             response.setMaMau(chiTiet.getIdMau().getMaMau());
         }
-//        if (chiTiet.getIdRam() != null) {
-//            response.setLoaiRam(chiTiet.getIdRam().getLoai());
-//            response.setDungLuongRam(chiTiet.getIdRam().getDungLuong());
-//            response.setTocDoDocGhiRam(chiTiet.getIdRam().getTocDoDocGhi());
-//            response.setNhaSanXuatRam(chiTiet.getIdRam().getNhaSanXuat());
-//            response.setNamRaMatRam(chiTiet.getIdRam().getNamRaMat());
-//        }
+
         if (chiTiet.getIdRom() != null) {
             response.setLoaiRom(chiTiet.getIdRom().getLoai());
             response.setDungLuongRom(chiTiet.getIdRom().getDungLuong());
@@ -92,57 +61,6 @@ public class SanPhamAdminService {
             response.setNhaSanXuatRom(chiTiet.getIdRom().getNhaSanXuat());
             response.setNamRaMatRom(chiTiet.getIdRom().getNamRaMat());
         }
-//        if (chiTiet.getIdManHinh() != null) {
-//            response.setTenManHinh(chiTiet.getIdManHinh().getTenManHinh());
-//            response.setKichThuoc(chiTiet.getIdManHinh().getKichThuoc());
-//            response.setLoaiManHinh(chiTiet.getIdManHinh().getLoaiManHinh());
-//            response.setDoPhanGiaiManHinh(chiTiet.getIdManHinh().getDoPhanGiai());
-//            response.setTanSoQuet(chiTiet.getIdManHinh().getTanSoQuet());
-//            response.setDoSang(chiTiet.getIdManHinh().getDoSang());
-//            response.setChatLieuKinh(chiTiet.getIdManHinh().getChatLieuKinh());
-//        }
-//        if (chiTiet.getIdHeDieuHanh() != null) {
-//            response.setPhienBanHeDieuHanh(chiTiet.getIdHeDieuHanh().getPhienBan());
-//            response.setNhaPhatTrien(chiTiet.getIdHeDieuHanh().getNhaPhatTrien());
-//            response.setGiaoDienNguoiDung(chiTiet.getIdHeDieuHanh().getGiaoDienNguoiDung());
-//        }
-//        if (chiTiet.getIdPin() != null) {
-//            response.setPhienBanPin(chiTiet.getIdPin().getPhienBan());
-//            response.setCongSuatSac(chiTiet.getIdPin().getCongSuatSac());
-//            response.setThoiGianSuDung(chiTiet.getIdPin().getThoiGianSuDung());
-//            response.setSoLanSacToiDa(chiTiet.getIdPin().getSoLanSacToiDa());
-//        }
-//        if (chiTiet.getIdCpu() != null) {
-//            response.setHangSanXuat(chiTiet.getIdCpu().getHangSanXuat());
-//            response.setSoNhan(chiTiet.getIdCpu().getSoNhan());
-//            response.setChipXuLy(chiTiet.getIdCpu().getChipXuLy());
-//            response.setXungNhip(chiTiet.getIdCpu().getXungNhip());
-//            response.setCongNgheSanXuat(chiTiet.getIdCpu().getCongNgheSanXuat());
-//            response.setBoNhoDem(chiTiet.getIdCpu().getBoNhoDem());
-//            response.setTieuThuDienNang(chiTiet.getIdCpu().getTieuThuDienNang());
-//            response.setNamRaMat(chiTiet.getIdCpu().getNamRaMat());
-//        }
-//        if (chiTiet.getIdCameraSau() != null) {
-//            response.setLoaiCameraSau(chiTiet.getIdCameraSau().getLoaiCamera());
-//            response.setDoPhanGiaiCameraSau(chiTiet.getIdCameraSau().getDoPhanGiai());
-//            response.setKhauDoCameraSau(chiTiet.getIdCameraSau().getKhauDo());
-//            response.setLoaiZoomCameraSau(chiTiet.getIdCameraSau().getLoaiZoom());
-//            response.setCheDoChupCameraSau(chiTiet.getIdCameraSau().getCheDoChup());
-//        }
-//        if (chiTiet.getIdCameraTruoc() != null) {
-//            response.setLoaiCameraTruoc(chiTiet.getIdCameraTruoc().getLoaiCamera());
-//            response.setDoPhanGiaiCameraTruoc(chiTiet.getIdCameraTruoc().getDoPhanGiai());
-//            response.setKhauDoCameraTruoc(chiTiet.getIdCameraTruoc().getKhauDo());
-//            response.setLoaiZoomCameraTruoc(chiTiet.getIdCameraTruoc().getLoaiZoom());
-//            response.setCheDoChupCameraTruoc(chiTiet.getIdCameraTruoc().getCheDoChup());
-//        }
-//        if (chiTiet.getIdXuatXu() != null) {
-//            response.setMaXuatXu(chiTiet.getIdXuatXu().getMaXuatXu());
-//            response.setTenQuocGia(chiTiet.getIdXuatXu().getTenQuocGia());
-//        }
-//        if (chiTiet.getIdLoai() != null) {
-//            response.setTenLoai(chiTiet.getIdLoai().getTenLoai());
-//        }
 
         // map danh sách hình ảnh
         if (chiTiet.getImeis() != null && !chiTiet.getImeis().isEmpty()) {
@@ -195,9 +113,9 @@ public class SanPhamAdminService {
         return response;
     }
 
-    public Page<SanPhamHienThiAdminResponse> getAllSanPham(int page, int size) {
+    public Page<SanPhamHienThiAdminResponse> getAllSanPham(String keyword, Integer idLoai, String trangThais, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Object[]> allHienThi = sanPhamRepository.getAllHienThi(pageable);
+        Page<Object[]> allHienThi = sanPhamRepository.getAllHienThi( keyword ,idLoai ,trangThais ,pageable );
 
         List<SanPhamHienThiAdminResponse> sanPhamHienThi = new ArrayList<>();
         for (Object[] hienThi : allHienThi) {
@@ -219,21 +137,6 @@ public class SanPhamAdminService {
         return new PageImpl<>(sanPhamHienThi,pageable, allHienThi.getTotalElements());
     }
 
-//    public Page<SanPhamHienThiAdminResponse> getAllSanPham(int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        return sanPhamRepo.getAllHienThi(pageable);
-//    }
-
-//    public SanPhamAdminResponse detailSanPhamAdmin(Integer id) {
-//        Optional<SanPham> sanPham = sanPhamRepo.findById(id);
-//        if (sanPham.isPresent()) {
-//            return mapToSanPhamAdminResponse(sanPham.get());
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "khong tim thay san pham hop le:" + id);
-//        }
-//    }
-
-
     //detai update sanpham
     public SanPhamAdminUpdateResponse getSanPhamById(Integer id) {
         SanPham sanPham = sanPhamRepository.findById(id)
@@ -253,17 +156,7 @@ public class SanPhamAdminService {
             dto.setGiaBan(ct.getGiaBan());
             dto.setMaSanPhamChiTiet(ct.getMaSanPhamChiTiet());
             dto.setIdMau(ct.getIdMau() != null ? ct.getIdMau().getId() : null);
-//            dto.setIdRam(ct.getIdRam() != null ? ct.getIdRam().getId() : null);
             dto.setIdRom(ct.getIdRom() != null ? ct.getIdRom().getId() : null);
-//            dto.setIdManHinh(ct.getIdManHinh() != null ? ct.getIdManHinh().getId() : null);
-//            dto.setIdHeDieuHanh(ct.getIdHeDieuHanh() != null ? ct.getIdHeDieuHanh().getId() : null);
-//            dto.setIdPin(ct.getIdPin() != null ? ct.getIdPin().getId() : null);
-//            dto.setIdCpu(ct.getIdCpu() != null ? ct.getIdCpu().getId() : null);
-//            dto.setIdCameraTruoc(ct.getIdCameraTruoc() != null ? ct.getIdCameraTruoc().getId() : null);
-//            dto.setIdCameraSau(ct.getIdCameraSau() != null ? ct.getIdCameraSau().getId() : null);
-//            dto.setIdXuatXu(ct.getIdXuatXu() != null ? ct.getIdXuatXu().getId() : null);
-//            dto.setIdLoai(ct.getIdLoai() != null ? ct.getIdLoai().getId() : null);
-
             // imeis
             if (ct.getImeis() != null) {
                 dto.setImeisInput(ct.getImeis().stream()
@@ -306,6 +199,7 @@ public class SanPhamAdminService {
         // Gán thông tin cơ bản của sản phẩm
         response.setId(sanPham.getId());
         response.setTenSanPham(sanPham.getTenSanPham());
+        response.setMaSanPham(sanPham.getMaSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
         if (sanPham.getIdNhaCungCap() != null) {
@@ -323,8 +217,7 @@ public class SanPhamAdminService {
             modelSanPhamAdminResponse.setMaModelSanPham(sanPham.getIdModelSanPham().getMaModelSanPham());
             modelSanPhamAdminResponse.setTenModel(sanPham.getIdModelSanPham().getTenModel());
             modelSanPhamAdminResponse.setNamRaMat(sanPham.getIdModelSanPham().getNamRaMat());
-            modelSanPhamAdminResponse.setMoTa(sanPham.getIdModelSanPham().getMoTa());
-            modelSanPhamAdminResponse.setTrangThai(sanPham.getIdModelSanPham().getTrangThai());
+            modelSanPhamAdminResponse.setTrangThaiSanPhamModel(sanPham.getIdModelSanPham().getTrangThaiSanPhamModel());
 
             if (sanPham.getIdModelSanPham().getIdRam() != null) {
                 modelSanPhamAdminResponse.setIdRam(sanPham.getIdModelSanPham().getIdRam().getId());
@@ -473,43 +366,14 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
 
-        Set<String> variantKeySet = new HashSet<>();
-        Set<String> allImeis = new HashSet<>();
-        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-            List<String> imeiList = rq.getImeis().stream()
-                    .map(i -> i.getSoImei().trim())
-                    .filter(s -> !s.isEmpty())
-                    .toList();
-
-            Set<String> imeiSet = new HashSet<>(imeiList);
-            if (imeiSet.size() < imeiList.size()) {
-                throw new BusinessException("Chi tiết sản phẩm có IMEI bị trùng trong chính nó.");
-            }
-
-            for (String imei : imeiList) {
-                if (!allImeis.add(imei)) {
-                    throw new BusinessException("IMEI bị trùng giữa các biến thể: " + imei);
-                }
-
-                // Check trùng với DB
-                if (imeiReposiory.existsBySoImei(imei)) {
-                    throw new BusinessException("IMEI đã tồn tại trong hệ thống: " + imei);
-                }
-            }
-
-            String variantKey = String.format("%d-%d",
-                    rq.getIdMau(), rq.getIdRom());
-            if (!variantKeySet.add(variantKey)) {
-                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
-            }
-        }
+       validateSanPhamRequest(sanPhamAdminRequest);
         // Bước 2: Tạo SanPham
         SanPham sanPham = new SanPham();
         sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
         sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
         sanPham.setTrangThaiSanPham(
                 Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
-                        .orElse(TrangThaiSanPham.COMING_SOON)
+                        .orElse(TrangThaiSanPham.ACTIVE)
         );
 
         if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
@@ -616,8 +480,7 @@ public class SanPhamAdminService {
             modelSanPhamAdminResponse.setMaModelSanPham(sanPham.getIdModelSanPham().getMaModelSanPham());
             modelSanPhamAdminResponse.setTenModel(sanPham.getIdModelSanPham().getTenModel());
             modelSanPhamAdminResponse.setNamRaMat(sanPham.getIdModelSanPham().getNamRaMat());
-            modelSanPhamAdminResponse.setMoTa(sanPham.getIdModelSanPham().getMoTa());
-            modelSanPhamAdminResponse.setTrangThai(sanPham.getIdModelSanPham().getTrangThai());
+            response.setModelSanPhamAdminResponse(modelSanPhamAdminResponse);
         }
 
         if (sanPham.getSanPhamChiTiets() != null) {
@@ -634,15 +497,17 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
+
+        validateSanPhamRequest(sanPhamAdminRequest);
         // Kiểm tra biến thể trùng lặp
-        Set<String> variantKeySet = new HashSet<>();
-        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-            String variantKey = String.format("%d-%d",
-                    rq.getIdMau(), rq.getIdRom());
-            if (!variantKeySet.add(variantKey)) {
-                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
-            }
-        }
+//        Set<String> variantKeySet = new HashSet<>();
+//        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+//            String variantKey = String.format("%d-%d",
+//                    rq.getIdMau(), rq.getIdRom());
+//            if (!variantKeySet.add(variantKey)) {
+//                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
+//            }
+//        }
 
         // Tìm sản phẩm cần cập nhật
         SanPham sanPham = sanPhamRepo.findById(id)
@@ -653,7 +518,7 @@ public class SanPhamAdminService {
         sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
         sanPham.setTrangThaiSanPham(
                 Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
-                        .orElse(TrangThaiSanPham.COMING_SOON)
+                        .orElse(TrangThaiSanPham.ACTIVE)
         );
 
         if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
@@ -692,66 +557,13 @@ public class SanPhamAdminService {
                 } else {
                     chiTiet.setIdMau(null);
                 }
-//                if (rq.getIdRam() != null) {
-//                    chiTiet.setIdRam(ramRepository.findById(rq.getIdRam())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy RAM với ID: " + rq.getIdRam())));
-//                } else {
-//                    chiTiet.setIdRam(null);
-//                }
                 if (rq.getIdRom() != null) {
                     chiTiet.setIdRom(romRepository.findById(rq.getIdRom())
                             .orElseThrow(() -> new NotFoundException("Không tìm thấy ROM với ID: " + rq.getIdRom())));
                 } else {
                     chiTiet.setIdRom(null);
                 }
-//                if (rq.getIdManHinh() != null) {
-//                    chiTiet.setIdManHinh(manHinhRepository.findById(rq.getIdManHinh())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy màn hình với ID: " + rq.getIdManHinh())));
-//                } else {
-//                    chiTiet.setIdManHinh(null);
-//                }
-//                if (rq.getIdHeDieuHanh() != null) {
-//                    chiTiet.setIdHeDieuHanh(heDieuHanhRepository.findById(rq.getIdHeDieuHanh())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy hệ điều hành với ID: " + rq.getIdHeDieuHanh())));
-//                } else {
-//                    chiTiet.setIdHeDieuHanh(null);
-//                }
-//                if (rq.getIdPin() != null) {
-//                    chiTiet.setIdPin(pinRepository.findById(rq.getIdPin())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy pin với ID: " + rq.getIdPin())));
-//                } else {
-//                    chiTiet.setIdPin(null);
-//                }
-//                if (rq.getIdCpu() != null) {
-//                    chiTiet.setIdCpu(cpuRepository.findById(rq.getIdCpu())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy CPU với ID: " + rq.getIdCpu())));
-//                } else {
-//                    chiTiet.setIdCpu(null);
-//                }
-//                if (rq.getIdCameraTruoc() != null) {
-//                    chiTiet.setIdCameraTruoc(cameraTruocRepository.findById(rq.getIdCameraTruoc())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy camera trước với ID: " + rq.getIdCameraTruoc())));
-//                } else {
-//                    chiTiet.setIdCameraTruoc(null);
-//                }
-//                if (rq.getIdCameraSau() != null) {
-//                    chiTiet.setIdCameraSau(cameraSauRepository.findById(rq.getIdCameraSau())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy camera sau với ID: " + rq.getIdCameraSau())));
-//                } else {
-//                    chiTiet.setIdCameraSau(null);
-//                }
-//                if (rq.getIdXuatXu() != null) {
-//                    chiTiet.setIdXuatXu(xuatXuRepository.findById(rq.getIdXuatXu())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy xuất xứ với ID: " + rq.getIdXuatXu())));
-//                } else {
-//                    chiTiet.setIdXuatXu(null);
-//                }
-//                if (rq.getIdLoai() != null) {
-//                    chiTiet.setIdLoai(loaiRepository.findById(rq.getIdLoai())
-//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy loại với ID: " + rq.getIdLoai())));
-//                } else {
-//                    chiTiet.setIdLoai(null);
-//                }
+//
 
                 // Lưu chi tiết sản phẩm
                 SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
@@ -833,9 +645,14 @@ public class SanPhamAdminService {
         response.setMaSanPham(sanPham.getMaSanPham());
         response.setTenSanPham(sanPham.getTenSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
-//        if (sanPham.getIdNhaCungCap() != null) {
-//            response.setIdNhaCungCap(Integer.valueOf(sanPham.getIdNhaCungCap().getId()));
-//        }
+        if (sanPham.getIdNhaCungCap() != null) {
+            NhaCungCapAdminResponse nhaCungCapAdminResponse = new NhaCungCapAdminResponse();
+            nhaCungCapAdminResponse.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
+            nhaCungCapAdminResponse.setSdt(sanPham.getIdNhaCungCap().getSdt());
+            nhaCungCapAdminResponse.setEmail(sanPham.getIdNhaCungCap().getEmail());
+            nhaCungCapAdminResponse.setDiaChi(sanPham.getIdNhaCungCap().getDiaChi());
+            response.setNhaCungCapAdminResponse(nhaCungCapAdminResponse);
+        }
 
         if (sanPham.getSanPhamChiTiets() != null) {
             Set<SanPhamChiTietResponse> chiTietResponses = sanPham.getSanPhamChiTiets().stream()
@@ -848,21 +665,12 @@ public class SanPhamAdminService {
     }
 
     @Transactional
-    public SanPhamAdminResponse deleteSanPhamAdmin(Integer id) {
-
+    public void deleteSanPhamAdmin(Integer id) {
         SanPham sanPham = sanPhamRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
-
-        SanPhamAdminResponse sanPhamAdminResponse = new SanPhamAdminResponse();
-        sanPhamAdminResponse.setId(sanPham.getId());
-        sanPhamAdminResponse.setTenSanPham(sanPham.getTenSanPham());
-        sanPhamAdminResponse.setThuongHieu(sanPham.getThuongHieu());
-
-        sanPhamRepo.deleteById(id);
-
-        return sanPhamAdminResponse;
+        sanPham.setTrangThaiSanPham(TrangThaiSanPham.TEMPORARILY_UNAVAILABLE);
+        sanPhamRepo.save(sanPham);
     }
-
 
     public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -876,6 +684,56 @@ public class SanPhamAdminService {
         return sanPhamRepo.findTenDongSanPham(pageable);
     }
 
+
+    private void validateSanPhamRequest(SanPhamAdminRequest request) {
+        Set<String> variantKeySet = new HashSet<>();
+        Set<String> allImeis = new HashSet<>();
+
+        ModelSanPham model = modelSanPhamRepository
+                .findById(request.getIdModelSanPham())
+                .orElseThrow(() -> new BusinessException("model.notFound"));
+
+        Integer idLoai = model.getIdLoai().getId();
+
+        sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets());
+
+
+        for (SanPhamChiTietAdminRepuest rq : request.getSanPhamChiTiets()) {
+            String key = rq.getIdMau() + "-" + rq.getIdRom();
+
+            // Check trùng biến thể
+            if (!variantKeySet.add(key)) {
+                throw new BusinessException("chitiet.variant.duplicate", "Biến thể trùng tổ hợp màu - ROM: " + key);
+            }
+
+            List<String> imeis = rq.getImeis().stream()
+                    .map(i -> i.getSoImei().trim())
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+
+            // Check IMEI trùng trong chính biến thể
+            if (new HashSet<>(imeis).size() < imeis.size()) {
+                throw new BusinessException("chitiet.imei.duplicate.self", "IMEI bị trùng trong cùng một biến thể");
+            }
+
+            for (String imei : imeis) {
+                // Check IMEI trùng giữa các biến thể
+                if (!allImeis.add(imei)) {
+                    throw new BusinessException("chitiet.imei.duplicate.cross", "IMEI trùng giữa các biến thể: " + imei);
+                }
+
+                // Check IMEI đã tồn tại trong hệ thống
+                if (imeiReposiory.existsBySoImei(imei)) {
+                    throw new BusinessException("chitiet.imei.exists", "IMEI đã tồn tại: " + imei);
+                }
+            }
+
+            // So sánh số lượng với số IMEI
+            if (!Objects.equals(rq.getSoLuong(), imeis.size())) {
+                throw new BusinessException("chitiet.imei.quantity.mismatch", "IMEI phải đúng với số lượng: " + rq.getSoLuong());
+            }
+        }
+    }
 
 }
 

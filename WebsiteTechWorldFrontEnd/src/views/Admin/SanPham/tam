@@ -396,7 +396,7 @@ export default {
       loading.generate = true;
       let hasError = false;
 
-      // Kiểm tra các trường bắt buộc để tạo biến thể
+      // Kiểm tra các trường bắt buộc
       if (!sanPham.idModelSanPham) {
         errors.idModelSanPham = "Vui lòng chọn model sản phẩm";
         hasError = true;
@@ -423,7 +423,7 @@ export default {
         return;
       }
 
-      // Làm mới hinhAnhTheoMau và errorsMauHinhAnh
+      // Làm sạch dữ liệu không còn chọn
       Object.keys(hinhAnhTheoMau).forEach((key) => {
         if (!selectedMaus.value.includes(Number(key))) {
           delete hinhAnhTheoMau[key];
@@ -435,7 +435,7 @@ export default {
         }
       });
 
-      // Tạo biến thể mới
+      // Tạo danh sách biến thể mới
       const existingCombinations = new Set();
       const newVariants = [];
       errorsChiTiet.length = 0;
@@ -456,7 +456,7 @@ export default {
               giaBan: giaBanChung.value || existingVariant?.giaBan || null,
               imeisInput: existingVariant?.imeisInput || "",
               isFileUploaded: existingVariant?.isFileUploaded || false,
-              imeis: existingVariant?.imeis || [], // Giữ lại danh sách IMEI
+              imeis: existingVariant?.imeis || [],
               hinhAnhs: hinhAnhTheoMau[mau] || [],
             });
             errorsChiTiet.push({
@@ -468,17 +468,47 @@ export default {
         });
       });
 
+      // 🔍 Kiểm tra biến thể trùng từ backend
+      const duplicateCombinations = [];
+
+      for (const variant of newVariants) {
+        try {
+          const res = await api.get('/admin/sanPhamChiTiet/check-duplicate-variant', {
+            params: {
+              idMau: variant.idMau,
+              idRom: variant.idRom,
+              idLoai: sanPham.idLoai // 👈 Đảm bảo bạn đã set idLoai từ trước
+            }
+          });
+
+          if (res.data.exists) {
+            duplicateCombinations.push(`Màu ${variant.idMau} - ROM ${variant.idRom}`);
+          }
+        } catch (err) {
+          console.error("Lỗi kiểm tra biến thể từ backend:", err);
+          ElMessage.error("Lỗi kiểm tra trùng biến thể từ hệ thống.");
+          loading.generate = false;
+          return;
+        }
+      }
+
+      if (duplicateCombinations.length > 0) {
+        ElMessage.error(`Không thể tạo các biến thể đã tồn tại: ${duplicateCombinations.join(', ')}`);
+        loading.generate = false;
+        return;
+      }
+
+      // ✅ Nếu không có trùng thì gán vào sản phẩm
       sanPham.sanPhamChiTiets = newVariants;
 
-      // Cập nhật số lượng dựa trên IMEI (không kiểm tra lỗi)
+      // Cập nhật số lượng từ IMEI
       sanPham.sanPhamChiTiets.forEach((_, index) => {
         capNhatSoLuong(index, false);
       });
 
-      // Chọn biến thể đầu tiên
+      // Cuộn đến bảng
       selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
 
-      // Cuộn đến bảng chi tiết
       setTimeout(() => {
         const table = document.querySelector(".variant-table");
         if (table) {
@@ -489,6 +519,7 @@ export default {
       loading.generate = false;
       ElMessage.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
     };
+
 
     // Áp dụng giá bán chung
     const applyGiaBanChung = () => {

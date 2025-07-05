@@ -357,7 +357,8 @@
                       ></path>
                     </svg>
                   </button>
-                  <button
+                  <button 
+                    v-if="isAdmin"
                     class="action-btn delete-btn"
                     title="Xóa"
                     :disabled="
@@ -1015,6 +1016,7 @@ import router from "@/router";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import store from "@/Service/LoginService/Store";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -1337,6 +1339,26 @@ function getActionBadgeClass(action) {
       return "badge-default";
   }
 }
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {

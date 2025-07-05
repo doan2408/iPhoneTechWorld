@@ -77,7 +77,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
             }
-            filterChain.doFilter(request, response);
         } catch (SignatureException e) {
             System.err.println("Lỗi xác minh chữ ký: " + e.getMessage());
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Token không hợp lệ", e.getMessage());
@@ -88,6 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.err.println("Lỗi khác: " + e.getMessage());
             sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi server", e.getMessage());
         }
+        filterChain.doFilter(request, response);
     }
 
     // ✅ Helper method để tránh lỗi "getOutputStream() has already been called"

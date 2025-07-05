@@ -1,15 +1,10 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse;
 
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.websitetechworld.Entity.Loai;
-import org.example.websitetechworld.Entity.Ram;
-import org.example.websitetechworld.Entity.XuatXu;
-
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import java.time.LocalDate;
 
 @Data
@@ -31,8 +26,7 @@ public class ModelSanPhamHienThiAdminResponse {
 
     private LocalDate namRaMat;
 
-    private String trangThai;
-
-
+    @Enumerated
+    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
 }

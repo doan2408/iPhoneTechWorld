@@ -80,7 +80,7 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
-        hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiMua());
+        hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiNhan());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
         hoaDonAdminResponse.setTongTien(hoaDon.getTongTien());
         hoaDonAdminResponse.setSoTienGiam(hoaDon.getSoTienGiam());

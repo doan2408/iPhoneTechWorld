@@ -166,9 +166,9 @@ function toggleOrderMenu() {
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <li>
+            <!-- <li>
               <router-link to="/admin/shipping">Quản lý giao hàng</router-link>
-            </li>
+            </li> -->
           </ul>
 
           <li>
