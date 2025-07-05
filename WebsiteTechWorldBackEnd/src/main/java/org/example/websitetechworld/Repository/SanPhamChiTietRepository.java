@@ -50,5 +50,19 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     int tangSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongTang") int soLuongTang);
 
 
-//    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContaining(@Size(max = 50) String idSanPhamTenSanPham, Pageable pageable);
+    @Query(value = """
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM san_pham_chi_tiet c
+    JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
+    JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
+    WHERE c.id_mau = :idMau
+      AND c.id_rom = :idRom
+      AND m.id_loai = :idLoai
+""", nativeQuery = true)
+    Integer existsVariantInLoai(
+            @Param("idMau") Integer idMau,
+            @Param("idRom") Integer idRom,
+            @Param("idLoai") Integer idLoai
+    );
+
 }

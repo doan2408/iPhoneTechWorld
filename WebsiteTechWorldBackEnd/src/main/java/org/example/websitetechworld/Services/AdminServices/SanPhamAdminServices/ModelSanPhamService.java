@@ -259,9 +259,4 @@ public class ModelSanPhamService {
         Page<ModelSanPham> modelPage = modelSanPhamRepository.findByFiltersNative(search, idLoai, idRam, idXuatXu, pageable);
         return modelPage.map(this::mapEntityToResponse);
     }
-
-
-    public void validateBeforeCreate (ModelSanPhamAdminRequest request) {
-
-    }
 }

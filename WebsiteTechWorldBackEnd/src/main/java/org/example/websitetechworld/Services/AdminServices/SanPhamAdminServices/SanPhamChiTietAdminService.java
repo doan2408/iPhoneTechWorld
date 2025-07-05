@@ -7,19 +7,19 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +28,7 @@ public class SanPhamChiTietAdminService {
     private final SanPhamChiTietRepository sanPhamChiTietRepo;
     private final SanPhamRepository sanPhamRepo;
     private final MauSacRepository mauSacRepo;
-    private final RamRepository ramRepo;
     private final RomRepository romRepo;
-    private final ManHinhRepository manHinhRepo;
-    private final HeDieuHanhRepository heDieuHanhRepo;
-    private final PinRepository pinRepo;
-    private final CpuRepository cpuRepo;
-    private final CameraTruocRepository cameraTruocRepo;
-    private final CameraSauRepository cameraSauRepo;
-    private final XuatXuRepository xuatXuRepo;
-    private final LoaiRepository loaiRepo;
 
 
     private void mapRequestToEntity(SanPhamChiTietAdminRepuest req, SanPhamChiTiet entity) {
@@ -142,6 +133,22 @@ public class SanPhamChiTietAdminService {
     public Page<SanPhamChiTietHienThiResponse> getAllSanPhamChiTiet(int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return sanPhamChiTietRepo.findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable).map(SanPhamChiTietHienThiResponse::converDto);
+    }
+
+
+    public boolean existsVariantInLoai(Integer idMau, Integer idRom, Integer idLoai) {
+        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idMau, idRom, idLoai);
+        return result != null && result == 1;
+    }
+
+    // Optional: kiểm tra nhiều biến thể 1 lần
+    public void validateKhongTrungBienTheTheoLoai(Integer idLoai, Set<SanPhamChiTietAdminRepuest> chiTiets) {
+        for (SanPhamChiTietAdminRepuest ct : chiTiets) {
+            boolean exists = existsVariantInLoai(ct.getIdMau(), ct.getIdRom(), idLoai);
+            if (exists) {
+                throw new BusinessException("Biến thể màu + ROM này đã tồn tại trong cùng loại sản phẩm.");
+            }
+        }
     }
 
 

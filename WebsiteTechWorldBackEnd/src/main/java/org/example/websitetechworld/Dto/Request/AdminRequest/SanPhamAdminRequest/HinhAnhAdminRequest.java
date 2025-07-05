@@ -18,8 +18,8 @@ public class HinhAnhAdminRequest {
     @Size(max = 255, message = "URL hình ảnh không được vượt quá 255 ký tự")
     private String url;
 
-    @NotBlank(message = "imagePublicId không được để trống")
-    @Size(max = 255, message = "imagePublicId không được vượt quá 255 ký tự")
+//    @NotBlank(message = "imagePublicId không được để trống")
+//    @Size(max = 255, message = "imagePublicId không được vượt quá 255 ký tự")
     private String imagePublicId;
 
 }

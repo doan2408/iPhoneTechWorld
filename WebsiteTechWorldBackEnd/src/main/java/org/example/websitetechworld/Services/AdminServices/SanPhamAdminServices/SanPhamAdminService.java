@@ -39,6 +39,7 @@ public class SanPhamAdminService {
     private final SanPhamRepository sanPhamRepository;
 
     private final ModelMapper modelMapper;
+    private final SanPhamChiTietAdminService sanPhamChiTietAdminService;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -365,36 +366,7 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
 
-        Set<String> variantKeySet = new HashSet<>();
-        Set<String> allImeis = new HashSet<>();
-        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-            List<String> imeiList = rq.getImeis().stream()
-                    .map(i -> i.getSoImei().trim())
-                    .filter(s -> !s.isEmpty())
-                    .toList();
-
-            Set<String> imeiSet = new HashSet<>(imeiList);
-            if (imeiSet.size() < imeiList.size()) {
-                throw new BusinessException("Chi tiết sản phẩm có IMEI bị trùng trong chính nó.");
-            }
-
-            for (String imei : imeiList) {
-                if (!allImeis.add(imei)) {
-                    throw new BusinessException("IMEI bị trùng giữa các biến thể: " + imei);
-                }
-
-                // Check trùng với DB
-                if (imeiReposiory.existsBySoImei(imei)) {
-                    throw new BusinessException("IMEI đã tồn tại trong hệ thống: " + imei);
-                }
-            }
-
-            String variantKey = String.format("%d-%d",
-                    rq.getIdMau(), rq.getIdRom());
-            if (!variantKeySet.add(variantKey)) {
-                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
-            }
-        }
+       validateSanPhamRequest(sanPhamAdminRequest);
         // Bước 2: Tạo SanPham
         SanPham sanPham = new SanPham();
         sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
@@ -507,6 +479,7 @@ public class SanPhamAdminService {
             modelSanPhamAdminResponse.setMaModelSanPham(sanPham.getIdModelSanPham().getMaModelSanPham());
             modelSanPhamAdminResponse.setTenModel(sanPham.getIdModelSanPham().getTenModel());
             modelSanPhamAdminResponse.setNamRaMat(sanPham.getIdModelSanPham().getNamRaMat());
+            response.setModelSanPhamAdminResponse(modelSanPhamAdminResponse);
         }
 
         if (sanPham.getSanPhamChiTiets() != null) {
@@ -523,15 +496,17 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
+
+        validateSanPhamRequest(sanPhamAdminRequest);
         // Kiểm tra biến thể trùng lặp
-        Set<String> variantKeySet = new HashSet<>();
-        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-            String variantKey = String.format("%d-%d",
-                    rq.getIdMau(), rq.getIdRom());
-            if (!variantKeySet.add(variantKey)) {
-                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
-            }
-        }
+//        Set<String> variantKeySet = new HashSet<>();
+//        for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+//            String variantKey = String.format("%d-%d",
+//                    rq.getIdMau(), rq.getIdRom());
+//            if (!variantKeySet.add(variantKey)) {
+//                throw new BusinessException("Biến thể với tổ hợp thuộc tính trùng lặp trong yêu cầu: " + variantKey);
+//            }
+//        }
 
         // Tìm sản phẩm cần cập nhật
         SanPham sanPham = sanPhamRepo.findById(id)
@@ -708,6 +683,56 @@ public class SanPhamAdminService {
         return sanPhamRepo.findTenDongSanPham(pageable);
     }
 
+
+    private void validateSanPhamRequest(SanPhamAdminRequest request) {
+        Set<String> variantKeySet = new HashSet<>();
+        Set<String> allImeis = new HashSet<>();
+
+        ModelSanPham model = modelSanPhamRepository
+                .findById(request.getIdModelSanPham())
+                .orElseThrow(() -> new BusinessException("model.notFound"));
+
+        Integer idLoai = model.getIdLoai().getId();
+
+        sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets());
+
+
+        for (SanPhamChiTietAdminRepuest rq : request.getSanPhamChiTiets()) {
+            String key = rq.getIdMau() + "-" + rq.getIdRom();
+
+            // Check trùng biến thể
+            if (!variantKeySet.add(key)) {
+                throw new BusinessException("chitiet.variant.duplicate", "Biến thể trùng tổ hợp màu - ROM: " + key);
+            }
+
+            List<String> imeis = rq.getImeis().stream()
+                    .map(i -> i.getSoImei().trim())
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+
+            // Check IMEI trùng trong chính biến thể
+            if (new HashSet<>(imeis).size() < imeis.size()) {
+                throw new BusinessException("chitiet.imei.duplicate.self", "IMEI bị trùng trong cùng một biến thể");
+            }
+
+            for (String imei : imeis) {
+                // Check IMEI trùng giữa các biến thể
+                if (!allImeis.add(imei)) {
+                    throw new BusinessException("chitiet.imei.duplicate.cross", "IMEI trùng giữa các biến thể: " + imei);
+                }
+
+                // Check IMEI đã tồn tại trong hệ thống
+                if (imeiReposiory.existsBySoImei(imei)) {
+                    throw new BusinessException("chitiet.imei.exists", "IMEI đã tồn tại: " + imei);
+                }
+            }
+
+            // So sánh số lượng với số IMEI
+            if (!Objects.equals(rq.getSoLuong(), imeis.size())) {
+                throw new BusinessException("chitiet.imei.quantity.mismatch", "IMEI phải đúng với số lượng: " + rq.getSoLuong());
+            }
+        }
+    }
 
 }
 

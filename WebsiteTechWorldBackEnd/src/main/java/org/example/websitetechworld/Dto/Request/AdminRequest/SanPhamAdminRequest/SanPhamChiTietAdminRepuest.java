@@ -25,28 +25,28 @@ public class SanPhamChiTietAdminRepuest {
 
     private Integer idSanPham;
 
-    @NotNull(message = "Màu sắc không được để trống")
+    @NotNull(message = "{chitiet.mau.required}")
     private Integer idMau;
 
-    @NotNull(message = "ROM không được để trống")
+    @NotNull(message = "{chitiet.rom.required}")
     private Integer idRom;
 
-    @NotNull(message = "Số lượng không được để trống")
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    @NotNull(message = "{chitiet.soLuong.required}")
+    @Min(value = 1, message = "{chitiet.soLuong.min}")
     private Integer soLuong;
 
-    @NotNull(message = "Vui lòng nhập giá bán sản phẩm")
-    @DecimalMin(value = "1000.0", inclusive = true, message = "Giá bán phải lớn hơn 1.000 VNĐ")
-    @Digits(integer = 10, fraction = 2, message = "Giá bán tối đa 10 chữ số trước dấu phẩy và không quá 2 số sau dấu phẩy (VD: 9999999999.99)")
+    @NotNull(message = "{chitiet.giaBan.required}")
+    @DecimalMin(value = "1000.0", inclusive = true, message = "{chitiet.giaBan.min}")
+    @Digits(integer = 10, fraction = 2, message = "{chitiet.giaBan.format}")
     private BigDecimal giaBan;
 
-    @NotNull(message = "Danh sách hình ảnh không được để trống")
-    @Size(min = 1, message = "Phải có ít nhất 1 hình ảnh")
+    @NotNull(message = "{chitiet.hinhAnh.required}")
+    @Size(min = 1, message = "{chitiet.hinhAnh.min}")
     @Valid
     private Set<HinhAnhAdminRequest> hinhAnhs;
 
-    @NotNull(message = "Danh sách IMEI không được để trống")
-    @Size(min = 1, message = "Phải có ít nhất 1 IMEI")
+    @NotNull(message = "{chitiet.imei.required}")
+    @Size(min = 1, message = "{chitiet.imei.min}")
     @Valid
     private Set<ImeiAdminRequest> imeis;
 
