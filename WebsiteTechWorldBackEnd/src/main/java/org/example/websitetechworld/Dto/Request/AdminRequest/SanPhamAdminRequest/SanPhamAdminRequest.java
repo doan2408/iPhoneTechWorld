@@ -4,6 +4,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,26 +23,27 @@ public class SanPhamAdminRequest {
 
     private String maSanPham;
 
-    @NotBlank(message = "Tên sản phẩm không được để trống")
-    @Size( min = 3, max = 50, message = "Tên sản phẩm phải từ 3 đến 50 ký tự")
+    @NotBlank(message = "{sanpham.tenSanPham.required}")
+    @Size(min = 3, max = 50, message = "{sanpham.tenSanPham.size}")
     private String tenSanPham;
 
-    @NotBlank(message = "Thương hiệu không được để trống")
-    @Size(min = 3, max = 50, message = "Tên thương hiệu phải từ 3 đến 50 ký tự")
+    @NotBlank(message = "{sanpham.thuongHieu.required}")
+    @Size(min = 3, max = 50, message = "{sanpham.thuongHieu.size}")
     private String thuongHieu;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Trạng thái sản phẩm không được để trống")
+    @NotNull(message = "{sanpham.trangThai.required}")
+    @Enumerated(EnumType.STRING) // Chỉ giữ lại nếu đây là Entity, nếu là DTO thì bỏ
     private TrangThaiSanPham trangThaiSanPham;
 
-    @NotNull(message = "Nhà cung cấp không được để trống")
+    @NotNull(message = "{sanpham.idNhaCungCap.required}")
     private Integer idNhaCungCap;
 
-    @NotNull(message = "id_model_san_pham không được để trống")
+    @NotNull(message = "{sanpham.idModel.required}")
     private Integer idModelSanPham;
 
-    @Size(min = 1, message = "Vui lòng tạo ít nhất 1 biến thể sản phẩm")
+    @NotEmpty(message = "{sanpham.chiTiet.required}")
     @Valid
     private Set<SanPhamChiTietAdminRepuest> sanPhamChiTiets;
+
 
 }

@@ -9,6 +9,8 @@ import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/sanPhamChiTiet")
@@ -45,5 +47,15 @@ public class SanPhamChiTietAdminController {
     @GetMapping
     public ResponseEntity<?> getAllSanPhamChiTiet(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,@RequestParam(defaultValue = "5",value = "pageSize") int pageSize){
         return ResponseEntity.ok(sanPhamChiTietAdminService.getAllSanPhamChiTiet(pageNo,pageSize));
+    }
+
+    @GetMapping("/check-duplicate-variant")
+    public ResponseEntity<?> checkDuplicateVariant(
+            @RequestParam Integer idMau,
+            @RequestParam Integer idRom,
+            @RequestParam (required = false) Integer idLoai
+    ) {
+        boolean exists = sanPhamChiTietAdminService.existsVariantInLoai(idMau, idRom, idLoai);
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
 }

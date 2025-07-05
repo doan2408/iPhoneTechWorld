@@ -71,14 +71,22 @@ public class GlobalExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse();
         error.setStatusCode(400);
         error.setError("Business Error");
-        error.setMessage(ex.getMessageCode()); // code cho FE dùng i18n
-        error.setMessage(messageSource.getMessage(
-                ex.getMessageCode(), null, ex.getMessageCode(), locale
-        ));
         error.setPath(request.getRequestURI());
+
+        // Lấy thông báo quốc tế hóa, có thể truyền args vào {0}
+        String message = messageSource.getMessage(
+                ex.getMessageCode(),
+                ex.getArgs(),
+                ex.getMessageCode(), // fallback nếu không tìm thấy
+                locale
+        );
+
+        error.setMessage(message);
+        error.setError(ex.getMessageCode()); // bạn có thể thêm thuộc tính errorCode vào response
 
         return ResponseEntity.badRequest().body(error);
     }
+
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest request) {
