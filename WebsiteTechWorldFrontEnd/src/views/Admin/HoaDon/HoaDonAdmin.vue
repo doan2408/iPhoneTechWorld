@@ -10,11 +10,14 @@
         <div class="header-actions">
           <button class="btn btn-primary" @click="handleCreateInvoice">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Tạo hóa đơn mới
           </button>
         </div>
+
+        <ConfirmModal v-if="showModalCreateInvoice" message="Bạn có chắc muốn tạo hóa đơn mới không?" @confirm="onConfirmCreateInvoice"
+          @cancel="onCancelCreate" />
       </div>
     </div>
 
@@ -198,11 +201,11 @@
                   <div class="customer-avatar">
                     {{ getInitials(hoaDon.tenNguoiMua) }}
                   </div>
-                  <div class="customer-name">{{ hoaDon.tenNguoiMua }}</div>
+                  <div class="customer-name">{{ hoaDon.tenNguoiMua ?? 'Khách vãng lai' }} </div>
                 </div>
               </td>
               <td class="table-td">
-                <div class="date">{{ hoaDon.sdtNguoiMua }}</div>
+                <div class="date">{{ hoaDon.sdtNguoiMua ?? 'N/A'}}</div>
               </td>
               <td class="table-td">
                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
@@ -231,7 +234,7 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa">
+                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="goToEdit(hoaDon.idHoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -494,7 +497,7 @@
                         <span class="info-label"> Ngày đặt hàng:</span>
                         <span class="info-value">{{
                           selectedInvoice.ngayDatHang || "N/A"
-                        }}</span>
+                          }}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label"> Trạng thái đơn hàng:</span>
@@ -704,6 +707,9 @@ import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import store from "@/Service/LoginService/Store";
+import { fa } from "element-plus/es/locales.mjs";
+import ConfirmModal from "@/views/Popup/ConfirmModal.vue";
+import { useToast } from "vue-toastification";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -717,6 +723,7 @@ const typeFilter = ref("");
 const dateFilter = ref("");
 const isLoading = ref(false);
 const error = ref(null);
+const showModalCreateInvoice = ref(null);
 // Thêm các ref để quản lý modal
 const showModal = ref(false);
 const selectedInvoice = ref(null);
@@ -725,6 +732,8 @@ const showLichSuHoaDon = ref(false);
 // Thong ke
 const doanhThuThang = ref(0);
 const choXuLy = ref(0);
+// Toast
+const toast = useToast()
 
 // Hàm mở modal và lấy chi tiết hóa đơn
 const viewInvoiceDetails = async (invoice) => {
@@ -819,8 +828,12 @@ const loadData = async () => {
 };
 
 //create pending hoaDon 
-const handleCreateInvoice = async () => {
-  isLoading.value = true
+const handleCreateInvoice =  () => {
+  showModalCreateInvoice.value = true
+}
+
+const onConfirmCreateInvoice = async () => {
+  showModalCreateInvoice.value = false
   try {
     const response = await createPendingInvoice()
     const data = response.data
@@ -828,7 +841,7 @@ const handleCreateInvoice = async () => {
     if (data.hoaDonId) {
       localStorage.setItem("selectedInvoiceId", data.hoaDonId)
 
-      ElMessage.success('Tạo hóa đơn thành công!')
+      toast.success('Tạo hóa đơn thành công!')
       router.push(`/admin/ban-hang`)
     }
   } catch (error) {
@@ -838,6 +851,10 @@ const handleCreateInvoice = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const onCancelCreate = () => {
+  showModalCreateInvoice.value = false
 }
 
 const deleteHoaDon = async (hoaDon) => {
@@ -1046,6 +1063,10 @@ const isStaff = computed(() => {
       .includes("ROLE_STAFF")
   );
 });
+
+const goToEdit = (id) => {
+  router.push({ name: 'CapNhatHoaDon', params: { id } })
+}
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {
