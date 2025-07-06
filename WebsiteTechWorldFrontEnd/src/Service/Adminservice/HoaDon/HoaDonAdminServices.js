@@ -120,14 +120,19 @@ export const addKhachHang = (data) => {
 }
 
 //Phieu giam gia
-export const getAllPhieuGiamGia = (search, idKhachHang) => {
+export const getAllPhieuGiamGia = (search, idKhachHang, giaTriDonHangToiThieu) => {
     const url = url_base + '/list-phieu-giam-gia'
     return api.get(url, {
         params: {
             search: search,
-            idKhachHang: idKhachHang
+            idKhachHang: idKhachHang,
+            giaTriDonHangToiThieu: giaTriDonHangToiThieu
         }
     })
+}
+
+export const phieuGiamGia = (id, request) => {
+    return api.put('/admin/hoa-don/' +id + '/phieu-giam-gia', request)
 }
 
 

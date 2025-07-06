@@ -32,7 +32,6 @@ public class ModelSanPhamAdminRequest {
     @NotNull(message = "{model.namRaMat.required}")
     private LocalDate namRaMat;
 
-
     @NotNull(message = "{model.trangThai.required}")
     @Enumerated(EnumType.STRING)
     private TrangThaiSanPhamModel trangThaiSanPhamModel;
