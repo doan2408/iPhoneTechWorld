@@ -44,7 +44,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
          LOWER(sp.ten_san_pham) LIKE LOWER(CONCAT(:keyword, '%')))
       AND (:idLoai IS NULL OR l.id_loai = :idLoai)
       AND (:trangThai IS NULL OR :trangThai = '' OR sp.trang_thai = :trangThai)
-    ORDER BY sp.id_san_pham
+    ORDER BY sp.id_san_pham DESC
     """,
             countQuery = """
     SELECT COUNT(DISTINCT sp.id_san_pham)

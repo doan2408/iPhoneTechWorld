@@ -27,6 +27,7 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
         JOIN xuat_xu xx ON xx.id_xuat_xu = msp.id_xuat_xu
         JOIN loai l ON l.id_loai = msp.id_loai
      WHERE msp.trang_thai != 'DELETED'
+     ORDER BY msp.id_model_san_pham DESC
 """, nativeQuery = true)
     Page<Object[]> getAllPage(Pageable pageable);
 
@@ -39,7 +40,7 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
       AND (:idLoai IS NULL OR m.id_loai = :idLoai)
       AND (:idRam IS NULL OR m.id_ram = :idRam)
       AND (:idXuatXu IS NULL OR m.id_xuat_xu = :idXuatXu)
-    ORDER BY m.id_model_san_pham ASC
+    ORDER BY m.id_model_san_pham DESC
     """,
             countQuery = """
     SELECT COUNT(*) FROM model_san_pham m
