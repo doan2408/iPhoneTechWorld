@@ -72,7 +72,7 @@
         </el-col>
       </el-row>
 
-      <div class="mb-3 action-section">
+      <div class="mb-3 action-section" v-if="isAdmin">
         <router-link to="/admin/products/create" class="el-link--success">
           <el-button type="success" size="default" class="action-btn">
             <el-icon>
@@ -169,12 +169,12 @@
                   <el-button size="small" type="info" :icon="View" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <router-link :to="`/admin/products/${row.id}`">
+              <router-link :to="`/admin/products/${row.id}`" v-if="isAdmin">
                 <el-tooltip content="Chỉnh sửa" placement="top">
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <el-tooltip content="Xóa sản phẩm" placement="top">
+              <el-tooltip content="Xóa sản phẩm" placement="top" v-if="isAdmin">
                 <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)"
                   class="action-btn-square" />
               </el-tooltip>
@@ -207,6 +207,7 @@ import { Edit, Delete, View, Search, Plus, DocumentAdd, Goods, Picture, CircleCh
 import { getAllSanPham, getAllLoaiList, getTrangThaiSanPham, deleteSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from 'lodash';
+import store from '@/Service/LoginService/Store';
 // import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
 // import store from '@/Service/LoginService/Store';
 
@@ -367,6 +368,26 @@ const trangThaiSanPhamMap = {
   TEMPORARILY_UNAVAILABLE: 'Tạm ngừng bán',
   OUT_OF_STOCK: 'Hết hàng',
 };
+
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
 
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
