@@ -11,7 +11,8 @@ import 'element-plus/dist/index.css'; //cấu hình  element
 import 'bootstrap'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
-
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
 
 // Cấu hình Axios trước khi khởi tạo ứng dụng
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -22,4 +23,5 @@ const app = createApp(App);
 app.use(store); // Đăng ký store
 app.use(router); // Đăng ký router
 app.use(ElementPlus); //cấu hình  element
+app.use(Toast);
 app.mount('#app');

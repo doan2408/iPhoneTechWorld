@@ -206,9 +206,9 @@ import { ref, onMounted, computed, watch, reactive } from 'vue';
 import { Edit, Delete, View, Search, Plus, DocumentAdd, Goods, Picture, CircleCheck, Warning, Clock, CircleClose, Minus, Filter, Refresh } from '@element-plus/icons-vue';
 import { getAllSanPham, getAllLoaiList, getTrangThaiSanPham, deleteSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
-// import { debounce } from 'lodash';
-import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
-import store from '@/Service/LoginService/Store';
+import { debounce } from 'lodash';
+// import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+// import store from '@/Service/LoginService/Store';
 
 
 // State

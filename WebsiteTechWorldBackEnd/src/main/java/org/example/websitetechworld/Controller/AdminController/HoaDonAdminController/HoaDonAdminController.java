@@ -25,6 +25,7 @@ import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -61,7 +62,7 @@ public class HoaDonAdminController {
     @GetMapping
     public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
                                                   @RequestParam(defaultValue = "10", value = "pageSize") int pageSize) {
-        return hoaDonAdminService.getPageHoaDon(pageNo, pageSize);
+        return hoaDonAdminService.getPageHoaDon(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name());
     }
 
     @GetMapping("/{idHoaDon}")

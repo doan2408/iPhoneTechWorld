@@ -2430,15 +2430,6 @@ input:checked+.slider:before {
     /* Đường kẻ dưới để phân tách */
 }
 
-/* Kiểu chữ cho nhãn (ví dụ: "Tổng tiền hàng:") */
-.total-label,
-.shipping-fee-label,
-.discount-label,
-.grand-total-label {
-    font-weight: 500;
-    /* Đậm vừa phải */
-    color: #333;
-}
 
 /* Kiểu chữ cho số tiền */
 .total-amount,

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,9 +69,12 @@ public class HoaDonAdminService {
         return hoaDonRepository.findAll().stream().map(HoaDonAdminResponse::convertDto).collect(Collectors.toList());
     }
 
-    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull(pageable).map(GetAllHoaDonAdminResponse::convertDto);
+    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize, String sortBy, String direction) {
+        Sort.Direction dir = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, sortBy));
+        return hoaDonRepository
+                .findByIsDeleteFalseOrIsDeleteIsNull(pageable)
+                .map(GetAllHoaDonAdminResponse::convertDto);
     }
 
     public HoaDonAdminResponse findById(Integer id){
