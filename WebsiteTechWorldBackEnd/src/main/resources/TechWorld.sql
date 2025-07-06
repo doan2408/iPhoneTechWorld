@@ -267,7 +267,7 @@ CREATE TABLE model_san_pham (
         END
     ) PERSISTED,
 
-                                ten_model NVARCHAR(50),
+                                ten_model NVARCHAR(255),
                                 id_cpu INT REFERENCES cpu(id_cpu),
                                 id_man_hinh INT REFERENCES man_hinh(id_man_hinh),
                                 id_camera_sau INT REFERENCES camera_sau(id_camera_sau),
