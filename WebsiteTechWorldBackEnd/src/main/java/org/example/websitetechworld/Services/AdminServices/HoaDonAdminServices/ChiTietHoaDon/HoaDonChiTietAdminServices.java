@@ -161,12 +161,14 @@ public class HoaDonChiTietAdminServices {
             soLuongMoi = 0;
         }
 
-        if (soLuongMoi == 0) {
-            // chua xu ly ( xoa chi tiet neu so luong ve 0 )
-        }
+
 
         chiTietHoaDon.setSoLuong(soLuongMoi);
         chiTietHoaDonRepository.save(chiTietHoaDon);
+
+        if (soLuongMoi == 0) {
+            deleleHdct(hdctId);
+        }
 
     }
 

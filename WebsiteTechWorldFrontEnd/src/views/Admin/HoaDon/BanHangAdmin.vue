@@ -89,7 +89,7 @@
                 <div class="customer-search">
                     <div class="search-box">
                         <Search class="search-icon" />
-                        <input v-model="customerSearchQuery" type="text" placeholder="Tìm khách hàng (F4)"
+                        <input v-model="customerSearchQuery" type="text" placeholder="Tìm sản phẩm (F4)"
                             class="search-input" @keydown.f4.prevent="focusCustomerSearch" @blur="searchCustomer" />
                     </div>
                     <div class="customer-actions">
@@ -227,8 +227,8 @@
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
                     <span><b v-if="currentInvoiceDetail.maKhachHang">{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
-                        currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                        currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                                currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -279,7 +279,7 @@
                             <div class="delete-modal-content-2">
                                 <h2>Trả một phần sản phẩm</h2>
                                 <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                        itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
+                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
                                 <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
                                 </p>
 
@@ -329,7 +329,8 @@
                     <span class="shipping-fee-label">Phí giao hàng:</span>
                     <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
                 </div>
-                <div class="discount-section" v-if="discountAmount > 0" style="flex-direction: row; max-height: 40.8px;">
+                <div class="discount-section" v-if="discountAmount > 0"
+                    style="flex-direction: row; max-height: 40.8px;">
                     <span class="discount-label">Giảm giá:</span>
                     <span class="discount-amount">- {{ formatCurrency(discountAmount) }}</span>
                 </div>
@@ -358,7 +359,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -406,61 +407,63 @@
                                         </div>
                                     </div>
                                     <div class="popup-actions">
-                                        <button @click="confirmShippingInfo" class="confirm-btn">Xác nhận</button>
+                                        <button @click="confirmShippingInfoPopup" class="confirm-btn">Xác nhận</button>
                                         <button @click="closeShippingPopup" class="cancel-btn">Hủy</button>
                                     </div>
-                                </div>
+                                    <ConfirmModal v-if="showMessageConfirmShipping"
+                                        message="Bạn có chắc cập nhật thông tin giao hàng không?"
+                                        @confirm="confirmShippingInfo" @cancel="onCancelCreate" />
                             </div>
                         </div>
-
-                        <div class="discount-section" style="padding-top: 0;">
-                            <h4>Chọn phiếu giảm giá</h4>
-                            <label>Chọn phiếu giảm giá</label>
-                            <select v-model="selectedDiscount" class="select-box">
-                                <option disabled value="">-- Chọn phiếu giảm giá --</option>
-                                <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
-                                    discount.tenKhuyenMai }}</option>
-                            </select>
-                        </div>
                     </div>
 
-                    <div class="payment-section">
-                        <h3>Chọn phương thức thanh toán</h3>
-                        <div class="payment-methods">
-                            <label class="payment-method-option" v-for="method in paymentMethods" :key="method.code">
-                                <input type="radio" name="paymentMethod" :value="method.code"
-                                    v-model="selectedPaymentMethod">
-                                <img :src="getIconUrl(method.code)" :alt="method.displayName" class="payment-icon">
-                                <span>{{ method.displayName }}</span>
-                            </label>
-                        </div>
-
-                        <div v-if="selectedPaymentMethod === 'NGAN_HANG'" class="payment-detail bank-transfer-info">
-                            <h4>Thông tin tài khoản ngân hàng</h4>
-                            <p><strong>Tên ngân hàng:</strong> Ngân hàng ABC</p>
-                            <p><strong>Số tài khoản:</strong> 1234567890</p>
-                            <p><strong>Chủ tài khoản:</strong> CÔNG TY TNHH XYZ</p>
-                            <p><strong>Nội dung chuyển khoản:</strong> [Mã đơn hàng của bạn]</p>
-                            <p class="note">Vui lòng chuyển khoản đúng nội dung để đơn hàng được xử lý nhanh chóng.</p>
-                        </div>
-
-                        <div class="terms-conditions">
-                            <label>
-                                <input type="checkbox" v-model="agreedToTerms">
-                                Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
-                                hàng.
-                            </label>
-                        </div>
+                    <div class="discount-section" style="padding-top: 0;">
+                        <h4>Chọn phiếu giảm giá</h4>
+                        <label>Chọn phiếu giảm giá</label>
+                        <select v-model="selectedDiscount" class="select-box">
+                            <option disabled value="">-- Chọn phiếu giảm giá --</option>
+                            <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
+                                discount.tenKhuyenMai }}</option>
+                        </select>
                     </div>
-
-
-                    <button @click="processPayment"
-                        class="payment-btn">
-                        THANH TOÁN
-                    </button>
                 </div>
+
+                <div class="payment-section">
+                    <h3>Chọn phương thức thanh toán</h3>
+                    <div class="payment-methods">
+                        <label class="payment-method-option" v-for="method in paymentMethods" :key="method.code">
+                            <input type="radio" name="paymentMethod" :value="method.code"
+                                v-model="selectedPaymentMethod">
+                            <img :src="getIconUrl(method.code)" :alt="method.displayName" class="payment-icon">
+                            <span>{{ method.displayName }}</span>
+                        </label>
+                    </div>
+
+                    <div v-if="selectedPaymentMethod === 'NGAN_HANG'" class="payment-detail bank-transfer-info">
+                        <h4>Thông tin tài khoản ngân hàng</h4>
+                        <p><strong>Tên ngân hàng:</strong> Ngân hàng ABC</p>
+                        <p><strong>Số tài khoản:</strong> 1234567890</p>
+                        <p><strong>Chủ tài khoản:</strong> CÔNG TY TNHH XYZ</p>
+                        <p><strong>Nội dung chuyển khoản:</strong> [Mã đơn hàng của bạn]</p>
+                        <p class="note">Vui lòng chuyển khoản đúng nội dung để đơn hàng được xử lý nhanh chóng.</p>
+                    </div>
+
+                    <div class="terms-conditions">
+                        <label>
+                            <input type="checkbox" v-model="agreedToTerms">
+                            Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
+                            hàng.
+                        </label>
+                    </div>
+                </div>
+
+
+                <button @click="processPayment" class="payment-btn">
+                    THANH TOÁN
+                </button>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Customer Modal -->
@@ -557,14 +560,14 @@ import {
     ChevronUp, ChevronDown, Minus, Trash2, History, FileText,
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
 } from 'lucide-vue-next'
-import { 
-    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory 
+import {
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory
 } from '@/Service/Adminservice/Products/ProductAdminService';
-import { 
+import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
     , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
-    , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan 
+    , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -572,6 +575,7 @@ import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "vue-toastification";
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -644,7 +648,7 @@ const calculateTotal = () => {
 
     if (selectedDiscount.value?.loaiKhuyenMai === 'Phần trăm') {
         discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriKhuyenMai / 100;
-        if(selectedDiscount.value?.giaTriKhuyenMaiToiDa < discountAmount.value) {
+        if (selectedDiscount.value?.giaTriKhuyenMaiToiDa < discountAmount.value) {
             discountAmount.value = selectedDiscount.value?.giaTriKhuyenMaiToiDa
         }
     } else if (selectedDiscount.value?.giaTriKhuyenMai) {
@@ -674,34 +678,35 @@ const loadDiscountList = async () => {
 const apPhieuGiamGia = async (idPhieuGiamGia) => {
     const storedId = localStorage.getItem("selectedInvoiceId");
     try {
-        await phieuGiamGia(storedId, {id: idPhieuGiamGia});
+        await phieuGiamGia(storedId, { id: idPhieuGiamGia });
     } catch (error) {
         console.error('Lỗi khi áp phiếu giảm giá:', error);
     }
 };
 
 watch(
-  () => currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList,
-  () => {
-    calculateTotal()
-    loadDiscountList()
-  },
-  { immediate: true, deep: true }
+    () => currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList,
+    () => {
+        calculateTotal()
+        loadDiscountList()
+
+    },
+    { immediate: true, deep: true }
 );
 
 watch(
-  () => selectedDiscount.value,
-  () => {
-    calculateTotal()
-    apPhieuGiamGia(selectedDiscount.value.id)
-  }
+    () => selectedDiscount.value,
+    () => {
+        calculateTotal()
+        apPhieuGiamGia(selectedDiscount.value.id)
+    }
 )
 
 watch(
-  () => shippingInfo.value.phiShip,
-  () => {
-    calculateTotal()
-  }
+    () => shippingInfo.value.phiShip,
+    () => {
+        calculateTotal()
+    }
 )
 
 
@@ -1253,7 +1258,7 @@ const confirmImeiSelection = async () => {
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
     } else {
-        toast.error(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
+        toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
 };
 
@@ -1273,10 +1278,10 @@ const addToCartWithImeis = async (product, imeiList) => {
     try {
         const response = await addProductIntoInvoice(storedId, data);
         await loadTabHoaDon(); // Tải lại dữ liệu hóa đơn sau khi thêm
-        ElMessage.success("Thêm sản phẩm thành công")
+        toast.success("Thêm sản phẩm thành công")
     } catch (err) {
         console.error("Thêm sản phẩm và IMEI thất bại:", err);
-        ElMessage.error("Thêm sản phẩm thất bại")
+        toast.error("Thêm sản phẩm thất bại")
     }
     // calculateTotal()
 }
@@ -1323,7 +1328,7 @@ const handleRemovePartial = async (item) => {
         // selectedImeisChon.value = imeisForCurrentItem.value.map(imei_item => imei_item.imei);
 
         // Hiển thị modal
-        showRemoveImeiModal.value = true;
+        showRemoveImeiModal.value = true; 
 
     } catch (error) {
         console.error('Lỗi khi tải IMEI từ API:', error);
@@ -1356,7 +1361,7 @@ const confirmPartialRemove = async () => {
 
         // ... (cập nhật UI sau khi thành công)
         closePartialModal();
-
+        await loadTabHoaDon()
     } catch (error) {
         console.error('Lỗi khi xác nhận loại bỏ IMEI:', error);
         toast.error(`Đã xảy ra lỗi: ${error.message}`);
@@ -1870,8 +1875,9 @@ const selectedKhachHang = async (khachHang) => {
             addOrUpdateInvoice(response.data);
             currentInvoiceDetail.value = response.data;
         }
+        toast.success("Chọn khách hàng thành công id: " + khachHang.id)
     } catch (err) {
-        ElMessage.error("Thêm khách hàng vào hóa đơn thất bại")
+        toast.error("Thêm khách hàng vào hóa đơn thất bại")
         console.error("Thêm khách hàng vào hóa đơn thất bại:", err);
     }
     showCustomerTable.value = false;
@@ -1903,6 +1909,10 @@ const closeShippingPopup = () => {
     showShippingPopup.value = false;
 };
 
+const showMessageConfirmShipping = ref(null)
+const confirmShippingInfoPopup = () => {
+    showMessageConfirmShipping.value = true
+}
 const confirmShippingInfo = async () => {
 
     const storedId = localStorage.getItem("selectedInvoiceId");
@@ -1943,6 +1953,8 @@ const confirmShippingInfo = async () => {
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
         toast.success('Cập nhật thông tin giao hàng thành công!');
+
+        showMessageConfirmShipping.value = false;
         showShippingPopup.value = false;
     } catch (error) {
         console.error('Lỗi khi cập nhật hóa đơn:', error);
@@ -1956,6 +1968,10 @@ const confirmShippingInfo = async () => {
         }
     }
 };
+
+const onCancelCreate = () => {
+    showMessageConfirmShipping.value = false;
+}
 
 const toggleShipping = () => {
     if (!isShipping.value) {
@@ -2021,7 +2037,7 @@ const processPayment = async () => {
     }
 
     const paymentPayload = {
-        hinhThucThanhToan: selectedPaymentMethod.value, 
+        hinhThucThanhToan: selectedPaymentMethod.value,
         soTienKhachDua: currentInvoiceDetail.value.thanhTien
     };
 
@@ -2034,6 +2050,7 @@ const processPayment = async () => {
             console.log('Hóa đơn sau thanh toán:', response.data);
             // Cập nhật trạng thái hóa đơn nếu cần
             // currentInvoiceDetail.value.trangThaiThanhToan = 'PAID'; // Giả sử có trường này
+            window.location.reload();
         } else {
             toast.error('Thanh toán không thành công: ' + (response.data?.message || 'Lỗi không xác định.'));
         }
