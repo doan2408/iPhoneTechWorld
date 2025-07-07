@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="container mt-4">
     <div class="form-header">
@@ -25,16 +26,14 @@
           <el-col :span="12">
             <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
               <el-select v-model="sanPhamModel.idNhaCungCap" placeholder="Chọn nhà cung cấp" style="width: 100%">
-                <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap"
-                  :value="ncc.id"></el-option>
+                <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap" :value="ncc.id"></el-option>
               </el-select>
             </el-form-item>                  
           </el-col>
           <el-col :span="12">
             <el-form-item label="Trạng thái" prop="trangThaiSanPham">
               <el-select v-model="sanPhamModel.trangThaiSanPham" placeholder="Chọn trạng thái" style="width: 100%">
-                <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label"
-                  :value="tt.value"></el-option>
+                <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label" :value="tt.value"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -123,7 +122,7 @@
           <el-col :span="8">
             <el-form-item label="Giá bán" :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`"
               :rules="[{ required: true, message: 'Vui lòng nhập giá bán', type: 'number' }]">
-              <el-input-number v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].giaBan" :min="0" :precision="2"
+              <el-input-number v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].giaBan" :min="1000" :precision="0"
                 style="width: 100%"></el-input-number>
             </el-form-item>
           </el-col>
@@ -134,9 +133,13 @@
           <el-input type="textarea" v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].imeisInput"
             placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy"
             @input="capNhatSoLuong(selectedChiTiet)"></el-input>
-          <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
-            accept=".txt,.csv" style="margin-top: 8px;">
-            <el-button type="primary">Tải lên file IMEI</el-button>
+          <el-upload 
+            :auto-upload="false" 
+            :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
+            accept=".txt,.csv,.xlsx,.xls" 
+            style="margin-top: 8px;"
+          >
+            <el-button type="primary">Tải lên file IMEI (TXT, CSV, Excel)</el-button>
           </el-upload>
           <div class="imei-info">
             <span class="imei-count">Số lượng IMEI hợp lệ: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
@@ -144,10 +147,14 @@
               ({{ sanPhamModel.sanPhamChiTiets[selectedChiTiet].invalidImeis.length }} IMEI không hợp lệ: {{
                 sanPhamModel.sanPhamChiTiets[selectedChiTiet].invalidImeis.join(', ') }})
             </span>
+            <span v-if="sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis?.length" class="imei-error">
+              ({{ sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis.length }} IMEI trùng lặp: {{
+                sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis.join(', ') }})
+            </span>
           </div>
         </el-form-item>
         
-        <!-- Improved Image Upload Section -->
+        <!-- Hình ảnh sản phẩm -->
         <el-form-item label="Hình ảnh sản phẩm">
           <div class="image-upload-section">
             <!-- Current Images Display -->
@@ -242,7 +249,7 @@
 
       <!-- Nút hành động -->
       <div class="form-actions">
-        <el-button type="success" size="large" @click="submitForm" class="action-btn primary-btn">
+        <el-button type="success" size="large" :loading="loading.submit" @click="submitForm" class="action-btn primary-btn">
           <i class="el-icon-check"></i>
           Cập nhật sản phẩm
         </el-button>
@@ -306,17 +313,19 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { Delete, View } from '@element-plus/icons-vue';
 import { getSanPhamById, getAllNhaCungCapList, getAllMauSacList, getAllRomList, putDataSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { debounce } from 'lodash';
 import api from "@/Service/LoginService/axiosInstance";
+import * as XLSX from 'xlsx';
 
 const route = useRoute();
 const id = route.params.id;
 const router = useRouter();
 
 const sanPhamModel = reactive({
+  id: null,
   tenSanPham: '',
   thuongHieu: '',
   idNhaCungCap: null,
@@ -330,8 +339,10 @@ const selectedChiTiet = ref(null);
 const nhaCungCaps = ref([]);
 const maus = ref([]);
 const roms = ref([]);
+const loading = reactive({
+  submit: false,
+});
 
-// Image handling states
 const imagePreview = reactive({
   visible: false,
   images: [],
@@ -362,7 +373,8 @@ const rules = {
   trangThaiSanPham: [{ required: true, message: 'Vui lòng chọn trạng thái' }]
 };
 
-// Image handling functions
+const validateIMEI = (imei) => /^\d{15}$/.test(imei);
+
 const previewTableImage = (images) => {
   imagePreview.images = images;
   imagePreview.currentIndex = 0;
@@ -433,7 +445,6 @@ const truncateFileName = (fileName) => {
 };
 
 const getImageSize = (image) => {
-  // Mock size calculation - in real app, you'd get this from file info
   return '~250KB';
 };
 
@@ -476,7 +487,6 @@ const handleFileChange = async (file, fileList, index) => {
     const formData = new FormData();
     formData.append('file', file.raw);
 
-    // Simulate upload progress
     const progressInterval = setInterval(() => {
       if (uploadProgress.percent < 90) {
         uploadProgress.percent += 10;
@@ -503,19 +513,16 @@ const handleFileChange = async (file, fileList, index) => {
     setTimeout(() => {
       uploadProgress.show = false;
     }, 1500);
-
   } catch (err) {
     uploadProgress.status = 'exception';
     uploadProgress.text = 'Tải lên thất bại';
     ElMessage.error('Lỗi khi tải ảnh: ' + (err.response?.data?.message || err.message));
-    
     setTimeout(() => {
       uploadProgress.show = false;
     }, 2000);
   }
 };
 
-// Rest of the existing functions remain the same...
 const fetchSanPham = async (id) => {
   try {
     const response = await getSanPhamById(id);
@@ -532,6 +539,7 @@ const fetchSanPham = async (id) => {
       giaBan: chiTiet.giaBan,
       imeisInput: chiTiet.imeis?.map(i => i.soImei).join(', ') || '',
       invalidImeis: [],
+      duplicateImeis: [],
       hinhAnhs: chiTiet.hinhAnhs?.map(h => ({
         name: h.url.split('/').pop(),
         url: h.url,
@@ -561,40 +569,125 @@ const fetchDanhMuc = async () => {
   }
 };
 
-const validateIMEI = (imei) => /^\d{15}$/.test(imei);
-
 const capNhatSoLuong = debounce((index) => {
   const imeis = sanPhamModel.sanPhamChiTiets[index].imeisInput
     .split(',')
     .map(i => i.trim())
     .filter(i => i);
   const validImeis = imeis.filter(validateIMEI);
+  const invalidImeis = imeis.filter(i => !validateIMEI(i));
+  
+  const allOtherImeis = sanPhamModel.sanPhamChiTiets
+    .flatMap((chiTiet, i) => 
+      i !== index ? chiTiet.imeisInput.split(',').map(im => im.trim()).filter(im => im) : []
+    );
+  const duplicateImeis = validImeis.filter(im => allOtherImeis.includes(im));
+
   sanPhamModel.sanPhamChiTiets[index].soLuong = validImeis.length;
-  sanPhamModel.sanPhamChiTiets[index].invalidImeis = imeis.filter(i => !validateIMEI(i));
+  sanPhamModel.sanPhamChiTiets[index].invalidImeis = invalidImeis;
+  sanPhamModel.sanPhamChiTiets[index].duplicateImeis = duplicateImeis;
 }, 300);
 
-const handleImeiFileChange = (file, index) => {
+const handleImeiFileChange = async (file, index) => {
   try {
     if (file.raw.size > 1024 * 1024) {
       throw new Error('File quá lớn, vui lòng chọn file dưới 1MB');
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target.result;
-      const imeis = content
-        .split(/[\n,;\s]+/)
-        .map(i => i.trim())
-        .filter(i => i);
-      sanPhamModel.sanPhamChiTiets[index].imeisInput = imeis.join(', ');
-      capNhatSoLuong(index);
-      ElMessage.success(`Đã tải lên ${imeis.length} IMEI từ file ${file.name}`);
-    };
-    reader.onerror = () => {
-      throw new Error('Lỗi khi đọc file');
-    };
-    reader.readAsText(file.raw);
+
+    const fileType = file.raw.type;
+    const textTypes = ['text/plain', 'text/csv'];
+    const excelTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+
+    const loadingInstance = ElLoading.service({
+      text: 'Đang xử lý file...',
+      background: 'rgba(0, 0, 0, 0.7)',
+    });
+
+    if (textTypes.includes(fileType)) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target.result;
+          const imeis = content
+            .split(/[\n,;\s]+/)
+            .map(i => i.trim())
+            .filter(i => i);
+          const validImeis = imeis.filter(validateIMEI);
+          const invalidImeis = imeis.filter(i => !validateIMEI(i));
+
+          sanPhamModel.sanPhamChiTiets[index].imeisInput = validImeis.join(', ');
+          sanPhamModel.sanPhamChiTiets[index].invalidImeis = invalidImeis;
+          capNhatSoLuong(index);
+          
+          ElMessage.success(`Đã tải lên ${validImeis.length} IMEI hợp lệ từ file ${file.name}`);
+          if (invalidImeis.length > 0) {
+            ElMessage.warning(`Có ${invalidImeis.length} IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(', ')}${invalidImeis.length > 3 ? '...' : ''}`);
+          }
+        } catch (err) {
+          ElMessage.error('Lỗi khi xử lý file: ' + err.message);
+        } finally {
+          loadingInstance.close();
+        }
+      };
+      reader.onerror = () => {
+        throw new Error('Lỗi khi đọc file');
+      };
+      reader.readAsText(file.raw);
+    } else if (excelTypes.includes(fileType)) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheet];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+          // Lấy danh sách tất cả IMEI từ các biến thể khác để kiểm tra trùng lặp
+          const allOtherImeis = sanPhamModel.sanPhamChiTiets
+            .flatMap((chiTiet, i) => 
+              i !== index ? chiTiet.imeisInput.split(',').map(im => im.trim()).filter(im => im) : []
+            );
+
+          // Xử lý dữ liệu từ file Excel
+          const imeis = jsonData
+            .slice(1)
+            .flatMap(row => row.map(cell => String(cell).trim()))
+            .filter(i => i);
+          
+          const validImeis = imeis.filter(i => validateIMEI(i) && !allOtherImeis.includes(i));
+          const invalidImeis = imeis.filter(i => i && !validateIMEI(i));
+          const duplicateImeis = imeis.filter(i => i && validateIMEI(i) && allOtherImeis.includes(i));
+
+          sanPhamModel.sanPhamChiTiets[index].imeisInput = validImeis.join(', ');
+          sanPhamModel.sanPhamChiTiets[index].invalidImeis = invalidImeis;
+          sanPhamModel.sanPhamChiTiets[index].duplicateImeis = duplicateImeis;
+          capNhatSoLuong(index);
+
+          ElMessage.success(`Đã tải lên ${validImeis.length} IMEI hợp lệ từ file ${file.name}`);
+          if (invalidImeis.length > 0) {
+            ElMessage.warning(`Có ${invalidImeis.length} IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(', ')}${invalidImeis.length > 3 ? '...' : ''}`);
+          }
+          if (duplicateImeis.length > 0) {
+            ElMessage.warning(`Có ${duplicateImeis.length} IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(', ')}${duplicateImeis.length > 3 ? '...' : ''}`);
+          }
+        } catch (err) {
+          ElMessage.error('Lỗi khi xử lý file Excel: ' + err.message);
+        } finally {
+          loadingInstance.close();
+        }
+      };
+      reader.onerror = () => {
+        ElMessage.error('Lỗi khi đọc file Excel');
+        loadingInstance.close();
+      };
+      reader.readAsArrayBuffer(file.raw);
+    } else {
+      throw new Error('Chỉ hỗ trợ định dạng .txt, .csv, .xlsx hoặc .xls');
+    }
   } catch (err) {
     ElMessage.error('Lỗi khi xử lý file IMEI: ' + err.message);
+    loadingInstance.close();
   }
 };
 
@@ -616,9 +709,89 @@ const getMauSacLabel = (idMau) => maus.value.find(m => m.id === idMau)?.tenMau |
 const getRomLabel = (idRom) => roms.value.find(r => r.id === idRom)?.dungLuong || 'Không rõ';
 const indexMethod = (index) => index + 1;
 
+const validateForm = () => {
+  let hasError = false;
+
+  if (!sanPhamModel.tenSanPham) {
+    error.value = 'Vui lòng nhập tên sản phẩm';
+    hasError = true;
+  }
+  if (!sanPhamModel.thuongHieu) {
+    error.value = 'Vui lòng nhập thương hiệu';
+    hasError = true;
+  }
+  if (!sanPhamModel.idNhaCungCap) {
+    error.value = 'Vui lòng chọn nhà cung cấp';
+    hasError = true;
+  }
+  if (!sanPhamModel.trangThaiSanPham) {
+    error.value = 'Vui lòng chọn trạng thái';
+    hasError = true;
+  }
+  if (!sanPhamModel.sanPhamChiTiets.length) {
+    error.value = 'Vui lòng thêm ít nhất một biến thể sản phẩm';
+    hasError = true;
+  }
+
+  sanPhamModel.sanPhamChiTiets.forEach((chiTiet, index) => {
+    if (!chiTiet.idMau) {
+      error.value = `Biến thể ${index + 1}: Vui lòng chọn màu sắc`;
+      hasError = true;
+    }
+    if (!chiTiet.idRom) {
+      error.value = `Biến thể ${index + 1}: Vui lòng chọn ROM`;
+      hasError = true;
+    }
+    if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
+      error.value = `Biến thể ${index + 1}: Giá bán phải lớn hơn hoặc bằng 1000 VND`;
+      hasError = true;
+    }
+    if (!chiTiet.soLuong) {
+      error.value = `Biến thể ${index + 1}: Số lượng phải lớn hơn 0`;
+      hasError = true;
+    }
+    if (chiTiet.hinhAnhs.length === 0) {
+      error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 hình ảnh`;
+      hasError = true;
+    }
+
+    const imeis = chiTiet.imeisInput.split(',').map(i => i.trim()).filter(i => i);
+    if (imeis.length === 0) {
+      error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 IMEI`;
+      hasError = true;
+    } else {
+      const allOtherImeis = sanPhamModel.sanPhamChiTiets
+        .flatMap((ct, i) => i !== index ? ct.imeisInput.split(',').map(im => im.trim()).filter(im => im) : []);
+      const duplicateImeis = imeis.filter(im => allOtherImeis.includes(im));
+      if (duplicateImeis.length > 0) {
+        error.value = `Biến thể ${index + 1}: Có ${duplicateImeis.length} IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(', ')}${duplicateImeis.length > 3 ? '...' : ''}`;
+        hasError = true;
+      }
+      const invalidImeis = imeis.filter(i => !validateIMEI(i));
+      if (invalidImeis.length > 0) {
+        error.value = `Biến thể ${index + 1}: Có ${invalidImeis.length} IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(', ')}${invalidImeis.length > 3 ? '...' : ''}`;
+        hasError = true;
+      }
+    }
+  });
+
+  return !hasError;
+};
+
 const submitForm = async () => {
   try {
     await sanPhamForm.value.validate();
+    if (!validateForm()) {
+      ElMessage.error(error.value);
+      return;
+    }
+
+    loading.submit = true;
+    const loadingInstance = ElLoading.service({
+      text: 'Đang cập nhật sản phẩm...',
+      background: 'rgba(0, 0, 0, 0.7)',
+    });
+
     const payload = {
       id: sanPhamModel.id,
       tenSanPham: sanPhamModel.tenSanPham,
@@ -650,17 +823,19 @@ const submitForm = async () => {
   } catch (err) {
     error.value = err.message || 'Lỗi khi cập nhật sản phẩm';
     ElMessage.error(error.value);
+  } finally {
+    loading.submit = false;
+    loadingInstance.close();
   }
 };
 
-onMounted(async () => {
-  await Promise.all([fetchDanhMuc(), fetchSanPham(route.params.id)]);
+onMounted(() => {
+  fetchSanPham(id);
+  fetchDanhMuc();
 });
 </script>
 
 <style scoped>
-/* Previous styles remain the same... */
-/* Container và Layout */
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -670,7 +845,6 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-/* Header Styling */
 .form-header {
   text-align: center;
   margin-bottom: 40px;
@@ -692,7 +866,6 @@ onMounted(async () => {
   border-radius: 2px;
 }
 
-/* Form Sections */
 .form-section {
   background: white;
   border-radius: 16px;
@@ -729,11 +902,6 @@ onMounted(async () => {
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Professional Form Styling */
-.professional-form {
-  background: transparent;
-}
-
 .professional-form .el-form-item {
   margin-bottom: 24px;
 }
@@ -761,7 +929,6 @@ onMounted(async () => {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Professional Table Styling */
 .table-container {
   border-radius: 12px;
   overflow: hidden;
@@ -833,7 +1000,6 @@ onMounted(async () => {
   font-size: 15px;
 }
 
-/* Table Images */
 .table-images {
   display: flex;
   justify-content: center;
@@ -889,7 +1055,6 @@ onMounted(async () => {
   margin-bottom: 4px;
 }
 
-/* Edit Section Styling */
 .edit-section {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 2px solid #0ea5e9;
@@ -909,7 +1074,6 @@ onMounted(async () => {
   color: #0ea5e9;
 }
 
-/* Enhanced Image Upload Section */
 .image-upload-section {
   width: 100%;
 }
@@ -1014,7 +1178,6 @@ onMounted(async () => {
   color: #718096;
 }
 
-/* Upload Area */
 .upload-area {
   margin-top: 20px;
 }
@@ -1078,7 +1241,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-/* Upload Progress */
 .upload-progress {
   margin-top: 16px;
   padding: 16px;
@@ -1093,7 +1255,6 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-/* Image Preview Dialog */
 .image-preview-dialog .el-dialog__body {
   padding: 0;
 }
@@ -1173,7 +1334,6 @@ onMounted(async () => {
   gap: 8px;
 }
 
-/* IMEI Info Styling */
 .imei-info {
   margin-top: 12px;
   padding: 12px;
@@ -1194,7 +1354,6 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
-/* Action Buttons */
 .form-actions {
   text-align: center;
   padding: 32px;
@@ -1238,7 +1397,6 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-/* Alert Styling */
 .selection-alert {
   border-radius: 12px;
   border: none;
@@ -1253,14 +1411,12 @@ onMounted(async () => {
   background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
 }
 
-/* Tags and Status */
 .el-tag {
   border-radius: 20px;
   font-weight: 500;
   padding: 4px 12px;
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
   .container {
     padding: 24px;
@@ -1346,7 +1502,6 @@ onMounted(async () => {
   }
 }
 
-/* Animation và Transitions */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -1374,7 +1529,6 @@ onMounted(async () => {
   animation-delay: 0.3s;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -1393,3 +1547,4 @@ onMounted(async () => {
   background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
 </style>
+```
