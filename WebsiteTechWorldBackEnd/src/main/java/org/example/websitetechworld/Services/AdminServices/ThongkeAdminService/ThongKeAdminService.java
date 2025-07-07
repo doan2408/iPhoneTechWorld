@@ -46,13 +46,13 @@ public class ThongKeAdminService {
 //        return count != null ? count : 0;
 //    }
 
-    public DashboardAdminResponse getDashboardAdminResponse () {
+    public DashboardAdminResponse getDashboardAdminResponse (String startDate, String endDate) {
 
         DashboardAdminResponse response = new DashboardAdminResponse();
-        response.setDoanhThuThang(thongKeRepository.doanhThuThang());
-        response.setTongSoDonhang(thongKeRepository.dashboardSoDonHang());
-        response.setTongSoSanPham(thongKeRepository.dashboardSoSanPham());
-        response.setTongSoKhachHang(thongKeRepository.dashboardSoKhachHang());
+        response.setDoanhThuThang(thongKeRepository.doanhThuTheoKhoang(startDate, endDate));
+        response.setTongSoDonhang(thongKeRepository.soDonHangTheoKhoang(startDate, endDate));
+        response.setTongSoSanPham(thongKeRepository.soSanPhamTheoKhoang(startDate, endDate));
+        response.setTongSoKhachHang(thongKeRepository.tongSoKhachHang());
 
         return response;
     }

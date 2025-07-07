@@ -37,6 +37,8 @@ public class PhieuGiamGiaAdminService {
     private final ModelMapper modelMapper;
     private final MailService mailService;
 
+    private final Set<Integer> idKhachHangDaGuiMail = new HashSet<>();
+
     public PhieuGiamGiaAdminService(PhieuGiamGiaRepository phieuGiamGiaRepository,
                                     KhachHangGiamGiaRepository khachHangGiamGiaRepository,
                                     KhachHangRepository khachHangRepository,
@@ -76,8 +78,17 @@ public class PhieuGiamGiaAdminService {
         kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
 //        kiemTraPhieuChoSp(request);
 
+        LocalDate currentDate = LocalDate.now();
+        if (request.getNgayBatDau().isBefore(currentDate)) {
+            throw new IllegalStateException("Ngày bắt đầu phải sau ngày hiện tại");
+        }
+
+        if (request.getMaGiamGia() == null || request.getMaGiamGia().trim().isEmpty()) {
+            request.setMaGiamGia(taoMaGiamGiaNgauNhien());
+        }
+
         PhieuGiamGia phieuGiamGia = modelMapper.map(request, PhieuGiamGia.class);
-//        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
+        phieuGiamGia = phieuGiamGiaRepository.save(phieuGiamGia);
 
 //        if (!phieuGiamGia.getCongKhai()) {
 //            xuLyKhachHangGiamGia(phieuGiamGia, layDanhSachIdKhachHangTuYeuCau(request));
@@ -94,8 +105,13 @@ public class PhieuGiamGiaAdminService {
         LocalDate currentDate = LocalDate.now();
         boolean hasStarted = !currentDate.isBefore(phieuGiamGia.getNgayBatDau());
 
-        if (hasStarted && isTrangThaiPhatHanhModified(phieuGiamGia, request)) {
-            throw new IllegalStateException("Không thể sửa trạng thái phát hành của phiếu giảm giá đã bắt đầu.");
+        if (isTrangThaiPhatHanhModified(phieuGiamGia, request)) {
+            if (phieuGiamGia.getTrangThaiPhatHanh() == TrangThaiPhatHanh.ISSUED
+                    && request.getTrangThaiPhatHanh() == TrangThaiPhatHanh.STOP_ISSUED) {
+
+                notifyAffectedCustomers(phieuGiamGia);
+                khachHangGiamGiaRepository.deleteByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+            }
         }
 
         boolean isSavedByCustomers = khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
@@ -120,6 +136,8 @@ public class PhieuGiamGiaAdminService {
             phieuGiamGia.setNgayKetThuc(request.getNgayKetThuc());
             phieuGiamGia.setSoDiemCanDeDoi(request.getSoDiemCanDeDoi());
             phieuGiamGia.setDieuKienApDung(request.getDieuKienApDung());
+            phieuGiamGia.setCongKhai(request.getCongKhai());
+            phieuGiamGia.setTrangThaiPhatHanh(request.getTrangThaiPhatHanh());
         }
 
         phieuGiamGia.setId(id);
@@ -127,6 +145,16 @@ public class PhieuGiamGiaAdminService {
         xoaKhachHangGiamGiaChuaSuDung(phieuGiamGia);
 
         return modelMapper.map(phieuGiamGiaRepository.save(phieuGiamGia), PhieuGiamGiaAdminResponse.class);
+    }
+
+    private String taoMaGiamGiaNgauNhien() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            int idx = (int) (Math.random() * chars.length());
+            sb.append(chars.charAt(idx));
+        }
+        return sb.toString();
     }
 
     @Transactional
@@ -165,24 +193,31 @@ public class PhieuGiamGiaAdminService {
     }
 
     @Async
-    public void notifyAffectedCustomers(PhieuGiamGia phieuGiamGia) {
-        List<KhachHangGiamGia> savedVouchers = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
-        for (KhachHangGiamGia khachHangGiamGia : savedVouchers) {
-            KhachHang khachHang = khachHangGiamGia.getIdKhachHang();
-            String emailContent = String.format(
-                    """
-                            Kính gửi %s,
-                            
-                            Chúng tôi xin lỗi vì phiếu giảm giá %s đã được cập nhật hoặc hủy bỏ. \
-                            Vui lòng kiểm tra thông tin mới nhất trên hệ thống của chúng tôi.
-                            
-                            Trân trọng,
-                            TechWorld""",
-                    khachHang.getTenKhachHang(), phieuGiamGia.getTenKhuyenMai()
-            );
-            mailService.sendMail(khachHang.getEmail(), "Thông báo về phiếu giảm giá", emailContent);
+    public void notifyAffectedCustomers(PhieuGiamGia phieu) {
+        try {
+            List<KhachHangGiamGia> lst = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieu, false);
+            for (KhachHangGiamGia khgg : lst) {
+                Integer idKhach = khgg.getIdKhachHang().getId();
+                if (!idKhachHangDaGuiMail.contains(idKhach)) {
+                    KhachHang kh = khgg.getIdKhachHang();
+                    mailService.sendMail(
+                            kh.getEmail(),
+                            "Thông báo về phiếu giảm giá",
+                            String.format("""
+                                    Kính gửi %s,
+                                    
+                                    Phiếu giảm giá %s đã được cập nhật/hủy bỏ. Vui lòng kiểm tra lại trong hệ thống.
+                                    
+                                    TechWorld""", kh.getTenKhachHang(), phieu.getTenKhuyenMai()));
+                    idKhachHangDaGuiMail.add(idKhach);
+                }
+            }
+            idKhachHangDaGuiMail.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
 
 
 //    public Page<SanPhamChiTietResponse> layDanhSachSanPham (String timKiem, int trang, int kichThuoc) {
@@ -357,13 +392,14 @@ public class PhieuGiamGiaAdminService {
 //    }
 
     //Hoa don
-    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang) {
+    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang, BigDecimal giaTriDonHangToiThieu) {
 
         Set<PhieuGiamGia> phieuGiamGiaGop = new HashSet<>();
 
         List<PhieuGiamGia> phieuCongKhai = phieuGiamGiaRepository
-                .findBySoDiemCanDeDoiAndTrangThaiPhatHanhAndCongKhaiAndTrangThaiPhieuGiamGiaAndMaGiamGiaContainingIgnoreCase(
+                .timPhieuGiamGiaCongKhai(
                         BigDecimal.ZERO,
+                        giaTriDonHangToiThieu,
                         TrangThaiPhatHanh.ISSUED,
                         true,
                         TrangThaiPGG.ACTIVE,
@@ -379,6 +415,7 @@ public class PhieuGiamGiaAdminService {
                     .filter(khgg -> !khgg.getIsUser())
                     .map(KhachHangGiamGia::getIdPhieuGiamGia)
                     .filter(pgg -> pgg.getTrangThaiPhatHanh() == TrangThaiPhatHanh.ISSUED
+                            && pgg.getGiaTriDonHangToiThieu().compareTo(giaTriDonHangToiThieu) <= 0
                             && pgg.getTrangThaiPhieuGiamGia() == TrangThaiPGG.ACTIVE
                             && pgg.getMaGiamGia().toLowerCase().contains(timKiem == null ? "" : timKiem.toLowerCase()))
                     .toList();

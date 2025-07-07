@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.
 import jakarta.persistence.EntityManager;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThongTinNguoiNhanAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
@@ -47,9 +48,10 @@ public class HoaDonAdminService {
     private final ImeiAdminService imeiAdminService;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
     private final HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_sanPhamAdminServices;
+    private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final EntityManager entityManager;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, EntityManager entityManager) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -59,6 +61,7 @@ public class HoaDonAdminService {
         this.imeiAdminService = imeiAdminService;
         this.hoaDonChiTiet_ImeiAdminServices = hoaDonChiTiet_ImeiAdminServices;
         hoaDonChiTiet_sanPhamAdminServices = hoaDonChiTietSanPhamAdminServices;
+        this.phieuGiamGiaRepository = phieuGiamGiaRepository;
         this.entityManager = entityManager;
     }
 
@@ -142,6 +145,24 @@ public class HoaDonAdminService {
         hoaDon.setSdtNguoiMua(khachHang.getSdt());
         hoaDonRepository.save(hoaDon);
     }
+
+    @Transactional
+    public void xuLyPhieuGiamGia(Integer idHoaDon, PhieuGiamGiaAdminRequest phieuGiamGiaAdminRequest) {
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại: " + idHoaDon));
+
+        Integer idPhieuGiamGia = phieuGiamGiaAdminRequest.getId();
+        if (idPhieuGiamGia == null) {
+            throw new IllegalArgumentException("Id phiếu giảm giá không được null");
+        }
+
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(idPhieuGiamGia)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá với ID: " + idPhieuGiamGia));
+
+        hoaDon.setIdPhieuGiamGia(phieuGiamGia);
+        hoaDonRepository.save(hoaDon);
+    }
+
 
     public ThanhToanAdminResponse xuLyThanhToan(Integer idHoaDon, ThanhToanAdminRequest request){
         HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)

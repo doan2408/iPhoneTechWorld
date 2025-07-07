@@ -24,4 +24,6 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
 
 
     List<KhachHangGiamGia> findByIdKhachHang_Id(Integer idKhachHangId);
+
+    void deleteByIdPhieuGiamGiaAndIsUser(PhieuGiamGia idPhieuGiamGia, Boolean isUser);
 }

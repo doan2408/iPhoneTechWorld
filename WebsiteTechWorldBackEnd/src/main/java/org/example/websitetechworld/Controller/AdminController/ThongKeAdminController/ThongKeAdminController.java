@@ -6,6 +6,7 @@ import org.example.websitetechworld.Services.AdminServices.ThongkeAdminService.T
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping ("/admin/thong-ke")
+
 public class ThongKeAdminController {
 
     private final ThongKeAdminService thongKeAdminService;
@@ -52,10 +54,11 @@ public class ThongKeAdminController {
 //    }
 
     @GetMapping("/tong-quan")
-    public DashboardAdminResponse tongQuan () {
-
-        return thongKeAdminService.getDashboardAdminResponse();
+    public DashboardAdminResponse tongQuan(@RequestParam String startDate,
+                                           @RequestParam String endDate) {
+        return thongKeAdminService.getDashboardAdminResponse(startDate, endDate);
     }
+
 
     @GetMapping("/san-pham-ban-chay")
     public List<Map<String, Object>> sanPhamBanChay () {

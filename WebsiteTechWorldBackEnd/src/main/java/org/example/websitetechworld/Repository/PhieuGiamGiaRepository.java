@@ -33,5 +33,23 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             Pageable pageable
     );
 
-    List<PhieuGiamGia> findBySoDiemCanDeDoiAndTrangThaiPhatHanhAndCongKhaiAndTrangThaiPhieuGiamGiaAndMaGiamGiaContainingIgnoreCase(BigDecimal soDiemCanDeDoi, TrangThaiPhatHanh trangThaiPhatHanh, Boolean congKhai, TrangThaiPGG trangThaiPhieuGiamGia, @Size(max = 50) String maGiamGia);
+    @Query("""
+    SELECT p 
+    FROM PhieuGiamGia p
+    WHERE p.soDiemCanDeDoi = :soDiemCanDeDoi
+      AND p.giaTriDonHangToiThieu <= :giaTriDonHangToiThieu
+      AND p.trangThaiPhatHanh = :trangThaiPhatHanh
+      AND p.congKhai = :congKhai
+      AND p.trangThaiPhieuGiamGia = :trangThaiPhieuGiamGia
+      AND LOWER(p.maGiamGia) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
+    List<PhieuGiamGia> timPhieuGiamGiaCongKhai (
+            @Param("soDiemCanDeDoi") BigDecimal soDiemCanDeDoi,
+            @Param("giaTriDonHangToiThieu") BigDecimal giaTriDonHangToiThieu,
+            @Param("trangThaiPhatHanh") TrangThaiPhatHanh trangThaiPhatHanh,
+            @Param("congKhai") Boolean congKhai,
+            @Param("trangThaiPhieuGiamGia") TrangThaiPGG trangThaiPhieuGiamGia,
+            @Param("keyword") String keyword
+    );
+
 }
