@@ -44,13 +44,10 @@ public class SanPhamClientController {
         try {
             ClientProductDetailResponse response = sanPhamClientService.getChiTietBienThe(idsp, idMau, idRom);
             return ResponseEntity.ok(response);
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             System.out.println("không có sản phẩm tương ứng");
         }
         return ResponseEntity.notFound().build();
     }
-
-
 }
