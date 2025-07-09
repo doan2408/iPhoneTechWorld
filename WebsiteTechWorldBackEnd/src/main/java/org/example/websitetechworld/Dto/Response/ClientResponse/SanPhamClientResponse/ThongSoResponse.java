@@ -1,0 +1,36 @@
+package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class ThongSoResponse {
+//    private Integer idSpct; //id san pham chi tiet
+
+    private String cpu;
+    private String ram;
+
+    private String tenManHinh;
+    private String kichThuoc;
+    private String loaiManHinh;
+    private String doPhanGiai;
+    private String tanSoQuet;
+    private String doSang;
+    private String chatLieuKinh;
+
+    private String cameraSau;
+    private String cameraTruoc;
+
+    private String phienBanPin;
+    private String congXuatSac;
+    private String thoiGianSuDung;
+    private String soLanSacToiDa;
+
+    private String heDieuHanh;
+    private String xuatXu;
+}
