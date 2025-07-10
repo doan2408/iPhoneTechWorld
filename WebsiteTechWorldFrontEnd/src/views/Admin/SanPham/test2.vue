@@ -86,7 +86,8 @@
       <el-row :gutter="20">
         <el-col :span="24" v-for="mau in selectedMaus" :key="mau">
           <el-form-item :label="getMauSacLabels(mau)" :error="errorsMauHinhAnh[mau] || ''">
-            <el-upload :file-list="hinhAnhTheoMau[mau] || []" :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
+            <el-upload :file-list="hinhAnhTheoMau[mau] || []"
+              :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
               :on-remove="(file, fileList) => handleMauFileRemove(file, fileList, mau)" :auto-upload="false"
               accept="image/jpeg,image/png,image/webp" list-type="picture-card" :limit="5" :on-exceed="handleExceed">
               <template #trigger>
@@ -161,8 +162,8 @@
             </el-table-column>
             <el-table-column label="Ảnh" width="100">
               <template #default="{ row }">
-                <el-image v-for="(hinh, index) in row.hinhAnhs.slice(0, 2)" :key="hinh.imagePublicId"
-                  :src="hinh.url" :preview-src-list="[hinh.url]" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
+                <el-image v-for="(hinh, index) in row.hinhAnhs.slice(0, 2)" :key="hinh.imagePublicId" :src="hinh.url"
+                  :preview-src-list="[hinh.url]" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
                 <span v-if="row.hinhAnhs.length > 2">+{{ row.hinhAnhs.length - 2 }} ảnh</span>
                 <span v-if="!row.hinhAnhs.length">Chưa có ảnh</span>
               </template>
@@ -192,14 +193,16 @@
                 :formatter="value => value ? `${value.toLocaleString('vi-VN')} VND` : ''"
                 :parser="value => value.replace(/\D/g, '')" />
             </el-form-item>
-            <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''" class="error-container">
+            <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''"
+              class="error-container">
               <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0" :disabled="true"
                 style="width: 100%" />
             </el-form-item>
-            <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''" class="error-container">
+            <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''"
+              class="error-container">
               <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
-                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)"
-                :rows="4" @input="capNhatSoLuong(selectedChiTiet, true)" />
+                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)" :rows="4"
+                @input="capNhatSoLuong(selectedChiTiet, true)" />
               <div class="action-buttons">
                 <el-upload :auto-upload="false" :on-change="(file) => handleImeiFileChange(file, selectedChiTiet)"
                   accept=".txt,.csv">
@@ -213,7 +216,8 @@
               </div>
               <div class="imei-status">
                 <span>Số lượng IMEI: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
-                <el-tooltip v-if="errorsChiTiet[selectedChiTiet]?.imeisInput === 'Hợp lệ'" content="Danh sách IMEI hợp lệ" placement="top">
+                <el-tooltip v-if="errorsChiTiet[selectedChiTiet]?.imeisInput === 'Hợp lệ'"
+                  content="Danh sách IMEI hợp lệ" placement="top">
                   <span class="valid-message"><i class="el-icon-success" /> Hợp lệ</span>
                 </el-tooltip>
               </div>
@@ -261,6 +265,8 @@ export default {
       idModelSanPham: null,
       sanPhamChiTiets: [],
     });
+
+    const toast = useToast();
 
     // Trạng thái loading
     const loading = reactive({
@@ -328,12 +334,12 @@ export default {
         ];
         const emptyLists = requiredLists.filter((item) => !item.list.length);
         if (emptyLists.length) {
-          ElMessage.error(
+          toast.error(
             `Không thể tải danh mục: ${emptyLists.map((item) => item.name).join(", ")}`
           );
         }
       } catch (error) {
-        ElMessage.error("Lỗi khi tải danh mục: " + error.message);
+        toast.error("Lỗi khi tải danh mục: " + error.message);
       } finally {
         loadingInstance.close();
       }
@@ -352,7 +358,7 @@ export default {
 
     // Xử lý khi vượt quá giới hạn ảnh
     const handleExceed = () => {
-      ElMessage.warning("Chỉ được tải lên tối đa 5 ảnh cho mỗi màu!");
+      toast.warning("Chỉ được tải lên tối đa 5 ảnh cho mỗi màu!");
     };
 
     // Tạo các biến thể sản phẩm
@@ -382,7 +388,7 @@ export default {
 
       if (hasError) {
         loading.generate = false;
-        ElMessage.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
+        toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
         scrollToError();
         return;
       }
@@ -449,18 +455,18 @@ export default {
       }, 100);
 
       loading.generate = false;
-      ElMessage.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
+      toast.success(`Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`);
     };
 
     // Áp dụng giá bán chung
     const applyGiaBanChung = () => {
       if (!sanPham.sanPhamChiTiets.length) {
-        ElMessage.error("Vui lòng tạo biến thể trước!");
+        toast.error("Vui lòng tạo biến thể trước!");
         return;
       }
       if (!giaBanChung.value || giaBanChung.value < 1000) {
         errors.giaBanChung = "Giá bán chung phải lớn hơn hoặc bằng 1000";
-        ElMessage.error("Vui lòng nhập giá bán chung hợp lệ!");
+        toast.error("Vui lòng nhập giá bán chung hợp lệ!");
         return;
       }
 
@@ -477,9 +483,9 @@ export default {
           chiTiet.giaBan = giaBanChung.value;
           errorsChiTiet[index].giaBan = "";
         });
-        ElMessage.success("Đã áp dụng giá bán chung!");
+        toast.success("Đã áp dụng giá bán chung!");
       }).catch(() => {
-        ElMessage.info("Đã hủy áp dụng giá chung.");
+        toast.info("Đã hủy áp dụng giá chung.");
       });
     };
 
@@ -546,9 +552,9 @@ export default {
         sanPham.sanPhamChiTiets[index].soLuong = 0;
         errorsChiTiet[index].imeisInput = "";
         errorsChiTiet[index].soLuong = "";
-        ElMessage.success("Đã xóa danh sách IMEI!");
+        toast.success("Đã xóa danh sách IMEI!");
       }).catch(() => {
-        ElMessage.info("Đã hủy xóa IMEI.");
+        toast.info("Đã hủy xóa IMEI.");
       });
     };
 
@@ -570,14 +576,14 @@ export default {
             .filter((i) => i);
           sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", ");
           capNhatSoLuong(index, true); // Kiểm tra lỗi ngay sau khi tải file
-          ElMessage.success(`Đã tải ${imeis.length} IMEI từ file ${file.name}`);
+          toast.success(`Đã tải ${imeis.length} IMEI từ file ${file.name}`);
         };
         reader.onerror = () => {
           throw new Error("Lỗi khi đọc file");
         };
         reader.readAsText(file.raw);
       } catch (error) {
-        ElMessage.error("Lỗi khi xử lý file IMEI: " + error.message);
+        toast.error("Lỗi khi xử lý file IMEI: " + error.message);
       }
     };
 
@@ -618,10 +624,10 @@ export default {
             chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
           }
         });
-        ElMessage.success(`Tải ảnh ${file.name} thành công!`);
+        toast.success(`Tải ảnh ${file.name} thành công!`);
       } catch (error) {
         errorsMauHinhAnh[idMau] = "Lỗi khi tải ảnh: " + (error.response?.data?.message || error.message);
-        ElMessage.error(errorsMauHinhAnh[idMau]);
+        toast.error(errorsMauHinhAnh[idMau]);
       } finally {
         loadingInstance.close();
       }
@@ -641,7 +647,7 @@ export default {
           chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
         }
       });
-      ElMessage.success(`Đã xóa ảnh ${file.name}`);
+      toast.success(`Đã xóa ảnh ${file.name}`);
     };
 
     // Xóa biến thể
@@ -658,9 +664,9 @@ export default {
         } else if (selectedChiTiet.value > index) {
           selectedChiTiet.value--;
         }
-        ElMessage.success("Đã xóa biến thể!");
+        toast.success("Đã xóa biến thể!");
       }).catch(() => {
-        ElMessage.info("Đã hủy xóa biến thể.");
+        toast.info("Đã hủy xóa biến thể.");
       });
     };
 
@@ -776,7 +782,7 @@ export default {
       loading.submit = true;
       try {
         if (!sanPham.sanPhamChiTiets.length) {
-          ElMessage.error("Vui lòng tạo ít nhất một biến thể sản phẩm!");
+          toast.error("Vui lòng tạo ít nhất một biến thể sản phẩm!");
           loading.submit = false;
           return;
         }
@@ -788,7 +794,7 @@ export default {
           if (errorIndex !== -1) {
             selectedChiTiet.value = errorIndex;
           }
-          ElMessage.error("Vui lòng sửa các lỗi trong form!");
+          toast.error("Vui lòng sửa các lỗi trong form!");
           scrollToError();
           loading.submit = false;
           return;
@@ -843,7 +849,7 @@ export default {
           Object.keys(errorsMauHinhAnh).forEach((key) => delete errorsMauHinhAnh[key]);
           errorsChiTiet.length = 0;
           Object.keys(errors).forEach((k) => (errors[k] = ""));
-          ElMessage.success("Form đã được làm mới!");
+          toast.success("Form đã được làm mới!");
         });
       } catch (error) {
         console.error("Lỗi khi lưu sản phẩm:", error);
@@ -903,10 +909,10 @@ export default {
           if (errorIndex !== -1) {
             selectedChiTiet.value = errorIndex;
           }
-          ElMessage.error(`Lỗi xác thực: ${errorMessages.join("; ")}`);
+          toast.error(`Lỗi xác thực: ${errorMessages.join("; ")}`);
           scrollToError();
         } else {
-          ElMessage.error("Lỗi hệ thống: " + (error.message || "Vui lòng thử lại"));
+          toast.error("Lỗi hệ thống: " + (error.message || "Vui lòng thử lại"));
         }
       } finally {
         loading.submit = false;
@@ -935,6 +941,7 @@ export default {
       hinhAnhTheoMau,
       giaBanChung,
       loading,
+      toast,
       generateVariants,
       applyGiaBanChung,
       removeChiTiet,
@@ -1022,9 +1029,17 @@ export default {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .el-input,
@@ -1060,24 +1075,30 @@ export default {
 }
 
 .el-button--primary {
-  background-color: #409EFF; /* Màu xanh chủ đạo, rõ ràng hơn */
+  background-color: #409EFF;
+  /* Màu xanh chủ đạo, rõ ràng hơn */
   color: #fff;
 }
 
 .el-button--primary:hover {
-  background-color: #66B1FF; /* Sáng lên khi hover */
+  background-color: #66B1FF;
+  /* Sáng lên khi hover */
   filter: brightness(110%);
 }
 
 .el-button--primary:active {
-  background-color: #3a8ee6; /* Tối hơn khi nhấn */
-  transform: scale(0.98); /* Hiệu ứng nhấn nhẹ */
+  background-color: #3a8ee6;
+  /* Tối hơn khi nhấn */
+  transform: scale(0.98);
+  /* Hiệu ứng nhấn nhẹ */
 }
 
 .el-button--success {
-  background-color: #67C23A; /* Màu xanh lá nổi bật cho "Lưu sản phẩm" */
+  background-color: #67C23A;
+  /* Màu xanh lá nổi bật cho "Lưu sản phẩm" */
   color: #fff;
-  padding: 12px 24px; /* Lớn hơn một chút để nổi bật */
+  padding: 12px 24px;
+  /* Lớn hơn một chút để nổi bật */
 }
 
 .el-button--success:hover {
@@ -1091,7 +1112,8 @@ export default {
 }
 
 .el-button--danger {
-  background-color: #F56C6C; /* Màu đỏ cảnh báo */
+  background-color: #F56C6C;
+  /* Màu đỏ cảnh báo */
   color: #fff;
 }
 
@@ -1106,7 +1128,8 @@ export default {
 }
 
 .el-button--warning {
-  background-color: #E6A23C; /* Màu vàng cảnh báo cho "Xóa IMEI" */
+  background-color: #E6A23C;
+  /* Màu vàng cảnh báo cho "Xóa IMEI" */
   color: #fff;
 }
 
@@ -1132,7 +1155,8 @@ export default {
 }
 
 .el-button--primary[plain]:hover {
-  background-color: #ECF5FF; /* Nền nhẹ khi hover */
+  background-color: #ECF5FF;
+  /* Nền nhẹ khi hover */
   color: #66B1FF;
 }
 
@@ -1207,13 +1231,15 @@ export default {
   display: flex;
   gap: 12px;
   align-items: center;
-  flex-wrap: nowrap; /* Ngăn xuống dòng trên màn hình lớn */
+  flex-wrap: nowrap;
+  /* Ngăn xuống dòng trên màn hình lớn */
 }
 
 .action-buttons .el-upload,
 .action-buttons .el-button {
   flex: 0 0 auto;
-  width: 150px; /* Kích thước đồng đều */
+  width: 150px;
+  /* Kích thước đồng đều */
   height: 36px;
   line-height: 36px;
   padding: 0;
@@ -1253,7 +1279,8 @@ export default {
 }
 
 .form-actions .el-button--success {
-  width: 180px; /* Nút "Lưu sản phẩm" lớn hơn */
+  width: 180px;
+  /* Nút "Lưu sản phẩm" lớn hơn */
 }
 
 .empty-state {

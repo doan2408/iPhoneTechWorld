@@ -34,17 +34,35 @@
                 clearable size="large" :class="{ 'updated-input': tenModelUpdated }" />
             </el-form-item>
             <el-form-item label="Loại" prop="idLoai" :error="errors.idLoai">
-              <el-select v-model="modelForm.idLoai" placeholder="Chọn loại" @change="clearFieldError('idLoai')"
-                clearable :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="loai in loais" :key="loai.idLoai" :label="loai.tenLoai" :value="loai.idLoai" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idLoai" placeholder="Chọn loại" @change="clearFieldError('idLoai')"
+                  clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="loai in loais" :key="loai.idLoai" :label="loai.tenLoai" :value="loai.idLoai" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addLoaiDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemLoai ref="addLoaiDialogRef" @saved="handleLoaiSaved" />
+
             <el-form-item label="Xuất xứ" prop="idXuatXu" :error="errors.idXuatXu">
-              <el-select v-model="modelForm.idXuatXu" placeholder="Chọn xuất xứ" @change="clearFieldError('idXuatXu')"
-                clearable :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="xx in xuatXus" :key="xx.idXuatXu" :label="xx.maXuatXu" :value="xx.idXuatXu" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idXuatXu" placeholder="Chọn xuất xứ" @change="clearFieldError('idXuatXu')"
+                  clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="xx in xuatXus" :key="xx.idXuatXu" :label="xx.maXuatXu" :value="xx.idXuatXu" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addXuatXuDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+
+            <DialogThemXuatXu ref="addXuatXuDialogRef" @saved="handleXuatXuSaved" />
           </div>
         </div>
 
@@ -58,36 +76,83 @@
           </div>
           <div class="form-grid">
             <el-form-item label="RAM" prop="idRam" :error="errors.idRam">
-              <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" @change="clearFieldError('idRam')"
-                :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" @change="clearFieldError('idRam')"
+                  :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addDungLuongDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemRam ref="addDungLuongDialogRef" @saved="handleDungLuongSaved" />
+
+
             <el-form-item label="CPU" prop="idCpu" :error="errors.idCpu">
-              <el-select v-model="modelForm.idCpu" placeholder="Chọn CPU" @change="clearFieldError('idCpu')" clearable
-                :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="cpu in cpus" :key="cpu.idCpu" :label="cpu.chipXuLy" :value="cpu.idCpu" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCpu" placeholder="Chọn CPU" @change="clearFieldError('idCpu')" clearable
+                  :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="cpu in cpus" :key="cpu.idCpu" :label="cpu.chipXuLy" :value="cpu.idCpu" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addCpuDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DiaLogThemCpu ref="addCpuDialogRef" @saved="handleCpuSaved" />
+
             <el-form-item label="Màn hình" prop="idManHinh" :error="errors.idManHinh">
-              <el-select v-model="modelForm.idManHinh" placeholder="Chọn màn hình"
-                @change="clearFieldError('idManHinh')" clearable :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="mh in manHinhs" :key="mh.idManHinh" :label="mh.kichThuoc" :value="mh.idManHinh" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idManHinh" placeholder="Chọn màn hình"
+                  @change="clearFieldError('idManHinh')" clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="mh in manHinhs" :key="mh.idManHinh" :label="mh.kichThuoc" :value="mh.idManHinh" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addManHinhDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemManHinh ref="addManHinhDialogRef" @saved="handleManHinhSaved" />
+
             <el-form-item label="Hệ điều hành" prop="idHeDieuHanh" :error="errors.idHeDieuHanh">
-              <el-select v-model="modelForm.idHeDieuHanh" placeholder="Chọn hệ điều hành"
-                @change="clearFieldError('idHeDieuHanh')" clearable :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="hdh in heDieuHanhs" :key="hdh.idHeDieuHanh" :label="hdh.phienBan"
-                  :value="hdh.idHeDieuHanh" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idHeDieuHanh" placeholder="Chọn hệ điều hành"
+                  @change="clearFieldError('idHeDieuHanh')" clearable :loading="loading" size="large"
+                  style="width: 100%">
+                  <el-option v-for="hdh in heDieuHanhs" :key="hdh.idHeDieuHanh" :label="hdh.phienBan"
+                    :value="hdh.idHeDieuHanh" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addHDHDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemHDH ref="addHDHDialogRef" @saved="handleHDHSaved" />
+
             <el-form-item label="Pin" prop="idPin" :error="errors.idPin">
-              <el-select v-model="modelForm.idPin" placeholder="Chọn pin" @change="clearFieldError('idPin')" clearable
-                :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="pin in pins" :key="pin.idPin" :label="pin.phienBan" :value="pin.idPin" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idPin" placeholder="Chọn pin" @change="clearFieldError('idPin')" clearable
+                  :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="pin in pins" :key="pin.idPin" :label="pin.phienBan" :value="pin.idPin" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addPinDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemPin ref="addPinDialogRef" @saved="handlePinSaved"/>
+
           </div>
         </div>
 
@@ -101,19 +166,33 @@
           </div>
           <div class="form-grid">
             <el-form-item label="Camera trước" prop="idCameraTruoc" :error="errors.idCameraTruoc">
-              <el-select v-model="modelForm.idCameraTruoc" placeholder="Chọn camera trước"
-                @change="clearFieldError('idCameraTruoc')" clearable :loading="loading" size="large"
-                style="width: 100%">
-                <el-option v-for="cam in cameraTruocs" :key="cam.idCamera" :label="cam.doPhanGiai"
-                  :value="cam.idCamera" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCameraTruoc" placeholder="Chọn camera trước"
+                  @change="clearFieldError('idCameraTruoc')" clearable :loading="loading" size="large"
+                  style="width: 100%">
+                  <el-option v-for="cam in cameraTruocs" :key="cam.idCamera" :label="cam.doPhanGiai"
+                    :value="cam.idCamera" />
+                </el-select>
+                <el-button type="success" size="large" circle>
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
             <el-form-item label="Camera sau" prop="idCameraSau" :error="errors.idCameraSau">
-              <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
-                @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%">
-                <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="cam.doPhanGiai"
-                  :value="cam.idCamera" />
-              </el-select>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
+                  @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="cam.doPhanGiai"
+                    :value="cam.idCamera" />
+                </el-select>
+                <el-button type="success" size="large" circle>
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
           </div>
         </div>
@@ -438,6 +517,7 @@
       </template>
     </el-dialog>
   </div>
+
 </template>
 
 <script>
@@ -465,13 +545,21 @@ import {
   finByIdModelSanPham,
   deleteModelSanPham
 } from '../../../Service/Adminservice/Products/ProductAdminService';
+import DialogThemLoai from '@/components/Admin/dialogs/DialogThemLoai.vue';
+import DialogThemXuatXu from '@/components/Admin/dialogs/DialogThemXuatXu.vue';
+import DialogThemRam from '@/components/Admin/dialogs/DialogThemRam.vue';
+import DiaLogThemCpu from '@/components/Admin/dialogs/DiaLogThemCpu.vue';
+import DialogThemManHinh from '@/components/Admin/dialogs/DialogThemManHinh.vue';
+import DialogThemHDH from '@/components/Admin/dialogs/DialogThemHDH.vue';
+import DialogThemPin from '@/components/Admin/dialogs/DialogThemPin.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'ModelManagement',
   components: {
     Edit, View, Delete, Plus, InfoFilled, Setting, Camera,
     DocumentAdd, Search, RefreshLeft, Check, ArrowLeft,
-    List, Close
+    List, Close, DialogThemLoai, DialogThemXuatXu, DialogThemRam, DiaLogThemCpu, DialogThemManHinh, DialogThemHDH, DialogThemPin,
   },
   setup() {
     const modelSanPhams = ref([]);
@@ -487,6 +575,14 @@ export default {
     const xuatXus = ref([]);
     const loais = ref([]);
     const errors = reactive({});
+    const addLoaiDialogRef = ref(null);
+    const addXuatXuDialogRef = ref(null);
+    const addDungLuongDialogRef = ref(null);
+    const addCpuDialogRef = ref(null);
+    const addManHinhDialogRef = ref(null);
+    const addHDHDialogRef = ref(null);
+    const addPinDialogRef = ref(null);
+    const toast = useToast();
 
     const statuses = ref([
       { value: 'ACTIVE', label: 'Đang hoạt động', type: 'success' },
@@ -574,6 +670,42 @@ export default {
         }
       }
     });
+
+
+    const handleLoaiSaved = (savedLoai) => {
+      loais.value.push({ idLoai: savedLoai.id, tenLoai: savedLoai.tenLoai });
+      modelForm.value.idLoai = savedLoai.id;
+    };
+
+    const handleXuatXuSaved = (savedXuatXu) => {
+      xuatXus.value.push({ idXuatXu: savedXuatXu.id, maXuatXu: savedXuatXu.maXuatXu });
+      modelForm.value.idXuatXu = savedXuatXu.id
+    };
+
+    const handleDungLuongSaved = (savedDungLuong) => {
+      rams.value.push({ idRam: savedDungLuong.id, dungLuongRam: savedDungLuong.dungLuong });
+      modelForm.value.idRam = savedDungLuong.id
+    };
+
+    const handleCpuSaved = (savedCpu) => {
+      cpus.value.push({ idCpu: savedCpu.id, chipXuLy: savedCpu.chipXuLy });
+      modelForm.value.idCpu = savedCpu.id
+    };
+
+    const handleManHinhSaved = (savedManHinh) => {
+      manHinhs.value.push({ idManHinh: savedManHinh.id, kichThuoc: savedManHinh.kichThuoc });
+      modelForm.value.idManHinh = savedManHinh.id
+    };
+
+    const handleHDHSaved = (savedHDH) => {
+      heDieuHanhs.value.push({ idHeDieuHanh: savedHDH.id, phienBan: savedHDH.phienBan });
+      modelForm.value.idHeDieuHanh = savedHDH.id
+    };
+
+    const handlePinSaved = (savedPin) => {
+      pins.value.push({ idPin: savedPin.id, phienBan: savedPin.phienBan });
+      modelForm.value.idPin = savedPin.id
+    };
 
     const fetchDanhMuc = async () => {
       loading.value = true;
@@ -669,7 +801,7 @@ export default {
             namRaMat: null
           };
           tenModelUpdated.value = false;
-          ElMessage.success('Form đã được đặt lại.');
+          toast.success('Form đã được đặt lại.');
         });
       } else {
         formMode.value = 'add';
@@ -751,7 +883,7 @@ export default {
           if (index !== -1) {
             modelSanPhams.value[index] = { ...modelSanPhams.value[index], ...payload };
           }
-          ElMessage.success('Cập nhật model thành công!');
+          toast.success('Cập nhật model thành công!');
         } else {
           const newForm = await postModelSanPham(payload);
 
@@ -763,9 +895,9 @@ export default {
               trangThaiSanPhamModel: newForm.trangThaiSanPhamModel || 'ACTIVE'
             });
             totalItems.value += 1;
-            ElMessage.success('Thêm model thành công!');
+            toast.success('Thêm model thành công!');
           } else {
-            ElMessage.error('Dữ liệu trả về từ API không hợp lệ!');
+            toast.error('Dữ liệu trả về từ API không hợp lệ!');
           }
         }
 
@@ -790,13 +922,13 @@ export default {
             // ElMessage.error(userMessage);
 
             // Nếu chưa dùng i18n:
-            ElMessage.error(errorData.message || 'Đã xảy ra lỗi nghiệp vụ!');
+            toast.error(errorData.message || 'Đã xảy ra lỗi nghiệp vụ!');
           }
           else {
-            ElMessage.error('Lỗi không xác định từ server!');
+            toast.error('Lỗi không xác định từ server!');
           }
         } else {
-          ElMessage.error('Có lỗi hệ thống xảy ra!');
+          toast.error('Có lỗi hệ thống xảy ra!');
           console.error('❌ Lỗi không xác định:', error);
         }
       } finally {
@@ -814,7 +946,7 @@ export default {
         await deleteModelSanPham(id);
         modelSanPhams.value = modelSanPhams.value.filter(m => m.idModelSanPham !== id);
         totalItems.value -= 1;
-        ElMessage.success('Xóa model thành công!');
+        toast.success('Xóa model thành công!');
         if (!modelSanPhams.value.length && currentPage.value > 1) {
           currentPage.value -= 1;
           await fetchDanhMuc();
@@ -860,6 +992,22 @@ export default {
       viewModelData,
       tenModelUpdated,
       errors,
+      DialogThemLoai,
+      addLoaiDialogRef,
+      addXuatXuDialogRef,
+      addDungLuongDialogRef,
+      addCpuDialogRef,
+      addManHinhDialogRef,
+      addHDHDialogRef,
+      addPinDialogRef,
+      toast,
+      handlePinSaved,
+      handleHDHSaved,
+      handleManHinhSaved,
+      handleCpuSaved,
+      handleDungLuongSaved,
+      handleLoaiSaved,
+      handleXuatXuSaved,
       clearFieldError,
       indexMethod,
       ramLabel,
