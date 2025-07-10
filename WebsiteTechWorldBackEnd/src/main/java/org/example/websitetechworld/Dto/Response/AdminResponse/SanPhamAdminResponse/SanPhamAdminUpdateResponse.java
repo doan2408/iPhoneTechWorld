@@ -24,6 +24,8 @@ public class SanPhamAdminUpdateResponse {
 
     private Integer idNhaCungCap;
 
+    private Integer idModelSanPham;
+
     private Set<SanPhamChiTietAdminDetailResponse> sanPhamChiTiets;
 
 }

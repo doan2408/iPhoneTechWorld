@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.MauSacAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.MauSacQuickAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.MauSacAdminResponse;
 import org.example.websitetechworld.Entity.MauSac;
 import org.example.websitetechworld.Repository.MauSacRepository;
@@ -60,6 +61,18 @@ public class MauSacAdminService {
         MauSac saved = mauSacRepository.save(mauSac);
         return convert(saved);
     }
+
+     @Transactional
+    public MauSacAdminResponse createMauSacQuick(MauSacQuickAdminRequest mauSacAdminRequest) {
+        if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
+            throw new IllegalArgumentException("Tên màu đã tồn tại");
+        }
+        MauSac mauSac = modelMapper.map(mauSacAdminRequest, MauSac.class);
+        MauSac saved = mauSacRepository.save(mauSac);
+        return convert(saved);
+    }
+
+
 
     @Transactional
     public MauSacAdminResponse updateMauSac(Integer id, MauSacAdminRequest mauSacAdminRequest) {

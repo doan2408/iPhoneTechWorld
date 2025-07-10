@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RamAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RamQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RamAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.RamAdminService;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,12 @@ public class RamAdminController {
     @PostMapping
     public ResponseEntity<RamAdminResponse> createRam(@Valid @RequestBody RamAdminRequest ramAdminRequest) {
         RamAdminResponse ramAdminResponse = ramAdminService.createRam(ramAdminRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ramAdminResponse);
+    }
+
+    @PostMapping("/quick-ram")
+    public ResponseEntity<RamAdminResponse> createRamQuick(@Valid @RequestBody RamQuickCreateAdminRequest ramAdminRequest) {
+        RamAdminResponse ramAdminResponse = ramAdminService.createRamQuick(ramAdminRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(ramAdminResponse);
     }
 

@@ -166,5 +166,15 @@ public class ImeiAdminController {
         }
     }
 
+    @GetMapping("/getImeisBySanPhamId")
+    public ResponseEntity<List<String>> getImeisBySanPhamId(@RequestParam("sanPhamId") Integer sanPhamId) {
+        try {
+            List<String> imeis = imeiAdminService.getImeisBySanPhamChiTietId(sanPhamId);
+            return ResponseEntity.ok(imeis);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 
 }
