@@ -115,7 +115,7 @@ onMounted(() => {
         />
 
         <!-- Danh sách ảnh thu nhỏ -->
-        <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 1">
+        <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img
             v-for="(img, index) in bienThe.hinhAnh"
             :key="index"
