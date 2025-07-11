@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -40,5 +43,8 @@ public class CameraSau {
     @Nationalized
     @Column(name = "che_do_chup", length = 50)
     private String cheDoChup;
+
+    @OneToMany(mappedBy = "cameraSau", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelCameraSau> modelCameraSaus = new ArrayList<>();
 
 }

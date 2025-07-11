@@ -6,6 +6,8 @@ import lombok.Data;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.hibernate.annotations.Nationalized;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -57,9 +59,12 @@ public class ModelSanPham {
     @JoinColumn(name = "id_camera_truoc")
     private CameraTruoc idCameraTruoc;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_camera_sau")
-    private CameraSau idCameraSau;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id_camera_sau")
+//    private CameraSau idCameraSau;
+
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelCameraSau> cameraSaus = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_xuat_xu")

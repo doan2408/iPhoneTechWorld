@@ -276,14 +276,14 @@ public class SanPhamAdminService {
                 modelSanPhamAdminResponse.setCheDoChupCameraTruoc(sanPham.getIdModelSanPham().getIdCameraTruoc().getCheDoChup());
             }
 
-            if (sanPham.getIdModelSanPham().getIdCameraSau() != null) {
-                modelSanPhamAdminResponse.setIdCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getId());
-                modelSanPhamAdminResponse.setLoaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiCamera());
-                modelSanPhamAdminResponse.setDoPhanGiaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getDoPhanGiai());
-                modelSanPhamAdminResponse.setKhauDoCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getKhauDo());
-                modelSanPhamAdminResponse.setLoaiZoomCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiZoom());
-                modelSanPhamAdminResponse.setCheDoChupCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getCheDoChup());
-            }
+//            if (sanPham.getIdModelSanPham().getIdCameraSau() != null) {
+//                modelSanPhamAdminResponse.setIdCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getId());
+//                modelSanPhamAdminResponse.setLoaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiCamera());
+//                modelSanPhamAdminResponse.setDoPhanGiaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getDoPhanGiai());
+//                modelSanPhamAdminResponse.setKhauDoCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getKhauDo());
+//                modelSanPhamAdminResponse.setLoaiZoomCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiZoom());
+//                modelSanPhamAdminResponse.setCheDoChupCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getCheDoChup());
+//            }
 
             if (sanPham.getIdModelSanPham().getIdXuatXu() != null) {
                 modelSanPhamAdminResponse.setIdXuatXu(sanPham.getIdModelSanPham().getIdXuatXu().getId());

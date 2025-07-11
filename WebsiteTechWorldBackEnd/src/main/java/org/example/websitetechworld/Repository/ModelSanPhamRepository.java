@@ -67,7 +67,6 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
         and m.idPin.id = :idPin
         and m.idCpu.id = :idCpu
         and m.idCameraTruoc.id = :idCameraTruoc
-        and m.idCameraSau.id = :idCameraSau
         and m.idXuatXu.id = :idXuatXu
         and m.idLoai.id = :idLoai
     """)
@@ -79,7 +78,6 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
             @Param("idPin") Integer idPin,
             @Param("idCpu") Integer idCpu,
             @Param("idCameraTruoc") Integer idCameraTruoc,
-            @Param("idCameraSau") Integer idCameraSau,
             @Param("idXuatXu") Integer idXuatXu,
             @Param("idLoai") Integer idLoai
     );
