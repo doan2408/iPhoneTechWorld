@@ -13,4 +13,5 @@ public class TabHoaDonAdminResponse {
 
     private Integer id;
     private String maHoaDon;
+    private Long soLuong;
 }

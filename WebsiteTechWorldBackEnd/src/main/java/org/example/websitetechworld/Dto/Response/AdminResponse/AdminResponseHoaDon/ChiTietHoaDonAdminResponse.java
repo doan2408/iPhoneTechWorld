@@ -29,6 +29,7 @@ public class ChiTietHoaDonAdminResponse {
     private String maChiTietHoaDon;
 
     private String tenSanPham;
+//    private
 
     private String moTa;
 
