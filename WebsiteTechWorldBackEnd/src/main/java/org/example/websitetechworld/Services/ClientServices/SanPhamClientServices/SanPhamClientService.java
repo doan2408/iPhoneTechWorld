@@ -29,9 +29,11 @@ public class SanPhamClientService {
     private final ModelMapper modelMapper;
 
     //hien thi san pham len trang chủ
-    public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, String loai, BigDecimal giaMin, BigDecimal giaMax) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, String loai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
         Page<ClientProductResponse> homePage;
+
+        Pageable pageable = PageRequest.of(page, size);
+
 
         if (tenSanPham != null) {
             tenSanPham = tenSanPham.trim();
@@ -46,7 +48,7 @@ public class SanPhamClientService {
                 loai = null;
             }
         }
-        homePage = sanPhamRepo.getSanPhamHome(tenSanPham, loai, giaMin, giaMax, pageable);
+        homePage = sanPhamRepo.getSanPhamHome(tenSanPham, loai, giaMin, giaMax, sort, pageable);
         return homePage;
     }
 
@@ -84,9 +86,9 @@ public class SanPhamClientService {
         return response;
     }
 
-    //hien thi thong so tuong ung voi bien the
-    public ThongSoResponse getThongSo(Integer idSpct) {
-        ThongSoResponse response = sanPhamRepo.getThongSoByIdSpct(idSpct);
+    //hien thi thong so tuong ung voi rom
+    public ThongSoResponse getThongSo(Integer idSp, Integer idRom) {
+        ThongSoResponse response = sanPhamRepo.getThongSoByIdSpct(idSp, idRom);
         return response !=null ? response : new ThongSoResponse();
     }
 
@@ -95,18 +97,16 @@ public class SanPhamClientService {
 
         Optional<SanPhamChiTiet> chiTietOtp = sanPhamRepo.getSpctByMauAndRom(idSanPham, idMau, idRom);
         if (chiTietOtp.isEmpty()) {
-            throw new RuntimeException("Không tim thấy spct với màu và rom tương ứng");
+            throw new RuntimeException("Không tim thấy sản phẩm với màu và rom tương ứng");
         }
 
         SanPhamChiTiet spct = chiTietOtp.get();
         SanPham sp = spct.getIdSanPham();
 
-        ThongSoResponse thongSoResponse = getThongSo(spct.getId());
-
         ClientProductDetailResponse response = new ClientProductDetailResponse();
         response.setIdSpct(spct.getId());
         response.setTenSanPham(sp.getTenSanPham());
-        List<String> hinhAnh = sanPhamRepo.getListHinhAnh(spct.getId());
+        List<String> hinhAnh = sanPhamRepo.getListAnhByMau(idSanPham, idMau);
         response.setHinhAnh(hinhAnh);
         response.setGiaBan(spct.getGiaBan());
 
@@ -128,9 +128,12 @@ public class SanPhamClientService {
         response.setTongSoLuong(sp.getSanPhamChiTiets().stream()
                 .mapToInt(SanPhamChiTiet::getSoLuong).sum()
         );
-        response.setThongSoResponse(thongSoResponse);
 
         return response;
+    }
+
+    public List<String> getListAnhByMau(Integer idSp, Integer idMau) {
+        return sanPhamRepo.getListAnhByMau(idSp, idMau);
     }
 
 }

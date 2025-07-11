@@ -14,6 +14,7 @@ public class ThongSoResponse {
 
     private String cpu;
     private String ram;
+    private String rom;
 
     private String tenManHinh;
     private String kichThuoc;

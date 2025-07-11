@@ -1,7 +1,5 @@
 package org.example.websitetechworld.Repository;
 
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamHienThiAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamBanHangAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Entity.SanPham;
@@ -107,7 +105,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                 JOIN ha2.idSanPhamChiTiet spct_ha2
                 WHERE spct_ha2.idSanPham.id = sp.id
             )
-            
         ),
         sp.tenSanPham,
         (
@@ -120,22 +117,31 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     FROM SanPham sp
     JOIN sp.idModelSanPham.idLoai l
     WHERE sp.trangThaiSanPham = 'ACTIVE'
-      AND (:loai IS NULL OR LOWER(l.tenLoai) LIKE CONCAT('%', :loai, '%'))
-      AND (:tenSanPham IS NULL OR LOWER(sp.tenSanPham) LIKE CONCAT('%', :tenSanPham, '%'))
+      AND (:loai IS NULL OR LOWER(l.tenLoai) LIKE LOWER(CONCAT('%', :loai, '%')))
+      AND (:tenSanPham IS NULL OR LOWER(sp.tenSanPham) LIKE LOWER(CONCAT('%', :tenSanPham, '%')))
       AND (
                   :giaMin IS NULL OR
                   (SELECT MIN(spct2.giaBan) FROM SanPhamChiTiet spct2 WHERE spct2.idSanPham.id = sp.id) >= :giaMin
             )
-            AND (
+      AND (
                   :giaMax IS NULL OR
                   (SELECT MIN(spct2.giaBan) FROM SanPhamChiTiet spct2 WHERE spct2.idSanPham.id = sp.id) <= :giaMax
             )
+    ORDER BY
+        CASE WHEN :sort = 'giaAsc' THEN
+            (SELECT MIN(spct2.giaBan) FROM SanPhamChiTiet spct2 WHERE spct2.idSanPham.id = sp.id)
+            END ASC,
+        CASE WHEN :sort = 'giaDesc' THEN
+            (SELECT MIN(spct2.giaBan) FROM SanPhamChiTiet spct2 WHERE spct2.idSanPham.id = sp.id)
+            END DESC
+            
     """)
     Page<ClientProductResponse> getSanPhamHome(
             @Param("tenSanPham") String tenSanPham,
             @Param("loai") String loai,
             @Param("giaMin") BigDecimal giaMin,
             @Param("giaMax") BigDecimal giaMax,
+            @Param("sort") String sort,
             Pageable pageable
     );
 
@@ -169,10 +175,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """, nativeQuery = true)
     Integer tongSoLuong(int idSanPham);
 
-    //get thong so chi tiet theo bien the
+    //get thong so theo rom
     @Query(value = """
-        select 
-        c.chip_xu_ly, r.dung_luong_ram,
+        select top 1
+        c.chip_xu_ly, r.dung_luong_ram, rom.dung_luong_rom,
     	mh.ten_man_hinh, mh.kich_thuoc, mh.loai_man_hinh, mh.do_phan_giai, mh.tan_so_quet, mh.do_sang, mh.chat_lieu_kinh,
     	cms.do_phan_giai, cmt.do_phan_giai,
     	p.phien_ban, p.cong_suat_sac, p.thoi_gian_su_dung, p.so_lan_sac_toi_da,
@@ -188,14 +194,23 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     	join xuat_xu x on x.id_xuat_xu = mdsp.id_xuat_xu
     	join san_pham sp on sp.id_model_san_pham = mdsp.id_model_san_pham
     	join san_pham_chi_tiet spct on spct.id_san_pham = sp.id_san_pham
-    	where spct.id_san_pham_chi_tiet = :idSanPhamChiTiet
+    	join rom on spct.id_rom = rom.id_rom
+    	WHERE sp.id_san_pham = :idSanPham AND rom.id_rom = :idRom
     """, nativeQuery = true)
-    ThongSoResponse getThongSoByIdSpct(@Param("idSanPhamChiTiet") Integer idSpct);
+    ThongSoResponse getThongSoByIdSpct(@Param("idSanPham") Integer idSanPham, @Param("idRom") Integer idRom);
 
     //get object spct
     @Query("select spct from SanPhamChiTiet spct " +
             "where spct.idSanPham.id = :idSanPham and spct.idMau.id = :idMau and spct.idRom.id = :idRom")
     Optional<SanPhamChiTiet> getSpctByMauAndRom(@Param("idSanPham") Integer idSanPham, @Param("idMau") Integer idMau, @Param("idRom") Integer idRom);
+
+    //get anh theo mau
+    @Query(value = """
+        select distinct ha.url from hinh_anh ha
+    	join san_pham_chi_tiet spct on ha.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
+    	where spct.id_san_pham = ?1 and spct.id_mau = ?2
+    """, nativeQuery = true)
+    List<String> getListAnhByMau(Integer idSanPham, Integer idMau);
 
 
 
