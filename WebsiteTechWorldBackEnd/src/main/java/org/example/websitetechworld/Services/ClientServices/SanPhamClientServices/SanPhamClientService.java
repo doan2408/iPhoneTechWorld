@@ -3,9 +3,11 @@ package org.example.websitetechworld.Services.ClientServices.SanPhamClientServic
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductDetailResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.LoaiClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Repository.LoaiRepository;
 import org.example.websitetechworld.Repository.MauSacRepository;
 import org.example.websitetechworld.Repository.RomRepository;
 import org.example.websitetechworld.Repository.SanPhamRepository;
@@ -27,9 +29,10 @@ public class SanPhamClientService {
     private final MauSacRepository mauSacRepository;
     private final RomRepository romRepository;
     private final ModelMapper modelMapper;
+    private final LoaiRepository loaiRepository;
 
     //hien thi san pham len trang chủ
-    public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, String loai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
+    public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, Integer idLoai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
         Page<ClientProductResponse> homePage;
 
         Pageable pageable = PageRequest.of(page, size);
@@ -42,13 +45,7 @@ public class SanPhamClientService {
             }
         }
 
-        if (loai != null) {
-            loai = loai.trim();
-            if (loai.isEmpty()) {
-                loai = null;
-            }
-        }
-        homePage = sanPhamRepo.getSanPhamHome(tenSanPham, loai, giaMin, giaMax, sort, pageable);
+        homePage = sanPhamRepo.getSanPhamHome(tenSanPham, idLoai, giaMin, giaMax, sort, pageable);
         return homePage;
     }
 
@@ -134,6 +131,10 @@ public class SanPhamClientService {
 
     public List<String> getListAnhByMau(Integer idSp, Integer idMau) {
         return sanPhamRepo.getListAnhByMau(idSp, idMau);
+    }
+
+    public List<LoaiClientResponse> getLoaiClientResponses() {
+        return loaiRepository.getLoaiClientResponse();
     }
 
 }

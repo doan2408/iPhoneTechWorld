@@ -21,14 +21,14 @@ public class TrangChuController {
     @GetMapping
     public ResponseEntity<?> getSanPham(@RequestParam(value = "page", defaultValue = "0") int page,
                                         @RequestParam(value = "tenSanPham", required = false) String tenSanPham,
-                                        @RequestParam(value = "loai", required = false) String loai,
+                                        @RequestParam(value = "idLoai", required = false) Integer idLoai,
                                         @RequestParam(value = "giaMin", required = false) BigDecimal giaMin,
                                         @RequestParam(value = "giaMax", required = false) BigDecimal giaMax,
                                         @RequestParam(value = "sort", required = false) String sort
     ) {
-        System.out.println("Loai: " + loai);
+        System.out.println("Loai: " + idLoai);
         int pageSize = 16;
-        Page<ClientProductResponse> clientProductResponse = sanPhamClientService.getAllSanPhamHome(page, pageSize, tenSanPham, loai, giaMin, giaMax, sort);
+        Page<ClientProductResponse> clientProductResponse = sanPhamClientService.getAllSanPhamHome(page, pageSize, tenSanPham, idLoai, giaMin, giaMax, sort);
         return ResponseEntity.ok(clientProductResponse);
     }
 
@@ -79,5 +79,10 @@ public class TrangChuController {
             System.out.println("did not find images");
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/loai")
+    public ResponseEntity<?> getLoai() {
+        return ResponseEntity.ok(sanPhamClientService.getLoaiClientResponses());
     }
 }

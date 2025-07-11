@@ -117,7 +117,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     FROM SanPham sp
     JOIN sp.idModelSanPham.idLoai l
     WHERE sp.trangThaiSanPham = 'ACTIVE'
-      AND (:loai IS NULL OR LOWER(l.tenLoai) LIKE LOWER(CONCAT('%', :loai, '%')))
+      AND (:idLoai IS NULL OR l.id = :idLoai)
       AND (:tenSanPham IS NULL OR LOWER(sp.tenSanPham) LIKE LOWER(CONCAT('%', :tenSanPham, '%')))
       AND (
                   :giaMin IS NULL OR
@@ -134,11 +134,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
         CASE WHEN :sort = 'giaDesc' THEN
             (SELECT MIN(spct2.giaBan) FROM SanPhamChiTiet spct2 WHERE spct2.idSanPham.id = sp.id)
             END DESC
-            
     """)
     Page<ClientProductResponse> getSanPhamHome(
             @Param("tenSanPham") String tenSanPham,
-            @Param("loai") String loai,
+            @Param("idLoai") Integer loai,
             @Param("giaMin") BigDecimal giaMin,
             @Param("giaMax") BigDecimal giaMax,
             @Param("sort") String sort,
