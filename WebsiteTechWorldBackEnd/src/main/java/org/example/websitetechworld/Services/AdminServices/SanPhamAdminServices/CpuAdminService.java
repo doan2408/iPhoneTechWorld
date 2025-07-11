@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CpuAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CpuQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
 import org.example.websitetechworld.Entity.Cpu;
 import org.example.websitetechworld.Repository.CpuRepository;
@@ -74,6 +75,26 @@ public class CpuAdminService {
         }
 
         Cpu cpu = cpuRepository.save(modelMapper.map(req, Cpu.class));
+
+        return convert(cpu);
+    }
+
+    @Transactional
+    public CpuAdminResponse createCpuQuick (CpuQuickCreateAdminRequest request) {
+        List<Map<String, String>> errors = new ArrayList<>();
+
+        Integer count = cpuRepository.countCheckTrung(
+                request.getChipXuLy()
+        );
+        if(count > 0) {
+            errors.add(Map.of("field", "cpu", "message", "Chip xử lý đã tồn tại"));
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
+        Cpu cpu = cpuRepository.save(modelMapper.map(request, Cpu.class));
 
         return convert(cpu);
     }

@@ -15,34 +15,47 @@ import java.util.Map;
 @Repository
 public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
 
+    // Tổng doanh thu theo khoảng thời gian và trạng thái
     @Query(value = """
     SELECT SUM(thanh_tien) 
     FROM hoa_don 
-    WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE())
-      AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())
-      AND trang_thai_thanh_toan = 'COMPLETED'
+    WHERE ngay_thanh_toan BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
-    BigDecimal doanhThuThang();
+    BigDecimal doanhThuTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
 
+    );
+
+
+    // Số đơn hàng theo khoảng thời gian
     @Query(value = """
     SELECT COUNT(*) 
     FROM hoa_don 
-    WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE())
-      AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())
-      AND trang_thai_thanh_toan = 'COMPLETED'
+    WHERE ngay_thanh_toan BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
-    Integer dashboardSoDonHang();
+    Integer soDonHangTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+
+    );
+
 
     @Query(value = """
-    SELECT SUM(cthd.so_luong) AS tong_so_san_pham_da_ban
+    SELECT SUM(cthd.so_luong)
     FROM chi_tiet_hoa_don cthd
     JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
-    WHERE hd.trang_thai_thanh_toan = 'COMPLETED'
+    WHERE hd.ngay_thanh_toan BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
-    Integer dashboardSoSanPham();
+    Integer soSanPhamTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+
+    );
+
 
     @Query(value = "SELECT COUNT(*) FROM khach_hang", nativeQuery = true)
-    Integer dashboardSoKhachHang();
+    Integer tongSoKhachHang();
 
 
     @Query(value = """

@@ -19,11 +19,7 @@
         </div>
       </template>
 
-      <el-alert v-if="!canSubmitForm" type="warning" title="Cảnh báo"
-        :description="`Các danh mục sau đang rỗng: ${emptyCategories.join(', ')}. Vui lòng kiểm tra dữ liệu.`"
-        :closable="false" class="form-alert" />
-
-      <el-form :model="modelForm" ref="modelFormRef" :rules="modelRules" label-position="top" class="model-form">
+      <el-form :model="modelForm" ref="modelFormRef" :rules="formRules" label-position="top" class="model-form">
         <!-- Thông tin cơ bản -->
         <div class="form-section">
           <div class="section-header">
@@ -33,22 +29,39 @@
             <h3 class="section-title">Thông tin cơ bản</h3>
           </div>
           <div class="form-grid">
-            <el-form-item label="Tên model" prop="tenModel">
-              <el-input v-model="modelForm.tenModel" placeholder="Nhập tên model" clearable size="large"
-                :class="{ 'updated-input': tenModelUpdated }" />
+            <el-form-item label="Tên model" prop="tenModel" :error="errors.tenModel">
+              <el-input v-model="modelForm.tenModel" placeholder="Nhập tên model" @input="clearFieldError('tenModel')"
+                clearable size="large" :class="{ 'updated-input': tenModelUpdated }" />
             </el-form-item>
-            <el-form-item label="Loại" prop="idLoai">
-              <el-select v-model="modelForm.idLoai" placeholder="Chọn loại" clearable :loading="loading" size="large"
-                style="width: 100%">
-                <el-option v-for="loai in loais" :key="loai.idLoai" :label="loai.tenLoai" :value="loai.idLoai" />
-              </el-select>
+            <el-form-item label="Loại" prop="idLoai" :error="errors.idLoai">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idLoai" placeholder="Chọn loại" @change="clearFieldError('idLoai')"
+                  clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="loai in loais" :key="loai.idLoai" :label="loai.tenLoai" :value="loai.idLoai" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addLoaiDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="Xuất xứ" prop="idXuatXu">
-              <el-select v-model="modelForm.idXuatXu" placeholder="Chọn xuất xứ" clearable :loading="loading"
-                size="large" style="width: 100%">
-                <el-option v-for="xx in xuatXus" :key="xx.idXuatXu" :label="xx.maXuatXu" :value="xx.idXuatXu" />
-              </el-select>
+            <DialogThemLoai ref="addLoaiDialogRef" @saved="handleLoaiSaved" />
+
+            <el-form-item label="Xuất xứ" prop="idXuatXu" :error="errors.idXuatXu">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idXuatXu" placeholder="Chọn xuất xứ" @change="clearFieldError('idXuatXu')"
+                  clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="xx in xuatXus" :key="xx.idXuatXu" :label="xx.maXuatXu" :value="xx.idXuatXu" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addXuatXuDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemXuatXu ref="addXuatXuDialogRef" @saved="handleXuatXuSaved" />
           </div>
         </div>
 
@@ -61,37 +74,82 @@
             <h3 class="section-title">Cấu hình phần cứng</h3>
           </div>
           <div class="form-grid">
-            <el-form-item label="RAM" prop="idRam">
-              <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" clearable :loading="loading" size="large"
-                style="width: 100%">
-                <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
-              </el-select>
+            <el-form-item label="RAM" prop="idRam" :error="errors.idRam">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" @change="clearFieldError('idRam')"
+                  clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addDungLuongDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="CPU" prop="idCpu">
-              <el-select v-model="modelForm.idCpu" placeholder="Chọn CPU" clearable :loading="loading" size="large"
-                style="width: 100%">
-                <el-option v-for="cpu in cpus" :key="cpu.idCpu" :label="cpu.chipXuLy" :value="cpu.idCpu" />
-              </el-select>
+            <DialogThemRam ref="addDungLuongDialogRef" @saved="handleDungLuongSaved" />
+
+            <el-form-item label="CPU" prop="idCpu" :error="errors.idCpu">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCpu" placeholder="Chọn CPU" @change="clearFieldError('idCpu')" clearable
+                  :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="cpu in cpus" :key="cpu.idCpu" :label="cpu.chipXuLy" :value="cpu.idCpu" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addCpuDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="Màn hình" prop="idManHinh">
-              <el-select v-model="modelForm.idManHinh" placeholder="Chọn màn hình" clearable :loading="loading"
-                size="large" style="width: 100%">
-                <el-option v-for="mh in manHinhs" :key="mh.idManHinh" :label="mh.kichThuoc" :value="mh.idManHinh" />
-              </el-select>
+            <DiaLogThemCpu ref="addCpuDialogRef" @saved="handleCpuSaved" />
+
+            <el-form-item label="Màn hình" prop="idManHinh" :error="errors.idManHinh">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idManHinh" placeholder="Chọn màn hình"
+                  @change="clearFieldError('idManHinh')" clearable :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="mh in manHinhs" :key="mh.idManHinh" :label="mh.kichThuoc" :value="mh.idManHinh" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addManHinhDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="Hệ điều hành" prop="idHeDieuHanh">
-              <el-select v-model="modelForm.idHeDieuHanh" placeholder="Chọn hệ điều hành" clearable :loading="loading"
-                size="large" style="width: 100%">
-                <el-option v-for="hdh in heDieuHanhs" :key="hdh.idHeDieuHanh" :label="hdh.phienBan"
-                  :value="hdh.idHeDieuHanh" />
-              </el-select>
+            <DialogThemManHinh ref="addManHinhDialogRef" @saved="handleManHinhSaved" />
+
+            <el-form-item label="Hệ điều hành" prop="idHeDieuHanh" :error="errors.idHeDieuHanh">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idHeDieuHanh" placeholder="Chọn hệ điều hành"
+                  @change="clearFieldError('idHeDieuHanh')" clearable :loading="loading" size="large"
+                  style="width: 100%">
+                  <el-option v-for="hdh in heDieuHanhs" :key="hdh.idHeDieuHanh" :label="hdh.phienBan"
+                    :value="hdh.idHeDieuHanh" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addHDHDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="Pin" prop="idPin">
-              <el-select v-model="modelForm.idPin" placeholder="Chọn pin" clearable :loading="loading" size="large"
-                style="width: 100%">
-                <el-option v-for="pin in pins" :key="pin.idPin" :label="pin.phienBan" :value="pin.idPin" />
-              </el-select>
+            <DialogThemHDH ref="addHDHDialogRef" @saved="handleHDHSaved" />
+
+            <el-form-item label="Pin" prop="idPin" :error="errors.idPin">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idPin" placeholder="Chọn pin" @change="clearFieldError('idPin')" clearable
+                  :loading="loading" size="large" style="width: 100%">
+                  <el-option v-for="pin in pins" :key="pin.idPin" :label="pin.phienBan" :value="pin.idPin" />
+                </el-select>
+                <el-button type="success" size="large" circle @click="addPinDialogRef.open()">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
+            <DialogThemPin ref="addPinDialogRef" @saved="handlePinSaved" />
           </div>
         </div>
 
@@ -104,19 +162,34 @@
             <h3 class="section-title">Camera</h3>
           </div>
           <div class="form-grid">
-            <el-form-item label="Camera trước" prop="idCameraTruoc">
-              <el-select v-model="modelForm.idCameraTruoc" placeholder="Chọn camera trước" clearable :loading="loading"
-                size="large" style="width: 100%">
-                <el-option v-for="cam in cameraTruocs" :key="cam.idCamera" :label="cam.doPhanGiai"
-                  :value="cam.idCamera" />
-              </el-select>
+            <el-form-item label="Camera trước" prop="idCameraTruoc" :error="errors.idCameraTruoc">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCameraTruoc" placeholder="Chọn camera trước"
+                  @change="clearFieldError('idCameraTruoc')" clearable :loading="loading" size="large"
+                  style="width: 100%">
+                  <el-option v-for="cam in cameraTruocs" :key="cam.idCamera" :label="cam.doPhanGiai"
+                    :value="cam.idCamera" />
+                </el-select>
+                <el-button type="success" size="large" circle disabled>
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
-            <el-form-item label="Camera sau" prop="idCameraSau">
-              <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau" clearable :loading="loading"
-                size="large" style="width: 100%">
-                <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="cam.doPhanGiai"
-                  :value="cam.idCamera" />
-              </el-select>
+            <el-form-item label="Camera sau" prop="idCameraSau" :error="errors.idCameraSau">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
+                  @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%" multiple>
+                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="cam.doPhanGiai"
+                    :value="cam.idCamera" />
+                </el-select>
+                <el-button type="success" size="large" circle disabled>
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
             </el-form-item>
           </div>
         </div>
@@ -130,16 +203,17 @@
             <h3 class="section-title">Thông tin bổ sung</h3>
           </div>
           <div class="form-grid">
-            <el-form-item label="Trạng thái" prop="trangThaiSanPhamModel">
-              <el-select v-model="modelForm.trangThaiSanPhamModel" placeholder="Chọn trạng thái" clearable size="large"
-                style="width: 100%">
+            <el-form-item label="Trạng thái" prop="trangThaiSanPhamModel" :error="errors.trangThaiSanPhamModel">
+              <el-select v-model="modelForm.trangThaiSanPhamModel" placeholder="Chọn trạng thái"
+                @change="clearFieldError('trangThaiSanPhamModel')" clearable size="large" style="width: 100%">
                 <el-option v-for="trangThai in statuses" :key="trangThai.value" :label="trangThai.label"
                   :value="trangThai.value" />
               </el-select>
             </el-form-item>
-            <el-form-item label="Ngày ra mắt" prop="namRaMat">
-              <el-date-picker v-model="modelForm.namRaMat" type="date" value-format="YYYY-MM-DD" format="DD/MM/YYYY"
-                placeholder="Chọn ngày ra mắt" size="large" style="width: 100%" />
+            <el-form-item label="Ngày ra mắt" prop="namRaMat" :error="errors.namRaMat">
+              <el-date-picker v-model="modelForm.namRaMat" @change="clearFieldError('namRaMat')" type="date"
+                value-format="YYYY-MM-DD" format="DD/MM/YYYY" placeholder="Chọn ngày ra mắt" size="large"
+                style="width: 100%" />
             </el-form-item>
           </div>
         </div>
@@ -151,8 +225,7 @@
             </el-icon>
             Đặt lại
           </el-button>
-          <el-button type="primary" size="large" @click="submitModelForm" :loading="submitting"
-            :disabled="!canSubmitForm">
+          <el-button type="primary" size="large" @click="submitModelForm" :loading="submitting">
             <el-icon>
               <Check />
             </el-icon>
@@ -387,7 +460,9 @@
           <div class="detail-item">
             <div class="detail-label">Camera sau</div>
             <div class="detail-value">
-              <el-tag type="warning">{{ cameraSauLabel(viewModelData.idCameraSau) }}</el-tag>
+              <el-tag v-for="cam in viewModelData.idCameraSau" :key="cam" type="warning" style="margin-right: 4px;">
+                {{ cameraSaus.value.find(c => c.idCamera === cam)?.doPhanGiai || 'Không rõ' }}
+              </el-tag>
             </div>
           </div>
 
@@ -468,13 +543,21 @@ import {
   finByIdModelSanPham,
   deleteModelSanPham
 } from '../../../Service/Adminservice/Products/ProductAdminService';
+import DialogThemLoai from '@/components/Admin/dialogs/DialogThemLoai.vue';
+import DialogThemXuatXu from '@/components/Admin/dialogs/DialogThemXuatXu.vue';
+import DialogThemRam from '@/components/Admin/dialogs/DialogThemRam.vue';
+import DiaLogThemCpu from '@/components/Admin/dialogs/DiaLogThemCpu.vue';
+import DialogThemManHinh from '@/components/Admin/dialogs/DialogThemManHinh.vue';
+import DialogThemHDH from '@/components/Admin/dialogs/DialogThemHDH.vue';
+import DialogThemPin from '@/components/Admin/dialogs/DialogThemPin.vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'ModelManagement',
   components: {
     Edit, View, Delete, Plus, InfoFilled, Setting, Camera,
     DocumentAdd, Search, RefreshLeft, Check, ArrowLeft,
-    List, Close
+    List, Close, DialogThemLoai, DialogThemXuatXu, DialogThemRam, DiaLogThemCpu, DialogThemManHinh, DialogThemHDH, DialogThemPin,
   },
   setup() {
     const modelSanPhams = ref([]);
@@ -489,14 +572,22 @@ export default {
     const cameraSaus = ref([]);
     const xuatXus = ref([]);
     const loais = ref([]);
+    const errors = reactive({});
+    const addLoaiDialogRef = ref(null);
+    const addXuatXuDialogRef = ref(null);
+    const addDungLuongDialogRef = ref(null);
+    const addCpuDialogRef = ref(null);
+    const addManHinhDialogRef = ref(null);
+    const addHDHDialogRef = ref(null);
+    const addPinDialogRef = ref(null);
+    const toast = useToast();
+
     const statuses = ref([
       { value: 'ACTIVE', label: 'Đang hoạt động', type: 'success' },
       { value: 'DISCONTINUED', label: 'Ngừng sản xuất', type: 'warning' },
       { value: 'UPCOMING', label: 'Chờ ra mắt', type: 'info' },
-      // { value: 'HIDDEN', label: 'Ẩn', type: '' },
-      // { value: 'DELETED', label: 'Đã xóa', type: 'danger' }
     ]);
-    const tenModelUpdated = ref(false); // Đánh dấu khi tenModel thay đổi
+    const tenModelUpdated = ref(false);
 
     const formMode = ref('add');
     const modelFormRef = ref(null);
@@ -515,114 +606,38 @@ export default {
 
     const modelForm = ref({
       idModelSanPham: null,
-      tenModel: '', // Tên model, ví dụ: "iphone thường"
+      tenModel: '',
       idRam: null,
       idCpu: null,
       idManHinh: null,
       idHeDieuHanh: null,
       idPin: null,
       idCameraTruoc: null,
-      idCameraSau: null,
+      idCameraSau: [],
       idXuatXu: null,
       idLoai: null,
       trangThaiSanPhamModel: 'ACTIVE',
       namRaMat: null
     });
 
-    const modelRules = reactive({
-      tenModel: [
-        { required: true, message: 'Vui lòng nhập tên model', trigger: 'blur' },
-        { min: 3, message: 'Tên model phải có ít nhất 3 ký tự', trigger: 'blur' }
-      ],
+    const formRules = ref({
+      tenModel: [{ required: true, message: 'Vui lòng nhập tên model', trigger: 'blur' }],
+      idLoai: [{ required: true, message: 'Vui lòng chọn loại', trigger: 'change' }],
+      idXuatXu: [{ required: true, message: 'Vui lòng chọn xuất xứ', trigger: 'change' }],
       idRam: [{ required: true, message: 'Vui lòng chọn RAM', trigger: 'change' }],
       idCpu: [{ required: true, message: 'Vui lòng chọn CPU', trigger: 'change' }],
       idManHinh: [{ required: true, message: 'Vui lòng chọn màn hình', trigger: 'change' }],
       idHeDieuHanh: [{ required: true, message: 'Vui lòng chọn hệ điều hành', trigger: 'change' }],
       idPin: [{ required: true, message: 'Vui lòng chọn pin', trigger: 'change' }],
       idCameraTruoc: [{ required: true, message: 'Vui lòng chọn camera trước', trigger: 'change' }],
-      idCameraSau: [{ required: true, message: 'Vui lòng chọn camera sau', trigger: 'change' }],
-      idXuatXu: [{ required: true, message: 'Vui lòng chọn xuất xứ', trigger: 'change' }],
-      idLoai: [{ required: true, message: 'Vui lòng chọn loại', trigger: 'change' }],
-      trangThaiSanPhamModel: [{ required: true, message: 'Vui lòng chọn trạng thái', trigger: 'change' }],
-      namRaMat: [
-        { required: true, message: 'Vui lòng chọn ngày ra mắt', trigger: 'change' },
-        {
-          validator: (rule, value, callback) => {
-            if (!value) {
-              callback();
-              return;
-            }
-
-            const date = new Date(value);
-            const now = new Date();
-
-            const trangThai = modelForm.value.trangThaiSanPhamModel;
-
-            if (trangThai === 'UPCOMING') {
-              if (date.getFullYear() < 2000) {
-                callback(new Error('Ngày ra mắt không hợp lệ (trước năm 2000)'));
-              } else {
-                callback(); // Hợp lệ
-              }
-            } else {
-              if (date > now) {
-                callback(new Error('Ngày ra mắt không được trong tương lai'));
-              } else if (date.getFullYear() < 2000) {
-                callback(new Error('Ngày ra mắt không hợp lệ (trước năm 2000)'));
-              } else {
-                callback(); // Hợp lệ
-              }
-            }
-          },
-          trigger: 'change'
-        }
+      idCameraSau: [
+        { type: 'array', required: true, message: 'Vui lòng chọn ít nhất một camera sau', trigger: 'change' }
       ]
     });
 
     const formTitle = computed(() => formMode.value === 'add' ? 'Thêm Model Mới' : 'Sửa Model');
 
-    const canSubmitForm = computed(() => {
-      return (
-        modelForm.value.tenModel &&
-        modelForm.value.idRam &&
-        modelForm.value.idCpu &&
-        modelForm.value.idManHinh &&
-        modelForm.value.idHeDieuHanh &&
-        modelForm.value.idPin &&
-        modelForm.value.idCameraTruoc &&
-        modelForm.value.idCameraSau &&
-        modelForm.value.idXuatXu &&
-        modelForm.value.idLoai &&
-        modelForm.value.trangThaiSanPhamModel &&
-        modelForm.value.namRaMat &&
-        rams.value.length > 0 &&
-        cpus.value.length > 0 &&
-        manHinhs.value.length > 0 &&
-        heDieuHanhs.value.length > 0 &&
-        pins.value.length > 0 &&
-        cameraTruocs.value.length > 0 &&
-        cameraSaus.value.length > 0 &&
-        xuatXus.value.length > 0 &&
-        loais.value.length > 0
-      );
-    });
-
-    const emptyCategories = computed(() => {
-      const categories = [];
-      if (!rams.value.length) categories.push('RAM');
-      if (!cpus.value.length) categories.push('CPU');
-      if (!manHinhs.value.length) categories.push('Màn hình');
-      if (!heDieuHanhs.value.length) categories.push('Hệ điều hành');
-      if (!pins.value.length) categories.push('Pin');
-      if (!cameraTruocs.value.length) categories.push('Camera trước');
-      if (!cameraSaus.value.length) categories.push('Camera sau');
-      if (!xuatXus.value.length) categories.push('Xuất xứ');
-      if (!loais.value.length) categories.push('Loại');
-      return categories;
-    });
-
     const indexMethod = (index) => (currentPage.value - 1) * pageSize + index + 1;
-
 
     const ramLabel = (idRam) => rams.value.find(r => r.idRam === idRam)?.dungLuongRam || 'Không rõ';
     const cpuLabel = (idCpu) => cpus.value.find(c => c.idCpu === idCpu)?.chipXuLy || 'Không rõ';
@@ -630,26 +645,36 @@ export default {
     const heDieuHanhLabel = (idHeDieuHanh) => heDieuHanhs.value.find(h => h.idHeDieuHanh === idHeDieuHanh)?.phienBan || 'Không rõ';
     const pinLabel = (idPin) => pins.value.find(p => p.idPin === idPin)?.phienBan || 'Không rõ';
     const cameraTruocLabel = (idCamera) => cameraTruocs.value.find(c => c.idCamera === idCamera)?.doPhanGiai || 'Không rõ';
-    const cameraSauLabel = (idCamera) => cameraSaus.value.find(c => c.idCamera === idCamera)?.doPhanGiai || 'Không rõ';
+    const cameraSauLabel = (idCameraSau) => {
+      if (!idCameraSau || !Array.isArray(idCameraSau)) return 'Không rõ';
+      return idCameraSau
+        .map(id => cameraSaus.value.find(c => c.idCamera === id)?.doPhanGiai || 'Không rõ')
+        .join(', ');
+    };
     const loaiLabel = (idLoai) => loais.value.find(l => l.idLoai === idLoai)?.tenLoai || 'Không rõ';
     const xuatXuLabel = (idXuatXu) => xuatXus.value.find(x => x.idXuatXu === idXuatXu)?.maXuatXu || 'Không rõ';
-    const statusLabel = (trangThai) => statuses.value.find(s => s.value === trangThai)?.label || 'Không rõ';
-    const statusTagType = (trangThai) => statuses.value.find(s => s.value === trangThai)?.type || '';
+    
+    const statusTagType = (trangThai) => {
+      const status = statuses.value.find(s => s.value === trangThai);
+      if (!status) {
+        console.warn(`Invalid status value: ${trangThai}`);
+        return 'info';
+      }
+      return status.type;
+    };
+
+    const statusLabel = (trangThai) => {
+      const status = statuses.value.find(s => s.value === trangThai);
+      if (!status) {
+        return 'Không rõ';
+      }
+      return status.label;
+    };
 
     const formatNamRaMat = (namRaMat) => {
       if (!namRaMat || isNaN(Date.parse(namRaMat))) return 'Không rõ';
       const date = new Date(namRaMat);
       return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-    };
-
-    const handleApiError = (error, defaultMessage) => {
-      const messages = {
-        400: 'Dữ liệu không hợp lệ.',
-        404: 'Không tìm thấy dữ liệu.',
-        500: 'Lỗi máy chủ.',
-        503: 'Dịch vụ không khả dụng.'
-      };
-      ElMessage.error(messages[error.response?.status] || `${defaultMessage}: ${error.message}`);
     };
 
     watch(() => modelForm.value.idLoai, (newIdLoai, oldIdLoai) => {
@@ -658,25 +683,19 @@ export default {
         if (selectedLoai) {
           const tenLoai = selectedLoai.tenLoai || '';
           let currentTenModel = modelForm.value.tenModel || '';
-
-          // Xóa hậu tố loại cũ nếu có
           if (oldIdLoai) {
             const oldLoai = loais.value.find(l => l.idLoai === oldIdLoai);
             if (oldLoai && currentTenModel.endsWith(' ' + oldLoai.tenLoai)) {
               currentTenModel = currentTenModel.slice(0, -(oldLoai.tenLoai.length + 1));
             }
           }
-
-          // 🛡️ Chặn nối trùng loại
           if (!currentTenModel.endsWith(' ' + tenLoai)) {
             if (currentTenModel) {
               modelForm.value.tenModel = `${currentTenModel.trim()} ${tenLoai}`;
             } else {
               modelForm.value.tenModel = tenLoai;
             }
-
             tenModelUpdated.value = true;
-            // ElMessage.info(`Tên model đã được cập nhật thành: ${modelForm.value.tenModel}`);
             setTimeout(() => {
               tenModelUpdated.value = false;
             }, 2000);
@@ -685,8 +704,41 @@ export default {
       }
     });
 
+    const handleLoaiSaved = (savedLoai) => {
+      loais.value.push({ idLoai: savedLoai.id, tenLoai: savedLoai.tenLoai });
+      modelForm.value.idLoai = savedLoai.id;
+    };
 
-    // Bước 8: Lấy dữ liệu từ API
+    const handleXuatXuSaved = (savedXuatXu) => {
+      xuatXus.value.push({ idXuatXu: savedXuatXu.id, maXuatXu: savedXuatXu.maXuatXu });
+      modelForm.value.idXuatXu = savedXuatXu.id;
+    };
+
+    const handleDungLuongSaved = (savedDungLuong) => {
+      rams.value.push({ idRam: savedDungLuong.id, dungLuongRam: savedDungLuong.dungLuong });
+      modelForm.value.idRam = savedDungLuong.id;
+    };
+
+    const handleCpuSaved = (savedCpu) => {
+      cpus.value.push({ idCpu: savedCpu.id, chipXuLy: savedCpu.chipXuLy });
+      modelForm.value.idCpu = savedCpu.id;
+    };
+
+    const handleManHinhSaved = (savedManHinh) => {
+      manHinhs.value.push({ idManHinh: savedManHinh.id, kichThuoc: savedManHinh.kichThuoc });
+      modelForm.value.idManHinh = savedManHinh.id;
+    };
+
+    const handleHDHSaved = (savedHDH) => {
+      heDieuHanhs.value.push({ idHeDieuHanh: savedHDH.id, phienBan: savedHDH.phienBan });
+      modelForm.value.idHeDieuHanh = savedHDH.id;
+    };
+
+    const handlePinSaved = (savedPin) => {
+      pins.value.push({ idPin: savedPin.id, phienBan: savedPin.phienBan });
+      modelForm.value.idPin = savedPin.id;
+    };
+
     const fetchDanhMuc = async () => {
       loading.value = true;
       try {
@@ -702,6 +754,12 @@ export default {
           getAllLoaiList(),
           filterModelSanPham(currentPage.value - 1, pageSize, filters.searchQuery, filters.idLoai, filters.idRam, filters.idXuatXu)
         ]);
+
+        const failedRequests = results.filter(r => r.status === 'rejected');
+        if (failedRequests.length > 0) {
+          toast.warning('Một số dữ liệu không tải được, vui lòng thử lại!');
+          console.error('API thất bại:', failedRequests);
+        }
 
         rams.value = results[0].status === 'fulfilled' && Array.isArray(results[0].value)
           ? results[0].value.map(ram => ({ idRam: ram.id, dungLuongRam: ram.dungLuong || '' }))
@@ -732,12 +790,22 @@ export default {
           : [];
 
         modelSanPhams.value = results[9].status === 'fulfilled' && Array.isArray(results[9].value.content)
-          ? results[9].value.content.map(model => ({
-            ...model,
-            tenModel: model.tenModel || '',
-            maModelSanPham: model.maModelSanPham || 'Không rõ',
-            trangThaiSanPhamModel: model.trangThaiSanPhamModel || 'ACTIVE'
-          }))
+          ? results[9].value.content.map(model => {
+              const validStatuses = ['ACTIVE', 'DISCONTINUED', 'UPCOMING'];
+              const trangThai = validStatuses.includes(model.trangThaiSanPhamModel)
+                ? model.trangThaiSanPhamModel
+                : 'ACTIVE';
+              if (!validStatuses.includes(model.trangThaiSanPhamModel)) {
+                console.warn(`Invalid trangThaiSanPhamModel: ${model.trangThaiSanPhamModel} for model ${model.maModelSanPham}`);
+              }
+              return {
+                ...model,
+                tenModel: model.tenModel || '',
+                maModelSanPham: model.maModelSanPham || 'Không rõ',
+                trangThaiSanPhamModel: trangThai,
+                idCameraSau: Array.isArray(model.cameraSaus) ? model.cameraSaus.map(cam => cam?.id).filter(id => id != null) : []
+              };
+            })
           : [];
 
         totalItems.value = results[9].status === 'fulfilled' ? results[9].value.totalElements || 0 : 0;
@@ -745,23 +813,19 @@ export default {
         if (!modelSanPhams.value.length) {
           ElMessage.info('Không tìm thấy model.');
         }
-      } catch (error) {
-        handleApiError(error, 'Lỗi khi lấy danh mục');
       } finally {
         loading.value = false;
       }
     };
 
-    // Bước 9: Reset filters
     const resetFilters = () => {
       Object.assign(filters, { searchQuery: '', idLoai: null, idRam: null, idXuatXu: null });
       currentPage.value = 1;
       fetchDanhMuc();
     };
 
-    // Bước 10: Reset form
     const resetForm = () => {
-      const hasChanges = Object.values(modelForm.value).some(value => value !== null && value !== '');
+      const hasChanges = Object.values(modelForm.value).some(value => value !== null && value !== '' && !(Array.isArray(value) && value.length === 0));
       if (hasChanges) {
         ElMessageBox.confirm('Bạn có chắc muốn đặt lại form? Dữ liệu sẽ bị mất.', 'Xác nhận', {
           confirmButtonText: 'Có',
@@ -778,14 +842,14 @@ export default {
             idHeDieuHanh: null,
             idPin: null,
             idCameraTruoc: null,
-            idCameraSau: null,
+            idCameraSau: [],
             idXuatXu: null,
             idLoai: null,
             trangThaiSanPhamModel: 'ACTIVE',
             namRaMat: null
           };
-          tenModelUpdated.value = false; // Reset đánh dấu
-          ElMessage.success('Form đã được đặt lại.');
+          tenModelUpdated.value = false;
+          toast.success('Form đã được đặt lại.');
         });
       } else {
         formMode.value = 'add';
@@ -799,57 +863,118 @@ export default {
           idHeDieuHanh: null,
           idPin: null,
           idCameraTruoc: null,
-          idCameraSau: null,
+          idCameraSau: [],
           idXuatXu: null,
           idLoai: null,
           trangThaiSanPhamModel: 'ACTIVE',
           namRaMat: null
         };
-        tenModelUpdated.value = false; // Reset đánh dấu
+        tenModelUpdated.value = false;
       }
     };
 
-    // Bước 11: Xem chi tiết model
     const viewModel = async (model) => {
       try {
         const response = await finByIdModelSanPham(model.idModelSanPham);
+        if (!response) {
+          toast.error('Không tìm thấy dữ liệu model!');
+          return;
+        }
+        const validStatuses = ['ACTIVE', 'DISCONTINUED', 'UPCOMING'];
+        const trangThai = validStatuses.includes(response.trangThaiSanPhamModel)
+          ? response.trangThaiSanPhamModel
+          : 'ACTIVE';
+        if (!validStatuses.includes(response.trangThaiSanPhamModel)) {
+          console.warn(`Invalid trangThaiSanPhamModel in viewModel: ${response.trangThaiSanPhamModel}`);
+        }
         viewModelData.value = {
           ...response,
           tenModel: response.tenModel || '',
           maModelSanPham: response.maModelSanPham || 'Không rõ',
-          trangThaiSanPhamModel: response.trangThaiSanPhamModel || 'ACTIVE'
+          trangThaiSanPhamModel: trangThai,
+          idCameraSau: Array.isArray(response.cameraSaus) ? response.cameraSaus.map(cam => cam?.id).filter(id => id != null) : []
         };
+        console.log('viewModelData:', viewModelData.value);
+        console.log('dialogVisible:', dialogVisible.value);
         dialogVisible.value = true;
       } catch (error) {
-        handleApiError(error, 'Lỗi khi xem chi tiết model');
+        console.error('Lỗi khi lấy chi tiết model:', error);
+        if (error.response?.status === 404) {
+          toast.error('Model không tồn tại!');
+        } else if (error.response?.status === 500) {
+          toast.error('Lỗi máy chủ, vui lòng thử lại sau!');
+        } else {
+          toast.error('Không thể lấy chi tiết model, vui lòng thử lại!');
+        }
       }
     };
 
-    // Bước 12: Sửa model
     const editModel = async (model) => {
       try {
         const response = await finByIdModelSanPham(model.idModelSanPham);
+        if (!response) {
+          toast.error('Không tìm thấy dữ liệu model!');
+          return;
+        }
+        const validStatuses = ['ACTIVE', 'DISCONTINUED', 'UPCOMING'];
+        const trangThai = validStatuses.includes(response.trangThaiSanPhamModel)
+          ? response.trangThaiSanPhamModel
+          : 'ACTIVE';
+        if (!validStatuses.includes(response.trangThaiSanPhamModel)) {
+          console.warn(`Invalid trangThaiSanPhamModel in editModel: ${response.trangThaiSanPhamModel}`);
+        }
         formMode.value = 'edit';
-        modelForm.value = { ...response, tenModel: response.tenModel || '' };
+        modelForm.value = {
+          ...response,
+          idModelSanPham: response.idModelSanPham,
+          tenModel: response.tenModel || '',
+          idRam: response.idRam,
+          idCpu: response.idCpu,
+          idManHinh: response.idManHinh,
+          idHeDieuHanh: response.idHeDieuHanh,
+          idPin: response.idPin,
+          idCameraTruoc: response.idCameraTruoc,
+          idCameraSau: Array.isArray(response.cameraSaus) ? response.cameraSaus.map(cam => cam?.id).filter(id => id != null) : [],
+          idXuatXu: response.idXuatXu,
+          idLoai: response.idLoai,
+          trangThaiSanPhamModel: trangThai,
+          namRaMat: response.namRaMat
+        };
       } catch (error) {
-        handleApiError(error, 'Lỗi khi lấy chi tiết model');
+        console.error('Lỗi khi lấy chi tiết model để chỉnh sửa:', error);
+        toast.error('Không thể lấy dữ liệu model để chỉnh sửa!');
       }
     };
 
-    // Bước 13: Chuyển sang chế độ chỉnh sửa
     const switchToEditMode = () => {
       formMode.value = 'edit';
       modelForm.value = { ...viewModelData.value };
       dialogVisible.value = false;
     };
 
-    // Bước 14: Gửi form
-    const submitModelForm = () => {
-      modelFormRef.value?.validate(async (valid) => {
-        if (!valid) return ElMessage.error('Vui lòng điền đầy đủ thông tin.');
+    function clearFieldError(fieldName) {
+      if (errors[fieldName]) {
+        delete errors[fieldName];
+      }
+    }
+
+    const submitModelForm = async () => {
+      if (!modelFormRef.value) return;
+
+      await modelFormRef.value.validate(async (valid) => {
+        if (!valid) {
+          toast.error('Vui lòng kiểm tra lại các trường thông tin!');
+          return;
+        }
 
         submitting.value = true;
+
         try {
+          const cameraSaus = modelForm.value.idCameraSau.map((id, index) => ({
+            id: id,
+            isChinh: index === 0
+          }));
+
           const payload = {
             tenModel: modelForm.value.tenModel ? modelForm.value.tenModel.trim() : '',
             idRam: modelForm.value.idRam,
@@ -858,7 +983,7 @@ export default {
             idHeDieuHanh: modelForm.value.idHeDieuHanh,
             idPin: modelForm.value.idPin,
             idCameraTruoc: modelForm.value.idCameraTruoc,
-            idCameraSau: modelForm.value.idCameraSau,
+            cameraSaus: cameraSaus,
             idXuatXu: modelForm.value.idXuatXu,
             idLoai: modelForm.value.idLoai,
             trangThaiSanPhamModel: modelForm.value.trangThaiSanPhamModel,
@@ -867,11 +992,17 @@ export default {
 
           if (formMode.value === 'edit') {
             await putModelSanPham(modelForm.value.idModelSanPham, payload);
-            const index = modelSanPhams.value.findIndex(m => m.idModelSanPham === modelForm.value.idModelSanPham);
+            const index = modelSanPhams.value.findIndex(
+              (m) => m.idModelSanPham === modelForm.value.idModelSanPham
+            );
             if (index !== -1) {
-              modelSanPhams.value[index] = { ...modelSanPhams.value[index], ...payload };
+              modelSanPhams.value[index] = {
+                ...modelSanPhams.value[index],
+                ...payload,
+                idCameraSau: payload.cameraSaus.map(cam => cam.id)
+              };
             }
-            ElMessage.success('Cập nhật model thành công!');
+            toast.success('Cập nhật model thành công!');
           } else {
             const newForm = await postModelSanPham(payload);
             if (newForm && typeof newForm === 'object') {
@@ -879,62 +1010,76 @@ export default {
                 ...newForm,
                 tenModel: newForm.tenModel || '',
                 maModelSanPham: newForm.maModelSanPham || 'Không rõ',
-                trangThaiSanPhamModel: newForm.trangThaiSanPhamModel || 'ACTIVE'
+                trangThaiSanPhamModel: newForm.trangThaiSanPhamModel || 'ACTIVE',
+                idCameraSau: newForm.cameraSaus ? newForm.cameraSaus.map(cam => cam.id) : []
               });
               totalItems.value += 1;
-              ElMessage.success('Thêm model thành công!');
+              toast.success('Thêm model thành công!');
             } else {
-              console.error('Invalid newForm:', newForm);
-              ElMessage.error('Dữ liệu trả về từ API không hợp lệ!');
+              toast.error('Dữ liệu trả về từ API không hợp lệ!');
             }
           }
 
           resetForm();
         } catch (error) {
-          console.error('Error in submitModelForm:', error);
-          handleApiError(error, 'Lỗi khi lưu model');
+          console.error('❌ Bắt lỗi từ backend:', error);
+          const errorData = error.response?.data;
+          Object.keys(errors).forEach((key) => delete errors[key]);
+
+          const errorMessages = {
+            'model.duplicate.config': 'Cấu hình model đã tồn tại, vui lòng kiểm tra lại!',
+            'camera_sau.not_found': 'Camera sau không tồn tại!',
+            'model.ten_model.required': 'Tên model là bắt buộc!',
+            'model.required_fields_missing': 'Vui lòng điền đầy đủ các trường bắt buộc!'
+          };
+
+          if (error.response?.status === 400 && errorData) {
+            if (typeof errorData.message === 'object' && errorData.message !== null) {
+              Object.assign(errors, errorData.message);
+            } else if (typeof errorData.message === 'string') {
+              toast.error(errorMessages[errorData.message] || errorData.message || 'Đã xảy ra lỗi nghiệp vụ!');
+            } else {
+              toast.error('Lỗi không xác định từ server!');
+            }
+          } else if (error.response?.status === 500) {
+            toast.error('Lỗi máy chủ, vui lòng thử lại sau!');
+          } else if (!error.response) {
+            toast.error('Không thể kết nối đến máy chủ!');
+          } else {
+            toast.error('Có lỗi hệ thống xảy ra!');
+          }
         } finally {
           submitting.value = false;
         }
       });
     };
 
-    // Bước 15: Xóa model
     const deleteModel = (id, model) => {
       ElMessageBox.confirm('Bạn có chắc chắn muốn xóa model này?', 'Xác nhận', {
         confirmButtonText: 'Có',
         cancelButtonText: 'Không'
       }).then(async () => {
-        try {
-          await deleteModelSanPham(id);
-          modelSanPhams.value = modelSanPhams.value.filter(m => m.idModelSanPham !== id);
-          totalItems.value -= 1;
-          ElMessage.success('Xóa model thành công!');
-          if (!modelSanPhams.value.length && currentPage.value > 1) {
-            currentPage.value -= 1;
-            await fetchDanhMuc();
-          }
-        } catch (error) {
-          handleApiError(error, 'Lỗi khi xóa model');
+        await deleteModelSanPham(id);
+        modelSanPhams.value = modelSanPhams.value.filter(m => m.idModelSanPham !== id);
+        totalItems.value -= 1;
+        toast.success('Xóa model thành công!');
+        if (!modelSanPhams.value.length && currentPage.value > 1) {
+          currentPage.value -= 1;
+          await fetchDanhMuc();
         }
-      }).catch(() => {
-        // Do nothing if user cancels
       });
     };
 
-    // Bước 16: Xử lý phân trang
     const handlePageChange = (newPage) => {
       currentPage.value = newPage;
       fetchDanhMuc();
     };
 
-    // Bước 17: Theo dõi filters
     watch(() => [filters.searchQuery, filters.idLoai, filters.idRam, filters.idXuatXu], debounce(() => {
       currentPage.value = 1;
       fetchDanhMuc();
     }, 500));
 
-    // Bước 18: Lấy dữ liệu khi component được mount
     onMounted(() => fetchDanhMuc());
 
     return {
@@ -955,16 +1100,31 @@ export default {
       formTitle,
       modelForm,
       modelFormRef,
-      modelRules,
+      formRules,
       currentPage,
       totalItems,
       pageSize,
       filters,
-      canSubmitForm,
-      emptyCategories,
       dialogVisible,
       viewModelData,
-      tenModelUpdated, // Trả về để sử dụng trong template
+      tenModelUpdated,
+      errors,
+      addLoaiDialogRef,
+      addXuatXuDialogRef,
+      addDungLuongDialogRef,
+      addCpuDialogRef,
+      addManHinhDialogRef,
+      addHDHDialogRef,
+      addPinDialogRef,
+      toast,
+      handlePinSaved,
+      handleHDHSaved,
+      handleManHinhSaved,
+      handleCpuSaved,
+      handleDungLuongSaved,
+      handleLoaiSaved,
+      handleXuatXuSaved,
+      clearFieldError,
       indexMethod,
       ramLabel,
       cpuLabel,
@@ -988,19 +1148,16 @@ export default {
       deleteModel,
       handlePageChange
     };
-  }
+  },
 };
 </script>
 
 <style scoped>
-/* CSS để đánh dấu khi tenModel được cập nhật */
 .updated-input {
   border: 2px solid #67C23A !important;
-  /* Viền xanh khi cập nhật */
   transition: border 0.3s;
 }
 
-/* Main Container */
 .model-management {
   max-width: 1400px;
   margin: 0 auto;
@@ -1009,7 +1166,6 @@ export default {
   min-height: 100vh;
 }
 
-/* Page Header */
 .page-header {
   margin-bottom: 32px;
 }
@@ -1031,7 +1187,6 @@ export default {
   margin: 0;
 }
 
-/* Card Styles */
 .form-card,
 .filter-card,
 .table-card {
@@ -1049,7 +1204,6 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Card Headers */
 .card-header {
   display: flex;
   align-items: center;
@@ -1066,12 +1220,6 @@ export default {
 
 .header-title {
   color: #1f2937;
-}
-
-/* Form Styles */
-.form-alert {
-  margin-bottom: 24px;
-  border-radius: 12px;
 }
 
 .model-form {
@@ -1122,7 +1270,6 @@ export default {
   border-top: 2px solid #e2e8f0;
 }
 
-/* Filter Styles */
 .filter-content {
   padding: 8px 0;
 }
@@ -1148,7 +1295,6 @@ export default {
   flex-wrap: wrap;
 }
 
-/* Table Styles */
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -1195,7 +1341,6 @@ export default {
   border-radius: 6px;
 }
 
-/* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 8px;
@@ -1211,7 +1356,6 @@ export default {
   transform: scale(1.1);
 }
 
-/* Pagination */
 .pagination-fixed {
   background: white;
   border-radius: 8px;
@@ -1237,7 +1381,6 @@ export default {
   gap: 12px;
 }
 
-/* Dialog Styles */
 .detail-dialog :deep(.el-dialog) {
   border-radius: 16px;
   overflow: hidden;
@@ -1305,7 +1448,6 @@ export default {
   border-top: 1px solid #e2e8f0;
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -1360,7 +1502,6 @@ export default {
   }
 }
 
-/* Custom Element Plus Overrides */
 :deep(.el-card__header) {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-bottom: 2px solid #e2e8f0;
@@ -1415,7 +1556,11 @@ export default {
   font-weight: 600 !important;
 }
 
-:deep(.el-alert) {
-  border-radius: 12px;
+:deep(.el-form-item__error) {
+  color: red;
+  font-size: 13px;
+  line-height: 1.2;
+  margin-top: 4px;
+  display: block;
 }
 </style>

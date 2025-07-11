@@ -191,7 +191,7 @@ public class ImeiAdminService {
                 Imei imei = new Imei();
                 imei.setSoImei(dto.getSoImei());
                 imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-                imei.setIdSanPhamChiTiet(spct); // 👈 dùng chung ID
+                imei.setIdSanPhamChiTiet(spct); //  dùng chung ID
                 return imei;
             }).collect(Collectors.toList());
 
@@ -235,5 +235,13 @@ public class ImeiAdminService {
             case NUMERIC -> String.valueOf(new java.math.BigDecimal(cell.getNumericCellValue()).toBigInteger()); // để không bị mất số 0 ở đầu
             default -> throw new IllegalArgumentException("Không thể đọc giá trị IMEI từ ô Excel.");
         };
+    }
+
+
+    public List<String> getImeisBySanPhamChiTietId(Integer sanPhamChiTietId) {
+        return imeiReposiory.findByIdSanPhamChiTiet_Id(sanPhamChiTietId)
+                .stream()
+                .map(Imei::getSoImei)
+                .collect(Collectors.toList());
     }
 }

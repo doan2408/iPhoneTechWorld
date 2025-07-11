@@ -3,6 +3,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ManHinhAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ManHinhQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.MauSacAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ManHinhAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.MauSacAdminResponse;
@@ -80,6 +81,12 @@ public class ManHinhAdminController {
             );
         }
 
+    }
+
+    @PostMapping("/quick-manHinh")
+    public ResponseEntity<?> createManHinhQuick (@RequestBody ManHinhQuickCreateAdminRequest request) {
+        ManHinhAdminResponse response = manHinhAdminService.createManHinhQuick(request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

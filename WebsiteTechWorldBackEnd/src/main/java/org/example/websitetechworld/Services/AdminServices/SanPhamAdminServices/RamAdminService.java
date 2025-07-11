@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RamAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RamQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RamAdminResponse;
 import org.example.websitetechworld.Entity.Ram;
 import org.example.websitetechworld.Repository.RamRepository;
@@ -54,6 +55,16 @@ public class RamAdminService {
 
     @Transactional
     public RamAdminResponse createRam(RamAdminRequest ramAdminRequest) {
+        if (ramRepository.existsByDungLuong(ramAdminRequest.getDungLuong())) {
+            throw new IllegalArgumentException("Dung lượng đã tồn tại");
+        }
+        Ram ram = modelMapper.map(ramAdminRequest, Ram.class);
+        Ram saved = ramRepository.save(ram);
+        return convert(saved);
+    }
+
+    @Transactional
+    public RamAdminResponse createRamQuick(RamQuickCreateAdminRequest ramAdminRequest) {
         if (ramRepository.existsByDungLuong(ramAdminRequest.getDungLuong())) {
             throw new IllegalArgumentException("Dung lượng đã tồn tại");
         }

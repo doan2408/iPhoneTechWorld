@@ -174,7 +174,7 @@
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <el-tooltip content="Xóa sản phẩm" placement="top">
+              <el-tooltip content="Tạm ngừng bán sản phẩm" placement="top">
                 <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)"
                   class="action-btn-square" />
               </el-tooltip>

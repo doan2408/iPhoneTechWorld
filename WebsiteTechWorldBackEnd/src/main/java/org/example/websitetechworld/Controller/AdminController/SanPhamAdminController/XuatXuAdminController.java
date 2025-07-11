@@ -4,6 +4,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.XuatXuAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.XuatXuAdminService;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,12 @@ public class XuatXuAdminController {
     @PostMapping
     public ResponseEntity<?> createXuatXu(@Valid @RequestBody XuatXuAdminRequest xuatXuAdminRequest) {
         XuatXuAdminResponse save = xuatXuAdminService.createXuatXu(xuatXuAdminRequest);
+        return ResponseEntity.ok(save);
+    }
+
+    @PostMapping("/quick-xuatXu")
+    public ResponseEntity<?> createQuickXuatXu(@Valid @RequestBody XuatXuQuickCreateAdminRequest xuatXuAdminRequest) {
+        XuatXuAdminResponse save = xuatXuAdminService.createQuickXuatXu(xuatXuAdminRequest);
         return ResponseEntity.ok(save);
     }
 

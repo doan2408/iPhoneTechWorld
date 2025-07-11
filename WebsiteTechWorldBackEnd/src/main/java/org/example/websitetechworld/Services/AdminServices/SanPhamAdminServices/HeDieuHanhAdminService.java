@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices;
 
 import lombok.RequiredArgsConstructor;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.HDHQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.HeDieuHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.HeDieuHanhAdminResponse;
 import org.example.websitetechworld.Entity.HeDieuHanh;
@@ -74,7 +75,14 @@ public class HeDieuHanhAdminService {
             }
             HeDieuHanh heDieuHanh = heDieuHanhRepository.save(modelMapper.map(heDieuHanhAdminRequest, HeDieuHanh.class));
             return convert(heDieuHanh);
-        }
+    }
+
+    @Transactional
+    public HeDieuHanhAdminResponse createHDHQuick (HDHQuickCreateAdminRequest request) {
+        HeDieuHanh dieuHanh = heDieuHanhRepository.save(modelMapper.map(request, HeDieuHanh.class));
+        return convert(dieuHanh);
+    }
+
 
     @Transactional
     public HeDieuHanhAdminResponse updateHeDieuHanh(Integer id, HeDieuHanhAdminRequest heDieuHanhAdminRequest) {

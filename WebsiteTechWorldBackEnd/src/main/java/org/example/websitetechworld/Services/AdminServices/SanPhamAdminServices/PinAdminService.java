@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.PinAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.PinQuicKCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.PinAdminResponse;
 import org.example.websitetechworld.Entity.Pin;
 import org.example.websitetechworld.Repository.PinRepository;
@@ -53,6 +54,16 @@ public class PinAdminService {
 
     @Transactional
     public PinAdminResponse createPin(PinAdminRequest pinAdminRequest) {
+        if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
+            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+        }
+        Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
+        Pin saved = pinRepository.save(pin);
+        return convert(saved);
+    }
+
+    @Transactional
+    public PinAdminResponse createPinQuick(PinQuicKCreateAdminRequest pinAdminRequest) {
         if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
             throw new IllegalArgumentException("Phiên bản đã tồn tại");
         }
