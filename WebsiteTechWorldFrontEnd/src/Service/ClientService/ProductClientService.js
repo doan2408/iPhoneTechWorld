@@ -16,20 +16,20 @@ const fetchData = async (url) => {
 export const getAllSanPham = async ({
   page = 0,
   tenSanPham = null,
-  loai = null,
+  idLoai = null,
   giaMin = null,
   giaMax = null,
-  sort = null
+  sort = null,
 } = {}) => {
   const params = { page };
 
   try {
     if (tenSanPham && tenSanPham.trim() !== "")
       params.tenSanPham = tenSanPham.trim();
-    if (loai && loai.trim() !== "") params.loai = loai.trim();
+    if (idLoai !== null) params.idLoai = idLoai;
     if (giaMin !== null) params.giaMin = giaMin;
     if (giaMax !== null) params.giaMax = giaMax;
-    if(sort && sort.trim() !== "") params.sort = sort.trim();
+    if (sort && sort.trim() !== "") params.sort = sort.trim();
 
     const response = await api.get(`${baseURL}/home`, { params });
     return response.data;
@@ -54,26 +54,35 @@ export const getChiTietBienThe = async (idSp, idMau, idRom) => {
     );
     return response.data;
   } catch (error) {
-    throw error.response?.data || "An error occurred while getting product variant"
+    throw (
+      error.response?.data || "An error occurred while getting product variant"
+    );
   }
 };
 
-export const getThongSo = async(idsp, idRom) => {
+export const getThongSo = async (idsp, idRom) => {
   try {
-    const response = await api.get(`${baseURL}/thongSo/${idsp}/rom/${idRom}`)
+    const response = await api.get(`${baseURL}/thongSo/${idsp}/rom/${idRom}`);
     return response.data;
+  } catch (error) {
+    throw error.response?.data || "Unable to fetch the product specifications";
   }
-  catch (error) {
-    throw error.response?.data || "Unable to fetch the product specifications"
-  }
-}
+};
 
-export const getListAnhByMau = async(idSp, idMau) => {
+export const getListAnhByMau = async (idSp, idMau) => {
   try {
-    const response = await api.get(`${baseURL}/anh/${idSp}/mau/${idMau}`)
+    const response = await api.get(`${baseURL}/anh/${idSp}/mau/${idMau}`);
     return response.data;
+  } catch (error) {
+    throw error.response?.data || "Did not find images";
   }
-  catch (error) {
-    throw error.response?.data || "Did not find images"
+};
+
+export const getLoai = async () => {
+  try {
+    const response = await api.get(`${baseURL}/loai`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Can't get list of loai";
   }
-}
+};

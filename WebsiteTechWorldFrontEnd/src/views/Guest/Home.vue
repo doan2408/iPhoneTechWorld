@@ -1,18 +1,17 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import Banner from "@/components/Client/Banner.vue";
-import { getAllSanPham } from "@/Service/GuestService/ProductGuestService";
-import { 
-  PriceTag, 
-  Search, 
-  Delete, 
-  Menu, 
-  ArrowDown, 
-  Sort, 
-  View 
-} from '@element-plus/icons-vue'
-import { h } from 'vue';
-
+import { getAllSanPham, getLoai} from "@/Service/GuestService/ProductGuestService";
+import {
+  PriceTag,
+  Search,
+  Delete,
+  Menu,
+  ArrowDown,
+  Sort,
+  View,
+} from "@element-plus/icons-vue";
+import { h } from "vue";
 
 const showClearFilter = ref(false);
 const filterKeyword = ref("");
@@ -35,7 +34,7 @@ const fetchProducts = async () => {
     const params = {
       page: currentPage.value - 1,
       tenSanPham: filterKeyword.value || null,
-      loai: selectedLoai.value || null,
+      idLoai: selectedLoai.value || null,
       giaMin: priceRange.value[0],
       giaMax: priceRange.value[1],
       sort: selectedSort.value || null,
@@ -55,14 +54,22 @@ const fetchProducts = async () => {
 };
 
 // Available product types
-const loaiOptions = [
-  { label: "Tất cả", value: "" },
-  { label: "Thường", value: "Thường" },
-  { label: "Pro", value: "Pro" },
-  { label: "Plus", value: "Plus" },
-  { label: "Pro Max", value: "Pro Max" },
-  { label: "Mini", value: "Mini" },
-];
+const loaiOptions = ref([{ label: "Tất cả", value: "" }]);
+
+const fetchLoai = async () => {
+  try {
+    const data = await getLoai();
+    loaiOptions.value = [
+      { label: "Tất cả", value: "" },
+      ...data.map((item) => ({
+        label: item.tenLoai,
+        value: item.idLoai,
+      })),
+    ];
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách loại:", error);
+  }
+};
 
 const hasProduct = computed(() => products.value.length > 0);
 
@@ -125,6 +132,7 @@ watch(currentPage, () => {
 });
 
 onMounted(() => {
+  fetchLoai();
   fetchProducts();
 });
 </script>
@@ -218,7 +226,7 @@ onMounted(() => {
               type="info"
               class="filter-tag"
             >
-              Loại: {{ selectedLoai }}
+              Loại: {{ loaiOptions.find((item) => item.value === selectedLoai)?.label }}
             </el-tag>
             <el-tag
               v-if="filterKeyword"
@@ -238,7 +246,14 @@ onMounted(() => {
             <el-dropdown trigger="click">
               <el-button class="filter-btn">
                 <el-icon><Menu /></el-icon>
-                <span>Loại {{ selectedLoai ? `(${selectedLoai})` : "" }}</span>
+                <span>
+                  {{
+                    selectedLoai
+                      ? loaiOptions.find((item) => item.value === selectedLoai)
+                          ?.label
+                      : "Loại"
+                  }}
+                </span>
                 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
@@ -347,7 +362,9 @@ onMounted(() => {
                   </div>
                   <div class="product-info">
                     <h3 class="product-name">{{ sp.tenSanPham }}</h3>
-                    <div class="product-price">{{ formatPrice(sp.giaBan) }}</div>
+                    <div class="product-price">
+                      {{ formatPrice(sp.giaBan) }}
+                    </div>
                   </div>
                 </div>
               </router-link>
