@@ -1,7 +1,6 @@
-import { id } from "element-plus/es/locales.mjs";
 import api from "../LoginService/axiosInstance";
 
-const baseURL = "/client";
+const baseURL = "/home";
 
 const fetchData = async (url) => {
   try {
@@ -31,7 +30,7 @@ export const getAllSanPham = async ({
     if (giaMax !== null) params.giaMax = giaMax;
     if(sort && sort.trim() !== "") params.sort = sort.trim();
 
-    const response = await api.get(`${baseURL}/home`, { params });
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (e) {
     console.log("error:", e);
@@ -40,7 +39,7 @@ export const getAllSanPham = async ({
 
 export const detailSanPham = async (id) => {
   try {
-    const response = await api.get(`${baseURL}/detail/${id}`);
+    const response = await api.get(`${baseURL}/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || "An error occurred while getting the product";
@@ -66,6 +65,7 @@ export const getThongSo = async(idsp, idRom) => {
   catch (error) {
     throw error.response?.data || "Unable to fetch the product specifications"
   }
+  
 }
 
 export const getListAnhByMau = async(idSp, idMau) => {

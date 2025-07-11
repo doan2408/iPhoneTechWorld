@@ -66,15 +66,13 @@ const goToLogin = () => {
 <template>
   <header class="client-header">
     <div class="logo">
-      <router-link to="/home">TechWorld</router-link>
+      <router-link to="/">TechWorld</router-link>
     </div>
     <nav>
       <ul>
-        <li><router-link to="/category">Danh mục</router-link></li>
-        <li><router-link to="/users">Lọc Theo Giá</router-link></li>
-        <li><router-link to="/searchProduct">Bạn muốn tìm gì</router-link></li>
-        <li><router-link to="/orders">Tra cứu đơn hàng</router-link></li>
-        <li><router-link to="/carts">Giỏ hàng</router-link></li>
+        <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li>
+        <li><router-link to="/orders"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
+        <li><router-link to="/carts"><i class="fa fa-shopping-cart"></i> Giỏ hàng</router-link></li>
 
         <!-- Chỉ hiển thị nút Đăng xuất nếu người dùng đã đăng nhập
         <li v-if="isLoggedIn">
@@ -92,7 +90,7 @@ const goToLogin = () => {
             :class="{ 'disabled-link': isLoginPage }"
             :disabled="isLoginPage"
           >
-            Đăng nhập
+          Đăng nhập
           </a>
         </li>
       </ul>
