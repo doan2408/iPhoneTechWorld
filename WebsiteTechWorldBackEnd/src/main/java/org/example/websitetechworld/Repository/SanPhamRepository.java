@@ -67,7 +67,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             @Param("trangThai") String trangThai,
             Pageable pageable);
 
-
     @Query(value = """
         SELECT DISTINCT
             LEFT(ten_san_pham, 
@@ -86,7 +85,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
         """,
             nativeQuery = true)
     Page<String> findTenDongSanPham(Pageable pageable);
-
 
     Boolean existsByTenSanPham (String tenSanPham);
 
@@ -211,7 +209,5 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """, nativeQuery = true)
     List<String> getListAnhByMau(Integer idSanPham, Integer idMau);
 
-
-
-
+    List<SanPham> findAllByIdModelSanPham_IdModelSanPham(Integer idModelSanPham);
 }

@@ -14,7 +14,7 @@
 
     <template #footer>
       <el-button @click="dialogVisible = false">Hủy</el-button>
-      <el-button type="primary" @click="submitLoai">Lưu</el-button>
+      <el-button type="primary" @click="submitMH">Lưu</el-button>
     </template>
   </el-dialog>
 </template>
@@ -49,7 +49,7 @@ function handleClose() {
   dialogVisible.value = false;
 }
 
-async function submitLoai() {
+async function submitMH() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {

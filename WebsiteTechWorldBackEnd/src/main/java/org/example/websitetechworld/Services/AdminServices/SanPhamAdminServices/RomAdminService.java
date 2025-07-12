@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RomAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RomQuickAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RomAdminResponse;
 import org.example.websitetechworld.Entity.Rom;
 import org.example.websitetechworld.Repository.RomRepository;
@@ -54,6 +55,16 @@ public class RomAdminService {
 
     @Transactional
     public RomAdminResponse createRom(RomAdminRequest romAdminRequest) {
+        if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
+            throw new IllegalArgumentException("Dung lượng đã tồn tại");
+        }
+        Rom rom = modelMapper.map(romAdminRequest, Rom.class);
+        Rom saved = romRepo.save(rom);
+        return convert(saved);
+    }
+
+    @Transactional
+    public RomAdminResponse createRomQuick(RomQuickAdminRequest romAdminRequest) {
         if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
             throw new IllegalArgumentException("Dung lượng đã tồn tại");
         }

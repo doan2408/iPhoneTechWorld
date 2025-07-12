@@ -275,6 +275,7 @@ export const getAllXuatXuList = () => fetchData('/xuatXu/listXuatXu');
 export const postXuatXuList = (data) => postData('/xuatXu/quick-xuatXu', data);
 
 export const getAllRomList = () => fetchData('/rom/listRom');
+export const postRomList = (data) => postData('/rom/quick-rom', data);
 
 export const getAllRamList = () => fetchData('/ram/listRam');
 export const postRamList = (data) => postData('/ram/quick-ram', data);
