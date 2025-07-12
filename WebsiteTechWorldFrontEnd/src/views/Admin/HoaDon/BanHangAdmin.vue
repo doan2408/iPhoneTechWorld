@@ -111,26 +111,18 @@
                         <button class="customer-btn" title="Lọc">
                             <Filter class="btn-icon" />
                         </button>
-                        <button class="customer-btn" title="Xem chi tiết">
-                            <Eye class="btn-icon" />
+                        <button class="customer-btn" @click="openQRModal" title="Quét mã QR">
+                            <ScanLine class="btn-icon" /> Quét QR
                         </button>
+
+                        <!-- Modal hiển thị camera -->
+                        <el-dialog v-model="showQRModal" width="400px" title="Quét mã sản phẩm" destroy-on-close
+                            @close="onCloseModal">
+                            <QrScanner @scanned="onScannedImei" />
+                        </el-dialog>
+
                     </div>
                 </div>
-
-                <!-- Chon chon khach hang -->
-                <!-- <div v-if="currentInvoice && currentInvoice.maHoaDon" class="selected-customer">
-                    <div class="customer-info">
-                        <input type="hidden" value="{{ currentInvoice.id }}">
-                        <User class="customer-icon" />
-                        <div>
-                            <strong>{{ currentInvoice.maHoaDon }}</strong> -->
-                <!-- <span class="customer-phone">{{ currentInvoice.customer.phone }}</span> -->
-                <!-- </div>
-                    </div>
-                    <button @click="clearCustomer" class="clear-customer-btn">
-                        <X class="clear-icon" />
-                    </button>
-                </div> -->
 
                 <!-- Products grid -->
                 <div class="products-section">
@@ -449,9 +441,8 @@
                     </div>
 
 
-                    <button @click="processPayment" class="payment-btn">
-                        THANH TOÁN
-                    </button>
+                    <button @click="processPayment" class="payment-btn">THANH TOÁN</button>
+                    <InvoicePrint v-if="showInvoice" :idHoaDon="selectedInvoiceId" ref="invoiceRef" />
                 </div>
             </div>
         </div>
@@ -549,7 +540,7 @@ import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
     ChevronUp, ChevronDown, Minus, Trash2, History, FileText,
-    Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
+    Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
     loadSanPhamChiTiet, findSanPhamBanHang, loadCategory
@@ -559,16 +550,18 @@ import {
     , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
-    , findHdctByImeiDaBan
+    , findHdctByImeiDaBan, findProductByImei
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { ca } from 'element-plus/es/locales.mjs';
+import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "vue-toastification";
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue';
-
+import QrScanner from '@/views/Admin/Qr/QrScanner.vue';
+import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
+import html2pdf from 'html2pdf.js';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -610,6 +603,10 @@ const grandTotal = ref(0)
 const discountList = ref([])
 const selectedDiscount = ref(null)
 const search = ref('')
+
+watch(selectedDiscount, (newVal) => {
+    console.log('PGG đã chọn:', newVal)
+})
 
 //toast message
 const toast = useToast()
@@ -702,6 +699,7 @@ watch(
 )
 
 
+
 // category san pham 
 const danhMucSanPham = async () => {
     try {
@@ -792,8 +790,8 @@ const loadTabHoaDon = async () => {
 
 const listHdctByImeiDaBan = ref([]);
 const pageNoHdctByImei = ref(0);
-const pageSizeHdctByImei = ref(5);
-const getImeiByPhieuGiamGia = async () => {
+const pageSizeHdctByImei = ref(10);
+const getHdctByImeiDaBan = async () => {
     const storedId = localStorage.getItem("selectedInvoiceId");
     console.log(storedId);
     const res = await findHdctByImeiDaBan(pageNoHdctByImei.value, pageSizeHdctByImei.value, storedId);
@@ -857,25 +855,6 @@ const selectInvoice = async (id) => {
     }
 };
 
-
-
-// const addNewInvoice = () => {
-//     // const newInvoice = {
-//     //     id: nextInvoiceId++,
-//     //     name: `Hóa đơn ${nextInvoiceId - 1}`,
-//     //     items: [],
-//     //     customer: { name: '', phone: '', email: '', address: '' },
-//     //     notes: '',
-//     //     total: 0
-//     // }
-//     // invoices.value.push(newInvoice)
-//     // currentInvoiceId.value = newInvoice.id
-
-
-// }   
-
-
-
 const isLoading = ref(false)
 const errorMessage = ref('')
 //add pending invoice
@@ -904,6 +883,7 @@ const addNewInvoice = async () => {
         invoices.value.push(newInvoice)
         currentInvoiceId.value = newInvoice.id
         localStorage.setItem('selectedInvoiceId', newInvoice.id)
+        loadHoaDon()
         toast.success('Tạo hóa đơn mới thành công!')
 
     } catch (error) {
@@ -966,7 +946,8 @@ const removeFromCart = async () => {
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
-        ElMessage.success("Trả lại sản phẩm thành công !");
+        getHdctByImeiDaBan();
+        toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
         console.error("Xóa thất bại", err);
@@ -1197,6 +1178,7 @@ const confirmImeiSelection = async () => {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
+        getHdctByImeiDaBan()
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
@@ -1214,7 +1196,7 @@ const addToCartWithImeis = async (product, imeiList) => {
         soLuong: imeiList.length,
         imeiIds: imeiList.map(imei => imei.imei)
     };
-
+    console.log(data)
     try {
         const response = await addProductIntoInvoice(storedId, data);
         await loadTabHoaDon(); // Tải lại dữ liệu hóa đơn sau khi thêm
@@ -1264,9 +1246,6 @@ const handleRemovePartial = async (item) => {
             imeisForCurrentItem.value = []; // Đảm bảo là mảng rỗng nếu dữ liệu không hợp lệ
         }
 
-        // Mặc định chọn tất cả IMEI sau khi tải xong
-        // selectedImeisChon.value = imeisForCurrentItem.value.map(imei_item => imei_item.imei);
-
         // Hiển thị modal
         showRemoveImeiModal.value = true;
 
@@ -1287,8 +1266,9 @@ const handleRemoveSingleImei = async (item) => {
     try {
         await updateSoLuongAndTrangThai(storedId, hdctId, imeiToReturn);
         toast.success(`Đã trả IMEI ${item.soImei} thành công.`);
-
+        showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
+        getHdctByImeiDaBan();
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
@@ -1821,7 +1801,7 @@ onMounted(async () => {
     await getTinhList();
     await loadDiscountList();
     fetchPaymentMethods();
-    await getImeiByPhieuGiamGia();
+    await getHdctByImeiDaBan();
 });
 
 //Khach hang
@@ -2015,6 +1995,9 @@ const getIconUrl = (code) => {
     }
 };
 
+const showInvoice = ref(false);
+const selectedInvoiceId = ref(localStorage.getItem("selectedInvoiceId") || null);
+const invoiceRef = ref(null);
 // Hàm xử lý thanh toán
 const processPayment = async () => {
     const storedId = localStorage.getItem("selectedInvoiceId");
@@ -2044,12 +2027,16 @@ const processPayment = async () => {
         const response = await thanhToan(storedId, paymentPayload);
         if (response.data && response.data.message === "Thanh toán thành công") {
             toast.success('Thanh toán thành công!');
-            // Bạn có thể làm gì đó ở đây sau khi thanh toán thành công,
-            // ví dụ: cập nhật trạng thái hóa đơn trên UI, chuyển hướng, v.v.
             console.log('Hóa đơn sau thanh toán:', response.data);
-            // Cập nhật trạng thái hóa đơn nếu cần
-            // currentInvoiceDetail.value.trangThaiThanhToan = 'PAID'; // Giả sử có trường này
+            selectedInvoiceId.value = storedId;
+            showInvoice.value = true;
+            await nextTick();
+            setTimeout(() => {
+                printInvoice();
+            }, 1200);
+            setTimeout(() => {
             window.location.reload();
+            }, 3200);
         } else {
             toast.error('Thanh toán không thành công: ' + (response.data?.message || 'Lỗi không xác định.'));
         }
@@ -2061,6 +2048,31 @@ const processPayment = async () => {
             toast.error('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
         }
     }
+};
+
+const printInvoice = () => {
+    if (invoiceRef.value) { // Kiểm tra xem invoiceRef có giá trị không
+        const element = invoiceRef.value.$el; // Lấy DOM của InvoicePrint
+        const opt = {
+            margin: 1,
+            filename: `hoa_don_${selectedInvoiceId.value || 'unknown'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+            pdf.autoPrint(); // Mở hộp thoại in
+            window.open(pdf.output('bloburl'), '_blank'); // Mở PDF trong tab mới
+        }).catch((error) => {
+            console.error('Lỗi khi tạo PDF:', error);
+        });
+    } else {
+        console.error('invoiceRef không được định nghĩa hoặc component chưa được render.');
+    }
+};
+
+const handleClose = () => {
+    showInvoice.value = false;
 };
 
 const formatTrangThai = (trangThai) => {
@@ -2100,6 +2112,37 @@ const toggleSelectAll = () => {
 watch(selectedItems, (newVal) => {
     selectAllItems.value = newVal.length === listHdctByImeiDaBan.value.length;
 });
+
+const showQRModal = ref(false)
+const openQRModal = () => {
+  showQRModal.value = true
+}
+const onProductScanned = (maSanPham) => {
+    console.log("Mã sản phẩm quét được:", maSanPham)
+    // Gọi API hoặc thêm vào giỏ hàng tại đây
+}
+const onCloseModal = () => {
+    console.log('Đã đóng modal quét QR')
+}
+
+const onScannedImei = async (soImei) => {
+    const product = await findProductByImei(soImei)
+    console.log(product.data)
+    console.log(product.data.tenSanPham)
+    if (product) {
+        await addToCartWithImeis(
+            {
+                idSanPhamChiTiet: product.data.idSanPhamChiTiet,
+                tenSanPham: product.data.tenSanPham
+            },
+            [{ imei: product.data.soImei }]
+        )
+        toast.success("Đã thêm sản phẩm từ IMEI: " + product.data.soImei)
+        // Nếu bạn muốn đóng modal sau khi quét xong:
+        showQRModal.value = false
+    }
+}
+
 
 </script>
 

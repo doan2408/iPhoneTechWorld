@@ -39,4 +39,6 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
         ORDER BY imbd.id DESC 
     """)
     Page<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer hoaDonId, Pageable pageable);
+
+    boolean existsBySoImei(String soImei);
 }

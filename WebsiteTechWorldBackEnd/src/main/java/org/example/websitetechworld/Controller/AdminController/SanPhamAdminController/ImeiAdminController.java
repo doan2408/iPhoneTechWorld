@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ImeiAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.LoaiAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SaveImeiRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiLookupResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ViewImeiAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ImeiAdminResponse;
@@ -26,10 +27,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -166,5 +169,23 @@ public class ImeiAdminController {
         }
     }
 
+    @GetMapping("/ma-vach/{soImei}")
+    public ResponseEntity<?> getSanPhamChiTietByImei(@PathVariable String soImei) {
+        Imei imei = Optional.ofNullable(imeiReposiory.findBySoImei(soImei))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "IMEI không tồn tại"));
+
+        if (!imei.getTrangThaiImei().equals(TrangThaiImei.AVAILABLE)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "IMEI không có sẵn (trạng thái hiện tại: " + imei.getTrangThaiImei() + ")");
+        }
+
+        SanPhamChiTiet spct = imei.getIdSanPhamChiTiet();
+
+        return ResponseEntity.ok(new ImeiLookupResponse(
+                imei.getSoImei(),
+                spct.getGiaBan(),
+                spct.getIdSanPham().getTenSanPham(),
+                spct.getId()
+        ));
+    }
 
 }
