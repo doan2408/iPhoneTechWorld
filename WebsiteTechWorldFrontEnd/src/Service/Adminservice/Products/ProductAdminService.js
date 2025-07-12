@@ -1,4 +1,5 @@
 import api from '@/Service/LoginService/axiosInstance';
+import { darken } from 'element-plus/es/components/button/src/button-custom.mjs';
 import { da, pa } from 'element-plus/es/locales.mjs';
 
  const baseURL= '/admin';
@@ -271,15 +272,34 @@ export const getAllNhaCungCapList = () => fetchData('/nhaCungCap/listNCC');
 export const postNhaCungCapList = (data) => postData('/nhaCungCap/quick-create', data)
 
 export const getAllXuatXuList = () => fetchData('/xuatXu/listXuatXu');
+export const postXuatXuList = (data) => postData('/xuatXu/quick-xuatXu', data);
+
 export const getAllRomList = () => fetchData('/rom/listRom');
+export const postRomList = (data) => postData('/rom/quick-rom', data);
+
 export const getAllRamList = () => fetchData('/ram/listRam');
+export const postRamList = (data) => postData('/ram/quick-ram', data);
+
 export const getAllPinList = () => fetchData('/pin/listPin');
+export const postPinList = (data) => postData('/pin/quick-pin', data);
+
 export const getAllMauSacList = () => fetchData('/mauSac/listMauSac');
+export const postMauSacList = (data) => postData('/mauSac/quick-mauSac', data);
+
 export const getAllManHinhList = () => fetchData('/manHinh/listManHinh');
+export const postManHinhList = (data) => postData('/manHinh/quick-manHinh', data);
+
 export const getAllLoaiList = () => fetchData('/loai/listLoai');
+export const postAllLoaiList = (dataLoai) => postData('/loai',dataLoai);
+
 export const getAllHinhAnhList = () => fetchData('/hinhAnh/listHinhAnh');
+
 export const getAllHDHList = () => fetchData('/heDieuHanh/listHDH');
+export const postHDHList = (data) => postData('/heDieuHanh/quick-hdh',data);
+
 export const getAllCpuList = () => fetchData('/cpu/listCpu');
+export const postCpuList = (data) => postData('/cpu/quick-cpu', data);
+
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
 

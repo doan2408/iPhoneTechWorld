@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ManHinhAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ManHinhQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ManHinhAdminResponse;
 import org.example.websitetechworld.Entity.ManHinh;
 import org.example.websitetechworld.Entity.MauSac;
@@ -80,6 +81,12 @@ public class ManHinhAdminService {
         }
 
         ManHinh manHinh = manHinhRepository.save(modelMapper.map(manHinhAdminRequest, ManHinh.class));
+        return convert(manHinh);
+    }
+
+    @Transactional
+    public ManHinhAdminResponse createManHinhQuick (ManHinhQuickCreateAdminRequest request) {
+        ManHinh manHinh = manHinhRepository.save(modelMapper.map(request, ManHinh.class));
         return convert(manHinh);
     }
 

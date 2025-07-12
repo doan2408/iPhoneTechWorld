@@ -169,12 +169,12 @@
                   <el-button size="small" type="info" :icon="View" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <router-link :to="`/admin/products/${row.id}`" v-if="isAdmin">
+              <router-link :to="`/admin/products/${row.id}`">
                 <el-tooltip content="Chỉnh sửa" placement="top">
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <el-tooltip content="Xóa sản phẩm" placement="top" v-if="isAdmin">
+              <el-tooltip content="Xóa sản phẩm" placement="top">
                 <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)"
                   class="action-btn-square" />
               </el-tooltip>
@@ -388,7 +388,6 @@ const isStaff = computed(() => {
       .includes("ROLE_STAFF")
   );
 });
-
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
   handleSearch();

@@ -2,10 +2,8 @@ package org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminReques
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +11,7 @@ import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -54,8 +53,10 @@ public class ModelSanPhamAdminRequest {
     @NotNull(message = "{model.idCameraTruoc.required}")
     private Integer idCameraTruoc;
 
-    @NotNull(message = "{model.idCameraSau.required}")
-    private Integer idCameraSau;
+//    @NotNull(message = "{model.idCameraSau.required}")
+    @Valid
+    @NotEmpty(message = "Phải chọn ít nhất 1 camera sau")
+    private List<CameraSauRequest> cameraSaus;
 
     @NotNull(message = "{model.idXuatXu.required}")
     private Integer idXuatXu;
@@ -64,4 +65,9 @@ public class ModelSanPhamAdminRequest {
     private Integer idLoai;
 
 
+    @Data
+    public static class CameraSauRequest {
+        private Integer id;
+        private Boolean isChinh;
+    }
 }

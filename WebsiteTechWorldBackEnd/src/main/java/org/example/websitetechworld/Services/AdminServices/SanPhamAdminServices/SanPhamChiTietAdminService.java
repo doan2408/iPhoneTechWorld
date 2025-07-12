@@ -151,5 +151,24 @@ public class SanPhamChiTietAdminService {
         }
     }
 
+    public boolean existsVariantInLoaiExceptId(Integer idMau, Integer idRom, Integer idLoai, Integer excludeId) {
+        Integer result = sanPhamChiTietRepo.existsVariantInLoaiExceptId(idMau, idRom, idLoai, excludeId);
+        return result != null && result == 1;
+    }
+
+
+    public void validateKhongTrungBienTheTheoLoai_Update(Integer idLoai, Set<SanPhamChiTietAdminRepuest> chiTiets) {
+        for (SanPhamChiTietAdminRepuest ct : chiTiets) {
+            if (ct.getId() == null) {
+                throw new BusinessException("ID biến thể không được để trống khi cập nhật.");
+            }
+            if (existsVariantInLoaiExceptId(ct.getIdMau(), ct.getIdRom(), idLoai, ct.getId())) {
+                throw new BusinessException("Biến thể màu + ROM này đã tồn tại trong cùng loại sản phẩm.");
+            }
+        }
+    }
+
+
+
 
 }
