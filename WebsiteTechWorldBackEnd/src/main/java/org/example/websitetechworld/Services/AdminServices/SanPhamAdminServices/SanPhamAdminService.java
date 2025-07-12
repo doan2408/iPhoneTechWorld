@@ -276,15 +276,6 @@ public class SanPhamAdminService {
                 modelSanPhamAdminResponse.setCheDoChupCameraTruoc(sanPham.getIdModelSanPham().getIdCameraTruoc().getCheDoChup());
             }
 
-//            if (sanPham.getIdModelSanPham().getIdCameraSau() != null) {
-//                modelSanPhamAdminResponse.setIdCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getId());
-//                modelSanPhamAdminResponse.setLoaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiCamera());
-//                modelSanPhamAdminResponse.setDoPhanGiaiCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getDoPhanGiai());
-//                modelSanPhamAdminResponse.setKhauDoCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getKhauDo());
-//                modelSanPhamAdminResponse.setLoaiZoomCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getLoaiZoom());
-//                modelSanPhamAdminResponse.setCheDoChupCameraSau(sanPham.getIdModelSanPham().getIdCameraSau().getCheDoChup());
-//            }
-
             if (sanPham.getIdModelSanPham().getIdXuatXu() != null) {
                 modelSanPhamAdminResponse.setIdXuatXu(sanPham.getIdModelSanPham().getIdXuatXu().getId());
                 modelSanPhamAdminResponse.setMaXuatXu(sanPham.getIdModelSanPham().getIdXuatXu().getMaXuatXu());
@@ -294,6 +285,25 @@ public class SanPhamAdminService {
             if (sanPham.getIdModelSanPham().getIdLoai() != null) {
                 modelSanPhamAdminResponse.setIdLoai(sanPham.getIdModelSanPham().getIdLoai().getId());
                 modelSanPhamAdminResponse.setTenLoai(sanPham.getIdModelSanPham().getIdLoai().getTenLoai());
+            }
+
+            if (sanPham.getIdModelSanPham().getCameraSaus() != null && !sanPham.getIdModelSanPham().getCameraSaus().isEmpty()) {
+                List<CameraSauAdminResponse> cameraSauList = sanPham.getIdModelSanPham().getCameraSaus().stream()
+                        .map(camera -> {
+                            CameraSauAdminResponse cameraDto = new CameraSauAdminResponse();
+                            cameraDto.setId(camera.getId().getCameraSauId());
+                            cameraDto.setLoaiCamera(camera.getCameraSau().getLoaiCamera());
+                            cameraDto.setDoPhanGiai(camera.getCameraSau().getDoPhanGiai());
+                            cameraDto.setKhauDo(camera.getCameraSau().getKhauDo());
+                            cameraDto.setLoaiZoom(camera.getCameraSau().getLoaiZoom());
+                            cameraDto.setCheDoChup(camera.getCameraSau().getCheDoChup());
+                            cameraDto.setIsChinh(camera.getIsChinh());
+                            return cameraDto;
+                        })
+                        .collect(Collectors.toList());
+                modelSanPhamAdminResponse.setCameraSaus(cameraSauList);
+            } else {
+                modelSanPhamAdminResponse.setCameraSaus(new ArrayList<>());
             }
 
             response.setModelSanPhamAdminResponse(modelSanPhamAdminResponse);
@@ -367,31 +377,41 @@ public class SanPhamAdminService {
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
 
-       validateSanPhamRequest(sanPhamAdminRequest, false);
-        // Bước 2: Tạo SanPham
-        SanPham sanPham = new SanPham();
-        sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
-        sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
-        sanPham.setTrangThaiSanPham(
-                Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
-                        .orElse(TrangThaiSanPham.ACTIVE)
-        );
+//        validateSanPhamRequest(sanPhamAdminRequest, false);
 
-        if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
-            NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap()).orElseThrow();
-            sanPham.setIdNhaCungCap(nhaCungCap);
+        // === Bước 1: Kiểm tra model tồn tại ===
+        if (sanPhamAdminRequest.getIdModelSanPham() == null) {
+            throw new BusinessException("Model sản phẩm không được để trống.");
         }
 
-        if (sanPhamAdminRequest.getIdModelSanPham() != null)  {
-            ModelSanPham modelSanPham = modelSanPhamRepository.findById(sanPhamAdminRequest.getIdModelSanPham()).orElseThrow();
+        ModelSanPham modelSanPham = modelSanPhamRepository.findById(sanPhamAdminRequest.getIdModelSanPham())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy model sản phẩm"));
+
+        // === Bước 2: Tìm hoặc tạo mới SanPham tương ứng với Model ===
+        List<SanPham> sanPhamList = sanPhamRepo.findAllByIdModelSanPham_IdModelSanPham(sanPhamAdminRequest.getIdModelSanPham());
+
+        SanPham sanPham;
+
+        if (!sanPhamList.isEmpty()) {
+            sanPham = sanPhamList.get(0); // hoặc có thể lọc kỹ hơn nếu có nhiều sản phẩm
+        } else {
+            sanPham = new SanPham();
+            sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
+            sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
+            sanPham.setTrangThaiSanPham(Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
+                    .orElse(TrangThaiSanPham.ACTIVE));
+            if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
+                NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
+                        .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp"));
+                sanPham.setIdNhaCungCap(nhaCungCap);
+            }
             sanPham.setIdModelSanPham(modelSanPham);
+            sanPham = sanPhamRepo.save(sanPham);
         }
-
-        sanPham = sanPhamRepo.save(sanPham);
 
         Set<SanPhamChiTiet> chiTietSet = new HashSet<>();
 
-        // Bước 3: Lưu chi tiết sản phẩm
+        // === Bước 3: Xử lý danh sách chi tiết sản phẩm ===
         if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
             for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
 
@@ -402,23 +422,25 @@ public class SanPhamAdminService {
                 chiTiet.setGiaBan(rq.getGiaBan());
                 chiTiet.setIdSanPham(sanPham);
 
-                // Validate foreign keys
+                // Kiểm tra khóa ngoại
                 if (rq.getIdMau() != null) {
-                    chiTiet.setIdMau(mauSacRepository.findById(rq.getIdMau())
-                            .orElseThrow(() -> new NotFoundException("Không tìm thấy màu sắc với ID: " + rq.getIdMau())));
+                    MauSac mauSac = mauSacRepository.findById(rq.getIdMau())
+                            .orElseThrow(() -> new NotFoundException("Không tìm thấy màu sắc với ID: " + rq.getIdMau()));
+                    chiTiet.setIdMau(mauSac);
                 }
 
                 if (rq.getIdRom() != null) {
-                    chiTiet.setIdRom(romRepository.findById(rq.getIdRom())
-                            .orElseThrow(() -> new NotFoundException("Không tìm thấy ROM với ID: " + rq.getIdRom())));
+                    Rom rom = romRepository.findById(rq.getIdRom())
+                            .orElseThrow(() -> new NotFoundException("Không tìm thấy ROM với ID: " + rq.getIdRom()));
+                    chiTiet.setIdRom(rom);
                 }
 
-                // Lưu chi tiết
+                // Lưu chi tiết sản phẩm
                 SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
 
-                // Lưu hình ảnh
+                // Lưu hình ảnh (nếu có)
                 if (rq.getHinhAnhs() != null && !rq.getHinhAnhs().isEmpty()) {
-                    hinhAnhRepository.saveAll(rq.getHinhAnhs().stream()
+                    List<HinhAnh> hinhAnhs = rq.getHinhAnhs().stream()
                             .filter(ha -> ha.getUrl() != null)
                             .map(ha -> {
                                 HinhAnh hinhAnh = new HinhAnh();
@@ -426,39 +448,37 @@ public class SanPhamAdminService {
                                 hinhAnh.setUrl(ha.getUrl());
                                 hinhAnh.setImagePublicId(ha.getImagePublicId());
                                 return hinhAnh;
-                            })
-                            .toList());
+                            }).toList();
+                    hinhAnhRepository.saveAll(hinhAnhs);
                 }
 
-                // Lưu IMEI
+                // Lưu danh sách IMEI (nếu có)
                 if (rq.getImeis() != null && !rq.getImeis().isEmpty()) {
-                    imeiReposiory.saveAll(rq.getImeis().stream()
+                    List<Imei> imeis = rq.getImeis().stream()
                             .filter(imeiDto -> imeiDto.getSoImei() != null && !imeiDto.getSoImei().trim().isEmpty())
                             .map(imeiDto -> {
-                                if (imeiReposiory.existsBySoImei(imeiDto.getSoImei().trim())) {
-                                    throw new BusinessException("Số IMEI đã tồn tại: " + imeiDto.getSoImei());
+                                String soImei = imeiDto.getSoImei().trim();
+                                if (imeiReposiory.existsBySoImei(soImei)) {
+                                    throw new BusinessException("Số IMEI đã tồn tại: " + soImei);
                                 }
-                                Imei newImei = new Imei();
-                                newImei.setSoImei(imeiDto.getSoImei().trim());
-                                newImei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-                                newImei.setIdSanPhamChiTiet(chiTietSaved);
-                                return newImei;
-                            })
-                            .toList());
+                                Imei imei = new Imei();
+                                imei.setSoImei(soImei);
+                                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                                imei.setIdSanPhamChiTiet(chiTietSaved);
+                                return imei;
+                            }).toList();
+                    imeiReposiory.saveAll(imeis);
                 }
 
                 chiTietSet.add(chiTietSaved);
             }
         }
 
-
-        // Gán lại chi tiết vào sản phẩm
-        sanPham.getSanPhamChiTiets().clear();
+        // === Bước 4: Gán chi tiết sản phẩm vào SanPham ===
         sanPham.getSanPhamChiTiets().addAll(chiTietSet);
-        sanPham = sanPhamRepo.save(sanPham);
+        sanPham = sanPhamRepo.save(sanPham); // cập nhật lại nếu cần
 
-
-        // Bước 4: Tạo response
+        // === Bước 5: Tạo response ===
         SanPhamAdminResponse response = new SanPhamAdminResponse();
         response.setId(sanPham.getId());
         response.setMaSanPham(sanPham.getMaSanPham());
@@ -467,20 +487,22 @@ public class SanPhamAdminService {
         response.setThuongHieu(sanPham.getThuongHieu());
 
         if (sanPham.getIdNhaCungCap() != null) {
-            NhaCungCapAdminResponse nhaCungCapAdminResponse = new NhaCungCapAdminResponse();
-            nhaCungCapAdminResponse.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
-            nhaCungCapAdminResponse.setSdt(sanPham.getIdNhaCungCap().getSdt());
-            nhaCungCapAdminResponse.setEmail(sanPham.getIdNhaCungCap().getEmail());
-            nhaCungCapAdminResponse.setDiaChi(sanPham.getIdNhaCungCap().getDiaChi());
-            response.setNhaCungCapAdminResponse(nhaCungCapAdminResponse);
+            NhaCungCap nha = sanPham.getIdNhaCungCap();
+            NhaCungCapAdminResponse nccRes = new NhaCungCapAdminResponse();
+            nccRes.setTenNhaCungCap(nha.getTenNhaCungCap());
+            nccRes.setSdt(nha.getSdt());
+            nccRes.setEmail(nha.getEmail());
+            nccRes.setDiaChi(nha.getDiaChi());
+            response.setNhaCungCapAdminResponse(nccRes);
         }
 
         if (sanPham.getIdModelSanPham() != null) {
-            ModelSanPhamAdminResponse modelSanPhamAdminResponse = new ModelSanPhamAdminResponse();
-            modelSanPhamAdminResponse.setMaModelSanPham(sanPham.getIdModelSanPham().getMaModelSanPham());
-            modelSanPhamAdminResponse.setTenModel(sanPham.getIdModelSanPham().getTenModel());
-            modelSanPhamAdminResponse.setNamRaMat(sanPham.getIdModelSanPham().getNamRaMat());
-            response.setModelSanPhamAdminResponse(modelSanPhamAdminResponse);
+            ModelSanPham m = sanPham.getIdModelSanPham();
+            ModelSanPhamAdminResponse modelRes = new ModelSanPhamAdminResponse();
+            modelRes.setMaModelSanPham(m.getMaModelSanPham());
+            modelRes.setTenModel(m.getTenModel());
+            modelRes.setNamRaMat(m.getNamRaMat());
+            response.setModelSanPhamAdminResponse(modelRes);
         }
 
         if (sanPham.getSanPhamChiTiets() != null) {

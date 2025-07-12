@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RomAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.RomQuickAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RomAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.RomAdminService;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,12 @@ public class RomAdminController {
     @PostMapping
     public ResponseEntity<RomAdminResponse> createRom(@Valid @RequestBody RomAdminRequest romAdminRequest) {
         RomAdminResponse romAdminResponse = romAdminService.createRom(romAdminRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(romAdminResponse);
+    }
+
+    @PostMapping("/quick-rom")
+    public ResponseEntity<RomAdminResponse> createRomQuick(@Valid @RequestBody RomQuickAdminRequest romAdminRequest) {
+        RomAdminResponse romAdminResponse = romAdminService.createRomQuick(romAdminRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(romAdminResponse);
     }
 

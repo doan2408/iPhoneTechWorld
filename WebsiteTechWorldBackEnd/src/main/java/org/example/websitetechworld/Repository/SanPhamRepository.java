@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
@@ -87,5 +88,8 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
 
     Boolean existsByTenSanPham (String tenSanPham);
+
+
+    List<SanPham> findAllByIdModelSanPham_IdModelSanPham(Integer idModelSanPham);
 
 }
