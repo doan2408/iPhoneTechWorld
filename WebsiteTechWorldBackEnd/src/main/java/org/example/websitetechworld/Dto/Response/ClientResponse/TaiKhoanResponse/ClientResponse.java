@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaiKhoanClientReponse {
+public class ClientResponse {
     private Integer id;
 
     private String maKhachHang;
@@ -42,4 +42,5 @@ public class TaiKhoanClientReponse {
 
     private String trangThai;
 
+    private AdminDiaChiResponse diaChiChinh;
 }
