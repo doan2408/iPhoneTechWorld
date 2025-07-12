@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Response.ClientResponse;
+package org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,5 +42,4 @@ public class TaiKhoanClientReponse {
 
     private String trangThai;
 
-    private AdminDiaChiResponse diaChiChinh;
 }

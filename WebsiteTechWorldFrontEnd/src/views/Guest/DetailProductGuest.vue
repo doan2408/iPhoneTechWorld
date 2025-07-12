@@ -99,6 +99,7 @@ watch([selectedRom], () => {
 
 // Gọi khi component được mount
 onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
 });
 </script>

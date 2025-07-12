@@ -11,7 +11,7 @@ const router = createRouter({
     component: DefaultLayout,
     children: [
       { path: '', component: () => import('@/views/Guest/Home.vue'), meta: { title: 'Trang Chủ'} },
-      {path: 'productDetail/:id', component: () => import('@/views/Guest/DetailProductGuest.vue'), meta: { title: 'Buy'} },
+      {path: 'detail/:id', component: () => import('@/views/Guest/DetailProductGuest.vue'), meta: { title: 'Buy'} },
       // { path: 'home', component: () => import('@/views/Client/Home.vue'), meta: { title: 'Trang Chủ'} },
       { path: 'login', component: () => import('@/views/Authentical/LoginView.vue'), meta: { title: 'Login'} },
       { path: 'category', component: () => import('@/views/Client/Category.vue'), meta: { title: 'Category'} },
