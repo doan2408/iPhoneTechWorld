@@ -223,7 +223,7 @@ const goToAdd = () => {
 };
 
 const back = () => {
-  router.push("/admin/client");
+  router.push("/client/home");
 };
 
 function handleTogglePrimary(value) {
