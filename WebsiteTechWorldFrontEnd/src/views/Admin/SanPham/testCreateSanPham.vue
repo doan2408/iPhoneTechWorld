@@ -110,7 +110,7 @@
                 <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id" />
               </el-select>
 
-              <el-button type="success" circle @click="addRomDialogRef.open()">
+              <el-button type="success" circle>
                 <el-icon>
                   <Plus />
                 </el-icon>
@@ -118,8 +118,6 @@
             </div>
           </el-form-item>
         </el-col>
-
-        <DialogThemRom ref="addRomDialogRef" @saved="handleDungLuongRomSaved"/>
       </el-row>
     </el-card>
 
@@ -171,15 +169,19 @@
               placeholder="Nhập giá bán chung" style="width: 200px" @change="errors.giaBanChung = ''"
               :formatter="value => value ? `${value.toLocaleString('vi-VN')} VND` : ''"
               :parser="value => value.replace(/\D/g, '')" />
+            <el-tooltip content="Áp dụng giá này cho tất cả biến thể" placement="top">
               <el-button type="primary" style="margin-left: 10px" @click="confirmApplyGiaBanChung">
                 <Check class="el-icon" /> Áp dụng
               </el-button>
+            </el-tooltip>
           </el-form-item>
         </el-col>
       </el-row>
+      <el-tooltip content="Vui lòng chọn model, màu sắc, ROM và tải ảnh trước khi tạo biến thể" placement="top">
         <el-button type="primary" :loading="loading.generate" @click="generateVariants">
           <Plus class="el-icon" /> {{ loading.generate ? 'Đang tạo...' : 'Tạo biến thể' }}
         </el-button>
+      </el-tooltip>
     </el-card>
 
     <!-- Danh sách chi tiết sản phẩm -->
@@ -221,9 +223,11 @@
             </el-table-column>
             <el-table-column label="Hành động" width="80" align="center" fixed="right">
               <template #default="{ $index }">
+                <el-tooltip content="Xóa biến thể" placement="top">
                   <el-button type="danger" size="small" @click.stop="confirmRemoveChiTiet($index)">
                     <Delete class="el-icon" />
                   </el-button>
+                </el-tooltip>
               </template>
             </el-table-column>
           </el-table>
@@ -328,7 +332,6 @@ import * as XLSX from "xlsx";
 import { Document, Setting, Picture, Money, Upload, Check, Delete, Tickets, InfoFilled, Plus, Box } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import DialogThemMauSac from "@/components/Admin/dialogs/DialogThemMauSac.vue";
-import DialogThemRom from "@/components/Admin/dialogs/DialogThemRom.vue";
 
 export default {
   components: {
@@ -344,7 +347,6 @@ export default {
     Plus,
     Box,
     DialogThemMauSac,
-    DialogThemRom,
   },
   setup() {
     const router = useRouter();
@@ -374,7 +376,6 @@ export default {
     const hinhAnhTheoMau = reactive({});
     const imeiFileList = reactive({}); // Quản lý file-list cho từng biến thể
     const addMauSacDialogRef = ref(null);
-    const addRomDialogRef = ref(null);
 
     const errors = reactive({
       tenSanPham: "",
@@ -394,11 +395,6 @@ export default {
     const handleMauSacSaved = (savedMauSac) => {
       maus.value.push({ idMau: savedMauSac.id, tenMau: savedMauSac.tenMau, maMau: savedMauSac.maMau });
       selectedMaus.value.push(savedMauSac.idMau);
-    };
-
-    const handleDungLuongRomSaved = (savedDungLuong) => {
-      roms.value.push({ idRom: savedDungLuong.id, dungLuong: savedDungLuong.dungLuong });
-      selectedRoms.value.push(savedDungLuong.idRom);
     };
 
 
@@ -1233,11 +1229,8 @@ export default {
       giaBanChung,
       loading,
       DialogThemMauSac,
-      DialogThemRom,
       addMauSacDialogRef,
-      addRomDialogRef,
       handleMauSacSaved,
-      handleDungLuongRomSaved,
       generateVariants,
       confirmApplyGiaBanChung,
       removeChiTiet,

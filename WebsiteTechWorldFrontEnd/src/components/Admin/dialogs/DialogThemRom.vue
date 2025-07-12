@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    title="Thêm dung lượng ram mới"
+    title="Thêm dung lượng rom mới"
     v-model="dialogVisible"
     width="600px"
     @close="handleClose"
@@ -14,13 +14,13 @@
 
     <template #footer>
       <el-button @click="dialogVisible = false">Hủy</el-button>
-      <el-button type="primary" @click="submitLoai">Lưu</el-button>
+      <el-button type="primary" @click="submitRom">Lưu</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { postRamList } from '@/Service/Adminservice/Products/ProductAdminService';
+import { postRomList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 
@@ -34,7 +34,7 @@ const dialogVisible = ref(false);
 const formRef = ref(null);
 
 const rules = {
-  tenLoai: [{ required: true, message: 'Vui lòng nhập mã quốc gia', trigger: 'blur' }],
+  dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng rom', trigger: 'blur' }],
 };
 
 function open() {
@@ -49,20 +49,20 @@ function handleClose() {
   dialogVisible.value = false;
 }
 
-async function submitLoai() {
+async function submitRom() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
-        const savedDungLuong = await postRamList({
+        const savedDungLuong = await postRomList({
           dungLuong: NewDungLuong.dungLuong,
         });
         emit('saved', savedDungLuong);
         dialogVisible.value = false;
         handleClose();
-        ElMessage.success('Thêm dung lượng thành công!'); // Thêm thông báo thành công
+        ElMessage.success('Thêm dung lượng rom thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error('Lỗi khi lưu dung lượng:', error);
-        ElMessage.error('Có lỗi xảy ra khi thêm dung lượng!');
+        console.error('Lỗi khi lưu dung lượng rom:', error);
+        ElMessage.error('Có lỗi xảy ra khi thêm dung lượng rom!');
       }
     }
   });

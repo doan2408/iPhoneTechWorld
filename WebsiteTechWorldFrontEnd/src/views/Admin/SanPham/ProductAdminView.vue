@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="product-details-container">
     <!-- Header Section -->
@@ -515,7 +514,7 @@
           <!-- Camera Information -->
           <el-card class="info-card" shadow="hover">
             <template #header>
-Cox              <div class="card-header">
+              <div class="card-header">
                 <el-icon class="header-icon"><Camera /></el-icon>
                 <span class="header-title">Thông tin camera</span>
               </div>
@@ -569,46 +568,50 @@ Cox              <div class="card-header">
               <el-col :xs="24" :md="12">
                 <div class="camera-section">
                   <h4 class="camera-title">Camera sau</h4>
-                  <div class="form-field">
-                    <label class="field-label">Loại camera</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                  <div v-for="(camera, index) in sanPhamModel.modelSanPham?.cameraSaus || []" 
+                       :key="index" 
+                       class="camera-item"
+                       :class="{ 'main-camera': camera.isChinh }">
+                    <h5 class="camera-sub-title">{{ camera.loaiCamera }} {{ camera.isChinh ? '(Chính)' : '' }}</h5>
+                    <div class="form-field">
+                      <label class="field-label">Độ phân giải</label>
+                      <el-input 
+                        :value="camera.doPhanGiai || ''" 
+                        readonly 
+                        class="readonly-input"
+                      />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Khẩu độ</label>
+                      <el-input 
+                        :value="camera.khauDo || ''" 
+                        readonly 
+                        class="readonly-input"
+                      />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Loại zoom</label>
+                      <el-input 
+                        :value="camera.loaiZoom || ''" 
+                        readonly 
+                        class="readonly-input"
+                      />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Chế độ chụp</label>
+                      <el-input 
+                        :value="camera.cheDoChup || ''" 
+                        readonly 
+                        class="readonly-input"
+                      />
+                    </div>
                   </div>
-                  <div class="form-field">
-                    <label class="field-label">Độ phân giải</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Khẩu độ</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.khauDoCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Loại zoom</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiZoomCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Chế độ chụp</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.cheDoChupCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
+                  <el-empty
+                    v-if="!sanPhamModel.modelSanPham?.cameraSaus?.length"
+                    description="Không có thông tin camera sau"
+                    :image-size="80"
+                    class="empty-camera"
+                  />
                 </div>
               </el-col>
             </el-row>
@@ -833,7 +836,7 @@ const sanPhamModel = reactive({
   diaChi: '',
   sdt: '',
   email: '',
-  modelSanPham: {},
+  modelSanPham: { cameraSaus: [] },
   sanPhamChiTiets: [],
 })
 
@@ -945,17 +948,19 @@ const fetchSanPham = async (id) => {
         khauDoCameraTruoc: response.modelSanPhamAdminResponse.khauDoCameraTruoc || '',
         loaiZoomCameraTruoc: response.modelSanPhamAdminResponse.loaiZoomCameraTruoc || '',
         cheDoChupCameraTruoc: response.modelSanPhamAdminResponse.cheDoChupCameraTruoc || '',
-        loaiCameraSau: response.modelSanPhamAdminResponse.loaiCameraSau || '',
-        doPhanGiaiCameraSau: response.modelSanPhamAdminResponse.doPhanGiaiCameraSau || '',
-        khauDoCameraSau: response.modelSanPhamAdminResponse.khauDoCameraSau || '',
-        loaiZoomCameraSau: response.modelSanPhamAdminResponse.loaiZoomCameraSau || '',
-        cheDoChupCameraSau: response.modelSanPhamAdminResponse.cheDoChupCameraSau || '',
-        maXuatXu: response.modelSanPhamAdminResponse.maXuatXu || '',
-        tenQuocGia: response.modelSanPhamAdminResponse.tenQuocGia || '',
-        tenLoai: response.modelSanPhamAdminResponse.tenLoai || '',
+        // Ánh xạ mảng cameraSaus
+        cameraSaus: response.modelSanPhamAdminResponse.cameraSaus?.sort((a, b) => b.isChinh - a.isChinh).map(cam => ({
+          id: cam.id || null,
+          loaiCamera: cam.loaiCamera || '',
+          doPhanGiai: cam.doPhanGiai || '',
+          khauDo: cam.khauDo || '',
+          loaiZoom: cam.loaiZoom || '',
+          cheDoChup: cam.cheDoChup || '',
+          isChinh: cam.isChinh || false
+        })) || []
       }
     } else {
-      sanPhamModel.modelSanPham = {}
+      sanPhamModel.modelSanPham = { cameraSaus: [] }
     }
 
     // Ánh xạ sanPhamChiTiets
@@ -971,8 +976,8 @@ const fetchSanPham = async (id) => {
       hinhAnhs: chiTiet.hinhAnhs?.map((h) => ({
         name: h.url?.split('/').pop() || '',
         url: h.url || '',
-        imagePublicId: h.imagePublicId || '',
-      })) || [],
+        imagePublicId: h.imagePublicId || ''
+      })) || []
     })) || []
 
     selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null
@@ -1188,6 +1193,36 @@ onMounted(async () => {
   margin: 0 0 16px 0;
   padding-bottom: 8px;
   border-bottom: 2px solid #e2e8f0;
+}
+
+.camera-item {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.camera-item.main-camera {
+  border-color: #409eff;
+  background: #f0f8ff;
+}
+
+.camera-sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.empty-camera {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .sidebar-content {
@@ -1434,4 +1469,3 @@ onMounted(async () => {
   }
 }
 </style>
-```
