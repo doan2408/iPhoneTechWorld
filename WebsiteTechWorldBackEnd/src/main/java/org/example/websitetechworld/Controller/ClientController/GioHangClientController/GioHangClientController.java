@@ -31,9 +31,9 @@ public class GioHangClientController {
         return ResponseEntity.ok(gioHangClientService.suaSoLuongSanPham(idGioHangChiTiet, soLuong));
     }
 
-    @DeleteMapping ("/remove/{idGioHangChiTiet}")
-    public ResponseEntity<Void> removeItem(@PathVariable Integer idGioHangChiTiet) {
-        gioHangClientService.xoaSanPhamKhoiGio(idGioHangChiTiet);
+    @DeleteMapping ("/remove/{idSanPhamChiTiet}")
+    public ResponseEntity<Void> removeItem(@PathVariable Integer idSanPhamChiTiet) {
+        gioHangClientService.xoaSanPhamKhoiGio(idSanPhamChiTiet);
         return ResponseEntity.ok().build();
     }
 

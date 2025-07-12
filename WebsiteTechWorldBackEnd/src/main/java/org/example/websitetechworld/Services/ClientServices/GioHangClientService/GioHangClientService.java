@@ -37,8 +37,11 @@ public class GioHangClientService {
     }
 
     @Transactional
-    public GioHangClientResponse themSanPhamVaoGio (GioHangClientRequest request) {
+    public GioHangClientResponse themSanPhamVaoGio(GioHangClientRequest request) {
         GioHang gioHang = gioHangRepository.findByIdKhachHangId(request.getIdKhachHang());
+        if (request.getSoLuong() <= 0) {
+            throw new IllegalStateException("Số lượng phải lớn hơn 0!");
+        }
         if (gioHang == null) {
             gioHang = new GioHang();
             KhachHang khachHang = khachHangRepository.findById(request.getIdKhachHang())
@@ -50,10 +53,18 @@ public class GioHangClientService {
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy spct có id: " + request.getIdSanPhamChiTiet()));
 
-        GioHangChiTiet item = new GioHangChiTiet();
-        item.setIdGioHang(gioHang);
-        item.setIdSanPhamChiTiet(sanPhamChiTiet);
-        item.setSoLuong(request.getSoLuong());
+        GioHangChiTiet item = gioHangChiTietRepository.findByIdGioHangAndIdSanPhamChiTiet(gioHang, sanPhamChiTiet);
+        if (item != null) {
+            if (item.getSoLuong() + request.getSoLuong() > item.getIdSanPhamChiTiet().getSoLuong()) {
+                throw new IllegalStateException("Trong giỏ hàng đã có " + item.getSoLuong() + " sản phẩm này");
+            }
+            item.setSoLuong(item.getSoLuong() + request.getSoLuong());
+        } else {
+            item = new GioHangChiTiet();
+            item.setIdGioHang(gioHang);
+            item.setIdSanPhamChiTiet(sanPhamChiTiet);
+            item.setSoLuong(request.getSoLuong());
+        }
         item.setGia(sanPhamChiTiet.getGiaBan());
         item.setNgayThem(LocalDate.now());
         gioHangChiTietRepository.save(item);
@@ -74,8 +85,8 @@ public class GioHangClientService {
     }
 
     @Transactional
-    public void xoaSanPhamKhoiGio (Integer idGioHangChiTiet) {
-        gioHangChiTietRepository.deleteById(idGioHangChiTiet);
+    public void xoaSanPhamKhoiGio (Integer idSanPhamChiTiet) {
+        gioHangChiTietRepository.deleteByIdSanPhamChiTiet_Id (idSanPhamChiTiet);
     }
 
     @Transactional
