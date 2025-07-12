@@ -72,7 +72,7 @@
         </el-col>
       </el-row>
 
-      <div class="mb-3 action-section">
+      <div class="mb-3 action-section" v-if="isAdmin">
         <router-link to="/admin/products/create" class="el-link--success">
           <el-button type="success" size="default" class="action-btn">
             <el-icon>
@@ -174,7 +174,7 @@
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <el-tooltip content="Tạm ngừng bán sản phẩm" placement="top">
+              <el-tooltip content="Xóa sản phẩm" placement="top">
                 <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)"
                   class="action-btn-square" />
               </el-tooltip>

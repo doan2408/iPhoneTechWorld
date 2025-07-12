@@ -1,18 +1,15 @@
 package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class ClientProductResponse {
-    private Integer id;
-    private String hinhAnh;
-    private String tenSanPham;
-    private BigDecimal giaBan;
+public class LoaiClientResponse {
+    private Integer idLoai;
     private String tenLoai;
 }

@@ -470,21 +470,18 @@ VALUES
 -- Table phieu_giam_gia
 INSERT INTO phieu_giam_gia (ma_giam_gia, ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 1000000.00, 200000.00, '2025-05-01', '2025-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 100.00, 1, N'ACTIVE', N'ISSUED'),
-    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-05-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
-    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-06-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2026-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 0.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-08-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-07-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED', N'ISSUED'),
     (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC005', N'Giảm 5% iPhone 16', N'Phần trăm', 5.00, 1000000.00, 100000.00, '2025-05-10', '2025-05-20', N'Áp dụng iPhone 16', N'GOLD', 150, 80.00, 1, N'EXPIRED', N'ISSUED'),
-    (N'VC006', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC007', N'Giảm 300K iPhone Pro', N'Cố định', 300000.00, 3000000.00, 300000.00, '2025-05-20', '2025-06-20', N'Đơn iPhone Pro từ 3 triệu', N'GOLD', 60, 250.00, 0, N'ACTIVE', N'ISSUED'),
-    (N'VC008', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC009', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC0010', N'Giảm 8% iPhone 15', N'Phần trăm', 8.00, 1200000.00, 150000.00, '2025-06-10', '2025-06-20', N'Áp dụng iPhone 15', N'GOLD', 180, 90.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC0011', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE', N'ISSUED'),
-    (N'VC0012', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE', N'ISSUED'),
-    (N'VC0013', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED', N'ISSUED'),
-	(N'VC0014', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC0015', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-06-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED', N'ISSUED');
+    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2026-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-07-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED', N'ISSUED');
 
 -- Table hoa_don
 INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping)
@@ -528,21 +525,21 @@ VALUES
 -- Table khach_hang_giam_gia
 INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap)
 VALUES
-    (1, 1, 1, '2025-05-01'),
-    (2, 2, 0, '2025-04-15'),
-    (3, 3, 0, '2025-06-01'),
-    (4, 4, 1, '2025-03-01'),
-    (5, 5, 1, '2025-05-10'),
-    (1, 6, 1, '2025-06-15'),
-    (2, 7, 0, '2025-05-20'),
-    (3, 8, 0, '2025-07-01'),
-    (4, 9, 1, '2025-04-01'),
-    (5, 10, 1, '2025-06-10'),
-    (1, 11, 1, '2025-05-15'),
-    (2, 12, 0, '2025-04-20'),
-    (3, 13, 0, '2025-07-15'),
-    (4, 14, 1, '2025-03-15'),
-    (5, 15, 1, '2025-06-20');
+    (1, 2, 1, GETDATE()),
+    (2, 2, 0, GETDATE()),
+    (3, 4, 0, GETDATE()),
+    (4, 4, 1, GETDATE()),
+    (5, 2, 1, GETDATE()),
+    (1, 2, 1, GETDATE()),
+    (2, 6, 0, GETDATE()),
+    (3, 6, 0, GETDATE()),
+    (4, 7, 1, GETDATE()),
+    (5, 2, 1, GETDATE()),
+    (1, 6, 1, GETDATE()),
+    (2, 6, 0, GETDATE()),
+    (3, 4, 0, GETDATE()),
+    (4, 4, 1, GETDATE()),
+    (5, 2, 1, GETDATE());
 
 -- Table dia_chi
 INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
@@ -647,17 +644,7 @@ VALUES
     (N'Plus'),
     (N'Pro'),
     (N'Pro Max'),
-    (N'Mini'),
-    (N'Ultra'),
-    (N'Standard'),
-    (N'Lite'),
-    (N'Compact'),
-    (N'Premium'),
-    (N'Max'),
-    (N'Elite'),
-    (N'Advanced'),
-    (N'Slim'),
-    (N'Pro Plus');
+    (N'Mini');
 
 -- Table xuat_xu
 INSERT INTO xuat_xu (ma_xuat_xu, ten_quoc_gia)
@@ -693,8 +680,6 @@ VALUES
     (N'Li-Ion 4100mAh', N'26W', N'21 giờ', N'1050 lần'),
     (N'Li-Ion 3700mAh', N'21W', N'18 giờ', N'850 lần'),
     (N'Li-Ion 4400mAh', N'29W', N'22 giờ', N'1250 lần'),
-    (N'Li-Ion 4000mAh', N'23W', N'20 giờ', N'1000 lần'),
-    (N'Li-Ion 4500mAh', N'31W', N'23 giờ', N'1350 lần'),
     (N'Li-Ion 3600mAh', N'20W', N'19 giờ', N'900 lần');
 
 -- Table he_dieu_hanh
@@ -742,17 +727,7 @@ VALUES
     (N'256GB', N'NVMe', N'4000 MB/s', N'Apple', '2023-09-01'),
     (N'512GB', N'NVMe', N'4000 MB/s', N'Apple', '2023-09-01'),
     (N'1TB', N'NVMe', N'5000 MB/s', N'Apple', '2023-09-01'),
-    (N'64GB', N'NVMe', N'3000 MB/s', N'Apple', '2021-09-01'),
-    (N'128GB', N'NVMe', N'3500 MB/s', N'Apple', '2022-09-01'),
-    (N'256GB', N'NVMe', N'4000 MB/s', N'Apple', '2022-09-01'),
-    (N'512GB', N'NVMe', N'4000 MB/s', N'Apple', '2022-09-01'),
-    (N'1TB', N'NVMe', N'5000 MB/s', N'Apple', '2022-09-01'),
-    (N'64GB', N'NVMe', N'3000 MB/s', N'Apple', '2020-09-01'),
-    (N'128GB', N'NVMe', N'3500 MB/s', N'Apple', '2021-09-01'),
-    (N'256GB', N'NVMe', N'4000 MB/s', N'Apple', '2021-09-01'),
-    (N'512GB', N'NVMe', N'4000 MB/s', N'Apple', '2021-09-01'),
-    (N'1TB', N'NVMe', N'5000 MB/s', N'Apple', '2021-09-01'),
-    (N'64GB', N'NVMe', N'3000 MB/s', N'Apple', '2019-09-01');
+    (N'64GB', N'NVMe', N'3000 MB/s', N'Apple', '2021-09-01');
 
 -- Table ram
 INSERT INTO ram (dung_luong_ram, loai_ram, toc_do_doc_ghi, nha_san_xuat, nam_ra_mat)
@@ -761,17 +736,7 @@ VALUES
     (N'8GB', N'LPDDR5', N'6400 MB/s', N'Apple', '2023-09-01'),
     (N'4GB', N'LPDDR4X', N'4266 MB/s', N'Apple', '2021-09-01'),
     (N'12GB', N'LPDDR5', N'7200 MB/s', N'Apple', '2023-09-01'),
-    (N'16GB', N'LPDDR5X', N'8500 MB/s', N'Apple', '2023-09-01'),
-    (N'6GB', N'LPDDR5', N'6400 MB/s', N'Apple', '2022-09-01'),
-    (N'8GB', N'LPDDR5', N'6400 MB/s', N'Apple', '2022-09-01'),
-    (N'4GB', N'LPDDR4X', N'4266 MB/s', N'Apple', '2020-09-01'),
-    (N'12GB', N'LPDDR5', N'7200 MB/s', N'Apple', '2022-09-01'),
-    (N'16GB', N'LPDDR5X', N'8500 MB/s', N'Apple', '2022-09-01'),
-    (N'6GB', N'LPDDR5', N'6400 MB/s', N'Apple', '2021-09-01'),
-    (N'8GB', N'LPDDR5', N'6400 MB/s', N'Apple', '2021-09-01'),
-    (N'4GB', N'LPDDR4X', N'4266 MB/s', N'Apple', '2019-09-01'),
-    (N'12GB', N'LPDDR5', N'7200 MB/s', N'Apple', '2021-09-01'),
-    (N'16GB', N'LPDDR5X', N'8500 MB/s', N'Apple', '2021-09-01');
+    (N'16GB', N'LPDDR5X', N'8500 MB/s', N'Apple', '2023-09-01');
 
 -- Table mau_sac
 INSERT INTO mau_sac (ten_mau, hex_color)
@@ -813,80 +778,80 @@ VALUES
 
 INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_sau, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, trang_thai)
 VALUES
-    (N'iPhone 6', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'DELETED'),
-    (N'iPhone 16', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'DISCONTINUED'),
-    (N'iPhone 15', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'UPCOMING'),
-    (N'iPhone 14', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'HIDDEN'),
-    (N'iPhone 13', 5, 6, 6, 6, 6, 5, 5, 1, 6, '2021-09-01', N'DELETED'),
-    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 7, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 8, '2023-09-01', N'DISCONTINUED'),
-    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 9, '2022-09-01', N'UPCOMING'),
-    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 10, '2021-09-01', N'HIDDEN'),
-    (N'iPhone 12', 10, 11, 11, 11, 11, 6, 10, 1, 11, '2020-09-01', N'DELETED'),
-    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 12, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 13, '2023-09-01', N'DISCONTINUED'),
-    (N'iPhone 14 Plus', 13, 14, 14, 14, 14, 4, 13, 2, 14, '2022-09-01', N'UPCOMING'),
-    (N'iPhone 13 Mini', 14, 15, 15, 15, 15, 5, 14, 5, 15, '2021-09-01', N'HIDDEN');
+    (N'iPhone 6 Thường', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'ACTIVE'),
+    (N'iPhone 16 Thường', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Thường', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Thường', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Thường', 5, 6, 6, 6, 6, 5, 5, 1, 1, '2021-09-01', N'ACTIVE'),
+    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 3, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 4, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 5, '2021-09-01', N'ACTIVE'),
+    (N'iPhone 12 Thường', 10, 11, 11, 11, 11, 6, 10, 1, 1, '2020-09-01', N'ACTIVE'),
+    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 3, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Plus', 13, 14, 14, 14, 2, 4, 13, 2, 4, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Mini', 14, 15, 15, 15, 1, 5, 14, 5, 5, '2021-09-01', N'ACTIVE');
 
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
 VALUES
-    (N'iPhone 6', N'Apple', 1, N'OUT_OF_STOCK', 1),
-    (N'iPhone 16', N'Apple', 2, N'DISCONTINUED', 2),
-    (N'iPhone 16 Pro', N'Apple', 3, N'COMING_SOON', 3),
-    (N'iPhone 15', N'Apple', 4, N'TEMPORARILY_UNAVAILABLE', 4),
-    (N'iPhone 14', N'Apple', 5, N'OUT_OF_STOCK', 5),
-    (N'iPhone 13', N'Apple', 6, N'ACTIVE', 6),
-    (N'iPhone 16 Plus', N'Apple', 7, N'DISCONTINUED', 7),
-    (N'iPhone 15 Pro', N'Apple', 8, N'COMING_SOON', 8),
-    (N'iPhone 14 Pro', N'Apple', 9, N'TEMPORARILY_UNAVAILABLE', 9),
-    (N'iPhone 13 Pro', N'Apple', 10, N'OUT_OF_STOCK', 10),
-    (N'iPhone 12', N'Apple', 11, N'ACTIVE', 11),
-    (N'iPhone 16 Pro Max', N'Apple', 12, N'DISCONTINUED', 12),
-    (N'iPhone 15 Pro Max', N'Apple', 13, N'COMING_SOON', 13),
-    (N'iPhone 14 Plus', N'Apple', 14, N'TEMPORARILY_UNAVAILABLE', 14),
-    (N'iPhone 13 Mini', N'Apple', 15, N'OUT_OF_STOCK', 15);
+    (N'iPhone 6 Thường', N'Apple', 1, N'ACTIVE', 1),
+    (N'iPhone 16 Thường', N'Apple', 2, N'ACTIVE', 2),
+    (N'iPhone 16 Pro', N'Apple', 3, N'ACTIVE', 3),
+    (N'iPhone 15 Thường', N'Apple', 4, N'ACTIVE', 4),
+    (N'iPhone 14 Thường', N'Apple', 5, N'ACTIVE', 5),
+    (N'iPhone 13 Thường', N'Apple', 6, N'ACTIVE', 6),
+    (N'iPhone 16 Plus', N'Apple', 7, N'ACTIVE', 7),
+    (N'iPhone 15 Pro', N'Apple', 8, N'ACTIVE', 8),
+    (N'iPhone 14 Pro', N'Apple', 9, N'ACTIVE', 9),
+    (N'iPhone 13 Pro', N'Apple', 10, N'ACTIVE', 10),
+    (N'iPhone 12 Thường', N'Apple', 11, N'ACTIVE', 11),
+    (N'iPhone 16 Pro Max', N'Apple', 12, N'ACTIVE', 12),
+    (N'iPhone 15 Pro Max', N'Apple', 13, N'ACTIVE', 13),
+    (N'iPhone 14 Plus', N'Apple', 14, N'ACTIVE', 14),
+    (N'iPhone 13 Mini', N'Apple', 15, N'ACTIVE', 15);
 
 -- Table san_pham_chi_tiet
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
 VALUES
     (1, 1, 1, 10, 5000000.00), -- iPhone 6 16GB
-    (1, 2, 6, 8, 5500000.00), -- iPhone 6 64GB
-    (1, 3, 12, 5, 6000000.00), -- iPhone 6 128GB
-    (2, 1, 2, 10, 20000000.00), -- iPhone 16 128GB
-    (3, 2, 3, 8, 25000000.00), -- iPhone 16 Pro 256GB
-    (4, 3, 4, 15, 15000000.00), -- iPhone 15 512GB
-    (5, 4, 5, 12, 12000000.00), -- iPhone 14 1TB
-    (6, 5, 6, 20, 10000000.00), -- iPhone 13 64GB
-    (7, 6, 7, 9, 22000000.00), -- iPhone 16 Plus 128GB
-    (8, 7, 8, 7, 27000000.00), -- iPhone 15 Pro 256GB
-    (9, 8, 9, 14, 18000000.00), -- iPhone 14 Pro 512GB
-    (10, 9, 10, 11, 13000000.00), -- iPhone 13 Pro 1TB
-    (11, 10, 11, 18, 11000000.00), -- iPhone 12 64GB
-    (12, 11, 12, 6, 30000000.00), -- iPhone 16 Pro Max 128GB
-    (13, 12, 13, 5, 28000000.00), -- iPhone 15 Pro Max 256GB
-    (14, 13, 14, 13, 16000000.00), -- iPhone 14 Plus 512GB
-    (15, 14, 15, 10, 14000000.00); -- iPhone 13 Mini 1TB
+    (1, 2, 2, 8, 5500000.00), -- iPhone 6 64GB
+    (1, 3, 3, 5, 6000000.00), -- iPhone 6 128GB
+    (2, 1, 4, 10, 20000000.00), -- iPhone 16 128GB
+    (3, 2, 5, 8, 25000000.00), -- iPhone 16 Pro 256GB
+    (4, 3, 1, 15, 15000000.00), -- iPhone 15 512GB
+    (5, 4, 2, 12, 12000000.00), -- iPhone 14 1TB
+    (6, 5, 3, 20, 10000000.00), -- iPhone 13 64GB
+    (7, 6, 4, 9, 22000000.00), -- iPhone 16 Plus 128GB
+    (8, 7, 5, 7, 27000000.00), -- iPhone 15 Pro 256GB
+    (9, 8, 1, 14, 18000000.00), -- iPhone 14 Pro 512GB
+    (10, 9, 2, 11, 13000000.00), -- iPhone 13 Pro 1TB
+    (11, 10, 3, 18, 11000000.00), -- iPhone 12 64GB
+    (12, 11, 4, 6, 30000000.00), -- iPhone 16 Pro Max 128GB
+    (13, 12, 5, 5, 28000000.00), -- iPhone 15 Pro Max 256GB
+    (14, 13, 1, 13, 16000000.00), -- iPhone 14 Plus 512GB
+    (15, 14, 2, 10, 14000000.00); -- iPhone 13 Mini 1TB
 
 -- Table chi_tiet_hoa_don
 INSERT INTO chi_tiet_hoa_don (id_hoa_don, id_san_pham_chi_tiet, ten_san_pham, mo_ta, so_luong, don_gia)
 VALUES
-    (1, 1, N'iPhone 16', N'Ip16', 1, 20000000.00),
-    (2, 2, N'iPhone 16 Pro', N'Ip16Pro', 1, 25000000.00),
-    (3, 3, N'iPhone 15', N'ip15', 1, 15000000.00),
-    (4, 4, N'iPhone 14', N'ip14', 1, 12000000.00),
-    (5, 5, N'iPhone 13', N'ip13', 1, 10000000.00),
-    (6, 6, N'iPhone 16 Plus', N'ip16plus', 1, 22000000.00),
-    (7, 7, N'iPhone 15 Pro', N'ip15pro', 1, 27000000.00),
-    (8, 8, N'iPhone 14 Pro', N'ip14pro', 1, 18000000.00),
-    (9, 9, N'iPhone 13 Pro', N'ip13pro', 1, 13000000.00),
-    (10, 10, N'iPhone 12', N'ip12', 1, 11000000.00),
-    (11, 11, N'iPhone 16 Pro Max', N'ip16promax', 1, 30000000.00),
-    (12, 12, N'iPhone 15 Pro Max', N'ip15promax', 1, 28000000.00),
-    (13, 13, N'iPhone 14 Plus', N'ip14plus', 1, 16000000.00),
-    (14, 14, N'iPhone 13 Mini', N'ip13mini', 1, 14000000.00),
-    (15, 15, N'iPhone 12 Pro', N'ip12pro', 1, 12000000.00);
+    (1, 2, N'iPhone 16 Thường', N'Ip16', 1, 20000000.00),
+    (2, 3, N'iPhone 16 Pro', N'Ip16Pro', 1, 25000000.00),
+    (3, 4, N'iPhone 15 Thường', N'ip15', 1, 15000000.00),
+    (4, 5, N'iPhone 14 Thường', N'ip14', 1, 12000000.00),
+    (5, 6, N'iPhone 13 Thường', N'ip13', 1, 10000000.00),
+    (6, 7, N'iPhone 16 Plus', N'ip16plus', 1, 22000000.00),
+    (7, 8, N'iPhone 15 Pro', N'ip15pro', 1, 27000000.00),
+    (8, 9, N'iPhone 14 Pro', N'ip14pro', 1, 18000000.00),
+    (9, 10, N'iPhone 13 Pro', N'ip13pro', 1, 13000000.00),
+    (10, 11, N'iPhone 12 Thường', N'ip12', 1, 11000000.00),
+    (11, 12, N'iPhone 16 Pro Max', N'ip16promax', 1, 30000000.00),
+    (12, 13, N'iPhone 15 Pro Max', N'ip15promax', 1, 28000000.00),
+    (13, 14, N'iPhone 14 Plus', N'ip14plus', 1, 16000000.00),
+    (14, 15, N'iPhone 13 Mini', N'ip13mini', 1, 14000000.00),
+    (15, 15, N'iPhone 6 Thường', N'ip6', 1, 12000000.00);
 
 -- Table loai_bao_hanh
 INSERT INTO loai_bao_hanh (ten_loai_bao_hanh, thoi_gian_thang, mo_ta)
@@ -1058,6 +1023,60 @@ VALUES
     (13, 13, 1, 16000000.00, '2025-05-10'),
     (14, 14, 1, 14000000.00, '2025-05-11'),
     (15, 15, 1, 12000000.00, '2025-05-11');
+
+
+-- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
+WITH SPCT_Data AS (
+    -- Chọn các sản phẩm chi tiết có số lượng lớn hơn 0
+    SELECT
+        id_san_pham_chi_tiet,
+        ma_san_pham_chi_tiet,
+        so_luong - 1 AS NumIMEIsToGenerate
+    FROM
+        san_pham_chi_tiet
+    WHERE
+        so_luong > 0
+),
+     IMEI_Generator AS (
+         SELECT
+             s.id_san_pham_chi_tiet,
+             s.ma_san_pham_chi_tiet,
+             ROW_NUMBER() OVER (PARTITION BY s.id_san_pham_chi_tiet ORDER BY (SELECT NULL)) AS RowNum
+         FROM
+             SPCT_Data s
+    CROSS APPLY
+        (SELECT TOP (s.NumIMEIsToGenerate) 1 AS N FROM sys.all_columns) AS a
+)
+INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
+SELECT
+    i.id_san_pham_chi_tiet,
+    -- Sinh số IMEI 15 chữ số
+    LEFT(CAST(ABS(CHECKSUM(NEWID())) AS VARCHAR(15)) + '000000000000000', 15),
+    N'AVAILABLE'
+FROM
+    IMEI_Generator i;
+
+-- Table hinh_anh
+INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
+VALUES
+    (1, 'https://example.com/images/iphone16_black.jpg', 'iphone16_black_001'),
+    (2, 'https://example.com/images/iphone16pro_white.jpg', 'iphone16pro_white_002'),
+    (3, 'https://example.com/images/iphone15_gold.jpg', 'iphone15_gold_003'),
+    (4, 'https://example.com/images/iphone14_blue.jpg', 'iphone14_blue_004'),
+    (5, 'https://example.com/images/iphone13_pink.jpg', 'iphone13_pink_005'),
+    (6, 'https://example.com/images/iphone16plus_gray.jpg', 'iphone16plus_gray_006'),
+    (7, 'https://example.com/images/iphone15pro_silver.jpg', 'iphone15pro_silver_007'),
+    (8, 'https://example.com/images/iphone14pro_green.jpg', 'iphone14pro_green_008'),
+    (9, 'https://example.com/images/iphone13pro_red.jpg', 'iphone13pro_red_009'),
+    (10, 'https://example.com/images/iphone12_purple.jpg', 'iphone12_purple_010'),
+    (11, 'https://example.com/images/iphone16promax_blue.jpg', 'iphone16promax_blue_011'),
+    (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'),
+    (13, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'),
+    (14, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'),
+    (15, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015');
+
+UPDATE hinh_anh SET url = 'https://www.worldshop.eu/medias/img/101627092680124629_w1500_z_6830532/apple-iphone16pro-smartphone-256gb-white-titanium.jpeg'
+UPDATE san_pham SET trang_thai = 'ACTIVE'
 
 -- 1. nhan_vien
 SELECT * FROM nhan_vien;

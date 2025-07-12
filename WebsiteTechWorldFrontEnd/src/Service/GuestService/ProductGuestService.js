@@ -1,7 +1,6 @@
-import { id } from "element-plus/es/locales.mjs";
 import api from "../LoginService/axiosInstance";
 
-const baseURL = "/client";
+const baseURL = "/home";
 
 const fetchData = async (url) => {
   try {
@@ -24,14 +23,13 @@ export const getAllSanPham = async ({
   const params = { page };
 
   try {
-    if (tenSanPham && tenSanPham.trim() !== "")
-      params.tenSanPham = tenSanPham.trim();
+    if (tenSanPham && tenSanPham.trim() !== "") params.tenSanPham = tenSanPham.trim();
     if (idLoai !== null) params.idLoai = idLoai;
     if (giaMin !== null) params.giaMin = giaMin;
     if (giaMax !== null) params.giaMax = giaMax;
     if (sort && sort.trim() !== "") params.sort = sort.trim();
 
-    const response = await api.get(`${baseURL}/home`, { params });
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (e) {
     console.log("error:", e);
@@ -40,7 +38,7 @@ export const getAllSanPham = async ({
 
 export const detailSanPham = async (id) => {
   try {
-    const response = await api.get(`${baseURL}/detail/${id}`);
+    const response = await api.get(`${baseURL}/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || "An error occurred while getting the product";
@@ -78,11 +76,12 @@ export const getListAnhByMau = async (idSp, idMau) => {
   }
 };
 
-export const getLoai = async () => {
+export const getLoai = async() => {
   try {
-    const response = await api.get(`${baseURL}/loai`);
+    const response = await api.get(`${baseURL}/loai`)
     return response.data;
-  } catch (error) {
-    throw error.response?.data || "Can't get list of loai";
+  }
+  catch(error) {
+    throw error.response?.data || "Can't get list of loai"
   }
 };
