@@ -7,7 +7,11 @@ import {
   getThongSo,
   getListAnhByMau,
 } from "@/Service/ClientService/ProductClientService";
+import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 import { ShoppingCart } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+
+const user = JSON.parse(localStorage.getItem("user"));
 
 const route = useRoute();
 const idSanPham = route.params.id;
@@ -83,6 +87,50 @@ const fetchListAnhByMau = async () => {
   if (hinhAnh.length > 0 && bienThe.value) {
     bienThe.value.hinhAnh = hinhAnh;
     selectedImage.value = hinhAnh[0];
+  }
+};
+
+const themVaoGio = async () => {
+  try {
+    if (quantity.value < 0) {
+      ElMessage.error("Số lượng phải lớn hơn 0!");
+      return;
+    }
+
+    const soLuongTonKho = bienThe.value.tongSoLuong;
+    if (soLuongTonKho < 0) {
+      ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
+      return;
+    }
+
+    const gioHangResponse = await cartService.getCart(user.id);
+    let soLuongHienTai = 0;
+
+    if (gioHangResponse && gioHangResponse.items) {
+      const item = gioHangResponse.items.find(
+        (chiTiet) => chiTiet.idSanPhamChiTiet === bienThe.value.idSpct
+      );
+      if (item) {
+        soLuongHienTai = item.soLuong;
+      }
+    }
+
+    const tongSoLuong = soLuongHienTai + quantity.value;
+    if (tongSoLuong > soLuongTonKho) {
+      ElMessage.error(`Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`);
+      return;
+    }
+
+    await cartService.addToCart({
+      idKhachHang: user.id,
+      idSanPhamChiTiet: bienThe.value.idSpct,
+      soLuong: quantity.value,
+    });
+
+    ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
+  } catch (error) {
+    console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
+    ElMessage.error(error.response?.data?.message || "Lỗi khi thêm sản phẩm vào giỏ hàng!");
   }
 };
 
@@ -205,6 +253,7 @@ onMounted(() => {
               :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
               class="cart-btn"
+              @click="themVaoGio"
             >
               Thêm vào giỏ hàng
             </el-button>

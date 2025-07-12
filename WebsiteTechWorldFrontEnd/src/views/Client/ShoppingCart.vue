@@ -35,12 +35,14 @@
                 </div>
                 <h3 class="empty-title">Giỏ hàng trống</h3>
                 <p class="empty-description">Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm</p>
-                <el-button type="primary" size="large" class="continue-shopping-btn">
-                    <el-icon>
-                        <Plus />
-                    </el-icon>
-                    Tiếp tục mua sắm
-                </el-button>
+                <router-link :to="`/client/home`">
+                    <el-button type="primary" size="large" class="continue-shopping-btn">
+                        <el-icon>
+                            <Plus />
+                        </el-icon>
+                        Tiếp tục mua sắm
+                    </el-button>
+                </router-link>
             </div>
 
             <div v-else class="products-container">
@@ -198,7 +200,6 @@ async function fetchCart() {
             ngayThem: item.ngayThem,
             selected: false
         }));
-        console.log(cartData.value)
     } catch (error) {
         ElMessage.error('Không thể tải giỏ hàng');
     }
@@ -297,8 +298,8 @@ const decreaseQuantity = async (product) => {
         try {
             await cartService.updateQuantity(product.idGioHangChiTiet, product.soLuong);
             updateTotal();
-        } catch {
-            ElMessage.error('Không thể cập nhật số lượng');
+        } catch (error) {
+            ElMessage.error(error.response.data.message || 'Không thể cập nhật số lượng');
             product.soLuong++; 
         }
     }

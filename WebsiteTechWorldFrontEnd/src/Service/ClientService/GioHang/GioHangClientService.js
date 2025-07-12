@@ -14,9 +14,9 @@ export const cartService = {
     }
   },
 
-  async addToCart(idGioHangChiTiet) {
+  async addToCart({ idKhachHang, idSanPhamChiTiet, soLuong }) {
     try {
-      const response = await api.post(`${baseURL}`, idGioHangChiTiet);
+      const response = await api.post(`${baseURL}`, { idKhachHang, idSanPhamChiTiet, soLuong });
       return response.data;
     } catch (error) {
       console.error('Lỗi thêm sản phẩm vào giỏ hàng:', error);

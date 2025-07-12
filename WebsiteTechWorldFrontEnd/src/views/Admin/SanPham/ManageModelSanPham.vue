@@ -19,7 +19,8 @@
         </div>
       </template>
 
-      <el-form :model="modelForm" ref="modelFormRef" :rules="formRules" label-position="top" class="model-form">
+      <el-form :model="modelForm" ref="modelFormRef" :rules="formRules" label-position="top" class="model-form"
+        id="form">
         <!-- Thông tin cơ bản -->
         <div class="form-section">
           <div class="section-header">
@@ -76,8 +77,8 @@
           <div class="form-grid">
             <el-form-item label="RAM" prop="idRam" :error="errors.idRam">
               <div style="display: flex; gap: 8px; width: 100%;">
-                <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" @change="clearFieldError('idRam')"
-                  clearable :loading="loading" size="large" style="width: 100%">
+                <el-select v-model="modelForm.idRam" placeholder="Chọn RAM" @change="clearFieldError('idRam')" clearable
+                  :loading="loading" size="large" style="width: 100%">
                   <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
                 </el-select>
                 <el-button type="success" size="large" circle @click="addDungLuongDialogRef.open()">
@@ -402,7 +403,7 @@
 
     <!-- Dialog chi tiết model -->
     <el-dialog :title="`Chi tiết model: ${viewModelData.tenModel || 'Không rõ'}`" v-model="dialogVisible" width="60%"
-      :before-close="() => dialogVisible = false" class="detail-dialog">
+      :before-close="() => dialogVisible = false" style="margin-top: 10px;" class="detail-dialog">
       <div class="dialog-content">
         <div class="detail-grid">
           <div class="detail-item">
@@ -460,9 +461,7 @@
           <div class="detail-item">
             <div class="detail-label">Camera sau</div>
             <div class="detail-value">
-              <el-tag v-for="cam in viewModelData.idCameraSau" :key="cam" type="warning" style="margin-right: 4px;">
-                {{ cameraSaus.value.find(c => c.idCamera === cam)?.doPhanGiai || 'Không rõ' }}
-              </el-tag>
+              <el-tag type="info">{{ cameraSauLabel(viewModelData.idCameraSau) }}</el-tag>
             </div>
           </div>
 
@@ -653,7 +652,7 @@ export default {
     };
     const loaiLabel = (idLoai) => loais.value.find(l => l.idLoai === idLoai)?.tenLoai || 'Không rõ';
     const xuatXuLabel = (idXuatXu) => xuatXus.value.find(x => x.idXuatXu === idXuatXu)?.maXuatXu || 'Không rõ';
-    
+
     const statusTagType = (trangThai) => {
       const status = statuses.value.find(s => s.value === trangThai);
       if (!status) {
@@ -791,21 +790,21 @@ export default {
 
         modelSanPhams.value = results[9].status === 'fulfilled' && Array.isArray(results[9].value.content)
           ? results[9].value.content.map(model => {
-              const validStatuses = ['ACTIVE', 'DISCONTINUED', 'UPCOMING'];
-              const trangThai = validStatuses.includes(model.trangThaiSanPhamModel)
-                ? model.trangThaiSanPhamModel
-                : 'ACTIVE';
-              if (!validStatuses.includes(model.trangThaiSanPhamModel)) {
-                console.warn(`Invalid trangThaiSanPhamModel: ${model.trangThaiSanPhamModel} for model ${model.maModelSanPham}`);
-              }
-              return {
-                ...model,
-                tenModel: model.tenModel || '',
-                maModelSanPham: model.maModelSanPham || 'Không rõ',
-                trangThaiSanPhamModel: trangThai,
-                idCameraSau: Array.isArray(model.cameraSaus) ? model.cameraSaus.map(cam => cam?.id).filter(id => id != null) : []
-              };
-            })
+            const validStatuses = ['ACTIVE', 'DISCONTINUED', 'UPCOMING'];
+            const trangThai = validStatuses.includes(model.trangThaiSanPhamModel)
+              ? model.trangThaiSanPhamModel
+              : 'ACTIVE';
+            if (!validStatuses.includes(model.trangThaiSanPhamModel)) {
+              console.warn(`Invalid trangThaiSanPhamModel: ${model.trangThaiSanPhamModel} for model ${model.maModelSanPham}`);
+            }
+            return {
+              ...model,
+              tenModel: model.tenModel || '',
+              maModelSanPham: model.maModelSanPham || 'Không rõ',
+              trangThaiSanPhamModel: trangThai,
+              idCameraSau: Array.isArray(model.cameraSaus) ? model.cameraSaus.map(cam => cam?.id).filter(id => id != null) : []
+            };
+          })
           : [];
 
         totalItems.value = results[9].status === 'fulfilled' ? results[9].value.totalElements || 0 : 0;
@@ -876,6 +875,7 @@ export default {
     const viewModel = async (model) => {
       try {
         const response = await finByIdModelSanPham(model.idModelSanPham);
+        console.log('Hhuhu: ', response)
         if (!response) {
           toast.error('Không tìm thấy dữ liệu model!');
           return;
@@ -940,6 +940,8 @@ export default {
           trangThaiSanPhamModel: trangThai,
           namRaMat: response.namRaMat
         };
+        document.getElementById('form').scrollIntoView();
+
       } catch (error) {
         console.error('Lỗi khi lấy chi tiết model để chỉnh sửa:', error);
         toast.error('Không thể lấy dữ liệu model để chỉnh sửa!');
