@@ -14,9 +14,12 @@ import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
 import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
 import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ThanhToanFactory;
@@ -31,12 +34,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin/hoa-don")
@@ -47,16 +48,18 @@ public class HoaDonAdminController {
     private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
     private final ThanhToanFactory thanhToanFactory;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
+    private final ImeiDaBanAdminServices imeiDaBanAdminServices;
 
     private static final int PAGE_SIZE = 4;
 
-    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, PhieuGiamGiaAdminService phieuGiamGiaAdminService, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
+    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, PhieuGiamGiaAdminService phieuGiamGiaAdminService, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.lichSuHoaDonAdminServices = lichSuHoaDonAdminServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
         this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
+        this.imeiDaBanAdminServices = imeiDaBanAdminServices;
     }
 
     @GetMapping
@@ -294,5 +297,13 @@ public class HoaDonAdminController {
         }
     }
 
+    @GetMapping("/{hoaDonId}/hdct-by-imei-da-ban")
+    public ResponseEntity<Page<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@RequestParam(defaultValue = "0") int pageNo,
+                                                                             @RequestParam(defaultValue = "10") int pageSize,
+                                                                             @PathVariable(value = "hoaDonId") Integer hoaDonId){
+        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId));
+    }
+
+    
 
 }

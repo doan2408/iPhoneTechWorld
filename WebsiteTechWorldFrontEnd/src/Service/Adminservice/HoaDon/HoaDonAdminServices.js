@@ -194,3 +194,12 @@ export const loadPaymentMethod = () => {
 export const thanhToan = (id, paymentPayload) => {
     return api.put('/admin/hoa-don/' +id + '/thanh-toan',paymentPayload)
 }
+
+export const findHdctByImeiDaBan = (pageNo = 0, pageSize = 5, idHoaDon ) => {
+    return api.get(url_base + '/' + idHoaDon +'/hdct-by-imei-da-ban', {
+        params: {
+            pageNo,
+            pageSize
+        }
+    })
+}

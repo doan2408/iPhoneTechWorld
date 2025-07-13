@@ -17,13 +17,18 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
     Page<LichSuHoaDon> findByIdHoaDon_Id(Integer idHoaDon, Pageable pageable);
 
     @Query("""
-
-            SELECT new org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.TabHoaDonAdminResponse(hd.id, hd.maHoaDon) FROM LichSuHoaDon lshd\s
+            SELECT new org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.TabHoaDonAdminResponse(
+                hd.id
+                , hd.maHoaDon
+                , SUM (cthd.soLuong)
+            ) FROM LichSuHoaDon lshd\s
 			LEFT JOIN HoaDon hd\s
 			ON lshd.idHoaDon.id = hd.id
+			LEFT JOIN ChiTietHoaDon cthd ON cthd.idHoaDon.id = hd.id
 			WHERE lshd.idNhanVien.id = :idNhanVien\s
-			AND lshd.hanhDong = 'CREATE'
-			AND hd.trangThaiThanhToan = 'PENDING'
+                AND lshd.hanhDong = 'CREATE'
+                AND hd.trangThaiThanhToan = 'PENDING'
+			GROUP BY hd.id, hd.maHoaDon
 """)
     List<TabHoaDonAdminResponse> findMaHoaDonPendingByNhanVien(@Param("idNhanVien") Integer idNhanVien);
 

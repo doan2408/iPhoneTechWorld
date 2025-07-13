@@ -14,15 +14,24 @@
                 <div class="invoice-tabs">
                     <div v-for="invoice in invoices" :key="invoice.id" @click="selectInvoice(invoice.id)"
                         :class="['invoice-tab', { active: currentInvoiceId == invoice.id }]">
+                        <!-- Badge hiển thị số lượng -->
+                        <div class="badge">
+                            {{ invoice.soLuong || 0 }}
+                        </div>
+
                         <span>{{ invoice.maHoaDon }}</span>
+
                         <button v-if="invoices.length > 1" @click.stop="closeInvoice(invoice.id)" class="close-tab-btn">
                             <X class="close-icon" />
                         </button>
                     </div>
+
                     <button @click="addNewInvoice" class="add-tab-btn">
                         <Plus class="add-icon" />
                     </button>
                 </div>
+
+
             </div>
 
             <!-- Header actions -->
@@ -102,26 +111,18 @@
                         <button class="customer-btn" title="Lọc">
                             <Filter class="btn-icon" />
                         </button>
-                        <button class="customer-btn" title="Xem chi tiết">
-                            <Eye class="btn-icon" />
+                        <button class="customer-btn" @click="openQRModal" title="Quét mã QR">
+                            <ScanLine class="btn-icon" /> Quét QR
                         </button>
+
+                        <!-- Modal hiển thị camera -->
+                        <el-dialog v-model="showQRModal" width="400px" title="Quét mã sản phẩm" destroy-on-close
+                            @close="onCloseModal">
+                            <QrScanner @scanned="onScannedImei" />
+                        </el-dialog>
+
                     </div>
                 </div>
-
-                <!-- Chon chon khach hang -->
-                <!-- <div v-if="currentInvoice && currentInvoice.maHoaDon" class="selected-customer">
-                    <div class="customer-info">
-                        <input type="hidden" value="{{ currentInvoice.id }}">
-                        <User class="customer-icon" />
-                        <div>
-                            <strong>{{ currentInvoice.maHoaDon }}</strong> -->
-                <!-- <span class="customer-phone">{{ currentInvoice.customer.phone }}</span> -->
-                <!-- </div>
-                    </div>
-                    <button @click="clearCustomer" class="clear-customer-btn">
-                        <X class="clear-icon" />
-                    </button>
-                </div> -->
 
                 <!-- Products grid -->
                 <div class="products-section">
@@ -227,8 +228,8 @@
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
                     <span><b v-if="currentInvoiceDetail.maKhachHang">{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
-                                currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
+                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                        currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
                         <ChevronDown v-else class="toggle-icon" />
@@ -237,81 +238,62 @@
 
 
                 <div v-if="showCartDetails" class="cart-items-list">
-                    <div v-for="item in currentInvoiceDetail?.chiTietHoaDonAdminResponseList"
-                        :key="item.idHoaDonChiTiet" class="cart-item">
-                        <img :src="item.imageSanPham" :alt="item.tenSanPham" class="cart-item-image" />
-                        <div class="cart-item-info">
-                            <span class="item-name">{{ item.tenSanPham }}</span>
-                            <span class="item-price">{{ formatCurrency(item.donGia) }}</span>
-                        </div>
-                        <div class="cart-item-controls">
-                            <button @click="handleRemovePartial(item)" class="qty-btn">
-                                <Minus class="qty-icon" />
-                            </button>
-                            <span class="quantity">{{ item.soLuong }}</span>
-                            <button @click="openImeiModal(item)" class="qty-btn">
-                                <Plus class="qty-icon" />
-                            </button>
-                        </div>
-                        <div class="item-total">{{ formatCurrency(item.soLuong * item.donGia) }}</div>
-                        <button @click="confirmRemoveFromCart(item)" class="remove-item-btn">
-                            <Undo class="remove-icon" />
+                    <div class="select-all-row">
+                        <input type="checkbox" id="selectAll" v-model="selectAllItems" @change="toggleSelectAll">
+                        <label for="selectAll">Chọn tất cả để trả</label>
+                        <button @click="confirmReturnSelected" :disabled="selectedItems.length === 0"
+                            class="return-selected-btn">
+                            Trả các mục đã chọn
                         </button>
                     </div>
+                    <div v-for="item in listHdctByImeiDaBan" :key="item.idImei" class="imei-row">
+                        <div class="imei-left">
+                            <input type="checkbox" :id="'item-' + item.idImei" :value="item.idImei"
+                                v-model="selectedItems">
+                            <label :for="'item-' + item.idImei" class="imei-checkbox-label"></label>
+
+                            <span class="imei-name">{{ item.tenSanPham }}</span>
+                            <span class="imei-detail">({{ item.dungLuongRom }} • {{ item.tenMau }})</span>
+                            <span class="imei-imei">| IMEI: <span class="imei-code">{{ item.soImei }}</span></span>
+                            <span class="imei-status">
+                                | Trạng thái imei:
+                                <span :class="getStatusClass(item.trangThai)">
+                                    {{ formatTrangThai(item.trangThai) }}
+                                </span>
+                            </span>
+
+                        </div>
+
+                        <div class="imei-right">
+                            <span class="imei-price">{{ formatCurrency(item.giaBan) }}</span>
+                            <button @click="confirmRemoveFromCart(item)" class="remove-btn" title="Xóa IMEI">
+                                <Undo class="remove-icon" />
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Modal xác nhận -->
                     <Transition name="modal-fade">
                         <div v-if="showDeleteConfirmModal" class="modal-overlay">
                             <div class="modal-content-2">
-                                <h2>Xác nhận xóa sản phẩm</h2>
-                                <p>Bạn muốn xóa sản phẩm này như thế nào?</p>
-                                <div class="modal-actions">
-                                    <button @click="removeFromCart" class="btn btn-danger">Trả toàn phần</button>
-                                    <button @click="() => handleRemovePartial(itemToDelete)" class="btn btn-warning">Trả
-                                        một
-                                        phần</button>
-                                    <button @click="closeModal" class="btn btn-secondary">Hủy</button>
-                                </div>
-                            </div>
-                        </div>
-                    </Transition>
-
-                    <Transition name="delete-modal-fade">
-                        <div v-if="showRemoveImeiModal" class="delete-modal-overlay">
-                            <div class="delete-modal-content-2">
-                                <h2>Trả một phần sản phẩm</h2>
-                                <p>Bạn đang muốn trả IMEI của <strong>{{ itemToDeleteImei ?
-                                    itemToDeleteImei.tenSanPham : '' }}</strong>?</p>
-                                <p v-if="itemToDeleteImei">Tổng số lượng hiện có: {{ itemToDeleteImei.soLuong }}
+                                <h2>Xác nhận trả sản phẩm</h2>
+                                <p>
+                                    Bạn muốn trả IMEI:
+                                    <strong>{{ itemToDelete?.soImei }}</strong>
+                                    của sản phẩm:
+                                    <strong>{{ itemToDelete?.tenSanPham }}</strong>
+                                    ({{ itemToDelete?.dungLuongRom }} • {{ itemToDelete?.tenMau }})?
                                 </p>
 
-                                <div class="delete-imei-list-container">
-                                    <label class="delete-imei-select-all">
-                                        <input type="checkbox" v-model="selectAllImeis">
-                                        Chọn tất cả ({{ selectedImeisChon.length }} / {{ imeisForCurrentItem.length
-                                        }})
-                                    </label>
-                                    <ul class="delete-imei-list">
-                                        <li v-for="imei_item in imeisForCurrentItem" :key="imei_item.imei">
-                                            <label>
-                                                <input type="checkbox" :value="imei_item.imei"
-                                                    v-model="selectedImeisChon">
-                                                <span>{{ imei_item.imei }}</span>
-                                                <span v-if="imei_item.trangThaiImei"
-                                                    :class="getImeiStatusClass(imei_item.trangThaiImei)">
-                                                    ({{ imei_item.trangThaiImei }})
-                                                </span>
-                                            </label>
-                                        </li>
-                                        <li v-if="imeisForCurrentItem.length === 0">Không có IMEI nào để hiển thị.
-                                        </li>
-                                    </ul>
-                                </div>
-
                                 <div class="modal-actions">
-                                    <button @click="confirmPartialRemove" class="btn btn-primary"
-                                        :disabled="selectedImeisChon.length === 0">
-                                        Xác nhận xóa ({{ selectedImeisChon.length }})
+                                    <button @click="removeFromCart" class="btn btn-danger">
+                                        Trả dòng sản phẩm
                                     </button>
-                                    <button @click="closePartialModal" class="btn btn-secondary">Hủy</button>
+                                    <button @click="() => handleRemoveSingleImei(itemToDelete)" class="btn btn-warning">
+                                        Trả sản phẩm
+                                    </button>
+                                    <button @click="closeModal" class="btn btn-secondary">
+                                        Hủy
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -359,7 +341,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                ' VNĐ' : 'Chưa tính' }}</p>
+                                    ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -413,57 +395,57 @@
                                     <ConfirmModal v-if="showMessageConfirmShipping"
                                         message="Bạn có chắc cập nhật thông tin giao hàng không?"
                                         @confirm="confirmShippingInfo" @cancel="onCancelCreate" />
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="discount-section" style="padding-top: 0;">
+                            <h4>Chọn phiếu giảm giá</h4>
+                            <label>Chọn phiếu giảm giá</label>
+                            <select v-model="selectedDiscount" class="select-box">
+                                <option disabled value="">-- Chọn phiếu giảm giá --</option>
+                                <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
+                                    discount.tenKhuyenMai }}</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="discount-section" style="padding-top: 0;">
-                        <h4>Chọn phiếu giảm giá</h4>
-                        <label>Chọn phiếu giảm giá</label>
-                        <select v-model="selectedDiscount" class="select-box">
-                            <option disabled value="">-- Chọn phiếu giảm giá --</option>
-                            <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
-                                discount.tenKhuyenMai }}</option>
-                        </select>
+                    <div class="payment-section">
+                        <h3>Chọn phương thức thanh toán</h3>
+                        <div class="payment-methods">
+                            <label class="payment-method-option" v-for="method in paymentMethods" :key="method.code">
+                                <input type="radio" name="paymentMethod" :value="method.code"
+                                    v-model="selectedPaymentMethod">
+                                <img :src="getIconUrl(method.code)" :alt="method.displayName" class="payment-icon">
+                                <span>{{ method.displayName }}</span>
+                            </label>
+                        </div>
+
+                        <div v-if="selectedPaymentMethod === 'NGAN_HANG'" class="payment-detail bank-transfer-info">
+                            <h4>Thông tin tài khoản ngân hàng</h4>
+                            <p><strong>Tên ngân hàng:</strong> Ngân hàng TechWord</p>
+                            <p><strong>Số tài khoản:</strong> 111111111111111</p>
+                            <p><strong>Chủ tài khoản:</strong> CÔNG TY TNHH TechWorld</p>
+                            <p><strong>Nội dung chuyển khoản:</strong> [Mã đơn hàng của bạn]</p>
+                            <p class="note">Vui lòng chuyển khoản đúng nội dung để đơn hàng đ qược xử lý nhanh chóng.
+                            </p>
+                        </div>
+
+                        <div class="terms-conditions">
+                            <label>
+                                <input type="checkbox" v-model="agreedToTerms">
+                                Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
+                                hàng.
+                            </label>
+                        </div>
                     </div>
+
+
+                    <button @click="processPayment" class="payment-btn">THANH TOÁN</button>
+                    <InvoicePrint v-if="showInvoice" :idHoaDon="selectedInvoiceId" ref="invoiceRef" />
                 </div>
-
-                <div class="payment-section">
-                    <h3>Chọn phương thức thanh toán</h3>
-                    <div class="payment-methods">
-                        <label class="payment-method-option" v-for="method in paymentMethods" :key="method.code">
-                            <input type="radio" name="paymentMethod" :value="method.code"
-                                v-model="selectedPaymentMethod">
-                            <img :src="getIconUrl(method.code)" :alt="method.displayName" class="payment-icon">
-                            <span>{{ method.displayName }}</span>
-                        </label>
-                    </div>
-
-                    <div v-if="selectedPaymentMethod === 'NGAN_HANG'" class="payment-detail bank-transfer-info">
-                        <h4>Thông tin tài khoản ngân hàng</h4>
-                        <p><strong>Tên ngân hàng:</strong> Ngân hàng ABC</p>
-                        <p><strong>Số tài khoản:</strong> 1234567890</p>
-                        <p><strong>Chủ tài khoản:</strong> CÔNG TY TNHH XYZ</p>
-                        <p><strong>Nội dung chuyển khoản:</strong> [Mã đơn hàng của bạn]</p>
-                        <p class="note">Vui lòng chuyển khoản đúng nội dung để đơn hàng được xử lý nhanh chóng.</p>
-                    </div>
-
-                    <div class="terms-conditions">
-                        <label>
-                            <input type="checkbox" v-model="agreedToTerms">
-                            Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
-                            hàng.
-                        </label>
-                    </div>
-                </div>
-
-
-                <button @click="processPayment" class="payment-btn">
-                    THANH TOÁN
-                </button>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Customer Modal -->
@@ -558,7 +540,7 @@ import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
     ChevronUp, ChevronDown, Minus, Trash2, History, FileText,
-    Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2
+    Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
     loadSanPhamChiTiet, findSanPhamBanHang, loadCategory
@@ -568,15 +550,18 @@ import {
     , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
+    , findHdctByImeiDaBan, findProductByImei
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
-import { ca } from 'element-plus/es/locales.mjs';
+import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "vue-toastification";
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue';
-
+import QrScanner from '@/views/Admin/Qr/QrScanner.vue';
+import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
+import html2pdf from 'html2pdf.js';
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -619,6 +604,10 @@ const discountList = ref([])
 const selectedDiscount = ref(null)
 const search = ref('')
 
+watch(selectedDiscount, (newVal) => {
+    console.log('PGG đã chọn:', newVal)
+})
+
 //toast message
 const toast = useToast()
 
@@ -631,7 +620,7 @@ const shippingInfo = ref({
     tenNguoiNhan: '',
     sdtNguoiNhan: '',
     diaChiChiTiet: '',
-    phiShip: null,
+    phiShip: 0,
     shippingMethod: 'express', // Đảm bảo khớp với 'express' thay vì 'EXPRESS'
     maVanDon: '',
     isShipping: false
@@ -710,6 +699,7 @@ watch(
 )
 
 
+
 // category san pham 
 const danhMucSanPham = async () => {
     try {
@@ -742,71 +732,7 @@ const loadProducts = async (category) => {
 // Pagination
 const itemsPerPage = 12
 
-//load tab hoa don
-// const loadTabHoaDon = async () => {
-//     invoices.value = []; // Xóa danh sách hóa đơn cũ
-//     currentInvoiceId.value = null; // Reset currentInvoiceId
-
-//     // Bước 1: Load các hóa đơn của nhân viên
-//     const response = await loadHoaDonByIdNhanVien();
-//     response.data.forEach(inv => addOrUpdateInvoice(inv));
-//     tabHoaDon.value = [...invoices.value]; // clone ra nếu cần reactive riêng
-
-//     const queryId = route.query.invoiceId;
-//     const storedId = localStorage.getItem("selectedInvoiceId");
-
-//     // Bước 2: Nếu storedId chưa có trong danh sách → fetch
-//     if (storedId && !invoices.value.find(i => i.id == storedId)) {
-//         try {
-//             const res = await hoaDonDetail(storedId);
-//             if (res.data) addOrUpdateInvoice(res.data);
-//             if (res.data) {
-//                 currentInvoiceDetail.value = res.data;
-//                 console.log(currentInvoiceDetail.value);
-
-//             }
-//         } catch (e) {
-//             console.warn("Không thể tải hóa đơn từ localStorage:", e);
-//             localStorage.removeItem('selectedInvoiceId'); // Xóa storedId nếu không hợp lệ
-//         }
-//     }
-
-//     // Bước 3: Xác định finalId
-//     let finalId = null;
-//     if (queryId && invoices.value.some(i => i.id == queryId)) {
-//         finalId = queryId;
-//     } else if (storedId && invoices.value.some(i => i.id == storedId)) {
-//         finalId = storedId;
-//     } else if (invoices.value.length > 0) {
-//         finalId = invoices.value[0].id;
-//     }
-
-//     // Bước 4: Gán finalId chính xác duy nhất ở đây
-//     if (finalId) {
-//         currentInvoiceId.value = finalId;
-//         localStorage.setItem('selectedInvoiceId', finalId);
-
-//         // Nếu chưa có chi tiết → gọi thêm
-//         const selected = invoices.value.find(i => i.id == finalId);
-//         if (!selected?.chiTietHoaDonAdminResponseList) {
-//             try {
-//                 const res = await hoaDonDetail(finalId);
-//                 if (res.data) addOrUpdateInvoice(res.data);
-//                 if (res.data) {
-//                     currentInvoiceDetail.value = res.data;
-//                     console.log(currentInvoiceDetail.value);
-//                 }
-//             } catch (e) {
-//                 console.error("Không thể load chi tiết:", e);
-//             }
-//         }
-//     }
-
-//     if (queryId) {
-//         router.replace({ query: { ...route.query, invoiceId: undefined } });
-//     }
-// };
-
+// load tab hoa don
 const loadTabHoaDon = async () => {
     try {
         const response = await loadHoaDonByIdNhanVien();
@@ -862,7 +788,17 @@ const loadTabHoaDon = async () => {
     }
 };
 
+const listHdctByImeiDaBan = ref([]);
+const pageNoHdctByImei = ref(0);
+const pageSizeHdctByImei = ref(10);
+const getHdctByImeiDaBan = async () => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    console.log(storedId);
+    const res = await findHdctByImeiDaBan(pageNoHdctByImei.value, pageSizeHdctByImei.value, storedId);
+    listHdctByImeiDaBan.value = res.data.content
+    console.log('res', res);
 
+}
 const addOrUpdateInvoice = (invoice) => {
     const index = invoices.value.findIndex(i => i.id === invoice.id);
     if (index !== -1) {
@@ -888,6 +824,8 @@ const newCustomer = reactive({
 
 // Cart display
 const showCartDetails = ref(true)
+const selectedItems = ref([]); 
+const selectAllItems = ref(false);
 
 // handle invoice tab logic 
 const currentInvoice = computed(() => {
@@ -917,25 +855,6 @@ const selectInvoice = async (id) => {
     }
 };
 
-
-
-// const addNewInvoice = () => {
-//     // const newInvoice = {
-//     //     id: nextInvoiceId++,
-//     //     name: `Hóa đơn ${nextInvoiceId - 1}`,
-//     //     items: [],
-//     //     customer: { name: '', phone: '', email: '', address: '' },
-//     //     notes: '',
-//     //     total: 0
-//     // }
-//     // invoices.value.push(newInvoice)
-//     // currentInvoiceId.value = newInvoice.id
-
-
-// }   
-
-
-
 const isLoading = ref(false)
 const errorMessage = ref('')
 //add pending invoice
@@ -964,6 +883,7 @@ const addNewInvoice = async () => {
         invoices.value.push(newInvoice)
         currentInvoiceId.value = newInvoice.id
         localStorage.setItem('selectedInvoiceId', newInvoice.id)
+        loadHoaDon()
         toast.success('Tạo hóa đơn mới thành công!')
 
     } catch (error) {
@@ -1026,7 +946,8 @@ const removeFromCart = async () => {
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
-        ElMessage.success("Trả lại sản phẩm thành công !");
+        getHdctByImeiDaBan();
+        toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
         console.error("Xóa thất bại", err);
@@ -1257,6 +1178,7 @@ const confirmImeiSelection = async () => {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
+        getHdctByImeiDaBan()
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
@@ -1274,7 +1196,7 @@ const addToCartWithImeis = async (product, imeiList) => {
         soLuong: imeiList.length,
         imeiIds: imeiList.map(imei => imei.imei)
     };
-
+    console.log(data)
     try {
         const response = await addProductIntoInvoice(storedId, data);
         await loadTabHoaDon(); // Tải lại dữ liệu hóa đơn sau khi thêm
@@ -1324,11 +1246,8 @@ const handleRemovePartial = async (item) => {
             imeisForCurrentItem.value = []; // Đảm bảo là mảng rỗng nếu dữ liệu không hợp lệ
         }
 
-        // Mặc định chọn tất cả IMEI sau khi tải xong
-        // selectedImeisChon.value = imeisForCurrentItem.value.map(imei_item => imei_item.imei);
-
         // Hiển thị modal
-        showRemoveImeiModal.value = true; 
+        showRemoveImeiModal.value = true;
 
     } catch (error) {
         console.error('Lỗi khi tải IMEI từ API:', error);
@@ -1336,6 +1255,63 @@ const handleRemovePartial = async (item) => {
         showRemoveImeiModal.value = false; // Đóng modal nếu có lỗi
     }
 };
+
+const handleRemoveSingleImei = async (item) => {
+    if (!item) return;
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    const hdctId = item.idHoaDonChiTiet;
+    const imeiToReturn = [item.soImei]; // Trả đúng 1 imei duy nhất
+
+    try {
+        await updateSoLuongAndTrangThai(storedId, hdctId, imeiToReturn);
+        toast.success(`Đã trả IMEI ${item.soImei} thành công.`);
+        showDeleteConfirmModal.value = false
+        await loadTabHoaDon(); // Load lại danh sách hóa đơn
+        getHdctByImeiDaBan();
+    } catch (error) {
+        console.error('Lỗi khi trả IMEI:', error);
+        toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
+    }
+};
+const confirmReturnSelected = async () => {
+    if (selectedItems.value.length === 0) return;
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+
+    const imeisByHdct = {};
+
+    for (const imeiId of selectedItems.value) {
+        const imeiObj = listHdctByImeiDaBan.value.find(i => i.idImei === imeiId);
+        if (!imeiObj) continue;
+
+        const hdctId = imeiObj.idHoaDonChiTiet;
+        const soImei = imeiObj.soImei;
+
+        if (!imeisByHdct[hdctId]) {
+            imeisByHdct[hdctId] = [];
+        }
+
+        imeisByHdct[hdctId].push(soImei);
+    }
+
+    try {
+        for (const hdctId in imeisByHdct) {
+            await updateSoLuongAndTrangThai(storedId, hdctId, imeisByHdct[hdctId]);
+        }
+
+        toast.success(`Đã trả ${selectedItems.value.length} sản phẩm.`);
+        selectedItems.value = [];
+        selectAllItems.value = false;
+        await loadTabHoaDon();
+    } catch (error) {
+        toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
+    }
+};
+
+
+
+
 
 // --- Hàm đóng Modal (closePartialModal) ---
 const closePartialModal = () => {
@@ -1825,6 +1801,7 @@ onMounted(async () => {
     await getTinhList();
     await loadDiscountList();
     fetchPaymentMethods();
+    await getHdctByImeiDaBan();
 });
 
 //Khach hang
@@ -2019,6 +1996,9 @@ const getIconUrl = (code) => {
     }
 };
 
+const showInvoice = ref(false);
+const selectedInvoiceId = ref(localStorage.getItem("selectedInvoiceId") || null);
+const invoiceRef = ref(null);
 // Hàm xử lý thanh toán
 const processPayment = async () => {
     const storedId = localStorage.getItem("selectedInvoiceId");
@@ -2038,19 +2018,26 @@ const processPayment = async () => {
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien
+        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip
     };
+    console.log("tien khach dua", paymentPayload);
+    console.log(paymentPayload.soTienKhachDua);
+
 
     try {
         const response = await thanhToan(storedId, paymentPayload);
         if (response.data && response.data.message === "Thanh toán thành công") {
             toast.success('Thanh toán thành công!');
-            // Bạn có thể làm gì đó ở đây sau khi thanh toán thành công,
-            // ví dụ: cập nhật trạng thái hóa đơn trên UI, chuyển hướng, v.v.
             console.log('Hóa đơn sau thanh toán:', response.data);
-            // Cập nhật trạng thái hóa đơn nếu cần
-            // currentInvoiceDetail.value.trangThaiThanhToan = 'PAID'; // Giả sử có trường này
+            selectedInvoiceId.value = storedId;
+            showInvoice.value = true;
+            await nextTick();
+            setTimeout(() => {
+                printInvoice();
+            }, 1200);
+            setTimeout(() => {
             window.location.reload();
+            }, 3200);
         } else {
             toast.error('Thanh toán không thành công: ' + (response.data?.message || 'Lỗi không xác định.'));
         }
@@ -2063,6 +2050,99 @@ const processPayment = async () => {
         }
     }
 };
+
+const printInvoice = () => {
+    if (invoiceRef.value) { // Kiểm tra xem invoiceRef có giá trị không
+        const element = invoiceRef.value.$el; // Lấy DOM của InvoicePrint
+        const opt = {
+            margin: 1,
+            filename: `hoa_don_${selectedInvoiceId.value || 'unknown'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+            pdf.autoPrint(); // Mở hộp thoại in
+            window.open(pdf.output('bloburl'), '_blank'); // Mở PDF trong tab mới
+        }).catch((error) => {
+            console.error('Lỗi khi tạo PDF:', error);
+        });
+    } else {
+        console.error('invoiceRef không được định nghĩa hoặc component chưa được render.');
+    }
+};
+
+const handleClose = () => {
+    showInvoice.value = false;
+};
+
+const formatTrangThai = (trangThai) => {
+    const mapping = {
+        AVAILABLE: 'Có sẵn',
+        RESERVED: 'Đã đặt trước',
+        SOLD: 'Đã bán',
+        RETURNED: 'Đã trả lại',
+        REFURBISHED: 'Tân trang',
+        BLACKLISTED: 'Bị chặn',
+    };
+    return mapping[trangThai] || 'Không rõ';
+};
+
+
+
+const getStatusClass = (trangThai) => {
+    const classMap = {
+        AVAILABLE: 'text-green-600',
+        RESERVED: 'text-blue-500',
+        SOLD: 'text-red-600',
+        RETURNED: 'text-yellow-500',
+        REFURBISHED: 'text-indigo-600',
+        BLACKLISTED: 'text-gray-500 line-through',
+    };
+    return classMap[trangThai] || 'text-gray-400';
+};
+
+const toggleSelectAll = () => {
+    if (selectAllItems.value) {
+        selectedItems.value = listHdctByImeiDaBan.value.map(item => item.idImei);
+    } else {
+        selectedItems.value = [];
+    }
+};
+
+watch(selectedItems, (newVal) => {
+    selectAllItems.value = newVal.length === listHdctByImeiDaBan.value.length;
+});
+
+const showQRModal = ref(false)
+const openQRModal = () => {
+  showQRModal.value = true
+}
+const onProductScanned = (maSanPham) => {
+    console.log("Mã sản phẩm quét được:", maSanPham)
+    // Gọi API hoặc thêm vào giỏ hàng tại đây
+}
+const onCloseModal = () => {
+    console.log('Đã đóng modal quét QR')
+}
+
+const onScannedImei = async (soImei) => {
+    const product = await findProductByImei(soImei)
+    console.log(product.data)
+    console.log(product.data.tenSanPham)
+    if (product) {
+        await addToCartWithImeis(
+            {
+                idSanPhamChiTiet: product.data.idSanPhamChiTiet,
+                tenSanPham: product.data.tenSanPham
+            },
+            [{ imei: product.data.soImei }]
+        )
+        toast.success("Đã thêm sản phẩm từ IMEI: " + product.data.soImei)
+        // Nếu bạn muốn đóng modal sau khi quét xong:
+        showQRModal.value = false
+    }
+}
 
 
 </script>

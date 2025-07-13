@@ -76,6 +76,27 @@
     color: #4f46e5;
     border-color: #e5e7eb;
 }
+.invoice-tab {
+    position: relative;
+    /* Thêm dòng này nếu chưa có */
+}
+
+.badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-weight: bold;
+    line-height: 1;
+    min-width: 18px;
+    text-align: center;
+    box-shadow: 0 0 0 1px white;
+}
+
 
 .close-tab-btn {
     background: none;
@@ -2605,3 +2626,223 @@ input:checked+.slider:before {
         max-width: 100%;
     }
 }
+.imei-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.imei-row:hover {
+    background: #f9fafb;
+}
+
+.imei-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    color: #374151;
+}
+
+.imei-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.imei-detail {
+    color: #6b7280;
+}
+
+.imei-imei,
+.imei-status {
+    color: #4b5563;
+}
+
+.imei-code {
+    font-family: monospace;
+    color: #1d4ed8;
+}
+
+.imei-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.imei-price {
+    font-weight: bold;
+    color: #4f46e5;
+    min-width: 100px;
+    text-align: right;
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 16px;
+}
+.product-imei {
+    color: #4b5563;
+}
+
+.imei-value {
+    color: #2563eb;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.product-status {
+    color: #4b5563;
+}
+
+.text-green-600 {
+    color: #16a34a;
+}
+
+.text-blue-500 {
+    color: #3b82f6;
+}
+
+.text-red-600 {
+    color: #dc2626;
+}
+
+.text-yellow-500 {
+    color: #eab308;
+}
+
+.text-indigo-600 {
+    color: #4f46e5;
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}
+
+.line-through {
+    text-decoration: line-through; }
+
+.select-all-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    /* Padding phù hợp với các hàng sản phẩm */
+    background-color: #f0f0f0;
+    /* Nền hơi xám để phân biệt */
+    border-bottom: 1px solid #e0e0e0;
+    /* Đường kẻ dưới để tách biệt */
+    gap: 10px;
+    /* Khoảng cách giữa các phần tử */
+}
+
+.select-all-row input[type="checkbox"] {
+    width: 18px;
+    /* Kích thước checkbox */
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    /* Đảm bảo checkbox không bị co lại */
+}
+
+.select-all-row label {
+    font-weight: 600;
+    /* Đậm hơn cho text "Chọn tất cả" */
+    color: #333;
+    cursor: pointer;
+    font-size: 15px;
+    /* Kích thước chữ */
+}
+
+/* Nút "Trả các mục đã chọn" */
+.return-selected-btn {
+    margin-left: auto;
+    /* Đẩy nút sang phải hết mức */
+    padding: 8px 15px;
+    background-color: #007bff;
+    /* Màu xanh dương chủ đạo */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    /* Bo tròn góc nút */
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    /* Hiệu ứng chuyển động mượt mà */
+}
+
+.return-selected-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+    /* Màu xanh đậm hơn khi di chuột */
+}
+
+.return-selected-btn:disabled {
+    background-color: #cccccc;
+    /* Màu xám khi bị vô hiệu hóa */
+    cursor: not-allowed;
+    /* Con trỏ "không được phép" */
+    opacity: 0.7;
+    /* Làm mờ khi vô hiệu hóa */
+}
+
+/* --- ĐIỀU CHỈNH NHỎ TRÊN CÁC CHECKBOX CỦA MỖI SẢN PHẨM --- */
+/* (Nếu bạn đã có các style này thì có thể bỏ qua) */
+.imei-row {
+    display: flex;
+    align-items: center;
+    /* Để checkbox căn giữa với nội dung */
+    /* ... các style khác của imei-row ... */
+}
+
+.imei-row input[type="checkbox"] {
+    width: 18px;
+    /* Kích thước checkbox */
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-right: 10px;
+    /* Khoảng cách giữa checkbox và tên sản phẩm */
+}
+
+/* Ẩn label rỗng nếu bạn không muốn nó chiếm không gian hoặc có thể tương tác */
+.imei-checkbox-label {
+    display: none;
+}
+
+/* Responsive adjustments cho phần mới thêm */
+@media (max-width: 768px) {
+    .select-all-row {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .select-all-row {
+        flex-direction: column;
+        /* Xếp chồng trên màn hình nhỏ */
+        align-items: flex-start;
+        /* Căn trái */
+    }
+
+    .select-all-row label {
+        margin-bottom: 5px;
+        /* Khoảng cách dưới label khi xếp chồng */
+    }
+
+    .return-selected-btn {
+        margin-left: 0;
+        /* Bỏ margin-left auto */
+        width: 100%;
+        /* Chiếm toàn bộ chiều rộng */
+        margin-top: 10px;
+        /* Khoảng cách trên nút */
+    }   }
