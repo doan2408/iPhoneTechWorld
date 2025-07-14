@@ -1058,7 +1058,7 @@ const openImeiModal = async (product) => {
         // KHÔNG TỰ ĐỘNG GỌI autoSelectImeis Ở ĐÂY NỮA
         // Người dùng sẽ nhấn nút "Tự động chọn" sau khi nhập số lượng
     } else {
-        alert("Không thể mở modal IMEI. Dữ liệu sản phẩm không hợp lệ.");
+        toast.error("Không thể mở modal IMEI. Dữ liệu sản phẩm không hợp lệ.");
     }
 };
 
@@ -1132,7 +1132,7 @@ const toggleImeiSelection = (imei) => {
         if (selectedImeis.value.length < 1) { // Ví dụ: Giới hạn chỉ chọn 1 IMEI mỗi lần
             selectedImeis.value.push(imei); // Chọn
         } else {
-            alert(`Bạn chỉ có thể chọn 1 IMEI cho sản phẩm này.`);
+            toast.error(`Bạn chỉ có thể chọn 1 IMEI cho sản phẩm này.`);
         }
     }
 };
@@ -1178,7 +1178,7 @@ const confirmImeiSelection = async () => {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
-        getHdctByImeiDaBan()
+        getHdctByImeiDaBan();
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
@@ -1333,14 +1333,14 @@ const confirmPartialRemove = async () => {
         // Gọi hàm service đã sửa đổi với tất cả các tham số cần thiết
         const message = await updateSoLuongAndTrangThai(storedId, hdctId, imeisToReturn);
 
-        alert('Cập nhật thành công'); // Hiển thị thông báo thành công
+        toast.success('Cập nhật thành công'); // Hiển thị thông báo thành công
 
         // ... (cập nhật UI sau khi thành công)
         closePartialModal();
         await loadTabHoaDon()
     } catch (error) {
         console.error('Lỗi khi xác nhận loại bỏ IMEI:', error);
-        alert(`Đã xảy ra lỗi: ${error.message}`);
+        toast.error(`Đã xảy ra lỗi: ${error.message}`);
     }
 };
 
@@ -1915,7 +1915,7 @@ const confirmShippingInfo = async () => {
     }
 
     if (!storedId) {
-        toast.warning('Không tìm thấy ID hóa đơn.');
+        toast.error('Không tìm thấy ID hóa đơn.');
         return;
     }
 
@@ -1930,6 +1930,7 @@ const confirmShippingInfo = async () => {
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
         toast.success('Cập nhật thông tin giao hàng thành công!');
+
         showMessageConfirmShipping.value = false;
         showShippingPopup.value = false;
     } catch (error) {
@@ -1979,7 +1980,7 @@ const fetchPaymentMethods = async () => {
         }
     } catch (error) {
         console.error('Lỗi khi tải phương thức thanh toán:', error);
-        alert('Không thể tải các phương thức thanh toán. Vui lòng thử lại sau.');
+        toast.error('Không thể tải các phương thức thanh toán. Vui lòng thử lại sau.');
     }
 };
 
@@ -2011,7 +2012,7 @@ const processPayment = async () => {
     }
     // Kiểm tra xem hóa đơn có chi tiết sản phẩm không
     if (currentInvoiceDetail.value.chiTietHoaDonAdminResponseList?.length === 0) {
-        toast.warning('Hóa đơn không có sản phẩm nào để thanh toán.');
+        toast.error('Hóa đơn không có sản phẩm nào để thanh toán.');
         return;
     }
 

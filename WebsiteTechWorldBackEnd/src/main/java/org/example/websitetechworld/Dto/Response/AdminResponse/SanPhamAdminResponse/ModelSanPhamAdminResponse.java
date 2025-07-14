@@ -9,6 +9,7 @@ import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -67,12 +68,7 @@ public class ModelSanPhamAdminResponse {
     private String loaiZoomCameraTruoc;
     private String cheDoChupCameraTruoc;
 
-    private Integer idCameraSau;
-    private String loaiCameraSau;
-    private String doPhanGiaiCameraSau;
-    private String khauDoCameraSau;
-    private String loaiZoomCameraSau;
-    private String cheDoChupCameraSau;
+    private List<CameraSauAdminResponse> cameraSaus;
 
     private Integer idXuatXu;
     private String maXuatXu;
@@ -80,4 +76,5 @@ public class ModelSanPhamAdminResponse {
 
     private Integer idLoai;
     private String tenLoai;
+
 }

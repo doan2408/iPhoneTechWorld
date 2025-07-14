@@ -1,10 +1,9 @@
 package org.example.websitetechworld.Services.ClientServices.TaiKhoanClientServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.TaiKhoanClientRequest.ClientRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanClientReponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanResponse.ClientResponse;
 import org.example.websitetechworld.Entity.DiaChi;
 import org.example.websitetechworld.Entity.GioHang;
 import org.example.websitetechworld.Entity.KhachHang;
@@ -34,8 +33,8 @@ public class ClientService {
     private final JwtService jwtService;
 
     //convert
-    private TaiKhoanClientReponse convert(KhachHang khachHang) {
-        TaiKhoanClientReponse clientResponse = new TaiKhoanClientReponse();
+    private ClientResponse convert(KhachHang khachHang) {
+        ClientResponse clientResponse = new ClientResponse();
         clientResponse.setId(khachHang.getId());
         clientResponse.setMaKhachHang(khachHang.getMaKhachHang());
         clientResponse.setTenKhachHang(khachHang.getTenKhachHang());
@@ -159,12 +158,12 @@ public class ClientService {
 
     }
 
-    public Optional<TaiKhoanClientReponse> hienThi(Integer id) {
+    public Optional<ClientResponse> hienThi(Integer id) {
         return khachHangRepository.findById(id).map(this::convert);
     }
 
     //update thong tin ca nhan (client)
-    public KhachHang updateClient(Integer id, KhachHang khachHangRequest) {
+    public KhachHang updateClient(Integer id, ClientRequest khachHangRequest) {
         KhachHang existing = khachHangRepository.findById(id).orElse(null);
         List<Map<String, String>> errors = new ArrayList<>();
 
@@ -203,10 +202,15 @@ public class ClientService {
             existing.setAnh(khachHangRequest.getAnh());
 
             if (khachHangRequest.getMatKhau() != null && !khachHangRequest.getMatKhau().isEmpty()) {
-                if (!passwordEncoder.matches(khachHangRequest.getMatKhau(), existing.getMatKhau())) {
-                    existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
+                String oldPassword = khachHangRequest.getMatKhauCu(); // cần thêm trường này trong ClientRequest
+
+                if (!passwordEncoder.matches(oldPassword, existing.getMatKhau())) {
+                    errors.add(Map.of("field", "matKhauCu", "message", "Mật khẩu cũ không đúng!"));
                 }
+
+                existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
             }
+
             return khachHangRepository.save(existing);
         }
         return null;

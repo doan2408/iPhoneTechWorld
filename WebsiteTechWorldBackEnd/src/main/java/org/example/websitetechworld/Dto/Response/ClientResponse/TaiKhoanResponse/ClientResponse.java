@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Response.ClientResponse;
+package org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaiKhoanClientReponse {
+public class ClientResponse {
     private Integer id;
 
     private String maKhachHang;

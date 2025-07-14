@@ -13,6 +13,7 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { Html5Qrcode } from 'html5-qrcode'
 
 // Cấu hình Axios trước khi khởi tạo ứng dụng
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080';

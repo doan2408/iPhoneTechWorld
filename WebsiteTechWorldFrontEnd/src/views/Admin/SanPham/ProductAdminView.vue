@@ -1,26 +1,15 @@
-```vue
 <template>
   <div class="product-details-container">
     <!-- Header Section -->
     <div class="page-header">
       <div class="header-content">
-        <el-button 
-          type="primary" 
-          :icon="ArrowLeft" 
-          circle 
-          class="back-btn"
-          @click="handleBackClick"
-        />
+        <el-button type="primary" :icon="ArrowLeft" circle class="back-btn" @click="handleBackClick" />
         <div class="header-text">
           <h1 class="page-title">Chi tiết sản phẩm</h1>
           <p class="page-subtitle">Xem thông tin chi tiết và thông số kỹ thuật</p>
         </div>
       </div>
-      <el-tag 
-        :type="getStatusType(sanPhamModel.trangThaiSanPham)" 
-        size="large"
-        class="status-tag"
-      >
+      <el-tag :type="getStatusType(sanPhamModel.trangThaiSanPham)" size="large" class="status-tag">
         {{ getTrangThaiLabel(sanPhamModel.trangThaiSanPham) }}
       </el-tag>
     </div>
@@ -33,7 +22,9 @@
           <el-card class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">Thông tin chung</span>
               </div>
             </template>
@@ -41,41 +32,25 @@
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Mã sản phẩm</label>
-                  <el-input 
-                    v-model="sanPhamModel.maSanPham" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.maSanPham" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Tên sản phẩm</label>
-                  <el-input 
-                    v-model="sanPhamModel.tenSanPham" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.tenSanPham" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Thương hiệu</label>
-                  <el-input 
-                    v-model="sanPhamModel.thuongHieu" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.thuongHieu" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Trạng thái</label>
-                  <el-input 
-                    :value="getTrangThaiLabel(sanPhamModel.trangThaiSanPham)" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="getTrangThaiLabel(sanPhamModel.trangThaiSanPham)" readonly class="readonly-input" />
                 </div>
               </el-col>
             </el-row>
@@ -85,7 +60,9 @@
           <el-card class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><OfficeBuilding /></el-icon>
+                <el-icon class="header-icon">
+                  <OfficeBuilding />
+                </el-icon>
                 <span class="header-title">Thông tin nhà cung cấp</span>
               </div>
             </template>
@@ -93,41 +70,25 @@
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Nhà cung cấp</label>
-                  <el-input 
-                    v-model="sanPhamModel.tenNhaCungCap" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.tenNhaCungCap" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Địa chỉ</label>
-                  <el-input 
-                    v-model="sanPhamModel.diaChi" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.diaChi" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Số điện thoại</label>
-                  <el-input 
-                    v-model="sanPhamModel.sdt" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.sdt" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Email</label>
-                  <el-input 
-                    v-model="sanPhamModel.email" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input v-model="sanPhamModel.email" readonly class="readonly-input" />
                 </div>
               </el-col>
             </el-row>
@@ -137,7 +98,9 @@
           <el-card class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><Cpu /></el-icon>
+                <el-icon class="header-icon">
+                  <Cpu />
+                </el-icon>
                 <span class="header-title">Thông tin model</span>
               </div>
             </template>
@@ -145,41 +108,26 @@
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Tên model</label>
-                  <el-input 
-                    :value="sanPhamModel.modelSanPham?.tenModel || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.modelSanPham?.tenModel || ''" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Mã model</label>
-                  <el-input 
-                    :value="sanPhamModel.modelSanPham?.maModelSanPham || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.modelSanPham?.maModelSanPham || ''" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Năm ra mắt</label>
-                  <el-input 
-                    :value="sanPhamModel.modelSanPham?.namRaMat || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.modelSanPham?.namRaMat || ''" readonly class="readonly-input" />
                 </div>
               </el-col>
               <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Trạng thái model</label>
-                  <el-input 
-                    :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)" readonly
+                    class="readonly-input" />
                 </div>
               </el-col>
             </el-row>
@@ -192,50 +140,33 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><MagicStick /></el-icon>
+                    <el-icon class="header-icon">
+                      <MagicStick />
+                    </el-icon>
                     <span class="header-title">Thông tin RAM</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Dung lượng RAM</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.dungLuongRam || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.dungLuongRam || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Loại RAM</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiRam || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.loaiRam || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Tốc độ đọc/ghi</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tocDoDocGhiRam || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tocDoDocGhiRam || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Nhà sản xuất RAM</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.nhaSanXuatRam || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.nhaSanXuatRam || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Năm ra mắt RAM</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.namRaMatRam || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.namRaMatRam || ''" readonly class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -246,66 +177,41 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><Monitor /></el-icon>
+                    <el-icon class="header-icon">
+                      <Monitor />
+                    </el-icon>
                     <span class="header-title">Thông tin màn hình</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Tên màn hình</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tenManHinh || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tenManHinh || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Kích thước</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.kichThuoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.kichThuoc || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Loại màn hình</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiManHinh || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.loaiManHinh || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Độ phân giải</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.doPhanGiaiManHinh || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.doPhanGiaiManHinh || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Tần số quét</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tanSoQuet || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tanSoQuet || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Độ sáng</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.doSang || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.doSang || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Chất liệu kính</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.chatLieuKinh || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.chatLieuKinh || ''" readonly class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -316,34 +222,26 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><Platform /></el-icon>
+                    <el-icon class="header-icon">
+                      <Platform />
+                    </el-icon>
                     <span class="header-title">Thông tin hệ điều hành</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Phiên bản HĐH</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.phienBanHeDieuHanh || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.phienBanHeDieuHanh || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Nhà phát triển</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.nhaPhatTrien || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.nhaPhatTrien || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Giao diện người dùng</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.giaoDienNguoiDung || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.giaoDienNguoiDung || ''" readonly
+                      class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -354,74 +252,46 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><Cpu /></el-icon>
+                    <el-icon class="header-icon">
+                      <Cpu />
+                    </el-icon>
                     <span class="header-title">Thông tin CPU</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Hãng sản xuất</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.hangSanXuat || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.hangSanXuat || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Chip xử lý</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.chipXuLy || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.chipXuLy || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Số nhân</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.soNhan || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.soNhan || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Xung nhịp</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.xungNhip || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.xungNhip || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Công nghệ sản xuất</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.congNgheSanXuat || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.congNgheSanXuat || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Bộ nhớ đệm</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.boNhoDem || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.boNhoDem || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Tiêu thụ điện năng</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tieuThuDienNang || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tieuThuDienNang || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Năm ra mắt CPU</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.namRaMatCpu || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.namRaMatCpu || ''" readonly class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -432,42 +302,29 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><Lightning /></el-icon>
+                    <el-icon class="header-icon">
+                      <Lightning />
+                    </el-icon>
                     <span class="header-title">Thông tin pin</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Phiên bản pin</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.phienBanPin || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.phienBanPin || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Công suất sạc</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.congSuatSac || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.congSuatSac || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Thời gian sử dụng</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.thoiGianSuDung || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.thoiGianSuDung || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Số lần sạc tối đa</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.soLanSacToiDa || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.soLanSacToiDa || ''" readonly class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -478,34 +335,24 @@
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
-                    <el-icon class="header-icon"><Location /></el-icon>
+                    <el-icon class="header-icon">
+                      <Location />
+                    </el-icon>
                     <span class="header-title">Thông tin xuất xứ</span>
                   </div>
                 </template>
                 <div class="spec-content">
                   <div class="form-field">
                     <label class="field-label">Mã xuất xứ</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.maXuatXu || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.maXuatXu || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Quốc gia</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tenQuocGia || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tenQuocGia || ''" readonly class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Loại sản phẩm</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.tenLoai || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.tenLoai || ''" readonly class="readonly-input" />
                   </div>
                 </div>
               </el-card>
@@ -515,8 +362,10 @@
           <!-- Camera Information -->
           <el-card class="info-card" shadow="hover">
             <template #header>
-Cox              <div class="card-header">
-                <el-icon class="header-icon"><Camera /></el-icon>
+              <div class="card-header">
+                <el-icon class="header-icon">
+                  <Camera />
+                </el-icon>
                 <span class="header-title">Thông tin camera</span>
               </div>
             </template>
@@ -526,89 +375,56 @@ Cox              <div class="card-header">
                   <h4 class="camera-title">Camera trước</h4>
                   <div class="form-field">
                     <label class="field-label">Loại camera</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiCameraTruoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.loaiCameraTruoc || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Độ phân giải</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraTruoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraTruoc || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Khẩu độ</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.khauDoCameraTruoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.khauDoCameraTruoc || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Loại zoom</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiZoomCameraTruoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.loaiZoomCameraTruoc || ''" readonly
+                      class="readonly-input" />
                   </div>
                   <div class="form-field">
                     <label class="field-label">Chế độ chụp</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.cheDoChupCameraTruoc || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                    <el-input :value="sanPhamModel.modelSanPham?.cheDoChupCameraTruoc || ''" readonly
+                      class="readonly-input" />
                   </div>
                 </div>
               </el-col>
               <el-col :xs="24" :md="12">
                 <div class="camera-section">
                   <h4 class="camera-title">Camera sau</h4>
-                  <div class="form-field">
-                    <label class="field-label">Loại camera</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
+                  <div v-for="(camera, index) in sanPhamModel.modelSanPham?.cameraSaus || []" :key="index"
+                    class="camera-item" :class="{ 'main-camera': camera.isChinh }">
+                    <h5 class="camera-sub-title">{{ camera.loaiCamera }} {{ camera.isChinh ? '(Chính)' : '' }}</h5>
+                    <div class="form-field">
+                      <label class="field-label">Độ phân giải</label>
+                      <el-input :value="camera.doPhanGiai || ''" readonly class="readonly-input" />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Khẩu độ</label>
+                      <el-input :value="camera.khauDo || ''" readonly class="readonly-input" />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Loại zoom</label>
+                      <el-input :value="camera.loaiZoom || ''" readonly class="readonly-input" />
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Chế độ chụp</label>
+                      <el-input :value="camera.cheDoChup || ''" readonly class="readonly-input" />
+                    </div>
                   </div>
-                  <div class="form-field">
-                    <label class="field-label">Độ phân giải</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.doPhanGiaiCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Khẩu độ</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.khauDoCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Loại zoom</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.loaiZoomCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label class="field-label">Chế độ chụp</label>
-                    <el-input 
-                      :value="sanPhamModel.modelSanPham?.cheDoChupCameraSau || ''" 
-                      readonly 
-                      class="readonly-input"
-                    />
-                  </div>
+                  <el-empty v-if="!sanPhamModel.modelSanPham?.cameraSaus?.length"
+                    description="Không có thông tin camera sau" :image-size="80" class="empty-camera" />
                 </div>
               </el-col>
             </el-row>
@@ -623,25 +439,20 @@ Cox              <div class="card-header">
           <el-card class="variants-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><Grid /></el-icon>
+                <el-icon class="header-icon">
+                  <Grid />
+                </el-icon>
                 <span class="header-title">Biến thể sản phẩm</span>
               </div>
             </template>
-            <el-table 
-              :data="sanPhamModel.sanPhamChiTiets" 
-              class="variants-table"
-              @row-click="selectChiTiet"
-              :row-class-name="getRowClassName"
-            >
+            <el-table :data="sanPhamModel.sanPhamChiTiets" class="variants-table" @row-click="selectChiTiet"
+              :row-class-name="getRowClassName">
               <el-table-column type="index" label="STT" width="60" :index="indexMethod" />
               <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
               <el-table-column label="Màu sắc" prop="tenMau">
                 <template #default="{ row }">
                   <div class="color-cell">
-                    <div 
-                      class="color-dot" 
-                      :style="{ backgroundColor: row.maMau }"
-                    ></div>
+                    <div class="color-dot" :style="{ backgroundColor: row.maMau }"></div>
                     <span class="color-name">{{ row.tenMau }}</span>
                   </div>
                 </template>
@@ -660,7 +471,9 @@ Cox              <div class="card-header">
           <el-card v-if="selectedChiTiet !== null" class="variant-details-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><View /></el-icon>
+                <el-icon class="header-icon">
+                  <View />
+                </el-icon>
                 <span class="header-title">Chi tiết biến thể {{ selectedChiTiet + 1 }}</span>
               </div>
             </template>
@@ -669,51 +482,33 @@ Cox              <div class="card-header">
                 <h5 class="section-title">Thông tin cơ bản</h5>
                 <div class="form-field">
                   <label class="field-label">Mã sản phẩm chi tiết</label>
-                  <el-input 
-                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''" readonly
+                    class="readonly-input" />
                 </div>
                 <div class="form-field">
                   <label class="field-label">Màu sắc</label>
-                  <el-input 
-                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" readonly
+                    class="readonly-input" />
                 </div>
                 <div class="form-field">
                   <label class="field-label">Mã màu</label>
-                  <el-input 
-                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" readonly
+                    class="readonly-input" />
                 </div>
                 <div class="form-field">
                   <label class="field-label">Dung lượng ROM</label>
-                  <el-input 
-                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" readonly
+                    class="readonly-input" />
                 </div>
                 <div class="form-field">
                   <label class="field-label">Giá bán</label>
-                  <el-input 
-                    :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" 
-                    readonly 
-                    class="readonly-input price-input"
-                  />
+                  <el-input :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" readonly
+                    class="readonly-input price-input" />
                 </div>
                 <div class="form-field">
                   <label class="field-label">Số lượng</label>
-                  <el-input 
-                    :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" 
-                    readonly 
-                    class="readonly-input"
-                  />
+                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" readonly
+                    class="readonly-input" />
                 </div>
               </div>
 
@@ -721,13 +516,8 @@ Cox              <div class="card-header">
 
               <div class="detail-section">
                 <h5 class="section-title">IMEI</h5>
-                <el-input 
-                  type="textarea" 
-                  :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''" 
-                  readonly 
-                  :rows="4"
-                  class="imei-textarea"
-                />
+                <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''"
+                  readonly :rows="4" class="imei-textarea" />
                 <div class="imei-count">
                   Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
                 </div>
@@ -738,60 +528,34 @@ Cox              <div class="card-header">
               <div class="detail-section">
                 <h5 class="section-title">Hình ảnh sản phẩm</h5>
                 <div class="image-gallery">
-                  <el-image
-                    v-for="(img, index) in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []"
-                    :key="index"
-                    :src="img.url || defaultImage"
-                    :preview-src-list="previewImageList"
-                    class="gallery-image"
-                    fit="cover"
-                    :preview-teleported="true"
-                    :lazy="true"
-                    @error="handleImageError"
-                  />
-                  <el-empty
-                    v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length"
-                    description="Không có hình ảnh"
-                    :image-size="80"
-                    class="empty-image"
-                  />
+                  <el-image v-for="(img, index) in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []"
+                    :key="index" :src="img.url || defaultImage" :preview-src-list="previewImageList"
+                    class="gallery-image" fit="cover" :preview-teleported="true" :lazy="true"
+                    @error="handleImageError" />
+                  <el-empty v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length"
+                    description="Không có hình ảnh" :image-size="80" class="empty-image" />
                 </div>
               </div>
             </div>
           </el-card>
 
-          <el-alert 
-            v-else 
-            title="Vui lòng chọn một biến thể để xem chi tiết" 
-            type="info" 
-            show-icon 
-            :closable="false"
-            class="select-variant-alert"
-          />
+          <el-alert v-else title="Vui lòng chọn một biến thể để xem chi tiết" type="info" show-icon :closable="false"
+            class="select-variant-alert" />
         </div>
       </el-col>
     </el-row>
 
     <!-- Footer Actions -->
     <div class="footer-actions">
-      <el-button 
-        type="default" 
-        size="large"
-        @click="handleBackClick"
-        class="back-button"
-      >
-        <el-icon><ArrowLeft /></el-icon>
+      <el-button type="default" size="large" @click="handleBackClick" class="back-button">
+        <el-icon>
+          <ArrowLeft />
+        </el-icon>
         Quay lại
       </el-button>
     </div>
 
-    <el-alert 
-      v-if="error" 
-      :title="error" 
-      type="error" 
-      show-icon 
-      class="error-alert" 
-    />
+    <el-alert v-if="error" :title="error" type="error" show-icon class="error-alert" />
   </div>
 </template>
 
@@ -799,16 +563,16 @@ Cox              <div class="card-header">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { 
-  ArrowLeft, 
-  InfoFilled, 
-  OfficeBuilding, 
-  Cpu, 
-  MagicStick, 
-  Monitor, 
-  Lightning, 
-  Camera, 
-  Grid, 
+import {
+  ArrowLeft,
+  InfoFilled,
+  OfficeBuilding,
+  Cpu,
+  MagicStick,
+  Monitor,
+  Lightning,
+  Camera,
+  Grid,
   View,
   Platform,
   Location
@@ -833,7 +597,7 @@ const sanPhamModel = reactive({
   diaChi: '',
   sdt: '',
   email: '',
-  modelSanPham: {},
+  modelSanPham: { cameraSaus: [] },
   sanPhamChiTiets: [],
 })
 
@@ -888,7 +652,7 @@ const fetchSanPham = async (id) => {
     sanPhamModel.tenSanPham = response.tenSanPham || ''
     sanPhamModel.thuongHieu = response.thuongHieu || ''
     sanPhamModel.trangThaiSanPham = response.trangThaiSanPham || ''
-    
+
     // Ánh xạ thông tin nhà cung cấp
     if (response.nhaCungCapAdminResponse) {
       sanPhamModel.idNhaCungCap = response.nhaCungCapAdminResponse.id || null
@@ -945,17 +709,23 @@ const fetchSanPham = async (id) => {
         khauDoCameraTruoc: response.modelSanPhamAdminResponse.khauDoCameraTruoc || '',
         loaiZoomCameraTruoc: response.modelSanPhamAdminResponse.loaiZoomCameraTruoc || '',
         cheDoChupCameraTruoc: response.modelSanPhamAdminResponse.cheDoChupCameraTruoc || '',
-        loaiCameraSau: response.modelSanPhamAdminResponse.loaiCameraSau || '',
-        doPhanGiaiCameraSau: response.modelSanPhamAdminResponse.doPhanGiaiCameraSau || '',
-        khauDoCameraSau: response.modelSanPhamAdminResponse.khauDoCameraSau || '',
-        loaiZoomCameraSau: response.modelSanPhamAdminResponse.loaiZoomCameraSau || '',
-        cheDoChupCameraSau: response.modelSanPhamAdminResponse.cheDoChupCameraSau || '',
+        // Ánh xạ mảng cameraSaus
+        cameraSaus: response.modelSanPhamAdminResponse.cameraSaus?.sort((a, b) => b.isChinh - a.isChinh).map(cam => ({
+          id: cam.id || null,
+          loaiCamera: cam.loaiCamera || '',
+          doPhanGiai: cam.doPhanGiai || '',
+          khauDo: cam.khauDo || '',
+          loaiZoom: cam.loaiZoom || '',
+          cheDoChup: cam.cheDoChup || '',
+          isChinh: cam.isChinh || false
+        })) || [],
+
         maXuatXu: response.modelSanPhamAdminResponse.maXuatXu || '',
         tenQuocGia: response.modelSanPhamAdminResponse.tenQuocGia || '',
         tenLoai: response.modelSanPhamAdminResponse.tenLoai || '',
       }
     } else {
-      sanPhamModel.modelSanPham = {}
+      sanPhamModel.modelSanPham = { cameraSaus: [] }
     }
 
     // Ánh xạ sanPhamChiTiets
@@ -971,8 +741,8 @@ const fetchSanPham = async (id) => {
       hinhAnhs: chiTiet.hinhAnhs?.map((h) => ({
         name: h.url?.split('/').pop() || '',
         url: h.url || '',
-        imagePublicId: h.imagePublicId || '',
-      })) || [],
+        imagePublicId: h.imagePublicId || ''
+      })) || []
     })) || []
 
     selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null
@@ -1106,14 +876,20 @@ onMounted(async () => {
   gap: 24px;
 }
 
-.info-card, .spec-card, .variants-card, .variant-details-card {
+.info-card,
+.spec-card,
+.variants-card,
+.variant-details-card {
   border-radius: 16px;
   border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
-.info-card:hover, .spec-card:hover, .variants-card:hover, .variant-details-card:hover {
+.info-card:hover,
+.spec-card:hover,
+.variants-card:hover,
+.variant-details-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
@@ -1188,6 +964,36 @@ onMounted(async () => {
   margin: 0 0 16px 0;
   padding-bottom: 8px;
   border-bottom: 2px solid #e2e8f0;
+}
+
+.camera-item {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.camera-item.main-camera {
+  border-color: #409eff;
+  background: #f0f8ff;
+}
+
+.camera-sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.empty-camera {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .sidebar-content {
@@ -1365,40 +1171,40 @@ onMounted(async () => {
   .product-details-container {
     padding: 16px;
   }
-  
+
   .page-header {
     flex-direction: column;
     gap: 16px;
     text-align: center;
   }
-  
+
   .page-title {
     font-size: 24px;
   }
-  
+
   .page-subtitle {
     font-size: 14px;
   }
-  
+
   .info-sections {
     gap: 16px;
   }
-  
+
   .spec-content {
     gap: 12px;
   }
-  
+
   .camera-section {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .image-gallery {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 12px;
     padding: 12px;
   }
-  
+
   .gallery-image {
     width: 100px;
     height: 100px;
@@ -1409,29 +1215,28 @@ onMounted(async () => {
   .page-title {
     font-size: 20px;
   }
-  
+
   .page-subtitle {
     font-size: 14px;
   }
-  
+
   .header-title {
     font-size: 16px;
   }
-  
+
   .field-label {
     font-size: 13px;
   }
-  
+
   .image-gallery {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 8px;
     padding: 8px;
   }
-  
+
   .gallery-image {
     width: 80px;
     height: 80px;
   }
 }
 </style>
-```

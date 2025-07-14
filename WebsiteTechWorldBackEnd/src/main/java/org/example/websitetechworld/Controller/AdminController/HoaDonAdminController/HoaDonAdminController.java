@@ -249,9 +249,15 @@ public class HoaDonAdminController {
 
     @PutMapping("/{idHoaDon}/thanh-toan")
     public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest) {
-        ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
-        return ResponseEntity.ok(response);
+        try {
+            ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace(); // Xem log ở console backend
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
+        }
     }
+
 
     @GetMapping("/all-name-hoa-don")
     public ResponseEntity<?> getAllNameHoaDon() {

@@ -85,6 +85,7 @@ public class SanPhamAdminController {
     public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham( @RequestParam(value = "tenSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
         return ResponseEntity.ok(sanPhamAdminService.getProductNames(tenSanPham,pageNo, pageSize));
     }
+
     @GetMapping("/category")
     public ResponseEntity<?> loadCategorey (@RequestParam(value = "pageNo", defaultValue = "0") int pageNo,@RequestParam(value = "pageSize", defaultValue = "5") int pageSize){
         return ResponseEntity.ok(sanPhamAdminService.getProductNameCategory(pageNo,pageSize));
