@@ -62,4 +62,6 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     List<Imei> findByIdSanPhamChiTiet_Id(Integer idSanPhamChiTiet);
 
     int countByIdSanPhamChiTiet(SanPhamChiTiet chiTiet);
+
+    int countByIdSanPhamChiTietIdAndTrangThaiImeiNot(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei);
 }
