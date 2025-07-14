@@ -168,30 +168,34 @@
                 <el-select v-model="modelForm.idCameraTruoc" placeholder="Chọn camera trước"
                   @change="clearFieldError('idCameraTruoc')" clearable :loading="loading" size="large"
                   style="width: 100%">
-                  <el-option v-for="cam in cameraTruocs" :key="cam.idCamera" :label="cam.doPhanGiai"
-                    :value="cam.idCamera" />
+                  <el-option v-for="cam in cameraTruocs" :key="cam.idCamera"
+                    :label="`${cam.doPhanGiai} - ${cam.khauDo}`" :value="cam.idCamera" />
                 </el-select>
-                <el-button type="success" size="large" circle disabled>
+                <el-button type="success" size="large" circle @click="addCameraTruocDialogRef.open()">
                   <el-icon>
                     <Plus />
                   </el-icon>
                 </el-button>
               </div>
             </el-form-item>
+            <DialogThemCameraTruoc ref="addCameraTruocDialogRef" @saved="handleCameraTruocSaved" />
+
             <el-form-item label="Camera sau" prop="idCameraSau" :error="errors.idCameraSau">
               <div style="display: flex; gap: 8px; width: 100%;">
                 <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
                   @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%" multiple>
-                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="cam.doPhanGiai"
+                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="`${cam.doPhanGiai} - ${cam.khauDo}`"
                     :value="cam.idCamera" />
                 </el-select>
-                <el-button type="success" size="large" circle disabled>
+                <el-button type="success" size="large" circle @click="addCameraSauDialogRef.open()">
                   <el-icon>
                     <Plus />
                   </el-icon>
                 </el-button>
               </div>
             </el-form-item>
+
+            <DialogThemCameraSau ref="addCameraSauDialogRef" @saved="handleCameraSauSaved" />
           </div>
         </div>
 
@@ -549,6 +553,8 @@ import DiaLogThemCpu from '@/components/Admin/dialogs/DiaLogThemCpu.vue';
 import DialogThemManHinh from '@/components/Admin/dialogs/DialogThemManHinh.vue';
 import DialogThemHDH from '@/components/Admin/dialogs/DialogThemHDH.vue';
 import DialogThemPin from '@/components/Admin/dialogs/DialogThemPin.vue';
+import DialogThemCameraSau from '@/components/Admin/dialogs/DialogThemCameraSau.vue';
+import DialogThemCameraTruoc from '@/components/Admin/dialogs/DialogThemCameraTruoc.vue';
 import { useToast } from 'vue-toastification';
 
 export default {
@@ -556,7 +562,15 @@ export default {
   components: {
     Edit, View, Delete, Plus, InfoFilled, Setting, Camera,
     DocumentAdd, Search, RefreshLeft, Check, ArrowLeft,
-    List, Close, DialogThemLoai, DialogThemXuatXu, DialogThemRam, DiaLogThemCpu, DialogThemManHinh, DialogThemHDH, DialogThemPin,
+    List, Close, DialogThemLoai,
+    DialogThemXuatXu,
+    DialogThemRam,
+    DiaLogThemCpu,
+    DialogThemManHinh,
+    DialogThemHDH,
+    DialogThemPin,
+    DialogThemCameraSau,
+    DialogThemCameraTruoc
   },
   setup() {
     const modelSanPhams = ref([]);
@@ -579,6 +593,8 @@ export default {
     const addManHinhDialogRef = ref(null);
     const addHDHDialogRef = ref(null);
     const addPinDialogRef = ref(null);
+    const addCameraSauDialogRef = ref(null);
+    const addCameraTruocDialogRef = ref(null);
     const toast = useToast();
 
     const statuses = ref([
@@ -643,11 +659,17 @@ export default {
     const manHinhLabel = (idManHinh) => manHinhs.value.find(m => m.idManHinh === idManHinh)?.kichThuoc || 'Không rõ';
     const heDieuHanhLabel = (idHeDieuHanh) => heDieuHanhs.value.find(h => h.idHeDieuHanh === idHeDieuHanh)?.phienBan || 'Không rõ';
     const pinLabel = (idPin) => pins.value.find(p => p.idPin === idPin)?.phienBan || 'Không rõ';
-    const cameraTruocLabel = (idCamera) => cameraTruocs.value.find(c => c.idCamera === idCamera)?.doPhanGiai || 'Không rõ';
+    const cameraTruocLabel = (idCamera) => {
+      const camera = cameraTruocs.value.find(c => c.idCamera === idCamera);
+      return camera ? `${camera.doPhanGiai} - ${camera.khauDo || 'Không rõ'}` : 'Không rõ';
+    };
     const cameraSauLabel = (idCameraSau) => {
       if (!idCameraSau || !Array.isArray(idCameraSau)) return 'Không rõ';
       return idCameraSau
-        .map(id => cameraSaus.value.find(c => c.idCamera === id)?.doPhanGiai || 'Không rõ')
+        .map(id => {
+          const camera = cameraSaus.value.find(c => c.idCamera === id);
+          return camera ? `${camera.doPhanGiai} - ${camera.khauDo || 'Không rõ'}` : 'Không rõ';
+        })
         .join(', ');
     };
     const loaiLabel = (idLoai) => loais.value.find(l => l.idLoai === idLoai)?.tenLoai || 'Không rõ';
@@ -738,6 +760,31 @@ export default {
       modelForm.value.idPin = savedPin.id;
     };
 
+    const handleCameraSauSaved = (savedCameraSau) => {
+      cameraSaus.value.push({
+        idCamera: savedCameraSau.id,
+        loaiCamera: savedCameraSau.loaiCamera,
+        khauDo: savedCameraSau.khauDo,
+        doPhanGiai: savedCameraSau.doPhanGiai
+      });
+
+      modelForm.value.idCameraSau = [savedCameraSau.id];
+
+    };
+
+    const handleCameraTruocSaved = (savedCameraTruoc) => {
+      // Thêm camera trước mới vào danh sách cameraTruocs
+      cameraTruocs.value.push({
+        idCamera: savedCameraTruoc.id,
+        loaiCamera: savedCameraTruoc.loaiCamera,
+        khauDo: savedCameraTruoc.khauDo,
+        doPhanGiai: savedCameraTruoc.doPhanGiai
+      });
+
+      // Cập nhật idCameraTruoc trong modelForm
+      modelForm.value.idCameraTruoc = savedCameraTruoc.id;
+    };
+
     const fetchDanhMuc = async () => {
       loading.value = true;
       try {
@@ -776,10 +823,10 @@ export default {
           ? results[4].value.map(pin => ({ idPin: pin.id, phienBan: pin.phienBan || '' }))
           : [];
         cameraTruocs.value = results[5].status === 'fulfilled' && Array.isArray(results[5].value)
-          ? results[5].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '' }))
+          ? results[5].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
           : [];
         cameraSaus.value = results[6].status === 'fulfilled' && Array.isArray(results[6].value)
-          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '' }))
+          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
           : [];
         xuatXus.value = results[7].status === 'fulfilled' && Array.isArray(results[7].value)
           ? results[7].value.map(xx => ({ idXuatXu: xx.id, maXuatXu: xx.maXuatXu || '' }))
@@ -826,7 +873,7 @@ export default {
     const resetForm = () => {
       const hasChanges = Object.values(modelForm.value).some(value => value !== null && value !== '' && !(Array.isArray(value) && value.length === 0));
       if (hasChanges) {
-        ElMessageBox.confirm('Bạn có chắc muốn đặt lại form? Dữ liệu sẽ bị mất.', 'Xác nhận', {
+        ElMessageBox.confirm('Bạn có chắc muốn đặt lại form?', 'Xác nhận', {
           confirmButtonText: 'Có',
           cancelButtonText: 'Không'
         }).then(() => {
@@ -875,7 +922,6 @@ export default {
     const viewModel = async (model) => {
       try {
         const response = await finByIdModelSanPham(model.idModelSanPham);
-        console.log('Hhuhu: ', response)
         if (!response) {
           toast.error('Không tìm thấy dữ liệu model!');
           return;
@@ -894,8 +940,6 @@ export default {
           trangThaiSanPhamModel: trangThai,
           idCameraSau: Array.isArray(response.cameraSaus) ? response.cameraSaus.map(cam => cam?.id).filter(id => id != null) : []
         };
-        console.log('viewModelData:', viewModelData.value);
-        console.log('dialogVisible:', dialogVisible.value);
         dialogVisible.value = true;
       } catch (error) {
         console.error('Lỗi khi lấy chi tiết model:', error);
@@ -1118,8 +1162,12 @@ export default {
       addManHinhDialogRef,
       addHDHDialogRef,
       addPinDialogRef,
+      addCameraTruocDialogRef,
+      addCameraSauDialogRef,
       toast,
       handlePinSaved,
+      handleCameraTruocSaved,
+      handleCameraSauSaved,
       handleHDHSaved,
       handleManHinhSaved,
       handleCpuSaved,
