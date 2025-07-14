@@ -1,5 +1,5 @@
 import { id } from "element-plus/es/locales.mjs";
-import api from "../LoginService/axiosInstance";
+import api from "@/Service/LoginService/axiosInstance";
 
 const baseURL = "/client";
 

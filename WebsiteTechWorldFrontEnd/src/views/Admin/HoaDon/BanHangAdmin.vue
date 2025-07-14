@@ -1178,7 +1178,7 @@ const confirmImeiSelection = async () => {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
-        getHdctByImeiDaBan()
+        getHdctByImeiDaBan();
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }

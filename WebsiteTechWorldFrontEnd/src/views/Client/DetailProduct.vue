@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import {
   detailSanPham,
   getChiTietBienThe,
   getThongSo,
   getListAnhByMau,
-} from "@/Service/ClientService/ProductClientService";
+} from "@/Service/ClientService/Products/ProductClientService";
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 import { ShoppingCart } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
@@ -147,6 +147,7 @@ watch([selectedRom], () => {
 
 // Gọi khi component được mount
 onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
 });
 </script>
