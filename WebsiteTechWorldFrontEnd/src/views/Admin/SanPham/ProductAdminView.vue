@@ -624,7 +624,7 @@ const previewImageList = computed(() => {
 // Handle image loading errors
 const handleImageError = (event) => {
   event.target.src = defaultImage
-  ElMessage.warning('Không thể tải hình ảnh, hiển thị ảnh mặc định')
+  //ElMessage.warning('Không thể tải hình ảnh, hiển thị ảnh mặc định')
 }
 
 const danhSachTrangThaiSanPham = [
