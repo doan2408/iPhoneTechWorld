@@ -270,7 +270,6 @@ CREATE TABLE model_san_pham (
                                 ten_model NVARCHAR(255),
                                 id_cpu INT REFERENCES cpu(id_cpu),
                                 id_man_hinh INT REFERENCES man_hinh(id_man_hinh),
-                                id_camera_sau INT REFERENCES camera_sau(id_camera_sau),
                                 id_camera_truoc INT REFERENCES camera_truoc(id_camera_truoc),
                                 id_pin INT REFERENCES pin(id_pin),
                                 id_he_dieu_hanh INT REFERENCES he_dieu_hanh(id_he_dieu_hanh),
@@ -279,6 +278,15 @@ CREATE TABLE model_san_pham (
                                 id_ram INT REFERENCES ram(id_ram),
                                 nam_ra_mat DATE,
                                 trang_thai NVARCHAR(50)
+);
+
+CREATE TABLE model_camera_sau (
+                                  id_model_san_pham INT,
+                                  id_camera_sau INT,
+                                  is_chinh BIT DEFAULT 0,
+                                  PRIMARY KEY (id_model_san_pham, id_camera_sau),
+                                  FOREIGN KEY (id_model_san_pham) REFERENCES model_san_pham(id_model_san_pham) ON DELETE CASCADE,
+                                  FOREIGN KEY (id_camera_sau) REFERENCES camera_sau(id_camera_sau) ON DELETE CASCADE
 );
 
 CREATE TABLE san_pham (
@@ -776,23 +784,23 @@ VALUES
     (N'HNam Mobile', N'555 Nguyễn Đình Chiểu, Hà Nội', '0935678901', 'hnam@example.com'),
     (N'Minh Tuấn Mobile', N'666 Lê Lai, TP.HCM', '0946789012', 'minhtuan@example.com');
 
-INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_sau, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, trang_thai)
+INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, trang_thai)
 VALUES
-    (N'iPhone 6 Thường', 15, 1, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'ACTIVE'),
-    (N'iPhone 16 Thường', 1, 2, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 16 Pro', 2, 3, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Thường', 3, 4, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Thường', 4, 5, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Thường', 5, 6, 6, 6, 6, 5, 5, 1, 1, '2021-09-01', N'ACTIVE'),
-    (N'iPhone 16 Plus', 6, 7, 7, 7, 7, 2, 6, 2, 2, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Pro', 7, 8, 8, 8, 8, 3, 7, 3, 3, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Pro', 8, 9, 9, 9, 9, 4, 8, 3, 4, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Pro', 9, 10, 10, 10, 10, 5, 9, 3, 5, '2021-09-01', N'ACTIVE'),
-    (N'iPhone 12 Thường', 10, 11, 11, 11, 11, 6, 10, 1, 1, '2020-09-01', N'ACTIVE'),
-    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 12, 2, 11, 4, 2, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 13, 3, 12, 4, 3, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Plus', 13, 14, 14, 14, 2, 4, 13, 2, 4, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Mini', 14, 15, 15, 15, 1, 5, 14, 5, 5, '2021-09-01', N'ACTIVE');
+    (N'iPhone 6 Thường', 15, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'ACTIVE'),
+    (N'iPhone 16 Thường', 1, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 16 Pro', 2, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Thường', 3, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Thường', 4, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Thường', 5, 6, 6, 6, 5, 5, 1, 1, '2021-09-01', N'ACTIVE'),
+    (N'iPhone 16 Plus', 6, 7, 7, 7, 2, 6, 2, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro', 7, 8, 8, 8, 3, 7, 3, 3, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Pro', 8, 9, 9, 9, 4, 8, 3, 4, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Pro', 9, 10, 10, 10, 5, 9, 3, 5, '2021-09-01', N'ACTIVE'),
+    (N'iPhone 12 Thường', 10, 11, 11, 11, 6, 10, 1, 1, '2020-09-01', N'ACTIVE'),
+    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 2, 11, 4, 2, '2024-09-01', N'ACTIVE'),
+    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 3, 12, 4, 3, '2023-09-01', N'ACTIVE'),
+    (N'iPhone 14 Plus', 13, 14, 14, 2, 4, 13, 2, 4, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Mini', 14, 15, 15, 1, 5, 14, 5, 5, '2021-09-01', N'ACTIVE');
 
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
@@ -1505,7 +1513,7 @@ VALUES
     (15, 15, 1, 12000000.00, '2025-05-11');
 
 
-	-- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
+-- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
 WITH SPCT_Data AS (
     -- Chọn các sản phẩm chi tiết có số lượng lớn hơn 0
     SELECT
@@ -1638,3 +1646,6 @@ SELECT * FROM user_tokens
 
 --36. model_san_pham
 SELECT * FROM model_san_pham
+
+--37. model_camera_sau
+SELECT * FROM model_camera_sau
