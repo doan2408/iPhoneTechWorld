@@ -802,6 +802,25 @@ VALUES
     (N'iPhone 14 Plus', 13, 14, 14, 2, 4, 13, 2, 4, '2022-09-01', N'ACTIVE'),
     (N'iPhone 13 Mini', 14, 15, 15, 1, 5, 14, 5, 5, '2021-09-01', N'ACTIVE');
 
+--Table model_camera_sau
+INSERT INTO model_camera_sau (id_model_san_pham, id_camera_sau, is_chinh)
+VALUES
+    (1,  1, 1), (1, 2, 0), (1, 3, 0),
+    (2,  4, 0), (2, 5, 0), (2, 6, 1),
+    (3,  7, 0), (3, 8, 0), (3, 9, 0),
+    (4, 10, 0), (4,11, 1), (4,12, 0),
+    (5, 13, 0), (5,14, 0), (5,15, 0),
+    (6,  1, 1), (6, 2, 0), (6, 3, 0),
+    (7,  4, 0), (7, 5, 0), (7, 6, 1),
+    (8,  7, 0), (8, 8, 0), (8, 9, 0),
+    (9, 10, 0), (9,11, 1), (9,12, 0),
+    (10,13, 0), (10,14, 0), (10,15, 0),
+    (11, 1, 1), (11, 2, 0), (11, 3, 0),
+    (12, 4, 0), (12, 5, 0), (12, 6, 1),
+    (13, 7, 0), (13, 8, 0), (13, 9, 0),
+    (14,10, 0), (14,11, 1), (14,12, 0),
+    (15,13, 0), (15,14, 0), (15,15, 0);
+
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
 VALUES
@@ -821,7 +840,6 @@ VALUES
     (N'iPhone 14 Plus', N'Apple', 14, N'ACTIVE', 14),
     (N'iPhone 13 Mini', N'Apple', 15, N'ACTIVE', 15);
 
--- Table san_pham_chi_tiet
 -- Table san_pham_chi_tiet
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
 VALUES
