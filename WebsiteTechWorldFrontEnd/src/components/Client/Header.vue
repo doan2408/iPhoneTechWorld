@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
-import { ElButton } from "element-plus"; // Import el-button
+
 
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
@@ -125,7 +125,7 @@ const goToLogin = () => {
               <router-link to="/client/orders">
                 <i class="fa fa-box"></i> Đơn mua
               </router-link>
-              <router-link to="/client/orders">
+              <router-link to="/client/addresses">
                 <i class="fa fa-map-marker-alt"></i> Địa chỉ
               </router-link>
               <a href="#" @click.prevent="handleLogout">

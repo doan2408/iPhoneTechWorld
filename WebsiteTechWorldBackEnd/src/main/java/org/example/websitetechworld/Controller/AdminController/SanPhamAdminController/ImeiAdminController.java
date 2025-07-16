@@ -169,16 +169,6 @@ public class ImeiAdminController {
         }
     }
 
-    @GetMapping("/getImeisBySanPhamId")
-    public ResponseEntity<List<String>> getImeisBySanPhamId(@RequestParam("sanPhamId") Integer sanPhamId) {
-        try {
-            List<String> imeis = imeiAdminService.getImeisBySanPhamChiTietId(sanPhamId);
-            return ResponseEntity.ok(imeis);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
-        }
-    }
-
     @GetMapping("/ma-vach/{soImei}")
     public ResponseEntity<?> getSanPhamChiTietByImei(@PathVariable String soImei) {
         Imei imei = Optional.ofNullable(imeiReposiory.findBySoImei(soImei))
@@ -196,6 +186,16 @@ public class ImeiAdminController {
                 spct.getIdSanPham().getTenSanPham(),
                 spct.getId()
         ));
+    }
+
+    @GetMapping("/getImeisBySanPhamId")
+    public ResponseEntity<List<String>> getImeisBySanPhamId(@RequestParam("sanPhamId") Integer sanPhamId) {
+        try {
+            List<String> imeis = imeiAdminService.getImeisBySanPhamChiTietId(sanPhamId);
+            return ResponseEntity.ok(imeis);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
 }

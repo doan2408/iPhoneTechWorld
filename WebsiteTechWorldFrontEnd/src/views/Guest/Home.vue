@@ -24,6 +24,9 @@ const selectedSort = ref("");
 // Product data
 const products = ref([]);
 
+// debounce timer
+let debounceTimer = null;
+
 // Price range configuration
 const minPrice = 0;
 const maxPrice = 50000000;
@@ -53,8 +56,21 @@ const fetchProducts = async () => {
   }
 };
 
+//debounced search function
+const debouncedFetchProducts = () => {
+  if(debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    currentPage.value = 1;
+    fetchProducts();
+  }, 500)  //500ms delay
+}
+
 // Available product types
 const loaiOptions = ref([{ label: "Tất cả", value: "" }]);
+
+const hasProduct = computed(() => products.value.length > 0);
 
 const fetchLoai = async () => {
   try {
@@ -71,16 +87,19 @@ const fetchLoai = async () => {
   }
 };
 
-const hasProduct = computed(() => products.value.length > 0);
-
 const clearFilters = () => {
+  if(debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+
   filterKeyword.value = "";
   selectedLoai.value = "";
   priceRange.value = [minPrice, maxPrice];
   showClearFilter.value = false;
   currentPage.value = 1;
   fetchProducts();
-};
+}
+
 
 const formatPrice = (val) => {
   return new Intl.NumberFormat("vi-VN").format(val) + "₫";
@@ -117,9 +136,18 @@ const sortLabel = computed(() => {
   if (selectedSort.value === "giaDesc") return "Giá giảm dần";
 });
 
+//watch for changes in filtes
+watch(
+  filterKeyword,
+  () => {
+      //only debounced for search keyword
+      debouncedFetchProducts();
+  }
+)
+
 // Watch for changes in filters
 watch(
-  [filterKeyword, selectedLoai, priceRange],
+  [selectedLoai, priceRange],
   () => {
     currentPage.value = 1;
     fetchProducts();
@@ -315,7 +343,7 @@ onMounted(() => {
       <!-- Cột phải: Sản phẩm -->
       <div class="products-container">
         <!-- Search bar -->
-        <div class="search-section" v-show="hasProduct">
+        <div class="search-section">
           <div class="search-wrapper">
             <el-input
               v-model="filterKeyword"
@@ -346,7 +374,7 @@ onMounted(() => {
               :xl="6"
               class="product-col"
             >
-              <router-link :to="`productDetail/${sp.id}`" class="product-link">
+              <router-link :to="`detail/${sp.id}`" class="product-link">
                 <div class="product-card">
                   <div class="product-image-container">
                     <img

@@ -129,20 +129,26 @@ public class HoaDonAdminService {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
-        KhachHang khachHang = khachHangRepository.findById(khachHangId)
-                .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
+        if (khachHangId == null){
+            hoaDon.setIdKhachHang(null);
+        } else {
+            KhachHang khachHang = khachHangRepository.findById(khachHangId)
+                    .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
 
-        String diaChiDayDu = khachHang.getDiaChis().stream()
-                .filter(DiaChi::getDiaChiChinh)
-                .findFirst()
-                .map(DiaChi::getDiaChiDayDu)
-                .orElse(null);
+            String diaChiDayDu = khachHang.getDiaChis().stream()
+                    .filter(DiaChi::getDiaChiChinh)
+                    .findFirst()
+                    .map(DiaChi::getDiaChiDayDu)
+                    .orElse(null);
 
-        hoaDon.setIdKhachHang(khachHang);
+            hoaDon.setIdKhachHang(khachHang);
 //        hoaDon.setTenNguoiNhan(khachHang.getTenKhachHang());
 //        hoaDon.setDiaChi(diaChiDayDu);
-        hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
-        hoaDon.setSdtNguoiMua(khachHang.getSdt());
+            hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
+            hoaDon.setSdtNguoiMua(khachHang.getSdt());
+        }
+
+
         hoaDonRepository.save(hoaDon);
     }
 

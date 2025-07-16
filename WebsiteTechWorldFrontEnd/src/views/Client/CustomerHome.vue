@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import Banner from "@/components/Client/Banner.vue";
-import { getAllSanPham, getLoai } from "@/Service/ClientService/ProductClientService";
+import { getAllSanPham, getLoai } from "@/Service/ClientService/Products/ProductClientService";
 import { 
   PriceTag, 
   Search, 
@@ -13,17 +13,19 @@ import {
 } from '@element-plus/icons-vue'
 import { h } from 'vue';
 
-
 const showClearFilter = ref(false);
 const filterKeyword = ref("");
 const selectedLoai = ref("");
-const priceRange = ref([0, 50000000]); // Default range: 0 - 50 triệu
+const priceRange = ref([0, 50000000]);  //default range 0 - 50 milions
 const currentPage = ref(1);
 const pageSize = 16;
 const totalProducts = ref(0);
 const selectedSort = ref("");
 // Product data
 const products = ref([]);
+
+// Debounce timer
+let debounceTimer = null;
 
 // Price range configuration
 const minPrice = 0;
@@ -54,6 +56,17 @@ const fetchProducts = async () => {
   }
 };
 
+// Debounced search function
+const debouncedFetchProducts = () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    currentPage.value = 1;
+    fetchProducts();
+  }, 500); // 500ms delay
+};
+
 // Available product types
 const loaiOptions = ref([{ label: "Tất cả", value: "" }]);
 
@@ -75,6 +88,11 @@ const fetchLoai = async() => {
 }
 
 const clearFilters = () => {
+  // Clear debounce timer when clearing filters
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  
   filterKeyword.value = "";
   selectedLoai.value = "";
   priceRange.value = [minPrice, maxPrice];
@@ -120,8 +138,17 @@ const sortLabel = computed(() => {
 
 // Watch for changes in filters
 watch(
-  [filterKeyword, selectedLoai, priceRange],
+  filterKeyword,
   () => {
+    // Chỉ debounce cho search keyword
+    debouncedFetchProducts();
+  }
+);
+
+watch(
+  [selectedLoai, priceRange],
+  () => {
+    // Không debounce cho filter loại và giá (cần response ngay lập tức)
     currentPage.value = 1;
     fetchProducts();
   },
@@ -311,7 +338,7 @@ onMounted(() => {
       <!-- Cột phải: Sản phẩm -->
       <div class="products-container">
         <!-- Search bar -->
-        <div class="search-section" v-show="hasProduct">
+        <div class="search-section">
           <div class="search-wrapper">
             <el-input
               v-model="filterKeyword"

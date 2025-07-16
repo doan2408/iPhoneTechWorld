@@ -24,7 +24,8 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
             "dc.tinhThanhPho," +
             "dc.diaChiChinh," +
             "dc.idKhachHang.id) " +
-            "from DiaChi dc where dc.idKhachHang.id = :idKhachHang")
+            "from DiaChi dc where dc.idKhachHang.id = :idKhachHang " +
+            "order by dc.diaChiChinh desc ")
     List<AdminDiaChiResponse> getAllDiaChi(int idKhachHang);
 
     @Query("select new org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse(" +

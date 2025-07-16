@@ -2,11 +2,9 @@
   <div class="profile-container">
     <h2 class="profile-title">Thông Tin Cá Nhân</h2>
 
-    <!-- Hiển thị loading -->
     <div v-if="isLoading" class="loading">Đang tải...</div>
 
     <div class="profile-card">
-      <!-- Hiển thị thông tin khi không chỉnh sửa -->
       <div v-if="!isEditing">
         <div class="profile-item">
           <label>Tài khoản:</label>
@@ -15,7 +13,7 @@
 
         <div class="profile-item">
           <label>Họ và Tên:</label>
-          <p>{{ userDetail.tenNhanVien || "Chưa cập nhật" }}</p>
+          <p>{{ userDetail.tenKhachHang || "Chưa cập nhật" }}</p>
         </div>
         <div class="profile-item">
           <label>Email:</label>
@@ -26,82 +24,55 @@
           <p>{{ userDetail.sdt || "Chưa cập nhật" }}</p>
         </div>
         <div class="profile-item">
-          <label>Địa Chỉ:</label>
-          <p>{{ userDetail.diaChi || "Chưa cập nhật" }}</p>
-        </div>
-        <div class="profile-item">
           <label>Ngày Sinh:</label>
-          <p>{{ userDetail.namSinh || "Chưa cập nhật" }}</p>
+          <p>{{ userDetail.ngaySinh || "Chưa cập nhật" }}</p>
         </div>
         <div class="profile-item">
           <label>Giới Tính:</label>
-          <p>
-            {{ userDetail.gioiTinh === true ? "Nam" : "Nữ" }}
-          </p>
+          <p>{{ userDetail.gioiTinh === true ? "Nam" : "Nữ" }}</p>
+        </div>
+        <div class="profile-item">
+          <label>Điểm hiện tại:</label>
+          <p>{{ userDetail.soDiemHienTai }}</p>
+        </div>
+        <div class="profile-item">
+          <label>Tổng điểm:</label>
+          <p>{{ userDetail.tongDiem }}</p>
         </div>
       </div>
 
-      <!-- Form chỉnh sửa -->
       <div v-if="isEditing" class="edit-form">
         <div class="form-group">
-          <div v-if="errors.tenNhanVien" class="text-danger mb-1">
-            {{ errors.tenNhanVien }}
-          </div>
+          <div v-if="errors.tenKhachHang" class="text-danger mb-1">{{ errors.tenKhachHang }}</div>
           <label>Họ và Tên:</label>
-          <input
-            v-model="form.tenNhanVien"
-            placeholder="Nhập họ và tên"
-            class="form-input"
-          />
+          <input v-model="form.tenKhachHang" placeholder="Nhập họ và tên" class="form-input" />
         </div>
 
         <div class="form-group">
-          <div v-if="errors.email" class="text-danger mb-1">
-            {{ errors.email }}
-          </div>
+          <div v-if="errors.email" class="text-danger mb-1">{{ errors.email }}</div>
           <label>Email:</label>
-          <input
-            v-model="form.email"
-            type="email"
-            placeholder="Nhập email"
-            class="form-input"
-          />
+          <input v-model="form.email" type="email" placeholder="Nhập email" class="form-input" />
         </div>
 
         <div class="form-group">
           <div v-if="errors.sdt" class="text-danger mb-1">{{ errors.sdt }}</div>
           <label>Số Điện Thoại:</label>
-          <input
-            v-model="form.sdt"
-            placeholder="Nhập số điện thoại"
-            class="form-input"
-          />
+          <input v-model="form.sdt" placeholder="Nhập số điện thoại" class="form-input" />
         </div>
 
         <div class="form-group">
-          <div v-if="errors.diaChi" class="text-danger mb-1">
-            {{ errors.diaChi }}
-          </div>
-          <label>Địa Chỉ:</label>
-          <input
-            v-model="form.diaChi"
-            placeholder="Nhập địa chỉ"
-            class="form-input"
-          />
+          <label>Mật khẩu:</label>
+          <el-button type="primary" plain size="small" @click="openPwdDialog">Cập nhật mật khẩu</el-button>
         </div>
 
         <div class="form-group">
-          <div v-if="errors.namSinh" class="text-danger mb-1">
-            {{ errors.namSinh }}
-          </div>
+          <div v-if="errors.ngaySinh" class="text-danger mb-1">{{ errors.ngaySinh }}</div>
           <label>Ngày Sinh:</label>
-          <input v-model="form.namSinh" type="date" class="form-input" />
+          <input v-model="form.ngaySinh" type="date" class="form-input" />
         </div>
 
         <div class="form-group">
-          <div v-if="errors.gioiTinh" class="text-danger mb-1">
-            {{ errors.gioiTinh }}
-          </div>
+          <div v-if="errors.gioiTinh" class="text-danger mb-1">{{ errors.gioiTinh }}</div>
           <label>Giới Tính:</label>
           <select v-model="form.gioiTinh" class="form-input">
             <option value="" disabled>Chọn giới tính</option>
@@ -111,77 +82,72 @@
         </div>
       </div>
 
-      <!-- Buttons -->
       <div class="button-group">
-        <button
-          class="edit-button"
-          @click="toggleEditMode"
-          :disabled="isLoading"
-        >
+        <button class="edit-button" @click="toggleEditMode" :disabled="isLoading">
           {{ isEditing ? "Hủy" : "Chỉnh Sửa" }}
         </button>
 
-        <button
-          v-if="isEditing"
-          class="save-button"
-          @click="saveProfile"
-          :disabled="isLoading"
-        >
+        <button v-if="isEditing" class="save-button" @click="saveProfile" :disabled="isLoading">
           Lưu Thay Đổi
         </button>
       </div>
     </div>
+
+    <!-- Modal đổi mật khẩu -->
+    <el-dialog v-model="showPwdDialog" title="Cập nhật mật khẩu" width="400px">
+      <div class="form-group">
+        <label>Mật khẩu cũ:</label>
+        <el-input v-model="passwordForm.oldPwd" type="password" />
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu mới:</label>
+        <el-input v-model="passwordForm.newPwd" type="password" />
+      </div>
+      <template #footer>
+        <el-button @click="showPwdDialog = false">Hủy</el-button>
+        <el-button type="primary" @click="confirmPasswordChange">Xác nhận</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import {
-  detailStaff,
-  updateStaff,
-} from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
+import { detailClient, updateInfor } from "@/Service/ClientService/TaiKhoan/ClientServices";
 import { ElMessage } from "element-plus";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 
-// Lấy store
 const store = useStore();
-
-// Lấy thông tin user từ store
 const user = computed(() => store.getters.user || null);
-
-// State cho thông tin user đầy đủ từ API
 const userDetail = ref({});
-
-// State cho form chỉnh sửa
 const isEditing = ref(false);
 const isLoading = ref(false);
 const errors = ref({});
+const showPwdDialog = ref(false);
 
-// Khởi tạo form
 const form = ref({
-  tenNhanVien: "",
+  tenKhachHang: "",
   email: "",
   sdt: "",
-  diaChi: "",
+  matKhau: "",
   ngaySinh: "",
   gioiTinh: "",
 });
 
-// Load thông tin user hiện tại
+const passwordForm = ref({
+  oldPwd: "",
+  newPwd: "",
+});
+
 const loadCurrentUserProfile = async () => {
   try {
     isLoading.value = true;
     errors.value = {};
-
     const idUser = user.value?.id;
-    if (!idUser) {
-      throw new Error("Không tìm thấy ID người dùng");
-    }
-
-    const response = await detailStaff(idUser);
+    if (!idUser) throw new Error("Không tìm thấy ID người dùng");
+    const response = await detailClient(idUser);
+    delete response.matKhau;
     userDetail.value = { ...response };
-
-    // Đồng bộ form với userDetail khi tải xong
     form.value = { ...userDetail.value };
   } catch (err) {
     errors.value = err.message || "Lỗi khi tải thông tin người dùng";
@@ -191,52 +157,35 @@ const loadCurrentUserProfile = async () => {
   }
 };
 
-// Auto load user profile khi component được mount
 onMounted(() => {
-  if (user.value?.id) {
-    loadCurrentUserProfile();
-  }
+  if (user.value?.id) loadCurrentUserProfile();
 });
 
-// Đồng bộ form với userDetail khi bắt đầu chỉnh sửa
 watch(
   () => isEditing.value,
   (newValue) => {
-    if (newValue) {
-      // Điền dữ liệu từ userDetail vào form khi bắt đầu chỉnh sửa
-      form.value = { ...userDetail.value };
-    }
+    if (newValue) form.value = { ...userDetail.value };
   }
 );
 
-// Hàm toggle chế độ chỉnh sửa
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value;
   Object.keys(errors.value).forEach((key) => delete errors.value[key]);
-  if (!isEditing.value) {
-    // Reset form khi hủy chỉnh sửa
-    form.value = { ...userDetail.value };
-  }
+  if (!isEditing.value) form.value = { ...userDetail.value };
 };
 
-// Hàm lưu thông tin (giả lập, vì bạn sẽ xử lý qua service riêng)
 const saveProfile = async () => {
   Object.keys(errors.value).forEach((key) => delete errors.value[key]);
   try {
     isLoading.value = true;
-
-    console.log("Saving current user profile:", form.value);
-
     const idUser = user.value?.id;
-    const response = await updateStaff(idUser, form.value);
-    loadCurrentUserProfile();
+    if (!form.value.matKhau) delete form.value.matKhau;
+    await updateInfor(idUser, form.value);
+    await loadCurrentUserProfile();
     ElMessage.success("Update thành công");
-
-    // Tắt chế độ chỉnh sửa
     isEditing.value = false;
   } catch (err) {
     if (Array.isArray(err)) {
-      // err là mảng lỗi [{field, message}, ...]
       err.forEach(({ field, message }) => {
         errors.value[field] = message;
       });
@@ -247,6 +196,44 @@ const saveProfile = async () => {
     isLoading.value = false;
   }
 };
+
+const openPwdDialog = () => {
+  passwordForm.value.oldPwd = "";
+  passwordForm.value.newPwd = "";
+  showPwdDialog.value = true;
+};
+
+const confirmPasswordChange = async () => {
+  if (!passwordForm.value.oldPwd || !passwordForm.value.newPwd) {
+    ElMessage.warning("Vui lòng nhập đủ mật khẩu cũ và mới!");
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const idUser = user.value?.id;
+
+    // Gửi cả mật khẩu cũ và mới
+    const payload = {
+      ...form.value,
+      matKhau: passwordForm.value.newPwd,
+      matKhauCu: passwordForm.value.oldPwd,
+    };
+
+    await updateInfor(idUser, payload);
+    await loadCurrentUserProfile();
+
+    ElMessage.success("Đổi mật khẩu thành công");
+    showPwdDialog.value = false;
+    passwordForm.value.oldPwd = "";
+    passwordForm.value.newPwd = "";
+  } catch (err) {
+      ElMessage.error("Mật khẩu cũ không đúng");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 </script>
 
 <style scoped>

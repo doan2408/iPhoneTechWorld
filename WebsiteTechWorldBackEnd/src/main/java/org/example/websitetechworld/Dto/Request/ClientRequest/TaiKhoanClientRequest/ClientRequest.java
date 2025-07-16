@@ -35,6 +35,10 @@ public class ClientRequest {
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String matKhau;
 
+    @NotBlank(message = "Mật khẩu không được để trống", groups = CreateGroups.class)
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    private String matKhauCu;
+
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
     @Pattern(
