@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraTruocAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CameraSauAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CameraTruocAdminResponse;
@@ -45,6 +46,12 @@ public class CameraSauAdminService {
 
     @Transactional
     public CameraSauAdminResponse createCameraSau(CameraSauAdminRequest cameraSauAdminRequest) {
+        CameraSau cameraSau = cameraSauRepository.save(modelMapper.map(cameraSauAdminRequest, CameraSau.class));
+        return convert(cameraSau);
+    }
+
+    @Transactional
+    public CameraSauAdminResponse createCameraSauQuick(CameraSauQuickCreateAdminRequest cameraSauAdminRequest) {
         CameraSau cameraSau = cameraSauRepository.save(modelMapper.map(cameraSauAdminRequest, CameraSau.class));
         return convert(cameraSau);
     }

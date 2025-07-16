@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CameraSauAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.CameraSauAdminService;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,13 @@ public class CameraSauAdminController {
     @PostMapping
     public ResponseEntity<CameraSauAdminResponse> createCameraSau(@RequestBody CameraSauAdminRequest cameraSauAdminRequest) {
         CameraSauAdminResponse response = cameraSauAdminService.createCameraSau(cameraSauAdminRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+   @PostMapping("/cameraSau-quick")
+    public ResponseEntity<CameraSauAdminResponse> createCameraSauQuick(@RequestBody CameraSauQuickCreateAdminRequest cameraSauAdminRequest) {
+        CameraSauAdminResponse response = cameraSauAdminService.createCameraSauQuick(cameraSauAdminRequest);
 
         return ResponseEntity.ok(response);
     }

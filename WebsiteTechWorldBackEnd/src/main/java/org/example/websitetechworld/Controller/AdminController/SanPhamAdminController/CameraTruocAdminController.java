@@ -3,6 +3,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraTruocAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraTruocQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CpuAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CameraTruocAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
@@ -82,6 +83,13 @@ public class CameraTruocAdminController {
                     List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
             );
         }
+    }
+
+
+    @PostMapping("/cameraTruoc-quick")
+    public ResponseEntity<?> createCameraTruocQuick(@RequestBody CameraTruocQuickCreateAdminRequest request) {
+        CameraTruocAdminResponse response = cameraTruocAdminService.createCameraTruocQuick(request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

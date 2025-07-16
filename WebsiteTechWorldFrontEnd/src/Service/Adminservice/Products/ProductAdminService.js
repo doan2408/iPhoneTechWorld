@@ -301,7 +301,10 @@ export const getAllCpuList = () => fetchData('/cpu/listCpu');
 export const postCpuList = (data) => postData('/cpu/quick-cpu', data);
 
 export const getAllCameraTruocList = () => fetchData('/cameraTruoc/listCameraTruoc');
+export const postCameraTruocList = (data) => postData('/cameraTruoc/cameraTruoc-quick', data);
+
 export const getAllCameraSauList = () => fetchData('/cameraSau/listCameraSau');
+export const postCameraSauList = (data) => postData('/cameraSau/cameraSau-quick', data);
 
 
 export const getAllModelSanPhamList = () => fetchData('/modelSanPham/listModelSanPham');

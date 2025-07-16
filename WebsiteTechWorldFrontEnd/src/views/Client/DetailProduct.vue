@@ -124,7 +124,8 @@ const themVaoGio = async () => {
     await cartService.addToCart({
       idKhachHang: user.id,
       idSanPhamChiTiet: bienThe.value.idSpct,
-      soLuong: quantity.value,
+      soLuong: 1,
+      // soLuong: quantity.value,
     });
 
     ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
@@ -220,7 +221,7 @@ onMounted(() => {
           </div>
 
           <!-- Chọn số lượng -->
-          <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
+          <!-- <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
@@ -237,7 +238,7 @@ onMounted(() => {
                 +
               </button>
             </div>
-          </div>
+          </div> -->
 
           <!-- Hành động -->
           <div class="button-group">
@@ -405,9 +406,10 @@ onMounted(() => {
   display: inline-block;
 }
 
+/* Giao diện vùng chọn */
 .options {
   margin-top: 25px;
-  padding: 20px;
+  padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -420,20 +422,45 @@ onMounted(() => {
   font-weight: 600;
 }
 
+/* Danh sách nút */
 .option-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  /* Xoá gap nếu dùng margin bên dưới */
 }
 
-.option-list .el-radio-button {
-  border-radius: 6px !important;
-  transition: all 0.2s ease;
+/* Nút radio bo góc và vuông */
+::v-deep(.option-list .el-radio-button) {
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
-.option-list .el-radio-button:hover {
+/* Nếu cần đều nhau, có thể dùng padding thay vì margin, nhưng margin rõ ràng hơn */
+
+/* Style phần bên trong như cũ */
+::v-deep(.option-list .el-radio-button__inner) {
+  border-radius: 12px !important;
+  padding: 12px 16px;
+  min-width: 80px;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+::v-deep(.option-list .el-radio-button__inner:hover) {
+  background-color: #f1f5f9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Active */
+::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
+  background-color: #667eea;
+  color: #fff;
+  border-color: #5a67d8;
+}
+
 
 /* Quantity Selector Styles */
 .quantity-selector {
