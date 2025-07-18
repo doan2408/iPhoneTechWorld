@@ -105,9 +105,6 @@
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
                             <Plus class="btn-icon" />
                         </button>
-                        <button class="customer-btn" title="Danh sách khách hàng">
-                            <List class="btn-icon" />
-                        </button>
                         <button class="customer-btn" title="Lọc">
                             <Filter class="btn-icon" />
                         </button>
@@ -749,6 +746,7 @@ const loadTabHoaDon = async () => {
         console.log('Danh sách hóa đơn từ backend:', response.data);
         //Load các hóa đơn của nhân viên
         // Cập nhật danh sách hóa đơn từ backend, tránh thêm trùng lặp
+        invoices.value = []; // Xóa các hóa đơn hiện có
         response.data.forEach(inv => {
             const existingIndex = invoices.value.findIndex(i => i.id === inv.id);
             if (existingIndex === -1) {
@@ -957,17 +955,13 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
         getHdctByImeiDaBan();
+        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
         console.error("Xóa thất bại", err);
     }
 }
-
-// const calculateTotal = () => {
-//     const invoice = currentInvoice.value
-//     invoice.total = invoice.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-// }
 
 const searchCustomer = () => {
     // Simulate customer search
@@ -1189,6 +1183,7 @@ const confirmImeiSelection = async () => {
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
         getHdctByImeiDaBan();
+        loadTabHoaDon()
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
@@ -1279,6 +1274,7 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
+        loadTabHoaDon();
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
@@ -1798,24 +1794,10 @@ watch(quantityToSelect, (newValue, oldValue) => {
 
 // Initialize
 onMounted(async () => {
-    // Làm sạch trạng thái trước khi tải dữ liệu
-    // invoices.value = [];
-    // currentInvoiceId.value = null;
-    // currentInvoiceDetail.value = null;
-    // localStorage.removeItem('selectedInvoiceId'); // Xóa storedId từ phiên trước
-
-    // console.log('onMounted - Trạng thái ban đầu sau khi làm sạch:', {
-    //     invoices: invoices.value,
-    //     currentInvoiceId: currentInvoiceId.value,
-    //     storedId: localStorage.getItem('selectedInvoiceId')
-    // });
-
-    // calculateTotal();
     await danhMucSanPham();
     selectedCategory.value = 'all';
     await loadProducts({ tenSanPham: 'all' });
-    loadTabHoaDon();
-    // getListTinhThanh();
+    await loadTabHoaDon();
     await loadHoaDon();
     await getTinhList();
     await loadDiscountList();

@@ -175,23 +175,24 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     //get thong so theo rom
     @Query(value = """
         select top 1
-        c.chip_xu_ly, r.dung_luong_ram, rom.dung_luong_rom,
-    	mh.ten_man_hinh, mh.kich_thuoc, mh.loai_man_hinh, mh.do_phan_giai, mh.tan_so_quet, mh.do_sang, mh.chat_lieu_kinh,
-    	cms.do_phan_giai, cmt.do_phan_giai,
-    	p.phien_ban, p.cong_suat_sac, p.thoi_gian_su_dung, p.so_lan_sac_toi_da,
-    	hdh.phien_ban, x.ten_quoc_gia
-    	from model_san_pham mdsp
-        join ram r on r.id_ram = mdsp.id_ram
-    	join cpu c on c.id_cpu = mdsp.id_cpu
-    	join man_hinh mh on mh.id_man_hinh = mdsp.id_man_hinh
-    	join camera_sau cms on cms.id_camera_sau = mdsp.id_camera_sau
-    	join camera_truoc cmt on cmt.id_camera_truoc = mdsp.id_camera_truoc
-    	join pin p on p.id_pin = mdsp.id_pin
-    	join he_dieu_hanh hdh on hdh.id_he_dieu_hanh = mdsp.id_he_dieu_hanh
-    	join xuat_xu x on x.id_xuat_xu = mdsp.id_xuat_xu
-    	join san_pham sp on sp.id_model_san_pham = mdsp.id_model_san_pham
-    	join san_pham_chi_tiet spct on spct.id_san_pham = sp.id_san_pham
-    	join rom on spct.id_rom = rom.id_rom
+                c.chip_xu_ly, r.dung_luong_ram, rom.dung_luong_rom,
+            	mh.ten_man_hinh, mh.kich_thuoc, mh.loai_man_hinh, mh.do_phan_giai, mh.tan_so_quet, mh.do_sang, mh.chat_lieu_kinh,
+            	cms.do_phan_giai, cmt.do_phan_giai,
+            	p.phien_ban, p.cong_suat_sac, p.thoi_gian_su_dung, p.so_lan_sac_toi_da,
+            	hdh.phien_ban, x.ten_quoc_gia
+            	from model_san_pham mdsp
+                join ram r on r.id_ram = mdsp.id_ram
+            	join cpu c on c.id_cpu = mdsp.id_cpu
+            	join man_hinh mh on mh.id_man_hinh = mdsp.id_man_hinh
+            	join model_camera_sau mdcms on mdcms.id_model_san_pham = mdsp.id_model_san_pham  and mdcms.is_chinh = 1
+        		join camera_sau cms on cms.id_camera_sau = mdcms.id_camera_sau
+            	join camera_truoc cmt on cmt.id_camera_truoc = mdsp.id_camera_truoc
+            	join pin p on p.id_pin = mdsp.id_pin
+            	join he_dieu_hanh hdh on hdh.id_he_dieu_hanh = mdsp.id_he_dieu_hanh
+            	join xuat_xu x on x.id_xuat_xu = mdsp.id_xuat_xu
+            	join san_pham sp on sp.id_model_san_pham = mdsp.id_model_san_pham
+            	join san_pham_chi_tiet spct on spct.id_san_pham = sp.id_san_pham
+            	join rom on spct.id_rom = rom.id_rom
     	WHERE sp.id_san_pham = :idSanPham AND rom.id_rom = :idRom
     """, nativeQuery = true)
     ThongSoResponse getThongSoByIdSpct(@Param("idSanPham") Integer idSanPham, @Param("idRom") Integer idRom);

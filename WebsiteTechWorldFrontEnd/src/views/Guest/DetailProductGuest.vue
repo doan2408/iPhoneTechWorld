@@ -8,6 +8,7 @@ import {
   getListAnhByMau,
 } from "@/Service/GuestService/ProductGuestService";
 import { ShoppingCart } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 
 const route = useRoute();
 const idSanPham = route.params.id;
@@ -83,6 +84,62 @@ const fetchListAnhByMau = async () => {
   if (hinhAnh.length > 0 && bienThe.value) {
     bienThe.value.hinhAnh = hinhAnh;
     selectedImage.value = hinhAnh[0];
+  }
+};
+
+const addToCart = async () => {
+  try {
+    if (quantity.value <= 0) {
+      ElMessage.error("Số lượng phải lớn hơn 0!");
+      return;
+    }
+
+    if (!bienThe.value || bienThe.value.soLuong <= 0) {
+      ElMessage.error("Sản phẩm đã hết hàng!");
+      return;
+    }
+    console.log(bienThe.value)
+    const idSanPhamChiTiet = bienThe.value.idSpct; 
+    const soLuongMoi = quantity.value;
+    const soLuongTonKho = bienThe.value.soLuong;
+
+    let storedCart = JSON.parse(localStorage.getItem("shoppingCart") || "[]");
+    const itemHienTai = storedCart.find(
+      (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
+    );
+    const soLuongHienTai = itemHienTai ? itemHienTai.soLuong : 0;
+
+    if (soLuongHienTai + soLuongMoi > soLuongTonKho) {
+      ElMessage.error(
+        `Số lượng vượt quá tồn kho. Đã có ${soLuongHienTai} sản phẩm trong giỏ.`
+      );
+      return;
+    }
+
+    if (itemHienTai) {
+      itemHienTai.soLuong = soLuongHienTai + soLuongMoi;
+    } else {
+      storedCart.push({
+        idSanPhamChiTiet: idSanPhamChiTiet,
+        soLuong: soLuongMoi,
+        tenSanPham: sanPham.value?.tenSanPham || "Sản phẩm",
+        phienBan: `${
+          sanPham.value?.mau.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
+        } - ${
+          sanPham.value?.rom.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
+        }`,
+        imageUrl: bienThe.value?.hinhAnh?.[0] || "",
+        gia: bienThe.value?.giaBan || 0,
+        soLuongTon: bienThe.value?.soLuong || 0,
+        ngayThem: new Date().toISOString(),
+      });
+    }
+
+    localStorage.setItem("shoppingCart", JSON.stringify(storedCart));
+    ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
+  } catch (error) {
+    console.error("Lỗi khi thêm vào giỏ hàng:", error);
+    ElMessage.error(error.message || "Lỗi khi thêm sản phẩm vào giỏ hàng!");
   }
 };
 
@@ -205,6 +262,7 @@ onMounted(() => {
               type="success"
               :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
+              @click="addToCart"
               class="cart-btn"
             >
               Thêm vào giỏ hàng
@@ -356,9 +414,10 @@ onMounted(() => {
   display: inline-block;
 }
 
+/* Giao diện vùng chọn */
 .options {
   margin-top: 25px;
-  padding: 20px;
+  padding: 10px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -371,20 +430,45 @@ onMounted(() => {
   font-weight: 600;
 }
 
+/* Danh sách nút */
 .option-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  /* Xoá gap nếu dùng margin bên dưới */
 }
 
-.option-list .el-radio-button {
-  border-radius: 6px !important;
-  transition: all 0.2s ease;
+/* Nút radio bo góc và vuông */
+::v-deep(.option-list .el-radio-button) {
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
-.option-list .el-radio-button:hover {
+/* Nếu cần đều nhau, có thể dùng padding thay vì margin, nhưng margin rõ ràng hơn */
+
+/* Style phần bên trong như cũ */
+::v-deep(.option-list .el-radio-button__inner) {
+  border-radius: 12px !important;
+  padding: 12px 16px;
+  min-width: 80px;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+::v-deep(.option-list .el-radio-button__inner:hover) {
+  background-color: #f1f5f9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Active */
+::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
+  background-color: #667eea;
+  color: #fff;
+  border-color: #5a67d8;
+}
+
 
 /* Quantity Selector Styles */
 .quantity-selector {
@@ -621,10 +705,6 @@ onMounted(() => {
   .thumbnail {
     width: 60px;
     height: 60px;
-  }
-
-  .options {
-    padding: 15px;
   }
 
   .quantity-control {
