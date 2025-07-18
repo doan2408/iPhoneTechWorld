@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
-import org.example.websitetechworld.Entity.DiaChi;
-import org.example.websitetechworld.Entity.GioHang;
-import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
@@ -50,10 +48,10 @@ public class ClientAdminService {
         adminClientResponse.setNgaySinh(khachHang.getNgaySinh());
         adminClientResponse.setGioiTinh(khachHang.getGioiTinh());
         adminClientResponse.setAnh(khachHang.getAnh());
-        adminClientResponse.setTongDiem(khachHang.getTongDiem());
-        adminClientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
-        adminClientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
         adminClientResponse.setTrangThai(khachHang.getTrangThai());
+        adminClientResponse.setHangKhachHang(
+                khachHang.getHangThanhVien() != null ? khachHang.getHangThanhVien().getTenHang().getDisplayName() : null
+        );
 
         // Tạo danh sách địa chỉ
         List<AdminDiaChiResponse> diaChiResponses = khachHang.getDiaChis().stream()
@@ -91,10 +89,8 @@ public class ClientAdminService {
         khachHang.setNgaySinh(adminClientRequest.getNgaySinh());
         khachHang.setGioiTinh(adminClientRequest.getGioiTinh());
         khachHang.setAnh(adminClientRequest.getAnh());
-        khachHang.setTongDiem(adminClientRequest.getTongDiem());
-        khachHang.setSoDiemHienTai(adminClientRequest.getSoDiemHienTai());
-        khachHang.setHangKhachHang(adminClientRequest.getHangKhachHang());
         khachHang.setTrangThai(adminClientRequest.getTrangThai());
+        khachHang.setHangThanhVien(adminClientRequest.getHangKhachHang());
      return khachHang;
     }
 
@@ -173,7 +169,9 @@ public class ClientAdminService {
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
         request.setTongDiem(new BigDecimal(0));
         request.setSoDiemHienTai(new BigDecimal(0));
-        request.setHangKhachHang(HangKhachHang.MEMBER);
+        HangThanhVien hangThanhVien = new HangThanhVien();
+        hangThanhVien.setId(1);
+        request.setHangKhachHang(hangThanhVien);
 
         KhachHang khachHang = convertToKhachHang(request);
 
@@ -183,13 +181,19 @@ public class ClientAdminService {
         GioHang gioHang = new GioHang();
         gioHang.setIdKhachHang(khachHangAdd); //oneToOne
 
-        //set ngược lại
+        //tạo ví tương ứng với khách hàng mới vừa tạo
+        ViDiem viDiem = new ViDiem();
+        viDiem.setKhachHang(khachHangAdd);
+
+        //set ngược lại one to one
         khachHangAdd.setGioHang(gioHang);
+        khachHangAdd.setViDiem(viDiem);
+
         DiaChi diaChi = new DiaChi();
         diaChi.setIdKhachHang(khachHangAdd);
         diaChi.setDiaChiChinh(true);
         diaChiRepository.save(diaChi);
-        //lưu id khách hàng và giỏ hàng cũng sẽ được lưu theo Cascade
+        //lưu id khách hàng và giỏ hàng, ví cũng sẽ được lưu theo Cascade
         return khachHangRepository.save(khachHangAdd);
     }
 

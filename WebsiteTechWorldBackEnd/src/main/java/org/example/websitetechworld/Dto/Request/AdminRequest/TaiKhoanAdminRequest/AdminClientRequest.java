@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Entity.HangThanhVien;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 
@@ -52,7 +53,7 @@ public class AdminClientRequest {
     @DecimalMin(value = "0.0", inclusive = true, message = "Số điểm hiện tại không được âm")
     private BigDecimal soDiemHienTai;
 
-    private HangKhachHang hangKhachHang;
+    private HangThanhVien hangKhachHang;
 
     @NotNull(message = "Trạng thái khách hàng không được để trống")
     private TrangThaiKhachHang trangThai;

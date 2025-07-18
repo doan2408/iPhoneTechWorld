@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.CheckValidation.CreateGroups;
 import org.example.websitetechworld.CheckValidation.UpdateGroups;
+import org.example.websitetechworld.Entity.HangThanhVien;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 
@@ -55,13 +56,7 @@ public class ClientRequest {
 
     private String anh; // Nếu có thể để trống
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Tổng điểm không được âm")
-    private BigDecimal tongDiem;
-
-    @DecimalMin(value = "0.0", inclusive = true, message = "Số điểm hiện tại không được âm")
-    private BigDecimal soDiemHienTai;
-
-    private HangKhachHang hangKhachHang;
-
     private TrangThaiKhachHang trangThai;
+
+    private HangThanhVien hangKhachHang;
 }
