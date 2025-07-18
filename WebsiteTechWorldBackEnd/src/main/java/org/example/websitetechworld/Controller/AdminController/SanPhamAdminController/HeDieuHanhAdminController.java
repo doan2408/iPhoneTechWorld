@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.HDHQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.HeDieuHanhAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.HinhAnhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.HeDieuHanhAdminResponse;
@@ -85,6 +86,13 @@ public class HeDieuHanhAdminController {
                     List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
             );
         }
+    }
+
+    @PostMapping("/quick-hdh")
+    public ResponseEntity<?> createHDHQuick (@RequestBody HDHQuickCreateAdminRequest request) {
+        HeDieuHanhAdminResponse response = heDieuHanhAdminService.createHDHQuick(request);
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

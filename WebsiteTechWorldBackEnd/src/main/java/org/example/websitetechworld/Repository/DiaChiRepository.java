@@ -22,8 +22,10 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
             "dc.xaPhuong," +
             "dc.quanHuyen," +
             "dc.tinhThanhPho," +
-            "dc.diaChiChinh) " +
-            "from DiaChi dc where dc.idKhachHang.id = :idKhachHang")
+            "dc.diaChiChinh," +
+            "dc.idKhachHang.id) " +
+            "from DiaChi dc where dc.idKhachHang.id = :idKhachHang " +
+            "order by dc.diaChiChinh desc ")
     List<AdminDiaChiResponse> getAllDiaChi(int idKhachHang);
 
     @Query("select new org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse(" +
@@ -36,13 +38,14 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
             "dc.xaPhuong," +
             "dc.quanHuyen," +
             "dc.tinhThanhPho," +
-            "dc.diaChiChinh) " +
+            "dc.diaChiChinh," +
+            "dc.idKhachHang.id) " +
             "from DiaChi dc where dc.id = :idDiaChi")
     AdminDiaChiResponse getDiaChi(int idDiaChi);
 
     @Modifying
-    @Query("UPDATE DiaChi d SET d.diaChiChinh = false WHERE d.idKhachHang.id = :idKhachHang AND d.id <> :idDiaChi")
-    void updateAllDiaChiPhu(@Param("idKhachHang") int idKhachHang, @Param("idDiaChi") int idDiaChi);
+    @Query("UPDATE DiaChi d SET d.diaChiChinh = false WHERE d.idKhachHang.id = :idKhachHang AND (:idDiaChi IS NULL OR d.id <> :idDiaChi)")
+    void updateAllDiaChiPhu(@Param("idKhachHang") int idKhachHang, @Param("idDiaChi") Integer idDiaChi);
 
     @Query("SELECT d FROM DiaChi d WHERE d.idKhachHang.id = :clientId")
     List<DiaChi> findByIdKhachHang(@Param("clientId") Integer clientId);

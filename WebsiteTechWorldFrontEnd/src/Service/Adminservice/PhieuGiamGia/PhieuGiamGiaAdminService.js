@@ -36,7 +36,7 @@ export const add = async (data) => {
 
 export const update = async (id, data) => {
   try {
-    const response = await api.put( baseURL +`/${id}`, data);
+    const response = await api.put( baseURL + `/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật phiếu giảm giá với ID ${id}:`, error);
@@ -46,7 +46,7 @@ export const update = async (id, data) => {
 
 export const deletePhieuGiamGia = async (id) => {
   try {
-    const response = await api.delete( baseURL +`/${id}`);
+    const response = await api.delete( baseURL + `/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi xóa phiếu giảm giá với ID ${id}:`, error);
@@ -54,12 +54,12 @@ export const deletePhieuGiamGia = async (id) => {
   }
 };
 
-export const getAllKhachHang = async () => {
+export const getAllSanPham = async (params) => {
   try {
-    const response = await api.get(baseURL +'/khach-hang');
+    const response = await api.get(baseURL + '/san-pham', { params });
     return response.data;
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách khách hàng:', error);
-    throw error.response?.data || new Error('Lỗi khi lấy danh sách khách hàng');
+    console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    throw error.response?.data || new Error('Lỗi khi lấy danh sách sản phẩm');
   }
 };

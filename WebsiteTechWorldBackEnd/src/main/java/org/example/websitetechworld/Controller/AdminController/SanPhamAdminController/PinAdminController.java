@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.PinAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.PinQuicKCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.PinAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.PinAdminService;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,12 @@ public class PinAdminController {
     @PostMapping
     public ResponseEntity<PinAdminResponse> createPin(@Valid @RequestBody PinAdminRequest pinAdminRequest) {
         PinAdminResponse response = pinAdminService.createPin(pinAdminRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/quick-pin")
+    public ResponseEntity<PinAdminResponse> createPinQuick(@Valid @RequestBody PinQuicKCreateAdminRequest pinAdminRequest) {
+        PinAdminResponse response = pinAdminService.createPinQuick(pinAdminRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

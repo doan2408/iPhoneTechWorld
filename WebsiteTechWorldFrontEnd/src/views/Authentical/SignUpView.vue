@@ -262,7 +262,7 @@ input {
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 18px;
   font-size: 1rem;
-  color: var(--text-color);
+  color: white;
   transition: all 0.3s ease;
 }
 

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ModelSanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
-import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.BusinessException;
@@ -14,13 +13,11 @@ import org.example.websitetechworld.exception.NotFoundException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +34,15 @@ public class ModelSanPhamService {
     private final XuatXuRepository xuatXuRepo;
     private final LoaiRepository loaiRepo;
     private final ModelSanPhamRepository modelSanPhamRepository;
+    private final ModelCameraSauRepository modelCameraSauRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
 
         entity.setTenModel(req.getTenModel());
+
         entity.setMaModelSanPham(req.getMaModelSanPham());
         entity.setNamRaMat(req.getNamRaMat());
         entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
@@ -50,10 +52,11 @@ public class ModelSanPhamService {
         entity.setIdPin(pinRepo.findById(req.getIdPin()).orElse(null));
         entity.setIdCpu(cpuRepo.findById(req.getIdCpu()).orElse(null));
         entity.setIdCameraTruoc(cameraTruocRepo.findById(req.getIdCameraTruoc()).orElse(null));
-        entity.setIdCameraSau(cameraSauRepo.findById(req.getIdCameraSau()).orElse(null));
+//        entity.setIdCameraSau(cameraSauRepo.findById(req.getIdCameraSau()).orElse(null));
         entity.setIdXuatXu(xuatXuRepo.findById(req.getIdXuatXu()).orElse(null));
         entity.setIdLoai(loaiRepo.findById(req.getIdLoai()).orElse(null));
     }
+
 
     private ModelSanPhamAdminResponse mapEntityToResponse(ModelSanPham entity) {
         ModelSanPhamAdminResponse response = new ModelSanPhamAdminResponse();
@@ -130,15 +133,23 @@ public class ModelSanPhamService {
             response.setCheDoChupCameraTruoc(cameraTruoc.getCheDoChup());
         }
 
-        CameraSau cameraSau = entity.getIdCameraSau();
-        if (cameraSau != null) {
-            response.setIdCameraSau(cameraSau.getId());
-            response.setLoaiCameraSau(cameraSau.getLoaiCamera());
-            response.setDoPhanGiaiCameraSau(cameraSau.getDoPhanGiai());
-            response.setKhauDoCameraSau(cameraSau.getKhauDo());
-            response.setLoaiZoomCameraSau(cameraSau.getLoaiZoom());
-            response.setCheDoChupCameraSau(cameraSau.getCheDoChup());
-        }
+        List<CameraSauAdminResponse> camList = Optional.ofNullable(entity.getCameraSaus())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(modelCam -> {
+                    CameraSauAdminResponse dto = new CameraSauAdminResponse();
+                    CameraSau cam = modelCam.getCameraSau();
+                    dto.setId(cam.getId());
+                    dto.setLoaiCamera(cam.getLoaiCamera());
+                    dto.setDoPhanGiai(cam.getDoPhanGiai());
+                    dto.setKhauDo(cam.getKhauDo());
+                    dto.setLoaiZoom(cam.getLoaiZoom());
+                    dto.setCheDoChup(cam.getCheDoChup());
+                    dto.setIsChinh(modelCam.getIsChinh());
+                    return dto;
+                }).collect(Collectors.toList());
+
+        response.setCameraSaus(camList);
 
         XuatXu xuatXu = entity.getIdXuatXu();
         if (xuatXu != null) {
@@ -198,6 +209,7 @@ public class ModelSanPhamService {
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
 
+        //  1. Kiểm tra trùng cấu hình (trừ camera sau)
         if (modelSanPhamRepository.existsModelWithSameConfig(
                 request.getTenModel().trim(),
                 request.getIdRam(),
@@ -206,27 +218,94 @@ public class ModelSanPhamService {
                 request.getIdPin(),
                 request.getIdCpu(),
                 request.getIdCameraTruoc(),
-                request.getIdCameraSau(),
                 request.getIdXuatXu(),
                 request.getIdLoai()
-                )) {
+        )) {
             throw new BusinessException("model.duplicate.config");
         }
 
+        //  2. Tạo entity ModelSanPham
         ModelSanPham model = new ModelSanPham();
         mapRequestToEntity(request, model);
+
+        //  3. Xử lý danh sách camera sau
+        List<ModelCameraSau> cameraSaus = new ArrayList<>();
+        for (ModelSanPhamAdminRequest.CameraSauRequest cam : request.getCameraSaus()) {
+            CameraSau entityCam = cameraSauRepo.findById(cam.getId())
+                    .orElseThrow(() -> new BusinessException("camera_sau.not_found"));
+
+            ModelCameraSau mcs = new ModelCameraSau();
+            mcs.setModel(model);
+            mcs.setCameraSau(entityCam);
+            mcs.setIsChinh(cam.getIsChinh());
+
+            ModelCameraSauKey key = new ModelCameraSauKey();
+            // modelId sẽ tạm null, sẽ cập nhật sau khi model được lưu
+            key.setCameraSauId(cam.getId());
+            mcs.setId(key);
+
+            cameraSaus.add(mcs);
+        }
+
+        //  4. Gắn vào model
+        model.setCameraSaus(cameraSaus);
+
+        //  5. Lưu model (sẽ cascade luôn modelCameraSau nếu bạn dùng Cascade.ALL)
         ModelSanPham savedModel = modelSanPhamRepository.save(model);
+
+        //  6. Đồng bộ để đảm bảo lấy đúng ID (vì ID được tự động sinh)
+        entityManager.flush();
+        entityManager.refresh(savedModel);
+
+        //  7. Gán lại modelId cho từng ModelCameraSauKey (vì giờ đã có id thật)
+        for (ModelCameraSau mcs : savedModel.getCameraSaus()) {
+            mcs.getId().setModelId(savedModel.getIdModelSanPham());
+        }
+
+        //  8. Lưu lại cameraSaus nếu cần (để cập nhật key đúng)
+        modelCameraSauRepository.saveAll(savedModel.getCameraSaus());
+
+        //  9. Trả về response
         return mapEntityToResponse(savedModel);
     }
+
 
     @Transactional
     public ModelSanPhamAdminResponse updateModelSanPham(Integer id, ModelSanPhamAdminRequest request) {
         ModelSanPham model = modelSanPhamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Model sản phẩm không tồn tại"));
+
+        // 1. Gán dữ liệu cơ bản
         mapRequestToEntity(request, model);
+
+        // 2. Xóa danh sách camera sau cũ
+        model.getCameraSaus().clear();
+
+        // 3. Tạo danh sách camera sau mới
+        for (ModelSanPhamAdminRequest.CameraSauRequest cam : request.getCameraSaus()) {
+            CameraSau entityCam = cameraSauRepo.findById(cam.getId())
+                    .orElseThrow(() -> new BusinessException("camera_sau.not_found"));
+
+            ModelCameraSau mcs = new ModelCameraSau();
+            mcs.setModel(model);
+            mcs.setCameraSau(entityCam);
+            mcs.setIsChinh(cam.getIsChinh());
+
+            // Composite key
+            ModelCameraSauKey key = new ModelCameraSauKey();
+            key.setModelId(model.getIdModelSanPham()); // Đã có vì đây là update
+            key.setCameraSauId(cam.getId());
+            mcs.setId(key);
+
+            model.getCameraSaus().add(mcs); //  Thêm từng phần tử vào list cũ
+        }
+
+        // 4. Lưu lại
         ModelSanPham updatedModel = modelSanPhamRepository.save(model);
         return mapEntityToResponse(updatedModel);
     }
+
+
 
     @Transactional
     public void deleteModelSanPham(Integer id) {
@@ -247,11 +326,5 @@ public class ModelSanPhamService {
         Pageable pageable = PageRequest.of(page, size);
         Page<ModelSanPham> modelPage = modelSanPhamRepository.findByFiltersNative(search, idLoai, idRam, idXuatXu, pageable);
         return modelPage.map(this::mapEntityToResponse);
-    }
-
-
-
-    public void validateBeforeCreate (ModelSanPhamAdminRequest request) {
-
     }
 }

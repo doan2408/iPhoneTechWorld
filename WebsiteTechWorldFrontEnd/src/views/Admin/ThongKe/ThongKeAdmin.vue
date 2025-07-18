@@ -1,10 +1,21 @@
 <template>
+  <div class="filter-panel">
+ 
+  <input type="date" v-model="startDate" />
+
+  <input type="date" v-model="endDate" />
+
+
+  <button @click="() => { console.log('Đã click lọc'); fetchDashboardData() }">Lọc</button>
+
+</div>
+
   <div class="stats-container">
     <div class="stat-card">
       <img src="https://img.icons8.com/ios-filled/50/FFA500/doughnut-chart.png" class="icon" />
       <div class="stat-content">
         <div class="stat-title">Tổng Doanh Thu</div>
-        <div class="stat-value">{{ dashboardData?.doanhThuThang ?? '0' }}</div>
+        <div class="stat-value">{{ formatCurrency(dashboardData?.doanhThuThang) }}</div>
       </div>
     </div>
 
@@ -43,7 +54,7 @@
 
       <div class="chart">
         <div class="chart-placeholder">
-          <canvas id="revenueChart" width="450" height="350"></canvas>
+          <canvas id="revenueChart"></canvas>
         </div>
       </div>
       <br>
@@ -60,58 +71,82 @@
       </div>
 
       <div class="chart-wrapper">
-        <canvas id="LetrevenueChart" width="600" height="400"></canvas>
+        <canvas id="LetrevenueChart"></canvas>
       </div>
     </div>
   </div>
-  <div class="p-4">
-    <h2 class="text-xl font-semibold mb-4">Sản phẩm bán chạy</h2>
+  <!-- Khách hàng trung thành  -->
+  <div class="khach-hang-wrapper">
+    <h2>Top 5 Khách Hàng Trung Thành</h2>
 
-    <!-- Bộ lọc thời gian -->
-    <div class="mb-4 flex gap-2 items-center">
-      <label>Ngày bắt đầu:</label>
-      <input type="date" v-model="startDate" class="border p-1" />
-      <label>Ngày kết thúc:</label>
-      <input type="date" v-model="endDate" class="border p-1" />
-      <button @click="fetchData" class="px-3 py-1 bg-blue-500 text-white rounded">Lọc</button>
-    </div>
-
-    <!-- Bảng dữ liệu -->
-    <table class="min-w-full border border-gray-300">
-      <thead class="bg-gray-100">
+    <table class="khach-hang-table">
+      <thead>
         <tr>
-          <th class="border px-4 py-2">Tên sản phẩm</th>
-          <th class="border px-4 py-2">Số lượng bán</th>
-          <th class="border px-4 py-2">Doanh thu</th>
+          <th>STT</th>
+          <th>Mã KH</th>
+          <th>Tên KH</th>
+          <th>Số lần mua</th>
+          <th>Doanh Thu</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in items" :key="index">
-          <td class="border px-4 py-2">{{ item.ten_san_pham }}</td>
-          <td class="border px-4 py-2">{{ item.tong_so_luong_ban }}</td>
-          <td class="border px-4 py-2">{{ formatCurrency(item.tong_doanh_thu) }}</td>
+        <tr v-for="(kh, index) in khachHangList" :key="kh.ma_khach_hang">
+          <td>{{ index + 1 }}</td>
+          <td>{{ kh.ma_khach_hang }}</td>
+          <td>{{ kh.ten_khach_hang }}</td>
+          <td>{{ kh.so_lan_mua }}</td>
+          <td>{{ kh.tong_doanh_thu }}</td>
         </tr>
-        <!-- <tr v-if="items.length === 0">
-          <td colspan="3" class="text-center py-4 text-gray-500">Không có dữ liệu</td>
-        </tr> -->
       </tbody>
     </table>
 
-    <!-- Phân trang -->
-    <div class="pagination flex items-center gap-4 mt-4">
-      <button :disabled="page === 1" @click="prevPage"
-        class="px-3 py-1 border rounded bg-gray-200 disabled:opacity-50">Trước</button>
-      <span>Trang {{ page }}</span>
-      <button :disabled="!hasMore" @click="nextPage"
-        class="px-3 py-1 border rounded bg-gray-200 disabled:opacity-50">Sau</button>
+    <p v-if="khachHangList && khachHangList.length === 0">Không có dữ liệu.</p>
+  </div>
+  <!-- sản phẩm sắp hết -->
+  <div class="khach-hang-wrapper">
+    <h2>Sản phẩm Sắp Hết Hàng</h2>
+
+    <table class="khach-hang-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Mã Sản Phẩm</th>
+          <th>Tên Sản Phảm</th>
+          <th>Số Lượng Còn</th>
+      
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(kh, index) in sanPhamList" :key="kh.ma_san_pham">
+          <td>{{ index + 1 }}</td>
+          <td>{{ kh.ma_san_pham }}</td>
+          <td>{{ kh.ten_san_pham }}</td>
+          <td>{{ kh.tong_so_luong }}</td>
+          
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- <p v-if="khachHangList && khachHangList.length === 0">Không có dữ liệu.</p> -->
+  </div>
+<!-- don hàn hủy -->
+ 
+  <div class="chart-container">
+    <div class="header">
+      <h2 class="title">Tổng Đơn Bị Hủy</h2>
+      <p class="subtitle">Giữa các tháng</p>
     </div>
 
-    <!-- Thông báo lỗi -->
-    <div v-if="error" class="mt-4 text-red-500">{{ error }}</div>
+    <div class="chart">
+      <div class="chart-placeholder">
+        <canvas ref="cancelChart"></canvas>
+      </div>
+    </div>
+    <br>
+    <div class="footer">
+      <p>Updated theo từng tháng</p>
+    </div>
   </div>
-
-
-
 
 </template>
 
@@ -120,18 +155,30 @@ import { ref, onMounted } from 'vue'
 import { getDashboardAdmin } from '@/Service/Adminservice/ThongKe/ThongKeAdminService'
 import { getDoanhThuTheoThang } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
 import { getSanPhamBanChay } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
-// import { getTopSanPhamBanChay } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { getKhachHangTrungThanh } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { getSanPhamSapHetHang } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { getDonHangHuy } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+
 import Chart from 'chart.js/auto'
 
 const dashboardData = ref(null)
+const startDate = ref('2025-01-01')
+const endDate = ref('')
 
-onMounted(async () => {
+
+const fetchDashboardData = async () => {
   try {
-    dashboardData.value = await getDashboardAdmin()
+    dashboardData.value = await getDashboardAdmin(startDate.value, endDate.value)
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu thống kê:', error)
   }
-})
+}
+onMounted(fetchDashboardData)
+
+const formatCurrency = (value) => {
+  if (!value) return '0 VNĐ'
+  return Number(value).toLocaleString('vi-VN') + ' VNĐ'
+}
 //biểu đồ 
 const labels = ref([])
 const revenues = ref([])
@@ -172,14 +219,14 @@ onMounted(async () => {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: value => value.toLocaleString('vi-VN') + ' đ'
+              callback: value => value.toLocaleString('vi-VN') + 'VNĐ'
             }
           }
         },
         plugins: {
           tooltip: {
             callbacks: {
-              label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString('vi-VN') + ' đ'
+              label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString('vi-VN') + 'VNĐ'
             }
           }
         }
@@ -224,65 +271,115 @@ onMounted(async () => {
     console.error('Lỗi lấy doanh thu:', error)
   }
 })
-///danh sách ap 
-// const items = ref([])
-// const page = ref(1)
-// const limit = 10     
-// const hasMore = ref(false)
-// const error = ref(null)
-// const startDate = ref('')
-// const endDate = ref('')
+// khách hàng trung thành
+const khachHangList = ref([])
 
-// Hàm gọi API
-// const fetchData = async () => {
-//   error.value = null
-//   try {
-//     const response = await axiosInstance.get('/admin/thong-ke/top-san-pham-ban-chay', {
-//       params: {
-//         startDate: startDate.value,
-//         endDate: endDate.value,
-//         page: page.value,
-//         limit
-//       }
-//     })
+onMounted(async () => {
+  try {
+    khachHangList.value = await getKhachHangTrungThanh()
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu thống kê:', error)
+  }
+})
+// Sản phẩm hết hàng 
+const sanPhamList = ref([])
 
-//     items.value = response.data.content || []
-//     hasMore.value = (response.data.number + 1) < response.data.totalPages
-//   } catch (err) {
-//     error.value = err.response?.data?.message || 'Lỗi không xác định khi lấy dữ liệu'
-//   }
-// }
+onMounted(async () => {
+  try {
+    sanPhamList.value = await getSanPhamSapHetHang()
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu thống kê:', error)
+  }
+})
 
-// Hàm phân trang
-// const prevPage = () => {
-//   if (page.value > 1) {
-//     page.value--
-//     fetchData()
-//   }
-// }
+// cột
+const cancelChart = ref(null)
+let cancelChartInstance = null
 
-// const nextPage = () => {
-//   if (hasMore.value) {
-//     page.value++
-//     fetchData()
-//   }
-// }
+const labelsCancel = ref([])
+const valuesCancel = ref([])
 
-// // Định dạng tiền tệ
-// const formatCurrency = (val) => {
-//   return Number(val).toLocaleString('vi-VN', {
-//     style: 'currency',
-//     currency: 'VND'
-//   })
-// }
+const fetchCancelData = async () => {
+  try {
+    const data = await getDonHangHuy()
+    console.log('Cancel data:', data)
 
-// // Khởi tạo ngày mặc định
-// onMounted(() => {
-//   const today = new Date().toISOString().split('T')[0]
-//   startDate.value = today
-//   endDate.value = today
-//   fetchData()
-// })
+    labelsCancel.value = data.map(item => item.thang)
+    valuesCancel.value = data.map(item => item.so_don_bi_huy)
+
+    if (cancelChartInstance) cancelChartInstance.destroy()
+
+  cancelChartInstance = new Chart(cancelChart.value, {
+  type: 'bar',
+  data: {
+    labels: labelsCancel.value,
+    datasets: [{
+      label: 'Số đơn bị huỷ',
+      data: valuesCancel.value,
+      backgroundColor: '#f87171',
+      borderColor: '#ef4444',
+      borderWidth: 1,
+      borderRadius: 6,
+      barPercentage: 0.5,       // Độ rộng của cột so với ô
+      categoryPercentage: 0.7   // Khoảng cách giữa các cột
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 20
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          font: {
+            size: 12
+          },
+          color: '#4b5563'
+        },
+        grid: {
+          color: '#e5e7eb'
+        }
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 12
+          },
+          color: '#4b5563'
+        },
+        grid: {
+          display: false
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: '#1f2937',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: '#f87171',
+        titleColor: '#fff',
+        bodyColor: '#fff'
+      }
+    }
+  }
+})
+  } catch (error) {
+    console.error('Lỗi lấy dữ liệu đơn huỷ:', error)
+  }
+}
+
+onMounted(fetchCancelData)
 </script>
 
 

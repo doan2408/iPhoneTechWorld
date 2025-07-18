@@ -60,13 +60,18 @@ public class HoaDonChiTietAdminServices {
                 .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
-
+        List<String> imeiIdsFromRequest = request.getImeiIds();
+        for (String soImei : imeiIdsFromRequest) {
+            boolean imeiDaBanTonTai = imeiDaBanRepository.existsBySoImei(soImei);
+            if (imeiDaBanTonTai) {
+                throw new IllegalArgumentException("IMEI " + soImei + " đã được thêm vào hóa đơn khác.");
+            }
+        }
         //check de cap nhat so neu neu ton tai
         ChiTietHoaDon cthdCheck = chiTietHoaDonRepository.findByIdHoaDon_IdAndIdSanPhamChiTiet_Id(request.getIdHoaDon(), request.getIdSanPhamChiTiet());
 
         BigDecimal donGia = sanPhamChiTiet.getGiaBan();
         int soLuong = request.getSoLuong();
-        List<String> imeiIdsFromRequest = request.getImeiIds();
 
         int updatedRows = sanPhamChiTietRepository.giamSoLuongTon(sanPhamChiTiet.getId(), soLuong);
         if (updatedRows == 0) {
@@ -161,12 +166,14 @@ public class HoaDonChiTietAdminServices {
             soLuongMoi = 0;
         }
 
-        if (soLuongMoi == 0) {
-            // chua xu ly ( xoa chi tiet neu so luong ve 0 )
-        }
+
 
         chiTietHoaDon.setSoLuong(soLuongMoi);
         chiTietHoaDonRepository.save(chiTietHoaDon);
+
+        if (soLuongMoi == 0) {
+            deleleHdct(hdctId);
+        }
 
     }
 

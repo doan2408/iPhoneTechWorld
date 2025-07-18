@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.XuatXuQuickCreateAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.XuatXuAdminResponse;
 import org.example.websitetechworld.Entity.XuatXu;
 import org.example.websitetechworld.Repository.XuatXuRepository;
@@ -61,6 +62,14 @@ public class XuatXuAdminService {
         XuatXu xuatXu = modelMapper.map(xuatXuAdminRequest, XuatXu.class);
         XuatXu saved = xuatXuRepo.save(xuatXu);
         return modelMapper.map(saved, XuatXuAdminResponse.class);
+    }
+
+    @Transactional
+    public XuatXuAdminResponse createQuickXuatXu(XuatXuQuickCreateAdminRequest req) {
+        XuatXu xuatXu = modelMapper.map(req, XuatXu.class);
+        xuatXuRepo.save(xuatXu);
+
+        return modelMapper.map(xuatXu, XuatXuAdminResponse.class);
     }
 
     @Transactional

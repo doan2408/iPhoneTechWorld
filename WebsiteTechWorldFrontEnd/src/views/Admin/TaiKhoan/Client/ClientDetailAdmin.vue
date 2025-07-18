@@ -17,7 +17,7 @@ const clientRequest = reactive({
 });
 
 const isLoading = ref(false);
-const errors = reactive({});
+const errors = reactive();
 const route = useRoute();
 const router = useRouter();
 
@@ -29,7 +29,7 @@ const loadClientDetail = async (id) => {
     Object.assign(clientRequest, response);
     console.log(clientRequest);
   } catch (err) {
-    errors = err.message || "Error while loading client information";
+    errors = err || "Error while loading client information";
   } finally {
     isLoading.value = false;
   }

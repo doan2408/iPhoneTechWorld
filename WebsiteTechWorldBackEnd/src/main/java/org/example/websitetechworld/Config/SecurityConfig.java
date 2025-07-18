@@ -1,7 +1,5 @@
 package org.example.websitetechworld.Config;
 
-
-import jakarta.servlet.http.HttpServletResponse;
 import org.example.websitetechworld.Services.LoginServices.AccountDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +44,8 @@ public class SecurityConfig {
                                     "/swagger-ui/index.html"
                             ).permitAll()
                             .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-                            .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+//                            .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+                            .requestMatchers("/client/**").hasAnyRole("KHACH_HANG")
                             .anyRequest().permitAll()
                     )
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa

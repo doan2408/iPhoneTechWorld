@@ -1,13 +1,10 @@
 package org.example.websitetechworld.Services.ClientServices.TaiKhoanClientServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.TaiKhoanClientRequest.ClientRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanClientReponse;
-import org.example.websitetechworld.Entity.DiaChi;
-import org.example.websitetechworld.Entity.GioHang;
-import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanResponse.ClientResponse;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
@@ -34,8 +31,8 @@ public class ClientService {
     private final JwtService jwtService;
 
     //convert
-    private TaiKhoanClientReponse convert(KhachHang khachHang) {
-        TaiKhoanClientReponse clientResponse = new TaiKhoanClientReponse();
+    private ClientResponse convert(KhachHang khachHang) {
+        ClientResponse clientResponse = new ClientResponse();
         clientResponse.setId(khachHang.getId());
         clientResponse.setMaKhachHang(khachHang.getMaKhachHang());
         clientResponse.setTenKhachHang(khachHang.getTenKhachHang());
@@ -46,10 +43,10 @@ public class ClientService {
         clientResponse.setNgaySinh(khachHang.getNgaySinh());
         clientResponse.setGioiTinh(khachHang.getGioiTinh());
         clientResponse.setAnh(khachHang.getAnh());
-        clientResponse.setTongDiem(khachHang.getTongDiem());
-        clientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
-        clientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
         clientResponse.setTrangThai(khachHang.getTrangThai());
+        clientResponse.setHangKhachHang(
+                khachHang.getHangThanhVien() != null ? khachHang.getHangThanhVien().getTenHang().getDisplayName() : null
+        );
 
         // Lọc địa chỉ chính
         DiaChi diaChiChinh = khachHang.getDiaChis().stream()
@@ -87,10 +84,8 @@ public class ClientService {
         khachHang.setNgaySinh(request.getNgaySinh());
         khachHang.setGioiTinh(request.getGioiTinh());
         khachHang.setAnh(request.getAnh());
-        khachHang.setTongDiem(request.getTongDiem());
-        khachHang.setSoDiemHienTai(request.getSoDiemHienTai());
-        khachHang.setHangKhachHang(request.getHangKhachHang());
         khachHang.setTrangThai(request.getTrangThai());
+        khachHang.setHangThanhVien(request.getHangKhachHang());
         return khachHang;
     }
 
@@ -125,10 +120,10 @@ public class ClientService {
 
         request.setAnh("Default.jpg");
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
-        request.setTongDiem(new BigDecimal(0));
-        request.setSoDiemHienTai(new BigDecimal(0));
-        request.setHangKhachHang(HangKhachHang.MEMBER);
         request.setGioiTinh(true);
+        HangThanhVien hangThanhVien = new HangThanhVien();
+        hangThanhVien.setId(1);
+        request.setHangKhachHang(hangThanhVien);
 
         KhachHang khachHang = convertToKhachHang(request);
 
@@ -138,8 +133,14 @@ public class ClientService {
         GioHang gioHang = new GioHang();
         gioHang.setIdKhachHang(khachHangAdd); //oneToOne
 
-        //set ngược lại
+        //tạo ví tương ứng với khách hàng mới vừa tạo
+        ViDiem viDiem = new ViDiem();
+        viDiem.setKhachHang(khachHangAdd);
+
+        //set ngược lại one to one
         khachHangAdd.setGioHang(gioHang);
+        khachHangAdd.setViDiem(viDiem);
+
         DiaChi diaChi = new DiaChi();
         diaChi.setIdKhachHang(khachHangAdd);
         diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
@@ -159,12 +160,12 @@ public class ClientService {
 
     }
 
-    public Optional<TaiKhoanClientReponse> hienThi(Integer id) {
+    public Optional<ClientResponse> hienThi(Integer id) {
         return khachHangRepository.findById(id).map(this::convert);
     }
 
     //update thong tin ca nhan (client)
-    public KhachHang updateClient(Integer id, KhachHang khachHangRequest) {
+    public KhachHang updateClient(Integer id, ClientRequest khachHangRequest) {
         KhachHang existing = khachHangRepository.findById(id).orElse(null);
         List<Map<String, String>> errors = new ArrayList<>();
 
@@ -203,10 +204,19 @@ public class ClientService {
             existing.setAnh(khachHangRequest.getAnh());
 
             if (khachHangRequest.getMatKhau() != null && !khachHangRequest.getMatKhau().isEmpty()) {
-                if (!passwordEncoder.matches(khachHangRequest.getMatKhau(), existing.getMatKhau())) {
-                    existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
+                String oldPassword = khachHangRequest.getMatKhauCu(); // cần thêm trường này trong ClientRequest
+
+                if (!passwordEncoder.matches(oldPassword, existing.getMatKhau())) {
+                    errors.add(Map.of("field", "matKhauCu", "message", "Mật khẩu cũ không đúng!"));
                 }
+
+                existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
             }
+
+            if(!errors.isEmpty()) {
+                throw new ValidationException(errors);
+            }
+
             return khachHangRepository.save(existing);
         }
         return null;

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,40 +15,83 @@ import java.util.Map;
 @Repository
 public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
 
+    // Tổng doanh thu theo khoảng thời gian và trạng thái
     @Query(value = """
-            SELECT SUM(thanh_tien) 
-            FROM hoa_don 
-            WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE())
-              AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())
-            """, nativeQuery = true)
-    BigDecimal doanhThuThang();
+    SELECT SUM(thanh_tien) 
+    FROM hoa_don 
+    WHERE ngay_thanh_toan BETWEEN :startDate AND :endDate
+    """, nativeQuery = true)
+    BigDecimal doanhThuTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
 
-    @Query(value = "SELECT COUNT(*) FROM hoa_don WHERE MONTH(ngay_tao_hoa_don) = MONTH(GETDATE()) AND YEAR(ngay_tao_hoa_don) = YEAR(GETDATE())", nativeQuery = true)
-    Integer dashboardSoDonHang();
+    );
 
-    @Query(value = "SELECT \n" +
-            "    SUM(cthd.so_luong) AS tong_so_san_pham_da_ban\n" +
-            "FROM \n" +
-            "    chi_tiet_hoa_don cthd;", nativeQuery = true)
-    Integer dashboardSoSanPham();
+
+    // Số đơn hàng theo khoảng thời gian
+    @Query(value = """
+    SELECT COUNT(*) 
+    FROM hoa_don 
+    WHERE ngay_thanh_toan BETWEEN :startDate AND :endDate
+    """, nativeQuery = true)
+    Integer soDonHangTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+
+    );
+
+
+    @Query(value = """
+    SELECT SUM(cthd.so_luong)
+    FROM chi_tiet_hoa_don cthd
+    JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
+    WHERE hd.ngay_thanh_toan BETWEEN :startDate AND :endDate
+    """, nativeQuery = true)
+    Integer soSanPhamTheoKhoang(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+
+    );
+
 
     @Query(value = "SELECT COUNT(*) FROM khach_hang", nativeQuery = true)
-    Integer dashboardSoKhachHang();
+    Integer tongSoKhachHang();
 
 
     @Query(value = """
-            SELECT TOP 3 
-            
-                sp.ten_san_pham, 
-                SUM(cthd.so_luong) AS tong_so_luong_ban
-            FROM chi_tiet_hoa_don cthd
-            JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
-            JOIN san_pham sp ON spct.id_san_pham = sp.id_san_pham
-            GROUP BY sp.ma_san_pham, sp.ten_san_pham
-            ORDER BY tong_so_luong_ban DESC
-            """, nativeQuery = true)
+    SELECT TOP 3 
+        sp.ten_san_pham, 
+        SUM(cthd.so_luong) AS tong_so_luong_ban
+    FROM chi_tiet_hoa_don cthd
+    JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
+    JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
+    JOIN san_pham sp ON spct.id_san_pham = sp.id_san_pham
+    WHERE hd.trang_thai_thanh_toan = 'COMPLETED'
+    GROUP BY sp.ma_san_pham, sp.ten_san_pham
+    ORDER BY tong_so_luong_ban DESC
+    """, nativeQuery = true)
     List<Map<String, Object>> sanPhamBanChay();
 
+
+
+    @Query(value = """
+    SELECT TOP 3 
+        sp.ten_san_pham, 
+        SUM(cthd.so_luong) AS tong_so_luong_ban,
+        SUM(cthd.so_luong * spct.gia_ban) AS tong_doanh_thu
+    FROM chi_tiet_hoa_don cthd
+    JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
+    JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
+    JOIN san_pham sp ON spct.id_san_pham = sp.id_san_pham
+    
+      AND hd.ngay_tao_hoa_don BETWEEN :startDate AND :endDate
+    GROUP BY sp.ma_san_pham, sp.ten_san_pham
+    ORDER BY tong_so_luong_ban DESC
+    """, nativeQuery = true)
+    List<Map<String, Object>> sanPhamBanChayTheoNgay(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
     @Query(value = """
             SELECT TOP 5 
                 hd.ma_hoa_don, 
@@ -82,26 +126,48 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     List<Map<String, Object>> thongKeDoanhThuTheoNgay();
 
     @Query(value = """
-                WITH Thang AS (
-                    SELECT CAST(DATEFROMPARTS(YEAR(GETDATE()), 1, 1) AS DATE) AS dau_thang
-                    UNION ALL
-                    SELECT DATEADD(MONTH, 1, dau_thang)
-                    FROM Thang
-                    WHERE MONTH(dau_thang) < MONTH(GETDATE())
-                )
-                SELECT 
-                    FORMAT(dau_thang, 'yyyy-MM') AS thang,
-            
-                    ISNULL(SUM(hd.thanh_tien), 0) AS tong_doanh_thu
-                FROM Thang
-                LEFT JOIN hoa_don hd 
-                    ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
-                   AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
-                GROUP BY FORMAT(dau_thang, 'yyyy-MM')
-                ORDER BY thang
-                OPTION (MAXRECURSION 100)
-            """, nativeQuery = true)
+    WITH Thang AS (
+        SELECT CAST(DATEFROMPARTS(YEAR(GETDATE()), 1, 1) AS DATE) AS dau_thang
+        UNION ALL
+        SELECT DATEADD(MONTH, 1, dau_thang)
+        FROM Thang
+        WHERE MONTH(dau_thang) < MONTH(GETDATE())
+    )
+    SELECT 
+        FORMAT(dau_thang, 'yyyy-MM') AS thang,
+        ISNULL(SUM(hd.thanh_tien), 0) AS tong_doanh_thu
+    FROM Thang
+    LEFT JOIN hoa_don hd 
+        ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
+       AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
+      AND hd.trang_thai_thanh_toan = 'COMPLETED'
+    GROUP BY FORMAT(dau_thang, 'yyyy-MM')
+    ORDER BY thang
+    OPTION (MAXRECURSION 100)
+    """, nativeQuery = true)
     List<Map<String, Object>> thongKeDoanhThuTheoThang();
+
+    @Query(value = """
+    WITH Thang AS (
+        SELECT CAST(DATEFROMPARTS(YEAR(GETDATE()), 1, 1) AS DATE) AS dau_thang
+        UNION ALL
+        SELECT DATEADD(MONTH, 1, dau_thang)
+        FROM Thang
+        WHERE MONTH(dau_thang) < MONTH(GETDATE())
+    )
+    SELECT 
+        FORMAT(dau_thang, 'yyyy-MM') AS thang,
+        ISNULL(COUNT(hd.id_hoa_don), 0) AS so_don_bi_huy
+    FROM Thang
+    LEFT JOIN hoa_don hd 
+        ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
+       AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
+       AND hd.trang_thai_don_hang = 'RETURNED'
+    GROUP BY FORMAT(dau_thang, 'yyyy-MM')
+    ORDER BY thang
+    OPTION (MAXRECURSION 100)
+    """, nativeQuery = true)
+    List<Map<String, Object>> thongKeDonHuyTheoThang();
 
     @Query(value = """
                 SELECT 
@@ -133,7 +199,8 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
             SELECT TOP 5
                 kh.ma_khach_hang,
                 kh.ten_khach_hang,
-                COUNT(hd.ma_hoa_don) AS so_lan_mua
+                COUNT(hd.ma_hoa_don) AS so_lan_mua,
+                SUM(hd.tong_tien) AS tong_doanh_thu
             FROM hoa_don hd
             JOIN khach_hang kh ON hd.id_khach_hang = kh.id_khach_hang
             GROUP BY kh.ma_khach_hang, kh.ten_khach_hang
@@ -152,26 +219,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     List<Map<String, Object>> khachHangHangCao();
 
 
-    //    @Query(value = """
-//                SELECT
-//                    sp.ten_san_pham,
-//                    SUM(cthd.so_luong) AS tong_so_luong_ban,
-//                    SUM(cthd.so_luong * spct.gia_ban) AS tong_doanh_thu
-//                FROM chi_tiet_hoa_don cthd
-//                JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
-//                JOIN san_pham sp ON spct.id_san_pham = sp.id_san_pham
-//                JOIN hoa_don hd ON cthd.id_hoa_don = hd.id_hoa_don
-//                WHERE hd.ngay_tao_hoa_don >= ?1 AND hd.ngay_tao_hoa_don < ?2
-//                GROUP BY sp.ma_san_pham, sp.ten_san_pham
-//                ORDER BY tong_so_luong_ban DESC
-//                OFFSET ?3 ROWS FETCH NEXT ?4 ROWS ONLY
-//            """, nativeQuery = true)
-//    List<Map<String, Object>> topSanPhamBanChay(
-//            Date startDate,
-//            Date endDate,   // đã là ngày hôm sau 00:00:00
-//            int offset,
-//            int limit
-//    );
+
     @Query(value = """
     SELECT COUNT(DISTINCT sp.id_san_pham)
     FROM chi_tiet_hoa_don cthd
@@ -196,12 +244,14 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
 
     @Query(value = """
             SELECT TOP 5
-                ma_san_pham,
-                ten_san_pham,
-                so_luong_ton_kho
-            FROM san_pham
-            WHERE so_luong_ton_kho <= 20
-            ORDER BY so_luong_ton_kho ASC
+                                     sp.ma_san_pham,
+                                     sp.ten_san_pham,
+                                     SUM(spct.so_luong) AS tong_so_luong
+                                 FROM san_pham sp
+                                 JOIN san_pham_chi_tiet spct ON sp.id_san_pham = spct.id_san_pham
+                                 GROUP BY sp.ma_san_pham, sp.ten_san_pham
+                                 HAVING SUM(spct.so_luong) <= 10
+                                 ORDER BY tong_so_luong ASC;
             """, nativeQuery = true)
     List<Map<String, Object>> sanPhamSapHetHang();
 
@@ -222,8 +272,6 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     Integer donHangDaHoanTien();
 
     @Query(value = "SELECT COUNT(*) FROM hoa_don WHERE trang_thai_thanh_toan = 'COMPLETED'", nativeQuery = true)
-
-Integer donHangDaHoanTat();
+    Integer donHangDaHoanTat();
 }
-
 

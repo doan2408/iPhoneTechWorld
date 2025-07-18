@@ -29,4 +29,7 @@ public class AdminDiaChiResponse {
     private String tinhThanhPho;
 
     private Boolean diaChiChinh;
+
+    private Integer idKhachHang;
+
 }

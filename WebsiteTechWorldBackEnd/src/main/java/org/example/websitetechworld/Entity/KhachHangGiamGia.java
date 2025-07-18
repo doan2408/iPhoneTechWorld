@@ -34,4 +34,7 @@ public class KhachHangGiamGia {
     @Column(name = "ngay_cap")
     private LocalDate ngayCap;
 
+    @Column(name = "doi_bang_diem")
+    private Boolean doiBangDiem;
+
 }

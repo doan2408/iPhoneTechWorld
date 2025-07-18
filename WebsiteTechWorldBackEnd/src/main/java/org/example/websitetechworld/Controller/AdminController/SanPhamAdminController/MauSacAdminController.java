@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.AdminController.SanPhamAdminCont
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.MauSacAdminRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.MauSacQuickAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.MauSacAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.MauSacAdminService;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,12 @@ public class MauSacAdminController {
     @PostMapping
     public ResponseEntity<MauSacAdminResponse> createMauSac(@Valid @RequestBody MauSacAdminRequest mauSacAdminRequest) {
         MauSacAdminResponse response = mauSacService.createMauSac(mauSacAdminRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/quick-mauSac")
+    public ResponseEntity<MauSacAdminResponse> createMauSacQuick(@Valid @RequestBody MauSacQuickAdminRequest mauSacAdminRequest) {
+        MauSacAdminResponse response = mauSacService.createMauSacQuick(mauSacAdminRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

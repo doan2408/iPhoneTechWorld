@@ -71,8 +71,9 @@
           </el-button>
         </el-col>
       </el-row>
+      <!-- v-if="isAdmin" -->
 
-      <div class="mb-3 action-section">
+      <div class="mb-3 action-section" >
         <router-link to="/admin/products/create" class="el-link--success">
           <el-button type="success" size="default" class="action-btn">
             <el-icon>
@@ -207,6 +208,10 @@ import { Edit, Delete, View, Search, Plus, DocumentAdd, Goods, Picture, CircleCh
 import { getAllSanPham, getAllLoaiList, getTrangThaiSanPham, deleteSanPham } from '@/Service/Adminservice/Products/ProductAdminService';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from 'lodash';
+import store from '@/Service/LoginService/Store';
+// import { add, debounce } from 'lodash'; // Cần cài đặt: npm install lodash
+// import store from '@/Service/LoginService/Store';
+
 
 // State
 const sanPhamList = ref([]);
@@ -223,6 +228,7 @@ const filters = reactive({
   idLoai: null,
   trangThai: ''
 });
+
 
 // Tải danh sách loại sản phẩm
 const loadLoaiSanPham = async () => {
@@ -364,6 +370,25 @@ const trangThaiSanPhamMap = {
   OUT_OF_STOCK: 'Hết hàng',
 };
 
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
 // Theo dõi thay đổi tìm kiếm
 watch(searchQuery, () => {
   handleSearch();

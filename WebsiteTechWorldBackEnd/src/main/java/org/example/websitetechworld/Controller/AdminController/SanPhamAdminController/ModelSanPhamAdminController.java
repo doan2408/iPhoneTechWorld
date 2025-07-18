@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +37,8 @@ public class ModelSanPhamAdminController {
 
         return ResponseEntity.ok(responses);
     }
-//(produces = "application/json; charset=UTF-8")
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ModelSanPhamAdminResponse> createModelSanPham(@Valid @RequestBody ModelSanPhamAdminRequest request) {
         ModelSanPhamAdminResponse response = modelSanPhamService.createModelSanPham(request);
@@ -49,6 +51,7 @@ public class ModelSanPhamAdminController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteModelSanPham(@PathVariable Integer id) {
         modelSanPhamService.deleteModelSanPham(id);

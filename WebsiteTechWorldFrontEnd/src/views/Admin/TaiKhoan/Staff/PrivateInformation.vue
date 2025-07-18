@@ -241,7 +241,7 @@ const saveProfile = async () => {
         errors.value[field] = message;
       });
     } else {
-      ElMessage.success("Update nhân viên thất bại");
+      ElMessage.error("Update thông tin thất bại");
     }
   } finally {
     isLoading.value = false;

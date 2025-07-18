@@ -1,6 +1,8 @@
 package org.example.websitetechworld.Repository;
 
+import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.springframework.data.domain.Page;
@@ -49,4 +51,36 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     int tangSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongTang") int soLuongTang);
 
 
+    @Query(value = """
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM san_pham_chi_tiet c
+    JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
+    JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
+    WHERE c.id_mau = :idMau
+      AND c.id_rom = :idRom
+      AND m.id_loai = :idLoai
+""", nativeQuery = true)
+    Integer existsVariantInLoai(
+            @Param("idMau") Integer idMau,
+            @Param("idRom") Integer idRom,
+            @Param("idLoai") Integer idLoai
+    );
+
+
+    @Query(value = """
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM san_pham_chi_tiet ct
+    JOIN san_pham sp ON ct.id_san_pham = sp.id_san_pham
+    JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
+    WHERE ct.id_mau = :idMau
+      AND ct.id_rom = :idRom
+      AND m.id_loai = :idLoai
+      AND ct.id_san_pham_chi_tiet <> :excludeId
+""", nativeQuery = true)
+    Integer existsVariantInLoaiExceptId(@Param("idMau") Integer idMau, @Param("idRom") Integer idRom,
+                                        @Param("idLoai") Integer idLoai, @Param("excludeId") Integer excludeId);
+
+
+
+    List<SanPhamChiTiet> findByIdSanPhamAndIdMau_IdAndIdRom_Id(SanPham sanPham, Integer idMau, Integer idRom);
 }

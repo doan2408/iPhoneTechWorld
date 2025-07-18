@@ -46,13 +46,13 @@ public class ThongKeAdminService {
 //        return count != null ? count : 0;
 //    }
 
-    public DashboardAdminResponse getDashboardAdminResponse () {
+    public DashboardAdminResponse getDashboardAdminResponse (String startDate, String endDate) {
 
         DashboardAdminResponse response = new DashboardAdminResponse();
-        response.setDoanhThuThang(thongKeRepository.doanhThuThang());
-        response.setTongSoDonhang(thongKeRepository.dashboardSoDonHang());
-        response.setTongSoSanPham(thongKeRepository.dashboardSoSanPham());
-        response.setTongSoKhachHang(thongKeRepository.dashboardSoKhachHang());
+        response.setDoanhThuThang(thongKeRepository.doanhThuTheoKhoang(startDate, endDate));
+        response.setTongSoDonhang(thongKeRepository.soDonHangTheoKhoang(startDate, endDate));
+        response.setTongSoSanPham(thongKeRepository.soSanPhamTheoKhoang(startDate, endDate));
+        response.setTongSoKhachHang(thongKeRepository.tongSoKhachHang());
 
         return response;
     }
@@ -77,6 +77,10 @@ public class ThongKeAdminService {
 
         return thongKeRepository.thongKeDoanhThuTheoThang();
     }
+    public List<Map<String, Object>> donHuyTheoThang () {
+
+        return thongKeRepository.thongKeDonHuyTheoThang();
+    }
 
     public List<Map<String, Object>> doanhThuTheoKhachHang () {
 
@@ -100,26 +104,6 @@ public class ThongKeAdminService {
     }
 
 
-//    public Map<String, Object> getTopSanPhamBanChay(LocalDate startDate , LocalDate endDate, int page, int limit) {
-//        int offset = (page - 1) * limit;
-//        if (limit <= 0 || page <= 0) {
-//            throw new IllegalArgumentException("Page và limit phải lớn hơn 0");
-//        }
-//
-//        Date start = java.sql.Date.valueOf(startDate);
-//        Date end = java.sql.Date.valueOf(endDate);
-//
-//        List<Map<String, Object>> items = thongKeRepository.topSanPhamBanChay(start, end, offset, limit);
-//        long totalItems = thongKeRepository.countSanPhamBanChay(start, end);
-//        int totalPages = (int) Math.ceil((double) totalItems / limit);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("content", items);
-//        response.put("number", page - 1); // giống như Spring Data Page
-//        response.put("totalPages", totalPages);
-//        response.put("totalItems", totalItems);
-//        return response;
-//    }
 
 
     public List<Map<String, Object>> sanPhamTonKhoNhieu () {
@@ -130,6 +114,9 @@ public class ThongKeAdminService {
     public List<Map<String, Object>> sanPhamSapHetHang () {
 
         return thongKeRepository.sanPhamSapHetHang();
+    }
+    public List<Map<String, Object>> getSanPhamBanChayTheoNgay(LocalDate startDate, LocalDate endDate) {
+        return thongKeRepository.sanPhamBanChayTheoNgay(startDate, endDate);
     }
 
 

@@ -3,6 +3,9 @@ package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResp
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Entity.ModelCameraSau;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -20,4 +23,6 @@ public class CameraSauAdminResponse {
     private String loaiZoom;
 
     private String cheDoChup;
+
+    private Boolean isChinh;
 }

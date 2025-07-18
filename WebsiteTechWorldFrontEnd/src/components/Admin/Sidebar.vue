@@ -6,8 +6,8 @@ import { useStore } from "vuex";
 
 const store = useStore();
 // Biến lưu trạng thái đăng nhập
-const isLoggedIn = ref<boolean>(false);
 const router = useRouter();
+const isLoggedIn = ref<boolean>(false);
 const user = ref<{ fullName: String } | null>(null); // JSON trả về phải có trường tương ứng (fullName)
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 
@@ -166,9 +166,9 @@ function toggleOrderMenu() {
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <li>
+            <!-- <li>
               <router-link to="/admin/shipping">Quản lý giao hàng</router-link>
-            </li>
+            </li> -->
           </ul>
 
           <li>

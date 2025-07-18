@@ -40,9 +40,28 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     @Query("DELETE FROM Imei imei WHERE imei.idSanPhamChiTiet = :sanPhamChiTiet")
     void deleteByIdSanPhamChiTiet(SanPhamChiTiet sanPhamChiTiet);
 
+    @Modifying
+    @Query("DELETE FROM Imei i WHERE i.idSanPhamChiTiet.id = :chiTietId")
+    void deleteByIdSanPhamChiTietId(Integer chiTietId);
+
 
     boolean existsBySoImei(String soImei);
 
+    @Query(value = """
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM imei
+    WHERE so_imei = :soImei
+      AND id_san_pham_chi_tiet <> :chiTietId
+""", nativeQuery = true)
+    Integer existsBySoImeiExceptChiTietId(@Param("soImei") String soImei,
+                                          @Param("chiTietId") Integer chiTietId);
+
+
     Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImei(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei, Pageable pageable);
 
+    List<Imei> findByIdSanPhamChiTiet_Id(Integer idSanPhamChiTiet);
+
+    int countByIdSanPhamChiTiet(SanPhamChiTiet chiTiet);
+
+    int countByIdSanPhamChiTietIdAndTrangThaiImeiNot(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei);
 }

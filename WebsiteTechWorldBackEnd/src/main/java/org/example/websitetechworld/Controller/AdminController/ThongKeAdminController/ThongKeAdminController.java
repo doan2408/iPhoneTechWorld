@@ -6,6 +6,7 @@ import org.example.websitetechworld.Services.AdminServices.ThongkeAdminService.T
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping ("/admin/thong-ke")
+
 public class ThongKeAdminController {
 
     private final ThongKeAdminService thongKeAdminService;
@@ -52,10 +54,11 @@ public class ThongKeAdminController {
 //    }
 
     @GetMapping("/tong-quan")
-    public DashboardAdminResponse tongQuan () {
-
-        return thongKeAdminService.getDashboardAdminResponse();
+    public DashboardAdminResponse tongQuan(@RequestParam String startDate,
+                                           @RequestParam String endDate) {
+        return thongKeAdminService.getDashboardAdminResponse(startDate, endDate);
     }
+
 
     @GetMapping("/san-pham-ban-chay")
     public List<Map<String, Object>> sanPhamBanChay () {
@@ -80,6 +83,11 @@ public class ThongKeAdminController {
     public List<Map<String, Object>> doanhThuTheoThang () {
 
         return thongKeAdminService.doanhThuTheoThang();
+    }
+    @GetMapping("/don-huy-theo-thang")
+    public List<Map<String, Object>> donHuyTheoThang () {
+
+        return thongKeAdminService.donHuyTheoThang();
     }
 
     @GetMapping("/doanh-thu-theo-khach-hang")
@@ -108,34 +116,6 @@ public class ThongKeAdminController {
     }
 
 
-//    @GetMapping("/top-san-pham-ban-chay")
-//    public ResponseEntity<?> topSanPhamBanChay(
-//            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-//            @RequestParam(value = "page", defaultValue = "1") int page,
-//            @RequestParam(value = "limit", defaultValue = "10") int limit
-//    ) {
-//        if (limit <= 0 || page <= 0) {
-//            return ResponseEntity.badRequest().body(Map.of("message", "Page và limit phải lớn hơn 0"));
-//        }
-//
-//        try {
-//            // Lưu ý: cộng thêm 1 ngày cho endDate để so sánh kiểu `ngay_tao < endDate + 1`
-//            Map<String, Object> result = thongKeAdminService.getTopSanPhamBanChay(
-//                    startDate,
-//                    endDate.plusDays(1),
-//                    page,
-//                    limit
-//            );
-//
-//            return ResponseEntity.ok(result);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("message", "Lỗi khi lấy dữ liệu: " + e.getMessage()));
-//        }
-//    }
-
-
     @GetMapping("/san-pham-ton-kho")
     public List<Map<String, Object>> sanPhamTonKhoNhieu () {
 
@@ -152,5 +132,12 @@ public class ThongKeAdminController {
     public ThongKeDonhangAdminResponse thongKeDonHang () {
 
         return thongKeAdminService.thongKeDonhangAdminResponse();
+    }
+    @GetMapping("/top-san-pham-ban-chay")
+    public List<Map<String, Object>> getSanPhamBanChayTheoNgay(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        return thongKeAdminService.getSanPhamBanChayTheoNgay(startDate, endDate);
     }
 }

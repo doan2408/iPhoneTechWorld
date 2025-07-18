@@ -1,10 +1,13 @@
 package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
-
+import org.hibernate.annotations.Nationalized;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -19,6 +22,8 @@ public class ModelSanPham {
     @Column(name = "ma_model_san_pham", insertable = false, updatable = false)
     private String maModelSanPham;
 
+    @Nationalized
+    @Size(max = 50)
     @Column(name = "ten_model")
     private String tenModel;
 
@@ -54,9 +59,12 @@ public class ModelSanPham {
     @JoinColumn(name = "id_camera_truoc")
     private CameraTruoc idCameraTruoc;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_camera_sau")
-    private CameraSau idCameraSau;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id_camera_sau")
+//    private CameraSau idCameraSau;
+
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelCameraSau> cameraSaus = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_xuat_xu")
