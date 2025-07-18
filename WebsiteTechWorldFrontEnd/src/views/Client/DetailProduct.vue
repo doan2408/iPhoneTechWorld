@@ -125,7 +125,7 @@ const themVaoGio = async () => {
       idKhachHang: user.id,
       idSanPhamChiTiet: bienThe.value.idSpct,
       soLuong: 1,
-      // soLuong: quantity.value,
+      soLuong: quantity.value
     });
 
     ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
@@ -221,7 +221,7 @@ onMounted(() => {
           </div>
 
           <!-- Chọn số lượng -->
-          <!-- <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
+          <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
@@ -238,7 +238,7 @@ onMounted(() => {
                 +
               </button>
             </div>
-          </div> -->
+          </div> 
 
           <!-- Hành động -->
           <div class="button-group">
