@@ -359,7 +359,7 @@ onMounted(() => {
 /* Giao diện vùng chọn */
 .options {
   margin-top: 25px;
-  padding: 10px;
+  padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -647,6 +647,10 @@ onMounted(() => {
   .thumbnail {
     width: 60px;
     height: 60px;
+  }
+
+  .options {
+    padding: 15px;
   }
 
   .quantity-control {

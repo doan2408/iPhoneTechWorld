@@ -65,8 +65,8 @@ const handleLogin = async () => {
 
 // Hàm phụ để xác định trang mặc định nếu không có redirect
 function getDefaultRedirect() {
-  if (store.getters.isAdmin) return "/admin/products";
-  if (store.getters.isStaff) return "/admin/products";
+  if (store.getters.isAdmin) return "/admin/ban-hang";
+  if (store.getters.isStaff) return "/admin/ban-hang";
   if (store.getters.isCustomer) return "/client/home";
   return "/"; // fallback
 }
