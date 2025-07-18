@@ -1,7 +1,10 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
+import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
