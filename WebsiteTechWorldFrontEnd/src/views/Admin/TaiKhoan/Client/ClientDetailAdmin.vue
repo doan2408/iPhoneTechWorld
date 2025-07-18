@@ -17,7 +17,7 @@ const clientRequest = reactive({
 });
 
 const isLoading = ref(false);
-const errors = reactive({});
+const errors = reactive();
 const route = useRoute();
 const router = useRouter();
 
