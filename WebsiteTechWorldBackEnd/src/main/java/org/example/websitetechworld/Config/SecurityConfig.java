@@ -44,7 +44,8 @@ public class SecurityConfig {
                                     "/swagger-ui/index.html"
                             ).permitAll()
                             .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
-                            .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+//                            .requestMatchers("/client/**").hasAnyRole("ADMIN", "STAFF", "KHACH_HANG")
+                            .requestMatchers("/client/**").hasAnyRole("KHACH_HANG")
                             .anyRequest().permitAll()
                     )
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ⛔ Không dùng session nữa

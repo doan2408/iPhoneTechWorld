@@ -62,17 +62,6 @@ public class KhachHang implements JointAccount {
     @Column(name = "anh", length = 200)
     private String anh;
 
-    @Column(name = "tong_diem", precision = 10, scale = 2)
-    private BigDecimal tongDiem;
-
-    @Column(name = "so_diem_hien_tai", precision = 10, scale = 2)
-    private BigDecimal soDiemHienTai;
-
-    @Enumerated(EnumType.STRING)
-    @Nationalized
-    @Column(name = "hang_khach_hang", length = 50)
-    private HangKhachHang hangKhachHang;
-
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai", length = 50)
@@ -84,12 +73,21 @@ public class KhachHang implements JointAccount {
     @OneToMany(mappedBy = "idKhachHang", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
 
-
     @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<KhachHangGiamGia> khachHangGiamGias = new LinkedHashSet<>();
 
     @OneToOne(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private GioHang gioHang;
+
+    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ChiTietLichSuDiem> chiTietLichSuDiems = new LinkedHashSet<>();
+
+    @OneToOne(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ViDiem viDiem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_hang_thanh_vien")
+    private HangThanhVien hangThanhVien;
 
 
     @Override
