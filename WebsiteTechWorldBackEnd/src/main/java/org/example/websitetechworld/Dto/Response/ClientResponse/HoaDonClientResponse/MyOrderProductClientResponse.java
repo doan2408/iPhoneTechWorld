@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,7 +16,8 @@ public class MyOrderProductClientResponse {
     private String urlImage;
     private String tenSanPham;
     private String colorName;
-    private String rom;
-    private String giaSanPham;
+    private String dungLuongRom;
+    private Integer soLuong;
+    private BigDecimal giaSanPham;
 
 }

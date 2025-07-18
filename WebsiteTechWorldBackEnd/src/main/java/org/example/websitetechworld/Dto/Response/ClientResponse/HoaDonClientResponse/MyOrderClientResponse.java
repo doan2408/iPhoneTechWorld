@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,5 +18,6 @@ public class MyOrderClientResponse {
     private Integer idHoaDon;
     private String maVanDon;
     private TrangThaiGiaoHang trangThaiGiaoHang;
-
+    private BigDecimal thanhTien;
+    private List<MyOrderProductClientResponse> myOrderClientResponseList;
 }
