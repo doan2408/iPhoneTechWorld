@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(Pageable pageable);
@@ -49,4 +50,10 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("shippingMethod") ShippingMethod shippingMethod,
                        @Param("trangThaiDonHang") TrangThaiGiaoHang trangThaiDonHang,
                        @Param("ngayDatHang") LocalDate ngayDatHang);
+
+    public List<HoaDon> findByIdKhachHang_Id(Integer userLoginId);
+
+
+    @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
+    public List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
 }

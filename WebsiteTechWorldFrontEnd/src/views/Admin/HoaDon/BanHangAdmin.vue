@@ -105,9 +105,6 @@
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
                             <Plus class="btn-icon" />
                         </button>
-                        <button class="customer-btn" title="Danh sách khách hàng">
-                            <List class="btn-icon" />
-                        </button>
                         <button class="customer-btn" title="Lọc">
                             <Filter class="btn-icon" />
                         </button>
@@ -227,8 +224,7 @@
             <!-- Cart items (if any) : san pham da chon -->
             <div v-if="currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length > 0" class="cart-items-summary">
                 <div class="cart-header">
-                    <span><b v-if="currentInvoiceDetail.maKhachHang">{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }} - </b>Sản phẩm đã chọn ({{
+                    <span>Sản phẩm đã chọn ({{
                         currentInvoiceDetail?.chiTietHoaDonAdminResponseList?.length }})</span>
                     <button @click="showCartDetails = !showCartDetails" class="toggle-cart-btn">
                         <ChevronUp v-if="showCartDetails" class="toggle-icon" />
@@ -303,6 +299,15 @@
 
             <!-- Total tong tien hang -->
             <div class="footer-container">
+                <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
+                    style="display: flex; align-items: center; justify-content: space-between;">
+                    <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
+                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                    <button @click="selectedKhachHang" class="toggle-cart-btn"
+                        style="background: none; border: none; padding: 0; cursor: pointer;">
+                        <X type="small" style="font-size: 12px; color: red;" />
+                    </button>
+                </div>
                 <div class="total-section">
                     <span class="total-label">Tổng tiền hàng:</span>
                     <span class="total-amount">{{ formatCurrency(totalProductAmount) }}</span>
@@ -341,7 +346,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -687,7 +692,9 @@ watch(
     () => selectedDiscount.value,
     () => {
         calculateTotal()
+        if (selectedDiscount.value != null) {
         apPhieuGiamGia(selectedDiscount.value.id)
+    }
     }
 )
 
@@ -739,6 +746,7 @@ const loadTabHoaDon = async () => {
         console.log('Danh sách hóa đơn từ backend:', response.data);
         //Load các hóa đơn của nhân viên
         // Cập nhật danh sách hóa đơn từ backend, tránh thêm trùng lặp
+        invoices.value = []; // Xóa các hóa đơn hiện có
         response.data.forEach(inv => {
             const existingIndex = invoices.value.findIndex(i => i.id === inv.id);
             if (existingIndex === -1) {
@@ -824,7 +832,7 @@ const newCustomer = reactive({
 
 // Cart display
 const showCartDetails = ref(true)
-const selectedItems = ref([]); 
+const selectedItems = ref([]);
 const selectAllItems = ref(false);
 
 // handle invoice tab logic 
@@ -947,17 +955,13 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts({ tenSanPham: selectedCategory.value });
         getHdctByImeiDaBan();
+        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
         console.error("Xóa thất bại", err);
     }
 }
-
-// const calculateTotal = () => {
-//     const invoice = currentInvoice.value
-//     invoice.total = invoice.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-// }
 
 const searchCustomer = () => {
     // Simulate customer search
@@ -1179,6 +1183,7 @@ const confirmImeiSelection = async () => {
         closeImeiModal();
         await loadProducts({ tenSanPham: selectedCategory.value });
         getHdctByImeiDaBan();
+        loadTabHoaDon()
     } else {
         toast.warning(`Bạn phải chọn chính xác ${quantityToSelect.value || 0} IMEI.`);
     }
@@ -1269,6 +1274,7 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
+        loadTabHoaDon();
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
@@ -1654,10 +1660,19 @@ const loadHoaDon = async () => {
     try {
         const response = await hoaDonDetail(storedId);
         const hoaDon = response.data;
+        console.log("hoaDon: ", hoaDon);
 
         if (hoaDon) {
             hoaDonList.value = hoaDon;
-
+            console.log("discountList: ", discountList);
+            if (hoaDon && hoaDon.idPhieuGiamGia) {
+                const selected = discountList.value.find(
+                    discount => discount.id === hoaDon.idPhieuGiamGia
+                );
+                selectedDiscount.value = selected || ''; 
+            } else {
+                selectedDiscount.value = null;
+            }
             if (hoaDon.isShipping) {
                 isShipping.value = true;
                 shippingInfo.value = {
@@ -1779,24 +1794,10 @@ watch(quantityToSelect, (newValue, oldValue) => {
 
 // Initialize
 onMounted(async () => {
-    // Làm sạch trạng thái trước khi tải dữ liệu
-    // invoices.value = [];
-    // currentInvoiceId.value = null;
-    // currentInvoiceDetail.value = null;
-    // localStorage.removeItem('selectedInvoiceId'); // Xóa storedId từ phiên trước
-
-    // console.log('onMounted - Trạng thái ban đầu sau khi làm sạch:', {
-    //     invoices: invoices.value,
-    //     currentInvoiceId: currentInvoiceId.value,
-    //     storedId: localStorage.getItem('selectedInvoiceId')
-    // });
-
-    // calculateTotal();
     await danhMucSanPham();
     selectedCategory.value = 'all';
     await loadProducts({ tenSanPham: 'all' });
-    loadTabHoaDon();
-    // getListTinhThanh();
+    await loadTabHoaDon();
     await loadHoaDon();
     await getTinhList();
     await loadDiscountList();
@@ -1852,7 +1853,11 @@ const selectedKhachHang = async (khachHang) => {
             addOrUpdateInvoice(response.data);
             currentInvoiceDetail.value = response.data;
         }
-        toast.success("Chọn khách hàng thành công id: " + khachHang.id)
+        if (selected.khachHangId == undefined || selected.khachHangId == null) {
+            toast.success("Bỏ chọn khách hàng thành công")
+        } else {
+            toast.success("Chọn khách hàng thành công id: " + khachHang.id)
+        }
     } catch (err) {
         toast.error("Thêm khách hàng vào hóa đơn thất bại")
         console.error("Thêm khách hàng vào hóa đơn thất bại:", err);
@@ -2036,7 +2041,7 @@ const processPayment = async () => {
                 printInvoice();
             }, 1200);
             setTimeout(() => {
-            window.location.reload();
+                window.location.reload();
             }, 3200);
         } else {
             toast.error('Thanh toán không thành công: ' + (response.data?.message || 'Lỗi không xác định.'));
@@ -2116,7 +2121,7 @@ watch(selectedItems, (newVal) => {
 
 const showQRModal = ref(false)
 const openQRModal = () => {
-  showQRModal.value = true
+    showQRModal.value = true
 }
 const onProductScanned = (maSanPham) => {
     console.log("Mã sản phẩm quét được:", maSanPham)

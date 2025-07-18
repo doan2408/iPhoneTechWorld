@@ -41,6 +41,7 @@ const handleLogout = async () => {
     await LoginService.logout(); // Gọi API đăng xuất
     isLoggedIn.value = false;
     localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập khỏi localStorage
+    localStorage.removeItem("user"); 
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
     console.error("Lỗi đăng xuất:", err);
@@ -98,7 +99,7 @@ const goToLogin = () => {
         </li>
 
         <li>
-          <router-link to="/client/orders"
+          <router-link to="/client/order-tracking-search"
             ><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link
           >
         </li>
@@ -122,7 +123,7 @@ const goToLogin = () => {
               <router-link to="/client/profile">
                 <i class="fa fa-user"></i> Thông tin
               </router-link>
-              <router-link to="/client/orders">
+              <router-link to="/client/my-order">
                 <i class="fa fa-box"></i> Đơn mua
               </router-link>
               <router-link to="/client/addresses">
