@@ -2,7 +2,6 @@ package org.example.websitetechworld.Services.ClientServices.DiemServices;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.example.websitetechworld.Dto.Response.ClientResponse.LichSuDiemResponse.LichSuDiemResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
@@ -16,10 +15,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class LichSuDiemService {
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final ChiTietLichSuDiemRepository chiTietLichSuDiemRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final HoaDonRepository hoaDonRepository;
 
     private LichSuDiemResponse convertToResponse(LichSuDiem entity) {
         return new LichSuDiemResponse(
@@ -150,4 +152,71 @@ public class LichSuDiemService {
 
         return "Đổi điểm thành công. Bạn đã nhận được voucher.";
     }
+
+    public void congDiemTuHoaDon(int idHoaDon) {
+        List<Map<String, String>> errors = new ArrayList<>();
+
+        Optional<HoaDon> optionalHoaDon = hoaDonRepository.findById(idHoaDon);
+        if(optionalHoaDon.isEmpty()) {
+            errors.add(Map.of("field", "hoaDon", "message", "Không tìm thấy hóa đơn với id: " + idHoaDon));
+        }
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
+        HoaDon hoaDon = optionalHoaDon.get();
+
+        // check cong diem
+        boolean daCongDiem = lichSuDiemRepository.existsByHoaDon(hoaDon);
+        if(daCongDiem) {
+            return;
+        }
+
+        // check valid status
+        boolean isShipping = hoaDon.getIsShipping();
+        String trangThaiThanhToan = hoaDon.getTrangThaiThanhToan().name();
+        String trangThaiGiaoHang = hoaDon.getTrangThaiDonHang().name();
+
+        boolean valid = (isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan) && "DELIVERED".equalsIgnoreCase(trangThaiGiaoHang))
+                || (!isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan));
+
+        if(!valid) {
+            return;
+        }
+
+        Integer idKhachHang = hoaDon.getIdKhachHang().getId();
+        if(idKhachHang == null) {
+            return; // khách vãng lai k có id -> không + điểm
+        }
+
+        //get ví điểm
+        Optional<ViDiem> optionalViDiem  = viDiemRepository.findByIdKhachHang(idKhachHang);
+        if(optionalViDiem.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy ví điểm của khách hàng có id: " + idKhachHang);
+        }
+
+        ViDiem viDiem = optionalViDiem.get();
+
+        // tính điểm dựa trên 1% của đơn hàng (có tính giảm giá + không tính phí ship)
+        BigDecimal diemCong =  hoaDon.getThanhTien()
+                .subtract(hoaDon.getPhiShip() != null ? hoaDon.getPhiShip() : BigDecimal.ZERO)
+                .multiply(BigDecimal.valueOf(0.01))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        // cộng điểm vào ví
+        viDiem.setDiemKhaDung(viDiem.getDiemKhaDung().add(diemCong));
+        viDiemRepository.save(viDiem);
+
+        // save history
+        LichSuDiem lichSuDiem = new LichSuDiem();
+        lichSuDiem.setViDiem(viDiem);
+        lichSuDiem.setHoaDon(hoaDon);
+        lichSuDiem.setSoDiem(diemCong);
+        lichSuDiem.setLoaiDiem(LoaiDiem.CONG);
+        lichSuDiem.setGhiChu("Cộng điểm từ đơn hàng: " + hoaDon.getMaHoaDon());
+        lichSuDiem.setThoiGian(OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        lichSuDiem.setHanSuDung(OffsetDateTime.now().plusYears(1)); // +1 năm hsd tính tại lúc điểm vào
+        lichSuDiemRepository.save(lichSuDiem);
+    }
+
 }

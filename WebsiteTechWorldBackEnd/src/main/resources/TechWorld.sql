@@ -52,29 +52,6 @@ CREATE TABLE khach_hang (
 							id_hang_thanh_vien INT REFERENCES hang_thanh_vien (id_hang_thanh_vien)
 );
 
-CREATE TABLE vi_diem ( 
-	id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
-	id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
-	diem_kha_dung DECIMAL(10,2) -- điểm có thể sử dụng được
-);
-
-CREATE TABLE lich_su_diem (
-	id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
-	id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
-	so_diem DECIMAL(10,2), -- Số điểm cộng / trừ
-	loai_diem VARCHAR(10), -- CONG / TRU
-	ghi_chu NVARCHAR(50),
-	thoi_gian DATETIMEOFFSET, -- thời gian điểm được cộng / trừ
-	han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
-);
-
-CREATE TABLE chi_tiet_lich_su_diem (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
-    id_lich_su_diem INT REFERENCES lich_su_diem(id_lich_su_diem) ON DELETE CASCADE,
-    so_diem_da_tru DECIMAL(10,2),         -- Bao nhiêu điểm đã trừ từ 1 bản ghi trong lich_su_hoa_don
-    ngay_tru DATETIMEOFFSET
-);
 
 CREATE TABLE user_tokens (
                              id INT IDENTITY(1,1) PRIMARY KEY,
@@ -156,13 +133,38 @@ CREATE TABLE lich_su_hoa_don (
                                  FOREIGN KEY (id_hoa_Don) REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE
 );
 
-	CREATE TABLE khach_hang_giam_gia (
-										 id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
-										 id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
-										 id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
-										 is_user BIT,
-										 ngay_cap DATE,
-										 doi_bang_diem BIT
+CREATE TABLE khach_hang_giam_gia (
+									id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
+									id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+									id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
+									is_user BIT,
+									ngay_cap DATE,
+									doi_bang_diem BIT
+);
+
+CREATE TABLE vi_diem ( 
+	id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
+	id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
+	diem_kha_dung DECIMAL(10,2) -- điểm có thể sử dụng được
+);
+
+CREATE TABLE lich_su_diem (
+	id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
+	id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
+	id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
+	so_diem DECIMAL(10,2), -- Số điểm cộng / trừ
+	loai_diem VARCHAR(10), -- CONG / TRU
+	ghi_chu NVARCHAR(50),
+	thoi_gian DATETIMEOFFSET, -- thời gian điểm được cộng / trừ
+	han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
+);
+
+CREATE TABLE chi_tiet_lich_su_diem (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+    id_lich_su_diem INT REFERENCES lich_su_diem(id_lich_su_diem) ON DELETE CASCADE,
+    so_diem_da_tru DECIMAL(10,2),         -- Bao nhiêu điểm đã trừ từ 1 bản ghi trong lich_su_hoa_don
+    ngay_tru DATETIMEOFFSET
 );
 
 CREATE TABLE dia_chi (
@@ -488,62 +490,6 @@ VALUES
     (N'Phạm Văn Tâm', '0954321097', N'tam_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'tam.pv@example.com', '1991-04-04', 1, 'tam.jpg', N'ACTIVE', 2),
     (N'Hoàng Thị Vân', '0943210986', N'van_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'van.ht@example.com', '1995-10-10', 0, 'van.jpg', N'ACTIVE', 3);
 
---Table vi_diem
-INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
-VALUES
-(1, 500.00),
-(2, 200.00),
-(3, 100.00),
-(4, 1500.00),
-(5, 400.00),
-(6, 600.00),
-(7, 200.00),
-(8, 1250.00),
-(9, 300.00),
-(10, 750.00),
-(11, 150.00),
-(12, 1000.00),
-(13, 350.00),
-(14, 900.00),
-(15, 450.00);
-
--- Table lich_su_diem
-INSERT INTO lich_su_diem (id_vi_diem, so_diem, loai_diem, ghi_chu, thoi_gian, han_su_dung)
-VALUES
-(1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-(2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-(4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
-(5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-(6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
-(8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
-(9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
-(10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
-(11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
-(12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
-(13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-(15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
-
--- Table chi_tiet_lich_su_diem
-INSERT INTO chi_tiet_lich_su_diem (id_khach_hang, id_lich_su_diem, so_diem_da_tru, ngay_tru)
-VALUES
-(1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
-(2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
-(3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
-(4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
-(5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
-(6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
-(7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
-(8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
-(9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
-(10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
-(11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
-(12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
-(13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
-(14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
-(15, 15, 750.00, '2025-02-02 00:00:00+07:00');
 
 -- 8 bản ghi cho nhân viên
 --INSERT INTO user_tokens (token, token_type, expires_at, id_nhan_vien) VALUES
@@ -593,16 +539,16 @@ VALUES
     (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1),
     (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1),
     (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0),
-    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
-    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
-    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
-    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
-    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
-    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
-    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
-    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
-    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
-    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
+    (6, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
+    (7, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
+    (8, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
+    (9, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
+    (10, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
+    (11, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
+    (12, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
+    (13, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
+    (14, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
+    (15, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
 
 
 -- Table lich_su_hoa_don
@@ -642,6 +588,63 @@ VALUES
     (3, 4, 0, GETDATE(), 0),
     (4, 4, 1, GETDATE(), 0),
     (5, 2, 1, GETDATE(), 0);
+
+--Table vi_diem
+INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
+VALUES
+(1, 500.00),
+(2, 200.00),
+(3, 100.00),
+(4, 1500.00),
+(5, 400.00),
+(6, 600.00),
+(7, 200.00),
+(8, 1250.00),
+(9, 300.00),
+(10, 750.00),
+(11, 150.00),
+(12, 1000.00),
+(13, 350.00),
+(14, 900.00),
+(15, 450.00);
+
+-- Table lich_su_diem
+INSERT INTO lich_su_diem (id_vi_diem, id_hoa_don, so_diem, loai_diem, ghi_chu, thoi_gian, han_su_dung)
+VALUES
+(1, 1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+(2, 2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(3, 3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+(4, 4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
+(5, 5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+(6, 6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(7, 7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
+(8, 8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
+(9, 9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
+(10, 10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
+(11, 11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
+(12, 12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
+(13, 13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(14, 14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+(15, 15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
+
+-- Table chi_tiet_lich_su_diem
+INSERT INTO chi_tiet_lich_su_diem (id_khach_hang, id_lich_su_diem, so_diem_da_tru, ngay_tru)
+VALUES
+(1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
+(2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
+(3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
+(4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
+(5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
+(6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
+(7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
+(8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
+(9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
+(10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
+(11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
+(12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
+(13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
+(14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
+(15, 15, 750.00, '2025-02-02 00:00:00+07:00');
 
 -- Table dia_chi
 INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
