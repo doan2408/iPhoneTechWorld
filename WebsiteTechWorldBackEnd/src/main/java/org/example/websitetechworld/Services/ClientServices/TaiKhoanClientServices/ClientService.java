@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.ClientRequest.TaiKhoanClientRequest.ClientRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.TaiKhoanResponse.ClientResponse;
-import org.example.websitetechworld.Entity.DiaChi;
-import org.example.websitetechworld.Entity.GioHang;
-import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
@@ -45,10 +43,10 @@ public class ClientService {
         clientResponse.setNgaySinh(khachHang.getNgaySinh());
         clientResponse.setGioiTinh(khachHang.getGioiTinh());
         clientResponse.setAnh(khachHang.getAnh());
-        clientResponse.setTongDiem(khachHang.getTongDiem());
-        clientResponse.setSoDiemHienTai(khachHang.getSoDiemHienTai());
-        clientResponse.setHangKhachHang(khachHang.getHangKhachHang().name());
         clientResponse.setTrangThai(khachHang.getTrangThai());
+        clientResponse.setHangKhachHang(
+                khachHang.getHangThanhVien() != null ? khachHang.getHangThanhVien().getTenHang().getDisplayName() : null
+        );
 
         // Lọc địa chỉ chính
         DiaChi diaChiChinh = khachHang.getDiaChis().stream()
@@ -86,10 +84,8 @@ public class ClientService {
         khachHang.setNgaySinh(request.getNgaySinh());
         khachHang.setGioiTinh(request.getGioiTinh());
         khachHang.setAnh(request.getAnh());
-        khachHang.setTongDiem(request.getTongDiem());
-        khachHang.setSoDiemHienTai(request.getSoDiemHienTai());
-        khachHang.setHangKhachHang(request.getHangKhachHang());
         khachHang.setTrangThai(request.getTrangThai());
+        khachHang.setHangThanhVien(request.getHangKhachHang());
         return khachHang;
     }
 
@@ -124,10 +120,10 @@ public class ClientService {
 
         request.setAnh("Default.jpg");
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
-        request.setTongDiem(new BigDecimal(0));
-        request.setSoDiemHienTai(new BigDecimal(0));
-        request.setHangKhachHang(HangKhachHang.MEMBER);
         request.setGioiTinh(true);
+        HangThanhVien hangThanhVien = new HangThanhVien();
+        hangThanhVien.setId(1);
+        request.setHangKhachHang(hangThanhVien);
 
         KhachHang khachHang = convertToKhachHang(request);
 
@@ -137,13 +133,20 @@ public class ClientService {
         GioHang gioHang = new GioHang();
         gioHang.setIdKhachHang(khachHangAdd); //oneToOne
 
-        //set ngược lại
+        //tạo ví tương ứng với khách hàng mới vừa tạo
+        ViDiem viDiem = new ViDiem();
+        viDiem.setKhachHang(khachHangAdd);
+        viDiem.setDiemKhaDung(new BigDecimal(0));
+
+        //set ngược lại one to one
         khachHangAdd.setGioHang(gioHang);
-        DiaChi diaChi = new DiaChi();
-        diaChi.setIdKhachHang(khachHangAdd);
-        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
-        diaChiRepository.save(diaChi);
-        khachHangRepository.save(khachHangAdd);
+        khachHangAdd.setViDiem(viDiem);
+
+//        DiaChi diaChi = new DiaChi();
+//        diaChi.setIdKhachHang(khachHangAdd);
+//        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
+//        diaChiRepository.save(diaChi);
+//        khachHangRepository.save(khachHangAdd);
 
         // ✅ Tạo token dựa trên KhachHang
         String accessToken = jwtService.generateAccessToken(khachHangAdd);
@@ -209,6 +212,10 @@ public class ClientService {
                 }
 
                 existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
+            }
+
+            if(!errors.isEmpty()) {
+                throw new ValidationException(errors);
             }
 
             return khachHangRepository.save(existing);

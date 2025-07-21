@@ -24,6 +24,13 @@ CREATE TABLE nhan_vien (
                            ngay_sinh DATE
 );
 
+CREATE TABLE hang_thanh_vien (
+	id_hang_thanh_vien INT IDENTITY(1,1) PRIMARY KEY,
+    ten_hang NVARCHAR(50),                    
+    diem_tu INT NOT NULL, -- Điểm tích lũy từ -- khoang diem xe xet hang
+    diem_den INT,         -- Tới điểm -- khoảng diem de xet hang
+);
+
 CREATE TABLE khach_hang (
                             id_khach_hang INT IDENTITY(1,1) PRIMARY KEY,
                             ma_khach_hang AS (
@@ -41,11 +48,10 @@ CREATE TABLE khach_hang (
                             ngay_sinh DATE,
                             gioi_tinh BIT,
                             anh NVARCHAR(200),
-                            tong_diem DECIMAL(10,2),
-                            so_diem_hien_tai DECIMAL(10,2),
-                            hang_khach_hang NVARCHAR(50),
-                            trang_thai NVARCHAR(50)
+                            trang_thai NVARCHAR(50),
+							id_hang_thanh_vien INT REFERENCES hang_thanh_vien (id_hang_thanh_vien)
 );
+
 
 CREATE TABLE user_tokens (
                              id INT IDENTITY(1,1) PRIMARY KEY,
@@ -79,7 +85,6 @@ CREATE TABLE phieu_giam_gia (
                                 trang_thai_phieu_giam_gia NVARCHAR(50),
                                 trang_thai_phat_hanh NVARCHAR(50)
 );
-
 
 CREATE TABLE hoa_don (
                          id_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
@@ -129,11 +134,37 @@ CREATE TABLE lich_su_hoa_don (
 );
 
 CREATE TABLE khach_hang_giam_gia (
-                                     id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
-                                     id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
-                                     id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
-                                     is_user BIT,
-                                     ngay_cap DATE
+									id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
+									id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+									id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
+									is_user BIT,
+									ngay_cap DATE,
+									doi_bang_diem BIT
+);
+
+CREATE TABLE vi_diem ( 
+	id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
+	id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
+	diem_kha_dung DECIMAL(10,2) NOT NULL DEFAULT 0 -- điểm có thể sử dụng được
+);
+
+CREATE TABLE lich_su_diem (
+	id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
+	id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
+	id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
+	so_diem DECIMAL(10,2), -- Số điểm cộng / trừ
+	loai_diem VARCHAR(10), -- CONG / TRU
+	ghi_chu NVARCHAR(50),
+	thoi_gian DATETIMEOFFSET, -- thời gian điểm được cộng / trừ
+	han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
+);
+
+CREATE TABLE chi_tiet_lich_su_diem (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+    id_lich_su_diem INT REFERENCES lich_su_diem(id_lich_su_diem) ON DELETE CASCADE,
+    so_diem_da_tru DECIMAL(10,2),         -- Bao nhiêu điểm đã trừ từ 1 bản ghi trong lich_su_hoa_don
+    ngay_tru DATETIMEOFFSET
 );
 
 CREATE TABLE dia_chi (
@@ -432,24 +463,33 @@ VALUES
     (N'Phạm Thị Quỳnh', 'nv_quynh', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'quynh.pt@example.com', '0935678901', N'555 Nguyễn Đình Chiểu, Hà Nội', N'ENABLE', N'STAFF', 0, '1995-01-25'),
     (N'Hoàng Văn Sơn', 'nv_son', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'son.hv@example.com', '0946789012', N'666 Lê Lai, TP.HCM', N'DISABLE', N'ADMIN', 1, '1987-11-11');
 
+-- Table hang_thanh_vien
+INSERT INTO hang_thanh_vien (ten_hang, diem_tu, diem_den)
+VALUES 
+(N'MEMBER', 0, 499),
+(N'SILVER', 500, 999),
+(N'GOLD', 1000, 1999),
+(N'DIAMOND', 2000, NULL);
+
 -- Table khach_hang
-INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, tong_diem, so_diem_hien_tai, hang_khach_hang, trang_thai)
+INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, trang_thai, id_hang_thanh_vien)
 VALUES
-    (N'Nguyễn Thị Hoa', '0987654321', N'hoa_nt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hoa.nt@example.com', '1993-04-12', 0, 'hoa.jpg', 1000.00, 500.00, N'GOLD', N'ACTIVE'),
-    (N'Trần Văn Hùng', '0976543210', N'hung_tv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hung.tv@example.com', '1985-09-25', 1, 'hung.jpg', 500.00, 200.00, N'SILVER', N'ACTIVE'),
-    (N'Lê Thị Lan', '0965432109', N'lan_lt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'lan.lt@example.com', '1997-12-30', 0, 'lan.jpg', 200.00, 100.00, N'MEMBER', N'INACTIVE'),
-    (N'Phạm Văn Minh', '0954321098', N'minh_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'minh.pv@example.com', '1990-06-18', 1, 'minh.jpg', 3000.00, 1500.00, N'DIAMOND', N'ACTIVE'),
-    (N'Hoàng Thị Ngọc', '0943210987', N'ngoc_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'ngoc.ht@example.com', '1995-03-05', 0, 'ngoc.jpg', 800.00, 400.00, N'GOLD', N'ACTIVE'),
-    (N'Nguyễn Văn Bình', '0932109876', N'binh_nv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'binh.nv@example.com', '1988-08-08', 1, 'binh.jpg', 1200.00, 600.00, N'GOLD', N'ACTIVE'),
-    (N'Trần Thị Mai', '0921098765', N'mai_tt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'mai.tt@example.com', '1992-02-14', 0, 'mai.jpg', 400.00, 200.00, N'SILVER', N'INACTIVE'),
-    (N'Lê Văn Nam', '0910987654', N'nam_lv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'nam.lv@example.com', '1990-11-11', 1, 'nam.jpg', 2500.00, 1250.00, N'DIAMOND', N'ACTIVE'),
-    (N'Phạm Thị Hồng', '0909876543', N'hong_pt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hong.pt@example.com', '1996-06-20', 0, 'hong.jpg', 600.00, 300.00, N'SILVER', N'ACTIVE'),
-    (N'Hoàng Văn Phong', '0998765432', N'phong_hv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'phong.hv@example.com', '1987-03-15', 1, 'phong.jpg', 1500.00, 750.00, N'GOLD', N'ACTIVE'),
-    (N'Nguyễn Thị Quỳnh', '0987654320', N'quynh_nt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'quynh.nt@example.com', '1994-09-09', 0, 'quynh.jpg', 300.00, 150.00, N'MEMBER', N'INACTIVE'),
-    (N'Trần Văn Sơn', '0976543219', N'son_tv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'son.tv@example.com', '1989-12-12', 1, 'son.jpg', 2000.00, 1000.00, N'DIAMOND', N'ACTIVE'),
-    (N'Lê Thị Thảo', '0965432108', N'thao_lt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'thao.lt@example.com', '1993-07-07', 0, 'thao.jpg', 700.00, 350.00, N'SILVER', N'ACTIVE'),
-    (N'Phạm Văn Tâm', '0954321097', N'tam_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'tam.pv@example.com', '1991-04-04', 1, 'tam.jpg', 1800.00, 900.00, N'GOLD', N'ACTIVE'),
-    (N'Hoàng Thị Vân', '0943210986', N'van_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'van.ht@example.com', '1995-10-10', 0, 'van.jpg', 900.00, 450.00, N'GOLD', N'ACTIVE');
+    (N'Nguyễn Thị Hoa', '0987654321', N'hoa_nt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hoa.nt@example.com', '1993-04-12', 0, 'hoa.jpg', N'ACTIVE', 3),
+    (N'Trần Văn Hùng', '0976543210', N'hung_tv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hung.tv@example.com', '1985-09-25', 1, 'hung.jpg', N'ACTIVE', 2),
+    (N'Lê Thị Lan', '0965432109', N'lan_lt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'lan.lt@example.com', '1997-12-30', 0, 'lan.jpg', N'INACTIVE', 1),
+    (N'Phạm Văn Minh', '0954321098', N'minh_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'minh.pv@example.com', '1990-06-18', 1, 'minh.jpg', N'ACTIVE', 4),
+    (N'Hoàng Thị Ngọc', '0943210987', N'ngoc_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'ngoc.ht@example.com', '1995-03-05', 0, 'ngoc.jpg', N'ACTIVE', 3),
+    (N'Nguyễn Văn Bình', '0932109876', N'binh_nv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'binh.nv@example.com', '1988-08-08', 1, 'binh.jpg', N'ACTIVE', 3),
+    (N'Trần Thị Mai', '0921098765', N'mai_tt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'mai.tt@example.com', '1992-02-14', 0, 'mai.jpg', N'INACTIVE', 2),
+    (N'Lê Văn Nam', '0910987654', N'nam_lv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'nam.lv@example.com', '1990-11-11', 1, 'nam.jpg', N'ACTIVE', 4),
+    (N'Phạm Thị Hồng', '0909876543', N'hong_pt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'hong.pt@example.com', '1996-06-20', 0, 'hong.jpg', N'ACTIVE', 2),
+    (N'Hoàng Văn Phong', '0998765432', N'phong_hv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'phong.hv@example.com', '1987-03-15', 1, 'phong.jpg', N'ACTIVE', 3),
+    (N'Nguyễn Thị Quỳnh', '0987654320', N'quynh_nt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'quynh.nt@example.com', '1994-09-09', 0, 'quynh.jpg', N'INACTIVE', 1),
+    (N'Trần Văn Sơn', '0976543219', N'son_tv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'son.tv@example.com', '1989-12-12', 1, 'son.jpg', N'ACTIVE', 4),
+    (N'Lê Thị Thảo', '0965432108', N'thao_lt', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'thao.lt@example.com', '1993-07-07', 0, 'thao.jpg', N'ACTIVE', 2),
+    (N'Phạm Văn Tâm', '0954321097', N'tam_pv', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'tam.pv@example.com', '1991-04-04', 1, 'tam.jpg', N'ACTIVE', 2),
+    (N'Hoàng Thị Vân', '0943210986', N'van_ht', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'van.ht@example.com', '1995-10-10', 0, 'van.jpg', N'ACTIVE', 3);
+
 
 -- 8 bản ghi cho nhân viên
 --INSERT INTO user_tokens (token, token_type, expires_at, id_nhan_vien) VALUES
@@ -499,16 +539,16 @@ VALUES
     (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1),
     (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1),
     (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0),
-    (1, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
-    (2, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
-    (3, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
-    (4, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
-    (5, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
-    (1, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
-    (2, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
-    (3, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
-    (4, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
-    (5, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
+    (6, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
+    (7, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
+    (8, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
+    (9, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
+    (10, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
+    (11, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
+    (12, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
+    (13, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
+    (14, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
+    (15, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
 
 
 -- Table lich_su_hoa_don
@@ -531,23 +571,80 @@ VALUES
     (5, 15, N'CONFIRM', '2025-05-05', N'Đơn iPhone 14 chờ thanh toán');
 
 -- Table khach_hang_giam_gia
-INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap)
+INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, doi_bang_diem)
 VALUES
-    (1, 2, 1, GETDATE()),
-    (2, 2, 0, GETDATE()),
-    (3, 4, 0, GETDATE()),
-    (4, 4, 1, GETDATE()),
-    (5, 2, 1, GETDATE()),
-    (1, 2, 1, GETDATE()),
-    (2, 6, 0, GETDATE()),
-    (3, 6, 0, GETDATE()),
-    (4, 7, 1, GETDATE()),
-    (5, 2, 1, GETDATE()),
-    (1, 6, 1, GETDATE()),
-    (2, 6, 0, GETDATE()),
-    (3, 4, 0, GETDATE()),
-    (4, 4, 1, GETDATE()),
-    (5, 2, 1, GETDATE());
+    (1, 2, 1, GETDATE(), 0),
+    (2, 2, 0, GETDATE(), 0),
+    (3, 4, 0, GETDATE(), 0),
+    (4, 4, 1, GETDATE(), 0),
+    (5, 2, 1, GETDATE(), 0),
+    (1, 2, 1, GETDATE(), 0),
+    (2, 6, 0, GETDATE(), 0),
+    (3, 6, 0, GETDATE(), 0),
+    (4, 7, 1, GETDATE(), 0),
+    (5, 2, 1, GETDATE(), 0),
+    (1, 6, 1, GETDATE(), 0),
+    (2, 6, 0, GETDATE(), 0),
+    (3, 4, 0, GETDATE(), 0),
+    (4, 4, 1, GETDATE(), 0),
+    (5, 2, 1, GETDATE(), 0);
+
+--Table vi_diem
+INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
+VALUES
+(1, 500.00),
+(2, 200.00),
+(3, 100.00),
+(4, 1500.00),
+(5, 400.00),
+(6, 600.00),
+(7, 200.00),
+(8, 1250.00),
+(9, 300.00),
+(10, 750.00),
+(11, 150.00),
+(12, 1000.00),
+(13, 350.00),
+(14, 900.00),
+(15, 450.00);
+
+-- Table lich_su_diem
+INSERT INTO lich_su_diem (id_vi_diem, id_hoa_don, so_diem, loai_diem, ghi_chu, thoi_gian, han_su_dung)
+VALUES
+(1, 1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+(2, 2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(3, 3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+(4, 4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
+(5, 5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+(6, 6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(7, 7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
+(8, 8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
+(9, 9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
+(10, 10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
+(11, 11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
+(12, 12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
+(13, 13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+(14, 14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+(15, 15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
+
+-- Table chi_tiet_lich_su_diem
+INSERT INTO chi_tiet_lich_su_diem (id_khach_hang, id_lich_su_diem, so_diem_da_tru, ngay_tru)
+VALUES
+(1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
+(2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
+(3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
+(4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
+(5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
+(6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
+(7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
+(8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
+(9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
+(10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
+(11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
+(12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
+(13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
+(14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
+(15, 15, 750.00, '2025-02-02 00:00:00+07:00');
 
 -- Table dia_chi
 INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
@@ -807,19 +904,19 @@ INSERT INTO model_camera_sau (id_model_san_pham, id_camera_sau, is_chinh)
 VALUES
     (1,  1, 1), (1, 2, 0), (1, 3, 0),
     (2,  4, 0), (2, 5, 0), (2, 6, 1),
-    (3,  7, 0), (3, 8, 0), (3, 9, 0),
+    (3,  7, 1), (3, 8, 0), (3, 9, 0),
     (4, 10, 0), (4,11, 1), (4,12, 0),
-    (5, 13, 0), (5,14, 0), (5,15, 0),
+    (5, 13, 1), (5,14, 0), (5,15, 0),
     (6,  1, 1), (6, 2, 0), (6, 3, 0),
     (7,  4, 0), (7, 5, 0), (7, 6, 1),
-    (8,  7, 0), (8, 8, 0), (8, 9, 0),
+    (8,  7, 1), (8, 8, 0), (8, 9, 0),
     (9, 10, 0), (9,11, 1), (9,12, 0),
-    (10,13, 0), (10,14, 0), (10,15, 0),
+    (10,13, 1), (10,14, 0), (10,15, 0),
     (11, 1, 1), (11, 2, 0), (11, 3, 0),
     (12, 4, 0), (12, 5, 0), (12, 6, 1),
-    (13, 7, 0), (13, 8, 0), (13, 9, 0),
+    (13, 7, 1), (13, 8, 0), (13, 9, 0),
     (14,10, 0), (14,11, 1), (14,12, 0),
-    (15,13, 0), (15,14, 0), (15,15, 0);
+    (15,13, 1), (15,14, 0), (15,15, 0);
 
 -- Table san_pham
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
@@ -1649,21 +1746,32 @@ SELECT * FROM imei_da_ban;
 -- 31. phuong_thuc_thanh_toan
 SELECT * FROM phuong_thuc_thanh_toan;
 
-
 -- 32. chi_tiet_thanh_toan
 SELECT * FROM chi_tiet_thanh_toan;
 
---33. loai_bao_hanh
+-- 33. loai_bao_hanh
 SELECT * FROM loai_bao_hanh
 
---34. lich_su_bao_hanh
+-- 34. lich_su_bao_hanh
 SELECT * FROM lich_su_bao_hanh
 
---35. user_tokens
+-- 35. user_tokens
 SELECT * FROM user_tokens
 
---36. model_san_pham
+-- 36. model_san_pham
 SELECT * FROM model_san_pham
 
---37. model_camera_sau
+-- 37. model_camera_sau
 SELECT * FROM model_camera_sau
+
+-- 38. lich_su_diem
+SELECT * FROM lich_su_diem
+
+-- 39. vi_diem
+SELECT * FROM vi_diem
+
+-- 40. chi_tiet_lich_su_diem
+SELECT * FROM chi_tiet_lich_su_diem
+
+-- 41. hang_thanh_vien
+SELECT * FROM hang_thanh_vien

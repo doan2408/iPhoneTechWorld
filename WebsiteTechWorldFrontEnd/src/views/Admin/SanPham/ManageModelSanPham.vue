@@ -184,7 +184,7 @@
               <div style="display: flex; gap: 8px; width: 100%;">
                 <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
                   @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%" multiple>
-                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="`${cam.doPhanGiai} - ${cam.khauDo}`"
+                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="`${cam.doPhanGiai} - ${cam.khauDo} - ${cam.loaiCamera}`"
                     :value="cam.idCamera" />
                 </el-select>
                 <el-button type="success" size="large" circle @click="addCameraSauDialogRef.open()">
@@ -826,7 +826,7 @@ export default {
           ? results[5].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
           : [];
         cameraSaus.value = results[6].status === 'fulfilled' && Array.isArray(results[6].value)
-          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
+          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '', loaiCamera : cam.loaiCamera || '' }))
           : [];
         xuatXus.value = results[7].status === 'fulfilled' && Array.isArray(results[7].value)
           ? results[7].value.map(xx => ({ idXuatXu: xx.id, maXuatXu: xx.maXuatXu || '' }))

@@ -1,6 +1,6 @@
 <script setup>
 import { ElMessage } from "element-plus";
-import { reactive, ref, watch } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 
@@ -65,8 +65,8 @@ const handleLogin = async () => {
 
 // Hàm phụ để xác định trang mặc định nếu không có redirect
 function getDefaultRedirect() {
-  if (store.getters.isAdmin) return "/admin/products";
-  if (store.getters.isStaff) return "/admin/products";
+  if (store.getters.isAdmin) return "/admin/ban-hang";
+  if (store.getters.isStaff) return "/admin/ban-hang";
   if (store.getters.isCustomer) return "/client/home";
   return "/"; // fallback
 }
@@ -150,7 +150,7 @@ watch([tai_khoan, mat_khau], () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url("src/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
+  background-image: url("@/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
   background-size: cover !important; /* Phủ ảnh toàn bộ */
   background-position: center !important; /* Canh giữa ảnh */
   background-repeat: no-repeat !important; /* Không lặp lại ảnh */

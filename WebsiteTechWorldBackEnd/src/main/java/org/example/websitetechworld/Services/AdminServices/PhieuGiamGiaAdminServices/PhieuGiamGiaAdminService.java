@@ -428,4 +428,17 @@ public class PhieuGiamGiaAdminService {
                 .collect(Collectors.toList());
     }
 
+    // Show the vouchers in client when redeeming points
+    public Page<PhieuGiamGiaAdminResponse> getVoucherRedeeming (String timKiem, TrangThaiPGG trangThai,
+                                                                    LocalDate ngayBatDau, LocalDate ngayKetThuc,
+                                                                    HangKhachHang hangKhachHang,
+                                                                    int trang, int kichThuoc, String sapXepTheo, String huongSapXep) {
+        Sort sapXep = huongSapXep.equalsIgnoreCase("desc") ? Sort.by(sapXepTheo).descending() : Sort.by(sapXepTheo).ascending();
+        Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
+        Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.getDoiVoucher(timKiem, trangThai, ngayBatDau, ngayKetThuc, hangKhachHang, phanTrang);
+        return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
+    }
+
+
+
 }
