@@ -52,5 +52,15 @@ export const cartService = {
       console.error('Lỗi xóa giỏ hàng:', error);
       throw error;
     }
-  }
+  },
+
+  async cartCount (idKhachHang) {
+    try {
+      const response = await api.get(`${baseURL}/${idKhachHang}/count`);
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi lấy giỏ hàng:', error);
+      throw error;
+    }
+  },
 };
