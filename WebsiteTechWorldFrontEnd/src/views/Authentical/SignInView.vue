@@ -3,6 +3,8 @@ import { ElMessage } from "element-plus";
 import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
+import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
+import headerState from "@/components/Client/modules/headerState";
 
 const tai_khoan = ref("");
 const mat_khau = ref("");
@@ -13,6 +15,16 @@ const router = useRouter();
 const route = useRoute(); // Khai báo useRoute để lấy route.query
 const store = useStore();
 const emit = defineEmits(["switchToRegister"]);
+
+const count = ref(0)
+
+if (!store.hasModule('headerState')) {
+  store.registerModule('headerState', headerState)
+}
+
+const guiLenHeader = () => {
+  store.commit('headerState/setCartItemCount', count.value)
+}
 
 const handleLogin = async () => {
   if (!tai_khoan.value.trim() || !mat_khau.value.trim()) {
@@ -46,6 +58,15 @@ const handleLogin = async () => {
 
     // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
+    
+    const user = JSON.parse(localStorage.getItem("user"));
+    try {
+      count.value = await cartService.cartCount(user.id);
+    } catch (error) {
+      console.error('Lỗi khi tải giỏ hàng:', error);
+    }
+    guiLenHeader()
+
     ElMessage.success("Đăng nhập thành công !");
   } catch (err) {
     console.log("Error:", err);
