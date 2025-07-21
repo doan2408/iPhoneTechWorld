@@ -136,16 +136,17 @@ public class ClientService {
         //tạo ví tương ứng với khách hàng mới vừa tạo
         ViDiem viDiem = new ViDiem();
         viDiem.setKhachHang(khachHangAdd);
+        viDiem.setDiemKhaDung(new BigDecimal(0));
 
         //set ngược lại one to one
         khachHangAdd.setGioHang(gioHang);
         khachHangAdd.setViDiem(viDiem);
 
-        DiaChi diaChi = new DiaChi();
-        diaChi.setIdKhachHang(khachHangAdd);
-        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
-        diaChiRepository.save(diaChi);
-        khachHangRepository.save(khachHangAdd);
+//        DiaChi diaChi = new DiaChi();
+//        diaChi.setIdKhachHang(khachHangAdd);
+//        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
+//        diaChiRepository.save(diaChi);
+//        khachHangRepository.save(khachHangAdd);
 
         // ✅ Tạo token dựa trên KhachHang
         String accessToken = jwtService.generateAccessToken(khachHangAdd);

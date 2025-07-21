@@ -53,5 +53,7 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
     @Query("SELECT d FROM DiaChi d WHERE d.idKhachHang.id = :idKhachHang AND d.diaChiChinh = :diaChiChinh")
     List<DiaChi> findByIdKhachHangAndDiaChiChinh(@Param("idKhachHang") int idKhachHang, @Param("diaChiChinh") boolean diaChiChinh);
 
+    // check xem khach hang co dia chi chua
+    boolean existsByIdKhachHang_Id(Integer idKhachHang);
 
 }

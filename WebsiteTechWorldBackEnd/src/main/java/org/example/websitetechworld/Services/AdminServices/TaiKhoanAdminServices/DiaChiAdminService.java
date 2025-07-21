@@ -121,6 +121,18 @@ public class DiaChiAdminService {
     public AdminDiaChiRequest addDiaChi(AdminDiaChiRequest adminDiaChiRequest) {
         DiaChi diaChi = new DiaChi();
 
+        if (adminDiaChiRequest.getIdKhachHang() == null) {
+            throw new IllegalArgumentException("Client does not exist");
+        }
+
+        // Kiểm tra xem khách hàng đã có địa chỉ nào chưa
+        boolean hasAnyDiaChi = diaChiRepository.existsByIdKhachHang_Id(adminDiaChiRequest.getIdKhachHang());
+
+        // Nếu chưa có địa chỉ nào => đặt là địa chỉ chính
+        if (!hasAnyDiaChi) {
+            adminDiaChiRequest.setDiaChiChinh(true);
+        }
+
         if (Boolean.TRUE.equals(adminDiaChiRequest.getDiaChiChinh())) {
             if(adminDiaChiRequest.getIdKhachHang() == null) {
                 throw new IllegalArgumentException("Client does not exist");

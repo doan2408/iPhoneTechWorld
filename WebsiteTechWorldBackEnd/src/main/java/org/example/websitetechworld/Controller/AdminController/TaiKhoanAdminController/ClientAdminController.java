@@ -109,8 +109,4 @@ public class ClientAdminController {
         return ResponseEntity.ok(diaChiAdminService.getAllDiaChi(idKhachHang));
     }
 
-
-
-
-
 }
