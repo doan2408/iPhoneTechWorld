@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,6 +38,6 @@ public class GioHangChiTiet {
 
     @ColumnDefault("CONVERT([date],getdate())")
     @Column(name = "ngay_them")
-    private LocalDate ngayThem;
+    private LocalDateTime ngayThem;
 
 }

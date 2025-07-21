@@ -10,7 +10,7 @@ import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +66,7 @@ public class GioHangClientService {
             item.setSoLuong(request.getSoLuong());
         }
         item.setGia(sanPhamChiTiet.getGiaBan());
-        item.setNgayThem(LocalDate.now());
+        item.setNgayThem(LocalDateTime.now());
         gioHangChiTietRepository.save(item);
 
         return mapToResponseDTO(gioHangRepository.findById(gioHang.getId()).orElseThrow());
