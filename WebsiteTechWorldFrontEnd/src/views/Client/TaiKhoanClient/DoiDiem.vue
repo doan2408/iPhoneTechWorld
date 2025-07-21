@@ -2,7 +2,7 @@
   <div class="voucher-page">
     <div class="header">
       <h2>Danh sách Voucher</h2>
-      <div class="diem-kha-dung">Điểm khả dụng: <strong>{{ diemKhaDung }}</strong></div>
+      <div class="diem-kha-dung">Điểm khả dụng: <strong>{{ viDiem.diemKhaDung }}</strong></div>
     </div>
 
     <el-tabs v-model="currentTab" class="tabs">
@@ -49,15 +49,14 @@ import { ref, onMounted, computed } from "vue";
 import { getAllVoucher } from "@/Service/ClientService/TichDiem/VoucherServies";
 import { getDiemKhaDung } from "@/Service/ClientService/TichDiem/DiemServices";
 import { ElMessage } from "element-plus";
-import api from "@/Service/LoginService/axiosInstance";
 
 const vouchers = ref([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = 10;
 
-const diemKhaDung = ref(0);
-const currentTab = ref("Diamond");
+const viDiem = ref(0);
+const currentTab = ref("MEMBER");
 
 const hangList = ["MEMBER", "SILVER",  "GOLD", "DIAMOND"];
 
@@ -90,7 +89,7 @@ const fetchVoucher = async () => {
 const fetchDiem = async () => {
   try {
     const res = await getDiemKhaDung();
-    diemKhaDung.value = res.diemKhaDung;
+    viDiem.value = res;
   } catch (err) {
     ElMessage.error("Lỗi khi lấy điểm khả dụng");
   }
