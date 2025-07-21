@@ -35,7 +35,7 @@
                 </div>
                 <h3 class="empty-title">Giỏ hàng trống</h3>
                 <p class="empty-description">Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm</p>
-                <router-link :to="`/client/home`">
+                <router-link :to="{ path: user && user.id ? '/client/home' : '/' }">
                     <el-button type="primary" size="large" class="continue-shopping-btn">
                         <el-icon>
                             <Plus />
@@ -93,9 +93,10 @@
                                     <Minus />
                                 </el-icon>
                             </el-button>
-                            <el-input-number v-model="product.soLuong" :min="1" :max="product.soLuongTon" size="large" :controls="false"
-                                readonly class="quantity-input" @change="updateQuantity(product)" />
-                            <el-button size="small" :disabled="product.soLuong >= product.soLuongTon" @click="increaseQuantity(product)" class="quantity-btn">
+                            <el-input-number v-model="product.soLuong" :min="1" :max="product.soLuongTon" size="large"
+                                :controls="false" readonly class="quantity-input" @change="updateQuantity(product)" />
+                            <el-button size="small" :disabled="product.soLuong >= product.soLuongTon"
+                                @click="increaseQuantity(product)" class="quantity-btn">
                                 <el-icon>
                                     <Plus />
                                 </el-icon>
@@ -153,12 +154,23 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
     ShoppingCart, Search, ShoppingCartFull, Delete, Plus,
     Picture, Minus, ShoppingBag
 } from '@element-plus/icons-vue';
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
+import { CartService } from '@/Service/ClientService/GioHang/CartService';
+import { createStore } from 'vuex';
+import headerState from '@/components/Client/modules/headerState';
+
+const count = ref(0)
+const store = useStore()
+
+const route = useRoute();
+const selectedId = route.query.selected;
 
 const search = ref('');
 const selectAll = ref(false);
@@ -167,7 +179,15 @@ const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 
 onMounted(async () => {
     await fetchCart();
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    if (!store.hasModule('headerState')) {
+        store.registerModule('headerState', headerState)
+    }
 });
+
+const guiLenHeader = () => {
+    store.commit('headerState/setUserName', count.value)
+}
 
 async function fetchCart() {
     cartData.value = [];
@@ -189,7 +209,17 @@ async function fetchCart() {
         } else {
             const storedCart = localStorage.getItem('shoppingCart');
             if (storedCart) {
-                cartData.value = JSON.parse(storedCart).map(item => ({
+                const currentTime = new Date();
+                let localCart = JSON.parse(storedCart);
+
+                localCart = localCart.filter(item => {
+                    const addedTime = new Date(item.ngayThem);
+                    const timeDiff = (currentTime - addedTime) / (1000 * 60);
+                    return timeDiff <= 30;
+                });
+                localStorage.setItem('shoppingCart', JSON.stringify(localCart));
+
+                cartData.value = localCart.map(item => ({
                     idGioHangChiTiet: item.idGioHangChiTiet || null,
                     idSanPhamChiTiet: item.idSanPhamChiTiet,
                     tenSanPham: item.tenSanPham || 'Sản phẩm',
@@ -203,6 +233,18 @@ async function fetchCart() {
                 }));
             }
         }
+        if (selectedId) {
+            cartData.value = cartData.value.map(item => ({
+                ...item,
+                selected: item.idSanPhamChiTiet == selectedId
+            }));
+        }
+        try {
+            count.value = await cartService.cartCount(user.value.id);
+        } catch (error) {
+            console.error('Lỗi khi tải giỏ hàng:', error);
+        }
+        guiLenHeader()
     } catch (error) {
         console.error('Lỗi khi tải giỏ hàng:', error);
         ElMessage.error('Không thể tải giỏ hàng');
@@ -210,11 +252,15 @@ async function fetchCart() {
 }
 
 const filteredCartData = computed(() => {
-    if (!search.value) return cartData.value;
-    return cartData.value.filter(product =>
-        product.tenSanPham.toLowerCase().includes(search.value.toLowerCase()) ||
-        product.phienBan.toLowerCase().includes(search.value.toLowerCase())
-    );
+    let result = cartData.value;
+
+    if (search.value) {
+        result = result.filter(product =>
+            product.tenSanPham.toLowerCase().includes(search.value.toLowerCase()) ||
+            product.phienBan.toLowerCase().includes(search.value.toLowerCase())
+        );
+    }
+    return result.sort((a, b) => new Date(b.ngayThem) - new Date(a.ngayThem));
 });
 
 const totalItems = computed(() => {
@@ -241,12 +287,7 @@ async function updateQuantity(product) {
         if (user.value?.id) {
             await cartService.updateQuantity(product.idGioHangChiTiet, product.soLuong);
         } else {
-            let storedCart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
-            const index = storedCart.findIndex(item => item.idSanPhamChiTiet === product.idSanPhamChiTiet);
-            if (index >= 0) {
-                storedCart[index].soLuong = product.soLuong;
-                localStorage.setItem('shoppingCart', JSON.stringify(storedCart));
-            }
+            const success = CartService.capNhatSoLuong(product.idSanPhamChiTiet, product.soLuong);
         }
         ElMessage.success('Cập nhật số lượng thành công');
     } catch (error) {
@@ -282,9 +323,7 @@ async function removeProduct(idSanPhamChiTiet) {
         if (user.value?.id) {
             await cartService.removeItem(idSanPhamChiTiet);
         } else {
-            let storedCart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
-            storedCart = storedCart.filter(item => item.idSanPhamChiTiet !== idSanPhamChiTiet);
-            localStorage.setItem('shoppingCart', JSON.stringify(storedCart));
+            const success = CartService.xoaSanPhamKhoiGio(idSanPhamChiTiet)
         }
         await fetchCart();
         ElMessage.success('Đã xóa sản phẩm khỏi giỏ hàng');
@@ -311,10 +350,9 @@ async function handleBulkDelete() {
                 await cartService.removeItem(item.idSanPhamChiTiet);
             }
         } else {
-            let storedCart = JSON.parse(localStorage.getItem('shoppingCart') || '[]');
-            const selectedIds = selectedItems.value.map(item => item.idSanPhamChiTiet);
-            storedCart = storedCart.filter(item => !selectedIds.includes(item.idSanPhamChiTiet));
-            localStorage.setItem('shoppingCart', JSON.stringify(storedCart));
+            for (const item of selectedItems.value) {
+                const success = CartService.xoaSanPhamKhoiGio(item.idSanPhamChiTiet);
+            }
         }
         await fetchCart();
         ElMessage.success('Đã xóa các sản phẩm đã chọn');
@@ -342,7 +380,6 @@ const handleCheckout = () => {
         return;
     }
     ElMessage.success(`Đang chuyển đến trang thanh toán với ${selectedItems.value.length} sản phẩm`);
-    // Implement checkout logic here
 };
 </script>
 

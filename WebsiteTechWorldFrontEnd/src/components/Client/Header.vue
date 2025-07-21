@@ -1,14 +1,19 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
+import { cartService } from "@/Service/ClientService/GioHang/GioHangClientService";
+import { useStore } from 'vuex'
 
+const store = useStore()
 
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
 const router = useRouter();
 const route = useRoute();
-const user = ref<{ fullName: String } | null>(null);
+const user = ref<{ id: number; fullName: string } | null>(null);
+
+const cartItemCount = computed(() => store.getters['headerState/getUserName'])
 
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 onMounted(async () => {
@@ -105,9 +110,11 @@ const goToLogin = () => {
         </li>
 
         <li>
-          <router-link to="/client/shopping-cart"
-            ><i class="fa fa-shopping-cart"></i> Giỏ hàng</router-link
-          >
+          <router-link to="/client/shopping-cart" class="cart-link">
+            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i>
+            <span class="badge">{{ cartItemCount }}</span>
+            Giỏ hàng
+          </router-link>
         </li>
 
         <!-- Hiển thị dropdown nếu đã đăng nhập -->
@@ -257,5 +264,23 @@ nav ul li a:hover {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+
+.cart-link {
+  position: relative;
+  display: inline-block;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: 60px;
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  z-index: 1;
 }
 </style>

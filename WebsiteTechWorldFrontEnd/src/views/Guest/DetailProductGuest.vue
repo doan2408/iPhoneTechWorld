@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   detailSanPham,
   getChiTietBienThe,
@@ -9,9 +9,12 @@ import {
 } from "@/Service/GuestService/ProductGuestService";
 import { ShoppingCart } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+import { CartService } from "@/Service/ClientService/GioHang/CartService";
 
 const route = useRoute();
 const idSanPham = route.params.id;
+
+const router = useRouter();
 
 const formatPrice = (val) => {
   if (!val) return "0₫";
@@ -87,60 +90,74 @@ const fetchListAnhByMau = async () => {
   }
 };
 
-const addToCart = async () => {
+const addToCart = async (buy) => {
   try {
-    if (quantity.value <= 0) {
+    if (!quantity?.value || quantity.value <= 0) {
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
 
-    if (!bienThe.value || bienThe.value.soLuong <= 0) {
-      ElMessage.error("Sản phẩm đã hết hàng!");
+    if (!bienThe?.value || typeof bienThe.value.soLuong !== 'number' || bienThe.value.soLuong <= 0) {
+      ElMessage.error("Sản phẩm đã hết hàng hoặc không hợp lệ!");
       return;
     }
-    console.log(bienThe.value)
-    const idSanPhamChiTiet = bienThe.value.idSpct; 
+
+    const idSanPhamChiTiet = bienThe.value.idSpct;
     const soLuongMoi = quantity.value;
-    const soLuongTonKho = bienThe.value.soLuong;
+    const tenSanPham = sanPham.value?.tenSanPham || "Sản phẩm không xác định";
+    const phienBan = `${
+      sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
+    } - ${
+      sanPham.value?.rom?.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
+    }`;
+    const imageUrl = bienThe.value?.hinhAnh?.[0] || "/default-image.png";
+    const gia = bienThe.value?.giaBan ?? 0;
+    const soLuongTon = bienThe.value.soLuong;
 
-    let storedCart = JSON.parse(localStorage.getItem("shoppingCart") || "[]");
-    const itemHienTai = storedCart.find(
-      (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
+    const isValid = validateCartItem(idSanPhamChiTiet, soLuongMoi, soLuongTon);
+
+    const success = CartService.themVaoGio(
+      idSanPhamChiTiet,
+      soLuongMoi,
+      tenSanPham,
+      phienBan,
+      imageUrl,
+      gia,
+      soLuongTon
     );
-    const soLuongHienTai = itemHienTai ? itemHienTai.soLuong : 0;
 
-    if (soLuongHienTai + soLuongMoi > soLuongTonKho) {
+    if (!success) {
+      const itemHienTai = CartService.cartData.value.find(
+        (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
+      );
       ElMessage.error(
-        `Số lượng vượt quá tồn kho. Đã có ${soLuongHienTai} sản phẩm trong giỏ.`
+        `Số lượng vượt quá tồn kho. Đã có ${itemHienTai?.soLuong || 0} sản phẩm trong giỏ.`
       );
       return;
     }
 
-    if (itemHienTai) {
-      itemHienTai.soLuong = soLuongHienTai + soLuongMoi;
+    if (buy) {
+      try {
+        await router.push({ path: '/shopping-cart', query: { selected: idSanPhamChiTiet } });
+      } catch (navError) {
+        console.error("Lỗi chuyển hướng:", navError);
+        ElMessage.error("Không thể chuyển hướng đến giỏ hàng!");
+      }
     } else {
-      storedCart.push({
-        idSanPhamChiTiet: idSanPhamChiTiet,
-        soLuong: soLuongMoi,
-        tenSanPham: sanPham.value?.tenSanPham || "Sản phẩm",
-        phienBan: `${
-          sanPham.value?.mau.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
-        } - ${
-          sanPham.value?.rom.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
-        }`,
-        imageUrl: bienThe.value?.hinhAnh?.[0] || "",
-        gia: bienThe.value?.giaBan || 0,
-        soLuongTon: bienThe.value?.soLuong || 0,
-        ngayThem: new Date().toISOString(),
-      });
+      ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
     }
-
-    localStorage.setItem("shoppingCart", JSON.stringify(storedCart));
-    ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
   } catch (error) {
-    console.error("Lỗi khi thêm vào giỏ hàng:", error);
-    ElMessage.error(error.message || "Lỗi khi thêm sản phẩm vào giỏ hàng!");
+    console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
+    ElMessage.error(error.response?.data?.message || "Lỗi khi thêm sản phẩm vào giỏ hàng!");
   }
+}
+
+const validateCartItem = (idSanPhamChiTiet, soLuongMoi, soLuongTon) => {
+  const itemHienTai = CartService.cartData.value.find(
+    (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
+  );
+  const soLuongHienTai = itemHienTai ? itemHienTai.soLuong : 0;
+  return soLuongHienTai + soLuongMoi <= soLuongTon;
 };
 
 // Gọi API lấy biến thể khi màu hoặc ROM thay đổi
@@ -253,6 +270,7 @@ onMounted(() => {
             <el-button
               type="primary"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
+              @click="addToCart(true)"
               class="buy-btn"
             >
               Mua ngay
@@ -262,7 +280,7 @@ onMounted(() => {
               type="success"
               :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              @click="addToCart"
+              @click="addToCart(false)"
               class="cart-btn"
             >
               Thêm vào giỏ hàng

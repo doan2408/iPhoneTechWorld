@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   detailSanPham,
   getChiTietBienThe,
@@ -15,6 +15,8 @@ const user = JSON.parse(localStorage.getItem("user"));
 
 const route = useRoute();
 const idSanPham = route.params.id;
+
+const router = useRouter();
 
 const formatPrice = (val) => {
   if (!val) return "0₫";
@@ -90,7 +92,7 @@ const fetchListAnhByMau = async () => {
   }
 };
 
-const themVaoGio = async () => {
+const themVaoGio = async (buy) => {
   try {
     if (quantity.value < 0) {
       ElMessage.error("Số lượng phải lớn hơn 0!");
@@ -124,11 +126,20 @@ const themVaoGio = async () => {
     await cartService.addToCart({
       idKhachHang: user.id,
       idSanPhamChiTiet: bienThe.value.idSpct,
-      soLuong: 1,
       soLuong: quantity.value
     });
 
-    ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
+    if (buy) {
+      try {
+        await router.push({ path: '/client/shopping-cart', query: { selected: bienThe.value.idSpct } });
+      } catch (navError) {
+        console.error("Lỗi chuyển hướng:", navError);
+        ElMessage.error("Không thể chuyển hướng đến giỏ hàng!");
+      }
+    } else {
+      ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
+    }
+
   } catch (error) {
     console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
     ElMessage.error(error.response?.data?.message || "Lỗi khi thêm sản phẩm vào giỏ hàng!");
@@ -246,6 +257,7 @@ onMounted(() => {
               type="primary"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
               class="buy-btn"
+              @click="themVaoGio(true)"
             >
               Mua ngay
             </el-button>
@@ -255,7 +267,7 @@ onMounted(() => {
               :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
               class="cart-btn"
-              @click="themVaoGio"
+              @click="themVaoGio(false)"
             >
               Thêm vào giỏ hàng
             </el-button>

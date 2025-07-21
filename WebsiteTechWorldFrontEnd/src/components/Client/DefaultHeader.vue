@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
+import { CartService } from "@/Service/ClientService/GioHang/CartService";
 
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
@@ -50,7 +51,7 @@ const getLoginLink = computed(() => {
   if (isLoginPage.value) {
     return null  // Không thêm redirect vào URL
   }
-  
+
   // Nếu không phải trang login, thêm redirect vào URL
   return `/login?redirect=${encodeURIComponent(route.fullPath)}`
 })
@@ -72,7 +73,14 @@ const goToLogin = () => {
       <ul>
         <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li>
         <li><router-link to="/orders"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
-        <li><router-link to="/shopping-cart"><i class="fa fa-shopping-cart"></i> Giỏ hàng</router-link></li>
+        <li>
+          <router-link to="/shopping-cart" class="cart-link">
+            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i>
+            <span class="badge">{{ CartService.cartCount }}</span>
+            Giỏ hàng
+          </router-link>
+        </li>
+
 
         <!-- Chỉ hiển thị nút Đăng xuất nếu người dùng đã đăng nhập
         <li v-if="isLoggedIn">
@@ -80,17 +88,12 @@ const goToLogin = () => {
         </li> -->
 
         <!-- Chỉ hiển thị nút Đăng nhập nếu người dùng chưa đăng nhập và không ở trang đăng nhập -->
-         <!-- <li v-if="isLoggedIn">
+        <!-- <li v-if="isLoggedIn">
           <a href="#" @click.prevent="handleLogout">Đăng nhập</a>
         </li> -->
         <li>
-          <a
-            href="#"
-            @click.prevent="goToLogin"
-            :class="{ 'disabled-link': isLoginPage }"
-            :disabled="isLoginPage"
-          >
-          Đăng nhập
+          <a href="#" @click.prevent="goToLogin" :class="{ 'disabled-link': isLoginPage }" :disabled="isLoginPage">
+            Đăng nhập
           </a>
         </li>
       </ul>
@@ -120,12 +123,10 @@ const goToLogin = () => {
   left: var(--mouse-x);
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(135, 206, 235, 0.4) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(135, 206, 235, 0.4) 30%,
+      transparent 70%);
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -168,5 +169,22 @@ nav ul li a:hover {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.cart-link {
+  position: relative;
+  display: inline-block;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: 60px;
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  z-index: 1;
 }
 </style>
