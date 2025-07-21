@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <div class="cart-content" :style="cartData.length > 3 ? { marginBottom: '100px' } : {}">
+        <div class="cart-content" :style="cartData.length < 3 ? { marginBottom: '310px' } : {}">
             <div v-if="cartData.length === 0 || totalItems === 0" class="empty-cart">
                 <div class="empty-illustration">
                     <el-icon class="empty-icon">
@@ -169,6 +169,10 @@ import headerState from '@/components/Client/modules/headerState';
 const count = ref(0)
 const store = useStore()
 
+if (!store.hasModule('headerState')) {
+    store.registerModule('headerState', headerState)
+}
+
 const route = useRoute();
 const selectedId = route.query.selected;
 
@@ -180,13 +184,10 @@ const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 onMounted(async () => {
     await fetchCart();
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    if (!store.hasModule('headerState')) {
-        store.registerModule('headerState', headerState)
-    }
 });
 
 const guiLenHeader = () => {
-    store.commit('headerState/setUserName', count.value)
+    store.commit('headerState/setCartItemCount', count.value)
 }
 
 async function fetchCart() {
@@ -723,7 +724,7 @@ const handleCheckout = () => {
 }
 
 .checkout-section {
-    position: fixed;
+    position: sticky;
     bottom: 0;
     background: white;
     border-top: 1px solid #e2e8f0;
