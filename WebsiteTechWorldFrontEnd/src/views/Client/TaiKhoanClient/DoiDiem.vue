@@ -59,7 +59,7 @@ const pageSize = 10;
 const diemKhaDung = ref(0);
 const currentTab = ref("Diamond");
 
-const hangList = ["DIAMOND", "GOLD", "SILVER", "MEMBER"];
+const hangList = ["MEMBER", "SILVER",  "GOLD", "DIAMOND"];
 
 const search = ref(null);
 const trangThai = ref(null);

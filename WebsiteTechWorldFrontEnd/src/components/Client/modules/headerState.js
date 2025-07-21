@@ -2,14 +2,15 @@
 export default {
   namespaced: true,
   state: () => ({
-    userName: '',
+    cartItemCount: 0,
   }),
   mutations: {
-    setUserName(state, name) {
-      state.userName = name
+    setCartItemCount(state, count) {
+      state.cartItemCount = count;
     },
   },
   getters: {
-    getUserName: (state) => state.userName,
+    getCartItemCount: (state) => state.cartItemCount,
   },
 }
+

@@ -2,10 +2,8 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
-import { cartService } from "@/Service/ClientService/GioHang/GioHangClientService";
 import { useStore } from 'vuex'
-
-const store = useStore()
+import headerState from "./modules/headerState";
 
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
@@ -13,7 +11,13 @@ const router = useRouter();
 const route = useRoute();
 const user = ref<{ id: number; fullName: string } | null>(null);
 
-const cartItemCount = computed(() => store.getters['headerState/getUserName'])
+const store = useStore()
+
+if (!store.hasModule('headerState')) {
+  store.registerModule('headerState', headerState);
+}
+
+const cartItemCount = computed(() => store.getters['headerState/getCartItemCount'])
 
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 onMounted(async () => {
@@ -38,6 +42,9 @@ onMounted(async () => {
 
   // Đăng ký sự kiện click bên ngoài để ẩn dropdown
   document.addEventListener("click", handleClickOutside);
+
+
+  console.log('Huhu: ', cartItemCount.value)
 });
 
 // Xử lý đăng xuất
@@ -98,15 +105,11 @@ const goToLogin = () => {
     <nav>
       <ul>
         <li>
-          <router-link to="/client/products"
-            ><i class="fa fa-box"></i> Đơn mua của tôi</router-link
-          >
+          <router-link to="/client/products"><i class="fa fa-box"></i> Đơn mua của tôi</router-link>
         </li>
 
         <li>
-          <router-link to="/client/order-tracking-search"
-            ><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link
-          >
+          <router-link to="/client/order-tracking-search"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link>
         </li>
 
         <li>
@@ -148,12 +151,7 @@ const goToLogin = () => {
 
         <!-- Chỉ hiển thị nút Đăng nhập nếu người dùng chưa đăng nhập -->
         <li v-if="!isLoggedIn">
-          <a
-            href="#"
-            @click.prevent="goToLogin"
-            :class="{ 'disabled-link': isLoginPage }"
-            :disabled="isLoginPage"
-          >
+          <a href="#" @click.prevent="goToLogin" :class="{ 'disabled-link': isLoginPage }" :disabled="isLoginPage">
             Đăng nhập
           </a>
         </li>
@@ -181,12 +179,10 @@ const goToLogin = () => {
   left: var(--mouse-x);
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(135, 206, 235, 0.4) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(135, 206, 235, 0.4) 30%,
+      transparent 70%);
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
