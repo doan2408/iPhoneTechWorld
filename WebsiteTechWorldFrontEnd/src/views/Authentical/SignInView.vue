@@ -1,6 +1,6 @@
 <script setup>
 import { ElMessage } from "element-plus";
-import { reactive, ref, watch } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 
@@ -150,7 +150,7 @@ watch([tai_khoan, mat_khau], () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url("src/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
+  background-image: url("@/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
   background-size: cover !important; /* Phủ ảnh toàn bộ */
   background-position: center !important; /* Canh giữa ảnh */
   background-repeat: no-repeat !important; /* Không lặp lại ảnh */

@@ -3,7 +3,6 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
 
-
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
 const router = useRouter();
@@ -41,7 +40,7 @@ const handleLogout = async () => {
     await LoginService.logout(); // Gọi API đăng xuất
     isLoggedIn.value = false;
     localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập khỏi localStorage
-    localStorage.removeItem("user"); 
+    localStorage.removeItem("user");
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
     console.error("Lỗi đăng xuất:", err);
@@ -128,6 +127,9 @@ const goToLogin = () => {
               </router-link>
               <router-link to="/client/addresses">
                 <i class="fa fa-map-marker-alt"></i> Địa chỉ
+              </router-link>
+              <router-link to="/client/lichSuDiem">
+                <i class="fa fa-exchange-alt"></i> Đổi điểm
               </router-link>
               <a href="#" @click.prevent="handleLogout">
                 <i class="fa fa-sign-out-alt"></i> Đăng xuất

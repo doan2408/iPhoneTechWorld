@@ -16,6 +16,7 @@ const error = ref(null);
 const selectedAddressId = ref(null); // Theo dõi địa chỉ được click để hiện nút
 const route = useRoute();
 const router = useRouter();
+const errors = reactive({});
 
 // Modal states
 const isModalVisible = ref(false);
@@ -50,7 +51,7 @@ const rules = {
   sdtNguoiNhan: [
     { required: true, message: "Vui lòng nhập số điện thoại", trigger: "blur" },
     {
-      pattern: /^[0-9]{10,11}$/,
+      pattern: /^[0-9]{10}$/,
       message: "Số điện thoại không hợp lệ",
       trigger: "blur",
     },
@@ -143,6 +144,8 @@ const handleSubmit = async () => {
     await formRef.value.validate();
     loading.value = true;
 
+    Object.keys(errors).forEach((key) => delete errors[key]);
+
     // Prepare data for API
     // Update existing address - sử dụng ID của địa chỉ
     const addressData = {
@@ -155,7 +158,7 @@ const handleSubmit = async () => {
       quanHuyen: formData.quanHuyen,
       tinhThanhPho: formData.tinhThanhPho,
       diaChiChinh: formData.diaChiChinh,
-      idKhachHang: route.params.idClient // ID khách hàng từ params
+      idKhachHang: route.params.idClient, // ID khách hàng từ params
     };
 
     if (isEditMode.value) {
@@ -176,7 +179,7 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error("Form validation failed:", error);
     if (Array.isArray(error)) {
-      err.forEach(({ field, message }) => {
+      error.forEach(({ field, message }) => {
         errors[field] = message;
       });
     } else {
@@ -377,7 +380,11 @@ onMounted(() => {
             v-model="formData.tenNguoiNhan"
             placeholder="Nhập tên người nhận"
             clearable
+            :class="{ 'is-error': errors.tenNguoiNhan }"
           />
+          <div v-if="errors.tenNguoiNhan" class="error-message">
+            {{ errors.tenNguoiNhan }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Số điện thoại" prop="sdtNguoiNhan">
@@ -385,8 +392,12 @@ onMounted(() => {
             v-model="formData.sdtNguoiNhan"
             placeholder="Nhập số điện thoại"
             clearable
-            maxlength="11"
+            maxlength="10"
+            :class="{ 'is-error': errors.sdtNguoiNhan }"
           />
+          <div v-if="errors.sdtNguoiNhan" class="error-message">
+            {{ errors.sdtNguoiNhan }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Số nhà" prop="soNha">
@@ -394,7 +405,11 @@ onMounted(() => {
             v-model="formData.soNha"
             placeholder="Nhập số nhà"
             clearable
+            :class="{ 'is-error': errors.soNha }"
           />
+          <div v-if="errors.soNha" class="error-message">
+            {{ errors.soNha }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Tên đường" prop="tenDuong">
@@ -402,7 +417,11 @@ onMounted(() => {
             v-model="formData.tenDuong"
             placeholder="Nhập tên đường"
             clearable
+            :class="{ 'is-error': errors.tenDuong }"
           />
+          <div v-if="errors.tenDuong" class="error-message">
+            {{ errors.tenDuong }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Xã/Phường" prop="xaPhuong">
@@ -410,7 +429,11 @@ onMounted(() => {
             v-model="formData.xaPhuong"
             placeholder="Nhập xã/phường"
             clearable
+            :class="{ 'is-error': errors.xaPhuong }"
           />
+          <div v-if="errors.xaPhuong" class="error-message">
+            {{ errors.xaPhuong }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Quận/Huyện" prop="quanHuyen">
@@ -418,7 +441,11 @@ onMounted(() => {
             v-model="formData.quanHuyen"
             placeholder="Nhập quận/huyện"
             clearable
+            :class="{ 'is-error': errors.quanHuyen }"
           />
+          <div v-if="errors.quanHuyen" class="error-message">
+            {{ errors.quanHuyen }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Tỉnh/Thành phố" prop="tinhThanhPho">
@@ -426,7 +453,11 @@ onMounted(() => {
             v-model="formData.tinhThanhPho"
             placeholder="Nhập tỉnh/thành phố"
             clearable
+            :class="{ 'is-error': errors.tinhThanhPho }"
           />
+          <div v-if="errors.tinhThanhPho" class="error-message">
+            {{ errors.tinhThanhPho }}
+          </div>
         </el-form-item>
 
         <el-form-item label="Địa chỉ chính">
@@ -441,16 +472,21 @@ onMounted(() => {
               (Địa chỉ chính không thể bỏ chọn)
             </span>
           </div>
+          <div v-if="errors.diaChiChinh" class="error-message">
+            {{ errors.diaChiChinh }}
+          </div>
         </el-form-item>
       </el-form>
 
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeModal">Hủy</el-button>
-          <el-button type="primary" @click="handleSubmit"
-           :loading="loading"
-           :disabled="isEditMode && !isFormChanged"
-           >
+          <el-button
+            type="primary"
+            @click="handleSubmit"
+            :loading="loading"
+            :disabled="isEditMode && !isFormChanged"
+          >
             {{ isEditMode ? "Cập nhật" : "Thêm mới" }}
           </el-button>
         </div>
@@ -599,5 +635,38 @@ onMounted(() => {
 
 :deep(.el-switch) {
   --el-switch-on-color: #409eff;
+}
+
+.error-message {
+  color: #f56c6c;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1;
+}
+
+.is-error :deep(.el-input__wrapper) {
+  border-color: #f56c6c !important;
+  box-shadow: 0 0 0 1px #f56c6c inset !important;
+}
+
+.is-error :deep(.el-input__wrapper:hover) {
+  border-color: #f56c6c !important;
+}
+
+.is-error :deep(.el-input__wrapper.is-focus) {
+  border-color: #f56c6c !important;
+  box-shadow: 0 0 0 1px #f56c6c inset !important;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.note {
+  font-size: 12px;
+  color: #909399;
+  font-style: italic;
 }
 </style>

@@ -300,7 +300,7 @@ onMounted(() => {
 
 <style scoped>
 .product-detail {
-  background: #f8f9fa;
+  background: #f5f5f5;
   min-height: 100vh;
   padding: 20px 0;
 }
@@ -308,55 +308,54 @@ onMounted(() => {
 .product-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 40px;
-  padding: 40px;
+  gap: 30px;
+  padding: 20px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  max-width: 1400px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
   margin: 0 auto;
-  border: 1px solid #e9ecef;
 }
 
 .product-image {
-  flex: 1 1 500px;
-  max-width: 550px;
+  flex: 1 1 450px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .main-image {
   width: 100%;
-  height: 450px;
+  height: 400px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #ffffff;
-  border: 1px solid #dee2e6;
-  transition: box-shadow 0.2s ease;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
 }
 
 .main-image:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .thumbnail-list {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
 }
 
 .thumbnail {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 2px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -364,314 +363,300 @@ onMounted(() => {
 }
 
 .thumbnail:hover {
-  border-color: #6c757d;
+  border-color: #999;
 }
 
 .thumbnail.active {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 1px #0d6efd;
+  border-color: #d70018;
+  box-shadow: 0 0 0 1px #d70018;
 }
 
 .product-right {
-  flex: 1 1 500px;
+  flex: 1 1 450px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
 }
 
 .product-info {
   background: #ffffff;
-  padding: 30px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
 }
 
 .product-info h1 {
-  font-size: 28px;
-  margin-bottom: 15px;
-  color: #212529;
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .price {
-  font-size: 32px;
-  color: #dc3545;
+  font-size: 28px;
+  color: #d70018;
   font-weight: 700;
-  margin: 20px 0;
-  padding: 15px 20px;
-  background: #fff5f5;
-  border-radius: 8px;
-  border-left: 4px solid #dc3545;
+  margin: 15px 0;
   display: inline-block;
 }
 
-/* Giao diện vùng chọn */
+/* Options styling */
 .options {
-  margin-top: 25px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  margin-top: 20px;
+  padding: 12px 0;
 }
 
 .options h3 {
-  font-size: 18px;
-  margin-bottom: 15px;
-  color: #495057;
-  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
 }
 
-/* Danh sách nút */
 .option-list {
   display: flex;
   flex-wrap: wrap;
-  /* Xoá gap nếu dùng margin bên dưới */
+  gap: 8px;
 }
 
-/* Nút radio bo góc và vuông */
 ::v-deep(.option-list .el-radio-button) {
-  margin-right: 10px;
-  margin-bottom: 10px;
+  margin: 5px;
 }
 
-/* Nếu cần đều nhau, có thể dùng padding thay vì margin, nhưng margin rõ ràng hơn */
-
-/* Style phần bên trong như cũ */
 ::v-deep(.option-list .el-radio-button__inner) {
-  border-radius: 12px !important;
-  padding: 12px 16px;
-  min-width: 80px;
+  border-radius: 10px !important;
+  padding: 8px 16px;
+  min-width: 70px;
+  font-size: 14px;
   text-align: center;
   background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  transition: all 0.3s ease;
+  border: 1px solid #d9d9d9;
+  transition: all 0.2s ease;
+  color: #333;
 }
 
-/* Hover */
 ::v-deep(.option-list .el-radio-button__inner:hover) {
-  background-color: #f1f5f9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f0f8ff;
+  border-color: #1890ff;
 }
 
-/* Active */
 ::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
-  background-color: #667eea;
+  background-color: #1890ff;
   color: #fff;
-  border-color: #5a67d8;
+  border-color: #1890ff;
 }
 
-
-/* Quantity Selector Styles */
+/* Quantity styles */
 .quantity-selector {
-  margin-top: 20px;
-  background: #e8f4fd;
-  border: 1px solid #b3d9ff;
+  margin-top: 15px;
+  background: transparent;
+  border: none;
+  padding: 12px 0;
 }
 
 .quantity-control {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 2px;
   max-width: 140px;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
   overflow: hidden;
   background: #ffffff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  padding: 3px;
 }
 
 .quantity-control button {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   font-size: 18px;
   font-weight: 600;
-  background: #f8f9fa;
-  color: #495057;
+  background: linear-gradient(145deg, #f1f3f4 0%, #e8eaed 100%);
+  color: #333;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .quantity-control button:hover:not(:disabled) {
-  background: #e9ecef;
-  color: #212529;
+  background: linear-gradient(145deg, #1976d2 0%, #2196f3 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.quantity-control button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 
 .quantity-control button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: #f8f9fa;
+  background: #f5f5f5;
+  transform: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .quantity-control input {
-  width: 60px;
-  height: 40px;
+  width: 50px;
+  height: 38px;
   text-align: center;
   font-size: 16px;
   font-weight: 600;
   border: none;
-  border-left: 1px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
-  background: #ffffff;
-  color: #212529;
+  background: transparent;
+  color: #333;
   outline: none;
+  margin: 0;
 }
 
 .quantity-control input:focus {
-  background: #f8f9fa;
+  background: rgba(25, 118, 210, 0.05);
+  border-radius: 6px;
+  color: #1976d2;
 }
 
-/* Remove spinner arrows from number input */
 .quantity-control input::-webkit-outer-spin-button,
 .quantity-control input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
-
+/* Button group */
 .button-group {
   display: flex;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 12px;
+  margin-top: 25px;
 }
 
 .buy-btn,
 .cart-btn {
   flex: 1;
-  font-size: 16px;
-  padding: 14px 0;
+  font-size: 14px;
+  padding: 12px 20px;
   text-align: center;
-  border-radius: 6px;
-  font-weight: 600;
+  border-radius: 4px;
+  font-weight: 500;
   transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  height: 44px;
 }
 
 .buy-btn {
-  background: #0d6efd;
-  border: none;
+  background: #d70018;
   color: white;
 }
 
-.buy-btn:hover {
-  background: #0b5ed7;
-  transform: translateY(-1px);
+.buy-btn:hover:not(:disabled) {
+  background: #b8001a;
 }
 
 .cart-btn {
-  background: #198754;
-  border: none;
+  background: #1890ff;
   color: white;
 }
 
-.cart-btn:hover {
-  background: #157347;
-  transform: translateY(-1px);
+.cart-btn:hover:not(:disabled) {
+  background: #096dd9;
 }
 
-/* Thông số kỹ thuật */
+.buy-btn:disabled,
+.cart-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Specifications */
 .product-specs {
   background: #ffffff;
-  padding: 30px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  transition: box-shadow 0.2s ease;
-}
-
-.product-specs:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
 }
 
 .product-specs h2 {
-  margin-bottom: 25px;
-  font-size: 22px;
-  color: #212529;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
   font-weight: 600;
-  border-bottom: 2px solid #0d6efd;
-  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 8px;
 }
 
 .spec-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #495057;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
 }
 
 .spec-list li {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 15px;
-  margin-bottom: 4px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
 }
 
-.spec-list li:nth-child(even) {
-  background: #f8f9fa;
-}
-
-.spec-list li:hover {
-  background: #e9ecef;
+.spec-list li:last-child {
+  border-bottom: none;
 }
 
 .spec-list li strong {
-  color: #212529;
+  color: #333;
   font-weight: 500;
-  flex: 0 0 40%;
+  flex: 0 0 35%;
+  margin-right: 15px;
 }
 
-.spec-list li span {
-  flex: 0 0 55%;
-  text-align: right;
-  color: #495057;
-  font-weight: 400;
+/* Stock info */
+.options:has(.quantity-selector) h3 {
+  color: #52c41a;
+  font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .product-container {
     flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 25px;
+    padding: 15px;
+    gap: 20px;
   }
 
   .main-image {
-    height: 350px;
-  }
-
-  .product-right {
-    width: 100%;
+    height: 300px;
   }
 
   .product-info {
-    width: 100%;
-    padding: 20px;
+    padding: 15px;
   }
 
   .product-info h1 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .price {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .product-specs {
-    width: 100%;
-    margin: 20px 0;
-    padding: 20px;
+    padding: 15px;
   }
 
   .button-group {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .buy-btn,
@@ -682,41 +667,64 @@ onMounted(() => {
 
   .spec-list li {
     flex-direction: column;
-    gap: 5px;
-    text-align: left;
-    padding: 12px 15px;
+    gap: 4px;
+    align-items: flex-start;
+    padding: 10px 0;
   }
 
-  .spec-list li strong,
-  .spec-list li span {
+  .spec-list li strong {
     flex: none;
-    text-align: left;
-    width: 100%;
+    margin-right: 0;
+    margin-bottom: 2px;
   }
 
   .thumbnail {
-    width: 60px;
-    height: 60px;
-  }
-
-  .options {
-    padding: 15px;
+    width: 50px;
+    height: 50px;
   }
 
   .quantity-control {
-    max-width: 120px;
+    max-width: 110px;
   }
 
   .quantity-control button {
-    width: 35px;
-    height: 35px;
-    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
   }
 
   .quantity-control input {
-    width: 50px;
-    height: 35px;
-    font-size: 14px;
+    width: 54px;
+    height: 28px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-container {
+    padding: 10px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-specs {
+    padding: 12px;
+  }
+
+  .options {
+    padding: 8px 0;
+  }
+
+  .option-list {
+    gap: 6px;
+  }
+
+  ::v-deep(.option-list .el-radio-button__inner) {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 60px;
   }
 }
 </style>
