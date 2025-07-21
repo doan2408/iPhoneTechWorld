@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getLichSuDiem } from "@/Service/ClientService/TaiKhoan/TichDiemServices";
+import { getLichSuDiem } from "@/Service/ClientService/TichDiem/TichDiemServices";
 
 const filters = ref({
   fromDate: null,

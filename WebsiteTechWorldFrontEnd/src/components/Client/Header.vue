@@ -136,7 +136,7 @@ const goToLogin = () => {
               <router-link to="/client/addresses">
                 <i class="fa fa-map-marker-alt"></i> Địa chỉ
               </router-link>
-              <router-link to="/client/lichSuDiem">
+              <router-link to="/client/doiDiem">
                 <i class="fa fa-exchange-alt"></i> Đổi điểm
               </router-link>
               <a href="#" @click.prevent="handleLogout">
