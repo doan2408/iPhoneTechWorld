@@ -14,5 +14,5 @@ import java.math.BigDecimal;
 public class ViDiemClientResponse {
     private Integer idViDiem;
     private Integer idKhachHang;
-    private BigDecimal viDiem;
+    private BigDecimal diemKhaDung;
 }
