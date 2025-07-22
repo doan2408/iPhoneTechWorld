@@ -287,15 +287,10 @@ onMounted(() => {
           alt="Hình ảnh sản phẩm"
           class="main-image"
         />
+
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
-          <img
-            v-for="(img, index) in bienThe.hinhAnh"
-            :key="index"
-            :src="img"
-            class="thumbnail"
-            :class="{ active: img === selectedImage }"
-            @click="selectedImage = img"
-          />
+          <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
+            :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
       </div>
 

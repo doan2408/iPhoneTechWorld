@@ -8,16 +8,18 @@ import org.example.websitetechworld.Entity.PhuongThucThanhToan;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
 import org.example.websitetechworld.Repository.PhuongThucThanhToanRepository;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class NganHangStrategy implements ThanhToanStrategy{
+@Component
+public class ChuyenKhoanStrategy implements ThanhToanStrategy{
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
 
-    public NganHangStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
+    public ChuyenKhoanStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.phuongThucThanhToanRepository = phuongThucThanhToanRepository;
     }
@@ -41,7 +43,7 @@ public class NganHangStrategy implements ThanhToanStrategy{
         }
 
         PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository
-                .findByLoaiHinhThuc(request.getHinhThucThanhToan());
+                .findOneByTenPhuongThuc(request.getHinhThucThanhToan());
         if (phuongThucThanhToan == null) {
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " +
                     request.getHinhThucThanhToan());
@@ -57,6 +59,6 @@ public class NganHangStrategy implements ThanhToanStrategy{
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
 
         chiTietThanhToanRepository.save(cttt);
-        return new ThanhToanAdminResponse("Thanh toan thanh cong",hoaDon.getThanhTien());
+        return new ThanhToanAdminResponse("Thanh toán thành công",hoaDon.getThanhTien());
     }
 }

@@ -3,10 +3,15 @@ package org.example.websitetechworld.Controller.ClientController.TaiKhoanClientC
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminDiaChiRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminDiaChiResponse;
+import org.example.websitetechworld.Entity.DiaChi;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.DiaChiAdminService;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,5 +94,16 @@ public class AddressClientController {
     @GetMapping("/addresses/{idKhachHang}")
     public ResponseEntity<?> getAllClientAddresses(@PathVariable int idKhachHang) {
         return ResponseEntity.ok(diaChiAdminService.getAllDiaChi(idKhachHang));
+    }
+    @GetMapping("/addresses_by_kh")
+    public ResponseEntity<?> getAllClientAddresses() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        List<AdminDiaChiResponse> listDiaChi = null;
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer userLoginId = customUserDetails.getId();
+            listDiaChi = diaChiAdminService.getAllDiaChi(userLoginId);
+        }
+        return ResponseEntity.ok(listDiaChi);
+
     }
 }
