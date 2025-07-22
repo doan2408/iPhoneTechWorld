@@ -1,6 +1,6 @@
 package org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices;
 
-import org.example.websitetechworld.Enum.HoaDon.LoaiHinhThuc;
+import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +16,9 @@ public class ThanhToanFactory {
     public ThanhToanFactory(List<ThanhToanStrategy> strategyList) {
         for (ThanhToanStrategy strategy : strategyList) {
             if (strategy instanceof TienMatStrategy) {
-                strategies.put(LoaiHinhThuc.TIEN_MAT.name(), strategy);
-            } else if (strategy instanceof NganHangStrategy) {
-                strategies.put(LoaiHinhThuc.NGAN_HANG.name(), strategy);
+                strategies.put(TenHinhThuc.TIEN_MAT.name(), strategy);
+            } else if (strategy instanceof ChuyenKhoanStrategy) {
+                strategies.put(TenHinhThuc.CHUYEN_KHOAN.name(), strategy);
             }
         }
     }

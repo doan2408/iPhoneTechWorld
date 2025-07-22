@@ -159,6 +159,7 @@ import {
     Picture, Minus, ShoppingBag
 } from '@element-plus/icons-vue';
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
+import router from '@/router';
 
 const search = ref('');
 const selectAll = ref(false);
@@ -342,6 +343,15 @@ const handleCheckout = () => {
         return;
     }
     ElMessage.success(`Đang chuyển đến trang thanh toán với ${selectedItems.value.length} sản phẩm`);
+
+    const selectedProducts = JSON.stringify(selectedItems.value);
+
+    router.push({
+        name: 'checkoutForm',
+        query: {
+            products: encodeURIComponent(selectedProducts)
+        }
+    });
     // Implement checkout logic here
 };
 </script>

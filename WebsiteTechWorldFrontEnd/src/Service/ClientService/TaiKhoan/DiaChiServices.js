@@ -62,3 +62,8 @@ export const updateAddress = async (id, addressRequest) => {
     }
   }
 };
+
+export const getDiaChiByClient = () => {
+  const url = baseURL + '/addresses_by_kh';
+  return api.get(url)
+}

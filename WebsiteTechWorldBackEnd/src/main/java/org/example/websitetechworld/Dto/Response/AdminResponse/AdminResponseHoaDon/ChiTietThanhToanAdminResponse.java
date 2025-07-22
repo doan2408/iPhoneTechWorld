@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.websitetechworld.Entity.ChiTietThanhToan;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.PhuongThucThanhToan;
 
 
 import java.math.BigDecimal;
@@ -36,8 +34,8 @@ public class ChiTietThanhToanAdminResponse {
         }
         if (chiTietThanhToan.getIdPhuongThucThanhToan() != null){
             response.setIdPhuongThucThanhToan(chiTietThanhToan.getId());
-            response.setTenPhuongThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getTenPhuongThuc());
-            response.setLoaiHinhThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getLoaiHinhThuc().getDisplayName());
+            response.setTenPhuongThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getTenPhuongThuc().getDisplayName());
+            response.setLoaiHinhThuc(chiTietThanhToan.getIdPhuongThucThanhToan().getLoaiHinhThuc());
         }
         response.setSoTienThanhToan(chiTietThanhToan.getSoTienThanhToan());
         return response;

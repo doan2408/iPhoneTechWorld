@@ -158,22 +158,13 @@ onMounted(() => {
     <div class="product-container">
       <!-- Cột trái: Hình ảnh -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
 
         <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
-          <img
-            v-for="(img, index) in bienThe.hinhAnh"
-            :key="index"
-            :src="img"
-            class="thumbnail"
-            :class="{ active: img === selectedImage }"
-            @click="selectedImage = img"
-          />
+          <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
+            :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
       </div>
 
@@ -188,11 +179,7 @@ onMounted(() => {
             <h3>Chọn màu:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedMau">
-                <el-radio-button
-                  v-for="m in sanPham?.mau"
-                  :key="m.id"
-                  :label="m.id"
-                >
+                <el-radio-button v-for="m in sanPham?.mau" :key="m.id" :label="m.id">
                   {{ m.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -204,11 +191,7 @@ onMounted(() => {
             <h3>Chọn ROM:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedRom">
-                <el-radio-button
-                  v-for="r in sanPham?.rom"
-                  :key="r.id"
-                  :label="r.id"
-                >
+                <el-radio-button v-for="r in sanPham?.rom" :key="r.id" :label="r.id">
                   {{ r.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -225,38 +208,22 @@ onMounted(() => {
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-              <input
-                type="number"
-                v-model="quantity"
-                min="1"
-                :max="bienThe.soLuong"
-              />
-              <button
-                @click="increaseQty"
-                :disabled="quantity >= bienThe.soLuong"
-              >
+              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
+              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
                 +
               </button>
             </div>
-          </div> 
+          </div>
 
           <!-- Hành động -->
           <div class="button-group">
-            <el-button
-              type="primary"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="buy-btn"
-            >
+            <el-button type="primary" :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
+              @click="themVaoGio" class="buy-btn">
               Mua ngay
             </el-button>
 
-            <el-button
-              type="success"
-              :icon="ShoppingCart"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="cart-btn"
-              @click="themVaoGio"
-            >
+            <el-button type="success" :icon="ShoppingCart"
+              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="cart-btn" @click="themVaoGio">
               Thêm vào giỏ hàng
             </el-button>
           </div>
@@ -270,7 +237,7 @@ onMounted(() => {
             <li><strong>RAM:</strong> {{ thongSo.ram }}</li>
             <li>
               <strong>Màn hình:</strong> {{ thongSo.tenManHinh }} ({{
-                thongSo.kichThuoc
+              thongSo.kichThuoc
               }})
             </li>
             <li><strong>Rom:</strong> {{ thongSo.rom }}</li>

@@ -45,7 +45,7 @@ const handleSubmit = async () => {
 
 const devliveryProcessing = async (data) => {
   router.push({
-    name: "GiaoHangProcessing",
+      name: "orderTracking",
     params: { id: data[0] },
   });
 };

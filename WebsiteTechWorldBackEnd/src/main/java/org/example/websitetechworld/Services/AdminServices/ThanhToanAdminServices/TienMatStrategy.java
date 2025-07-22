@@ -39,7 +39,7 @@ public class TienMatStrategy implements ThanhToanStrategy{
         hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
         hoaDon.setNgayThanhToan(LocalDate.now());
 
-        PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findByLoaiHinhThuc(request.getHinhThucThanhToan());
+        PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findOneByTenPhuongThuc(request.getHinhThucThanhToan());
 
         ChiTietThanhToan cttt = new ChiTietThanhToan();
         cttt.setIdHoaDon(hoaDon);

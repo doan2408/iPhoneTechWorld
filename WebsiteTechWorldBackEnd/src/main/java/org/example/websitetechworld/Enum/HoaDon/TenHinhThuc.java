@@ -3,13 +3,16 @@ package org.example.websitetechworld.Enum.HoaDon;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum LoaiHinhThuc {
+public enum TenHinhThuc {
     TIEN_MAT("Tiền mặt"),
-    NGAN_HANG("Ngân hàng");
+    CHUYEN_KHOAN("Chuyển khoản"),
+    NGAN_HANG("Ngân hàng"),
+    COD("Thanh toán sau khi nhận hàng"),
+    VNPAY("Thanh toán qua VNPAY");
 
     private final String displayName;
 
-    LoaiHinhThuc(String displayName) {
+    TenHinhThuc(String displayName) {
         this.displayName = displayName;
     }
 
@@ -24,9 +27,9 @@ public enum LoaiHinhThuc {
 
     // Ánh xạ chuỗi từ JSON sang enum
     @JsonCreator
-    public static LoaiHinhThuc fromValue(String value) {
+    public static TenHinhThuc fromValue(String value) {
         try {
-            return LoaiHinhThuc.valueOf(value.toUpperCase());
+            return TenHinhThuc.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Hình thức thanh toán không hợp lệ: " + value);
         }
