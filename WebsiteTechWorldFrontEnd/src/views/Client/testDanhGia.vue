@@ -7,13 +7,12 @@ import {
   getThongSo,
   getListAnhByMau,
 } from "@/Service/ClientService/Products/ProductClientService";
-import { cartService } from "@/service/ClientService/GioHang/GioHangClientService";
-import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 import { ShoppingCart } from "@element-plus/icons-vue";
-import { ElMessage, ElRate, ElUpload } from "element-plus";
-import { ElPagination } from "element-plus";
+import { ElMessage } from "element-plus";
 
 const user = JSON.parse(localStorage.getItem("user"));
+
 const route = useRoute();
 const idSanPham = route.params.id;
 
@@ -25,24 +24,10 @@ const formatPrice = (val) => {
 const sanPham = ref(null);
 const selectedRom = ref(null);
 const selectedMau = ref(null);
-const selectedImage = ref(null);
-const bienThe = ref(null);
-const thongSo = ref(null);
+const selectedImage = ref("");
+const bienThe = ref(null); //anh, gia, soLuong
+const thongSo = ref(null); //thong so ky thuat specifications
 const quantity = ref(1);
-
-// Review-related refs
-const rating = ref(0);
-const comment = ref("");
-const uploadedImages = ref([]);
-const reviews = ref([]);
-const averageRating = ref(0);
-const starDistribution = ref({});
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalReviews = ref(0);
-const selectedStarFilter = ref(0); // 0 là "Tất cả", 1-5 là số sao
-const hasMediaFilter = ref(false); // Lọc đánh giá có hình ảnh/video
-const isLoading = ref(false); // Trạng thái tải thêm
 
 const increaseQty = () => {
   if (bienThe.value && quantity.value < bienThe.value.soLuong) {
@@ -60,6 +45,7 @@ const fetchSanPhamDetail = async () => {
   try {
     const data = await detailSanPham(idSanPham);
     sanPham.value = data;
+
     if (data.rom.length > 0) selectedRom.value = data.rom[0].id;
     if (data.mau.length > 0) selectedMau.value = data.mau[0].id;
     if (data.hinhAnh?.length > 0) selectedImage.value = data.hinhAnh[0];
@@ -82,13 +68,13 @@ const fetchThongSo = async () => {
 const fetchChiTietBienThe = async () => {
   if (!selectedRom.value || !selectedMau.value) return;
   try {
-    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value);
+    const res = await getChiTietBienThe(
+      idSanPham,
+      selectedMau.value,
+      selectedRom.value
+    );
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
-    // Fetch reviews for the selected variant
-    await fetchReviews();
-    await fetchAverageRating();
-    await fetchStarDistribution();
   } catch (e) {
     bienThe.value = { soLuong: 0 };
     console.error("Không lấy được biến thể:", e);
@@ -110,13 +96,16 @@ const themVaoGio = async () => {
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
+
     const soLuongTonKho = bienThe.value.tongSoLuong;
     if (soLuongTonKho < 0) {
       ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
       return;
     }
+
     const gioHangResponse = await cartService.getCart(user.id);
     let soLuongHienTai = 0;
+
     if (gioHangResponse && gioHangResponse.items) {
       const item = gioHangResponse.items.find(
         (chiTiet) => chiTiet.idSanPhamChiTiet === bienThe.value.idSpct
@@ -125,16 +114,20 @@ const themVaoGio = async () => {
         soLuongHienTai = item.soLuong;
       }
     }
+
     const tongSoLuong = soLuongHienTai + quantity.value;
     if (tongSoLuong > soLuongTonKho) {
       ElMessage.error(`Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`);
       return;
     }
+
     await cartService.addToCart({
       idKhachHang: user.id,
       idSanPhamChiTiet: bienThe.value.idSpct,
-      soLuong: quantity.value,
+      soLuong: 1,
+      soLuong: quantity.value
     });
+
     ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
   } catch (error) {
     console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
@@ -142,151 +135,36 @@ const themVaoGio = async () => {
   }
 };
 
-// Review-related Functions
-const fetchReviews = async () => {
-  try {
-    isLoading.value = true;
-    const response = await DanhGiaSanPhamClientService.layDanhGiaTheoSanPham(
-      bienThe.value.idSpct,
-      currentPage.value - 1,
-      pageSize.value,
-      selectedStarFilter.value === 0 ? null : selectedStarFilter.value,
-      hasMediaFilter.value ? true : null
-    );
-    reviews.value = currentPage.value === 1 ? (response.content || response) : [...reviews.value, ...(response.content || response)];
-    totalReviews.value = response.totalElements || response.length;
-  } catch (error) {
-    console.error("Lỗi khi lấy đánh giá:", error);
-    ElMessage.error("Không thể tải đánh giá!");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const fetchAverageRating = async () => {
-  try {
-    const avg = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPham(bienThe.value.idSpct);
-    averageRating.value = avg || 0;
-  } catch (error) {
-    console.error("Lỗi khi lấy điểm trung bình:", error);
-  }
-};
-
-const fetchStarDistribution = async () => {
-  try {
-    const distribution = await DanhGiaSanPhamClientService.thongKeSoSaoSanPham(bienThe.value.idSpct);
-    starDistribution.value = distribution;
-  } catch (error) {
-    console.error("Lỗi khi lấy thống kê sao:", error);
-  }
-};
-
-const handleImageUpload = async (file) => {
-  try {
-    const imageUrl = await DanhGiaSanPhamClientService.uploadImage(file.raw);
-    uploadedImages.value.push(imageUrl);
-    ElMessage.success("Tải ảnh lên thành công!");
-  } catch (error) {
-    console.error("Lỗi khi tải ảnh:", error);
-    ElMessage.error("Không thể tải ảnh lên!");
-  }
-};
-
-const submitReview = async () => {
-  if (!user) {
-    ElMessage.error("Vui lòng đăng nhập để đánh giá!");
-    return;
-  }
-  if (rating.value < 1 || rating.value > 5) {
-    ElMessage.error("Vui lòng chọn số sao từ 1 đến 5!");
-    return;
-  }
-  try {
-    const reviewData = {
-      idSanPhamChiTiet: bienThe.value.idSpct,
-      idKhachHang: user.id,
-      soSao: rating.value,
-      noiDung: comment.value,
-      anonymous: true, // Có thể thêm tùy chọn ẩn danh trong UI
-    };
-    await DanhGiaSanPhamClientService.taoMoiDanhGia(reviewData);
-    ElMessage.success("Đánh giá đã được gửi!");
-    rating.value = 0;
-    comment.value = "";
-    uploadedImages.value = [];
-    await fetchReviews();
-    await fetchAverageRating();
-    await fetchStarDistribution();
-  } catch (error) {
-    console.error("Lỗi khi gửi đánh giá:", error);
-    ElMessage.error(error.response?.data?.message || "Lỗi khi gửi đánh giá!");
-  }
-};
-
-const filterReviewsByStar = async (star) => {
-  selectedStarFilter.value = star;
-  currentPage.value = 1;
-  console.log("Đã lọc theo số sao:", star);
-  console.log("Lọc: soSao =", selectedStarFilter.value, ", hasMedia =", hasMediaFilter.value);
-  await fetchReviews();
-};
-
-const filterReviewsByMedia = async () => {
-  currentPage.value = 1;
-  console.log("Đã lọc theo hình ảnh/video:", hasMediaFilter.value);
-  await fetchReviews();
-};
-
-const loadMoreReviews = async () => {
-  currentPage.value++;
-  await fetchReviews();
-};
-
-const setupInfiniteScroll = () => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting && reviews.value.length < totalReviews.value && !isLoading.value) {
-        loadMoreReviews();
-      }
-    },
-    { threshold: 0.1 }
-  );
-
-  nextTick(() => {
-    const loadMoreElement = document.querySelector('.reviews-list');
-    if (loadMoreElement) observer.observe(loadMoreElement);
-  });
-};
-
-const handlePageChange = (page) => {
-  currentPage.value = page;
-  fetchReviews();
-};
-
-// Watchers
-watch([selectedMau, selectedRom], () => {
+// Gọi API lấy biến thể khi màu hoặc ROM thay đổi
+watch([selectedMau], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
-  fetchThongSo();
 });
 
+watch([selectedRom], () => {
+  fetchChiTietBienThe();
+  fetchThongSo(); // chỉ khi ROM đổi mới gọi
+});
+
+// Gọi khi component được mount
 onMounted(() => {
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
-  setupInfiniteScroll();
 });
 </script>
 
 <template>
   <section class="product-detail">
     <div class="product-container">
-      <!-- Product Image Section -->
+      <!-- Cột trái: Hình ảnh -->
       <div class="product-image">
         <img
           :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
           alt="Hình ảnh sản phẩm"
           class="main-image"
         />
+
+        <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img
             v-for="(img, index) in bienThe.hinhAnh"
@@ -299,47 +177,79 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Product Right Section -->
+      <!-- Cột phải: Thông tin + thông số -->
       <div class="product-right">
-        <!-- Product Info -->
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }}</h1>
           <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+
+          <!-- Màu sắc -->
           <div class="options">
             <h3>Chọn màu:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedMau">
-                <el-radio-button v-for="m in sanPham?.mau" :key="m.id" :label="m.id">
+                <el-radio-button
+                  v-for="m in sanPham?.mau"
+                  :key="m.id"
+                  :label="m.id"
+                >
                   {{ m.ten }}
                 </el-radio-button>
               </el-radio-group>
             </div>
           </div>
+
+          <!-- ROM -->
           <div class="options">
             <h3>Chọn ROM:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedRom">
-                <el-radio-button v-for="r in sanPham?.rom" :key="r.id" :label="r.id">
+                <el-radio-button
+                  v-for="r in sanPham?.rom"
+                  :key="r.id"
+                  :label="r.id"
+                >
                   {{ r.ten }}
                 </el-radio-button>
               </el-radio-group>
             </div>
           </div>
+
+          <!-- Số lượng -->
           <div class="options" v-if="bienThe">
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
+
+          <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
-              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">+</button>
+              <input
+                type="number"
+                v-model="quantity"
+                min="1"
+                :max="bienThe.soLuong"
+              />
+              <button
+                @click="increaseQty"
+                :disabled="quantity >= bienThe.soLuong"
+              >
+                +
+              </button>
             </div>
-          </div>
+          </div> 
+
+          <!-- Hành động -->
           <div class="button-group">
-            <el-button type="primary" :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="buy-btn">
+            <el-button
+              type="primary"
+              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
+              class="buy-btn"
+            >
               Mua ngay
             </el-button>
+
             <el-button
               type="success"
               :icon="ShoppingCart"
@@ -352,13 +262,17 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Product Specs -->
+        <!-- Thông số kỹ thuật -->
         <div class="product-specs" v-if="thongSo">
           <h2>Thông số kỹ thuật</h2>
           <ul class="spec-list">
             <li><strong>CPU:</strong> {{ thongSo.cpu }}</li>
             <li><strong>RAM:</strong> {{ thongSo.ram }}</li>
-            <li><strong>Màn hình:</strong> {{ thongSo.tenManHinh }} ({{ thongSo.kichThuoc }})</li>
+            <li>
+              <strong>Màn hình:</strong> {{ thongSo.tenManHinh }} ({{
+                thongSo.kichThuoc
+              }})
+            </li>
             <li><strong>Rom:</strong> {{ thongSo.rom }}</li>
             <li><strong>Loại màn hình:</strong> {{ thongSo.loaiManHinh }}</li>
             <li><strong>Độ phân giải:</strong> {{ thongSo.doPhanGiai }}</li>
@@ -369,128 +283,20 @@ onMounted(() => {
             <li><strong>Camera trước:</strong> {{ thongSo.cameraTruoc }}</li>
             <li><strong>Pin:</strong> {{ thongSo.phienBanPin }}</li>
             <li><strong>Công suất sạc:</strong> {{ thongSo.congXuatSac }}</li>
-            <li><strong>Thời gian sử dụng:</strong> {{ thongSo.thoiGianSuDung }}</li>
-            <li><strong>Số lần sạc tối đa:</strong> {{ thongSo.soLanSacToiDa }}</li>
+            <li>
+              <strong>Thời gian sử dụng:</strong> {{ thongSo.thoiGianSuDung }}
+            </li>
+            <li>
+              <strong>Số lần sạc tối đa:</strong> {{ thongSo.soLanSacToiDa }}
+            </li>
             <li><strong>Hệ điều hành:</strong> {{ thongSo.heDieuHanh }}</li>
             <li><strong>Xuất xứ:</strong> {{ thongSo.xuatXu }}</li>
           </ul>
-        </div>
-
-        <!-- Reviews Section -->
-        <div class="product-reviews">
-          <h2>Đánh giá sản phẩm</h2>
-          <div class="rating-summary">
-            <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
-            <el-rate v-model="averageRating" disabled allow-half />
-            <div class="star-distribution">
-              <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
-                <span>{{ star }} sao:</span>
-                <div class="progress-bar">
-                  <div
-                    :style="{ width: ((starDistribution[star] || 0) / totalReviews * 100) + '%' }"
-                    class="progress"
-                  ></div>
-                </div>
-                <span>{{ starDistribution[star] || 0 }} đánh giá</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Review Filters -->
-          <div class="review-filters">
-            <el-button
-              v-for="star in [0, 5, 4, 3, 2, 1]"
-              :key="star"
-              @click="filterReviewsByStar(star)"
-              :type="selectedStarFilter === star ? 'primary' : 'default'"
-            >
-              {{ star === 0 ? 'Tất cả' : `${star} sao` }}
-            </el-button>
-            <el-button
-              @click="hasMediaFilter = !hasMediaFilter; filterReviewsByMedia()"
-              :type="hasMediaFilter ? 'primary' : 'default'"
-            >
-              Có hình ảnh/video
-            </el-button>
-          </div>
-
-          <!-- Add Review Form -->
-          <div class="add-review" v-if="user">
-            <h3>Viết đánh giá của bạn</h3>
-            <el-rate v-model="rating" />
-            <el-input
-              type="textarea"
-              v-model="comment"
-              placeholder="Nhập bình luận của bạn..."
-              :rows="4"
-              class="comment-input"
-            />
-            <el-upload
-              :file-list="uploadedImages"
-              :on-change="handleImageUpload"
-              :auto-upload="true"
-              list-type="picture-card"
-              :limit="5"
-            >
-              <i class="el-icon-plus"></i>
-            </el-upload>
-            <el-button type="primary" @click="submitReview">Gửi đánh giá</el-button>
-          </div>
-          <div v-else class="login-prompt">
-            <p>Vui lòng <a href="/login">đăng nhập</a> để viết đánh giá.</p>
-          </div>
-
-          <!-- Reviews List -->
-          <div class="reviews-list">
-            <div v-for="review in reviews" :key="review.id" class="review-item">
-              <div class="review-header">
-                <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
-                <span class="purchased-label" v-if="review.hasPurchased">Đã mua hàng</span>
-                <el-rate v-model="review.soSao" disabled />
-                <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
-              </div>
-              <p class="review-comment">{{ review.noiDung }}</p>
-              <div class="review-media" v-if="review.hinhAnh?.length || review.video">
-                <div class="review-images" v-if="review.hinhAnh?.length">
-                  <img
-                    v-for="(img, index) in review.hinhAnh"
-                    :key="index"
-                    :src="img"
-                    alt="Hình ảnh đánh giá"
-                    class="review-image"
-                  />
-                </div>
-                <video
-                  v-if="review.video"
-                  :src="review.video"
-                  controls
-                  class="review-video"
-                ></video>
-              </div>
-            </div>
-            <div v-if="isLoading" class="loading">Đang tải thêm...</div>
-          </div>
-
-          <!-- Load More Button -->
-          <div class="load-more" v-if="reviews.length < totalReviews && !isLoading">
-            <el-button type="primary" @click="loadMoreReviews">Xem thêm</el-button>
-          </div>
-
-          <!-- Pagination (Optional) -->
-          <el-pagination
-            v-if="totalReviews > pageSize"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            :total="totalReviews"
-            layout="prev, pager, next"
-            @current-change="handlePageChange"
-          />
         </div>
       </div>
     </div>
   </section>
 </template>
-
 
 <style scoped>
 .product-detail {
@@ -512,7 +318,6 @@ onMounted(() => {
   border: 1px solid #e9ecef;
 }
 
-/* Product Image */
 .product-image {
   flex: 1 1 500px;
   max-width: 550px;
@@ -567,7 +372,6 @@ onMounted(() => {
   box-shadow: 0 0 0 1px #0d6efd;
 }
 
-/* Product Right */
 .product-right {
   flex: 1 1 500px;
   display: flex;
@@ -575,13 +379,12 @@ onMounted(() => {
   gap: 30px;
 }
 
-/* Product Info */
-/* .product菜
+.product-info {
   background: #ffffff;
   padding: 30px;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-} */
+}
 
 .product-info h1 {
   font-size: 28px;
@@ -603,7 +406,7 @@ onMounted(() => {
   display: inline-block;
 }
 
-/* Options */
+/* Giao diện vùng chọn */
 .options {
   margin-top: 25px;
   padding: 15px;
@@ -619,16 +422,22 @@ onMounted(() => {
   font-weight: 600;
 }
 
+/* Danh sách nút */
 .option-list {
   display: flex;
   flex-wrap: wrap;
+  /* Xoá gap nếu dùng margin bên dưới */
 }
 
+/* Nút radio bo góc và vuông */
 ::v-deep(.option-list .el-radio-button) {
   margin-right: 10px;
   margin-bottom: 10px;
 }
 
+/* Nếu cần đều nhau, có thể dùng padding thay vì margin, nhưng margin rõ ràng hơn */
+
+/* Style phần bên trong như cũ */
 ::v-deep(.option-list .el-radio-button__inner) {
   border-radius: 12px !important;
   padding: 12px 16px;
@@ -639,18 +448,21 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
+/* Hover */
 ::v-deep(.option-list .el-radio-button__inner:hover) {
   background-color: #f1f5f9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Active */
 ::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
   background-color: #667eea;
   color: #fff;
   border-color: #5a67d8;
 }
 
-/* Quantity Selector */
+
+/* Quantity Selector Styles */
 .quantity-selector {
   margin-top: 20px;
   background: #e8f4fd;
@@ -685,7 +497,7 @@ onMounted(() => {
 
 .quantity-control button:hover:not(:disabled) {
   background: #e9ecef;
-  /* color: #禁止 */
+  color: #212529;
 }
 
 .quantity-control button:disabled {
@@ -712,13 +524,14 @@ onMounted(() => {
   background: #f8f9fa;
 }
 
+/* Remove spinner arrows from number input */
 .quantity-control input::-webkit-outer-spin-button,
 .quantity-control input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Button Group */
+
 .button-group {
   display: flex;
   gap: 15px;
@@ -758,7 +571,7 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
-/* Product Specs */
+/* Thông số kỹ thuật */
 .product-specs {
   background: #ffffff;
   padding: 30px;
@@ -820,191 +633,6 @@ onMounted(() => {
   font-weight: 400;
 }
 
-/* Reviews Section */
-.product-reviews {
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  margin-top: 30px;
-}
-
-.product-reviews h2 {
-  margin-bottom: 25px;
-  font-size: 22px;
-  color: #212529;
-  font-weight: 600;
-  border-bottom: 2px solid #0d6efd;
-  padding-bottom: 10px;
-}
-
-.rating-summary {
-  margin-bottom: 30px;
-}
-
-.rating-summary h3 {
-  font-size: 18px;
-  color: #495057;
-  margin-bottom: 10px;
-}
-
-.star-distribution {
-  margin-top: 15px;
-}
-
-.star-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 10px;
-  background: #e9ecef;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  background: #0d6efd;
-  transition: width 0.3s ease;
-}
-
-.review-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.review-filters .el-button {
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 14px;
-}
-
-.add-review {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.add-review h3 {
-  font-size: 18px;
-  color: #495057;
-  margin-bottom: 15px;
-}
-
-.comment-input {
-  margin: 15px 0;
-}
-
-.reviews-list {
-  margin-bottom: 20px;
-}
-
-.review-item {
-  padding: 15px;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.review-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.review-user {
-  font-weight: 600;
-  color: #212529;
-}
-
-.purchased-label {
-  background: #e7f3ff;
-  color: #0d6efd;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.review-date {
-  color: #6c757d;
-  font-size: 14px;
-}
-
-.review-comment {
-  color: #495057;
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-
-.review-media {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.review-images {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.review-image {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
-}
-
-.review-video {
-  width: 300px;
-  height: auto;
-  border-radius: 6px;
-}
-
-.load-more {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.load-more .el-button {
-  border-radius: 20px;
-  padding: 10px 30px;
-}
-
-.loading {
-  text-align: center;
-  padding: 20px;
-  color: #6c757d;
-}
-
-.login-prompt {
-  padding: 15px;
-  background: #fff3cd;
-  border: 1px solid #ffeeba;
-  border-radius: 6px;
-  color: #856404;
-  text-align: center;
-}
-
-.login-prompt a {
-  color: #0d6efd;
-  text-decoration: none;
-}
-
-.login-prompt a:hover {
-  text-decoration: underline;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .product-container {
@@ -1015,7 +643,7 @@ onMounted(() => {
   }
 
   .main-image {
-    height: 350px
+    height: 350px;
   }
 
   .product-right {
@@ -1089,28 +717,6 @@ onMounted(() => {
     width: 50px;
     height: 35px;
     font-size: 14px;
-  }
-
-  .product-reviews {
-    padding: 20px;
-  }
-
-  .review-image {
-    width: 80px;
-    height: 80px;
-  }
-
-  .review-video {
-    width: 100%;
-  }
-
-  .star-bar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .progress-bar {
-    width: 100%;
   }
 }
 </style>

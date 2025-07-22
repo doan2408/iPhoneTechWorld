@@ -169,7 +169,7 @@
                   @change="clearFieldError('idCameraTruoc')" clearable :loading="loading" size="large"
                   style="width: 100%">
                   <el-option v-for="cam in cameraTruocs" :key="cam.idCamera"
-                    :label="`${cam.doPhanGiai} - ${cam.khauDo}`" :value="cam.idCamera" />
+                    :label="`${cam.doPhanGiai} - ${cam.khauDo} - ${cam.loaiCamera}`" :value="cam.idCamera" />
                 </el-select>
                 <el-button type="success" size="large" circle @click="addCameraTruocDialogRef.open()">
                   <el-icon>
@@ -184,7 +184,7 @@
               <div style="display: flex; gap: 8px; width: 100%;">
                 <el-select v-model="modelForm.idCameraSau" placeholder="Chọn camera sau"
                   @change="clearFieldError('idCameraSau')" :loading="loading" size="large" style="width: 100%" multiple>
-                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="`${cam.doPhanGiai} - ${cam.khauDo}`"
+                  <el-option v-for="cam in cameraSaus" :key="cam.idCamera" :label="`${cam.doPhanGiai} - ${cam.khauDo} - ${cam.loaiCamera}`"
                     :value="cam.idCamera" />
                 </el-select>
                 <el-button type="success" size="large" circle @click="addCameraSauDialogRef.open()">
@@ -729,6 +729,7 @@ export default {
       loais.value.push({ idLoai: savedLoai.id, tenLoai: savedLoai.tenLoai });
       modelForm.value.idLoai = savedLoai.id;
     };
+    
 
     const handleXuatXuSaved = (savedXuatXu) => {
       xuatXus.value.push({ idXuatXu: savedXuatXu.id, maXuatXu: savedXuatXu.maXuatXu });
@@ -823,10 +824,10 @@ export default {
           ? results[4].value.map(pin => ({ idPin: pin.id, phienBan: pin.phienBan || '' }))
           : [];
         cameraTruocs.value = results[5].status === 'fulfilled' && Array.isArray(results[5].value)
-          ? results[5].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
+          ? results[5].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' , loaiCamera: cam.loaiCamera || ''}))
           : [];
         cameraSaus.value = results[6].status === 'fulfilled' && Array.isArray(results[6].value)
-          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' }))
+          ? results[6].value.map(cam => ({ idCamera: cam.id, doPhanGiai: cam.doPhanGiai || '', khauDo: cam.khauDo || '' , loaiCamera: cam.loaiCamera || ''}))
           : [];
         xuatXus.value = results[7].status === 'fulfilled' && Array.isArray(results[7].value)
           ? results[7].value.map(xx => ({ idXuatXu: xx.id, maXuatXu: xx.maXuatXu || '' }))
