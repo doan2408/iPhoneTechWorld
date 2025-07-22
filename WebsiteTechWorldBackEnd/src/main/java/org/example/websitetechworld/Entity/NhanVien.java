@@ -10,7 +10,9 @@ import org.example.websitetechworld.Repository.JointAccount;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -72,6 +74,8 @@ public class NhanVien implements JointAccount {
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
+    private List<PhanHoiDanhGia> phanHoiDanhGias = new ArrayList<>();
 
     @Override
     public String tai_khoan() {
