@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/client/viDiem")
 @RequiredArgsConstructor
-public class ViDiemControler {
+public class ViDiemController {
     private final ViDiemServices viDiemServices;
 
     @GetMapping

@@ -42,7 +42,6 @@ public class LichSuDiemController {
             return ResponseEntity.ok(lichSuDiemService.doiDiemNhanVoucher(idPhieuGiamGia));
         }
         catch (ValidationException e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
         }
     }

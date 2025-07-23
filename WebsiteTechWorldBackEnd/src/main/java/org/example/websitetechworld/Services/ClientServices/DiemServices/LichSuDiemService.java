@@ -87,6 +87,21 @@ public class LichSuDiemService {
             throw new ValidationException(errors);
         }
 
+        // ngay doi hien tai
+        LocalDate ngayHienTai = LocalDate.now();
+        YearMonth thangNamHienTai = YearMonth.from(ngayHienTai);
+
+        boolean daDoiTrongThang = khachHangGiamGiaRepository
+                .checkSoLanDoiTrong1Thang(idKhachHang, idPhieuGiamGia, thangNamHienTai.getMonthValue(), thangNamHienTai.getYear());
+
+        if(daDoiTrongThang) {
+            errors.add(Map.of("field", "voucher", "message", "Bạn đã đổi voucher này trong tháng rồi !"));
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
 
         System.out.println("Thời gian offset: " + now);

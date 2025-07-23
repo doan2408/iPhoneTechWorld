@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.hibernate.annotations.ColumnDefault;
@@ -59,10 +60,10 @@ public class PhieuGiamGia {
     @Column(name = "dieu_kien_ap_dung", length = 100)
     private String dieuKienApDung;
 
-    @Size(max = 50)
+    @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "hang_toi_thieu", length = 50)
-    private String hangToiThieu;
+    private HangKhachHang hangToiThieu;
 
     @Column(name = "so_luong")
     private Integer soLuong;
