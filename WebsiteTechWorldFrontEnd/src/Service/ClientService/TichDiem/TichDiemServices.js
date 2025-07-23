@@ -23,7 +23,7 @@ export const getLichSuDiem = async ({
 
 export const doiDiem = async (idVoucher) => {
   try {
-    const response = await api.post(`${baseUrl}/${id}`);
+    const response = await api.post(`${baseUrl}/${idVoucher}`);
     return response.data;
   } catch (err) {
     throw err.response?.data || "Errors when redeeming points";

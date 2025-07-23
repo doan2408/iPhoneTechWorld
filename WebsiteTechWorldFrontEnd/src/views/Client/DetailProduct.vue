@@ -400,8 +400,7 @@ onMounted(() => {
 
 /* Options styling */
 .options {
-  margin-top: 20px;
-  padding: 12px 0;
+  padding: 5px 0;
 }
 
 .options h3 {

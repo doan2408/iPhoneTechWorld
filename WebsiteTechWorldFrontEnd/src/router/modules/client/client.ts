@@ -16,7 +16,7 @@ const clientRoutes: RouteRecordRaw[] = [
       { path: "my-order", component: () => import("@/views/Client/HoaDonClient/MyOrder.vue"), meta: { title: "Đơn hàng của tôi" } },
       { path: "order-tracking-search", component: () => import("@/views/Client/HoaDonClient/OrderTrackingSearch.vue"), meta: { title: "Tra cuu don hang" } },
       { path: "lichSuDiem", component: () => import("@/views/Client/TaiKhoanClient/LichSuDiem.vue"), meta: { title: "Lịch sử điểm" } },
-      { path: "doiDiem", component: () => import("@/views/Client/TaiKhoanClient/DoiDiem.vue"), meta: { title: "Lịch sử điểm" } },
+      { path: "doiDiem", component: () => import("@/views/Client/TaiKhoanClient/DoiDiem.vue"), meta: { title: "Quy đổi điểm" } },
       
     ],
   },

@@ -2,7 +2,6 @@ package org.example.websitetechworld.Controller.ClientController.DiemController;
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.DiemResponse.ViDiemClientResponse;
-import org.example.websitetechworld.Entity.ViDiem;
 import org.example.websitetechworld.Services.ClientServices.DiemServices.ViDiemServices;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/client/viDiem")
