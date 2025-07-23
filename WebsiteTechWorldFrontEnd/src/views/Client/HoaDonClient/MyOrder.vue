@@ -1,108 +1,182 @@
 <template>
     <div class="page-container">
-        <header class="header">
-            <div class="header-right">
-                <div class="search-container">
-                    <SearchIcon class="search-icon" />
-                    <input type="search" placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm"
-                        class="search-input" v-model="searchTerm" />
+        <!-- left  -->
+        <aside class="sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Bộ Lọc Đơn Hàng</h2>
+                </div>
+                <div class="card-content space-y-6">
+                    <!-- Filter by Status -->
+                    <div class="space-y-2">
+                        <label for="status-filter" class="label">Trạng thái</label>
+                        <select id="status-filter" v-model="filterStatus" class="select-input">
+                            <option value="all">Tất cả</option>
+                            <option v-for="status in orderStatuses" :key="status" :value="status">
+                                {{ status }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Filter by Price Range -->
+                    <div class="space-y-2">
+                        <label class="label">Khoảng giá</label>
+                        <div class="flex-group">
+                            <input type="number" placeholder="Min" v-model="filterMinPrice" class="text-input flex-1" />
+                            <span class="separator">-</span>
+                            <input type="number" placeholder="Max" v-model="filterMaxPrice" class="text-input flex-1" />
+                        </div>
+                    </div>
+
+                    <!-- Filter by Date Range -->
+                    <div class="space-y-2">
+                        <label class="label">Khoảng ngày</label>
+                        <div class="space-y-2">
+                            <div>
+                                <label for="start-date" class="sr-only">Ngày bắt đầu</label>
+                                <input id="start-date" type="date" v-model="filterStartDate" class="text-input" />
+                            </div>
+                            <div>
+                                <label for="end-date" class="sr-only">Ngày kết thúc</label>
+                                <input id="end-date" type="date" v-model="filterEndDate" class="text-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer flex-col space-y-2">
+                    <button @click="handleApplyFilters" class="button primary-button w-full">
+                        Áp dụng bộ lọc
+                    </button>
+                    <button @click="handleResetFilters" class="button outline-button w-full">
+                        Đặt lại bộ lọc
+                    </button>
                 </div>
             </div>
-        </header>
+        </aside>
 
+        <!-- right  -->
         <main class="main-content">
-            <div class="tabs-container">
-                <div class="tabs-list">
-                    <button :class="['tab-trigger', { active: activeTab === 'all' }]" @click="setActiveTab('all')">
-                        Tất cả
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Chờ thanh toán' }]"
-                        @click="setActiveTab('Chờ thanh toán')">
-                        Chờ thanh toán
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Vận chuyển' }]"
-                        @click="setActiveTab('Vận chuyển')">
-                        Vận chuyển
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Chờ giao hàng' }]"
-                        @click="setActiveTab('Chờ giao hàng')">
-                        Chờ giao hàng
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Hoàn thành' }]"
-                        @click="setActiveTab('Hoàn thành')">
-                        Hoàn thành
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]"
-                        @click="setActiveTab('Đã hủy')">
-                        Đã hủy
-                    </button>
-                    <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
-                        @click="setActiveTab('Trả hàng/Hoàn tiền')">
-                        Trả hàng/Hoàn tiền
-                    </button>
-                </div>
-            </div>
-
-            <div class="order-list">
-                <div v-if="1 === 0" class="empty-state">
-                    Không tìm thấy đơn hàng nào phù hợp.
-                </div>
-                <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
-                    <div class="order-header">
-                        <!-- Removed shop info and chat/view shop buttons -->
-                        <div class="order-status-info">
-                            <TruckIcon class="delivery-icon" />
-                            <span>{{ order.trangThaiGiaoHang }}</span>
-                            <InfoIcon class="info-icon" />
-                            <span :class="['order-status-badge', getOrderStatusClass(order.trangThaiGiaoHang)]">{{
-                                order.trangThaiGiaoHang.toUpperCase() }}</span>
-                        </div>
+            <header class="header">
+                <div class="header-right">
+                    <div class="search-container">
+                        <SearchIcon class="search-icon" />
+                        <input type="search" placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm"
+                            class="search-input" v-model="searchTerm" />
                     </div>
+                </div>
+            </header>
 
-                    <div class="order-products">
-                        <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
-                            class="product-item">
-                            <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
-                            <div class="product-details">
-                                <div class="product-name">{{ product.tenSanPham }}</div>
-                                <div class="product-variant">Phân loại hàng: {{ product.colorName + product.dungLuongRom }}</div>
-                                <div class="product-quantity">x{{ product.soLuong }}</div>
+            <main class="main-content">
+                <div class="tabs-container">
+                    <div class="tabs-list">
+                        <button :class="['tab-trigger', { active: activeTab === 'all' }]" @click="setActiveTab('all')">
+                            Tất cả
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Chờ thanh toán' }]"
+                            @click="setActiveTab('Chờ thanh toán')">
+                            Chờ thanh toán
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Vận chuyển' }]"
+                            @click="setActiveTab('Vận chuyển')">
+                            Vận chuyển
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Chờ giao hàng' }]"
+                            @click="setActiveTab('Chờ giao hàng')">
+                            Chờ giao hàng
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Hoàn thành' }]"
+                            @click="setActiveTab('Hoàn thành')">
+                            Hoàn thành
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]"
+                            @click="setActiveTab('Đã hủy')">
+                            Đã hủy
+                        </button>
+                        <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
+                            @click="setActiveTab('Trả hàng/Hoàn tiền')">
+                            Trả hàng/Hoàn tiền
+                        </button>
+                    </div>
+                </div>
+
+                <div class="order-list">
+                    <div v-if="1 === 0" class="empty-state">
+                        Không tìm thấy đơn hàng nào phù hợp.
+                    </div>
+                    <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
+                        <div class="order-header">
+                            <!-- Removed shop info and chat/view shop buttons -->
+                            <div class="order-status-info">
+                                <TruckIcon class="delivery-icon" />
+                                <span>{{ order.trangThaiGiaoHang }}</span>
+                                <InfoIcon class="info-icon" />
+                                <span :class="['order-status-badge', getOrderStatusClass(order.trangThaiGiaoHang)]">{{
+                                    order.trangThaiGiaoHang.toUpperCase() }}</span>
                             </div>
-                            <div class="product-prices">
-                                <!-- <span v-if="product.originalPrice !== product.discountedPrice"
+                        </div>
+
+                        <div class="order-products">
+                            <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
+                                class="product-item">
+                                <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
+                                <div class="product-details">
+                                    <div class="product-name">{{ product.tenSanPham }}</div>
+                                    <div class="product-variant">Phân loại hàng: {{ product.colorName +
+                                        product.dungLuongRom
+                                        }}</div>
+                                    <div class="product-quantity">x{{ product.soLuong }}</div>
+                                </div>
+                                <div class="product-prices">
+                                    <!-- <span v-if="product.originalPrice !== product.discountedPrice"
                                     class="original-price">₫{{ product.originalPrice }}</span> -->
-                                <span class="discounted-price">₫{{ product.giaSanPham }}</span>
+                                    <span class="discounted-price">₫{{ product.giaSanPham }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-footer">
+                            <div class="order-total">
+                                Thành tiền: <span class="total-amount">₫{{ order.thanhTien }}</span>
+                            </div>
+                            <div class="order-actions">
+                                <button class="action-button buy-again-button">Mua Lại</button>
+                                <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="order-footer">
-                        <div class="order-total">
-                            Thành tiền: <span class="total-amount">₫{{ order.thanhTien }}</span>
-                        </div>
-                        <div class="order-actions">
-                            <button class="action-button buy-again-button">Mua Lại</button>
-                            <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
-                        </div>
-                    </div>
+                <div v-if="0 > 1" class="pagination-controls">
+                    <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage--">
+                        Trước
+                    </button>
+                    <span v-for="page in [1,2,3]" :key="page">
+                        <button :class="['pagination-button', { active: currentPage === page }]"
+                            @click="currentPage = page">
+                            {{ page }}
+                        </button>
+                    </span>
+                    <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage++">
+                        Sau
+                    </button>
+                </div>
+            </main>
+        </main>
+        <section class="orders-stats">
+            <!-- Thống kê đơn hàng -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Thống Kê Đơn Hàng</h2>
+                </div>
+                <div class="card-content space-y-4">
+                    <p>Tổng đơn: <strong>{{ totalOrders }}</strong></p>
+                    <p>Đã giao: <strong>{{ deliveredOrders }}</strong></p>
+                    <p>Chờ xử lý: <strong>{{ pendingOrders }}</strong></p>
+                    <p>Tổng doanh thu: <strong>₫{{ totalRevenue }}</strong></p>
                 </div>
             </div>
+        </section>
 
-            <div v-if="0 > 1" class="pagination-controls">
-                <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage--">
-                    Trước
-                </button>
-                <span v-for="page in [1,2,3]" :key="page">
-                    <button :class="['pagination-button', { active: currentPage === page }]"
-                        @click="currentPage = page">
-                        {{ page }}
-                    </button>
-                </span>
-                <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage++">
-                    Sau
-                </button>
-            </div>
-        </main>
     </div>
 </template>
 

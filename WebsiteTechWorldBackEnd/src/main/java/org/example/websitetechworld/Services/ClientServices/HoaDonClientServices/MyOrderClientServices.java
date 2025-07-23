@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.ClientServices.HoaDonClientServices;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
@@ -26,5 +27,7 @@ public class MyOrderClientServices {
         return hoaDonRepository.findIdHoaDonByMVD(maVanDon);
     }
 
-
+    public HoaDonAdminResponse findById(Integer id){
+        return hoaDonRepository.findById(id).map(HoaDonAdminResponse::convertDto).orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
+    }
 }

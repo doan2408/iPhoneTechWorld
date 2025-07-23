@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Controller.ClientController.HoaDonClientController;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
@@ -32,10 +33,15 @@ public class MyOrderController {
         }
         return myOrderClientResponseList;
 
-    }
+        }
 
-    @GetMapping("/{maVanDon}")
+    @GetMapping("/mvd/{maVanDon}")
     public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon) {
         return myOrderClientServices.findIdHoaDonByMVD(maVanDon);
+    }
+
+    @GetMapping("/{idHoaDon}")
+    public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
+        return myOrderClientServices.findById(idHoaDon);
     }
 }

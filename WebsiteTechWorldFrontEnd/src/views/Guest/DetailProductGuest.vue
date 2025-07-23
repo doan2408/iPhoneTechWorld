@@ -101,6 +101,10 @@ const addToCart = async (buy) => {
       ElMessage.error("Sản phẩm đã hết hàng hoặc không hợp lệ!");
       return;
     }
+    console.log(bienThe.value)
+    const idSanPhamChiTiet = bienThe.value.idSpct;
+    const soLuongMoi = quantity.value;
+    const soLuongTonKho = bienThe.value.soLuong;
 
     const idSanPhamChiTiet = bienThe.value.idSpct;
     const soLuongMoi = quantity.value;
@@ -145,6 +149,18 @@ const addToCart = async (buy) => {
       }
     } else {
       ElMessage.success("Sản phẩm đã được thêm vào giỏ hàng!");
+      storedCart.push({
+        idSanPhamChiTiet: idSanPhamChiTiet,
+        soLuong: soLuongMoi,
+        tenSanPham: sanPham.value?.tenSanPham || "Sản phẩm",
+        phienBan: `${sanPham.value?.mau.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
+          } - ${sanPham.value?.rom.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
+          }`,
+        imageUrl: bienThe.value?.hinhAnh?.[0] || "",
+        gia: bienThe.value?.giaBan || 0,
+        soLuongTon: bienThe.value?.soLuong || 0,
+        ngayThem: new Date().toISOString(),
+      });
     }
   } catch (error) {
     console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
@@ -183,22 +199,13 @@ onMounted(() => {
     <div class="product-container">
       <!-- Cột trái: Hình ảnh -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
 
         <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
-          <img
-            v-for="(img, index) in bienThe.hinhAnh"
-            :key="index"
-            :src="img"
-            class="thumbnail"
-            :class="{ active: img === selectedImage }"
-            @click="selectedImage = img"
-          />
+          <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
+            :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
       </div>
 
@@ -213,11 +220,7 @@ onMounted(() => {
             <h3>Chọn màu:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedMau">
-                <el-radio-button
-                  v-for="m in sanPham?.mau"
-                  :key="m.id"
-                  :label="m.id"
-                >
+                <el-radio-button v-for="m in sanPham?.mau" :key="m.id" :label="m.id">
                   {{ m.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -229,11 +232,7 @@ onMounted(() => {
             <h3>Chọn ROM:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedRom">
-                <el-radio-button
-                  v-for="r in sanPham?.rom"
-                  :key="r.id"
-                  :label="r.id"
-                >
+                <el-radio-button v-for="r in sanPham?.rom" :key="r.id" :label="r.id">
                   {{ r.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -250,16 +249,8 @@ onMounted(() => {
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-              <input
-                type="number"
-                v-model="quantity"
-                min="1"
-                :max="bienThe.soLuong"
-              />
-              <button
-                @click="increaseQty"
-                :disabled="quantity >= bienThe.soLuong"
-              >
+              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
+              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
                 +
               </button>
             </div>

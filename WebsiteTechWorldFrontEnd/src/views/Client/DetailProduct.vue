@@ -267,7 +267,7 @@ onMounted(() => {
             <li><strong>RAM:</strong> {{ thongSo.ram }}</li>
             <li>
               <strong>Màn hình:</strong> {{ thongSo.tenManHinh }} ({{
-                thongSo.kichThuoc
+              thongSo.kichThuoc
               }})
             </li>
             <li><strong>Rom:</strong> {{ thongSo.rom }}</li>
