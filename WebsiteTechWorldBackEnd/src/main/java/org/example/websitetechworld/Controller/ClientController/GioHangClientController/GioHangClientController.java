@@ -42,4 +42,9 @@ public class GioHangClientController {
         gioHangClientService.xoaGioHang(idKhachHang);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping ("/{idKhachHang}/count")
+    public ResponseEntity<?> cartCount (@PathVariable Integer idKhachHang) {
+        return ResponseEntity.ok(gioHangClientService.layGioHang(idKhachHang).getItems().size());
+    }
 }

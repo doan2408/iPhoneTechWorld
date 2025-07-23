@@ -31,14 +31,6 @@
           <label>Giới Tính:</label>
           <p>{{ userDetail.gioiTinh === true ? "Nam" : "Nữ" }}</p>
         </div>
-        <div class="profile-item">
-          <label>Điểm hiện tại:</label>
-          <p>{{ userDetail.soDiemHienTai }}</p>
-        </div>
-        <div class="profile-item">
-          <label>Tổng điểm:</label>
-          <p>{{ userDetail.tongDiem }}</p>
-        </div>
       </div>
 
       <div v-if="isEditing" class="edit-form">

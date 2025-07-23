@@ -1,7 +1,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import Banner from "@/components/Client/Banner.vue";
-import { getAllSanPham, getLoai} from "@/Service/GuestService/ProductGuestService";
+import {
+  getAllSanPham,
+  getLoai,
+} from "@/Service/GuestService/ProductGuestService";
 import {
   PriceTag,
   Search,
@@ -58,14 +61,14 @@ const fetchProducts = async () => {
 
 //debounced search function
 const debouncedFetchProducts = () => {
-  if(debounceTimer) {
+  if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
     currentPage.value = 1;
     fetchProducts();
-  }, 500)  //500ms delay
-}
+  }, 500); //500ms delay
+};
 
 // Available product types
 const loaiOptions = ref([{ label: "Tất cả", value: "" }]);
@@ -88,7 +91,7 @@ const fetchLoai = async () => {
 };
 
 const clearFilters = () => {
-  if(debounceTimer) {
+  if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
 
@@ -98,8 +101,7 @@ const clearFilters = () => {
   showClearFilter.value = false;
   currentPage.value = 1;
   fetchProducts();
-}
-
+};
 
 const formatPrice = (val) => {
   return new Intl.NumberFormat("vi-VN").format(val) + "₫";
@@ -137,13 +139,10 @@ const sortLabel = computed(() => {
 });
 
 //watch for changes in filtes
-watch(
-  filterKeyword,
-  () => {
-      //only debounced for search keyword
-      debouncedFetchProducts();
-  }
-)
+watch(filterKeyword, () => {
+  //only debounced for search keyword
+  debouncedFetchProducts();
+});
 
 // Watch for changes in filters
 watch(
@@ -254,7 +253,10 @@ onMounted(() => {
               type="info"
               class="filter-tag"
             >
-              Loại: {{ loaiOptions.find((item) => item.value === selectedLoai)?.label }}
+              Loại:
+              {{
+                loaiOptions.find((item) => item.value === selectedLoai)?.label
+              }}
             </el-tag>
             <el-tag
               v-if="filterKeyword"
@@ -389,7 +391,9 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="product-info">
-                    <h3 class="product-name">{{ sp.tenSanPham }}</h3>
+                    <h3 class="product-name">
+                      {{ sp.tenSanPham }} - {{ sp.maXuatXu }}
+                    </h3>
                     <div class="product-price">
                       {{ formatPrice(sp.giaBan) }}
                     </div>

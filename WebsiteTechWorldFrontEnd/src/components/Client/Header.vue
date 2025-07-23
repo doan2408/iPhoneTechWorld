@@ -1,14 +1,23 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
-
+import { useStore } from 'vuex'
+import headerState from "./modules/headerState";
 
 // Biến lưu trạng thái đăng nhập
 const isLoggedIn = ref<boolean>(false);
 const router = useRouter();
 const route = useRoute();
-const user = ref<{ fullName: String } | null>(null);
+const user = ref<{ id: number; fullName: string } | null>(null);
+
+const store = useStore()
+
+if (!store.hasModule('headerState')) {
+  store.registerModule('headerState', headerState);
+}
+
+const cartItemCount = computed(() => store.getters['headerState/getCartItemCount'])
 
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 onMounted(async () => {
@@ -33,6 +42,9 @@ onMounted(async () => {
 
   // Đăng ký sự kiện click bên ngoài để ẩn dropdown
   document.addEventListener("click", handleClickOutside);
+
+
+  console.log('Huhu: ', cartItemCount.value)
 });
 
 // Xử lý đăng xuất
@@ -41,7 +53,7 @@ const handleLogout = async () => {
     await LoginService.logout(); // Gọi API đăng xuất
     isLoggedIn.value = false;
     localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập khỏi localStorage
-    localStorage.removeItem("user"); 
+    localStorage.removeItem("user");
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
     console.error("Lỗi đăng xuất:", err);
@@ -93,21 +105,19 @@ const goToLogin = () => {
     <nav>
       <ul>
         <li>
-          <router-link to="/client/products"
-            ><i class="fa fa-box"></i> Đơn mua của tôi</router-link
-          >
+          <router-link to="/client/products"><i class="fa fa-box"></i> Đơn mua của tôi</router-link>
         </li>
 
         <li>
-          <router-link to="/client/order-tracking-search"
-            ><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link
-          >
+          <router-link to="/client/order-tracking-search"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link>
         </li>
 
         <li>
-          <router-link to="/client/shopping-cart"
-            ><i class="fa fa-shopping-cart"></i> Giỏ hàng</router-link
-          >
+          <router-link to="/client/shopping-cart" class="cart-link">
+            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i>
+            <span class="badge">{{ cartItemCount }}</span>
+            Giỏ hàng
+          </router-link>
         </li>
 
         <!-- Hiển thị dropdown nếu đã đăng nhập -->
@@ -129,6 +139,9 @@ const goToLogin = () => {
               <router-link to="/client/addresses">
                 <i class="fa fa-map-marker-alt"></i> Địa chỉ
               </router-link>
+              <router-link to="/client/lichSuDiem">
+                <i class="fa fa-exchange-alt"></i> Đổi điểm
+              </router-link>
               <a href="#" @click.prevent="handleLogout">
                 <i class="fa fa-sign-out-alt"></i> Đăng xuất
               </a>
@@ -138,12 +151,7 @@ const goToLogin = () => {
 
         <!-- Chỉ hiển thị nút Đăng nhập nếu người dùng chưa đăng nhập -->
         <li v-if="!isLoggedIn">
-          <a
-            href="#"
-            @click.prevent="goToLogin"
-            :class="{ 'disabled-link': isLoginPage }"
-            :disabled="isLoginPage"
-          >
+          <a href="#" @click.prevent="goToLogin" :class="{ 'disabled-link': isLoginPage }" :disabled="isLoginPage">
             Đăng nhập
           </a>
         </li>
@@ -171,12 +179,10 @@ const goToLogin = () => {
   left: var(--mouse-x);
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(135, 206, 235, 0.4) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(135, 206, 235, 0.4) 30%,
+      transparent 70%);
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -257,5 +263,23 @@ nav ul li a:hover {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+
+.cart-link {
+  position: relative;
+  display: inline-block;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: 60px;
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  z-index: 1;
 }
 </style>

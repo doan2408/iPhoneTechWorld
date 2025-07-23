@@ -12,9 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @Controller
@@ -40,7 +38,6 @@ public class LichSuDiemController {
     public ResponseEntity<?> doiVoucher(
             @PathVariable Integer idPhieuGiamGia
     ) {
-
         try {
             return ResponseEntity.ok(lichSuDiemService.doiDiemNhanVoucher(idPhieuGiamGia));
         }

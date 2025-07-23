@@ -15,4 +15,5 @@ public class ClientProductResponse {
     private String tenSanPham;
     private BigDecimal giaBan;
     private String tenLoai;
+    private String maXuatXu;
 }
