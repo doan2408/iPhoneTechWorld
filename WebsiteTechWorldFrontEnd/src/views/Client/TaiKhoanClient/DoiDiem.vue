@@ -4,8 +4,12 @@ import { getAllVoucher } from "@/Service/ClientService/TichDiem/VoucherServies";
 import { getDiemKhaDung } from "@/Service/ClientService/TichDiem/DiemServices";
 import { doiDiem } from "@/Service/ClientService/TichDiem/TichDiemServices";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getHangThanhVien, getListHang } from "@/Service/ClientService/TichDiem/HangServices";
+import {
+  getHangThanhVien,
+  getListHang,
+} from "@/Service/ClientService/TichDiem/HangServices";
 import { Clock } from "@element-plus/icons-vue";
+import { vi } from "element-plus/es/locales.mjs";
 
 // State
 const vouchers = ref([]);
@@ -164,13 +168,18 @@ onMounted(() => {
   <div class="voucher-page">
     <div class="header">
       <h2>Danh sách Voucher</h2>
-      
 
       <div class="diem-kha-dung">
         Điểm khả dụng: <strong>{{ formatDiem(viDiem.diemKhaDung) }}</strong>
       </div>
       <div class="hang-thanh-vien">
         Hạng: <strong> {{ hangThanhVien }}</strong>
+      </div>
+      
+      <div class="diem-sap-het-han" v-if="viDiem.diemSapHetHan">
+        Có:
+        <strong>{{ formatDiem(viDiem.diemSapHetHan || 0) }}</strong>
+        điểm sắp hết hạn trong 7 ngày tới
       </div>
 
       <el-tooltip content="Lịch sử điểm" placement="top">
@@ -264,17 +273,22 @@ onMounted(() => {
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  grid-template-rows: auto;
+  gap: 16px;
   align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #49a9c1 100%);
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
+  position: relative;
 }
 
 .header h2 {
+  grid-column: 1;
+  grid-row: 1;
   color: white;
   font-size: 28px;
   font-weight: 700;
@@ -282,7 +296,26 @@ onMounted(() => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.diem-sap-het-han {
+  grid-column: 2;
+  grid-row: 1;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.diem-sap-het-han strong {
+  color: #ff4757;
+  font-weight: 700;
+}
+
 .diem-kha-dung {
+  grid-column: 3;
+  grid-row: 1;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   padding: 12px 20px;
@@ -301,6 +334,8 @@ onMounted(() => {
 }
 
 .hang-thanh-vien {
+  grid-column: 4;
+  grid-row: 1;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   padding: 12px 20px;
@@ -316,6 +351,26 @@ onMounted(() => {
   font-weight: 700;
   color: #ff6b6b;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.history-icon {
+  grid-column: 5;
+  grid-row: 1;
+  font-size: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.history-icon:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
 }
 
 .tabs {
@@ -457,31 +512,53 @@ onMounted(() => {
   .voucher-page {
     padding: 16px;
   }
-
+  
   .header {
-    flex-direction: column;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
     text-align: center;
+    gap: 12px;
   }
-
+  
   .header h2 {
+    grid-column: 1;
+    grid-row: 1;
     font-size: 24px;
   }
-
-  .diem-kha-dung,
-  .hang-thanh-vien {
+  
+  .diem-sap-het-han {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .diem-kha-dung {
+    grid-column: 1;
+    grid-row: 3;
     font-size: 14px;
     padding: 10px 16px;
   }
-
+  
+  .hang-thanh-vien {
+    grid-column: 1;
+    grid-row: 4;
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+  
+  .history-icon {
+    grid-column: 1;
+    grid-row: 5;
+    justify-self: center;
+  }
+  
   .tabs .el-tabs__content {
     padding: 16px;
   }
-
+  
   .el-table {
     font-size: 14px;
   }
-
+  
   .el-table td {
     padding: 12px 8px;
   }
@@ -501,14 +578,5 @@ onMounted(() => {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
-}
-
-.history-icon {
-  margin-left: -100px;
-  font-size: 30px;
-  color: #f80202;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
 }
 </style>
