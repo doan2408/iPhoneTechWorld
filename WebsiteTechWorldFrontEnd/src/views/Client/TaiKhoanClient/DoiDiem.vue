@@ -349,7 +349,7 @@ onMounted(() => {
 
 .hang-thanh-vien strong {
   font-weight: 700;
-  color: #ff6b6b;
+  color: #22ff00;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
