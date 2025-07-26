@@ -8,13 +8,14 @@ import org.example.websitetechworld.Entity.PhuongThucThanhToan;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
 import org.example.websitetechworld.Repository.PhuongThucThanhToanRepository;
+import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
-public class TienMatStrategy implements ThanhToanStrategy{
+public class TienMatStrategy implements ThanhToanStrategy {
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
@@ -36,7 +37,11 @@ public class TienMatStrategy implements ThanhToanStrategy{
 
         BigDecimal tienThua = soTienKhachDua.subtract(thanhTien);
 
-        hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
+        if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+        }else {
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
+        }
         hoaDon.setNgayThanhToan(LocalDate.now());
 
         PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findOneByTenPhuongThuc(request.getHinhThucThanhToan());

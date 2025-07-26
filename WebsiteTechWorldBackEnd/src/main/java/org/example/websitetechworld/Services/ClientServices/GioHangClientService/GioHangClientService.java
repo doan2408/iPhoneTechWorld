@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,6 +96,10 @@ public class GioHangClientService {
         if (gioHang != null) {
             gioHangChiTietRepository.deleteAll(gioHang.getGioHangChiTiets());
         }
+    }
+    @Transactional
+    public void xoaAllGioHang (SanPhamChiTiet sanPhamChiTiet) {
+        gioHangChiTietRepository.deleteByIdSanPhamChiTiet_Id(sanPhamChiTiet.getId());
     }
 
     private GioHangClientResponse mapToResponseDTO (GioHang gioHang) {

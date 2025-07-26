@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices;
+package org.example.websitetechworld.Services.ClientServices.ThanhToanClientService;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
@@ -15,12 +15,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
-public class ChuyenKhoanStrategy implements ThanhToanStrategy {
+public class NganHangStrategy implements ThanhToanStrategy {
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
 
-    public ChuyenKhoanStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
+    public NganHangStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.phuongThucThanhToanRepository = phuongThucThanhToanRepository;
     }
@@ -31,16 +31,8 @@ public class ChuyenKhoanStrategy implements ThanhToanStrategy {
         if (hoaDon == null) {
             throw new IllegalArgumentException("Hóa đơn không hợp lệ.");
         }
-        if (hoaDon.getThanhTien() == null || hoaDon.getThanhTien().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Tổng tiền hóa đơn không hợp lệ.");
-        }
         if (hoaDon.getTrangThaiThanhToan() == TrangThaiThanhToan.PAID) {
             throw new IllegalArgumentException("Hóa đơn đã được thanh toán.");
-        }
-
-        BigDecimal soTienThanhToan = request.getSoTienKhachDua();
-        if (soTienThanhToan == null || soTienThanhToan.compareTo(hoaDon.getThanhTien()) < 0) {
-            throw new IllegalArgumentException("Số tiền thanh toán không đủ.");
         }
 
         PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository
@@ -50,7 +42,11 @@ public class ChuyenKhoanStrategy implements ThanhToanStrategy {
                     request.getHinhThucThanhToan());
         }
 
-        hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
+        if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+        }else {
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
+        }
         hoaDon.setNgayThanhToan(LocalDate.now());
 
 
@@ -60,6 +56,6 @@ public class ChuyenKhoanStrategy implements ThanhToanStrategy {
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
 
         chiTietThanhToanRepository.save(cttt);
-        return new ThanhToanAdminResponse("Thanh toán thành công",hoaDon.getThanhTien());
+        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien());
     }
 }
