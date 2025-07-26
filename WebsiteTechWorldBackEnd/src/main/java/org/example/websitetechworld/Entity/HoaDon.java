@@ -13,6 +13,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -69,7 +70,7 @@ public class HoaDon {
     private LoaiHoaDon loaiHoaDon;
 
     @Column(name = "ngay_thanh_toan")
-    private LocalDate ngayThanhToan;
+    private LocalDateTime ngayThanhToan;
 
     @Enumerated(EnumType.STRING)
     @Nationalized
@@ -106,10 +107,10 @@ public class HoaDon {
     private String diaChiGiaoHang;
 
     @Column(name = "ngay_dat_hang")
-    private LocalDate ngayDatHang;
+    private LocalDateTime ngayDatHang;
 
     @Column(name = "ngay_tao_hoa_don")
-    private LocalDate ngayTaoHoaDon;
+    private LocalDateTime ngayTaoHoaDon;
 
     @Column(name = "is_delete")
     private Boolean isDelete;
@@ -118,9 +119,6 @@ public class HoaDon {
     @Nationalized
     @Column(name = "trang_thai_don_hang", length = 50)
     private TrangThaiGiaoHang trangThaiDonHang;
-
-    @Column(name = "ngay_tao_don_hang")
-    private LocalDate ngayTaoDonHang;
 
     @Column(name = "is_shipping")
     private Boolean isShipping;

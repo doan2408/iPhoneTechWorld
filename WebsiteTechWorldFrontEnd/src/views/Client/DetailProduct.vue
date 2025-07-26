@@ -623,6 +623,7 @@ watch(showSpecModal, (newVal) => {
         </div>
       </div>
     </div>
+    </div>
   </section>
 </template>
 

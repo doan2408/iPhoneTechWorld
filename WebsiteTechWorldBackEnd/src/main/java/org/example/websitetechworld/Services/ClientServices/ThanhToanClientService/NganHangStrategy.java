@@ -8,21 +8,25 @@ import org.example.websitetechworld.Entity.PhuongThucThanhToan;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
 import org.example.websitetechworld.Repository.PhuongThucThanhToanRepository;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class NganHangStrategy implements ThanhToanStrategy {
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
+    private final LichSuDiemService lichSuDiemService;
 
-    public NganHangStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
+    public NganHangStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository, LichSuDiemService lichSuDiemService) {
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.phuongThucThanhToanRepository = phuongThucThanhToanRepository;
+        this.lichSuDiemService = lichSuDiemService;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class NganHangStrategy implements ThanhToanStrategy {
         }else {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
         }
-        hoaDon.setNgayThanhToan(LocalDate.now());
+        hoaDon.setNgayThanhToan(LocalDateTime.now());
 
 
         ChiTietThanhToan cttt = new ChiTietThanhToan();
@@ -56,6 +60,7 @@ public class NganHangStrategy implements ThanhToanStrategy {
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
 
         chiTietThanhToanRepository.save(cttt);
+
         return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien());
     }
 }

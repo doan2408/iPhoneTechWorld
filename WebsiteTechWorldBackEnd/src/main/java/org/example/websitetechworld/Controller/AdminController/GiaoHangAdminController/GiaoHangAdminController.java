@@ -8,6 +8,7 @@ import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ import org.springframework.web.filter.RequestContextFilter;
 public class GiaoHangAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final GiaoHangAdminServices giaoHangAdminServices;
+    private final LichSuDiemService lichSuDiemService;
 
     private final RequestContextFilter requestContextFilter;
 
-    public GiaoHangAdminController(HoaDonAdminService hoaDonAdminService, GiaoHangAdminServices giaoHangAdminServices, RequestContextFilter requestContextFilter) {
+    public GiaoHangAdminController(HoaDonAdminService hoaDonAdminService, GiaoHangAdminServices giaoHangAdminServices, LichSuDiemService lichSuDiemService, RequestContextFilter requestContextFilter) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.giaoHangAdminServices = giaoHangAdminServices;
+        this.lichSuDiemService = lichSuDiemService;
         this.requestContextFilter = requestContextFilter;
     }
 
@@ -37,6 +40,7 @@ public class GiaoHangAdminController {
             trangThai = TrangThaiGiaoHang.fromDisplayName(request.getTrangThaiDonHang());
         }
         giaoHangAdminServices.updateStatus(idHoaDon, trangThai);
+        lichSuDiemService.congDiemTuHoaDon(idHoaDon);
         return ResponseEntity.ok("Đã cập nhật trạng thái: " + trangThai.getDisplayName());
     }
 }
