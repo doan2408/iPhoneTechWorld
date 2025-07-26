@@ -48,6 +48,9 @@ public class ViDiemServices {
                 diemKhaDung = diemKhaDung.add(diemConLai);
             }
         }
+        ViDiem viDiem = viDiemRepository.findByIdKhachHang(idKhachHang).get();
+        viDiem.setDiemKhaDung(diemKhaDung);
+        viDiemRepository.save(viDiem);
         return diemKhaDung;
     }
 
