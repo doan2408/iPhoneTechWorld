@@ -51,7 +51,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("trangThaiDonHang") TrangThaiGiaoHang trangThaiDonHang,
                        @Param("ngayDatHang") LocalDate ngayDatHang);
 
-    public List<HoaDon> findByIdKhachHang_Id(Integer userLoginId);
+    public Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
 
 
     @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")

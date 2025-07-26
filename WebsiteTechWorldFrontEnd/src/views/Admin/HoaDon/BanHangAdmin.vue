@@ -1463,12 +1463,6 @@ watch(isShipping, (newVal) => {
 
 // ham update phi ship 
 const updatePhiShip = async () => {
-    console.log("Debug updatePhiShip:");
-    console.log("  isShipping:", isShipping.value);
-    console.log("  shippingMethod:", shippingInfo.value.shippingMethod);
-    console.log("  selectedTinh.name:", selectedTinh.value?.name);
-    console.log("  selectedHuyen.name:", selectedHuyen.value?.name);
-    console.log("  selectedXa.name:", selectedXa.value?.name);
     if (!isShipping.value ||
         shippingInfo.value.shippingMethod !== 'express' ||
         !selectedTinh.value?.name ||
@@ -1981,7 +1975,7 @@ const fetchPaymentMethods = async () => {
         const response = await loadPaymentMethod();
         paymentMethods.value = response.data;
         if (paymentMethods.value.length > 0) {
-            selectedPaymentMethod.value = paymentMethods.value[0].code; // Chọn mặc định cái đầu tiên
+            selectedPaymentMethod.value = paymentMethods.value[0].code; 
         }
     } catch (error) {
         console.error('Lỗi khi tải phương thức thanh toán:', error);
@@ -1989,15 +1983,14 @@ const fetchPaymentMethods = async () => {
     }
 };
 
-// Hàm này sẽ gán đường dẫn icon DỰA VÀO code của phương thức
 const getIconUrl = (code) => {
     switch (code) {
         case 'TIEN_MAT':
-            return '/icons/cod.png'; // Đảm bảo file cod.png có trong public/icons
+            return '/icons/cod.png'; 
         case 'NGAN_HANG':
-            return '/icons/bank.png'; // Đảm bảo file bank.png có trong public/icons
+            return '/icons/bank.png'; 
         default:
-            return '/icons/default.png'; // Icon mặc định
+            return '/icons/default.png'; 
     }
 };
 
@@ -2057,8 +2050,8 @@ const processPayment = async () => {
 };
 
 const printInvoice = () => {
-    if (invoiceRef.value) { // Kiểm tra xem invoiceRef có giá trị không
-        const element = invoiceRef.value.$el; // Lấy DOM của InvoicePrint
+    if (invoiceRef.value) { 
+        const element = invoiceRef.value.$el;
         const opt = {
             margin: 1,
             filename: `hoa_don_${selectedInvoiceId.value || 'unknown'}.pdf`,
@@ -2067,8 +2060,8 @@ const printInvoice = () => {
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-            pdf.autoPrint(); // Mở hộp thoại in
-            window.open(pdf.output('bloburl'), '_blank'); // Mở PDF trong tab mới
+            pdf.autoPrint(); 
+            window.open(pdf.output('bloburl'), '_blank'); 
         }).catch((error) => {
             console.error('Lỗi khi tạo PDF:', error);
         });

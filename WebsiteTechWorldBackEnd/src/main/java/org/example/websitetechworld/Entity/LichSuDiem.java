@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,6 +29,11 @@ public class LichSuDiem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_vi_diem")
     private ViDiem viDiem;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "id_hoa_don")
+    private HoaDon hoaDon;
 
     @Column(name = "so_diem", precision = 10, scale = 2)
     private BigDecimal soDiem;

@@ -110,10 +110,12 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             FROM SanPhamChiTiet spct2
             WHERE spct2.idSanPham.id = sp.id
         ),
-        l.tenLoai
+        l.tenLoai,
+        xx.maXuatXu
     )
     FROM SanPham sp
     JOIN sp.idModelSanPham.idLoai l
+    JOIN sp.idModelSanPham.idXuatXu xx
     WHERE sp.trangThaiSanPham = 'ACTIVE'
       AND (:idLoai IS NULL OR l.id = :idLoai)
       AND (:tenSanPham IS NULL OR LOWER(sp.tenSanPham) LIKE LOWER(CONCAT('%', :tenSanPham, '%')))

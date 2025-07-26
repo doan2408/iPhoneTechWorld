@@ -1,6 +1,10 @@
-package org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices;
+package org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices;
 
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
+import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.ChuyenKhoanStrategy;
+import org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices.TienMatStrategy;
+import org.example.websitetechworld.Services.ClientServices.ThanhToanClientService.CodStrategy;
+import org.example.websitetechworld.Services.ClientServices.ThanhToanClientService.NganHangStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +23,10 @@ public class ThanhToanFactory {
                 strategies.put(TenHinhThuc.TIEN_MAT.name(), strategy);
             } else if (strategy instanceof ChuyenKhoanStrategy) {
                 strategies.put(TenHinhThuc.CHUYEN_KHOAN.name(), strategy);
+            } else if (strategy instanceof NganHangStrategy) {
+                strategies.put(TenHinhThuc.NGAN_HANG.name(),strategy);
+            } else if (strategy instanceof CodStrategy) {
+                strategies.put(TenHinhThuc.COD.name(),strategy);
             }
         }
     }

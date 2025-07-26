@@ -76,7 +76,7 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <div class="radio-content">
-                            <input type="radio" name="shipping-method" value="standard" v-model="selectedShippingMethod"
+                            <input type="radio" name="shipping-method" value="ghtk" v-model="selectedShippingMethod"
                                 class="radio-field" />
                             <span>Vận chuyển tiêu chuẩn</span>
                         </div>
@@ -133,10 +133,11 @@
             <div class="summary-section">
                 <h2 class="section-title">Tổng cộng</h2>
                 <div class="summary-details">
-                    <!-- <div class="summary-row">
+                    <div class="summary-row" v-for="item in product" :key="item.id">
                         <span>Tổng tiền sản phẩm:</span>
-                        <span class="summary-value">₫{{ product.gia }}</span>
+                        <span class="summary-value">₫{{ (item.gia * item.soLuong).toLocaleString() }}</span>
                     </div>
+                    <!--
                     <div v-if="hasInsurance" class="summary-row">
                         <span>Bảo hiểm:</span>
                         <span class="summary-value">₫{{ insurance.gia }}</span>
@@ -187,7 +188,8 @@
                                         <div class="address-info">
                                             <span class="address-name">{{ address.tenNguoiNhan+ '-' }}</span>
                                             <span class="address-phone">{{ address.sdtNguoiNhan+ '-' }}</span>
-                                            <span class="address-detail">{{ address.soNha + ', ' + address.tenDuong + ','+ address.xaPhuong
+                                            <span class="address-detail">{{ address.soNha + ', ' + address.tenDuong +
+                                                ','+ address.xaPhuong
                                                 + ', ' + address.quanHuyen + ', ' + address.tinhThanhPho }}</span>
                                         </div>
                                     </div>
@@ -273,8 +275,11 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { getDiaChiByClient } from '@/Service/ClientService/TaiKhoan/DiaChiServices'
 import { useRoute } from 'vue-router';
-import { loadPaymentMethod } from "@/Service/ClientService/HoaDon/MyOrderClient";
+import { loadPaymentMethod, thanhToanClient } from "@/Service/ClientService/HoaDon/MyOrderClient";
+import { useToast } from "vue-toastification";
+import router from '@/router';
 
+const toast = useToast()
 const route = useRoute();
 
 // --- Address Management ---
@@ -423,6 +428,11 @@ onMounted(() => {
     }
 });
 
+watch(product, (newVal) => {
+    console.log("👀 product thay đổi:", newVal);
+    console.log("💵 Subtotal mới:", calculateSubtotal.value);
+});
+
 const insurance = ref({
     id: 'fashion-insurance',
     name: 'Bảo hiểm Thời trang',
@@ -434,55 +444,76 @@ const insurance = ref({
 
 const getShippingCost = computed(() => {
     switch (selectedShippingMethod.value) {
-        case 'standard':
-            return 25000
+        case 'ghtk':
+            return 25000;
         case 'express':
-            return 40000
+            return 40000;
         default:
-            return 0
+            return 0;
     }
-})
+});
 
 const calculateSubtotal = computed(() => {
-    let subtotal = product.value.price * product.value.quantity
-    if (hasInsurance.value) {
-        subtotal += insurance.value.price * insurance.value.quantity
+    let subtotal = 0;
+    if (Array.isArray(product.value)) {
+        for (const item of product.value) {
+            const price = Number(item.gia) || 0;
+            const quantity = Number(item.soLuong) || 0;
+            subtotal += price * quantity;
+        }
     }
-    return subtotal
-})
+
+    if (hasInsurance.value && insurance.value?.price && insurance.value?.quantity) {
+        subtotal += Number(insurance.value.price) * Number(insurance.value.quantity);
+    }
+
+    return subtotal;
+});
 
 const calculateTotal = computed(() => {
-    let total = calculateSubtotal.value + getShippingCost.value;
-    // Apply voucher discount
-    total -= appliedVoucher.value.discount;
-    return Math.max(0, total); // Ensure total doesn't go below zero
+    return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0);
 })
+console.log('total',calculateTotal.value)
 
 
-const handleBuy = () => {
-    const diaChiGiaoHang = [
-        shippingAddress.value.soNha,
-        shippingAddress.value.tenDuong,
-        shippingAddress.value.xaPhuong,
-        shippingAddress.value.quanHuyen,
-        shippingAddress.value.tinhThanhPho
-    ].filter(Boolean).join(', ');
-    
-    if (!shippingAddress.value.tenNguoiNhan || !shippingAddress.value.sdtNguoiNhan || !diaChiGiaoHang) {
+const handleBuy = async () => {
+    const shippingConfirm = {
+        hinhThucThanhToan: selectedPaymentMethod.value, 
+        soTienKhachDua: calculateTotal.value,
+        thanhTien: calculateTotal.value,
+        phiShip: getShippingCost.value, 
+        shippingMethod: selectedShippingMethod.value.toUpperCase(), 
+        sdtNguoiNhan: shippingAddress.value.sdtNguoiNhan,
+        tenNguoiNhan: shippingAddress.value.tenNguoiNhan,
+        diaChiGiaoHang: [
+            shippingAddress.value.soNha,
+            shippingAddress.value.tenDuong,
+            shippingAddress.value.xaPhuong,
+            shippingAddress.value.quanHuyen,
+            shippingAddress.value.tinhThanhPho
+        ].filter(Boolean).join(', '),
+        sanPhamRequests: product.value.map(p => ({
+            idSanPham: p.idSanPhamChiTiet,
+            soLuong: p.soLuong
+        }))
+    };
+    console.log('shipping',shippingConfirm);
+    if (getShippingCost.value == 0) {
+        toast.warning('Chưa chọn phương thức giao hàng')
+        return
+    }
+
+    if (!shippingAddress.value.tenNguoiNhan || !shippingAddress.value.sdtNguoiNhan || !shippingConfirm.diaChiGiaoHang) {
         alert('Vui lòng chọn hoặc nhập địa chỉ giao hàng.');
         return;
     }
-    console.log('Purchase details:', {
-        shippingAddress: shippingAddress.value,
-        product: product.value,
-        hasInsurance: hasInsurance.value,
-        selectedShippingMethod: selectedShippingMethod.value,
-        selectedPaymentMethod: selectedPaymentMethod.value,
-        pointsToApply: pointsToApply.value,
-        appliedVoucher: appliedVoucher.value,
-        total: calculateTotal.value,
-    })
-    alert('Mua hàng thành công! (Simulated)');
+
+    const res = await thanhToanClient(shippingConfirm);
+    if (res.data.message === 'Đặt hàng thành công') {
+        router.push({ name: 'ordersucces' });
+    }
+
+    toast.success('Đặt hàng thành công')
 }
 
 const paymentMethods = ref([]);
@@ -490,7 +521,6 @@ const selectedPaymentMethod = ref(null);
 const agreedToTerms = ref(false);
 
 const fetchPaymentMethods = async () => {
-    console.log(selectedPaymentMethod.value);
     try {
         const response = await loadPaymentMethod();
         paymentMethods.value = response.data;

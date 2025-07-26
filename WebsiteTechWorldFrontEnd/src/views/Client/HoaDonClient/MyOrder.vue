@@ -100,21 +100,18 @@
                 </div>
 
                 <div class="order-list">
-                    <div v-if="1 === 0" class="empty-state">
+                    <div v-if="allOrderValue.length === 0" class="empty-state">
                         Không tìm thấy đơn hàng nào phù hợp.
                     </div>
                     <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
-                        <div class="order-header">
-                            <!-- Removed shop info and chat/view shop buttons -->
-                            <div class="order-status-info">
-                                <TruckIcon class="delivery-icon" />
-                                <span>{{ order.trangThaiGiaoHang }}</span>
-                                <InfoIcon class="info-icon" />
-                                <span :class="['order-status-badge', getOrderStatusClass(order.trangThaiGiaoHang)]">{{
-                                    order.trangThaiGiaoHang.toUpperCase() }}</span>
+                        <div class="order-status-bar">
+                            <div class="order-status">
+                                🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
+                            </div>
+                            <div class="payment-status">
+                                💳 Thanh toán: <span>{{ order.trangThaiThanhToan }}</span>
                             </div>
                         </div>
-
                         <div class="order-products">
                             <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
                                 class="product-item">
@@ -136,7 +133,7 @@
 
                         <div class="order-footer">
                             <div class="order-total">
-                                Thành tiền: <span class="total-amount">₫{{ order.thanhTien }}</span>
+                                Thành tiền: <span class="total-amount">{{ order.thanhTien }} VNĐ</span>
                             </div>
                             <div class="order-actions">
                                 <button class="action-button buy-again-button">Mua Lại</button>
@@ -146,17 +143,17 @@
                     </div>
                 </div>
 
-                <div v-if="0 > 1" class="pagination-controls">
-                    <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage--">
+                <div v-if="totalElements > pageSizeMyOrder" class="pagination-controls">
+                    <button class="pagination-button" :disabled="currentPage === 0" @click="prevPage()">
                         Trước
                     </button>
-                    <span v-for="page in [1,2,3]" :key="page">
-                        <button :class="['pagination-button', { active: currentPage === page }]"
-                            @click="currentPage = page">
+                    <span v-for="page in totalPages" :key="page">
+                        <button :class="['pagination-button', { active: currentPage === page-1 }]"
+                            @click="changePage(page-1)">
                             {{ page }}
                         </button>
                     </span>
-                    <button class="pagination-button" :disabled="currentPage === 1" @click="currentPage++">
+                    <button class="pagination-button" :disabled="currentPage ===  totalPages - 1" @click="nextPage()">
                         Sau
                     </button>
                 </div>
@@ -184,18 +181,42 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Package2Icon, SearchIcon, TruckIcon, InfoIcon } from 'lucide-vue-next'
 import { getMyOrder } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { pa } from 'element-plus/es/locales.mjs'
 
 // Dummy data for orders
-const allOrderValue = ref ([])
+const allOrderValue = ref([])
+
+const pageNoMyOrder = ref(0)
+const pageSizeMyOrder = ref(5)
+const totalElements = ref(0)
+const totalPages = ref(0)
+const currentPage = ref(0)
+
 
 const allMyOrde = async () => {
-    const res = await getMyOrder();
-    allOrderValue.value = res.data
-    console.log(res);
-    console.log(allOrderValue.value);
-    
-    
+    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
+    allOrderValue.value = res.data.content
+    totalElements.value = res.data.totalElements
+    totalPages.value = res.data.totalPages
 }
+
+const changePage = (page) => {
+    currentPage.value = page
+} 
+
+const prevPage = () => {
+    if (currentPage.value > 0) {
+        currentPage.value--
+    }
+}
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value - 1 ) currentPage.value++
+}
+
+watch(currentPage,(newPage)=>{
+    allMyOrde()
+})
 
 const searchTerm = ref("")
 const activeTab = ref("all")
@@ -203,12 +224,11 @@ const isUserMenuOpen = ref(false)
 const activeOrderActions = ref(null)
 
 // Pagination state
-const currentPage = ref(1)
-const itemsPerPage = 5 // Number of orders per page
+const itemsPerPage = 5 
 
 const setActiveTab = (tab) => {
     activeTab.value = tab
-    currentPage.value = 1 // Reset to first page on tab change
+    currentPage.value = 1 
     activeOrderActions.value = null
 }
 
@@ -257,5 +277,4 @@ const getOrderStatusClass = (status) => {
 }
 </script>
 
-<style scoped src="@/style/HoaDon/MyOrder.css">
-</style>
+<style scoped src="@/style/HoaDon/MyOrder.css"></style>

@@ -3,8 +3,7 @@
 import { reactive, ref } from "vue";
 import { useStore } from "vuex";
 
-
-const khachHangRegister = ref({})
+const khachHangRegister = ref({});
 const confirm_mat_khau = ref("");
 const errors = reactive({});
 const isLoading = ref(false);
@@ -13,9 +12,9 @@ const emit = defineEmits(["switchToLogin"]);
 
 const handleRegister = async () => {
   //remove old errors
-  Object.keys(errors).forEach(key => delete errors[key]);
+  Object.keys(errors).forEach((key) => delete errors[key]);
 
-  const { taiKhoan, matKhau, tenKhachHang, email} = khachHangRegister.value;
+  const { taiKhoan, matKhau, tenKhachHang, email } = khachHangRegister.value;
 
   // Kiểm tra input
   if (!taiKhoan?.trim()) errors.taiKhoan = "Vui lòng nhập tài khoản";
@@ -25,8 +24,8 @@ const handleRegister = async () => {
   if (matKhau !== confirm_mat_khau.value) {
     errors.confirm_mat_khau = "Mật khẩu nhập lại không khớp";
   }
-  
-  if(Object.keys(errors).length > 0) return;
+
+  if (Object.keys(errors).length > 0) return;
 
   try {
     isLoading.value = true;
@@ -39,15 +38,13 @@ const handleRegister = async () => {
       err.forEach(({ field, message }) => {
         errors[field] = message; // Gán lỗi vào errors
       });
-    } 
-    else {
-      errors.server = err.message || "Register failed"
+    } else {
+      errors.server = err.message || "Register failed";
     }
   } finally {
     isLoading.value = false;
   }
 };
-
 </script>
 
 <template>
@@ -64,7 +61,6 @@ const handleRegister = async () => {
             v-model.trim="khachHangRegister.taiKhoan"
             type="text"
             placeholder="Nhập tài khoản"
-            
           />
         </div>
         <div>
@@ -97,7 +93,7 @@ const handleRegister = async () => {
           <input
             v-model="khachHangRegister.matKhau"
             type="password"
-            placeholder="Nhập password"
+            placeholder="Nhập mật khẩu"
           />
         </div>
         <div>
@@ -115,7 +111,6 @@ const handleRegister = async () => {
         <button type="submit" :disabled="isLoading">
           {{ isLoading ? "Đang xử lý..." : "Đăng ký" }}
         </button>
-
 
         <p class="switch-mode">
           Đã có tài khoản?
@@ -146,7 +141,7 @@ const handleRegister = async () => {
   justify-content: center;
   align-items: center;
   min-height: 91.4vh;
-  background-image: url("src/components/images/loginBackground.jpg");
+  background-image: url("@/components/images/loginBackground.jpg") !important; 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -199,11 +194,12 @@ const handleRegister = async () => {
 
 /* Gradient animation */
 @keyframes gradientShift {
-  0%, 100% { 
-    background-position: 0% 50%; 
+  0%,
+  100% {
+    background-position: 0% 50%;
     transform: scale(1);
   }
-  50% { 
+  50% {
     background-position: 100% 50%;
     transform: scale(1.02);
   }
@@ -211,24 +207,31 @@ const handleRegister = async () => {
 
 /* Underline effect for title */
 .signup-container h2::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #1ed6ff, #00bfff, #1ed6ff, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #1ed6ff,
+    #00bfff,
+    #1ed6ff,
+    transparent
+  );
   border-radius: 3px;
   animation: underlineGlow 2s ease-in-out infinite alternate;
 }
 
 @keyframes underlineGlow {
-  0% { 
+  0% {
     box-shadow: 0 0 5px rgba(30, 214, 255, 0.5);
     opacity: 0.8;
   }
-  100% { 
+  100% {
     box-shadow: 0 0 15px rgba(30, 214, 255, 0.8);
     opacity: 1;
   }

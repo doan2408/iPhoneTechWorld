@@ -11,4 +11,6 @@ public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTiet, 
     void deleteByIdSanPhamChiTiet_Id(Integer idSanPhamChiTietId);
 
     GioHangChiTiet findByIdGioHangAndIdSanPhamChiTiet(GioHang idGioHang, SanPhamChiTiet idSanPhamChiTiet);
+
+    void deleteAllByIdSanPhamChiTiet_Id(Integer idSanPhamChiTietId);
 }

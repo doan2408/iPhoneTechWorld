@@ -184,15 +184,16 @@ public class ClientAdminService {
         //tạo ví tương ứng với khách hàng mới vừa tạo
         ViDiem viDiem = new ViDiem();
         viDiem.setKhachHang(khachHangAdd);
+        viDiem.setDiemKhaDung(new BigDecimal(0));
 
         //set ngược lại one to one
         khachHangAdd.setGioHang(gioHang);
         khachHangAdd.setViDiem(viDiem);
 
-        DiaChi diaChi = new DiaChi();
-        diaChi.setIdKhachHang(khachHangAdd);
-        diaChi.setDiaChiChinh(true);
-        diaChiRepository.save(diaChi);
+//        DiaChi diaChi = new DiaChi();
+//        diaChi.setIdKhachHang(khachHangAdd);
+//        diaChi.setDiaChiChinh(true);
+//        diaChiRepository.save(diaChi);
         //lưu id khách hàng và giỏ hàng, ví cũng sẽ được lưu theo Cascade
         return khachHangRepository.save(khachHangAdd);
     }

@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Dto.Response.ClientResponse.LichSuDiemResponse.LichSuDiemResponse;
+import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.LichSuDiem;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
 import org.springframework.data.domain.Page;
@@ -10,8 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -40,5 +39,7 @@ public interface LichSuDiemRepository extends JpaRepository<LichSuDiem, Integer>
             @Param("loaiDiem") LoaiDiem loaiDiem,
             @Param("now") OffsetDateTime now
     );
+
+    boolean existsByHoaDon(HoaDon hoaDon);
 
 }

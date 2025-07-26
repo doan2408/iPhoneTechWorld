@@ -130,4 +130,7 @@ public class HoaDon {
     @Column(name = "shipping_method", length = 50)
     private ShippingMethod shippingMethod;
 
+    @OneToOne(mappedBy = "hoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private LichSuDiem lichSuDiem;
+
 }

@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     );
 
     @Query("""
-    SELECT p 
+    SELECT p
     FROM PhieuGiamGia p
     WHERE p.soDiemCanDeDoi = :soDiemCanDeDoi
       AND p.giaTriDonHangToiThieu <= :giaTriDonHangToiThieu
@@ -50,6 +51,24 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             @Param("congKhai") Boolean congKhai,
             @Param("trangThaiPhieuGiamGia") TrangThaiPGG trangThaiPhieuGiamGia,
             @Param("keyword") String keyword
+    );
+
+    @Query("""
+        SELECT p FROM PhieuGiamGia p
+        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenKhuyenMai LIKE %:search%)
+          AND (:trangThai IS NULL OR p.trangThaiPhieuGiamGia = :trangThai)
+          AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
+          AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)
+          AND (:hangToiThieu IS NULL OR p.hangToiThieu = :hangToiThieu)
+          AND p.congKhai = false
+    """)
+    Page<PhieuGiamGia> getDoiVoucher (
+            @Param("search") String search,
+            @Param("trangThai") TrangThaiPGG trangThai,
+            @Param("ngayBatDau") LocalDate ngayBatDau,
+            @Param("ngayKetThuc") LocalDate ngayKetThuc,
+            @Param("hangToiThieu") HangKhachHang hangToiThieu,
+            Pageable pageable
     );
 
 }

@@ -23,16 +23,4 @@ export const updateInfor = async (id, clientRequest) => {
   }
 };
 
-//xem các địa chỉ của 1 khách
-export const getAdressesClient = async (id) => {
-  try {
-    const response = await api.get(`${baseURL}/address/addresses/${id}`);
-    return response.data;
-  } catch (err) {
-    console.log(
-      "An errors was thrown while loading the addresses of client in admin: ",
-      err
-    );
-    throw err.response?.data || "Error getting addresses";
-  }
-};
+
