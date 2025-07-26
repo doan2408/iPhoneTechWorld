@@ -1,22 +1,37 @@
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import Banner from "@/components/Client/Banner.vue";
 import { getAllSanPham, getLoai } from "@/Service/ClientService/Products/ProductClientService";
-import { 
-  PriceTag, 
-  Search, 
-  Delete, 
-  Menu, 
-  ArrowDown, 
-  Sort, 
-  View 
-} from '@element-plus/icons-vue'
+import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import {
+  PriceTag,
+  Search,
+  Delete,
+  Menu,
+  ArrowDown,
+  Sort,
+  View
+} from '@element-plus/icons-vue';
 import { h } from 'vue';
 
 const showClearFilter = ref(false);
 const filterKeyword = ref("");
 const selectedLoai = ref("");
-const priceRange = ref([0, 50000000]);  //default range 0 - 50 milions
+const priceRange = ref([0, 50000000]); // default range 0 - 50 millions
 const currentPage = ref(1);
 const pageSize = 16;
 const totalProducts = ref(0);
@@ -32,6 +47,27 @@ const minPrice = 0;
 const maxPrice = 50000000;
 const priceStep = 1000000;
 
+// Hàm nhúng Tawk.to
+const loadTawkTo = () => {
+  // Kiểm tra xem Tawk.to đã được tải chưa để tránh tải lại
+  if (window.Tawk_API) return;
+
+  // Tạo script element
+  const s1 = document.createElement("script");
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+
+  // Thêm script vào DOM
+  const s0 = document.getElementsByTagName("script")[0];
+  s0.parentNode.insertBefore(s1, s0);
+
+  // Khởi tạo Tawk_API
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+};
+
 const fetchProducts = async () => {
   try {
     const params = {
@@ -44,7 +80,17 @@ const fetchProducts = async () => {
     };
 
     const data = await getAllSanPham(params);
-    products.value = data.content || data;
+    products.value = await Promise.all(
+      (data.content || data).map(async (item) => {
+        try {
+          const avgRating = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPham(item.id);
+          return { ...item, averageRating: avgRating || 0 };
+        } catch (error) {
+          console.error(`Lỗi khi lấy điểm trung bình cho sản phẩm ${item.id}:`, error);
+          return { ...item, averageRating: 0 };
+        }
+      })
+    );
     totalProducts.value = data.totalElements || data.length;
     showClearFilter.value =
       filterKeyword.value ||
@@ -72,11 +118,11 @@ const loaiOptions = ref([{ label: "Tất cả", value: "" }]);
 
 const hasProduct = computed(() => products.value.length > 0);
 
-const fetchLoai = async() => {
+const fetchLoai = async () => {
   try {
     const data = await getLoai();
     loaiOptions.value = [
-      {label: "Tất cả", value: ""},
+      { label: "Tất cả", value: "" },
       ...data.map((item) => ({
         label: item.tenLoai,
         value: item.idLoai,
@@ -85,14 +131,12 @@ const fetchLoai = async() => {
   } catch (error) {
     console.error("Lỗi khi lấy danh sách loại", error);
   }
-}
+};
 
 const clearFilters = () => {
-  // Clear debounce timer when clearing filters
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
-  
   filterKeyword.value = "";
   selectedLoai.value = "";
   priceRange.value = [minPrice, maxPrice];
@@ -140,7 +184,6 @@ const sortLabel = computed(() => {
 watch(
   filterKeyword,
   () => {
-    // Chỉ debounce cho search keyword
     debouncedFetchProducts();
   }
 );
@@ -148,7 +191,6 @@ watch(
 watch(
   [selectedLoai, priceRange],
   () => {
-    // Không debounce cho filter loại và giá (cần response ngay lập tức)
     currentPage.value = 1;
     fetchProducts();
   },
@@ -162,6 +204,7 @@ watch(currentPage, () => {
 onMounted(() => {
   fetchLoai();
   fetchProducts();
+  loadTawkTo(); // Tải Tawk.to khi component được gắn
 });
 </script>
 
@@ -275,7 +318,7 @@ onMounted(() => {
               <el-button class="filter-btn">
                 <el-icon><Menu /></el-icon>
                 <span>
-                  {{ selectedLoai ? loaiOptions.find((item) => item.value ===selectedLoai)?.label : "Loại" }}
+                  {{ selectedLoai ? loaiOptions.find((item) => item.value === selectedLoai)?.label : "Loại" }}
                 </span>
                 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
@@ -296,7 +339,7 @@ onMounted(() => {
             <el-dropdown trigger="click">
               <el-button class="filter-btn">
                 <el-icon><Sort /></el-icon>
-                <span> {{ sortLabel }}</span>
+                <span>{{ sortLabel }}</span>
                 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
@@ -386,6 +429,16 @@ onMounted(() => {
                   <div class="product-info">
                     <h3 class="product-name">{{ sp.tenSanPham }}</h3>
                     <div class="product-price">{{ formatPrice(sp.giaBan) }}</div>
+                    <div class="rating-summary">
+                      <el-rate
+                        v-model="sp.averageRating"
+                        disabled
+                        allow-half
+                        class="product-rating"
+                      />
+                      <span class="rating-text">{{ sp.averageRating.toFixed(1) }} / 5</span>
+                    </div>
+                    <!-- GHI CHÚ: Kết thúc phần hiển thị số sao trung bình -->
                   </div>
                 </div>
               </router-link>
@@ -405,6 +458,7 @@ onMounted(() => {
             layout="prev, pager, next, jumper"
             :background="true"
             class="custom-pagination"
+            @current-change="handlePageChange"
           />
         </div>
 
@@ -682,6 +736,10 @@ onMounted(() => {
   transition: opacity 0.2s ease;
 }
 
+.product-card:hover .product-overlay {
+  opacity: 1;
+}
+
 .quick-view-btn {
   width: 40px;
   height: 40px;
@@ -711,13 +769,36 @@ onMounted(() => {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .product-price {
   font-size: 16px;
   font-weight: 700;
   color: #dc3545;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.product-rating {
+  display: inline-flex;
+}
+
+.product-rating :deep(.el-rate__icon.el-icon-star-off) {
+  color: #d9d9d9; /* Màu xám cho ngôi sao chưa được điền */
+}
+
+.rating-text {
+  font-size: 12px;
+  color: #495057;
+  font-weight: 500;
 }
 
 .pagination-container {
@@ -736,6 +817,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Đảm bảo widget Tawk.to không bị che */
+#tawkto-container {
+  z-index: 1000 !important;
 }
 
 /* Responsive design */
@@ -793,6 +879,18 @@ onMounted(() => {
 
   .products-count {
     font-size: 12px;
+  }
+
+  .rating-summary {
+    margin-top: 6px;
+  }
+
+  .product-rating :deep(.el-rate__icon) {
+    font-size: 12px; /* Giảm kích thước ngôi sao trên màn hình nhỏ */
+  }
+
+  .rating-text {
+    font-size: 11px;
   }
 }
 

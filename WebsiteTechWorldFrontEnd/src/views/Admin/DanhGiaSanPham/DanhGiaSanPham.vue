@@ -1,12 +1,15 @@
-```vue
 <template>
   <div class="container mx-auto p-6">
     <el-card class="shadow-xl bg-white">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900">Danh sách đánh giá sản phẩm</h2>
-        <el-button type="primary" class="px-4 py-2" @click="openCreateDialog">
-          <i class="el-icon-plus mr-2"></i> Thêm đánh giá
-        </el-button>
+        <el-select v-model="filterStatus" placeholder="Lọc trạng thái" @change="loadDanhGia" class="w-48">
+          <el-option label="Tất cả" value="" />
+          <el-option label="Chờ duyệt" value="PENDING_APPROVAL" />
+          <el-option label="Đã duyệt" value="APPROVED" />
+          <el-option label="Từ chối" value="REFUSE" />
+          <el-option label="Ẩn" value="HIDE" />
+        </el-select>
       </div>
 
       <el-table
@@ -18,17 +21,19 @@
         :row-class-name="tableRowClassName"
       >
         <el-table-column type="index" label="STT" width="60" :index="indexMethod" align="center" />
-        <el-table-column prop="idDanhGia" label="ID" width="80" align="center" />
         <el-table-column prop="tenKhachHang" label="Khách hàng" width="150" />
-        <el-table-column prop="tenSanPham" label="Sản phẩm" width="160"/>
+        <el-table-column prop="maSanPhamChiTiet" label="Mã sản phẩm" width="120" align="center" />
+        <el-table-column prop="tenSanPham" label="Sản phẩm" width="160" />
+        <el-table-column prop="tenMau" label="Màu sắc" width="120" align="center" />
+        <el-table-column prop="dungLuongRam" label="RAM" width="100" align="center" />
+        <el-table-column prop="dungLuongRom" label="ROM" width="100" align="center" />
         <el-table-column label="Sao" width="200" align="center">
           <template #default="{ row }">
             <el-rate v-model="row.soSao" disabled :max="5" class="text-yellow-400" />
           </template>
         </el-table-column>
-        <el-table-column prop="noiDung" label="Nội dung" width="500"/>
+        <el-table-column prop="noiDung" label="Nội dung" width="400" />
         <el-table-column prop="ngayDanhGia" label="Ngày đánh giá" width="180" align="center" />
-        
         <el-table-column label="Ảnh" width="200" align="center">
           <template #default="{ row }">
             <el-image
@@ -42,7 +47,6 @@
             />
           </template>
         </el-table-column>
-
         <el-table-column label="Video" width="200" align="center">
           <template #default="{ row }">
             <video
@@ -54,7 +58,7 @@
             ></video>
           </template>
         </el-table-column>
-
+        <el-table-column prop="noiDungPhanHoi" label="Phản hồi" width="300" />
         <el-table-column label="Trạng thái" width="150" align="center">
           <template #default="{ row }">
             <span
@@ -69,8 +73,7 @@
             </span>
           </template>
         </el-table-column>
-
-        <el-table-column label="Hành động" width="280" align="center">
+        <el-table-column label="Hành động" width="350" align="center">
           <template #default="{ row }">
             <el-button
               type="success"
@@ -91,12 +94,12 @@
               Từ chối
             </el-button>
             <el-button
-              type="primary"
+              type="info"
               size="small"
-              @click="openEditDialog(row)"
+              @click="openReplyDialog(row)"
               class="mr-2 hover:bg-blue-600 transition"
             >
-              Sửa
+              Phản hồi
             </el-button>
             <el-button
               type="danger"
@@ -123,44 +126,29 @@
       </div>
     </el-card>
 
-    <!-- Dialog thêm/sửa đánh giá -->
+    <!-- Dialog phản hồi -->
     <el-dialog
-      :title="dialogTitle"
-      v-model="dialogVisible"
+      title="Phản hồi đánh giá"
+      v-model="dialogReplyVisible"
       width="35%"
-      :before-close="handleCloseDialog"
+      :before-close="handleCloseReplyDialog"
       class="rounded-lg"
     >
-      <el-form :model="form" :rules="rules" ref="reviewForm" label-position="top" class="p-4">
-        <el-form-item label="Khách hàng" prop="tenKhachHang">
-          <el-input v-model="form.tenKhachHang" placeholder="Nhập tên khách hàng" class="w-full" />
-        </el-form-item>
-        <el-form-item label="Sản phẩm" prop="tenSanPham">
-          <el-input v-model="form.tenSanPham" placeholder="Nhập tên sản phẩm" class="w-full" />
-        </el-form-item>
-        <el-form-item label="Số sao" prop="soSao">
-          <el-rate v-model="form.soSao" :max="5" class="text-yellow-400" />
-        </el-form-item>
-        <el-form-item label="Nội dung" prop="noiDung">
+      <el-form :model="replyForm" :rules="replyRules" ref="replyForm" label-position="top" class="p-4">
+        <el-form-item label="Nội dung phản hồi" prop="noiDungPhanHoi">
           <el-input
             type="textarea"
-            v-model="form.noiDung"
-            placeholder="Nhập nội dung đánh giá"
+            v-model="replyForm.noiDungPhanHoi"
+            placeholder="Nhập nội dung phản hồi"
             :rows="4"
             class="w-full"
           />
         </el-form-item>
-        <el-form-item label="Ảnh (URLs, cách nhau bằng dấu phẩy)">
-          <el-input v-model="form.anhUrls" placeholder="Nhập URL ảnh" class="w-full" />
-        </el-form-item>
-        <el-form-item label="Video (URLs, cách nhau bằng dấu phẩy)">
-          <el-input v-model="form.videoUrls" placeholder="Nhập URL video" class="w-full" />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer flex justify-end gap-3 p-4">
-          <el-button @click="dialogVisible = false" class="hover:bg-gray-100 transition">Hủy</el-button>
-          <el-button type="primary" @click="submitForm" class="hover:bg-blue-600 transition">Lưu</el-button>
+          <el-button @click="dialogReplyVisible = false" class="hover:bg-gray-100 transition">Hủy</el-button>
+          <el-button type="primary" @click="submitReplyForm" class="hover:bg-blue-600 transition">Gửi</el-button>
         </span>
       </template>
     </el-dialog>
@@ -178,24 +166,16 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
 const pageSize = ref(5);
-const dialogVisible = ref(false);
-const dialogTitle = ref('Thêm đánh giá');
-const form = ref({
+const filterStatus = ref('');
+const dialogReplyVisible = ref(false);
+const replyForm = ref({
   idDanhGia: null,
-  tenKhachHang: '',
-  tenSanPham: '',
-  soSao: 0,
-  noiDung: '',
-  anhUrls: '',
-  videoUrls: '',
+  noiDungPhanHoi: '',
 });
-const rules = ref({
-  tenKhachHang: [{ required: true, message: 'Vui lòng nhập tên khách hàng', trigger: 'blur' }],
-  tenSanPham: [{ required: true, message: 'Vui lòng nhập tên sản phẩm', trigger: 'blur' }],
-  noiDung: [{ required: true, message: 'Vui lòng nhập nội dung', trigger: 'blur' }],
-  soSao: [{ required: true, message: 'Vui lòng chọn số sao', trigger: 'change' }],
+const replyRules = ref({
+  noiDungPhanHoi: [{ required: true, message: 'Vui lòng nhập nội dung phản hồi', trigger: 'blur' }],
 });
-const reviewForm = ref(null);
+const replyFormRef = ref(null);
 
 // Ánh xạ trạng thái sang tiếng Việt
 const mapStatusToVietnamese = (status) => {
@@ -235,19 +215,21 @@ const loadDanhGia = async () => {
   try {
     const response = await DanhGiaSanPhamAdminService.layTatCaDanhGiaAdmin(
       currentPage.value - 1,
-      pageSize.value
+      pageSize.value,
+      filterStatus.value
     );
     dataReview.value = response.content.map(item => ({
       ...item,
       anhUrls: Array.isArray(item.anhUrls) ? item.anhUrls : item.anhUrls ? item.anhUrls.split(',') : [],
       videoUrls: Array.isArray(item.videoUrls) ? item.videoUrls : item.videoUrls ? item.videoUrls.split(',') : [],
       soSao: Number(item.soSao),
+      noiDungPhanHoi: item.noiDungPhanHoi || '',
     }));
     totalPages.value = response.totalPages;
     totalItems.value = response.totalElements;
   } catch (error) {
-    ElMessage.error('Không thể tải dữ liệu đánh giá');
-    console.error(error);
+    ElMessage.error('Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.');
+    console.error('Lỗi khi tải đánh giá:', error);
   } finally {
     loading.value = false;
   }
@@ -259,38 +241,17 @@ const handlePageChange = (page) => {
   loadDanhGia();
 };
 
-// Mở dialog thêm đánh giá
-const openCreateDialog = () => {
-  dialogTitle.value = 'Thêm đánh giá';
-  form.value = {
-    idDanhGia: null,
-    tenKhachHang: '',
-    tenSanPham: '',
-    soSao: 0,
-    noiDung: '',
-    anhUrls: '',
-    videoUrls: '',
-  };
-  dialogVisible.value = true;
-};
-
-// Mở dialog sửa đánh giá
-const openEditDialog = (row) => {
-  dialogTitle.value = 'Sửa đánh giá';
-  form.value = {
+// Mở dialog phản hồi
+const openReplyDialog = (row) => {
+  replyForm.value = {
     idDanhGia: row.idDanhGia,
-    tenKhachHang: row.tenKhachHang,
-    tenSanPham: row.tenSanPham,
-    soSao: Number(row.soSao),
-    noiDung: row.noiDung,
-    anhUrls: row.anhUrls.join(','),
-    videoUrls: row.videoUrls.join(','),
+    noiDungPhanHoi: row.noiDungPhanHoi || '',
   };
-  dialogVisible.value = true;
+  dialogReplyVisible.value = true;
 };
 
-// Đóng dialog
-const handleCloseDialog = (done) => {
+// Đóng dialog phản hồi
+const handleCloseReplyDialog = (done) => {
   ElMessageBox.confirm('Bạn có chắc muốn đóng mà không lưu?', 'Xác nhận', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
@@ -302,29 +263,20 @@ const handleCloseDialog = (done) => {
     .catch(() => {});
 };
 
-// Lưu form (thêm hoặc sửa)
-const submitForm = () => {
-  reviewForm.value.validate(async (valid) => {
+// Gửi phản hồi
+const submitReplyForm = () => {
+  replyFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        const data = {
-          ...form.value,
-          anhUrls: form.value.anhUrls ? form.value.anhUrls.split(',').map(url => url.trim()) : [],
-          videoUrls: form.value.videoUrls ? form.value.videoUrls.split(',').map(url => url.trim()) : [],
-          soSao: Number(form.value.soSao),
-        };
-        if (form.value.idDanhGia) {
-          await DanhGiaSanPhamAdminService.capNhatDanhGia(form.value.idDanhGia, data);
-          ElMessage.success('Cập nhật đánh giá thành công');
-        } else {
-          await DanhGiaSanPhamAdminService.themDanhGia(data);
-          ElMessage.success('Thêm đánh giá thành công');
-        }
-        dialogVisible.value = false;
+        await DanhGiaSanPhamAdminService.phanHoiDanhGia(replyForm.value.idDanhGia, {
+          noiDungPhanHoi: replyForm.value.noiDungPhanHoi,
+        });
+        ElMessage.success('Gửi phản hồi thành công');
+        dialogReplyVisible.value = false;
         loadDanhGia();
       } catch (error) {
-        ElMessage.error('Lỗi khi lưu đánh giá');
-        console.error(error);
+        ElMessage.error('Lỗi khi gửi phản hồi. Vui lòng thử lại.');
+        console.error('Lỗi khi gửi phản hồi:', error);
       }
     }
   });
@@ -342,8 +294,8 @@ const handleApprove = async (id) => {
     ElMessage.success('Phê duyệt đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    ElMessage.error('Lỗi khi phê duyệt đánh giá');
-    console.error(error);
+    ElMessage.error('Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi khi phê duyệt:', error);
   }
 };
 
@@ -359,8 +311,8 @@ const handleReject = async (id) => {
     ElMessage.success('Từ chối đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    ElMessage.error('Lỗi khi từ chối đánh giá');
-    console.error(error);
+    ElMessage.error('Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi khi từ chối:', error);
   }
 };
 
@@ -376,8 +328,8 @@ const handleDelete = async (id) => {
     ElMessage.success('Xóa đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    ElMessage.error('Lỗi khi xóa đánh giá');
-    console.error(error);
+    ElMessage.error('Lỗi khi xóa đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi khi xóa:', error);
   }
 };
 
@@ -445,7 +397,7 @@ onMounted(() => {
   font-weight: 500;
   color: #374151;
 }
-.el-input, .el-textarea {
+.el-input, .el-textarea, .el-select {
   border-radius: 8px;
 }
 .el-pagination {
@@ -455,4 +407,3 @@ onMounted(() => {
   border-radius: 8px;
 }
 </style>
-```

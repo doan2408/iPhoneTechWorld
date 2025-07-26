@@ -1,3 +1,19 @@
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
@@ -12,6 +28,28 @@ import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanP
 import { ShoppingCart } from "@element-plus/icons-vue";
 import { ElMessage, ElRate, ElUpload } from "element-plus";
 import { ElPagination } from "element-plus";
+
+
+// Hàm nhúng Tawk.to
+const loadTawkTo = () => {
+  // Kiểm tra xem Tawk.to đã được tải chưa để tránh tải lại
+  if (window.Tawk_API) return;
+
+  // Tạo script element
+  const s1 = document.createElement("script");
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+
+  // Thêm script vào DOM
+  const s0 = document.getElementsByTagName("script")[0];
+  s0.parentNode.insertBefore(s1, s0);
+
+  // Khởi tạo Tawk_API
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+};
 
 const user = JSON.parse(localStorage.getItem("user"));
 const route = useRoute();
