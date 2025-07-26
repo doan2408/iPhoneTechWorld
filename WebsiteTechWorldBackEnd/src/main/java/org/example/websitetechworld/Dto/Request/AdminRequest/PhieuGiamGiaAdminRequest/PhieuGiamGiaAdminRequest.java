@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.*;
+import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 
 import java.math.BigDecimal;
@@ -52,7 +53,7 @@ public class PhieuGiamGiaAdminRequest {
     private String dieuKienApDung;
 
     @Size(max = 50, message = "Hạng tối thiểu không được vượt quá 50 ký tự")
-    private String hangToiThieu;
+    private HangKhachHang hangToiThieu;
 
     @NotNull(message = "Số lượng không được để trống")
     @PositiveOrZero(message = "Số lượng phải lớn hơn hoặc bằng 0")

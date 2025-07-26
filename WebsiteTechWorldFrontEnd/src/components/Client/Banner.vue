@@ -111,6 +111,7 @@ onUnmounted(() => {
   position: relative;
   height: 400px;
   overflow: hidden;
+  border-radius: 20px;
 }
 
 .slider-container {

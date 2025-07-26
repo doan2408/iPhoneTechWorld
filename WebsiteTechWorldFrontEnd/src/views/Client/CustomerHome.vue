@@ -599,8 +599,8 @@ onMounted(() => {
 }
 
 .search-input {
-  border-radius: 8px;
-  border: 1px solid #ced4da;
+  border-radius: 15px;
+  border: 1px solid #1172d4;
   padding: 10px 14px;
   font-size: 14px;
 }

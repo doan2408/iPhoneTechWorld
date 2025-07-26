@@ -49,7 +49,6 @@ public class SanPhamClientController {
             ClientProductDetailResponse response = sanPhamClientService.getChiTietBienThe(idsp, idMau, idRom);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("không có sản phẩm tương ứng");
         }
         return ResponseEntity.notFound().build();
@@ -62,7 +61,6 @@ public class SanPhamClientController {
             return ResponseEntity.ok(response);
         }
         catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("Không có thông số");
         }
         return ResponseEntity.notFound().build();
@@ -75,7 +73,6 @@ public class SanPhamClientController {
             return ResponseEntity.ok(listAnh);
         }
         catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("did not find images");
         }
         return ResponseEntity.notFound().build();

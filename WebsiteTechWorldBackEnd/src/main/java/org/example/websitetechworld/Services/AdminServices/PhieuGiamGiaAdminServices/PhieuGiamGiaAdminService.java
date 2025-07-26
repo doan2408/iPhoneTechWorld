@@ -303,7 +303,7 @@ public class PhieuGiamGiaAdminService {
     private Set<Integer> layDanhSachIdKhachHangTuYeuCau (PhieuGiamGiaAdminRequest request) {
         Set<Integer> danhSachIdKhachHang = new HashSet<>();
         if (request.getHangToiThieu() != null) {
-            danhSachIdKhachHang.addAll(khachHangRepository.findByHangKhachHang(HangKhachHang.valueOf(request.getHangToiThieu()))
+            danhSachIdKhachHang.addAll(khachHangRepository.findByHangKhachHang(request.getHangToiThieu())
                     .stream()
                     .map(KhachHang::getId)
                     .collect(Collectors.toSet()));

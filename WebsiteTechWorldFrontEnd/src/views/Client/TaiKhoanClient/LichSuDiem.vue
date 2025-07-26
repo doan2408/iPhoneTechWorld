@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getLichSuDiem } from "@/Service/ClientService/TaiKhoan/TichDiemServices";
+import { getLichSuDiem } from "@/Service/ClientService/TichDiem/TichDiemServices";
+import { Back } from "@element-plus/icons-vue";
 
 const filters = ref({
   fromDate: null,
@@ -62,6 +63,9 @@ onMounted(fetchData);
 <template>
   <div class="p-4">
     <h2 class="text-xl font-semibold mb-4">Lịch sử tích điểm</h2>
+    <router-link to="/client/doiDiem">
+      <el-button type="info" plain :icon="Back" class="mb-4">Quay lại</el-button>
+    </router-link>
 
     <!-- Bộ lọc ngày -->
     <el-form :inline="true" class="mb-4">
@@ -94,8 +98,14 @@ onMounted(fetchData);
     <!-- Bảng lịch sử điểm -->
     <el-table :data="lichSuDiemList" border stripe style="width: 100%">
       <el-table-column label="STT" type="index" width="60" />
+      <el-table-column label="Loại điểm">
+      <template #default="{ row }">
+        <span :class="row.loaiDiem === 'CONG' ? 'green-text' : 'red-text'">
+          {{ row.loaiDiem == "CONG" ? "+++" : "---" }}
+        </span>
+      </template>
+      </el-table-column>
       <el-table-column prop="soDiem" label="Số điểm" />
-      <el-table-column prop="loaiDiem" label="Loại điểm" />
       <el-table-column prop="ghiChu" label="Ghi chú" />
       <el-table-column
         label="Thời gian"
@@ -162,5 +172,14 @@ h2 {
 .el-pagination {
   justify-content: center;
   margin-top: 24px;
+}
+
+.green-text {
+  color: rgb(4, 188, 4);
+  font-weight: bold;
+}
+.red-text {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
 }
 </style>

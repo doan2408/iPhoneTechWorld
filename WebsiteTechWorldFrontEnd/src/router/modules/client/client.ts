@@ -19,6 +19,8 @@ const clientRoutes: RouteRecordRaw[] = [
       { path: "checkout-form", name: "checkoutForm", component: () => import("@/views/Client/HoaDonClient/CheckoutForm.vue"), meta: { title: "CheckOutForm" } },
       { path: "order-succes", name: "ordersucces", component: () => import("@/views/Client/HoaDonClient/OrderSucces.vue"), meta: { title: "OrderSucces" } },
       { path: "lichSuDiem", component: () => import("@/views/Client/TaiKhoanClient/LichSuDiem.vue"), meta: { title: "Lịch sử điểm" } },
+      { path: "doiDiem", component: () => import("@/views/Client/TaiKhoanClient/DoiDiem.vue"), meta: { title: "Quy đổi điểm" } },
+      
     ],
   },
 ];

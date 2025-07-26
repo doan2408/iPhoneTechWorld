@@ -398,7 +398,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    id_san_pham_chi_tiet INT,
                                    so_luong INT,
                                    gia DECIMAL(10,2),
-                                   ngay_them DATE DEFAULT CAST(GETDATE() AS DATE),
+                                   ngay_them DATETIME DEFAULT CAST(GETDATE() AS DATETIME),
                                    FOREIGN KEY (id_gio_hang) REFERENCES gio_hang(id_gio_hang) ON DELETE CASCADE,
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
