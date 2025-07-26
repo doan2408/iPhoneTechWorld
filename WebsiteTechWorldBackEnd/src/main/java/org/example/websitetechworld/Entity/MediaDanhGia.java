@@ -2,6 +2,7 @@ package org.example.websitetechworld.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiMedia;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Table(name = "media_danh_gia")
 public class MediaDanhGia {
     @Id
@@ -44,7 +46,7 @@ public class MediaDanhGia {
     private TrangThaiMedia trangThaiMedia;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_danh_gia", insertable = false, updatable = false)
+    @JoinColumn(name = "id_danh_gia", updatable = false)
     private DanhGiaSanPham danhGiaSanPham;
 
 }

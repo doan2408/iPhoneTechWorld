@@ -70,21 +70,52 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
 
 
     @Query(value = """
-    SELECT 
-        dg.id_danh_gia AS idDanhGia,
-        kh.ten_khach_hang AS tenKhachHang,
-        spct.ma_san_pham_chi_tiet AS maSanPhamChiTiet,
-        sp.ten_san_pham AS tenSanPham,
-        dg.so_sao AS soSao,
-        dg.noi_dung AS noiDung,
-        dg.ngay_danh_gia AS ngayDanhGia,
-        dg.trang_thai_danh_gia AS trangThaiDanhGia
-    FROM danh_gia_san_pham dg
-    JOIN khach_hang kh ON kh.id_khach_hang = dg.id_khach_hang
-    JOIN san_pham_chi_tiet spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
-    JOIN san_pham sp ON sp.id_san_pham = spct.id_san_pham
-    """,
-            countQuery = "SELECT COUNT(*) FROM danh_gia_san_pham",
+SELECT
+    dg.id_danh_gia,
+    kh.ten_khach_hang,
+    spct.ma_san_pham_chi_tiet,
+    sp.ten_san_pham,
+    ms.ten_mau,
+    r.dung_luong_rom,
+    ra.dung_luong_ram,
+    dg.so_sao,
+    dg.noi_dung,
+    (
+        SELECT STRING_AGG(m.url_media, ', ')
+        FROM media_danh_gia m
+        WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'IMAGE'
+    ) AS anh_url,
+    (
+        SELECT STRING_AGG(m.url_media, ', ')
+        FROM media_danh_gia m
+        WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'VIDEO'
+    ) AS video_url,
+    phdg.noi_dung AS noi_dung_phan_hoi,
+    dg.ngay_danh_gia,
+    dg.trang_thai_danh_gia
+FROM danh_gia_san_pham AS dg
+JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
+JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
+JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
+JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
+JOIN rom AS r ON r.id_rom = spct.id_rom
+JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+JOIN ram AS ra ON ra.id_ram = msp.id_ram
+LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
+ORDER BY dg.ngay_danh_gia DESC
+""",
+            countQuery = """
+SELECT COUNT(*)
+FROM danh_gia_san_pham AS dg
+JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
+JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
+JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
+JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
+JOIN rom AS r ON r.id_rom = spct.id_rom
+JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+JOIN ram AS ra ON ra.id_ram = msp.id_ram
+LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
+""",
             nativeQuery = true)
     Page<Object[]> findAllDanhGia(Pageable pageable);
 
