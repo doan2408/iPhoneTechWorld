@@ -17,7 +17,12 @@ public class MyOrderClientMapper {
         MyOrderClientResponse dto = new MyOrderClientResponse();
         dto.setIdHoaDon(hoaDon.getId());
         dto.setMaVanDon(hoaDon.getMaVanDon());
-        dto.setTrangThaiGiaoHang(hoaDon.getTrangThaiDonHang());
+        if (hoaDon.getTrangThaiDonHang() != null ){
+            dto.setTrangThaiGiaoHang(hoaDon.getTrangThaiDonHang().getDisplayName());
+        }
+        if (hoaDon.getTrangThaiThanhToan() != null){
+            dto.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan().getDisplayName());
+        }
         dto.setThanhTien(hoaDon.getThanhTien());
         dto.setMyOrderClientResponseList(
                 hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)

@@ -42,6 +42,32 @@ public class HoaDonChiTiet_ImeiAdminServices {
             imeiReposiory.save(imei);
         }
     }
+    public void ganImeiChoHoaDon(List<ChiTietHoaDon> chiTietHoaDons) {
+        List<ImeiDaBan> imeiDaBansToSave = new ArrayList<>();
+        for (ChiTietHoaDon chiTiet : chiTietHoaDons) {
+            Integer idSpct = chiTiet.getIdSanPhamChiTiet().getId();
+            int soLuong = chiTiet.getSoLuong();
+
+            List<Imei> imeis = imeiReposiory.findTopByIdSanPhamChiTietAndTrangThaiImei(
+                    idSpct,
+                    TrangThaiImei.AVAILABLE.name(),
+                    soLuong
+            );
+
+            if (imeis.size() < soLuong) {
+                throw new IllegalStateException("Không đủ IMEI cho sản phẩm chi tiết ID: " + idSpct);
+            }
+
+            List<ImeiDaBan> imeiDaBanList = imeiDaBanAdminServices.generateImeiDaBan(
+                    chiTiet,
+                    imeis,
+                    TrangThaiImei.RESERVED
+            );
+
+            imeiDaBansToSave.addAll(imeiDaBanList);
+        }
+        imeiDaBanRepository.saveAll(imeiDaBansToSave);
+    }
     public void tangSoLuong(ChiTietHoaDon chiTietHoaDon, int soLuongCanThem) {
         List<Imei> imeisAvailable = imeiReposiory.findTopByIdSanPhamChiTietAndTrangThaiImei(
                 chiTietHoaDon.getIdSanPhamChiTiet().getId(), "AVAILABLE", soLuongCanThem
@@ -113,12 +139,12 @@ public class HoaDonChiTiet_ImeiAdminServices {
     public Page<ViewImeiAdminResponse> getAvailableImeisByProductId(Integer productId, Pageable pageable) {
         Page<Imei> imeiEntitiesPage = imeiReposiory.findByIdSanPhamChiTiet_IdAndTrangThaiImei(productId, TrangThaiImei.AVAILABLE, pageable);
         List<ViewImeiAdminResponse> imeiDtos = imeiEntitiesPage.getContent().stream()
-                .map(this::mapToImeiResponse) // Sử dụng phương thức map riêng
+                .map(this::mapToImeiResponse)
                 .collect(Collectors.toList());
 
-        // Tạo một Page mới từ danh sách DTO và thông tin phân trang gốc
         return new PageImpl<>(imeiDtos, pageable, imeiEntitiesPage.getTotalElements());
     }
+
     private ViewImeiAdminResponse mapToImeiResponse(Imei imei) {
         ViewImeiAdminResponse dto = new ViewImeiAdminResponse();
         dto.setId(imei.getId());

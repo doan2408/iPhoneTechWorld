@@ -62,7 +62,6 @@ export const updateAddress = async (id, addressRequest) => {
     }
   }
 };
-
 //xem các địa chỉ của 1 khách
 export const getAdressesClient = async (id) => {
   try {
@@ -76,3 +75,7 @@ export const getAdressesClient = async (id) => {
     throw err.response?.data || "Error getting addresses";
   }
 };
+export const getDiaChiByClient = () => {
+  const url = baseURL + '/addresses_by_kh';
+  return api.get(url)
+}

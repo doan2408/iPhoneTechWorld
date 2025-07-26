@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Services.AdminServices.ThanhToanAdminServices;
+package org.example.websitetechworld.Services.ClientServices.ThanhToanClientService;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
@@ -15,27 +15,32 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
-public class TienMatStrategy implements ThanhToanStrategy {
+public class NganHangStrategy implements ThanhToanStrategy {
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
 
-    public TienMatStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
+    public NganHangStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.phuongThucThanhToanRepository = phuongThucThanhToanRepository;
     }
 
-
     @Override
     public ThanhToanAdminResponse thanhToan(HoaDon hoaDon, ThanhToanAdminRequest request) {
-        BigDecimal soTienKhachDua = request.getSoTienKhachDua();
-        BigDecimal thanhTien = hoaDon.getThanhTien();
 
-        if (soTienKhachDua == null || soTienKhachDua.compareTo(thanhTien) < 0) {
-            throw new IllegalArgumentException("Số tiền khách đưa không đủ để thanh toán.");
+        if (hoaDon == null) {
+            throw new IllegalArgumentException("Hóa đơn không hợp lệ.");
+        }
+        if (hoaDon.getTrangThaiThanhToan() == TrangThaiThanhToan.PAID) {
+            throw new IllegalArgumentException("Hóa đơn đã được thanh toán.");
         }
 
-        BigDecimal tienThua = soTienKhachDua.subtract(thanhTien);
+        PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository
+                .findOneByTenPhuongThuc(request.getHinhThucThanhToan());
+        if (phuongThucThanhToan == null) {
+            throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " +
+                    request.getHinhThucThanhToan());
+        }
 
         if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
@@ -44,14 +49,13 @@ public class TienMatStrategy implements ThanhToanStrategy {
         }
         hoaDon.setNgayThanhToan(LocalDate.now());
 
-        PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findOneByTenPhuongThuc(request.getHinhThucThanhToan());
 
         ChiTietThanhToan cttt = new ChiTietThanhToan();
         cttt.setIdHoaDon(hoaDon);
-        cttt.setSoTienThanhToan(thanhTien);
+        cttt.setSoTienThanhToan(hoaDon.getThanhTien());
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
-        chiTietThanhToanRepository.save(cttt);
 
-        return new ThanhToanAdminResponse("Thanh toán thành công", tienThua);
+        chiTietThanhToanRepository.save(cttt);
+        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien());
     }
 }

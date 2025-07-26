@@ -620,7 +620,6 @@ watch(showSpecModal, (newVal) => {
                 <span class="spec-value">{{ thongSo.soLanSacToiDa }}</span>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
