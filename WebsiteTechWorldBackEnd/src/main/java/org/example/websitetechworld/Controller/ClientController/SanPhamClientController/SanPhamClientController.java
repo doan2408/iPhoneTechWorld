@@ -3,6 +3,7 @@ package org.example.websitetechworld.Controller.ClientController.SanPhamClientCo
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductDetailResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoCompareResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Services.ClientServices.SanPhamClientServices.SanPhamClientService;
 import org.springframework.data.domain.Page;
@@ -68,9 +69,9 @@ public class SanPhamClientController {
     }
 
     @GetMapping("/thongSoCompare/{idSp}")
-    public ResponseEntity<ThongSoResponse> getThongSoCompare(@PathVariable("idSp") Integer idSp) {
+    public ResponseEntity<ThongSoCompareResponse> getThongSoCompare(@PathVariable("idSp") Integer idSp) {
         try {
-            ThongSoResponse response = sanPhamClientService.getThongSoLimitRomMin(idSp);
+            ThongSoCompareResponse response = sanPhamClientService.getThongSoLimitRomMin(idSp);
             return ResponseEntity.ok(response);
         }
         catch (RuntimeException e) {
