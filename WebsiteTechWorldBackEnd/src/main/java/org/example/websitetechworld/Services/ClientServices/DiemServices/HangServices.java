@@ -78,4 +78,20 @@ public class HangServices {
         return hangRepo.diemXetHang(idViDiem, now);
     }
 
+    // hiem thi diem xet hang hien tai theo khoang
+    public HangClientResponse rankRange() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer idKhachHang = null;
+        if(authentication != null && authentication.getPrincipal() instanceof CustomUserDetails){
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            idKhachHang = userDetails.getId();
+        }
+        if (idKhachHang == null) {
+            // chua dang nhap
+            return null;
+        }
+        Integer tongDiemXetHang = diemXetHang(idKhachHang).intValue();
+        return hangRepo.findHangInfoWithMissingPoints(idKhachHang, tongDiemXetHang);
+    }
+
 }

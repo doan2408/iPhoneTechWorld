@@ -102,5 +102,4 @@ public class ViDiemServices {
         viDiemClientResponse.setDiemSapHetHan(diemSapHetHan);
         return viDiemClientResponse;
     }
-
 }

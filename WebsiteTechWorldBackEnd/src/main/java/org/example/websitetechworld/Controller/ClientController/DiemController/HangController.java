@@ -19,22 +19,20 @@ public class HangController {
     private final HangServices hangServices;
 
     @GetMapping
-    public ResponseEntity<?> getHang () {
+    public ResponseEntity<?> getHang() {
         try {
             return ResponseEntity.ok(hangServices.tenHang());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.noContent().build();
         }
     }
 
     @GetMapping("/listHang")
-    public ResponseEntity<?> getHangList () {
+    public ResponseEntity<?> getHangList() {
         try {
             List<HangClientResponse> hang = hangServices.getAllHang();
             return ResponseEntity.ok(hang);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.noContent().build();
         }
     }
@@ -44,6 +42,16 @@ public class HangController {
         try {
             BigDecimal diemXetHang = hangServices.diemXetHang(idViDiem);
             return ResponseEntity.ok(diemXetHang);
+        } catch (Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<?> getRange() {
+        try {
+            HangClientResponse hangClientResponse = hangServices.rankRange();
+            return ResponseEntity.ok(hangClientResponse);
         }
         catch (Exception e) {
             return ResponseEntity.noContent().build();

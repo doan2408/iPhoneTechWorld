@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Dto.Response.ClientResponse.DiemResponse.HangClientResponse;
 import org.example.websitetechworld.Entity.HangThanhVien;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +32,26 @@ public interface HangThanhVienRepository extends JpaRepository<HangThanhVien, In
     @Query(value = "select h from HangThanhVien h " +
             "where :diem between h.diemTu and h.diemDen")
     HangThanhVien getHangThanhVien(@Param("diem") BigDecimal diemHienTai);
+
+    // hien thi diem xet hang hien tai theo khoang
+    @Query(value = """
+                SELECT new org.example.websitetechworld.Dto.Response.ClientResponse.DiemResponse.HangClientResponse(
+                h.id,
+                h.tenHang,
+                :tongDiem,
+                h.diemTu,
+                h.diemDen,
+                case
+                when (h.diemDen - :tongDiem) <= 0  then 0
+                else (h.diemDen - :tongDiem)
+                end
+                )
+                from HangThanhVien h
+                join KhachHang kh on kh.hangThanhVien.id = h.id
+                where kh.id = :idKhachHang
+            """)
+    HangClientResponse findHangInfoWithMissingPoints(@Param("idKhachHang") Integer idKhachHang,
+                                                     @Param("tongDiem") Integer tongDiem);
 }
+
+
