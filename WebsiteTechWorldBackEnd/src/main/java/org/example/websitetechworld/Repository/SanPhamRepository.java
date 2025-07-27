@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoCompareResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
@@ -239,6 +240,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     	WHERE sp.id_san_pham = :idSanPham
         ORDER BY rom.dung_luong_rom ASC
     """, nativeQuery = true)
-    ThongSoResponse getThongSoByIdSp(@Param("idSanPham") Integer idSanPham);
+    ThongSoCompareResponse getThongSoByIdSp(@Param("idSanPham") Integer idSanPham);
 
 }

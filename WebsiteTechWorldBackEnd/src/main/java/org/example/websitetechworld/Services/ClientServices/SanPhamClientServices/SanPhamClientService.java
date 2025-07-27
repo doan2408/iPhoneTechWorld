@@ -1,10 +1,7 @@
 package org.example.websitetechworld.Services.ClientServices.SanPhamClientServices;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductDetailResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.LoaiClientResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Repository.LoaiRepository;
@@ -89,9 +86,9 @@ public class SanPhamClientService {
         return response !=null ? response : new ThongSoResponse();
     }
 
-    public ThongSoResponse getThongSoLimitRomMin(Integer idSp) {
-        ThongSoResponse response = sanPhamRepo.getThongSoByIdSp(idSp);
-        return response !=null ? response : new ThongSoResponse();
+    public ThongSoCompareResponse getThongSoLimitRomMin(Integer idSp) {
+        ThongSoCompareResponse response = sanPhamRepo.getThongSoByIdSp(idSp);
+        return response !=null ? response : new ThongSoCompareResponse();
     }
 
     //khi chon mau + rom

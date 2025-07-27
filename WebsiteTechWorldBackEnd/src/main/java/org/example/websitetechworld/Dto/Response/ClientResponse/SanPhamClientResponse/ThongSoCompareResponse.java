@@ -1,6 +1,9 @@
 package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -8,8 +11,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ThongSoResponse {
-
+public class ThongSoCompareResponse {
     private String cpu;
     private String ram;
     private String rom;
@@ -32,6 +34,12 @@ public class ThongSoResponse {
 
     private String heDieuHanh;
     private String xuatXu;
+    private String tenLoai;
 
-
+    // cpu
+    private String soNhan;
+    private String xungNhip;
+    private String boNhoDem;
+    private String tieuThuDienNang;
+    private Date namRaMat;
 }

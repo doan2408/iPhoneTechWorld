@@ -152,9 +152,6 @@ const goBack = () => {
 
 .back-btn:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #3b82f6;
-  ring-offset: 2px;
 }
 
 /* Responsive design */
