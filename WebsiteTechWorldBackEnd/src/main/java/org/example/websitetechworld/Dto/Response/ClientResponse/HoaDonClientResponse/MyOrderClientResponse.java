@@ -17,7 +17,8 @@ import java.util.List;
 public class MyOrderClientResponse {
     private Integer idHoaDon;
     private String maVanDon;
-    private TrangThaiGiaoHang trangThaiGiaoHang;
+    private String trangThaiGiaoHang;
+    private String trangThaiThanhToan;
     private BigDecimal thanhTien;
     private List<MyOrderProductClientResponse> myOrderClientResponseList;
 }

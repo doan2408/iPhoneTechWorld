@@ -45,7 +45,7 @@ const handleSubmit = async () => {
 
 const devliveryProcessing = async (data) => {
   router.push({
-    name: "GiaoHangProcessing",
+      name: "orderTracking",
     params: { id: data[0] },
   });
 };
@@ -63,6 +63,12 @@ const devliveryProcessing = async (data) => {
     padding: 20px;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20190221/ourmid/pngtree-move-the-company-goods-transport-image_12000.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
 }
 
 /* Thẻ chứa nội dung */

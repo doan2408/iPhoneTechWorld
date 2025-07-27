@@ -175,6 +175,7 @@ if (!store.hasModule('headerState')) {
 
 const route = useRoute();
 const selectedId = route.query.selected;
+import router from '@/router';
 
 const search = ref('');
 const selectAll = ref(false);
@@ -381,6 +382,15 @@ const handleCheckout = () => {
         return;
     }
     ElMessage.success(`Đang chuyển đến trang thanh toán với ${selectedItems.value.length} sản phẩm`);
+    const selectedProducts = JSON.stringify(selectedItems.value);
+
+    router.push({
+        name: 'checkoutForm',
+        query: {
+            products: encodeURIComponent(selectedProducts)
+        }
+    });
+    // Implement checkout logic here
 };
 </script>
 

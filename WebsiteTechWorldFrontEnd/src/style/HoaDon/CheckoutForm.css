@@ -1,0 +1,975 @@
+/* General Styles */
+.container {
+    min-height: 100vh;
+    background-color: #e0e6f0;
+    /* Light bluish-gray background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.checkout-card {
+    width: 100%;
+    max-width: 1000px;
+    /* Increased width */
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    padding: 25px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    background-color: #f8f8f8;
+    /* Slightly off-white for title background */
+}
+
+.section {
+    padding: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+/* Form Elements */
+.form-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    /* Added transition */
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #6a82fb;
+    /* A soft blue for focus */
+    box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.2);
+}
+
+.input-field[readonly] {
+    background-color: #f0f0f0;
+    /* Gray out readonly fields */
+    cursor: not-allowed;
+}
+
+/* Current Address Display */
+.current-address-display {
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.address-name-display {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.address-phone-display,
+.address-detail-display {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 3px;
+}
+
+.change-button {
+    background-color: #6a82fb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.change-button:hover {
+    background-color: #526edc;
+    transform: translateY(-2px);
+}
+
+.change-button:active {
+    transform: translateY(0);
+}
+
+/* Address Selection Modal Specifics */
+.address-modal-options {
+    margin-bottom: 20px;
+}
+
+.address-modal-options .radio-option {
+    margin-bottom: 10px;
+}
+
+.address-modal-options .radio-option:last-child {
+    margin-bottom: 0;
+}
+
+.modal-new-address-form {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.cancel-button {
+    padding: 12px 25px;
+    background-color: #ccc;
+    color: #333;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+}
+
+.cancel-button:hover {
+    background-color: #bbb;
+    transform: translateY(-2px);
+}
+
+.cancel-button:active {
+    transform: translateY(0);
+}
+
+.save-address-button {
+    padding: 12px 25px;
+    background-color: #28a745;
+    /* Green for save button */
+    color: #ffffff;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.save-address-button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.save-address-button:active {
+    transform: translateY(0);
+}
+
+/* Product Item */
+.product-item-wrapper {
+    background-color: #f8f8f8;
+    /* Light gray background for the product row */
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Added transition */
+}
+
+.product-item-wrapper:hover {
+    transform: translateY(-3px);
+    /* Subtle lift effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.product-checkbox {
+    min-width: 20px;
+    height: 20px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    cursor: pointer;
+    accent-color: #6a82fb;
+    /* Blue accent for checkbox */
+    transition: transform 0.2s ease;
+    /* Added transition */
+}
+
+.product-checkbox:checked {
+    transform: scale(1.1);
+    /* Slight scale on check */
+}
+
+.product-image-container {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Use contain to show full image */
+    border-radius: 8px;
+}
+
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.product-type {
+    font-size: 14px;
+    color: #777;
+}
+
+.product-pricing {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 380px;
+    /* Adjusted for wider layout */
+    justify-content: flex-end;
+    /* Align items to the right */
+}
+
+.product-price {
+    font-weight: 600;
+    color: #e74c3c;
+    /* Red for price */
+    font-size: 16px;
+    min-width: 100px;
+    /* Ensure price column width */
+    text-align: right;
+}
+
+.quantity-control {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.quantity-button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+    transition: background-color 0.2s, transform 0.1s ease;
+    /* Added transform transition */
+}
+
+.quantity-button:hover {
+    background-color: #e0e0e0;
+}
+
+.quantity-button:active {
+    transform: scale(0.95);
+    /* Slight press effect */
+}
+
+.quantity-input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+}
+
+.product-subtotal {
+    font-weight: 600;
+    color: #e74c3c;
+    /* Red for subtotal */
+    font-size: 16px;
+    min-width: 100px;
+    /* Ensure subtotal column width */
+    text-align: right;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #e74c3c;
+    /* Red for delete icon */
+    padding: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s, transform 0.2s ease;
+    /* Added transform transition */
+}
+
+.delete-button:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+    transform: scale(1.1);
+    /* Slight scale on hover */
+}
+
+/* Insurance Item */
+.insurance-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Added transition */
+}
+
+.insurance-item:hover {
+    transform: translateY(-3px);
+    /* Subtle lift effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.checkbox-field {
+    min-width: 20px;
+    height: 20px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    cursor: pointer;
+    accent-color: #6a82fb;
+    /* Blue accent for checkbox */
+    transition: transform 0.2s ease;
+    /* Added transition */
+}
+
+.checkbox-field:checked {
+    transform: scale(1.1);
+    /* Slight scale on check */
+}
+
+.insurance-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.insurance-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.new-tag {
+    background-color: #e74c3c;
+    /* Red tag */
+    color: #ffffff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
+.insurance-description {
+    font-size: 13px;
+    color: #777;
+}
+
+.learn-more-link {
+    color: #6a82fb;
+    /* Soft blue link */
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    /* Added transition */
+}
+
+.learn-more-link:hover {
+    text-decoration: underline;
+    color: #526edc;
+    /* Darker blue on hover */
+}
+
+.insurance-pricing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    min-width: 100px;
+    /* Adjust as needed */
+}
+
+.insurance-price {
+    font-weight: 500;
+    color: #333;
+    font-size: 15px;
+}
+
+.insurance-quantity {
+    font-size: 13px;
+    color: #777;
+}
+
+.insurance-total {
+    font-weight: 500;
+    color: #333;
+    font-size: 15px;
+}
+
+.separator {
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+/* Radio Group */
+.radio-group {
+    display: grid;
+    gap: 10px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s ease;
+    /* Added transitions */
+}
+
+.radio-option:hover {
+    background-color: #f0f0f0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+    /* Subtle lift */
+}
+
+.radio-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #444;
+}
+
+.radio-field {
+    height: 18px;
+    width: 18px;
+    border: 1px solid #bbb;
+    border-radius: 50%;
+    /* Make it round */
+    cursor: pointer;
+    accent-color: #6a82fb;
+    /* Blue accent for radio */
+    transition: transform 0.2s ease;
+    /* Added transition */
+}
+
+.radio-field:checked {
+    transform: scale(1.1);
+    /* Slight scale on check */
+}
+
+.radio-field:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.2);
+}
+
+.shipping-cost {
+    font-size: 14px;
+    color: #666;
+}
+
+.shipping-cost.free {
+    color: #28a745;
+    /* Green for free shipping */
+    font-weight: 500;
+}
+
+/* Voucher Input Group */
+.voucher-display-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.voucher-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    /* Space below input */
+}
+
+.applied-voucher-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #e6ffe6;
+    /* Light green background */
+    border: 1px solid #a3e6a3;
+    /* Green border */
+    border-radius: 6px;
+    color: #28a745;
+    /* Green text */
+    font-size: 14px;
+    width: 100%;
+    /* Take full width */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.applied-voucher-text strong {
+    font-weight: 600;
+}
+
+.applied-voucher-discount {
+    font-weight: 600;
+    color: #e74c3c;
+    /* Red for discount amount */
+}
+
+.no-voucher-text {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.voucher-error {
+    color: #e74c3c;
+    /* Red for error message */
+    font-size: 14px;
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Points Input */
+.points-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.apply-button {
+    padding: 12px 25px;
+    background-color: #6a82fb;
+    /* Soft blue button */
+    color: #ffffff;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+    /* Added transform transition */
+}
+
+.apply-button:hover {
+    background-color: #526edc;
+    transform: translateY(-2px);
+    /* Subtle lift */
+}
+
+.apply-button:active {
+    transform: translateY(0);
+    /* Reset on click */
+}
+
+.apply-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.4);
+}
+
+/* Summary Section */
+.summary-section {
+    padding: 25px;
+}
+
+.summary-details {
+    display: grid;
+    gap: 10px;
+    color: #444;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+}
+
+.summary-value {
+    font-weight: 500;
+}
+
+.voucher-discount-row .summary-value {
+    color: #e74c3c;
+    /* Red for discount value in summary */
+}
+
+.total-row {
+    font-weight: bold;
+    font-size: 22px;
+    color: #333;
+    margin-top: 15px;
+}
+
+.buy-button {
+    width: 100%;
+    margin-top: 30px;
+    padding: 15px 30px;
+    background-color: #f08080;
+    /* Light coral/pinkish-red */
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease, box-shadow 0.2s ease;
+    /* Added transitions */
+}
+
+.buy-button:hover {
+    background-color: #e76f6f;
+    /* Darker pinkish-red */
+    transform: translateY(-3px);
+    /* More pronounced lift */
+    box-shadow: 0 8px 20px rgba(240, 128, 128, 0.3);
+}
+
+.buy-button:active {
+    transform: translateY(0);
+    /* Reset on click */
+    box-shadow: none;
+}
+
+.buy-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(240, 128, 128, 0.4);
+}
+
+/* Modal Styles (Integrated) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Darker overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    /* Max width for modal content */
+    max-height: 90vh;
+    /* Limit height for scrollable content */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Hide overflow for body scroll */
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f8f8;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #777;
+    padding: 5px;
+    border-radius: 5px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.modal-close-button:hover {
+    color: #333;
+    background-color: #eee;
+}
+
+.modal-body {
+    padding: 25px;
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Enable scrolling for long content */
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #eee;
+    background-color: #f8f8f8;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Modal Transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+
+    /* Adjust breakpoint for wider layout */
+    .product-pricing {
+        min-width: 300px;
+        /* Adjust for smaller screens */
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-item {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .product-info {
+        align-items: center;
+    }
+
+    .product-pricing {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        min-width: unset;
+        width: 100%;
+    }
+
+    .product-price,
+    .product-subtotal {
+        text-align: center;
+        min-width: unset;
+    }
+
+    .insurance-item {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .insurance-details {
+        align-items: center;
+    }
+
+    .insurance-pricing {
+        align-items: center;
+        min-width: unset;
+        width: 100%;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px 20px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 24px;
+        padding: 20px;
+    }
+
+    .section,
+    .summary-section {
+        padding: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .input-field,
+    .apply-button,
+    .buy-button {
+        padding: 10px 15px;
+        font-size: 15px;
+    }
+
+    .buy-button {
+        font-size: 18px;
+    }
+}
+.payment-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.payment-method-option {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: #fff;
+    flex: 1 1 calc(50% - 15px);
+    max-width: calc(50% - 15px);
+}
+
+.payment-method-option:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.payment-method-option input[type="radio"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.payment-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    margin-right: 10px;
+    filter: grayscale(80%);
+}
+
+.payment-method-option input[type="radio"]:checked~.payment-icon {
+    filter: none;
+}
+
+.payment-method-option input[type="radio"]:checked+.payment-icon+span {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.payment-detail {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    margin-bottom: 25px;
+}
+
+.payment-detail h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #0056b3;
+}
+
+.payment-detail p {
+    margin-bottom: 5px;
+    line-height: 1.6;
+}
+
+.payment-detail .note {
+    font-style: italic;
+    color: #6c757d;
+    font-size: 0.9em;
+}

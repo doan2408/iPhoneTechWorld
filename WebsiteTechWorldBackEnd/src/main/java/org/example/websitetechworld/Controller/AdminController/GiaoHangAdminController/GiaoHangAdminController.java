@@ -19,7 +19,6 @@ public class GiaoHangAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final GiaoHangAdminServices giaoHangAdminServices;
 
-    private static final int PAGE_SIZE = 4;
     private final RequestContextFilter requestContextFilter;
 
     public GiaoHangAdminController(HoaDonAdminService hoaDonAdminService, GiaoHangAdminServices giaoHangAdminServices, RequestContextFilter requestContextFilter) {

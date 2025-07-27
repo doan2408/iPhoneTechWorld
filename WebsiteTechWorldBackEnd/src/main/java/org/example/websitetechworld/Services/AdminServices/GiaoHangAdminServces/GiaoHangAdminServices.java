@@ -32,9 +32,11 @@ public class GiaoHangAdminServices {
         }
         HoaDon hoaDon = optionalGiaoHang.get();
         hoaDon.setTrangThaiDonHang(newStatus);
-        if (newStatus == TrangThaiGiaoHang.FAILED || newStatus == TrangThaiGiaoHang.RETURNED) {
-            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.CANCELLED);
-        }
+        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang())) hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+//        if (newStatus == TrangThaiGiaoHang.FAILED || newStatus == TrangThaiGiaoHang.RETURNED) {
+//            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.CANCELLED);
+//        }
+
         hoaDonRepository.save(hoaDon);
     }
 
