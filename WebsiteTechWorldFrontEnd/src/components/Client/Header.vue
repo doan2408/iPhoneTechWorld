@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login.js";
 import { useStore } from 'vuex'
@@ -10,6 +10,7 @@ const isLoggedIn = ref<boolean>(false);
 const router = useRouter();
 const route = useRoute();
 const user = ref<{ id: number; fullName: string } | null>(null);
+const isLoading = ref<boolean>(true); // Thêm loading state
 
 const store = useStore()
 
@@ -19,48 +20,122 @@ if (!store.hasModule('headerState')) {
 
 const cartItemCount = computed(() => store.getters['headerState/getCartItemCount'])
 
+// Hàm kiểm tra trạng thái đăng nhập
+const checkLoginStatus = async () => {
+  try {
+    isLoading.value = true;
+    
+    // Kiểm tra localStorage trước
+    const storedLoginStatus = localStorage.getItem("isLoggedIn");
+    const storedUser = localStorage.getItem("user");
+    
+    if (storedLoginStatus === "true") {
+      try {
+        // Verify với server
+        const currentUser = await LoginService.getCurrentUser();
+        
+        // Cập nhật state
+        isLoggedIn.value = true;
+        user.value = currentUser;
+        
+        // Cập nhật localStorage với thông tin mới nhất
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(currentUser));
+        
+      } catch (err) {
+        console.error("Token expired or invalid:", err);
+        // Clear invalid state
+        await clearLoginState();
+      }
+    } else {
+      // Thử kiểm tra với server trong trường hợp localStorage bị xóa nhưng token còn valid
+      try {
+        const currentUser = await LoginService.getCurrentUser();
+        
+        // Nếu server trả về user valid, cập nhật localStorage
+        isLoggedIn.value = true;
+        user.value = currentUser;
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(currentUser));
+        
+      } catch (err) {
+        // User thực sự chưa đăng nhập
+        await clearLoginState();
+      }
+    }
+  } catch (error) {
+    console.error("Error checking login status:", error);
+    await clearLoginState();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Hàm clear login state
+const clearLoginState = async () => {
+  isLoggedIn.value = false;
+  user.value = null;
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("user");
+};
+
 // Kiểm tra trạng thái đăng nhập khi trang được tải
 onMounted(async () => {
-  // Kiểm tra trạng thái đăng nhập từ localStorage trước
-  const storedLoginStatus = localStorage.getItem("isLoggedIn");
-
-  if (storedLoginStatus === "true") {
-    // Nếu có trong localStorage, cố gắng lấy thông tin người dùng
-    try {
-      const currentUser = await LoginService.getCurrentUser(); // Lấy thông tin người dùng từ API
-      isLoggedIn.value = true; // Người dùng đã đăng nhập
-      user.value = currentUser;
-    } catch (err) {
-      // Nếu có lỗi (người dùng đã đăng nhập nhưng phiên hết hạn chẳng hạn)
-      isLoggedIn.value = false; // Đánh dấu người dùng không đăng nhập
-      localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập không hợp lệ
-    }
-  } else {
-    // Nếu không có trạng thái đăng nhập trong localStorage
-    isLoggedIn.value = false; // Đánh dấu người dùng chưa đăng nhập
-  }
+  await checkLoginStatus();
 
   // Đăng ký sự kiện click bên ngoài để ẩn dropdown
   document.addEventListener("click", handleClickOutside);
 
+  // Lắng nghe sự kiện storage change (khi user login/logout ở tab khác)
+  window.addEventListener('storage', handleStorageChange);
 
-  console.log('Huhu: ', cartItemCount.value)
+  // Lắng nghe sự kiện focus window (khi user quay lại tab)
+  window.addEventListener('focus', handleWindowFocus);
+
+  console.log('Cart item count: ', cartItemCount.value);
 });
+
+// Cleanup khi component unmount
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener('storage', handleStorageChange);
+  window.removeEventListener('focus', handleWindowFocus);
+});
+
+// Xử lý khi localStorage thay đổi ở tab khác
+const handleStorageChange = (e: StorageEvent) => {
+  if (e.key === 'isLoggedIn' || e.key === 'user') {
+    checkLoginStatus();
+  }
+};
+
+// Xử lý khi user focus lại window/tab
+const handleWindowFocus = () => {
+  // Kiểm tra lại trạng thái khi user quay lại tab
+  // Có thể debounce để tránh gọi quá nhiều
+  checkLoginStatus();
+};
 
 // Xử lý đăng xuất
 const handleLogout = async () => {
   try {
     await LoginService.logout(); // Gọi API đăng xuất
-    isLoggedIn.value = false;
-    localStorage.removeItem("isLoggedIn"); // Xóa trạng thái đăng nhập khỏi localStorage
-    localStorage.removeItem("user");
+    await clearLoginState();
+    
+    // Clear cart nếu cần
+    store.dispatch('headerState/clearCart');
+    
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
     console.error("Lỗi đăng xuất:", err);
+    // Vẫn clear state local ngay cả khi API lỗi
+    await clearLoginState();
+    router.push("/login");
   }
 };
 
 const showDropdown = ref(false);
+
 // Toggle dropdown khi click vào tên người dùng
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
@@ -80,17 +155,13 @@ const isLoginPage = computed(() => route.path === "/login");
 
 // Kiểm tra trang hiện tại, nếu là /login thì không thêm redirect vào URL
 const getLoginLink = computed(() => {
-  // Nếu đang ở trang login, không cần thay đổi gì
   if (isLoginPage.value) {
-    return null; // Không thêm redirect vào URL
+    return null;
   }
-
-  // Nếu không phải trang login, thêm redirect vào URL
   return `/login?redirect=${encodeURIComponent(route.fullPath)}`;
 });
 
 const goToLogin = () => {
-  // Nếu không ở trang login, điều hướng đến trang login với redirect
   if (getLoginLink.value) {
     router.push(getLoginLink.value);
   }
@@ -120,8 +191,13 @@ const goToLogin = () => {
           </router-link>
         </li>
 
+        <!-- Hiển thị loading khi đang kiểm tra -->
+        <li v-if="isLoading" class="loading-state">
+          <i class="fa fa-spinner fa-spin"></i>
+        </li>
+
         <!-- Hiển thị dropdown nếu đã đăng nhập -->
-        <li v-if="isLoggedIn" class="user-dropdown">
+        <li v-else-if="isLoggedIn" class="user-dropdown">
           <a href="#" @click.prevent.stop="toggleDropdown">
             <i class="bi bi-person-circle"></i>
             {{ user?.fullName }}
@@ -150,7 +226,7 @@ const goToLogin = () => {
         </li>
 
         <!-- Chỉ hiển thị nút Đăng nhập nếu người dùng chưa đăng nhập -->
-        <li v-if="!isLoggedIn">
+        <li v-else>
           <a href="#" @click.prevent="goToLogin" :class="{ 'disabled-link': isLoginPage }" :disabled="isLoginPage">
             Đăng nhập
           </a>
