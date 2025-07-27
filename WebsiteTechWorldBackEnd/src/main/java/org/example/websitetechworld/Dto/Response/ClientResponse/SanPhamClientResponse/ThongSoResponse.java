@@ -1,16 +1,14 @@
 package org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.Date;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ThongSoResponse {
-//    private Integer idSpct; //id san pham chi tiet
 
     private String cpu;
     private String ram;
@@ -34,4 +32,14 @@ public class ThongSoResponse {
 
     private String heDieuHanh;
     private String xuatXu;
+    private String tenLoai;
+
+    // cpu
+    private String soNhan;
+    private String xungNhip;
+    private String boNhoDem;
+    private String tieuThuDienNang;
+    private Date namRaMat;
+
+
 }
