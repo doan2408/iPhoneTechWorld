@@ -8,6 +8,7 @@ import org.example.websitetechworld.Entity.HoaDon;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class GetAllHoaDonAdminResponse {
     private String tenNguoiMua;
     private String sdtNguoiMua;
     private BigDecimal tongTien;
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
     private String loaiHoaDon;
     private String trangThaiThanhToan;
 

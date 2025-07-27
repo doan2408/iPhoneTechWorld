@@ -89,6 +89,11 @@ public class SanPhamClientService {
         return response !=null ? response : new ThongSoResponse();
     }
 
+    public ThongSoResponse getThongSoLimitRomMin(Integer idSp) {
+        ThongSoResponse response = sanPhamRepo.getThongSoByIdSp(idSp);
+        return response !=null ? response : new ThongSoResponse();
+    }
+
     //khi chon mau + rom
     public ClientProductDetailResponse getChiTietBienThe(Integer idSanPham, Integer idMau, Integer idRom) {
 

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
@@ -49,7 +50,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("thanhTien") BigDecimal thanhTien,
                        @Param("shippingMethod") ShippingMethod shippingMethod,
                        @Param("trangThaiDonHang") TrangThaiGiaoHang trangThaiDonHang,
-                       @Param("ngayDatHang") LocalDate ngayDatHang);
+                       @Param("ngayDatHang") LocalDateTime ngayDatHang);
 
     public Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
 

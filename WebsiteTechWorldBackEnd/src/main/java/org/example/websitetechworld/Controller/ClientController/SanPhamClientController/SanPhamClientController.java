@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientRes
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Services.ClientServices.SanPhamClientServices.SanPhamClientService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,6 +65,19 @@ public class SanPhamClientController {
             System.out.println("Không có thông số");
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/thongSoCompare/{idSp}")
+    public ResponseEntity<ThongSoResponse> getThongSoCompare(@PathVariable("idSp") Integer idSp) {
+        try {
+            ThongSoResponse response = sanPhamClientService.getThongSoLimitRomMin(idSp);
+            return ResponseEntity.ok(response);
+        }
+        catch (RuntimeException e) {
+            System.err.println("Không có thông số cho sản phẩm id = " + idSp);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/anh/{idSp}/mau/{idMau}")

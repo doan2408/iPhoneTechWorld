@@ -2141,7 +2141,15 @@ const onScannedImei = async (soImei) => {
         showQRModal.value = false
     }
 }
-
+// onMounted(async () => {
+//     await loadHoaDon()
+//     console.log('invoice',invoices.value);
+    
+//     // Nếu chưa có hóa đơn nào thì tự tạo mới
+//     if (invoices.value.length === 0) {
+//         await addNewInvoice()
+//     }
+// })
 
 </script>
 

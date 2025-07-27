@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class TienMatStrategy implements ThanhToanStrategy {
@@ -42,7 +43,7 @@ public class TienMatStrategy implements ThanhToanStrategy {
         }else {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
         }
-        hoaDon.setNgayThanhToan(LocalDate.now());
+        hoaDon.setNgayThanhToan(LocalDateTime.now());
 
         PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findOneByTenPhuongThuc(request.getHinhThucThanhToan());
 
