@@ -25,10 +25,10 @@ CREATE TABLE nhan_vien (
 );
 
 CREATE TABLE hang_thanh_vien (
-	id_hang_thanh_vien INT IDENTITY(1,1) PRIMARY KEY,
-    ten_hang NVARCHAR(50),                    
-    diem_tu INT NOT NULL, -- Điểm tích lũy từ -- khoang diem xe xet hang
-    diem_den INT,         -- Tới điểm -- khoảng diem de xet hang
+                                 id_hang_thanh_vien INT IDENTITY(1,1) PRIMARY KEY,
+                                 ten_hang NVARCHAR(50),
+                                 diem_tu INT NOT NULL, -- Điểm tích lũy từ -- khoang diem xe xet hang
+                                 diem_den INT,         -- Tới điểm -- khoảng diem de xet hang
 );
 
 CREATE TABLE khach_hang (
@@ -49,7 +49,7 @@ CREATE TABLE khach_hang (
                             gioi_tinh BIT,
                             anh NVARCHAR(200),
                             trang_thai NVARCHAR(50),
-							id_hang_thanh_vien INT REFERENCES hang_thanh_vien (id_hang_thanh_vien)
+                            id_hang_thanh_vien INT REFERENCES hang_thanh_vien (id_hang_thanh_vien)
 );
 
 
@@ -133,37 +133,37 @@ CREATE TABLE lich_su_hoa_don (
 );
 
 CREATE TABLE khach_hang_giam_gia (
-									id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
-									id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
-									id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
-									is_user BIT,
-									ngay_cap DATE,
-									doi_bang_diem BIT
+                                     id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
+                                     id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+                                     id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
+                                     is_user BIT,
+                                     ngay_cap DATE,
+                                     doi_bang_diem BIT
 );
 
-CREATE TABLE vi_diem ( 
-	id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
-	id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
-	diem_kha_dung DECIMAL(10,2) NOT NULL DEFAULT 0 -- điểm có thể sử dụng được
+CREATE TABLE vi_diem (
+                         id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
+                         id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
+                         diem_kha_dung DECIMAL(10,2) NOT NULL DEFAULT 0 -- điểm có thể sử dụng được
 );
 
 CREATE TABLE lich_su_diem (
-	id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
-	id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
-	id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
-	so_diem DECIMAL(10,2), -- Số điểm cộng / trừ
-	loai_diem VARCHAR(10), -- CONG / TRU
-	ghi_chu NVARCHAR(50),
-	thoi_gian DATETIMEOFFSET, -- thời gian điểm được cộng / trừ
-	han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
+                              id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
+                              id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
+                              id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
+                              so_diem DECIMAL(10,2), -- Số điểm cộng / trừ
+                              loai_diem VARCHAR(10), -- CONG / TRU
+                              ghi_chu NVARCHAR(50),
+                              thoi_gian DATETIMEOFFSET, -- thời gian điểm được cộng / trừ
+                              han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
 );
 
 CREATE TABLE chi_tiet_lich_su_diem (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
-    id_lich_su_diem INT REFERENCES lich_su_diem(id_lich_su_diem) ON DELETE CASCADE,
-    so_diem_da_tru DECIMAL(10,2),         -- Bao nhiêu điểm đã trừ từ 1 bản ghi trong lich_su_hoa_don
-    ngay_tru DATETIMEOFFSET
+                                       id INT IDENTITY(1,1) PRIMARY KEY,
+                                       id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
+                                       id_lich_su_diem INT REFERENCES lich_su_diem(id_lich_su_diem) ON DELETE CASCADE,
+                                       so_diem_da_tru DECIMAL(10,2),         -- Bao nhiêu điểm đã trừ từ 1 bản ghi trong lich_su_hoa_don
+                                       ngay_tru DATETIMEOFFSET
 );
 
 CREATE TABLE dia_chi (
@@ -331,9 +331,14 @@ CREATE TABLE san_pham (
                           ten_san_pham NVARCHAR(50),
                           thuong_hieu NVARCHAR(50),
                           trang_thai VARCHAR(50),
-                          id_nha_cung_cap INT REFERENCES nha_cung_cap(id_nha_cung_cap),
                           id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham) ON DELETE CASCADE
 );
+
+CREATE TABLE nha_cung_cap_sp (
+                                 id_nha_cung_cap_sp INT IDENTITY(1,1) PRIMARY KEY,
+                                 id_nha_cung_cap INT references nha_cung_cap(id_nha_cung_cap),
+                                 id_san_pham INT references san_pham(id_san_pham)
+)
 
 CREATE TABLE san_pham_chi_tiet (
                                    id_san_pham_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
@@ -464,11 +469,11 @@ VALUES
 
 -- Table hang_thanh_vien
 INSERT INTO hang_thanh_vien (ten_hang, diem_tu, diem_den)
-VALUES 
-(N'MEMBER', 0, 499),
-(N'SILVER', 500, 999),
-(N'GOLD', 1000, 1999),
-(N'DIAMOND', 2000, NULL);
+VALUES
+    (N'MEMBER', 0, 499),
+    (N'SILVER', 500, 999),
+    (N'GOLD', 1000, 1999),
+    (N'DIAMOND', 2000, NULL);
 
 -- Table khach_hang
 INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, trang_thai, id_hang_thanh_vien)
@@ -591,59 +596,59 @@ VALUES
 --Table vi_diem
 INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
 VALUES
-(1, 500.00),
-(2, 200.00),
-(3, 100.00),
-(4, 1500.00),
-(5, 400.00),
-(6, 600.00),
-(7, 200.00),
-(8, 1250.00),
-(9, 300.00),
-(10, 750.00),
-(11, 150.00),
-(12, 1000.00),
-(13, 350.00),
-(14, 900.00),
-(15, 450.00);
+    (1, 500.00),
+    (2, 200.00),
+    (3, 100.00),
+    (4, 1500.00),
+    (5, 400.00),
+    (6, 600.00),
+    (7, 200.00),
+    (8, 1250.00),
+    (9, 300.00),
+    (10, 750.00),
+    (11, 150.00),
+    (12, 1000.00),
+    (13, 350.00),
+    (14, 900.00),
+    (15, 450.00);
 
 -- Table lich_su_diem
 INSERT INTO lich_su_diem (id_vi_diem, id_hoa_don, so_diem, loai_diem, ghi_chu, thoi_gian, han_su_dung)
 VALUES
-(1, 1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-(2, 2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(3, 3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-(4, 4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
-(5, 5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-(6, 6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(7, 7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
-(8, 8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
-(9, 9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
-(10, 10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
-(11, 11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
-(12, 12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
-(13, 13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-(14, 14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-(15, 15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
+    (1, 1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+    (2, 2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+    (3, 3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+    (4, 4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
+    (5, 5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
+    (6, 6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+    (7, 7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
+    (8, 8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
+    (9, 9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
+    (10, 10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
+    (11, 11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
+    (12, 12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
+    (13, 13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
+    (14, 14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
+    (15, 15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
 
 -- Table chi_tiet_lich_su_diem
 INSERT INTO chi_tiet_lich_su_diem (id_khach_hang, id_lich_su_diem, so_diem_da_tru, ngay_tru)
 VALUES
-(1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
-(2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
-(3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
-(4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
-(5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
-(6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
-(7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
-(8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
-(9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
-(10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
-(11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
-(12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
-(13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
-(14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
-(15, 15, 750.00, '2025-02-02 00:00:00+07:00');
+    (1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
+    (2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
+    (3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
+    (4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
+    (5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
+    (6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
+    (7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
+    (8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
+    (9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
+    (10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
+    (11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
+    (12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
+    (13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
+    (14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
+    (15, 15, 750.00, '2025-02-02 00:00:00+07:00');
 
 -- Table dia_chi
 INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
@@ -918,23 +923,40 @@ VALUES
     (15,13, 1), (15,14, 0), (15,15, 0);
 
 -- Table san_pham
-INSERT INTO san_pham (ten_san_pham, thuong_hieu, id_nha_cung_cap, trang_thai, id_model_san_pham)
+INSERT INTO san_pham (ten_san_pham, thuong_hieu, trang_thai, id_model_san_pham)
 VALUES
-    (N'iPhone 6 Thường', N'Apple', 1, N'ACTIVE', 1),
-    (N'iPhone 16 Thường', N'Apple', 2, N'ACTIVE', 2),
-    (N'iPhone 16 Pro', N'Apple', 3, N'ACTIVE', 3),
-    (N'iPhone 15 Thường', N'Apple', 4, N'ACTIVE', 4),
-    (N'iPhone 14 Thường', N'Apple', 5, N'ACTIVE', 5),
-    (N'iPhone 13 Thường', N'Apple', 6, N'ACTIVE', 6),
-    (N'iPhone 16 Plus', N'Apple', 7, N'ACTIVE', 7),
-    (N'iPhone 15 Pro', N'Apple', 8, N'ACTIVE', 8),
-    (N'iPhone 14 Pro', N'Apple', 9, N'ACTIVE', 9),
-    (N'iPhone 13 Pro', N'Apple', 10, N'ACTIVE', 10),
-    (N'iPhone 12 Thường', N'Apple', 11, N'ACTIVE', 11),
-    (N'iPhone 16 Pro Max', N'Apple', 12, N'ACTIVE', 12),
-    (N'iPhone 15 Pro Max', N'Apple', 13, N'ACTIVE', 13),
-    (N'iPhone 14 Plus', N'Apple', 14, N'ACTIVE', 14),
-    (N'iPhone 13 Mini', N'Apple', 15, N'ACTIVE', 15);
+    (N'iPhone 6 Thường', N'Apple', N'ACTIVE', 1),
+    (N'iPhone 16 Thường', N'Apple', N'ACTIVE', 2),
+    (N'iPhone 16 Pro', N'Apple', N'ACTIVE', 3),
+    (N'iPhone 15 Thường', N'Apple', N'ACTIVE', 4),
+    (N'iPhone 14 Thường', N'Apple', N'ACTIVE', 5),
+    (N'iPhone 13 Thường', N'Apple', N'ACTIVE', 6),
+    (N'iPhone 16 Plus', N'Apple', N'ACTIVE', 7),
+    (N'iPhone 15 Pro', N'Apple', N'ACTIVE', 8),
+    (N'iPhone 14 Pro', N'Apple', N'ACTIVE', 9),
+    (N'iPhone 13 Pro', N'Apple', N'ACTIVE', 10),
+    (N'iPhone 12 Thường', N'Apple', N'ACTIVE', 11),
+    (N'iPhone 16 Pro Max', N'Apple', N'ACTIVE', 12),
+    (N'iPhone 15 Pro Max', N'Apple', N'ACTIVE', 13),
+    (N'iPhone 14 Plus', N'Apple', N'ACTIVE', 14),
+    (N'iPhone 13 Mini', N'Apple', N'ACTIVE', 15);
+
+Insert into nha_cung_cap_sp(id_nha_cung_cap, id_san_pham) values
+                                                              (1,1),
+                                                              (1,2),
+                                                              (1,3),
+                                                              (1,4),
+                                                              (1,5),
+                                                              (1,6),
+                                                              (1,7),
+                                                              (3,8),
+                                                              (1,9),
+                                                              (1,10),
+                                                              (2,11),
+                                                              (1,12),
+                                                              (1,13),
+                                                              (1,14),
+                                                              (1,15);
 
 -- Table san_pham_chi_tiet
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
@@ -1774,3 +1796,6 @@ SELECT * FROM chi_tiet_lich_su_diem
 
 -- 41. hang_thanh_vien
 SELECT * FROM hang_thanh_vien
+
+--42. nha_cung_cap_sp
+SELECT * FROM nha_cung_cap_sp

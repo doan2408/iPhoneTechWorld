@@ -41,6 +41,7 @@ public class SanPhamAdminService {
     private final SanPhamRepository sanPhamRepository;
     private final ModelMapper modelMapper;
     private final SanPhamChiTietAdminService sanPhamChiTietAdminService;
+    private final NhaCungCapSpRepository nhaCungCapSpRepository;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -143,11 +144,14 @@ public class SanPhamAdminService {
         SanPham sanPham = sanPhamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
 
+        Optional<NhaCungCapSp> nhaCungCapSpOptional = nhaCungCapSpRepository.getNhaCungCapSp(sanPham.getId());
+        NhaCungCapSp nhaCungCapSp = nhaCungCapSpOptional.get();
+
         SanPhamAdminUpdateResponse response = new SanPhamAdminUpdateResponse();
         response.setId(sanPham.getId());
         response.setTenSanPham(sanPham.getTenSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
-        response.setIdNhaCungCap(sanPham.getIdNhaCungCap().getId());
+        response.setIdNhaCungCap(nhaCungCapSp.getNhaCungCap().getId());
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
         response.setIdModelSanPham(sanPham.getIdModelSanPham().getIdModelSanPham());
 
@@ -198,18 +202,21 @@ public class SanPhamAdminService {
         // Khởi tạo đối tượng phản hồi
         SanPhamAdminResponse response = new SanPhamAdminResponse();
 
+        Optional<NhaCungCapSp> nhaCungCapSpOptional = nhaCungCapSpRepository.getNhaCungCapSp(sanPham.getId());
+        NhaCungCapSp nhaCungCapSp = nhaCungCapSpOptional.get();
+
         // Gán thông tin cơ bản của sản phẩm
         response.setId(sanPham.getId());
         response.setTenSanPham(sanPham.getTenSanPham());
         response.setMaSanPham(sanPham.getMaSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
-        if (sanPham.getIdNhaCungCap() != null) {
+        if (sanPham.getNhaCungCapSps() != null) {
             NhaCungCapAdminResponse nhaCungCapDto = new NhaCungCapAdminResponse();
-            nhaCungCapDto.setTenNhaCungCap(sanPham.getIdNhaCungCap().getTenNhaCungCap());
-            nhaCungCapDto.setDiaChi(sanPham.getIdNhaCungCap().getDiaChi());
-            nhaCungCapDto.setSdt(sanPham.getIdNhaCungCap().getSdt());
-            nhaCungCapDto.setEmail(sanPham.getIdNhaCungCap().getEmail());
+            nhaCungCapDto.setTenNhaCungCap(nhaCungCapSp.getNhaCungCap().getTenNhaCungCap());
+            nhaCungCapDto.setDiaChi(nhaCungCapSp.getNhaCungCap().getDiaChi());
+            nhaCungCapDto.setSdt(nhaCungCapSp.getNhaCungCap().getSdt());
+            nhaCungCapDto.setEmail(nhaCungCapSp.getNhaCungCap().getEmail());
             response.setNhaCungCapAdminResponse(nhaCungCapDto);
         }
 
@@ -379,9 +386,6 @@ public class SanPhamAdminService {
     public SanPhamAdminResponse createSanPhamAdmin(SanPhamAdminRequest sanPhamAdminRequest) {
 
         // === Bước 1: Kiểm tra dữ liệu đầu vào ===
-//        validateSanPhamRequest(sanPhamAdminRequest);
-//
-        // === Bước 2: Kiểm tra model tồn tại ===
         if (sanPhamAdminRequest.getIdModelSanPham() == null) {
             throw new BusinessException("Model sản phẩm không được để trống.");
         }
@@ -389,28 +393,15 @@ public class SanPhamAdminService {
         ModelSanPham modelSanPham = modelSanPhamRepository.findById(sanPhamAdminRequest.getIdModelSanPham())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy model sản phẩm với ID: " + sanPhamAdminRequest.getIdModelSanPham()));
 
-        // === Bước 3: Tìm hoặc tạo mới SanPham tương ứng với Model và Nhà cung cấp ===
+        // === Bước 2: Tìm hoặc tạo mới SanPham ===
         List<SanPham> sanPhamList = sanPhamRepo.findAllByIdModelSanPham_IdModelSanPham(sanPhamAdminRequest.getIdModelSanPham());
 
-        SanPham sanPham = null;
-
-        // Nếu có idNhaCungCap, lọc sản phẩm theo cả idModelSanPham và idNhaCungCap
-        if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
-            sanPham = sanPhamList.stream()
-                    .filter(sp -> sp.getTrangThaiSanPham() == TrangThaiSanPham.ACTIVE)
-                    .filter(sp -> sp.getTenSanPham().equalsIgnoreCase(sanPhamAdminRequest.getTenSanPham()))
-                    .filter(sp -> sp.getIdNhaCungCap() != null && sp.getIdNhaCungCap().getId().equals(sanPhamAdminRequest.getIdNhaCungCap()))
-                    .findFirst()
-                    .orElse(null);
-        } else {
-            // Nếu không có idNhaCungCap, lọc sản phẩm không có nhà cung cấp
-            sanPham = sanPhamList.stream()
-                    .filter(sp -> sp.getTrangThaiSanPham() == TrangThaiSanPham.ACTIVE)
-                    .filter(sp -> sp.getTenSanPham().equalsIgnoreCase(sanPhamAdminRequest.getTenSanPham()))
-                    .filter(sp -> sp.getIdNhaCungCap() == null)
-                    .findFirst()
-                    .orElse(null);
-        }
+        // Sử dụng findFirst() để lấy 1 kết quả duy nhất, tránh lỗi NonUniqueResultException
+        SanPham sanPham = sanPhamList.stream()
+                .filter(sp -> sp.getTrangThaiSanPham() == TrangThaiSanPham.ACTIVE)
+                .filter(sp -> sp.getTenSanPham().equalsIgnoreCase(sanPhamAdminRequest.getTenSanPham()))
+                .findFirst()
+                .orElse(null);
 
         // Nếu không tìm thấy sản phẩm phù hợp, tạo mới
         if (sanPham == null) {
@@ -419,25 +410,53 @@ public class SanPhamAdminService {
             sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
             sanPham.setTrangThaiSanPham(Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
                     .orElse(TrangThaiSanPham.ACTIVE));
-            if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
-                NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
-                        .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
-                sanPham.setIdNhaCungCap(nhaCungCap);
-            }
             sanPham.setIdModelSanPham(modelSanPham);
             sanPham = sanPhamRepo.save(sanPham);
+        }
+
+        // === Bước 3: Xử lý quan hệ với nhà cung cấp ===
+        if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
+            Optional<NhaCungCap> nhaCungCapOpt = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap());
+
+            if (nhaCungCapOpt.isPresent()) {
+                NhaCungCap nhaCungCap = nhaCungCapOpt.get();
+
+                // Kiểm tra xem quan hệ đã tồn tại chưa - sử dụng List để tránh lỗi NonUniqueResult
+                List<NhaCungCapSp> existingRelations = nhaCungCapSpRepository
+                        .findAllByNhaCungCapAndSanPham(nhaCungCap, sanPham);
+
+                if (existingRelations.isEmpty()) {
+                    NhaCungCapSp nhaCungCapSp = new NhaCungCapSp();
+                    nhaCungCapSp.setNhaCungCap(nhaCungCap);
+                    nhaCungCapSp.setSanPham(sanPham);
+                    nhaCungCapSpRepository.save(nhaCungCapSp);
+                }
+            }
         }
 
         // === Bước 4: Xử lý danh sách chi tiết sản phẩm ===
         Set<SanPhamChiTiet> chiTietSet = new HashSet<>();
         if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
             for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
-                // Tìm SanPhamChiTiet hiện có với cùng idMau và idRom
-                SanPhamChiTiet chiTiet = sanPham.getSanPhamChiTiets().stream()
-                        .filter(ct -> Objects.equals(ct.getIdMau() != null ? ct.getIdMau().getId() : null, rq.getIdMau()))
-                        .filter(ct -> Objects.equals(ct.getIdRom() != null ? ct.getIdRom().getId() : null, rq.getIdRom()))
-                        .findFirst()
-                        .orElse(null);
+
+                // Tìm SanPhamChiTiet hiện có - sử dụng findFirst() để tránh lỗi NonUniqueResult
+                SanPhamChiTiet chiTiet = null;
+
+                // Nếu sanPham đã có chi tiết, tìm trong danh sách hiện có
+                if (sanPham.getSanPhamChiTiets() != null) {
+                    chiTiet = sanPham.getSanPhamChiTiets().stream()
+                            .filter(ct -> Objects.equals(ct.getIdMau() != null ? ct.getIdMau().getId() : null, rq.getIdMau()))
+                            .filter(ct -> Objects.equals(ct.getIdRom() != null ? ct.getIdRom().getId() : null, rq.getIdRom()))
+                            .findFirst()
+                            .orElse(null);
+                }
+
+                // Nếu không tìm thấy trong collection hiện có, tìm trong database
+                if (chiTiet == null) {
+                    List<SanPhamChiTiet> existingChiTiets = sanPhamChiTietRepository
+                            .findBySanPhamAndMauAndRom(sanPham.getId(), rq.getIdMau(), rq.getIdRom());
+                    chiTiet = existingChiTiets.stream().findFirst().orElse(null);
+                }
 
                 if (chiTiet == null) {
                     // Tạo mới SanPhamChiTiet nếu không tìm thấy
@@ -459,7 +478,8 @@ public class SanPhamAdminService {
                     }
                 } else {
                     // Cập nhật giá bán nếu giá mới cao hơn
-                    if (rq.getGiaBan() != null && chiTiet.getGiaBan().compareTo(rq.getGiaBan()) < 0) {
+                    if (rq.getGiaBan() != null && chiTiet.getGiaBan() != null &&
+                            chiTiet.getGiaBan().compareTo(rq.getGiaBan()) < 0) {
                         chiTiet.setGiaBan(rq.getGiaBan());
                     }
                     // Cập nhật maSanPhamChiTiet nếu cần
@@ -536,6 +556,9 @@ public class SanPhamAdminService {
         }
 
         // Cập nhật danh sách chi tiết sản phẩm
+        if (sanPham.getSanPhamChiTiets() == null) {
+            sanPham.setSanPhamChiTiets(new HashSet<>());
+        }
         sanPham.getSanPhamChiTiets().addAll(chiTietSet);
         sanPham = sanPhamRepo.save(sanPham);
 
@@ -547,14 +570,21 @@ public class SanPhamAdminService {
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
         response.setThuongHieu(sanPham.getThuongHieu());
 
-        if (sanPham.getIdNhaCungCap() != null) {
-            NhaCungCap nha = sanPham.getIdNhaCungCap();
-            NhaCungCapAdminResponse nccRes = new NhaCungCapAdminResponse();
-            nccRes.setTenNhaCungCap(nha.getTenNhaCungCap());
-            nccRes.setSdt(nha.getSdt());
-            nccRes.setEmail(nha.getEmail());
-            nccRes.setDiaChi(nha.getDiaChi());
-            response.setNhaCungCapAdminResponse(nccRes);
+        // Xử lý thông tin nhà cung cấp - sử dụng List để tránh lỗi NonUniqueResult
+        List<NhaCungCapSp> nhaCungCapSpList = nhaCungCapSpRepository.findAllBySanPham(sanPham);
+
+        if (!nhaCungCapSpList.isEmpty()) {
+            // Lấy nhà cung cấp đầu tiên nếu có nhiều
+            NhaCungCapSp nhaCungCapSp = nhaCungCapSpList.get(0);
+            if (nhaCungCapSp.getNhaCungCap() != null) {
+                NhaCungCap nha = nhaCungCapSp.getNhaCungCap();
+                NhaCungCapAdminResponse nccRes = new NhaCungCapAdminResponse();
+                nccRes.setTenNhaCungCap(nha.getTenNhaCungCap());
+                nccRes.setSdt(nha.getSdt());
+                nccRes.setEmail(nha.getEmail());
+                nccRes.setDiaChi(nha.getDiaChi());
+                response.setNhaCungCapAdminResponse(nccRes);
+            }
         }
 
         if (sanPham.getIdModelSanPham() != null) {
@@ -741,13 +771,19 @@ public class SanPhamAdminService {
         sanPham.setTrangThaiSanPham(Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
                 .orElse(TrangThaiSanPham.ACTIVE));
 
+        Optional<NhaCungCapSp> nhaCungCapSpOptional = nhaCungCapSpRepository.getNhaCungCapSp(sanPham.getId());
+        NhaCungCapSp nhaCungCapSp = nhaCungCapSpOptional.get();
+
         // Cập nhật nhà cung cấp nếu có
         if (sanPhamAdminRequest.getIdNhaCungCap() != null) {
             NhaCungCap nhaCungCap = nhaCungCapRepository.findById(sanPhamAdminRequest.getIdNhaCungCap())
                     .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + sanPhamAdminRequest.getIdNhaCungCap()));
-            sanPham.setIdNhaCungCap(nhaCungCap);
+            nhaCungCapSp.setNhaCungCap(nhaCungCap);
+            nhaCungCapSpRepository.save(nhaCungCapSp);
         } else {
-            sanPham.setIdNhaCungCap(null);
+            nhaCungCapSp.setNhaCungCap(null);
+            nhaCungCapSpRepository.save(nhaCungCapSp);
+
         }
 
         // Cập nhật model sản phẩm nếu có
@@ -915,8 +951,8 @@ public class SanPhamAdminService {
         response.setThuongHieu(sanPham.getThuongHieu());
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
 
-        if (sanPham.getIdNhaCungCap() != null) {
-            NhaCungCap nha = sanPham.getIdNhaCungCap();
+        if (nhaCungCapSp.getNhaCungCap() != null) {
+            NhaCungCap nha = nhaCungCapSp.getNhaCungCap();
             NhaCungCapAdminResponse nccRes = new NhaCungCapAdminResponse();
             nccRes.setTenNhaCungCap(nha.getTenNhaCungCap());
             nccRes.setSdt(nha.getSdt());

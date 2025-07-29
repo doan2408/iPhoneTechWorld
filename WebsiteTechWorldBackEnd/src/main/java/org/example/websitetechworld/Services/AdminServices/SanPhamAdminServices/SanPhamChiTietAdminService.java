@@ -136,15 +136,15 @@ public class SanPhamChiTietAdminService {
     }
 
 
-    public boolean existsVariantInLoai(Integer idMau, Integer idRom, Integer idLoai) {
-        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idMau, idRom, idLoai);
+    public boolean existsVariantInLoai(Integer idSp, Integer idMau, Integer idRom, Integer idLoai) {
+        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idSp, idMau, idRom, idLoai);
         return result != null && result == 1;
     }
 
     // Optional: kiểm tra nhiều biến thể 1 lần
     public void validateKhongTrungBienTheTheoLoai(Integer idLoai, Set<SanPhamChiTietAdminRepuest> chiTiets) {
         for (SanPhamChiTietAdminRepuest ct : chiTiets) {
-            boolean exists = existsVariantInLoai(ct.getIdMau(), ct.getIdRom(), idLoai);
+            boolean exists = existsVariantInLoai(ct.getIdSanPham(), ct.getIdMau(), ct.getIdRom(), idLoai);
             if (exists) {
                 throw new BusinessException("Biến thể màu + ROM này đã tồn tại trong cùng loại sản phẩm.");
             }

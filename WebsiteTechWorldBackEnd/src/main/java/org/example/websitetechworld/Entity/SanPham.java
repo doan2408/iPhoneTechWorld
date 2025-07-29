@@ -42,9 +42,9 @@ public class SanPham {
 
     // Xóa thuộc tính soLuongTonKho
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_nha_cung_cap")
-    private NhaCungCap idNhaCungCap;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id_nha_cung_cap")
+//    private NhaCungCap idNhaCungCap;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -54,4 +54,9 @@ public class SanPham {
 
     @OneToMany(mappedBy = "idSanPham", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SanPhamChiTiet> sanPhamChiTiets = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<NhaCungCapSp> nhaCungCapSps = new LinkedHashSet<>();
+
+
 }

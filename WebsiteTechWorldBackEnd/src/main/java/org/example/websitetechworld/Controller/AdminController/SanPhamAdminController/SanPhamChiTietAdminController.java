@@ -51,11 +51,12 @@ public class SanPhamChiTietAdminController {
 
     @GetMapping("/check-duplicate-variant")
     public ResponseEntity<?> checkDuplicateVariant(
+            @RequestParam Integer idSp,
             @RequestParam Integer idMau,
             @RequestParam Integer idRom,
             @RequestParam (required = false) Integer idLoai
     ) {
-        boolean exists = sanPhamChiTietAdminService.existsVariantInLoai(idMau, idRom, idLoai);
+        boolean exists = sanPhamChiTietAdminService.existsVariantInLoai(idSp, idMau, idRom, idLoai);
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 }

@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -34,5 +37,8 @@ public class NhaCungCap {
     @Size(max = 50)
     @Column(name = "email", length = 50)
     private String email;
+
+    @OneToMany(mappedBy = "nhaCungCap", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<NhaCungCapSp> nhaCungCapSps = new LinkedHashSet<>();
 
 }
