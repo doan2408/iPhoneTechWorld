@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientRes
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Entity.XuatXu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,9 +27,11 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
         sp.trang_thai,
         l.ten_loai,
         COALESCE(sl.tong_so_luong, 0) AS so_luong,
-        ha_min.url AS url
+        ha_min.url AS url,
+        xx.ma_xuat_xu
     FROM san_pham AS sp
     JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+    JOIN xuat_xu AS xx on xx.id_xuat_xu = msp.id_xuat_xu
     JOIN loai AS l ON l.id_loai = msp.id_loai
     LEFT JOIN (
         SELECT id_san_pham, SUM(so_luong) AS tong_so_luong
@@ -53,6 +56,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     SELECT COUNT(DISTINCT sp.id_san_pham)
     FROM san_pham AS sp
     JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+    JOIN xuat_xu AS xx on xx.id_xuat_xu = msp.id_xuat_xu
     JOIN loai AS l ON l.id_loai = l.id_loai
     WHERE 
         (:keyword IS NULL OR :keyword = '' OR 
@@ -174,6 +178,13 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     where spct.id_san_pham = ?1
     """, nativeQuery = true)
     Integer tongSoLuong(int idSanPham);
+
+    // get xuat xu by id sp
+    @Query(value = "select xx.id_xuat_xu, xx.ma_xuat_xu, xx.ten_quoc_gia from xuat_xu xx " +
+            "join model_san_pham msp on msp.id_xuat_xu = xx.id_xuat_xu " +
+            "join san_pham sp on sp.id_model_san_pham = msp.id_model_san_pham " +
+            "where sp.id_san_pham = :idSp", nativeQuery = true)
+    XuatXu getXuatXuByIdSp(@Param("idSp") Integer idSp);
 
     //get thong so theo rom
     @Query(value = """

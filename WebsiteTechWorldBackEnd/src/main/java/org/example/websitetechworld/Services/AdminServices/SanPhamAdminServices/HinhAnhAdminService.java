@@ -108,4 +108,8 @@ public class HinhAnhAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không thấy hình ảnh ID: " + id));
         return convertHinhAnh(hinhAnh);
     }
+
+    public Integer countAnh(Integer idSp, Integer idMau) {
+        return hinhAnhRepository.anhQuantityOfSp(idSp, idMau);
+    }
 }

@@ -212,12 +212,7 @@ public class ModelSanPhamService {
         //  1. Kiểm tra trùng cấu hình (trừ camera sau)
         if (modelSanPhamRepository.existsModelWithSameConfig(
                 request.getTenModel().trim(),
-                request.getIdRam(),
-                request.getIdManHinh(),
-                request.getIdHeDieuHanh(),
-                request.getIdPin(),
-                request.getIdCpu(),
-                request.getIdCameraTruoc(),
+//                request.getIdRam(),
                 request.getIdXuatXu(),
                 request.getIdLoai()
         )) {

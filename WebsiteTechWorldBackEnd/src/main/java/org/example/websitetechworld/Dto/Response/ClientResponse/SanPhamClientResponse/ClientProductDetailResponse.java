@@ -22,6 +22,7 @@ public class ClientProductDetailResponse {
     private Integer soLuong;
     private Integer tongSoLuong;
     private ThongSoResponse thongSoResponse;
+    private String maXuatXu;
 
     @Getter
     @Setter
