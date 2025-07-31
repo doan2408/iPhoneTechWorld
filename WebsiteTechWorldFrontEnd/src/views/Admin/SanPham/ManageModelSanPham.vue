@@ -218,7 +218,7 @@
             <el-form-item label="Ngày ra mắt" prop="namRaMat" :error="errors.namRaMat">
               <el-date-picker v-model="modelForm.namRaMat" @change="clearFieldError('namRaMat')" type="date"
                 value-format="YYYY-MM-DD" format="DD/MM/YYYY" placeholder="Chọn ngày ra mắt" size="large"
-                style="width: 100%" />
+                style="width: 100%" :disabled-date="disabledDate"/>
             </el-form-item>
           </div>
         </div>
@@ -649,6 +649,17 @@ export default {
         { type: 'array', required: true, message: 'Vui lòng chọn ít nhất một camera sau', trigger: 'change' }
       ]
     });
+
+    const disabledDate = (date) => {
+    if (modelForm.value.trangThaiSanPhamModel === 'UPCOMING') {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // reset về đầu ngày
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return date < tomorrow;
+    }
+    return false; // không chặn ngày nếu không phải "chờ ra mắt"
+    };
 
     const formTitle = computed(() => formMode.value === 'add' ? 'Thêm Model Mới' : 'Sửa Model');
 
@@ -1165,6 +1176,7 @@ export default {
       addCameraTruocDialogRef,
       addCameraSauDialogRef,
       toast,
+      disabledDate,
       handlePinSaved,
       handleCameraTruocSaved,
       handleCameraSauSaved,
