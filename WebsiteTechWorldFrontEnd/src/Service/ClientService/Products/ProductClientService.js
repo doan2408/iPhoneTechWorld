@@ -88,11 +88,19 @@ export const getLoai = async () => {
 };
 
 export const getThongSoLimitRomMin = async (idsp) => {
-  debugger
   try {
     const response = await api.get(`${baseURL}/thongSoCompare/${idsp}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || "Unable to fetch the product specifications";
+  }
+};
+
+export const getListCameraSau = async (idsp) => {
+  try {
+    const response = await api.get(`${baseURL}/cameraSau/${idsp}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Loi";
   }
 };

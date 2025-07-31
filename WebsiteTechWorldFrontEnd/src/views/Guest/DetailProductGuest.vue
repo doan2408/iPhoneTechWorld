@@ -196,8 +196,8 @@ const addToCart = async (buy) => {
     const soLuongMoi = quantity.value;
     const soLuongTonKho = bienThe.value.soLuong;
 
-    const idSanPhamChiTiet = bienThe.value.idSpct;
-    const soLuongMoi = quantity.value;
+    // const idSanPhamChiTiet = bienThe.value.idSpct;
+    // const soLuongMoi = quantity.value;
     const tenSanPham = sanPham.value?.tenSanPham || "Sản phẩm không xác định";
     const phienBan = `${
       sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"

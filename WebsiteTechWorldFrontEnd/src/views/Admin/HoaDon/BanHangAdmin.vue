@@ -3,13 +3,6 @@
         <!-- Header với tabs hóa đơn -->
         <div class="pos-header">
             <div class="left-section">
-                <!-- Tìm kiếm hàng hóa -->
-                <div class="search-box">
-                    <Search class="search-icon" />
-                    <input v-model="productSearchQuery" type="text" placeholder="Tìm hàng hóa (F3)" class="search-input"
-                        @keydown.f3.prevent="focusProductSearch" />
-                </div>
-
                 <!-- Tabs hóa đơn -->
                 <div class="invoice-tabs">
                     <div v-for="invoice in invoices" :key="invoice.id" @click="selectInvoice(invoice.id)"
@@ -97,9 +90,18 @@
                 <!-- Customer search -->
                 <div class="customer-search">
                     <div class="search-box">
-                        <Search class="search-icon" />
-                        <input v-model="customerSearchQuery" type="text" placeholder="Tìm sản phẩm (F4)"
-                            class="search-input" @keydown.f4.prevent="focusCustomerSearch" @blur="searchCustomer" />
+                        <select v-model="searchType" class="search-select">
+                            <option disabled value="">-- Chọn loại tìm kiếm --</option>
+                            <option value="name">Tên</option>
+                            <option value="code">Mã</option>
+                        </select>
+
+                        <div class="search-input-wrapper">
+                            <Search class="search-icon" />
+                            <input v-model="customerSearchQuery" type="text"
+                                :placeholder="searchType === 'name' ? 'Nhập tên sản phẩm' : 'Nhập mã sản phẩm'"
+                                class="search-input" @keydown.f4.prevent="focusCustomerSearch" @blur="searchCustomer" />
+                        </div>
                     </div>
                     <div class="customer-actions">
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
@@ -154,7 +156,8 @@
                 <div v-if="isImeiModalOpen" class="modal-overlay">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>Chọn IMEI cho {{ selectedProductForImei?.tenSanPham }}</h2>
+                            <h2>Chọn IMEI cho {{ selectedProductForImei?.maSanPhamChiTiet }} - {{
+                                selectedProductForImei?.tenSanPham }}</h2>
                             <div class="quantity-input-group">
                                 <label for="quantityToSelect">Số lượng:</label>
                                 <input type="number" id="quantityToSelect" v-model.number="quantityToSelect"
@@ -302,7 +305,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                            currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -346,7 +349,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                ' VNĐ' : 'Chưa tính' }}</p>
+                                    ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -609,6 +612,9 @@ const discountList = ref([])
 const selectedDiscount = ref(null)
 const search = ref('')
 
+//search
+const searchType = ''
+
 watch(selectedDiscount, (newVal) => {
     console.log('PGG đã chọn:', newVal)
 })
@@ -723,7 +729,7 @@ const danhMucSanPham = async () => {
 }
 
 const loadProducts = async (category) => {
-    selectedCategory.value = category.tenSanPham;
+    // selectedCategory.value = category.tenSanPham;
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
         response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value);
@@ -743,6 +749,10 @@ const itemsPerPage = 12
 const loadTabHoaDon = async () => {
     try {
         const response = await loadHoaDonByIdNhanVien();
+        if (response.data.length == 0) {
+            await addNewInvoice();
+            loadTabHoaDon()
+        }
         console.log('Danh sách hóa đơn từ backend:', response.data);
         //Load các hóa đơn của nhân viên
         // Cập nhật danh sách hóa đơn từ backend, tránh thêm trùng lặp

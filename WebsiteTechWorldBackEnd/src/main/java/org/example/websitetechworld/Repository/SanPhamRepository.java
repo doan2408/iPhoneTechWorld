@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoCompareResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
+import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.springframework.data.domain.Page;
@@ -223,6 +224,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             	p.phien_ban, p.cong_suat_sac, p.thoi_gian_su_dung, p.so_lan_sac_toi_da,
             	hdh.phien_ban, x.ten_quoc_gia, loai.ten_loai,
             	c.so_nhan , c.xung_nhip, c.bo_nho_dem, c.tieu_thu_dien_nang, c.nam_ra_mat
+                ,cmt.loai_camera, cmt.khau_do,cmt.loai_zoom,cmt.che_do_chup,hdh.giao_dien_nguoi_dung
             	from model_san_pham mdsp
                 join ram r on r.id_ram = mdsp.id_ram
             	join cpu c on c.id_cpu = mdsp.id_cpu
@@ -241,5 +243,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
         ORDER BY rom.dung_luong_rom ASC
     """, nativeQuery = true)
     ThongSoCompareResponse getThongSoByIdSp(@Param("idSanPham") Integer idSanPham);
+
+
 
 }

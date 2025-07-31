@@ -2,12 +2,10 @@ package org.example.websitetechworld.Services.ClientServices.SanPhamClientServic
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
+import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
-import org.example.websitetechworld.Repository.LoaiRepository;
-import org.example.websitetechworld.Repository.MauSacRepository;
-import org.example.websitetechworld.Repository.RomRepository;
-import org.example.websitetechworld.Repository.SanPhamRepository;
+import org.example.websitetechworld.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +25,7 @@ public class SanPhamClientService {
     private final RomRepository romRepository;
     private final ModelMapper modelMapper;
     private final LoaiRepository loaiRepository;
+    private final CameraSauRepository cameraSauRepository;
 
     //hien thi san pham len trang chủ
     public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, Integer idLoai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
@@ -89,6 +88,10 @@ public class SanPhamClientService {
     public ThongSoCompareResponse getThongSoLimitRomMin(Integer idSp) {
         ThongSoCompareResponse response = sanPhamRepo.getThongSoByIdSp(idSp);
         return response !=null ? response : new ThongSoCompareResponse();
+    }
+
+    public List<CameraSauResponse> findCameraSauByIdSanPham(Integer idSanPham){
+        return cameraSauRepository.findCameraSauByIdSanPham(idSanPham);
     }
 
     //khi chon mau + rom

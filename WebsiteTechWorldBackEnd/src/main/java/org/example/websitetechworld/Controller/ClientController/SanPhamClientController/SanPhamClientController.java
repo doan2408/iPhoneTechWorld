@@ -1,10 +1,8 @@
 package org.example.websitetechworld.Controller.ClientController.SanPhamClientController;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductDetailResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoCompareResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
+import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Services.ClientServices.SanPhamClientServices.SanPhamClientService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -73,6 +71,18 @@ public class SanPhamClientController {
         try {
             ThongSoCompareResponse response = sanPhamClientService.getThongSoLimitRomMin(idSp);
             return ResponseEntity.ok(response);
+        }
+        catch (RuntimeException e) {
+            System.err.println("Không có thông số cho sản phẩm id = " + idSp);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    @GetMapping("/cameraSau/{idSp}")
+    public ResponseEntity<List<CameraSauResponse>> getCameraSau(@PathVariable("idSp") Integer idSp) {
+        try {
+            List<CameraSauResponse> cameraSauList = sanPhamClientService.findCameraSauByIdSanPham(idSp);
+            return ResponseEntity.ok(cameraSauList);
         }
         catch (RuntimeException e) {
             System.err.println("Không có thông số cho sản phẩm id = " + idSp);

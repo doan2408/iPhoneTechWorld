@@ -27,7 +27,7 @@ public class ChiTietThanhToan {
     @JoinColumn(name = "id_phuong_thuc_thanh_toan")
     private PhuongThucThanhToan idPhuongThucThanhToan;
 
-    @Column(name = "so_tien_thanh_toan", precision = 10, scale = 2)
+    @Column(name = "so_tien_thanh_toan", precision = 18, scale = 2)
     private BigDecimal soTienThanhToan;
 
 }
