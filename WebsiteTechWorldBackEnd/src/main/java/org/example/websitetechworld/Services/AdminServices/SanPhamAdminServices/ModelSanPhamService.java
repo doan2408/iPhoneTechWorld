@@ -13,10 +13,8 @@ import org.example.websitetechworld.exception.NotFoundException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,9 +37,38 @@ public class ModelSanPhamService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
+    public static String  formatTenModel(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
 
-        entity.setTenModel(req.getTenModel());
+        input = input.trim();
+        // Chèn khoảng cách sau từ 'iphone' nếu liền với số, ví dụ "iphone14" → "iphone 14"
+        input = input.replaceAll("(?i)(iphone)(\\d)", "$1 $2");
+
+        String[] word = input.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+
+        for(int i=0; i<word.length; i++) {
+            if(i==0 && word[i].equalsIgnoreCase("iphone")) {
+                sb.append("iPhone");
+            }
+            else {
+                sb.append(word[i]);
+            }
+
+            if(i < word.length - 1) {
+                sb.append(" ");
+            }
+        }
+        return sb.toString();
+    }
+
+    private void mapRequestToEntity(ModelSanPhamAdminRequest req, ModelSanPham entity) {
+        String tenModel = req.getTenModel();
+        String tenFormat = formatTenModel(tenModel);
+
+        entity.setTenModel(tenFormat);
 
         entity.setMaModelSanPham(req.getMaModelSanPham());
         entity.setNamRaMat(req.getNamRaMat());
@@ -209,9 +236,11 @@ public class ModelSanPhamService {
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
 
+        String tenFormat = formatTenModel(request.getTenModel());
+
         //  1. Kiểm tra trùng cấu hình (trừ camera sau)
         if (modelSanPhamRepository.existsModelWithSameConfig(
-                request.getTenModel().trim(),
+                tenFormat,
 //                request.getIdRam(),
                 request.getIdXuatXu(),
                 request.getIdLoai()
@@ -269,6 +298,23 @@ public class ModelSanPhamService {
     public ModelSanPhamAdminResponse updateModelSanPham(Integer id, ModelSanPhamAdminRequest request) {
         ModelSanPham model = modelSanPhamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Model sản phẩm không tồn tại"));
+
+        String tenFormat = formatTenModel(request.getTenModel());
+
+        // check changed of tenModel, idXuatXu, idLoai
+        boolean isChanged = !Objects.equals(tenFormat, model.getTenModel().trim()) ||
+                !Objects.equals(request.getIdXuatXu(), model.getIdXuatXu().getId()) ||
+                !Objects.equals(request.getIdLoai(), model.getIdLoai().getId());
+
+        if(isChanged) {
+            if(modelSanPhamRepository.existsModelWithSameConfig(
+                    tenFormat,
+                    request.getIdXuatXu(),
+                    request.getIdLoai()
+            )) {
+                throw new BusinessException("model.duplicate.config");
+            }
+        }
 
         // 1. Gán dữ liệu cơ bản
         mapRequestToEntity(request, model);
