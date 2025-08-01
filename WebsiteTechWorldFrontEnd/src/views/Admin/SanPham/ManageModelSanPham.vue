@@ -359,70 +359,100 @@
             />
 
             <el-form-item
-  label="Camera sau"
-  prop="idCameraSau"
-  :error="errors.idCameraSau"
->
-  <div style="display: flex; gap: 8px; width: 100%">
-    <el-select
-      v-model="modelForm.idCameraSau"
-      placeholder="Chọn camera sau (Wide bắt buộc)"
-      @change="handleCameraSauChange"
-      :loading="loading"
-      size="large"
-      style="width: 100%"
-      multiple
-    >
-      <el-option
-        v-for="cam in availableCameraSaus"
-        :key="cam.idCamera"
-        :label="`${cam.doPhanGiai} - ${cam.khauDo} - ${cam.loaiCamera}`"
-        :value="cam.idCamera"
-        :disabled="isCameraSauDisabled(cam)"
-      >
-        <span style="float: left">{{ cam.doPhanGiai }} - {{ cam.khauDo }}</span>
-        <span 
-          style="float: right; color: var(--el-text-color-secondary); font-size: 13px"
-          :style="{ 
-            color: cam.loaiCamera === 'Wide' ? '#67c23a' : 
-                   cam.loaiCamera === 'Ultra Wide' ? '#409eff' : '#f56c6c' 
-          }"
-        >
-          {{ cam.loaiCamera }}
-        </span>
-      </el-option>
-    </el-select>
-    <el-button
-      type="success"
-      size="large"
-      circle
-      @click="addCameraSauDialogRef.open()"
-    >
-      <el-icon>
-        <Plus />
-      </el-icon>
-    </el-button>
-  </div>
-  
-  <!-- Hiển thị thông tin camera đã chọn -->
-  <div v-if="modelForm.idCameraSau?.length" style="margin-top: 8px; font-size: 12px; color: #909399;">
-    <div v-for="cameraId in modelForm.idCameraSau" :key="cameraId" style="display: inline-block; margin-right: 12px;">
-      <el-tag 
-        :type="(() => {
-          const cam = cameraSaus.find(c => c.idCamera === cameraId);
-          return cam?.loaiCamera === 'Wide' ? 'success' : 
-                 cam?.loaiCamera === 'Ultra Wide' ? 'primary' : 'danger';
-        })()"
-        size="small"
-      >
-        {{ (() => {
-          const cam = cameraSaus.find(c => c.idCamera === cameraId);
-          return cam ? `${cam.loaiCamera}: ${cam.doPhanGiai}` : 'Unknown';
-        })() }}
-      </el-tag>
-    </div>
-  </div>
-</el-form-item>
+              label="Camera sau"
+              prop="idCameraSau"
+              :error="errors.idCameraSau"
+            >
+              <div style="display: flex; gap: 8px; width: 100%">
+                <el-select
+                  v-model="modelForm.idCameraSau"
+                  placeholder="Chọn camera sau (Wide bắt buộc)"
+                  @change="handleCameraSauChange"
+                  :loading="loading"
+                  size="large"
+                  style="width: 100%"
+                  multiple
+                >
+                  <el-option
+                    v-for="cam in availableCameraSaus"
+                    :key="cam.idCamera"
+                    :label="`${cam.doPhanGiai} - ${cam.khauDo} - ${cam.loaiCamera}`"
+                    :value="cam.idCamera"
+                    :disabled="isCameraSauDisabled(cam)"
+                  >
+                    <span style="float: left"
+                      >{{ cam.doPhanGiai }} - {{ cam.khauDo }}</span
+                    >
+                    <span
+                      style="
+                        float: right;
+                        color: var(--el-text-color-secondary);
+                        font-size: 13px;
+                      "
+                      :style="{
+                        color:
+                          cam.loaiCamera === 'Wide'
+                            ? '#67c23a'
+                            : cam.loaiCamera === 'Ultra Wide'
+                            ? '#409eff'
+                            : '#f56c6c',
+                      }"
+                    >
+                      {{ cam.loaiCamera }}
+                    </span>
+                  </el-option>
+                </el-select>
+                <el-button
+                  type="success"
+                  size="large"
+                  circle
+                  @click="addCameraSauDialogRef.open()"
+                >
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                </el-button>
+              </div>
+
+              <!-- Hiển thị thông tin camera đã chọn -->
+              <div
+                v-if="modelForm.idCameraSau?.length"
+                style="margin-top: 8px; font-size: 12px; color: #909399"
+              >
+                <div
+                  v-for="cameraId in modelForm.idCameraSau"
+                  :key="cameraId"
+                  style="display: inline-block; margin-right: 12px"
+                >
+                  <el-tag
+                    :type="
+                      (() => {
+                        const cam = cameraSaus.find(
+                          (c) => c.idCamera === cameraId
+                        );
+                        return cam?.loaiCamera === 'Wide'
+                          ? 'success'
+                          : cam?.loaiCamera === 'Ultra Wide'
+                          ? 'primary'
+                          : 'danger';
+                      })()
+                    "
+                    size="small"
+                  >
+                    {{
+                      (() => {
+                        const cam = cameraSaus.find(
+                          (c) => c.idCamera === cameraId
+                        );
+                        return cam
+                          ? `${cam.loaiCamera}: ${cam.doPhanGiai}`
+                          : "Unknown";
+                      })()
+                    }}
+                  </el-tag>
+                </div>
+              </div>
+            </el-form-item>
 
             <DialogThemCameraSau
               ref="addCameraSauDialogRef"
@@ -1007,118 +1037,130 @@ export default {
     const toast = useToast();
 
     // Computed để lọc camera sau có thể chọn
-const availableCameraSaus = computed(() => {
-  return cameraSaus.value.filter(cam => {
-    // Luôn hiển thị camera đã được chọn
-    if (modelForm.value.idCameraSau?.includes(cam.idCamera)) {
-      return true;
-    }
-    
-    // Lấy danh sách camera đã chọn
-    const selectedCameras = cameraSaus.value.filter(c => 
-      modelForm.value.idCameraSau?.includes(c.idCamera)
-    );
-    
-    // Kiểm tra các loại camera đã được chọn
-    const hasWide = selectedCameras.some(c => c.loaiCamera === 'Wide');
-    const hasUltraWide = selectedCameras.some(c => c.loaiCamera === 'Ultra Wide');
-    const hasTelephoto = selectedCameras.some(c => c.loaiCamera === 'Telephoto'); // Đổi từ 'Tele' thành 'Telephoto'
-    
-    // Logic lọc camera theo loại
-    switch (cam.loaiCamera) {
-      case 'Wide':
-        // Nếu đã có Wide thì ẩn các Wide khác
-        return !hasWide;
-      case 'Ultra Wide':
-        // Chỉ hiển thị nếu chưa có Ultra Wide và đã có Wide
-        return !hasUltraWide && hasWide;
-      case 'Telephoto': // Đổi từ 'Tele' thành 'Telephoto'
-        // Chỉ hiển thị nếu chưa có Telephoto và đã có Wide
-        return !hasTelephoto && hasWide;
-      default:
+    const availableCameraSaus = computed(() => {
+      return cameraSaus.value.filter((cam) => {
+        // Luôn hiển thị camera đã được chọn
+        if (modelForm.value.idCameraSau?.includes(cam.idCamera)) {
+          return true;
+        }
+
+        // Lấy danh sách camera đã chọn
+        const selectedCameras = cameraSaus.value.filter((c) =>
+          modelForm.value.idCameraSau?.includes(c.idCamera)
+        );
+
+        // Kiểm tra các loại camera đã được chọn
+        const hasWide = selectedCameras.some((c) => c.loaiCamera === "Wide");
+        const hasUltraWide = selectedCameras.some(
+          (c) => c.loaiCamera === "Ultra Wide"
+        );
+        const hasTelephoto = selectedCameras.some(
+          (c) => c.loaiCamera === "Telephoto"
+        ); // Đổi từ 'Tele' thành 'Telephoto'
+
+        // Logic lọc camera theo loại
+        switch (cam.loaiCamera) {
+          case "Wide":
+            // Nếu đã có Wide thì ẩn các Wide khác
+            return !hasWide;
+          case "Ultra Wide":
+            // Chỉ hiển thị nếu chưa có Ultra Wide và đã có Wide
+            return !hasUltraWide && hasWide;
+          case "Telephoto": // Đổi từ 'Tele' thành 'Telephoto'
+            // Chỉ hiển thị nếu chưa có Telephoto và đã có Wide
+            return !hasTelephoto && hasWide;
+          default:
+            return true;
+        }
+      });
+    });
+
+    // Function xử lý khi thay đổi lựa chọn camera sau
+    const handleCameraSauChange = (selectedIds) => {
+      // Lấy thông tin các camera được chọn
+      const selectedCameras = cameraSaus.value.filter((c) =>
+        selectedIds.includes(c.idCamera)
+      );
+
+      // Validation: Phải có ít nhất 1 camera Wide
+      const hasWide = selectedCameras.some((c) => c.loaiCamera === "Wide");
+
+      if (selectedIds.length > 0 && !hasWide) {
+        ElMessage.warning("Phải có ít nhất 1 camera Wide");
+        // Khôi phục giá trị cũ
+        const oldValue = modelForm.value.idCameraSau;
+        setTimeout(() => {
+          modelForm.value.idCameraSau = oldValue;
+        }, 0);
+        return;
+      }
+
+      // Validation: Chỉ được chọn tối đa 1 camera mỗi loại
+      const cameraTypes = selectedCameras.map((c) => c.loaiCamera);
+      const wideCount = cameraTypes.filter((type) => type === "Wide").length;
+      const ultraWideCount = cameraTypes.filter(
+        (type) => type === "Ultra Wide"
+      ).length;
+      const teleCount = cameraTypes.filter(
+        (type) => type === "Telephoto"
+      ).length; // Đổi từ 'Tele' thành 'Telephoto'
+
+      if (wideCount > 1) {
+        ElMessage.warning("Chỉ được chọn 1 camera Wide");
+        // Khôi phục giá trị cũ
+        const oldValue = modelForm.value.idCameraSau;
+        setTimeout(() => {
+          modelForm.value.idCameraSau = oldValue;
+        }, 0);
+        return;
+      }
+      if (ultraWideCount > 1) {
+        ElMessage.warning("Chỉ được chọn 1 camera Ultra Wide");
+        // Khôi phục giá trị cũ
+        const oldValue = modelForm.value.idCameraSau;
+        setTimeout(() => {
+          modelForm.value.idCameraSau = oldValue;
+        }, 0);
+        return;
+      }
+      if (teleCount > 1) {
+        ElMessage.warning("Chỉ được chọn 1 camera Telephoto");
+        // Khôi phục giá trị cũ
+        const oldValue = modelForm.value.idCameraSau;
+        setTimeout(() => {
+          modelForm.value.idCameraSau = oldValue;
+        }, 0);
+        return;
+      }
+
+      // Cập nhật form data
+      modelForm.value.idCameraSau = selectedIds;
+      clearFieldError("idCameraSau");
+    };
+
+    // Function kiểm tra camera có bị disable không
+    const isCameraSauDisabled = (cam) => {
+      // Không disable camera đã được chọn
+      if (modelForm.value.idCameraSau?.includes(cam.idCamera)) {
+        return false;
+      }
+
+      const selectedCameras = cameraSaus.value.filter((c) =>
+        modelForm.value.idCameraSau?.includes(c.idCamera)
+      );
+
+      const hasWide = selectedCameras.some((c) => c.loaiCamera === "Wide");
+
+      // Disable Ultra Wide và Telephoto khi chưa chọn Wide
+      if (
+        !hasWide &&
+        (cam.loaiCamera === "Ultra Wide" || cam.loaiCamera === "Telephoto")
+      ) {
         return true;
-    }
-  });
-});
+      }
 
-// Function xử lý khi thay đổi lựa chọn camera sau
-const handleCameraSauChange = (selectedIds) => {
-  // Lấy thông tin các camera được chọn
-  const selectedCameras = cameraSaus.value.filter(c => selectedIds.includes(c.idCamera));
-  
-  // Validation: Phải có ít nhất 1 camera Wide
-  const hasWide = selectedCameras.some(c => c.loaiCamera === 'Wide');
-  
-  if (selectedIds.length > 0 && !hasWide) {
-    ElMessage.warning('Phải có ít nhất 1 camera Wide');
-    // Khôi phục giá trị cũ
-    const oldValue = modelForm.value.idCameraSau;
-    setTimeout(() => {
-      modelForm.value.idCameraSau = oldValue;
-    }, 0);
-    return;
-  }
-  
-  // Validation: Chỉ được chọn tối đa 1 camera mỗi loại
-  const cameraTypes = selectedCameras.map(c => c.loaiCamera);
-  const wideCount = cameraTypes.filter(type => type === 'Wide').length;
-  const ultraWideCount = cameraTypes.filter(type => type === 'Ultra Wide').length;
-  const teleCount = cameraTypes.filter(type => type === 'Telephoto').length; // Đổi từ 'Tele' thành 'Telephoto'
-  
-  if (wideCount > 1) {
-    ElMessage.warning('Chỉ được chọn 1 camera Wide');
-    // Khôi phục giá trị cũ
-    const oldValue = modelForm.value.idCameraSau;
-    setTimeout(() => {
-      modelForm.value.idCameraSau = oldValue;
-    }, 0);
-    return;
-  }
-  if (ultraWideCount > 1) {
-    ElMessage.warning('Chỉ được chọn 1 camera Ultra Wide');
-    // Khôi phục giá trị cũ
-    const oldValue = modelForm.value.idCameraSau;
-    setTimeout(() => {
-      modelForm.value.idCameraSau = oldValue;
-    }, 0);
-    return;
-  }
-  if (teleCount > 1) {
-    ElMessage.warning('Chỉ được chọn 1 camera Telephoto');
-    // Khôi phục giá trị cũ
-    const oldValue = modelForm.value.idCameraSau;
-    setTimeout(() => {
-      modelForm.value.idCameraSau = oldValue;
-    }, 0);
-    return;
-  }
-  
-  // Cập nhật form data
-  modelForm.value.idCameraSau = selectedIds;
-  clearFieldError('idCameraSau');
-};
-
-// Function kiểm tra camera có bị disable không
-const isCameraSauDisabled = (cam) => {
-  // Không disable camera đã được chọn
-  if (modelForm.value.idCameraSau?.includes(cam.idCamera)) {
-    return false;
-  }
-  
-  const selectedCameras = cameraSaus.value.filter(c => 
-    modelForm.value.idCameraSau?.includes(c.idCamera)
-  );
-  
-  const hasWide = selectedCameras.some(c => c.loaiCamera === 'Wide');
-  
-  // Disable Ultra Wide và Telephoto khi chưa chọn Wide
-  if (!hasWide && (cam.loaiCamera === 'Ultra Wide' || cam.loaiCamera === 'Telephoto')) {
-    return true;
-  }
-  
-  return false;
-};
-
+      return false;
+    };
 
     const statuses = ref([
       { value: "ACTIVE", label: "Đang hoạt động", type: "success" },
@@ -1895,7 +1937,7 @@ const isCameraSauDisabled = (cam) => {
       addCameraTruocDialogRef,
       addCameraSauDialogRef,
       toast,
-        // ... existing returns
+      // ... existing returns
       availableCameraSaus,
       handleCameraSauChange,
       isCameraSauDisabled,
