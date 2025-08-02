@@ -581,6 +581,7 @@ export default {
               idMau: variant.idMau,
               idRom: variant.idRom,
               idLoai: sanPham.idModelSanPham,
+              idNhaCungCap: sanPham.idNhaCungCap
             },
             signal: controller.signal,
           });
@@ -1125,7 +1126,7 @@ export default {
         const payload = {
           tenSanPham: sanPham.tenSanPham,
           thuongHieu: sanPham.thuongHieu,
-          idNhaCungCap: sanPham.idNhaCungCap,
+          idNhaCungCaps: [sanPham.idNhaCungCap],
           trangThaiSanPham: sanPham.trangThaiSanPham,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {

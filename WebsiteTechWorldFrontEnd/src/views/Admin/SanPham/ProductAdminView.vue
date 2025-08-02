@@ -66,32 +66,14 @@
                 <span class="header-title">Thông tin nhà cung cấp</span>
               </div>
             </template>
-            <el-row :gutter="20">
-              <el-col :xs="24" :sm="12">
-                <div class="form-field">
-                  <label class="field-label">Nhà cung cấp</label>
-                  <el-input v-model="sanPhamModel.tenNhaCungCap" readonly class="readonly-input" />
-                </div>
-              </el-col>
-              <el-col :xs="24" :sm="12">
-                <div class="form-field">
-                  <label class="field-label">Địa chỉ</label>
-                  <el-input v-model="sanPhamModel.diaChi" readonly class="readonly-input" />
-                </div>
-              </el-col>
-              <el-col :xs="24" :sm="12">
-                <div class="form-field">
-                  <label class="field-label">Số điện thoại</label>
-                  <el-input v-model="sanPhamModel.sdt" readonly class="readonly-input" />
-                </div>
-              </el-col>
-              <el-col :xs="24" :sm="12">
-                <div class="form-field">
-                  <label class="field-label">Email</label>
-                  <el-input v-model="sanPhamModel.email" readonly class="readonly-input" />
-                </div>
-              </el-col>
-            </el-row>
+            <el-table :data="sanPhamModel.nhaCungCaps" class="suppliers-table">
+              <el-table-column type="index" label="STT" width="60" :index="indexMethod" />
+              <el-table-column prop="tenNhaCungCap" label="Nhà cung cấp" />
+              <el-table-column prop="diaChi" label="Địa chỉ" />
+              <el-table-column prop="sdt" label="Số điện thoại" />
+              <el-table-column prop="email" label="Email" />
+            </el-table>
+            <el-empty v-if="!sanPhamModel.nhaCungCaps?.length" description="Không có thông tin nhà cung cấp" :image-size="80" class="empty-supplier" />
           </el-card>
 
           <!-- Model Information -->
@@ -592,11 +574,7 @@ const sanPhamModel = reactive({
   tenSanPham: '',
   thuongHieu: '',
   trangThaiSanPham: '',
-  idNhaCungCap: null,
-  tenNhaCungCap: '',
-  diaChi: '',
-  sdt: '',
-  email: '',
+  nhaCungCaps: [],
   modelSanPham: { cameraSaus: [] },
   sanPhamChiTiets: [],
 })
@@ -654,18 +632,16 @@ const fetchSanPham = async (id) => {
     sanPhamModel.trangThaiSanPham = response.trangThaiSanPham || ''
 
     // Ánh xạ thông tin nhà cung cấp
-    if (response.nhaCungCapAdminResponse) {
-      sanPhamModel.idNhaCungCap = response.nhaCungCapAdminResponse.id || null
-      sanPhamModel.tenNhaCungCap = response.nhaCungCapAdminResponse.tenNhaCungCap || ''
-      sanPhamModel.diaChi = response.nhaCungCapAdminResponse.diaChi || ''
-      sanPhamModel.sdt = response.nhaCungCapAdminResponse.sdt || ''
-      sanPhamModel.email = response.nhaCungCapAdminResponse.email || ''
+    if (response.nhaCungCaps && Array.isArray(response.nhaCungCaps)) {
+      sanPhamModel.nhaCungCaps = response.nhaCungCaps.map(ncc => ({
+        id: ncc.id || null,
+        tenNhaCungCap: ncc.tenNhaCungCap || '',
+        diaChi: ncc.diaChi || '',
+        sdt: ncc.sdt || '',
+        email: ncc.email || ''
+      })) || []
     } else {
-      sanPhamModel.idNhaCungCap = null
-      sanPhamModel.tenNhaCungCap = ''
-      sanPhamModel.diaChi = ''
-      sanPhamModel.sdt = ''
-      sanPhamModel.email = ''
+      sanPhamModel.nhaCungCaps = []
     }
 
     // Ánh xạ thông tin model sản phẩm
