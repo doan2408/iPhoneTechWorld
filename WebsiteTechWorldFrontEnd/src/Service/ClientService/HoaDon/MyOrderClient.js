@@ -26,3 +26,9 @@ export const loadPaymentMethod = () => {
 export const thanhToanClient = (data) => {
     return api.put(baseURL + '/thanh-toan',data);
 }
+
+//cuong
+
+export const getHoaDonAndIdChiTietHoaDon = (id) => {
+    return api.get(`${baseURL}/${id}/chi-tiet`);
+};
