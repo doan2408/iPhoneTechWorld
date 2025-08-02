@@ -490,14 +490,14 @@ export default {
         hinhAnhTheoMau,
       });
 
-      if (!validateForm()) {
-        Object.keys(errors).forEach((key) => {
-          if (errors[key]) {
-            errorMessages.push(errors[key]);
-          }
-        });
-        hasError = true;
-      }
+      // if (!validateForm()) {
+      //   Object.keys(errors).forEach((key) => {
+      //     if (errors[key]) {
+      //       errorMessages.push(errors[key]);
+      //     }
+      //   });
+      //   hasError = true;
+      // }
 
       if (!selectedMaus.value.length) {
         errors.selectedMaus = "Vui lòng chọn ít nhất một màu sắc";
@@ -679,7 +679,7 @@ export default {
         sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
         if (validate) {
           if (imeis.length === 0) {
-            errorsChiTiet[index].imeisInput = "Phải có ít nhất 1 IMEI";
+            errorsChiTiet[index].imeisInput = "Phải có ít nhất 1 IMEIkkkkk";
             errorsChiTiet[index].soLuong = "Số lượng phải lớn hơn 0";
           } else {
             const allImeis = sanPham.sanPhamChiTiets

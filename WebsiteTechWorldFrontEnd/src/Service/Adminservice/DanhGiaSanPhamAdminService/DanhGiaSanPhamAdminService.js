@@ -3,16 +3,19 @@ import api from '@/Service/LoginService/axiosInstance';
 const BASE_URL = "/admin/danh-gia-san-pham";
 
 export const DanhGiaSanPhamAdminService = {
-    async layTatCaDanhGiaAdmin(page = 0, size = 10) {
-        const response = await api.get(`${BASE_URL}`, {
-            params: {
-                page: page,
-                size: size,
-                sort: 'ngayDanhGia,desc'  // Sắp xếp theo ngày đánh giá mới nhất
-            }
-        });
-        return response.data;
-    },
+    
+   async layTatCaDanhGiaAdmin(page = 0, size = 10, soSao = null, trangThai = null) {
+    const response = await api.get(`${BASE_URL}`, {
+        params: {
+            page: page,
+            size: size,
+            sort: 'ngayDanhGia,desc', // Sắp xếp theo ngày đánh giá mới nhất
+            soSao: soSao, // Thêm tham số lọc số sao
+            trangThai: trangThai // Thêm tham số lọc trạng thái
+        }
+    });
+    return response.data;
+},
 
       // Phê duyệt đánh giá
     async pheDuyetDanhGia(id) {
@@ -48,14 +51,16 @@ export const DanhGiaSanPhamAdminService = {
     },
 
     // Phản hồi đánh giá
-    async phanHoiDanhGia(id, data) {
+    async phanHoiDanhGia(idDanhGia, data) {
         try {
-            const response = await api.post(`${BASE_URL}/${id}/phan-hoi`, {
-                noiDungPhanHoi: data.noiDungPhanHoi
+           const response = await api.post(`/admin/phan-hoi-danh-gia/danh-gia/${idDanhGia}/phan-hoi`, {
+                noiDungPhanHoi: data.noiDungPhanHoi,
+                idNhanVien: data.idNhanVien,
             });
+            console.log("hahah phan hoi", response.data)
             return response.data;
         } catch (error) {
-            console.error(`Lỗi khi phản hồi đánh giá với ID ${id}:`, error);
+            console.error(`Lỗi khi phản hồi đánh giá với ID ${idDanhGia}:`, error);
             throw error;
         }
     }

@@ -29,8 +29,8 @@ export const DanhGiaSanPhamClientService = {
     return response.data;
   },
 
-  async layDanhGiaTheoSanPham(idSanPhamChiTiet, page = 0, size = 10, soSao = null, hasMedia = null) {
-    const response = await api.get(`${BASE_URL}/san-pham/${idSanPhamChiTiet}`, {
+  async layDanhGiaTheoSanPham (idSanPhamChiTiet, page = 0, size = 10, soSao = null, hasMedia = null) {
+    const response = await api.get(`${BASE_URL}/san-pham-chi-tiet/${idSanPhamChiTiet}`, {
       params: {
         page,
         size,
@@ -40,6 +40,8 @@ export const DanhGiaSanPhamClientService = {
         hasMedia,
       },
     });
+
+    console.log(response, "cường nèeee")
     return response.data;
   },
 
@@ -67,6 +69,13 @@ export const DanhGiaSanPhamClientService = {
 
   async tinhDiemTrungBinhSanPham(idSanPhamChiTiet) {
     const response = await api.get(`${BASE_URL}/thong-ke/diem-trung-binh/${idSanPhamChiTiet}`);
+    console.log("idSanPhamChiTiet", response)
+    return response.data;
+  },
+
+  async tinhDiemTrungBinhSanPhamSpct(idSanPhamChiTiet) {
+    const response = await api.get(`${BASE_URL}/thong-ke-spct/diem-trung-binh/${idSanPhamChiTiet}`);
+    console.log("idSanPhamChiTiet", response)
     return response.data;
   },
 

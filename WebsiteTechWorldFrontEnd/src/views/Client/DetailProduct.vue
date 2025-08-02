@@ -1,18 +1,17 @@
-
+```vue
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
+var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+(function () {
+  var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  s0.parentNode.insertBefore(s1, s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-
 
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
@@ -26,45 +25,36 @@ import {
 } from "@/Service/ClientService/Products/ProductClientService";
 import { cartService } from "@/service/ClientService/GioHang/GioHangClientService";
 import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import { PhanHoiDanhGiaClientService } from "@/Service/ClientService/PhanHoiDanhGia/PhanHoiDanhGiaClientService";
 import { ShoppingCart } from "@element-plus/icons-vue";
 import { ElMessage, ElRate, ElUpload } from "element-plus";
 import { ElPagination } from "element-plus";
 
-
-// Hàm nhúng Tawk.to
 const loadTawkTo = () => {
-  // Kiểm tra xem Tawk.to đã được tải chưa để tránh tải lại
   if (window.Tawk_API) return;
-
-  // Tạo script element
   const s1 = document.createElement("script");
   s1.async = true;
   s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
   s1.charset = 'UTF-8';
   s1.setAttribute('crossorigin', '*');
-
-  // Thêm script vào DOM
   const s0 = document.getElementsByTagName("script")[0];
   s0.parentNode.insertBefore(s1, s0);
-
-  // Khởi tạo Tawk_API
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
 };
-// import { ElMessage } from "element-plus";
-// import headerState from '@/components/Client/modules/headerState';
 
-// const count = ref(0)
-// const store = useStore()
+import headerState from '@/components/Client/modules/headerState';
 
-// if (!store.hasModule('headerState')) {
-//   store.registerModule('headerState', headerState)
-// }
+const count = ref(0)
+const store = useStore()
 
-// const guiLenHeader = () => {
-//   store.commit('headerState/setCartItemCount', count.value)
-// }
+if (!store.hasModule('headerState')) {
+  store.registerModule('headerState', headerState)
+}
 
+const guiLenHeader = () => {
+  store.commit('headerState/setCartItemCount', count.value)
+}
 
 const user = JSON.parse(localStorage.getItem("user"));
 const route = useRoute();
@@ -85,7 +75,6 @@ const bienThe = ref(null);
 const thongSo = ref(null);
 const quantity = ref(1);
 
-// Review-related refs
 const rating = ref(0);
 const comment = ref("");
 const uploadedImages = ref([]);
@@ -95,9 +84,20 @@ const starDistribution = ref({});
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalReviews = ref(0);
-const selectedStarFilter = ref(0); // 0 là "Tất cả", 1-5 là số sao
-const hasMediaFilter = ref(false); // Lọc đánh giá có hình ảnh/video
-const isLoading = ref(false); // Trạng thái tải thêm
+const selectedStarFilter = ref(0);
+const hasMediaFilter = ref(false);
+const isLoading = ref(false);
+const phanHoiByDanhGia = ref({});
+
+const fetchPhanHoi = async (idDanhGia) => {
+  try {
+    const phanHoi = await PhanHoiDanhGiaClientService.layPhanHoiTheoDanhGia(idDanhGia);
+    phanHoiByDanhGia.value[idDanhGia] = phanHoi;
+  } catch (error) {
+    console.error(`Lỗi khi lấy phản hồi cho đánh giá ${idDanhGia}:`, error);
+    ElMessage.error("Không thể tải phản hồi!");
+  }
+};
 
 const increaseQty = () => {
   if (bienThe.value && quantity.value < bienThe.value.soLuong) {
@@ -140,7 +140,6 @@ const fetchChiTietBienThe = async () => {
     const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value);
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
-    // Fetch reviews for the selected variant
     await fetchReviews();
     await fetchAverageRating();
     await fetchStarDistribution();
@@ -213,7 +212,6 @@ const themVaoGio = async (buy) => {
   }
 };
 
-// Review-related Functions
 const fetchReviews = async () => {
   try {
     isLoading.value = true;
@@ -224,8 +222,13 @@ const fetchReviews = async () => {
       selectedStarFilter.value === 0 ? null : selectedStarFilter.value,
       hasMediaFilter.value ? true : null
     );
+
     reviews.value = currentPage.value === 1 ? (response.content || response) : [...reviews.value, ...(response.content || response)];
     totalReviews.value = response.totalElements || response.length;
+
+    for (const review of reviews.value) {
+      await fetchPhanHoi(review.idDanhGia);
+    }
   } catch (error) {
     console.error("Lỗi khi lấy đánh giá:", error);
     ElMessage.error("Không thể tải đánh giá!");
@@ -236,7 +239,7 @@ const fetchReviews = async () => {
 
 const fetchAverageRating = async () => {
   try {
-    const avg = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPham(bienThe.value.idSpct);
+    const avg = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPhamSpct(bienThe.value.idSpct);
     averageRating.value = avg || 0;
   } catch (error) {
     console.error("Lỗi khi lấy điểm trung bình:", error);
@@ -252,59 +255,14 @@ const fetchStarDistribution = async () => {
   }
 };
 
-const handleImageUpload = async (file) => {
-  try {
-    const imageUrl = await DanhGiaSanPhamClientService.uploadImage(file.raw);
-    uploadedImages.value.push(imageUrl);
-    ElMessage.success("Tải ảnh lên thành công!");
-  } catch (error) {
-    console.error("Lỗi khi tải ảnh:", error);
-    ElMessage.error("Không thể tải ảnh lên!");
-  }
-};
-
-const submitReview = async () => {
-  if (!user) {
-    ElMessage.error("Vui lòng đăng nhập để đánh giá!");
-    return;
-  }
-  if (rating.value < 1 || rating.value > 5) {
-    ElMessage.error("Vui lòng chọn số sao từ 1 đến 5!");
-    return;
-  }
-  try {
-    const reviewData = {
-      idSanPhamChiTiet: bienThe.value.idSpct,
-      idKhachHang: user.id,
-      soSao: rating.value,
-      noiDung: comment.value,
-      anonymous: true, // Có thể thêm tùy chọn ẩn danh trong UI
-    };
-    await DanhGiaSanPhamClientService.taoMoiDanhGia(reviewData);
-    ElMessage.success("Đánh giá đã được gửi!");
-    rating.value = 0;
-    comment.value = "";
-    uploadedImages.value = [];
-    await fetchReviews();
-    await fetchAverageRating();
-    await fetchStarDistribution();
-  } catch (error) {
-    console.error("Lỗi khi gửi đánh giá:", error);
-    ElMessage.error(error.response?.data?.message || "Lỗi khi gửi đánh giá!");
-  }
-};
-
 const filterReviewsByStar = async (star) => {
   selectedStarFilter.value = star;
   currentPage.value = 1;
-  console.log("Đã lọc theo số sao:", star);
-  console.log("Lọc: soSao =", selectedStarFilter.value, ", hasMedia =", hasMediaFilter.value);
   await fetchReviews();
 };
 
 const filterReviewsByMedia = async () => {
   currentPage.value = 1;
-  console.log("Đã lọc theo hình ảnh/video:", hasMediaFilter.value);
   await fetchReviews();
 };
 
@@ -334,7 +292,6 @@ const handlePageChange = (page) => {
   fetchReviews();
 };
 
-// Watchers
 watch([selectedMau, selectedRom], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
@@ -351,23 +308,16 @@ onMounted(() => {
 <template>
   <section class="product-detail">
     <div class="product-container">
-      <!-- Product Image Section -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
-
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
             :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
       </div>
 
-      <!-- Product Right Section -->
       <div class="product-right">
-        <!-- Product Info -->
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }}</h1>
           <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
@@ -407,7 +357,6 @@ onMounted(() => {
               @click="themVaoGio(true)">
               Mua ngay
             </el-button>
-
             <el-button type="success" :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="cart-btn"
               @click="themVaoGio(false)">
@@ -416,7 +365,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Product Specs -->
         <div class="product-specs" v-if="thongSo">
           <h2>Thông số kỹ thuật</h2>
           <ul class="spec-list">
@@ -439,122 +387,88 @@ onMounted(() => {
             <li><strong>Xuất xứ:</strong> {{ thongSo.xuatXu }}</li>
           </ul>
         </div>
+      </div>
 
-        <!-- Reviews Section -->
-        <div class="product-reviews">
-          <h2>Đánh giá sản phẩm</h2>
-          <div class="rating-summary">
-            <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
-            <el-rate v-model="averageRating" disabled allow-half />
-            <div class="star-distribution">
-              <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
-                <span>{{ star }} sao:</span>
-                <div class="progress-bar">
-                  <div
-                    :style="{ width: ((starDistribution[star] || 0) / totalReviews * 100) + '%' }"
-                    class="progress"
-                  ></div>
-                </div>
-                <span>{{ starDistribution[star] || 0 }} đánh giá</span>
+
+    </div>
+
+    <div class="product-reviews">
+      <h2>Đánh giá sản phẩm</h2>
+      <div class="rating-summary">
+        <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
+        <el-rate v-model="averageRating" disabled allow-half />
+        <div class="star-distribution">
+          <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
+            <span>{{ star }} sao:</span>
+            <div class="progress-bar">
+              <div :style="{ width: ((starDistribution[star] || 0) / totalReviews * 100) + '%' }" class="progress">
               </div>
             </div>
+            <span>{{ starDistribution[star] || 0 }} đánh giá</span>
           </div>
-
-          <!-- Review Filters -->
-          <div class="review-filters">
-            <el-button
-              v-for="star in [0, 5, 4, 3, 2, 1]"
-              :key="star"
-              @click="filterReviewsByStar(star)"
-              :type="selectedStarFilter === star ? 'primary' : 'default'"
-            >
-              {{ star === 0 ? 'Tất cả' : `${star} sao` }}
-            </el-button>
-            <el-button
-              @click="hasMediaFilter = !hasMediaFilter; filterReviewsByMedia()"
-              :type="hasMediaFilter ? 'primary' : 'default'"
-            >
-              Có hình ảnh/video
-            </el-button>
-          </div>
-
-          <!-- Add Review Form -->
-          <div class="add-review" v-if="user">
-            <h3>Viết đánh giá của bạn</h3>
-            <el-rate v-model="rating" />
-            <el-input
-              type="textarea"
-              v-model="comment"
-              placeholder="Nhập bình luận của bạn..."
-              :rows="4"
-              class="comment-input"
-            />
-            <el-upload
-              :file-list="uploadedImages"
-              :on-change="handleImageUpload"
-              :auto-upload="true"
-              list-type="picture-card"
-              :limit="5"
-            >
-              <i class="el-icon-plus"></i>
-            </el-upload>
-            <el-button type="primary" @click="submitReview">Gửi đánh giá</el-button>
-          </div>
-          <div v-else class="login-prompt">
-            <p>Vui lòng <a href="/login">đăng nhập</a> để viết đánh giá.</p>
-          </div>
-
-          <!-- Reviews List -->
-          <div class="reviews-list">
-            <div v-for="review in reviews" :key="review.id" class="review-item">
-              <div class="review-header">
-                <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
-                <span class="purchased-label" v-if="review.hasPurchased">Đã mua hàng</span>
-                <el-rate v-model="review.soSao" disabled />
-                <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
-              </div>
-              <p class="review-comment">{{ review.noiDung }}</p>
-              <div class="review-media" v-if="review.hinhAnh?.length || review.video">
-                <div class="review-images" v-if="review.hinhAnh?.length">
-                  <img
-                    v-for="(img, index) in review.hinhAnh"
-                    :key="index"
-                    :src="img"
-                    alt="Hình ảnh đánh giá"
-                    class="review-image"
-                  />
-                </div>
-                <video
-                  v-if="review.video"
-                  :src="review.video"
-                  controls
-                  class="review-video"
-                ></video>
-              </div>
-            </div>
-            <div v-if="isLoading" class="loading">Đang tải thêm...</div>
-          </div>
-
-          <!-- Load More Button -->
-          <div class="load-more" v-if="reviews.length < totalReviews && !isLoading">
-            <el-button type="primary" @click="loadMoreReviews">Xem thêm</el-button>
-          </div>
-
-          <!-- Pagination (Optional) -->
-          <el-pagination
-            v-if="totalReviews > pageSize"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            :total="totalReviews"
-            layout="prev, pager, next"
-            @current-change="handlePageChange"
-          />
         </div>
       </div>
+
+      <div class="review-filters">
+        <el-button v-for="star in [0, 5, 4, 3, 2, 1]" :key="star" @click="filterReviewsByStar(star)"
+          :type="selectedStarFilter === star ? 'primary' : 'default'">
+          {{ star === 0 ? 'Tất cả' : `${star} sao` }}
+        </el-button>
+        <el-button @click="hasMediaFilter = !hasMediaFilter; filterReviewsByMedia()"
+          :type="hasMediaFilter ? 'primary' : 'default'">
+          Có hình ảnh/video
+        </el-button>
+      </div>
+
+      <div class="reviews-list">
+        <div v-for="review in reviews" :key="review.idDanhGia" class="review-item">
+          <div class="review-header">
+            <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
+            <span class="purchased-label" v-if="review.idChiTietHoaDon">Đã mua hàng</span>
+            <el-rate v-model="review.soSao" disabled />
+            <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
+          </div>
+          <p class="review-comment">{{ review.noiDung }}</p>
+          <div class="review-media" v-if="review.mediaUrls?.length">
+            <div class="review-images"
+              v-if="review.mediaUrls?.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i)).length">
+              <img v-for="(img, index) in review.mediaUrls.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i))"
+                :key="index" :src="img" alt="Hình ảnh đánh giá" class="review-image"
+                @error="console.log('Lỗi tải ảnh:', img)" />
+            </div>
+            <video v-for="(video, index) in review.mediaUrls.filter(url => url.match(/\.(mp4|mov|avi|webm)$/i))"
+              :key="'video-' + index" :src="video" controls class="review-video"
+              @error="console.log('Lỗi tải video:', video)"></video>
+          </div>
+          <div class="review-responses">
+            <el-button v-if="!phanHoiByDanhGia[review.idDanhGia]" @click="fetchPhanHoi(review.idDanhGia)" size="small">
+              Tải phản hồi
+            </el-button>
+            <div v-else-if="phanHoiByDanhGia[review.idDanhGia]?.length">
+              <h4>Phản hồi từ cửa hàng:</h4>
+              <div v-for="phanHoi in phanHoiByDanhGia[review.idDanhGia]" :key="phanHoi.idPhanHoi" class="response-item">
+                <p class="response-content">{{ phanHoi.noiDungPhanHoi }}</p>
+                <span class="response-date">{{ new Date(phanHoi.ngayPhanHoi).toLocaleDateString("vi-VN") }}</span>
+              </div>
+            </div>
+            <div v-else class="no-response">
+              Chưa có phản hồi từ cửa hàng.
+            </div>
+          </div>
+        </div>
+        <div v-if="isLoading" class="loading">Đang tải thêm...</div>
+      </div>
+
+      <div class="load-more" v-if="reviews.length < totalReviews && !isLoading">
+        <el-button type="primary" @click="loadMoreReviews">Xem thêm</el-button>
+      </div>
+
+      <el-pagination v-if="totalReviews > pageSize" :current-page="currentPage" :page-size="pageSize"
+        :total="totalReviews" layout="prev, pager, next" @current-change="handlePageChange" />
     </div>
+
   </section>
 </template>
-
 
 <style scoped>
 .product-detail {
@@ -569,16 +483,16 @@ onMounted(() => {
   gap: 30px;
   padding: 20px;
   background: #ffffff;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Product Image */
 .product-image {
   flex: 1 1 450px;
   max-width: 500px;
+  max-height: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -630,25 +544,12 @@ onMounted(() => {
   box-shadow: 0 0 0 1px #d70018;
 }
 
-/* Product Right */
 .product-right {
   flex: 1 1 450px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
-/* Product Info */
-/* .product菜
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-} */
-  /* padding: 20px;
-  border-radius: 6px;
-  border: 1px solid #e5e5e5;
-} */
 
 .product-info h1 {
   font-size: 24px;
@@ -666,7 +567,6 @@ onMounted(() => {
   display: inline-block;
 }
 
-/* Options styling */
 .options {
   margin-top: 20px;
   padding: 12px 0;
@@ -712,8 +612,6 @@ onMounted(() => {
   border-color: #1890ff;
 }
 
-
-/* Quantity styles */
 .quantity-selector {
   margin-top: 15px;
   background: transparent;
@@ -797,8 +695,6 @@ onMounted(() => {
   margin: 0;
 }
 
-
-/* Button group */
 .button-group {
   display: flex;
   gap: 12px;
@@ -843,7 +739,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* Specifications */
 .product-specs {
   background: #ffffff;
   padding: 20px;
@@ -888,94 +783,96 @@ onMounted(() => {
   margin-right: 15px;
 }
 
-/* Stock info */
 .options:has(.quantity-selector) h3 {
   color: #52c41a;
   font-weight: 500;
 }
 
-/* Reviews Section */
 .product-reviews {
   background: #ffffff;
   padding: 30px;
-  border-radius: 8px;
+  /* border-radius: 12px; */
   border: 1px solid #e9ecef;
   margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .product-reviews h2 {
   margin-bottom: 25px;
-  font-size: 22px;
-  color: #212529;
-  font-weight: 600;
-  border-bottom: 2px solid #0d6efd;
-  padding-bottom: 10px;
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: 700;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 12px;
+  letter-spacing: 0.5px;
 }
 
 .rating-summary {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
   margin-bottom: 30px;
+  transition: all 0.3s ease;
 }
 
 .rating-summary h3 {
-  font-size: 18px;
-  color: #495057;
-  margin-bottom: 10px;
+  font-size: 20px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .star-distribution {
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .star-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #34495e;
 }
 
 .progress-bar {
   flex: 1;
-  height: 10px;
+  height: 12px;
   background: #e9ecef;
-  border-radius: 5px;
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .progress {
   height: 100%;
-  background: #0d6efd;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #1890ff, #40c4ff);
+  transition: width 0.5s ease-in-out;
 }
 
 .review-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 25px;
+  padding: 10px;
+  background: #f1f3f5;
+  border-radius: 8px;
 }
 
 .review-filters .el-button {
   border-radius: 20px;
-  padding: 8px 16px;
+  padding: 8px 18px;
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.add-review {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.add-review h3 {
-  font-size: 18px;
-  color: #495057;
-  margin-bottom: 15px;
-}
-
-.comment-input {
-  margin: 15px 0;
+.review-filters .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .reviews-list {
@@ -983,51 +880,67 @@ onMounted(() => {
 }
 
 .review-item {
-  padding: 15px;
+  padding: 20px;
   border-bottom: 1px solid #e9ecef;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.review-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .review-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 15px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .review-user {
   font-weight: 600;
-  color: #212529;
+  color: #2c3e50;
+  font-size: 16px;
 }
 
 .purchased-label {
-  background: #e7f3ff;
-  color: #0d6efd;
-  padding: 4px 8px;
+  background: linear-gradient(90deg, #e7f3ff, #d0e6ff);
+  color: #1890ff;
+  padding: 5px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .review-date {
-  color: #6c757d;
-  font-size: 14px;
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-left: auto;
 }
 
 .review-comment {
-  color: #495057;
-  line-height: 1.6;
-  margin-bottom: 10px;
+  color: #34495e;
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 15px;
 }
 
 .review-media {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
+  margin-bottom: 15px;
 }
 
 .review-images {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -1035,51 +948,105 @@ onMounted(() => {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.review-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .review-video {
   width: 300px;
   height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-responses {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9fbfc;
+  border-radius: 8px;
+  border-left: 4px solid #1890ff;
+  transition: all 0.3s ease;
+}
+
+.review-responses h4 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-responses h4::before {
+  content: '\f3e5';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.response-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.response-content {
+  color: #34495e;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.response-date {
+  font-size: 12px;
+  color: #95a5a6;
+  display: block;
+}
+
+.no-response {
+  color: #7f8c8d;
+  font-size: 14px;
+  font-style: italic;
+  padding: 10px;
+  background: #f1f3f5;
   border-radius: 6px;
 }
 
 .load-more {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .load-more .el-button {
   border-radius: 20px;
-  padding: 10px 30px;
+  padding: 12px 35px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.load-more .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .loading {
   text-align: center;
   padding: 20px;
-  color: #6c757d;
+  color: #7f8c8d;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-.login-prompt {
-  padding: 15px;
-  background: #fff3cd;
-  border: 1px solid #ffeeba;
-  border-radius: 6px;
-  color: #856404;
-  text-align: center;
-}
-
-.login-prompt a {
-  color: #0d6efd;
-  text-decoration: none;
-}
-
-.login-prompt a:hover {
-  text-decoration: underline;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .product-container {
     flex-direction: column;
@@ -1151,6 +1118,28 @@ onMounted(() => {
     height: 28px;
     font-size: 13px;
   }
+
+  .product-reviews {
+    padding: 20px;
+  }
+
+  .review-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .review-video {
+    width: 100%;
+  }
+
+  .star-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress-bar {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1180,26 +1169,19 @@ onMounted(() => {
     min-width: 60px;
   }
 
-  .product-reviews {
-    padding: 20px;
+  .review-item {
+    padding: 15px;
   }
 
-  .review-image {
-    width: 80px;
-    height: 80px;
-  }
-
-  .review-video {
-    width: 100%;
-  }
-
-  .star-bar {
+  .review-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
 
-  .progress-bar {
-    width: 100%;
+  .review-date {
+    margin-left: 0;
   }
 }
 </style>
+```

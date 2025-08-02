@@ -80,10 +80,12 @@ const fetchProducts = async () => {
     };
 
     const data = await getAllSanPham(params);
+    console.log(data, "sai mẹ r")
     products.value = await Promise.all(
       (data.content || data).map(async (item) => {
         try {
           const avgRating = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPham(item.id);
+          console.log("tao cường", avgRating);
           return { ...item, averageRating: avgRating || 0 };
         } catch (error) {
           console.error(`Lỗi khi lấy điểm trung bình cho sản phẩm ${item.id}:`, error);

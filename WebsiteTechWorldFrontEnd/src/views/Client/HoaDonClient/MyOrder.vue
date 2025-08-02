@@ -1,280 +1,526 @@
 <template>
-    <div class="page-container">
-        <!-- left  -->
-        <aside class="sidebar">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Bộ Lọc Đơn Hàng</h2>
-                </div>
-                <div class="card-content space-y-6">
-                    <!-- Filter by Status -->
-                    <div class="space-y-2">
-                        <label for="status-filter" class="label">Trạng thái</label>
-                        <select id="status-filter" v-model="filterStatus" class="select-input">
-                            <option value="all">Tất cả</option>
-                            <option v-for="status in orderStatuses" :key="status" :value="status">
-                                {{ status }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Filter by Price Range -->
-                    <div class="space-y-2">
-                        <label class="label">Khoảng giá</label>
-                        <div class="flex-group">
-                            <input type="number" placeholder="Min" v-model="filterMinPrice" class="text-input flex-1" />
-                            <span class="separator">-</span>
-                            <input type="number" placeholder="Max" v-model="filterMaxPrice" class="text-input flex-1" />
-                        </div>
-                    </div>
-
-                    <!-- Filter by Date Range -->
-                    <div class="space-y-2">
-                        <label class="label">Khoảng ngày</label>
-                        <div class="space-y-2">
-                            <div>
-                                <label for="start-date" class="sr-only">Ngày bắt đầu</label>
-                                <input id="start-date" type="date" v-model="filterStartDate" class="text-input" />
-                            </div>
-                            <div>
-                                <label for="end-date" class="sr-only">Ngày kết thúc</label>
-                                <input id="end-date" type="date" v-model="filterEndDate" class="text-input" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer flex-col space-y-2">
-                    <button @click="handleApplyFilters" class="button primary-button w-full">
-                        Áp dụng bộ lọc
-                    </button>
-                    <button @click="handleResetFilters" class="button outline-button w-full">
-                        Đặt lại bộ lọc
-                    </button>
-                </div>
+  <div class="page-container">
+    <!-- left -->
+    <aside class="sidebar">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Bộ Lọc Đơn Hàng</h2>
+        </div>
+        <div class="card-content space-y-6">
+          <div class="space-y-2">
+            <label for="status-filter" class="label">Trạng thái</label>
+            <select id="status-filter" v-model="filterStatus" class="select-input">
+              <option value="all">Tất cả</option>
+              <option v-for="status in orderStatuses" :key="status" :value="status">
+                {{ status }}
+              </option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="label">Khoảng giá</label>
+            <div class="flex-group">
+              <input type="number" placeholder="Min" v-model="filterMinPrice" class="text-input flex-1" />
+              <span class="separator">-</span>
+              <input type="number" placeholder="Max" v-model="filterMaxPrice" class="text-input flex-1" />
             </div>
-        </aside>
-
-        <!-- right  -->
-        <main class="main-content">
-            <header class="header">
-                <div class="header-right">
-                    <div class="search-container">
-                        <SearchIcon class="search-icon" />
-                        <input type="search" placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm"
-                            class="search-input" v-model="searchTerm" />
-                    </div>
-                </div>
-            </header>
-
-            <main class="main-content">
-                <div class="tabs-container">
-                    <div class="tabs-list">
-                        <button :class="['tab-trigger', { active: activeTab === 'all' }]" @click="setActiveTab('all')">
-                            Tất cả
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Chờ thanh toán' }]"
-                            @click="setActiveTab('Chờ thanh toán')">
-                            Chờ thanh toán
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Vận chuyển' }]"
-                            @click="setActiveTab('Vận chuyển')">
-                            Vận chuyển
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Chờ giao hàng' }]"
-                            @click="setActiveTab('Chờ giao hàng')">
-                            Chờ giao hàng
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Hoàn thành' }]"
-                            @click="setActiveTab('Hoàn thành')">
-                            Hoàn thành
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]"
-                            @click="setActiveTab('Đã hủy')">
-                            Đã hủy
-                        </button>
-                        <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
-                            @click="setActiveTab('Trả hàng/Hoàn tiền')">
-                            Trả hàng/Hoàn tiền
-                        </button>
-                    </div>
-                </div>
-
-                <div class="order-list">
-                    <div v-if="allOrderValue.length === 0" class="empty-state">
-                        Không tìm thấy đơn hàng nào phù hợp.
-                    </div>
-                    <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
-                        <div class="order-status-bar">
-                            <div class="order-status">
-                                🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
-                            </div>
-                            <div class="payment-status">
-                                💳 Thanh toán: <span>{{ order.trangThaiThanhToan }}</span>
-                            </div>
-                        </div>
-                        <div class="order-products">
-                            <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
-                                class="product-item">
-                                <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
-                                <div class="product-details">
-                                    <div class="product-name">{{ product.tenSanPham }}</div>
-                                    <div class="product-variant">Phân loại hàng: {{ product.colorName +
-                                        product.dungLuongRom
-                                        }}</div>
-                                    <div class="product-quantity">x{{ product.soLuong }}</div>
-                                </div>
-                                <div class="product-prices">
-                                    <!-- <span v-if="product.originalPrice !== product.discountedPrice"
-                                    class="original-price">₫{{ product.originalPrice }}</span> -->
-                                    <span class="discounted-price">₫{{ product.giaSanPham }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="order-footer">
-                            <div class="order-total">
-                                Thành tiền: <span class="total-amount">{{ order.thanhTien }} VNĐ</span>
-                            </div>
-                            <div class="order-actions">
-                                <button class="action-button buy-again-button">Mua Lại</button>
-                                <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="totalElements > pageSizeMyOrder" class="pagination-controls">
-                    <button class="pagination-button" :disabled="currentPage === 0" @click="prevPage()">
-                        Trước
-                    </button>
-                    <span v-for="page in totalPages" :key="page">
-                        <button :class="['pagination-button', { active: currentPage === page-1 }]"
-                            @click="changePage(page-1)">
-                            {{ page }}
-                        </button>
-                    </span>
-                    <button class="pagination-button" :disabled="currentPage ===  totalPages - 1" @click="nextPage()">
-                        Sau
-                    </button>
-                </div>
-            </main>
-        </main>
-        <section class="orders-stats">
-            <!-- Thống kê đơn hàng -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Thống Kê Đơn Hàng</h2>
-                </div>
-                <div class="card-content space-y-4">
-                    <p>Tổng đơn: <strong>{{ totalOrders }}</strong></p>
-                    <p>Đã giao: <strong>{{ deliveredOrders }}</strong></p>
-                    <p>Chờ xử lý: <strong>{{ pendingOrders }}</strong></p>
-                    <p>Tổng doanh thu: <strong>₫{{ totalRevenue }}</strong></p>
-                </div>
+          </div>
+          <div class="space-y-2">
+            <label class="label">Khoảng ngày</label>
+            <div class="space-y-2">
+              <div>
+                <label for="start-date" class="sr-only">Ngày bắt đầu</label>
+                <input id="start-date" type="date" v-model="filterStartDate" class="text-input" />
+              </div>
+              <div>
+                <label for="end-date" class="sr-only">Ngày kết thúc</label>
+                <input id="end-date" type="date" v-model="filterEndDate" class="text-input" />
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+        <div class="card-footer flex-col space-y-2">
+          <button @click="handleApplyFilters" class="button primary-button w-full">
+            Áp dụng bộ lọc
+          </button>
+          <button @click="handleResetFilters" class="button outline-button w-full">
+            Đặt lại bộ lọc
+          </button>
+        </div>
+      </div>
+    </aside>
 
-    </div>
+    <!-- right -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-right">
+          <div class="search-container">
+            <SearchIcon class="search-icon" />
+            <input type="search" placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm"
+              class="search-input" v-model="searchTerm" />
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="tabs-container">
+          <div class="tabs-list">
+            <button :class="['tab-trigger', { active: activeTab === 'all' }]" @click="setActiveTab('all')">
+              Tất cả
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Chờ thanh toán' }]"
+              @click="setActiveTab('Chờ thanh toán')">
+              Chờ thanh toán
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Vận chuyển' }]"
+              @click="setActiveTab('Vận chuyển')">
+              Vận chuyển
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Chờ giao hàng' }]"
+              @click="setActiveTab('Chờ giao hàng')">
+              Chờ giao hàng
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Hoàn thành' }]"
+              @click="setActiveTab('Hoàn thành')">
+              Hoàn thành
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]"
+              @click="setActiveTab('Đã hủy')">
+              Đã hủy
+            </button>
+            <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
+              @click="setActiveTab('Trả hàng/Hoàn tiền')">
+              Trả hàng/Hoàn tiền
+            </button>
+          </div>
+        </div>
+
+        <div class="order-list">
+          <div v-if="allOrderValue.length === 0" class="empty-state">
+            Không tìm thấy đơn hàng nào phù hợp.
+          </div>
+          <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
+            <div class="order-status-bar">
+              <div class="order-status">
+                🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
+              </div>
+              <div class="payment-status">
+                💳 Thanh toán: <span>{{ order.trangThaiThanhToan }}</span>
+              </div>
+            </div>
+            <div class="order-products">
+              <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
+                class="product-item">
+                <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
+                <div class="product-details">
+                  <div class="product-name">{{ product.tenSanPham }}</div>
+                  <div class="product-variant">Phân loại hàng: {{ product.colorName + product.dungLuongRom }}</div>
+                  <div class="product-quantity">x{{ product.soLuong }}</div>
+                </div>
+                <div class="product-prices">
+                  <span class="discounted-price">₫{{ product.giaSanPham }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-footer">
+              <div class="order-total">
+                Thành tiền: <span class="total-amount">{{ order.thanhTien }} VNĐ</span>
+              </div>
+              <div class="order-actions">
+                <button class="action-button buy-again-button">Mua Lại</button>
+                <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
+                <button v-if="order.trangThaiThanhToan === 'Hoàn tất'" class="action-button rate-button"
+                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">Đánh giá</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="totalElements > pageSizeMyOrder" class="pagination-controls">
+          <button class="pagination-button" :disabled="currentPage === 0" @click="prevPage()">
+            Trước
+          </button>
+          <span v-for="page in totalPages" :key="page">
+            <button :class="['pagination-button', { active: currentPage === page - 1 }]"
+              @click="changePage(page - 1)">
+              {{ page }}
+            </button>
+          </span>
+          <button class="pagination-button" :disabled="currentPage === totalPages - 1" @click="nextPage()">
+            Sau
+          </button>
+        </div>
+      </main>
+    </main>
+    <section class="orders-stats">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Thống Kê Đơn Hàng</h2>
+        </div>
+        <div class="card-content space-y-4">
+          <p>Tổng đơn: <strong>{{ totalOrders }}</strong></p>
+          <p>Đã giao: <strong>{{ deliveredOrders }}</strong></p>
+          <p>Chờ xử lý: <strong>{{ pendingOrders }}</strong></p>
+          <p>Tổng doanh thu: <strong>₫{{ totalRevenue }}</strong></p>
+        </div>
+      </div>
+    </section>
+    <!-- Thêm dialog đánh giá -->
+    <RateOrderDialog 
+      :is-open="isRateDialogOpen" 
+      :order-id="selectedOrderId" 
+     
+      :order-products="selectedOrderProducts" 
+      :id-san-pham-chi-tiet-list="idSanPhamChiTietList"
+      @close="closeRateDialog" 
+      @submit="submitRating" />
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { Package2Icon, SearchIcon, TruckIcon, InfoIcon } from 'lucide-vue-next'
-import { getMyOrder } from '@/Service/ClientService/HoaDon/MyOrderClient'
-import { pa } from 'element-plus/es/locales.mjs'
+import { ref, watch, onMounted, computed } from 'vue';
+import { SearchIcon } from 'lucide-vue-next';
+import { getHoaDonAndIdChiTietHoaDon, getMyOrder } from '@/Service/ClientService/HoaDon/MyOrderClient';
+import RateOrderDialog from '@/components/Admin/dialogs/DialogDanhGiaSao.vue';
+import { DanhGiaSanPhamClientService } from '@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService';
+import { MediaDanhGiaClientService } from '@/Service/ClientService/MediaDanhGiaClientService/MediaDanhGiaClientService';
 
-// Dummy data for orders
-const allOrderValue = ref([])
+// State
+const allOrderValue = ref([]);
+const pageNoMyOrder = ref(0);
+const pageSizeMyOrder = ref(5);
+const totalElements = ref(0);
+const totalPages = ref(0);
+const currentPage = ref(0);
+const searchTerm = ref('');
+const activeTab = ref('all');
+const isUserMenuOpen = ref(false);
+const activeOrderActions = ref(null);
+const isRateDialogOpen = ref(false);
+const selectedOrderId = ref(null);
+const selectedOrderProducts = ref([]);
+const idSanPhamChiTietList = ref([]);
+const user = ref(JSON.parse(localStorage.getItem('user')) || null);
 
-const pageNoMyOrder = ref(0)
-const pageSizeMyOrder = ref(5)
-const totalElements = ref(0)
-const totalPages = ref(0)
-const currentPage = ref(0)
+// Bộ lọc
+const filterStatus = ref('all');
+const filterMinPrice = ref(null);
+const filterMaxPrice = ref(null);
+const filterStartDate = ref(null);
+const filterEndDate = ref(null);
+const orderStatuses = ref([
+  'Chờ thanh toán',
+  'Vận chuyển',
+  'Chờ giao hàng',
+  'Hoàn thành',
+  'Đã hủy',
+  'Trả hàng/Hoàn tiền',
+]);
 
+// Thống kê
+const totalOrders = computed(() => allOrderValue.value.length);
+const deliveredOrders = computed(() =>
+  allOrderValue.value.filter(order => order.trangThaiGiaoHang === 'Hoàn thành').length
+);
+const pendingOrders = computed(() =>
+  allOrderValue.value.filter(order => order.trangThaiGiaoHang === 'Chờ thanh toán').length
+);
+const totalRevenue = computed(() =>
+  allOrderValue.value.reduce((sum, order) => sum + order.thanhTien, 0)
+);
 
 const allMyOrde = async () => {
+  try {
     const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
-    allOrderValue.value = res.data.content
-    totalElements.value = res.data.totalElements
-    totalPages.value = res.data.totalPages
-}
+    allOrderValue.value = res.data.content || [];
+    totalElements.value = res.data.totalElements || 0;
+    totalPages.value = res.data.totalPages || 0;
+    console.log('Dữ liệu đơn hàng:', res);
+  } catch (error) {
+    console.error('Lỗi khi lấy đơn hàng:', error);
+    alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+  }
+};
 
 const changePage = (page) => {
-    currentPage.value = page
-} 
+  currentPage.value = page;
+};
 
 const prevPage = () => {
-    if (currentPage.value > 0) {
-        currentPage.value--
-    }
-}
+  if (currentPage.value > 0) {
+    currentPage.value--;
+  }
+};
 
 const nextPage = () => {
-    if (currentPage.value < totalPages.value - 1 ) currentPage.value++
-}
+  if (currentPage.value < totalPages.value - 1) currentPage.value++;
+};
 
-watch(currentPage,(newPage)=>{
-    allMyOrde()
-})
-
-const searchTerm = ref("")
-const activeTab = ref("all")
-const isUserMenuOpen = ref(false)
-const activeOrderActions = ref(null)
-
-// Pagination state
-const itemsPerPage = 5 
-
-const setActiveTab = (tab) => {
-    activeTab.value = tab
-    currentPage.value = 1 
-    activeOrderActions.value = null
-}
-
-const toggleUserMenu = () => {
-    isUserMenuOpen.value = !isUserMenuOpen.value
-    activeOrderActions.value = null
-}
-
-const toggleOrderActions = (orderId) => {
-    activeOrderActions.value = activeOrderActions.value === orderId ? null : orderId
-    isUserMenuOpen.value = false
-}
-
-// Close dropdowns when clicking outside
-window.addEventListener('click', (event) => {
-    if (!event.target.closest('.dropdown-menu')) {
-        isUserMenuOpen.value = false;
-        activeOrderActions.value = null;
-    }
+watch(currentPage, () => {
+  allMyOrde();
 });
 
-onMounted(async () => {
-    await allMyOrde();
-})
+const handleApplyFilters = () => {
+  console.log('Áp dụng bộ lọc:', {
+    status: filterStatus.value,
+    minPrice: filterMinPrice.value,
+    maxPrice: filterMaxPrice.value,
+    startDate: filterStartDate.value,
+    endDate: filterEndDate.value,
+  });
+  allMyOrde();
+};
 
+const handleResetFilters = () => {
+  filterStatus.value = 'all';
+  filterMinPrice.value = null;
+  filterMaxPrice.value = null;
+  filterStartDate.value = null;
+  filterEndDate.value = null;
+  allMyOrde();
+};
+
+const setActiveTab = (tab) => {
+  activeTab.value = tab;
+  currentPage.value = 1;
+  activeOrderActions.value = null;
+};
+
+const toggleUserMenu = () => {
+  isUserMenuOpen.value = !isUserMenuOpen.value;
+  activeOrderActions.value = null;
+};
+
+const toggleOrderActions = (orderId) => {
+  activeOrderActions.value = activeOrderActions.value === orderId ? null : orderId;
+  isUserMenuOpen.value = false;
+};
+
+window.addEventListener('click', (event) => {
+  if (!event.target.closest('.dropdown-menu')) {
+    isUserMenuOpen.value = false;
+    activeOrderActions.value = null;
+  }
+});
+
+// Dialog đánh giá
+const openRateDialog = async (orderId, products) => {
+  if (!user.value?.id) {
+    console.error('Không thể mở dialog vì thiếu thông tin user:', user.value);
+    alert('Vui lòng đăng nhập để đánh giá!');
+    return;
+  }
+
+  console.log('Mở dialog đánh giá cho đơn hàng:', {
+    orderId,
+    products: Array.from(products), // Log dữ liệu gốc của products
+  });
+
+  selectedOrderId.value = orderId; // Chuyển thành chuỗi để tránh lỗi prop
+  selectedOrderProducts.value = Array.from(products); // Chuyển Proxy thành mảng
+
+  try {
+    const chiTietList = await getHoaDonAndIdChiTietHoaDon(orderId);
+    console.log('API getHoaDonAndIdChiTietHoaDon response:', chiTietList.data);
+
+    // Kiểm tra tính hợp lệ của chiTietList
+    if (!chiTietList.data || !Array.isArray(chiTietList.data)) {
+      console.error('Dữ liệu chiTietList không hợp lệ:', chiTietList.data);
+      alert('Không thể lấy chi tiết hóa đơn. Dữ liệu không hợp lệ!');
+      return;
+    }
+
+    // Tạo idSanPhamChiTietList
+    idSanPhamChiTietList.value = chiTietList.data.map(item => {
+      const product = products.find(p => p.idSanPhamChiTiet === item.idSanPhamChiTiet);
+      return {
+        idSanPhamChiTiet: item.idSanPhamChiTiet,
+        idChiTietHoaDon: item.idChiTietHoaDon,
+        tenSanPham: product?.tenSanPham || 'Unknown',
+      };
+    });
+
+    // Bổ sung idChiTietHoaDon vào selectedOrderProducts
+    selectedOrderProducts.value = selectedOrderProducts.value.map(product => {
+      const chiTiet = chiTietList.data.find(item => item.idSanPhamChiTiet === product.idSanPhamChiTiet);
+      return {
+        ...product,
+        idChiTietHoaDon: chiTiet?.idChiTietHoaDon || null,
+      };
+    });
+
+    // Kiểm tra tính hợp lệ của selectedOrderProducts
+    const invalidProducts = selectedOrderProducts.value.filter(p => !p.idSanPhamChiTiet || !p.idChiTietHoaDon);
+    if (invalidProducts.length > 0) {
+      console.error('Dữ liệu selectedOrderProducts không hợp lệ:', {
+        invalidProducts,
+        fullOrderProducts: selectedOrderProducts.value,
+        chiTietList: chiTietList.data,
+      });
+      alert('Dữ liệu sản phẩm không hợp lệ! Vui lòng kiểm tra lại.');
+      return;
+    }
+
+    // Log dữ liệu trước khi mở dialog
+    console.log('Dữ liệu truyền vào DialogDanhGiaSao:', {
+      isOpen: isRateDialogOpen.value,
+      orderId: selectedOrderId.value,
+      idKhachHang: user.value?.id,
+      orderProducts: selectedOrderProducts.value,
+      idSanPhamChiTietList: idSanPhamChiTietList.value,
+    });
+
+    isRateDialogOpen.value = true;
+  } catch (error) {
+    console.error('Lỗi khi lấy chi tiết hóa đơn:', {
+      error: error.message,
+      stack: error.stack,
+    });
+    alert('Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.');
+  }
+};
+
+
+const closeRateDialog = () => {
+  isRateDialogOpen.value = false;
+  selectedOrderId.value = null;
+  selectedOrderProducts.value = [];
+  idSanPhamChiTietList.value = [];
+};
+
+const submitRating = async (ratingData) => {
+  try {
+    if (!user.value?.id) {
+      alert('Vui lòng đăng nhập để đánh giá!');
+      return;
+    }
+
+    const data = ratingData.payload;
+
+    console.log("🔍 Dữ liệu nhận từ dialog:", data);
+    console.log("🔍 idHoaDon:", data.idHoaDon);
+
+    const chiTietList = await getHoaDonAndIdChiTietHoaDon(data.idHoaDon);
+    const chiTietArray = chiTietList.data;
+
+    if (!chiTietArray || chiTietArray.length === 0) {
+      console.error('Không có chi tiết hóa đơn!');
+      alert('Lỗi: Không tìm thấy chi tiết hóa đơn.');
+      return;
+    }
+
+    if (chiTietArray.length !== data.soSao.length) {
+      console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
+      alert('Lỗi: Số lượng đánh giá không khớp.');
+      return;
+    }
+
+    const isValid = chiTietArray.every((chiTiet, index) => {
+      const rating = data.soSao[index];
+      return chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet;
+    });
+
+    if (!isValid) {
+      console.error('Dữ liệu không khớp giữa chi tiết hóa đơn và đánh giá!');
+      alert('Lỗi: Dữ liệu đánh giá không khớp.');
+      return;
+    }
+
+    const danhGiaPromises = data.soSao.map(async (chiTiet, index) => {
+      if (!chiTietArray[index]?.idChiTietHoaDon) {
+        throw new Error(`Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`);
+      }
+
+      const danhGiaRequest = {
+        idHoaDon: data.idHoaDon,
+        idSanPhamChiTiet: chiTietArray[index].idSanPhamChiTiet,
+        idChiTietHoaDon: chiTietArray[index].idChiTietHoaDon,
+        idKhachHang: data.idKhachHang,
+        soSao: chiTiet.soSao,
+        noiDung: data.noiDung,
+        trangThaiDanhGia: data.trangThaiDanhGia,
+      };
+
+      console.log('📤 Gửi yêu cầu đánh giá:', danhGiaRequest);
+      return await DanhGiaSanPhamClientService.taoMoiDanhGia(danhGiaRequest);
+    });
+
+    const danhGiaResponses = await Promise.all(danhGiaPromises);
+    console.log('✅ Phản hồi đánh giá:', danhGiaResponses);
+
+    // Upload media
+    const mediaPromises = [];
+    const idDanhGia = danhGiaResponses[0]?.idDanhGia;
+    if (!idDanhGia) {
+      console.error('Không có idDanhGia trong phản hồi:', danhGiaResponses);
+      alert('Lỗi: Không nhận được idDanhGia từ server.');
+      return;
+    }
+
+    for (const file of data.imageFiles) {
+      console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+    }
+    for (const file of data.videoFiles) {
+      console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+    }
+    await Promise.all(mediaPromises);
+
+    alert('🎉 Gửi đánh giá thành công!');
+    closeRateDialog();
+  } catch (error) {
+    console.error('❌ Lỗi khi gửi đánh giá:', error);
+
+    // Kiểm tra lỗi cụ thể từ backend
+    if (error.response && error.response.status === 500 && error.response.data.message === 'Sản phẩm này đã được đánh giá rồi') {
+      alert('Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá.');
+    } else {
+      alert('Gửi đánh giá thất bại. Vui lòng thử lại.');
+    }
+  }
+};
+
+
+
+onMounted(async () => {
+  await allMyOrde();
+});
 
 const getOrderStatusClass = (status) => {
-    switch (status) {
-        case "Hoàn thành":
-            return "status-completed"
-        case "Đang vận chuyển":
-            return "status-shipping"
-        case "Chờ thanh toán":
-            return "status-pending-payment"
-        case "Vận chuyển":
-            return "status-in-transit"
-        case "Chờ giao hàng":
-            return "status-awaiting-delivery"
-        case "Đã hủy":
-            return "status-cancelled"
-        case "Trả hàng/Hoàn tiền":
-            return "status-return-refund"
-        default:
-            return ""
-    }
-}
+  switch (status) {
+    case 'Hoàn thành':
+      return 'status-completed';
+    case 'Đang vận chuyển':
+      return 'status-shipping';
+    case 'Chờ thanh toán':
+      return 'status-pending-payment';
+    case 'Vận chuyển':
+      return 'status-in-transit';
+    case 'Chờ giao hàng':
+      return 'status-awaiting-delivery';
+    case 'Đã hủy':
+      return 'status-cancelled';
+    case 'Trả hàng/Hoàn tiền':
+      return 'status-return-refund';
+    default:
+      return '';
+  }
+};
 </script>
 
-<style scoped src="@/style/HoaDon/MyOrder.css"></style>
+<style scoped src="@/style/HoaDon/MyOrder.css">
+.rate-button {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.rate-button:hover {
+  background-color: #218838;
+}
+</style>
