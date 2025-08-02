@@ -84,13 +84,27 @@ const formatDiemThuong = (giaBan) => {
   const diem = giaBan * 0.01;
   return new Intl.NumberFormat("vi-VN").format(Math.floor(diem));
 };
-
+const selectedImage = ref(null);
 const sanPham = ref(null);
 const selectedRom = ref(null);
 const selectedMau = ref(null);
 const bienThe = ref(null); //anh, gia, soLuongcon
 const thongSo = ref(null); //thong so ky thuat specifications
 const quantity = ref(1);
+
+const rating = ref(0);
+const comment = ref("");
+const uploadedImages = ref([]);
+const reviews = ref([]);
+const averageRating = ref(0);
+const starDistribution = ref({});
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalReviews = ref(0);
+const selectedStarFilter = ref(0);
+const hasMediaFilter = ref(false);
+const isLoading = ref(false);
+const phanHoiByDanhGia = ref({});
 
 const showSpecModal = ref(false);
 
@@ -237,21 +251,6 @@ const handleScroll = () => {
   }
 };
 
-const selectedImage = ref(null);
-const rating = ref(0);
-const comment = ref("");
-const uploadedImages = ref([]);
-const reviews = ref([]);
-const averageRating = ref(0);
-const starDistribution = ref({});
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalReviews = ref(0);
-const selectedStarFilter = ref(0);
-const hasMediaFilter = ref(false);
-const isLoading = ref(false);
-const phanHoiByDanhGia = ref({});
-
 const fetchPhanHoi = async (idDanhGia) => {
   try {
     const phanHoi = await PhanHoiDanhGiaClientService.layPhanHoiTheoDanhGia(idDanhGia);
@@ -381,6 +380,13 @@ const themVaoGio = async (buy) => {
   }
 };
 
+const reviewsSection = ref(null)
+
+const scrollToReviews = async () => {
+  await nextTick()
+  reviewsSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
 const fetchReviews = async () => {
   try {
     isLoading.value = true;
@@ -461,11 +467,6 @@ const handlePageChange = (page) => {
   fetchReviews();
 };
 
-watch([selectedMau, selectedRom], () => {
-  fetchChiTietBienThe();
-  fetchListAnhByMau();
-  fetchThongSo();
-});
 
 watch([selectedMau], () => {
   fetchChiTietBienThe();
@@ -564,7 +565,7 @@ watch(showSpecModal, (newVal) => {
       <div class="product-right">
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }} - {{ sanPham?.maXuatXu }}</h1>
-          <router-link class="danhGia">Đánh giá</router-link> |
+          <a href="#" class="danhGia" @click.prevent="scrollToReviews">Đánh giá</a> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số
           </button>
@@ -843,7 +844,7 @@ watch(showSpecModal, (newVal) => {
     </div>
     </div>
 
-    <div class="product-reviews">
+    <div class="product-reviews" ref="reviewsSection">
       <h2>Đánh giá sản phẩm</h2>
       <div class="rating-summary">
         <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
