@@ -45,3 +45,8 @@ export const getDistance = (from, to) => {
         }
     })
 }
+//cuong
+
+export const getHoaDonAndIdChiTietHoaDon = (id) => {
+    return api.get(`${baseURL}/${id}/chi-tiet`);
+};

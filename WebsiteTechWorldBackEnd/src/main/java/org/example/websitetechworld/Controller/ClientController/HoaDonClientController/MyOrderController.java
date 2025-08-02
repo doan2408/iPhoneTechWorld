@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.ClientController.HoaDonClientCon
 
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
@@ -13,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -61,5 +61,12 @@ public class MyOrderController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
+    }
+
+
+    //cuong
+    @GetMapping("/{idHoaDon}/chi-tiet")
+    public List<HoaDonAndChiTietHoaDonClientResponse> getHoaDonChiTiet(@PathVariable Integer idHoaDon) {
+        return myOrderClientServices.getHoaDonAndChiTiet(idHoaDon);
     }
 }

@@ -106,7 +106,7 @@ import { deleteCameraSau, getAllCameraSauPage, postCameraSau, putCameraSau } fro
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import { computed, markRaw, ref, onMounted, watch } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 // Refs
 const dialogVisible = ref(false);

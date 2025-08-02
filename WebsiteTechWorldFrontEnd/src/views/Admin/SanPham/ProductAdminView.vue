@@ -623,6 +623,8 @@ const danhSachTrangThaiModel = ref([
 
 const fetchSanPham = async (id) => {
   try {
+
+    console.log('Fetching product with 1111111111111:', id)
     const response = await getViewSanPham(id)
     // Ánh xạ thông tin cơ bản
     sanPhamModel.id = response.id || null
@@ -722,6 +724,8 @@ const fetchSanPham = async (id) => {
     })) || []
 
     selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null
+
+    console.log('Product details fetched successfully:', sanPhamModel.sanPhamChiTiets[selectedChiTiet.value])
   } catch (err) {
     error.value = err.message || 'Lỗi khi tải chi tiết sản phẩm'
     ElMessage.error(error.value)
@@ -768,10 +772,13 @@ const formatPrice = (value) => {
 
 const selectChiTiet = (row, column, event) => {
   const index = sanPhamModel.sanPhamChiTiets.indexOf(row)
+  console.log('Selected variant index:', index)
   selectedChiTiet.value = index
+  console.log('Selected variant details:', sanPhamModel.sanPhamChiTiets[selectedChiTiet.value])
 }
 
 const getRowClassName = ({ rowIndex }) => {
+  console.log('Row index:', rowIndex, 'Selected index:', selectedChiTiet.value);
   return selectedChiTiet.value === rowIndex ? 'selected-row' : ''
 }
 

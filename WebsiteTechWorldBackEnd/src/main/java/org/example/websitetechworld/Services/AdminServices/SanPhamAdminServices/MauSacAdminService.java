@@ -62,7 +62,7 @@ public class MauSacAdminService {
         return convert(saved);
     }
 
-     @Transactional
+    @Transactional
     public MauSacAdminResponse createMauSacQuick(MauSacQuickAdminRequest mauSacAdminRequest) {
         if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
             throw new IllegalArgumentException("Tên màu đã tồn tại");

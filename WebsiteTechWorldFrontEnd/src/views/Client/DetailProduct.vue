@@ -1,3 +1,14 @@
+<script type="text/javascript">
+var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+(function () {
+  var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  s0.parentNode.insertBefore(s1, s0);
+})();
+</script>
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -10,14 +21,37 @@ import {
 } from "@/Service/ClientService/Products/ProductClientService";
 import { checkExistsWishList, addNewWishList, deleteWishList } from "@/Service/ClientService/WishList/WishListService";
 import { cartService } from "@/service/ClientService/GioHang/GioHangClientService";
+import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import { PhanHoiDanhGiaClientService } from "@/Service/ClientService/PhanHoiDanhGia/PhanHoiDanhGiaClientService";
 import { ShoppingCart } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
 import headerState from "@/components/Client/modules/headerState";
 import axios from "axios";
 import { useToast } from "vue-toastification";
 const toast = useToast()
 const count = ref(0);
 const store = useStore();
+import { ElMessage, ElRate, ElUpload } from "element-plus";
+import { ElPagination } from "element-plus";
+
+const loadTawkTo = () => {
+  if (window.Tawk_API) return;
+  const s1 = document.createElement("script");
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  const s0 = document.getElementsByTagName("script")[0];
+  s0.parentNode.insertBefore(s1, s0);
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+};
+
+
+if (!store.hasModule('headerState')) {
+  store.registerModule('headerState', headerState)
+}
+
+
 const guiLenHeader = () => {
   store.commit("headerState/setCartItemCount", count.value);
 };
@@ -49,14 +83,27 @@ const formatDiemThuong = (giaBan) => {
   const diem = giaBan * 0.01;
   return new Intl.NumberFormat("vi-VN").format(Math.floor(diem));
 };
-
+const selectedImage = ref(null);
 const sanPham = ref(null);
 const selectedRom = ref(null);
 const selectedMau = ref(null);
-const selectedImage = ref("");
 const bienThe = ref(null); //anh, gia, soLuongcon
 const thongSo = ref(null); //thong so ky thuat specifications
 const quantity = ref(1);
+
+const rating = ref(0);
+const comment = ref("");
+const uploadedImages = ref([]);
+const reviews = ref([]);
+const averageRating = ref(0);
+const starDistribution = ref({});
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalReviews = ref(0);
+const selectedStarFilter = ref(0);
+const hasMediaFilter = ref(false);
+const isLoading = ref(false);
+const phanHoiByDanhGia = ref({});
 
 const showSpecModal = ref(false);
 
@@ -203,6 +250,16 @@ const handleScroll = () => {
   }
 };
 
+const fetchPhanHoi = async (idDanhGia) => {
+  try {
+    const phanHoi = await PhanHoiDanhGiaClientService.layPhanHoiTheoDanhGia(idDanhGia);
+    phanHoiByDanhGia.value[idDanhGia] = phanHoi;
+  } catch (error) {
+    console.error(`Lỗi khi lấy phản hồi cho đánh giá ${idDanhGia}:`, error);
+    ElMessage.error("Không thể tải phản hồi!");
+  }
+};
+
 const increaseQty = () => {
   if (bienThe.value && quantity.value < bienThe.value.soLuong) {
     quantity.value++;
@@ -242,13 +299,12 @@ const fetchThongSo = async () => {
 const fetchChiTietBienThe = async () => {
   if (!selectedRom.value || !selectedMau.value) return;
   try {
-    const res = await getChiTietBienThe(
-      idSanPham,
-      selectedMau.value,
-      selectedRom.value
-    );
+    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value);
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
+    await fetchReviews();
+    await fetchAverageRating();
+    await fetchStarDistribution();
   } catch (e) {
     bienThe.value = { soLuong: 0 };
     console.error("Không lấy được biến thể:", e);
@@ -326,6 +382,94 @@ const themVaoGio = async (buy) => {
   }
 };
 
+const reviewsSection = ref(null)
+
+const scrollToReviews = async () => {
+  await nextTick()
+  reviewsSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const fetchReviews = async () => {
+  try {
+    isLoading.value = true;
+    const response = await DanhGiaSanPhamClientService.layDanhGiaTheoSanPham(
+      bienThe.value.idSpct,
+      currentPage.value - 1,
+      pageSize.value,
+      selectedStarFilter.value === 0 ? null : selectedStarFilter.value,
+      hasMediaFilter.value ? true : null
+    );
+
+    reviews.value = currentPage.value === 1 ? (response.content || response) : [...reviews.value, ...(response.content || response)];
+    totalReviews.value = response.totalElements || response.length;
+
+    for (const review of reviews.value) {
+      await fetchPhanHoi(review.idDanhGia);
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy đánh giá:", error);
+    ElMessage.error("Không thể tải đánh giá!");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const fetchAverageRating = async () => {
+  try {
+    const avg = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPhamSpct(bienThe.value.idSpct);
+    averageRating.value = avg || 0;
+  } catch (error) {
+    console.error("Lỗi khi lấy điểm trung bình:", error);
+  }
+};
+
+const fetchStarDistribution = async () => {
+  try {
+    const distribution = await DanhGiaSanPhamClientService.thongKeSoSaoSanPham(bienThe.value.idSpct);
+    starDistribution.value = distribution;
+  } catch (error) {
+    console.error("Lỗi khi lấy thống kê sao:", error);
+  }
+};
+
+const filterReviewsByStar = async (star) => {
+  selectedStarFilter.value = star;
+  currentPage.value = 1;
+  await fetchReviews();
+};
+
+const filterReviewsByMedia = async () => {
+  currentPage.value = 1;
+  await fetchReviews();
+};
+
+const loadMoreReviews = async () => {
+  currentPage.value++;
+  await fetchReviews();
+};
+
+const setupInfiniteScroll = () => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && reviews.value.length < totalReviews.value && !isLoading.value) {
+        loadMoreReviews();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  nextTick(() => {
+    const loadMoreElement = document.querySelector('.reviews-list');
+    if (loadMoreElement) observer.observe(loadMoreElement);
+  });
+};
+
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  fetchReviews();
+};
+
+
 watch([selectedMau], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
@@ -341,6 +485,7 @@ watch([selectedRom], () => {
 onMounted(() => {
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
+  setupInfiniteScroll();
 });
 
 watch(showSpecModal, (newVal) => {
@@ -400,6 +545,7 @@ const toggleWishlist = async () => {
         <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
           class="main-image" />
         <!-- Danh sách ảnh thu nhỏ -->
+
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
             :class="{ active: img === selectedImage }" @click="selectedImage = img" />
@@ -435,12 +581,11 @@ const toggleWishlist = async () => {
           </div>
         </div>
       </div>
-
       <!-- Cột phải: Thông tin + thông số (45%) -->
       <div class="product-right">
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }} - {{ sanPham?.maXuatXu }}</h1>
-          <router-link class="danhGia">Đánh giá</router-link> |
+          <a href="#" class="danhGia" @click.prevent="scrollToReviews">Đánh giá</a> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số
           </button> |
@@ -462,8 +607,6 @@ const toggleWishlist = async () => {
               </el-radio-group>
             </div>
           </div>
-
-          <!-- ROM -->
           <div class="options">
             <h3>Chọn ROM:</h3>
             <div class="option-list">
@@ -474,8 +617,6 @@ const toggleWishlist = async () => {
               </el-radio-group>
             </div>
           </div>
-
-          <!-- Số lượng -->
           <div class="options" v-if="bienThe">
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
@@ -487,8 +628,17 @@ const toggleWishlist = async () => {
             <h3>Chọn số lượng:</h3>
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
-              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
+
+              <input
+                type="number"
+                v-model="quantity"
+                min="1"
+                :max="bienThe.soLuong"
+              />
+              <button
+                @click="increaseQty"
+                :disabled="quantity >= bienThe.soLuong"
+              >
                 +
               </button>
             </div>
@@ -665,6 +815,80 @@ const toggleWishlist = async () => {
         </div>
       </div>
     </div>
+    <div class="product-reviews" ref="reviewsSection">
+      <h2>Đánh giá sản phẩm</h2>
+      <div class="rating-summary">
+        <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
+        <el-rate v-model="averageRating" disabled allow-half />
+        <div class="star-distribution">
+          <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
+            <span>{{ star }} sao:</span>
+            <div class="progress-bar">
+              <div :style="{ width: ((starDistribution[star] || 0) / totalReviews * 100) + '%' }" class="progress">
+              </div>
+            </div>
+            <span>{{ starDistribution[star] || 0 }} đánh giá</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-filters">
+        <el-button v-for="star in [0, 5, 4, 3, 2, 1]" :key="star" @click="filterReviewsByStar(star)"
+          :type="selectedStarFilter === star ? 'primary' : 'default'">
+          {{ star === 0 ? 'Tất cả' : `${star} sao` }}
+        </el-button>
+        <el-button @click="hasMediaFilter = !hasMediaFilter; filterReviewsByMedia()"
+          :type="hasMediaFilter ? 'primary' : 'default'">
+          Có hình ảnh/video
+        </el-button>
+      </div>
+
+      <div class="reviews-list">
+        <div v-for="review in reviews" :key="review.idDanhGia" class="review-item">
+          <div class="review-header">
+            <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
+            <span class="purchased-label" v-if="review.idChiTietHoaDon">Đã mua hàng</span>
+            <el-rate v-model="review.soSao" disabled />
+            <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
+          </div>
+          <p class="review-comment">{{ review.noiDung }}</p>
+          <div class="review-media" v-if="review.mediaUrls?.length">
+            <div class="review-images"
+              v-if="review.mediaUrls?.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i)).length">
+              <img v-for="(img, index) in review.mediaUrls.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i))"
+                :key="index" :src="img" alt="Hình ảnh đánh giá" class="review-image"
+                @error="console.log('Lỗi tải ảnh:', img)" />
+            </div>
+            <video v-for="(video, index) in review.mediaUrls.filter(url => url.match(/\.(mp4|mov|avi|webm)$/i))"
+              :key="'video-' + index" :src="video" controls class="review-video"
+              @error="console.log('Lỗi tải video:', video)"></video>
+          </div>
+          <div class="review-responses">
+            <el-button v-if="!phanHoiByDanhGia[review.idDanhGia]" @click="fetchPhanHoi(review.idDanhGia)" size="small">
+              Tải phản hồi
+            </el-button>
+            <div v-else-if="phanHoiByDanhGia[review.idDanhGia]?.length">
+              <h4>Phản hồi từ cửa hàng:</h4>
+              <div v-for="phanHoi in phanHoiByDanhGia[review.idDanhGia]" :key="phanHoi.idPhanHoi" class="response-item">
+                <p class="response-content">{{ phanHoi.noiDungPhanHoi }}</p>
+                <span class="response-date">{{ new Date(phanHoi.ngayPhanHoi).toLocaleDateString("vi-VN") }}</span>
+              </div>
+            </div>
+            <div v-else class="no-response">
+              Chưa có phản hồi từ cửa hàng.
+            </div>
+          </div>
+        </div>
+        <div v-if="isLoading" class="loading">Đang tải thêm...</div>
+      </div>
+
+      <div class="load-more" v-if="reviews.length < totalReviews && !isLoading">
+        <el-button type="primary" @click="loadMoreReviews">Xem thêm</el-button>
+      </div>
+
+      <el-pagination v-if="totalReviews > pageSize" :current-page="currentPage" :page-size="pageSize"
+        :total="totalReviews" layout="prev, pager, next" @current-change="handlePageChange" />
+    </div>
   </section>
 </template>
 
@@ -681,7 +905,7 @@ const toggleWishlist = async () => {
   gap: 30px;
   padding: 20px;
   background: #ffffff;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
   margin: 0 auto;
@@ -838,13 +1062,6 @@ const toggleWishlist = async () => {
   gap: 20px;
 }
 
-.product-info {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 6px;
-  border: 1px solid #e5e5e5;
-}
-
 .product-info h1 {
   font-size: 24px;
   margin-bottom: 10px;
@@ -956,7 +1173,6 @@ const toggleWishlist = async () => {
   border-color: #1890ff;
 }
 
-/* Quantity styles */
 .quantity-selector {
   margin-top: 15px;
   background: transparent;
@@ -1040,7 +1256,6 @@ const toggleWishlist = async () => {
   margin: 0;
 }
 
-/* Button group */
 .button-group {
   display: flex;
   gap: 12px;
@@ -1114,6 +1329,7 @@ const toggleWishlist = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   padding: 20px;
   border-bottom: 1px solid #e5e5e5;
   background: white;
@@ -1278,6 +1494,270 @@ const toggleWishlist = async () => {
 }
 
 /* Mobile responsive for modal */
+.options:has(.quantity-selector) h3 {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.product-reviews {
+  background: #ffffff;
+  padding: 30px;
+  /* border-radius: 12px; */
+  border: 1px solid #e9ecef;
+  margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-reviews h2 {
+  margin-bottom: 25px;
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: 700;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.rating-summary {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.rating-summary h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.star-distribution {
+  margin-top: 20px;
+}
+
+.star-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #34495e;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #1890ff, #40c4ff);
+  transition: width 0.5s ease-in-out;
+}
+
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+  padding: 10px;
+  background: #f1f3f5;
+  border-radius: 8px;
+}
+
+.review-filters .el-button {
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.review-filters .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-list {
+  margin-bottom: 20px;
+}
+
+.review-item {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.review-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.review-user {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.purchased-label {
+  background: linear-gradient(90deg, #e7f3ff, #d0e6ff);
+  color: #1890ff;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.review-date {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-left: auto;
+}
+
+.review-comment {
+  color: #34495e;
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+.review-media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.review-images {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.review-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.review-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.review-video {
+  width: 300px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-responses {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9fbfc;
+  border-radius: 8px;
+  border-left: 4px solid #1890ff;
+  transition: all 0.3s ease;
+}
+
+.review-responses h4 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-responses h4::before {
+  content: '\f3e5';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.response-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.response-content {
+  color: #34495e;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.response-date {
+  font-size: 12px;
+  color: #95a5a6;
+  display: block;
+}
+
+.no-response {
+  color: #7f8c8d;
+  font-size: 14px;
+  font-style: italic;
+  padding: 10px;
+  background: #f1f3f5;
+  border-radius: 6px;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.load-more .el-button {
+  border-radius: 20px;
+  padding: 12px 35px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.load-more .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .spec-modal {
     width: 100vw;
@@ -1309,6 +1789,28 @@ const toggleWishlist = async () => {
   .spec-value {
     text-align: left;
   }
+
+  .product-reviews {
+    padding: 20px;
+  }
+
+  .review-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .review-video {
+    width: 100%;
+  }
+
+  .star-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress-bar {
+    width: 100%;
+  }
 }
 .wishlist-btn {
   border: none;
@@ -1328,5 +1830,46 @@ const toggleWishlist = async () => {
 
 .wishlist-btn.active {
   color: red;
+}
+@media (max-width: 480px) {
+  .product-container {
+    padding: 10px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-specs {
+    padding: 12px;
+  }
+
+  .options {
+    padding: 8px 0;
+  }
+
+  .option-list {
+    gap: 6px;
+  }
+
+  ::v-deep(.option-list .el-radio-button__inner) {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 60px;
+  }
+
+  .review-item {
+    padding: 15px;
+  }
+
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .review-date {
+    margin-left: 0;
+  }
 }
 </style>

@@ -174,6 +174,10 @@ function toggleOrderMenu() {
           <li>
             <router-link to="/admin/promotions">Quản lý khuyến mãi</router-link>
           </li>
+
+          <li>
+            <router-link to="/admin/danhGiaSanPham">Quản lý đánh giá sản phẩm</router-link>
+          </li>
         </ul>
       </nav>
     </div>

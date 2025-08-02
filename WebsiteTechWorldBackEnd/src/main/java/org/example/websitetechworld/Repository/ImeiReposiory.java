@@ -63,5 +63,10 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
 
     int countByIdSanPhamChiTiet(SanPhamChiTiet chiTiet);
 
+    @Query(value = "select count(m) from Imei m " +
+            "join m.idSanPhamChiTiet spct " +
+            "where m.trangThaiImei = :trangThaiImei and m.idSanPhamChiTiet.id = :idSpct")
+    Integer soLuongImei(@Param("trangThaiImei") TrangThaiImei trangThaiImei, @Param("idSpct") Integer idSpct);
+
     int countByIdSanPhamChiTietIdAndTrangThaiImeiNot(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei);
 }

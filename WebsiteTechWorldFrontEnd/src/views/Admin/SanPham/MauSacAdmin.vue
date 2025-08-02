@@ -93,6 +93,7 @@ import { Edit, Delete } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import chroma from 'chroma-js'
 
+
 const tableMauSac = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
@@ -245,6 +246,7 @@ watch(() => formData.maMau, (newVal) => {
     try {
         const hex = chroma(newVal).hex('rgba');
         formData.maMau = hex.toLowerCase(); 
+        console.log("11111111111111111111", newVal);
     } catch (err) {
         console.warn("Mã màu không hợp lệ:", newVal);
     }

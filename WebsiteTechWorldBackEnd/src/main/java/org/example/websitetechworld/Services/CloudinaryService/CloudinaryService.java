@@ -27,4 +27,27 @@ public class CloudinaryService {
     public void delete(String publicId) throws IOException {
         cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
     }
+
+
+    public Map<String, Object> uploadMedia(MultipartFile file, String folder) throws IOException {
+        boolean isVideo = file.getContentType() != null && file.getContentType().startsWith("video");
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", folder,
+                        "resource_type", isVideo ? "video" : "image"
+                ));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("url", uploadResult.get("secure_url").toString());
+        result.put("public_id", uploadResult.get("public_id").toString());
+        result.put("resource_type", isVideo ? "VIDEO" : "IMAGE");
+
+        if (isVideo && uploadResult.get("duration") != null) {
+            result.put("duration", ((Number) uploadResult.get("duration")).intValue());
+        }
+        return result;
+    }
+
+
 }
