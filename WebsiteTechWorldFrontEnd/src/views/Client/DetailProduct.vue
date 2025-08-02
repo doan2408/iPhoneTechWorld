@@ -68,17 +68,68 @@ const closeSpecModal = () => {
   showSpecModal.value = false;
 };
 
+// Function cải thiện cho cả Client và Guest
 const scrollTabIntoView = (tabId) => {
   if (specTabsContainer.value) {
     const activeTabElement = specTabsContainer.value.querySelector(
       `[data-tab="${tabId}"]`
     );
     if (activeTabElement) {
-      activeTabElement.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
+      const container = specTabsContainer.value;
+      
+      // Tính toán vị trí để tab luôn ở góc trái với padding 20px
+      const targetScrollLeft = activeTabElement.offsetLeft - 20;
+      
+      // Scroll container để đưa tab về góc trái
+      container.scrollTo({
+        left: Math.max(0, targetScrollLeft), // Đảm bảo không scroll âm
+        behavior: "smooth"
       });
+      
+      // Debug log
+      console.log('Tab scrolled to left:', tabId, targetScrollLeft);
+    }
+  }
+};
+
+// Nếu bạn muốn có tùy chọn vị trí khác, dùng function này:
+const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
+  if (specTabsContainer.value) {
+    const activeTabElement = specTabsContainer.value.querySelector(
+      `[data-tab="${tabId}"]`
+    );
+    if (activeTabElement) {
+      const container = specTabsContainer.value;
+      const containerWidth = container.clientWidth;
+      const tabLeft = activeTabElement.offsetLeft;
+      const tabWidth = activeTabElement.offsetWidth;
+      
+      let targetScrollLeft;
+      
+      switch (position) {
+        case 'left':
+          // Tab ở góc trái với padding 20px
+          targetScrollLeft = tabLeft - 20;
+          break;
+        case 'center':
+          // Tab ở giữa container
+          targetScrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+          break;
+        case 'right':
+          // Tab ở góc phải
+          targetScrollLeft = tabLeft - containerWidth + tabWidth + 20;
+          break;
+        default:
+          targetScrollLeft = tabLeft - 20;
+      }
+      
+      // Scroll container
+      container.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: "smooth"
+      });
+      
+      console.log(`Tab "${tabId}" scrolled to ${position}:`, targetScrollLeft);
     }
   }
 };
@@ -88,21 +139,34 @@ const scrollToSection = (sectionId) => {
   scrollTabIntoView(sectionId);
 
   if (specModalContent.value) {
-    const targetSection = specModalContent.value.querySelector(
-      `[data-section="${sectionId}"]`
-    );
-    if (targetSection) {
-      const modalContent = specModalContent.value;
-      const headerHeight = 81; // Modal header
-      const tabsHeight = 49; // Tabs height
-      const elementTop =
-        targetSection.offsetTop - headerHeight - tabsHeight - 10;
-
-      modalContent.scrollTo({
-        top: elementTop,
-        behavior: "smooth",
-      });
-    }
+    // Sử dụng nextTick để đảm bảo DOM đã được cập nhật
+    nextTick(() => {
+      const targetSection = specModalContent.value.querySelector(
+        `[data-section="${sectionId}"]`
+      );
+      
+      if (targetSection) {
+        const modalContent = specModalContent.value;
+        const headerHeight = 81; // Modal header
+        const tabsHeight = 49; // Tabs height
+        
+        // Tính toán vị trí chính xác của section
+        const sectionTop = targetSection.offsetTop;
+        const scrollPosition = sectionTop - headerHeight - tabsHeight - 10;
+        
+        // Debug log để kiểm tra
+        console.log('Section ID:', sectionId);
+        console.log('Section top:', sectionTop);
+        console.log('Scroll to:', scrollPosition);
+        
+        modalContent.scrollTo({
+          top: Math.max(0, scrollPosition), // Đảm bảo không scroll âm
+          behavior: "smooth",
+        });
+      } else {
+        console.warn(`Section with data-section="${sectionId}" not found`);
+      }
+    });
   }
 };
 
@@ -110,29 +174,29 @@ const handleScroll = () => {
   if (!specModalContent.value) return;
 
   const scrollTop = specModalContent.value.scrollTop;
-  const headerHeight = 81; // Modal header height
-  const tabsHeight = 49; // Tabs height
-  const totalOffset = headerHeight + tabsHeight + 20; // Extra buffer
+  const headerHeight = 81;
+  const tabsHeight = 49;
+  const buffer = 50; // Tăng buffer để dễ trigger hơn
 
   // Get all sections
   const sections = specModalContent.value.querySelectorAll(
     ".spec-section[data-section]"
   );
 
-  // Find which section is currently in view
   let currentSection = "thong-tin-hang-hoa"; // default
 
-  for (let i = 0; i < sections.length; i++) {
-    const section = sections[i];
-    const sectionTop = section.offsetTop - totalOffset;
+  // Tìm section hiện tại dựa trên scroll position
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop - headerHeight - tabsHeight;
     const sectionBottom = sectionTop + section.offsetHeight;
 
-    if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
+    // Kiểm tra nếu phần lớn section đang visible
+    if (scrollTop >= sectionTop - buffer && scrollTop < sectionBottom - buffer) {
       currentSection = section.getAttribute("data-section");
-      break;
     }
-  }
+  });
 
+  // Cập nhật active tab nếu khác
   if (activeTab.value !== currentSection) {
     activeTab.value = currentSection;
     scrollTabIntoView(currentSection);
@@ -281,12 +345,19 @@ watch(showSpecModal, (newVal) => {
   if (newVal) {
     nextTick(() => {
       if (specModalContent.value) {
-        specModalContent.value.addEventListener("scroll", handleScroll);
-        // Reset to first tab when opening modal
+        // Reset scroll position về đầu
+        specModalContent.value.scrollTop = 0;
+        
+        // Add scroll listener
+        specModalContent.value.addEventListener("scroll", handleScroll, { passive: true });
+        
+        // Set default active tab
         activeTab.value = "thong-tin-hang-hoa";
+        scrollTabIntoView("thong-tin-hang-hoa");
       }
     });
   } else {
+    // Cleanup
     if (specModalContent.value) {
       specModalContent.value.removeEventListener("scroll", handleScroll);
     }
@@ -366,8 +437,8 @@ const toggleWishlist = async () => {
       <!-- Cột phải: Thông tin + thông số (45%) -->
       <div class="product-right">
         <div class="product-info">
-          <h1>{{ sanPham?.tenSanPham }}</h1>
-          <router-link class="danhGia">Đánh giá</router-link>|
+          <h1>{{ sanPham?.tenSanPham }} - {{ sanPham?.maXuatXu }}</h1>
+          <router-link class="danhGia">Đánh giá</router-link> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số
           </button> |

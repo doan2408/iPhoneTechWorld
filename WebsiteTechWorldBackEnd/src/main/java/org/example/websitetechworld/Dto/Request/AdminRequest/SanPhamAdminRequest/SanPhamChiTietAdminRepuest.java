@@ -40,8 +40,8 @@ public class SanPhamChiTietAdminRepuest {
     @Digits(integer = 10, fraction = 2, message = "{chitiet.giaBan.format}")
     private BigDecimal giaBan;
 
-    @NotNull(message = "{chitiet.hinhAnh.required}")
-    @Size(min = 1, message = "{chitiet.hinhAnh.min}")
+//    @NotNull(message = "{chitiet.hinhAnh.required}")
+//    @Size(min = 1, message = "{chitiet.hinhAnh.min}")
     @Valid
     private Set<HinhAnhAdminRequest> hinhAnhs;
 

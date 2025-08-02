@@ -173,7 +173,9 @@ onMounted(() => {
         Điểm khả dụng: <strong>{{ formatDiem(viDiem.diemKhaDung) }}</strong>
       </div>
       <div class="hang-thanh-vien">
-        Hạng: <strong> {{ hangThanhVien }}</strong>
+        <router-link to="/client/khoangHang" class="hang"
+        >Hạng: <strong> {{ hangThanhVien }}</strong>
+      </router-link>
       </div>
       
       <div class="diem-sap-het-han" v-if="viDiem.diemSapHetHan">
@@ -351,6 +353,10 @@ onMounted(() => {
   font-weight: 700;
   color: #22ff00;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hang {
+   text-decoration: none;
 }
 
 .history-icon {

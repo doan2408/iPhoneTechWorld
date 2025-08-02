@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientRes
 import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Entity.XuatXu;
 import org.example.websitetechworld.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,7 @@ public class SanPhamClientService {
     public ClientProductDetailResponse getSanPhamDetail(int idSanPham) {
         SanPham sanPham = sanPhamRepo.findById(idSanPham).orElse(null);
         if (sanPham == null) return null;
+        XuatXu xuatXu = sanPhamRepo.getXuatXuByIdSp(sanPham.getId());
 
         List<ClientProductDetailResponse.ThuocTinh> listMau = new ArrayList<>();
         for (Object[] row : mauSacRepository.getMauByIdSanPham(idSanPham)) {
@@ -76,6 +78,7 @@ public class SanPhamClientService {
         response.setRom(listRom);
         Integer tongSoLuong = sanPhamRepo.tongSoLuong(idSanPham);
         response.setTongSoLuong(tongSoLuong);
+        response.setMaXuatXu(xuatXu.getMaXuatXu());
         return response;
     }
 

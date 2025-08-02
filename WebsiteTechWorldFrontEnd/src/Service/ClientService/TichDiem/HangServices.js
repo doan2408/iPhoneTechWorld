@@ -34,3 +34,13 @@ export const getDiemXetHang = async (idViDiem) => {
     );
   }
 };
+
+// rank range
+export const khoangHang = async () => {
+  try {
+    const response = await api.get(`${baseURL}/range`);
+    return response.data;
+  } catch (err) {
+    err.response?.data || "Lỗi khi lấy khoảng điểm"
+  }
+};

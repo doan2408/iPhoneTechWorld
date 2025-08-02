@@ -136,7 +136,6 @@ public class PhieuGiamGiaAdminService {
             phieuGiamGia.setNgayKetThuc(request.getNgayKetThuc());
             phieuGiamGia.setSoDiemCanDeDoi(request.getSoDiemCanDeDoi());
             phieuGiamGia.setDieuKienApDung(request.getDieuKienApDung());
-            phieuGiamGia.setCongKhai(request.getCongKhai());
             phieuGiamGia.setTrangThaiPhatHanh(request.getTrangThaiPhatHanh());
         }
 
@@ -334,6 +333,16 @@ public class PhieuGiamGiaAdminService {
 
     private void xoaKhachHangGiamGiaChuaSuDung (PhieuGiamGia phieuGiamGia) {
         List<KhachHangGiamGia> banGhiChuaSuDung = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIsUser(phieuGiamGia, false);
+
+        BigDecimal diemHoanTra = phieuGiamGia.getSoDiemCanDeDoi();
+        for (KhachHangGiamGia khgg : banGhiChuaSuDung) {
+            KhachHang khachHang = khgg.getIdKhachHang();
+            ViDiem viDiem = khachHang.getViDiem();
+            viDiem.setDiemKhaDung(viDiem.getDiemKhaDung().add(diemHoanTra));
+            khachHang.setViDiem(viDiem);
+            khachHangRepository.save(khachHang);
+        }
+
         khachHangGiamGiaRepository.deleteAll(banGhiChuaSuDung);
     }
 
@@ -401,7 +410,6 @@ public class PhieuGiamGiaAdminService {
                         BigDecimal.ZERO,
                         giaTriDonHangToiThieu,
                         TrangThaiPhatHanh.ISSUED,
-                        true,
                         TrangThaiPGG.ACTIVE,
                         timKiem
                 );

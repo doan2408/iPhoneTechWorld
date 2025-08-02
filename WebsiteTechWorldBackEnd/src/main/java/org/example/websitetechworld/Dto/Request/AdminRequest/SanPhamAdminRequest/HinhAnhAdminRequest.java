@@ -14,7 +14,7 @@ public class HinhAnhAdminRequest {
 
     private Integer idSanPhamChiTiet;
 
-    @NotBlank(message = "URL hình ảnh không được để trống")
+//    @NotBlank(message = "URL hình ảnh không được để trống")
     @Size(max = 255, message = "URL hình ảnh không được vượt quá 255 ký tự")
     private String url;
 

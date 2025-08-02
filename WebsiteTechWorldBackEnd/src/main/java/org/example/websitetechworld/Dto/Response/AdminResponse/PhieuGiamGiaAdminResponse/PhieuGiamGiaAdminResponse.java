@@ -28,7 +28,6 @@ public class PhieuGiamGiaAdminResponse {
     private String hangToiThieu;
     private Integer soLuong;
     private BigDecimal soDiemCanDeDoi;
-    private Boolean congKhai;
     private TrangThaiPGG trangThaiPhieuGiamGia;
     private TrangThaiPhatHanh trangThaiPhatHanh;
 }

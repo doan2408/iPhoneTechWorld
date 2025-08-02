@@ -50,7 +50,7 @@
               clearable
               class="filter-select"
             >
-              <el-option label="Tất cả" :value="null" />
+              <el-option label="Tất cả" :value="''" />
               <el-option label="Chưa bắt đầu" value="NOT_STARTED" />
               <el-option label="Đang hoạt động" value="ACTIVE" />
               <el-option label="Đã hết hạn" value="EXPIRED" />
@@ -171,14 +171,6 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="Loại" width="130" align="center">
-          <template #default="scope">
-            <el-tag :type="scope.row.congKhai ? 'success' : 'warning'" size="small">
-              {{ scope.row.congKhai ? 'Công khai' : 'Riêng tư' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        
         <el-table-column v-if="isAdmin" label="Thao tác" width="120" align="center" fixed="right">
           <template #default="scope">
             <div class="action-buttons">
@@ -276,13 +268,7 @@
                   />
                   <span v-if="errors.giaTriKhuyenMai" class="error-text">{{ errors.giaTriKhuyenMai }}</span>
                 </el-form-item>
-              </div>
-            </div>
 
-            <!-- Conditions -->
-            <div class="form-section">
-              <h3 class="section-title">Điều kiện áp dụng</h3>
-              <div class="form-row">
                 <el-form-item label="Giá trị đơn hàng tối thiểu" class="form-item">
                   <el-input-number
                     v-model="formData.giaTriDonHangToiThieu"
@@ -369,14 +355,8 @@
               </div>
               
               <div class="form-row">
-                <el-form-item label="Loại phiếu" class="form-item">
-                  <el-select v-model="formData.congKhai" placeholder="Chọn loại">
-                    <el-option :value="true" label="Công khai" />
-                    <el-option :value="false" label="Riêng tư" />
-                  </el-select>
-                </el-form-item>
                 
-                <el-form-item v-if="!formData.congKhai" label="Hạng tối thiểu" class="form-item">
+                <el-form-item label="Hạng tối thiểu" class="form-item">
                   <el-select v-model="formData.hangToiThieu" placeholder="Chọn hạng">
                     <el-option value="MEMBER" label="Thành viên" />
                     <el-option value="SILVER" label="Bạc" />
@@ -460,7 +440,6 @@ const formData = reactive({
   soDiemCanDeDoi: 0,
   soLuong: 0,
   dieuKienApDung: "",
-  congKhai: true,
   trangThaiPhieuGiamGia: "ACTIVE",
   trangThaiPhatHanh: "NOT_ISSUED"
 });
@@ -495,7 +474,6 @@ const resetForm = () => {
   formData.dieuKienApDung = "";
   formData.trangThaiPhieuGiamGia = "ACTIVE";
   formData.trangThaiPhatHanh = "NOT_ISSUED";
-  formData.congKhai = true;
 };
 
 const resetErrors = () => {
@@ -587,7 +565,6 @@ const loadPhieuGiamGia = async (page) => {
     totalPages.value = response.totalPages;
     total.value = response.totalElements;
     currentPage.value = page;
-    console.log(response)
   } catch (err) {
     console.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
     ElMessage.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
@@ -616,7 +593,6 @@ const savePhieuGiamGia = async () => {
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
       giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),
       soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
-      hangToiThieu: formData.congKhai ? null : formData.hangToiThieu,
     };
 
     if (formData.id) {

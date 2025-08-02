@@ -35,7 +35,7 @@
       <el-form-item label="Model sản phẩm" prop="idModelSanPham" :error="errors.idModelSanPham">
         <el-select v-model="sanPham.idModelSanPham" placeholder="Chọn model sản phẩm" clearable filterable
           @change="onModelChange" style="width: 100%">
-          <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="model.tenModel"
+          <el-option v-for="model in modelSanPhams" :key="model.idModelSanPham" :label="`${model.tenModel} - ${model.maXuatXu}`"
             :value="model.idModelSanPham" />
         </el-select>
       </el-form-item>
@@ -320,6 +320,7 @@ import {
   getAllModelSanPhamList,
   getAllNhaCungCapList,
   getAllRomList,
+  getAllXuatXuList,
   postSanPham,
 } from "@/Service/Adminservice/Products/ProductAdminService";
 import { debounce } from "chart.js/helpers";
@@ -350,7 +351,7 @@ export default {
     const router = useRouter();
     const sanPham = reactive({
       tenSanPham: "",
-      thuongHieu: "",
+      thuongHieu: "Apple",
       idNhaCungCap: "",
       trangThaiSanPham: "",
       idModelSanPham: null,
@@ -510,13 +511,13 @@ export default {
         hasError = true;
       }
 
-      selectedMaus.value.forEach((mau) => {
-        if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-          errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
-          errorMessages.push(`Màu ${getMauSacLabels(mau)}: Phải có ít nhất 1 hình ảnh`);
-          hasError = true;
-        }
-      });
+      // selectedMaus.value.forEach((mau) => {
+      //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
+      //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
+      //     errorMessages.push(`Màu ${getMauSacLabels(mau)}: Phải có ít nhất 1 hình ảnh`);
+      //     hasError = true;
+      //   }
+      // });
 
       if (hasError) {
         loading.generate = false;
@@ -576,9 +577,11 @@ export default {
           const timeoutId = setTimeout(() => controller.abort(), 5000);
           const res = await api.get('/admin/sanPhamChiTiet/check-duplicate-variant', {
             params: {
+              idSp: sanPham.idModelSanPham,
               idMau: variant.idMau,
               idRom: variant.idRom,
               idLoai: sanPham.idModelSanPham,
+              idNhaCungCap: sanPham.idNhaCungCap
             },
             signal: controller.signal,
           });
@@ -894,13 +897,13 @@ export default {
           imagePublicId:
             item.uid === file.uid ? response.data.imagePublicId : item.imagePublicId,
         }));
-        errorsMauHinhAnh[idMau] =
-          hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
-        sanPham.sanPhamChiTiets.forEach((chiTiet) => {
-          if (chiTiet.idMau === idMau) {
-            chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
-          }
-        });
+        // errorsMauHinhAnh[idMau] =
+        //   hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
+        // sanPham.sanPhamChiTiets.forEach((chiTiet) => {
+        //   if (chiTiet.idMau === idMau) {
+        //     chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
+        //   }
+        // });
         showNotification(`Tải ảnh ${file.name} thành công!`, "success", 3000);
       } catch (error) {
         errorsMauHinhAnh[idMau] = "Lỗi khi tải ảnh: " + (error.response?.data?.message || error.message);
@@ -916,13 +919,13 @@ export default {
         url: item.url,
         imagePublicId: item.imagePublicId,
       }));
-      errorsMauHinhAnh[idMau] =
-        hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
-      sanPham.sanPhamChiTiets.forEach((chiTiet) => {
-        if (chiTiet.idMau === idMau) {
-          chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
-        }
-      });
+      // errorsMauHinhAnh[idMau] =
+      //   hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
+      // sanPham.sanPhamChiTiets.forEach((chiTiet) => {
+      //   if (chiTiet.idMau === idMau) {
+      //     chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
+      //   }
+      // });
       showNotification(`Đã xóa ảnh ${file.name}`, "success", 3000);
     };
 
@@ -1037,12 +1040,12 @@ export default {
         errors.idModelSanPham = "Vui lòng chọn model sản phẩm";
         hasError = true;
       }
-      selectedMaus.value.forEach((mau) => {
-        if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-          errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
-          hasError = true;
-        }
-      });
+      // selectedMaus.value.forEach((mau) => {
+      //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
+      //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
+      //     hasError = true;
+      //   }
+      // });
       sanPham.sanPhamChiTiets.forEach((chiTiet, index) => {
         if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
           errorsChiTiet[index].giaBan = `Giá bán phải ≥ 1000 VND`;
@@ -1123,7 +1126,7 @@ export default {
         const payload = {
           tenSanPham: sanPham.tenSanPham,
           thuongHieu: sanPham.thuongHieu,
-          idNhaCungCap: sanPham.idNhaCungCap,
+          idNhaCungCaps: [sanPham.idNhaCungCap],
           trangThaiSanPham: sanPham.trangThaiSanPham,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {

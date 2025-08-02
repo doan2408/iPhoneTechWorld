@@ -59,26 +59,41 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
             Pageable pageable);
 
 
+//    @Query("""
+//        select count (m) > 0 from ModelSanPham m where
+//        lower(m.tenModel) = lower(:tenModel)
+//        and m.idRam.id = :idRam
+//        and m.idManHinh.id = :idManHinh
+//        and m.idHeDieuHanh.id = :idHeDieuHanh
+//        and m.idPin.id = :idPin
+//        and m.idCpu.id = :idCpu
+//        and m.idCameraTruoc.id = :idCameraTruoc
+//        and m.idXuatXu.id = :idXuatXu
+//        and m.idLoai.id = :idLoai
+//    """)
+//    boolean existsModelWithSameConfig (
+//            @Param("tenModel") String tenModel,
+//            @Param("idRam") Integer idRam,
+//            @Param("idManHinh") Integer idManHinh,
+//            @Param("idHeDieuHanh") Integer idHeDieuHanh,
+//            @Param("idPin") Integer idPin,
+//            @Param("idCpu") Integer idCpu,
+//            @Param("idCameraTruoc") Integer idCameraTruoc,
+//            @Param("idXuatXu") Integer idXuatXu,
+//            @Param("idLoai") Integer idLoai
+//    );
+
+
+//        and m.idRam.id = :idRam
     @Query("""
         select count (m) > 0 from ModelSanPham m where
         lower(m.tenModel) = lower(:tenModel)
-        and m.idRam.id = :idRam
-        and m.idManHinh.id = :idManHinh
-        and m.idHeDieuHanh.id = :idHeDieuHanh
-        and m.idPin.id = :idPin
-        and m.idCpu.id = :idCpu
-        and m.idCameraTruoc.id = :idCameraTruoc
         and m.idXuatXu.id = :idXuatXu
         and m.idLoai.id = :idLoai
     """)
     boolean existsModelWithSameConfig (
             @Param("tenModel") String tenModel,
-            @Param("idRam") Integer idRam,
-            @Param("idManHinh") Integer idManHinh,
-            @Param("idHeDieuHanh") Integer idHeDieuHanh,
-            @Param("idPin") Integer idPin,
-            @Param("idCpu") Integer idCpu,
-            @Param("idCameraTruoc") Integer idCameraTruoc,
+//            @Param("idRam") Integer idRam,
             @Param("idXuatXu") Integer idXuatXu,
             @Param("idLoai") Integer idLoai
     );

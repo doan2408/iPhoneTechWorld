@@ -22,7 +22,7 @@ public class SanPhamAdminUpdateResponse {
 
     private TrangThaiSanPham trangThaiSanPham;
 
-    private Integer idNhaCungCap;
+    private List<Integer> idNhaCungCaps;
 
     private Integer idModelSanPham;
 

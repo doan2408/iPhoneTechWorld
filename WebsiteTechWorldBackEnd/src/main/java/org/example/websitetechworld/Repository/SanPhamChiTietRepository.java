@@ -58,14 +58,20 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     FROM san_pham_chi_tiet c
     JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
     JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
-    WHERE c.id_mau = :idMau
-      AND c.id_rom = :idRom
+    JOIN nha_cung_cap_sp ncc_sp ON ncc_sp.id_san_pham = sp.id_san_pham
+    WHERE 
+      c.id_san_pham = :idSp
       AND m.id_loai = :idLoai
+      AND c.id_mau = :idMau
+      AND c.id_rom = :idRom
+      AND ncc_sp.id_nha_cung_cap = :idNhaCungCap
 """, nativeQuery = true)
     Integer existsVariantInLoai(
+            @Param("idSp") Integer idSp,
             @Param("idMau") Integer idMau,
             @Param("idRom") Integer idRom,
-            @Param("idLoai") Integer idLoai
+            @Param("idLoai") Integer idLoai,
+            @Param("idNhaCungCap") Integer idNhaCungCap
     );
 
 
@@ -85,4 +91,14 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
 
     List<SanPhamChiTiet> findByIdSanPhamAndIdMau_IdAndIdRom_Id(SanPham sanPham, Integer idMau, Integer idRom);
+
+    // Method để tìm chi tiết sản phẩm theo sanPham, màu sắc và ROM
+    @Query("SELECT spct FROM SanPhamChiTiet spct WHERE spct.idSanPham.id = :sanPhamId " +
+            "AND (:mauId IS NULL AND spct.idMau IS NULL OR spct.idMau.id = :mauId) " +
+            "AND (:romId IS NULL AND spct.idRom IS NULL OR spct.idRom.id = :romId)")
+    List<SanPhamChiTiet> findBySanPhamAndMauAndRom(
+            @Param("sanPhamId") Integer sanPhamId,
+            @Param("mauId") Integer mauId,
+            @Param("romId") Integer romId);
+
 }

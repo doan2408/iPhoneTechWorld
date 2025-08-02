@@ -35,7 +35,7 @@ public class SanPhamAdminController {
             @RequestParam(required = false) String trangThai,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        Page<SanPhamHienThiAdminResponse> result = sanPhamAdminService.getAllSanPham(keyword, idLoai, trangThai ,page, size );
+        Page<SanPhamHienThiAdminResponse> result = sanPhamAdminService.getAllSanPham(keyword, idLoai, trangThai, page, size );
         return ResponseEntity.ok(result);
     }
 

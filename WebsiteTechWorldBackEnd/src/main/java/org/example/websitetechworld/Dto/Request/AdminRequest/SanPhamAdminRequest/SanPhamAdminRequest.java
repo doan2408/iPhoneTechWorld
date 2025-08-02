@@ -36,7 +36,7 @@ public class SanPhamAdminRequest {
     private TrangThaiSanPham trangThaiSanPham;
 
     @NotNull(message = "{sanpham.idNhaCungCap.required}")
-    private Integer idNhaCungCap;
+    private List<Integer> idNhaCungCaps;
 
     @NotNull(message = "{sanpham.idModel.required}")
     private Integer idModelSanPham;

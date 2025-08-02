@@ -153,12 +153,13 @@ const deleteData = async (url) => {
 export const getAllSanPhamChiTiet = (pageNo, pageSize) => fetchData(`/sanPhamChiTiet?page=${page}&size=${size}`);
 // export const postChiTietSanPham = (data) => postData('/sanPhamChiTiet', data);
 
-export const getAllSanPham = (page = 0, size = 5, keyword = '', idLoai, trangThai = '') => {
+export const getAllSanPham = (page = 0, size = 5, keyword = '', idLoai, trangThai = '', maXuatXu = '') => {
   const params = new URLSearchParams({
     keyword,
     page,
     size,
-    trangThai
+    trangThai,
+    maXuatXu
   });
   if (idLoai !== null && idLoai !== undefined) {
     params.append('idLoai', idLoai); // Sửa params26 thành params
