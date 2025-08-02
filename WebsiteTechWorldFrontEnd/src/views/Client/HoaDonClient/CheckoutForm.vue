@@ -456,7 +456,7 @@ const getShippingCost = computed(() => {
         case 'ghtk':
             return 25000;
         case 'express':
-            return 40000;
+            return phishipDisplay.value;
         default:
             return 0;
     }

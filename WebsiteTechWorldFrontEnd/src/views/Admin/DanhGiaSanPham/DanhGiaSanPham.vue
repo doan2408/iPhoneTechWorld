@@ -365,6 +365,9 @@ const handleApprove = async (id) => {
     ElMessage.success('Phê duyệt đánh giá thành công');
     loadDanhGia();
   } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return;
+    }
     ElMessage.error('Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi phê duyệt:', error);
   }

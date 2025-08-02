@@ -1051,7 +1051,7 @@ public class SanPhamAdminService {
         if (isUpdate) {
             sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai_Update(idLoai, request.getSanPhamChiTiets());
         } else {
-            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets(), request.getIdNhaCungCaps().getFirst());
+            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets());
         }
 
         for (SanPhamChiTietAdminRepuest rq : request.getSanPhamChiTiets()) {
