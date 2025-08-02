@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.DanhGiaSanPhamAdminResponse.DanhGiaSanPhamAdminResponse;
 import org.example.websitetechworld.Entity.DanhGiaSanPham;
+import org.example.websitetechworld.Entity.MediaDanhGia;
 import org.example.websitetechworld.Entity.PhanHoiDanhGia;
 import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiDanhGia;
+import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiMedia;
 import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
+import org.example.websitetechworld.Repository.MediaDanhGiaRepository;
 import org.example.websitetechworld.Repository.PhanHoiDanhGiaRepository;
+import org.example.websitetechworld.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +29,13 @@ import java.util.stream.Collectors;
 public class DanhGiaSanPhamAdminService {
     private final DanhGiaSanPhamRepository danhGiaSanPhamRepository;
     private final PhanHoiDanhGiaRepository phanHoiDanhGiaRepository;
+    private final MediaDanhGiaRepository mediaDanhGiaRepository;
 
-    public Page<DanhGiaSanPhamAdminResponse> layTatCaDanhGiaAdmin(Pageable pageable) {
-        Page<Object[]> pageResult = danhGiaSanPhamRepository.findAllDanhGia(pageable);
+    public Page<DanhGiaSanPhamAdminResponse> layTatCaDanhGiaAdmin(Integer soSao, String trangThai, Pageable pageable) {
+        // Call the repository method with soSao and trangThai parameters
+        Page<Object[]> pageResult = danhGiaSanPhamRepository.findAllDanhGia(soSao, trangThai, pageable);
 
+        // Map the results to DanhGiaSanPhamAdminResponse DTOs
         List<DanhGiaSanPhamAdminResponse> danhGiaList = pageResult.getContent().stream().map(row -> {
             DanhGiaSanPhamAdminResponse dto = new DanhGiaSanPhamAdminResponse();
             dto.setIdDanhGia(((Number) row[0]).intValue());
@@ -54,53 +61,70 @@ public class DanhGiaSanPhamAdminService {
 
     @Transactional
     public void pheDuyetDanhGia(Integer id) {
-        Optional<DanhGiaSanPham> optional = danhGiaSanPhamRepository.findById(id);
-        if (optional.isPresent()) {
-            DanhGiaSanPham danhGia = optional.get();
-            danhGia.setTrangThaiDanhGia(TrangThaiDanhGia.APPROVED);
-            danhGiaSanPhamRepository.save(danhGia);
-        } else {
-            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
+        DanhGiaSanPham danhGiaSanPham = danhGiaSanPhamRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy id đánh giá sản phẩm"));
+
+        danhGiaSanPham.setTrangThaiDanhGia(TrangThaiDanhGia.APPROVED);
+
+        danhGiaSanPhamRepository.save(danhGiaSanPham);
+
+        List<MediaDanhGia> mediaDanhGias = mediaDanhGiaRepository.findByDanhGiaSanPham_IdDanhGia(id);
+
+        for (MediaDanhGia mediaDanhGia : mediaDanhGias) {
+            mediaDanhGia.setTrangThaiMedia(TrangThaiMedia.APPROVED);
         }
+
+        mediaDanhGiaRepository.saveAll(mediaDanhGias);
     }
 
     // Từ chối đánh giá
     @Transactional
     public void tuChoiDanhGia(Integer id) {
-        Optional<DanhGiaSanPham> optional = danhGiaSanPhamRepository.findById(id);
-        if (optional.isPresent()) {
-            DanhGiaSanPham danhGia = optional.get();
-            danhGia.setTrangThaiDanhGia(TrangThaiDanhGia.REFUSE);
-            danhGiaSanPhamRepository.save(danhGia);
-        } else {
-            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
+        DanhGiaSanPham danhGiaSanPham = danhGiaSanPhamRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy id đánh giá sản phẩm"));
+
+        danhGiaSanPham.setTrangThaiDanhGia(TrangThaiDanhGia.REFUSE);
+
+        danhGiaSanPhamRepository.save(danhGiaSanPham);
+
+        List<MediaDanhGia> mediaDanhGias = mediaDanhGiaRepository.findByDanhGiaSanPham_IdDanhGia(id);
+
+        for (MediaDanhGia mediaDanhGia : mediaDanhGias) {
+            mediaDanhGia.setTrangThaiMedia(TrangThaiMedia.REFUSE);
         }
+
+        mediaDanhGiaRepository.saveAll(mediaDanhGias);
     }
 
     // Xóa đánh giá
     @Transactional
     public void xoaDanhGia(Integer id) {
-        if (danhGiaSanPhamRepository.existsById(id)) {
-            danhGiaSanPhamRepository.deleteById(id);
-        } else {
+        if (!danhGiaSanPhamRepository.existsById(id)) {
             throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
         }
+
+        // Xóa media trước
+        mediaDanhGiaRepository.deleteByDanhGiaSanPham_IdDanhGia(id);
+
+        // Xóa đánh giá
+        danhGiaSanPhamRepository.deleteById(id);
     }
 
+
     // Phản hồi đánh giá
-    @Transactional
-    public void phanHoiDanhGia(Integer id, Map<String, String> request) {
-        Optional<DanhGiaSanPham> optional = danhGiaSanPhamRepository.findById(id);
-        if (optional.isPresent()) {
-            DanhGiaSanPham danhGia = optional.get();
-            PhanHoiDanhGia phanHoi = new PhanHoiDanhGia();
-            phanHoi.setDanhGiaSanPham(danhGia);
-            phanHoi.setNoiDung(request.get("noiDungPhanHoi"));
-            phanHoi.setNgayPhanHoi(LocalDateTime.now());
-            phanHoiDanhGiaRepository.save(phanHoi);
-        } else {
-            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
-        }
-    }
+//    @Transactional
+//    public void phanHoiDanhGia(Integer id, Map<String, String> request) {
+//        Optional<DanhGiaSanPham> optional = danhGiaSanPhamRepository.findById(id);
+//        if (optional.isPresent()) {
+//            DanhGiaSanPham danhGia = optional.get();
+//            PhanHoiDanhGia phanHoi = new PhanHoiDanhGia();
+//            phanHoi.setDanhGiaSanPham(danhGia);
+//            phanHoi.setNoiDungPhanHoi(request.get("noiDungPhanHoi"));
+//            phanHoi.setNgayPhanHoi(LocalDateTime.now());
+//            phanHoiDanhGiaRepository.save(phanHoi);
+//        } else {
+//            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
+//        }
+//    }
 
 }

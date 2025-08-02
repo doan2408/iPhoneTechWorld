@@ -21,10 +21,12 @@ public class DanhGiaSanPhamAdminController {
     @GetMapping
     public ResponseEntity<Page<DanhGiaSanPhamAdminResponse>> getAllDanhGiaAdmin(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer soSao,
+            @RequestParam(required = false) String trangThai
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<DanhGiaSanPhamAdminResponse> result = danhGiaSanPhamAdminService.layTatCaDanhGiaAdmin(pageable);
+        Page<DanhGiaSanPhamAdminResponse> result = danhGiaSanPhamAdminService.layTatCaDanhGiaAdmin(soSao, trangThai, pageable);
         return ResponseEntity.ok(result);
     }
 
@@ -62,13 +64,13 @@ public class DanhGiaSanPhamAdminController {
     }
 
     // Phản hồi đánh giá
-    @PostMapping("/{id}/phan-hoi")
-    public ResponseEntity<String> phanHoiDanhGia(@PathVariable Integer id, @RequestBody PhanHoiDanhGiaAdminRequest request) {
-        try {
-            danhGiaSanPhamAdminService.phanHoiDanhGia(id, Map.of("noiDungPhanHoi", request.getNoiDungPhanHoi()));
-            return ResponseEntity.ok("Phản hồi thành công");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PostMapping("/{id}/phan-hoi")
+//    public ResponseEntity<String> phanHoiDanhGia(@PathVariable Integer id, @RequestBody PhanHoiDanhGiaAdminRequest request) {
+//        try {
+//            danhGiaSanPhamAdminService.phanHoiDanhGia(id, Map.of("noiDungPhanHoi", request.getNoiDungPhanHoi()));
+//            return ResponseEntity.ok("Phản hồi thành công");
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 }

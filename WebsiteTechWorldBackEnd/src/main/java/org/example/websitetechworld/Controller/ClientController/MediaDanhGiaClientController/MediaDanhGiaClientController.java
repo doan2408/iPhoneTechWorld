@@ -36,10 +36,13 @@ public class MediaDanhGiaClientController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MediaDanhGiaClientResponse> uploadMedia(
+    public ResponseEntity<?> uploadMedia(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("idDanhGia") Integer idDanhGia
-    ) throws IOException {
+            @RequestParam("idDanhGia") Integer idDanhGia) throws IOException {
+
+        System.out.println("📂 Nhận được file: " + (file != null ? file.getOriginalFilename() : "null"));
+        System.out.println("📌 idDanhGia: " + idDanhGia);
+
         return ResponseEntity.ok(mediaService.uploadFile(file, idDanhGia));
     }
 

@@ -148,8 +148,8 @@ public class DanhGiaSanPhamClientService {
     }
 
     @Transactional
-    public List<DanhGiaSanPhamClientResponse> layDanhGiaTheoSanPham(Integer idSanPhamChiTiet, Integer soSao, Boolean hasMedia) {
-        List<DanhGiaSanPham> danhGias = danhGiaRepository.findBySanPhamAndFilters(idSanPhamChiTiet, soSao, hasMedia);
+    public List<DanhGiaSanPhamClientResponse> layDanhGiaTheoSanPhamChiTiet(Integer idSanPhamChiTiet, Integer soSao, Boolean hasMedia) {
+        List<DanhGiaSanPham> danhGias = danhGiaRepository.findBySanPhamChiTietAndFilters(idSanPhamChiTiet, soSao, hasMedia);
 
         return danhGias.stream()
                 .map(this::chuyenDoiSangResponse)
@@ -192,8 +192,14 @@ public class DanhGiaSanPhamClientService {
     }
 
     @Transactional(readOnly = true)
-    public Double tinhDiemTrungBinhSanPham(Integer idSanPhamChiTiet) {
-        Double diemTrungBinh = danhGiaRepository.tinhDiemTrungBinhSanPham(idSanPhamChiTiet);
+    public Double tinhDiemTrungBinhSanPhamChiTiet(Integer idSanPhamChiTiet) {
+        Double diemTrungBinh = danhGiaRepository.tinhDiemTrungBinhSanPhamChiTiet(idSanPhamChiTiet);
+        return diemTrungBinh != null ? Math.round(diemTrungBinh * 10.0) / 10.0 : 0.0;
+    }
+
+    @Transactional(readOnly = true)
+    public Double tinhDiemTrungBinhSanPham(Integer idSanPham) {
+        Double diemTrungBinh = danhGiaRepository.tinhDiemTrungBinhTheoSanPham(idSanPham);
         return diemTrungBinh != null ? Math.round(diemTrungBinh * 10.0) / 10.0 : 0.0;
     }
 
@@ -263,12 +269,12 @@ public class DanhGiaSanPhamClientService {
         }
 
         // Set media URLs
-//        if (danhGia.getMediaList() != null && !danhGia.getMediaList().isEmpty()) {
-//            List<String> mediaUrls = danhGia.getMediaList().stream()
-//                    .map(MediaDanhGia::getUrl)
-//                    .collect(Collectors.toList());
-//            response.setMediaUrls(mediaUrls);
-//        }
+        if (danhGia.getMediaList() != null && !danhGia.getMediaList().isEmpty()) {
+            List<String> mediaUrls = danhGia.getMediaList().stream()
+                    .map(MediaDanhGia::getUrlMedia)
+                    .collect(Collectors.toList());
+            response.setMediaUrls(mediaUrls);
+        }
 
         // Set response count
         if (danhGia.getPhanHoiList() != null) {

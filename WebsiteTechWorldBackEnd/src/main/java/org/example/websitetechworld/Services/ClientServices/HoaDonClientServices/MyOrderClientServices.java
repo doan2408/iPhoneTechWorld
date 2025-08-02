@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.ClientServices.HoaDonClientService
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
@@ -10,7 +11,6 @@ import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
-import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
 import org.example.websitetechworld.Repository.HoaDonRepository;
@@ -28,7 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MyOrderClientServices {
@@ -120,6 +122,21 @@ public class MyOrderClientServices {
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
         return hoaDonRepository.save(hoaDon);
     }
+
+
+    //cuong
+    public List<HoaDonAndChiTietHoaDonClientResponse> getHoaDonAndChiTiet(Integer idHoaDon) {
+        List<Object[]> rawData = hoaDonRepository.findHoaDonAndChiTiet(idHoaDon);
+
+        return rawData.stream()
+                .map(row -> new HoaDonAndChiTietHoaDonClientResponse(
+                        ((Number) row[0]).intValue(),   // id_hoa_don
+                        ((Number) row[1]).intValue(),   // id_chi_tiet_hoa_don
+                        ((Number) row[2]).intValue()    // id_san_pham_chi_tiet
+                ))
+                .collect(Collectors.toList());
+    }
+
 
 
 

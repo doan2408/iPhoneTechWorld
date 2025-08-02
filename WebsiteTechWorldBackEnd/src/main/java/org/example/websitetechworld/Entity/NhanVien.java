@@ -74,7 +74,7 @@ public class NhanVien implements JointAccount {
     @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private Set<LichSuHoaDon> lichSuHoaDons = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "idNhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
+    @OneToMany(mappedBy = "nhanVien", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private List<PhanHoiDanhGia> phanHoiDanhGias = new ArrayList<>();
 
     @Override

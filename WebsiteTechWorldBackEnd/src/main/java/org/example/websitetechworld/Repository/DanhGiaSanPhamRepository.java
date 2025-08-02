@@ -29,8 +29,8 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
     AND (:hasMedia IS NULL 
          OR (SIZE(d.mediaList) > 0))
     AND d.trangThaiDanhGia = 'APPROVED'
-""")
-    List<DanhGiaSanPham> findBySanPhamAndFilters(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet,
+    """)
+    List<DanhGiaSanPham> findBySanPhamChiTietAndFilters(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet,
                                                  @Param("soSao") Integer soSao,
                                                  @Param("hasMedia") Boolean hasMedia);
 
@@ -44,9 +44,13 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
     // Tìm đánh giá theo số sao
     List<DanhGiaSanPham> findBySoSao(Integer soSao);
 
-    // Tính điểm trung bình đánh giá của sản phẩm
+    // Tính điểm trung bình đánh giá của sản phẩm chi tiết
     @Query("SELECT AVG(d.soSao) FROM DanhGiaSanPham d WHERE d.idSanPhamChiTiet.id = ?1")
-    Double tinhDiemTrungBinhSanPham(Integer idSanPhamChiTiet);
+    Double tinhDiemTrungBinhSanPhamChiTiet(Integer idSanPhamChiTiet);
+
+    // Tính điểm trung bình đánh giá của sản phẩm
+    @Query("SELECT AVG(d.soSao) FROM DanhGiaSanPham d WHERE d.idSanPhamChiTiet.idSanPham.id = ?1")
+    Double tinhDiemTrungBinhTheoSanPham(Integer idSanPham);
 
     // Đếm số lượng đánh giá theo từng số sao
     @Query("SELECT d.soSao, COUNT(d) FROM DanhGiaSanPham d WHERE d.idSanPhamChiTiet.id = ?1 GROUP BY d.soSao")
@@ -69,55 +73,65 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
 //    admin
 
 
-    @Query(value = """
-SELECT
-    dg.id_danh_gia,
-    kh.ten_khach_hang,
-    spct.ma_san_pham_chi_tiet,
-    sp.ten_san_pham,
-    ms.ten_mau,
-    r.dung_luong_rom,
-    ra.dung_luong_ram,
-    dg.so_sao,
-    dg.noi_dung,
-    (
-        SELECT STRING_AGG(m.url_media, ', ')
-        FROM media_danh_gia m
-        WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'IMAGE'
-    ) AS anh_url,
-    (
-        SELECT STRING_AGG(m.url_media, ', ')
-        FROM media_danh_gia m
-        WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'VIDEO'
-    ) AS video_url,
-    phdg.noi_dung AS noi_dung_phan_hoi,
-    dg.ngay_danh_gia,
-    dg.trang_thai_danh_gia
-FROM danh_gia_san_pham AS dg
-JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
-JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
-JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
-JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
-JOIN rom AS r ON r.id_rom = spct.id_rom
-JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
-JOIN ram AS ra ON ra.id_ram = msp.id_ram
-LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
-ORDER BY dg.ngay_danh_gia DESC
-""",
+    @Query(
+            value = """
+    SELECT
+        dg.id_danh_gia,
+        kh.ten_khach_hang,
+        spct.ma_san_pham_chi_tiet,
+        sp.ten_san_pham,
+        ms.ten_mau,
+        r.dung_luong_rom,
+        ra.dung_luong_ram,
+        dg.so_sao,
+        dg.noi_dung,
+        (
+            SELECT STRING_AGG(m.url_media, ', ')
+            FROM media_danh_gia m
+            WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'IMAGE'
+        ) AS anh_url,
+        (
+            SELECT STRING_AGG(m.url_media, ', ')
+            FROM media_danh_gia m
+            WHERE m.id_danh_gia = dg.id_danh_gia AND m.loai_media = 'VIDEO'
+        ) AS video_url,
+        phdg.noi_dung AS noi_dung_phan_hoi,
+        dg.ngay_danh_gia,
+        dg.trang_thai_danh_gia
+    FROM danh_gia_san_pham AS dg
+    JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
+    JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
+    JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
+    JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
+    JOIN rom AS r ON r.id_rom = spct.id_rom
+    JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+    JOIN ram AS ra ON ra.id_ram = msp.id_ram
+    LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
+    WHERE (:soSao IS NULL OR dg.so_sao = :soSao)
+    AND (:trangThai IS NULL OR dg.trang_thai_danh_gia = :trangThai)
+    ORDER BY dg.ngay_danh_gia DESC
+    """,
             countQuery = """
-SELECT COUNT(*)
-FROM danh_gia_san_pham AS dg
-JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
-JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
-JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
-JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
-JOIN rom AS r ON r.id_rom = spct.id_rom
-JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
-JOIN ram AS ra ON ra.id_ram = msp.id_ram
-LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
-""",
-            nativeQuery = true)
-    Page<Object[]> findAllDanhGia(Pageable pageable);
+    SELECT COUNT(*)
+    FROM danh_gia_san_pham AS dg
+    JOIN khach_hang AS kh ON kh.id_khach_hang = dg.id_khach_hang
+    JOIN san_pham_chi_tiet AS spct ON spct.id_san_pham_chi_tiet = dg.id_san_pham_chi_tiet
+    JOIN san_pham AS sp ON sp.id_san_pham = spct.id_san_pham
+    JOIN mau_sac AS ms ON ms.id_mau_sac = spct.id_mau
+    JOIN rom AS r ON r.id_rom = spct.id_rom
+    JOIN model_san_pham AS msp ON msp.id_model_san_pham = sp.id_model_san_pham
+    JOIN ram AS ra ON ra.id_ram = msp.id_ram
+    LEFT JOIN phan_hoi_danh_gia AS phdg ON phdg.id_danh_gia = dg.id_danh_gia
+    WHERE (:soSao IS NULL OR dg.so_sao = :soSao)
+    AND (:trangThai IS NULL OR dg.trang_thai_danh_gia = :trangThai)
+    """,
+            nativeQuery = true
+    )
+    Page<Object[]> findAllDanhGia(
+            @Param("soSao") Integer soSao,
+            @Param("trangThai") String trangThai,
+            Pageable pageable
+    );
 
     @Query(value = "SELECT url_media FROM media_danh_gia WHERE id_danh_gia = :id AND loai_media = 'IMAGE'", nativeQuery = true)
     List<String> findAnhByDanhGiaId(@Param("id") Integer id);

@@ -19,20 +19,17 @@ public class PhanHoiDanhGia {
     @Column(name = "id_phan_hoi")
     private Integer idPhanHoi;
 
-    @Column(name = "id_danh_gia", nullable = false)
-    private Integer idDanhGia;
-
     @Column(name = "noi_dung", length = 500)
-    private String noiDung;
+    private String noiDungPhanHoi;
 
     @Column(name = "ngay_phan_hoi")
     private LocalDateTime ngayPhanHoi;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_danh_gia", insertable = false, updatable = false)
+    @JoinColumn(name = "id_danh_gia", nullable = false)
     private DanhGiaSanPham danhGiaSanPham;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nhan_vien", nullable = false)
-    private NhanVien idNhanVien;
+    private NhanVien nhanVien;
 }

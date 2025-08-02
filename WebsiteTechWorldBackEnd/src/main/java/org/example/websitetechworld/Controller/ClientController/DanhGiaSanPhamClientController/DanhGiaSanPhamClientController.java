@@ -77,14 +77,14 @@ public class DanhGiaSanPhamClientController {
 //
 //    }
 
-    @GetMapping("/san-pham/{idSanPhamChiTiet}")
-    public ResponseEntity<List<DanhGiaSanPhamClientResponse>> layDanhGiaTheoSanPham(
+    @GetMapping("/san-pham-chi-tiet/{idSanPhamChiTiet}")
+    public ResponseEntity<List<DanhGiaSanPhamClientResponse>> layDanhGiaTheoSanPhamChiTiet(
             @PathVariable Integer idSanPhamChiTiet,
             @RequestParam(required = false) Integer soSao,
             @RequestParam(required = false) Boolean hasMedia
     ) {
         List<DanhGiaSanPhamClientResponse> responses =
-                danhGiaService.layDanhGiaTheoSanPham(idSanPhamChiTiet, soSao, hasMedia);
+                danhGiaService.layDanhGiaTheoSanPhamChiTiet(idSanPhamChiTiet, soSao, hasMedia);
         return ResponseEntity.ok(responses);
     }
 
@@ -131,10 +131,17 @@ public class DanhGiaSanPhamClientController {
 
     // ===== Statistics Operations =====
 
-    @GetMapping("/thong-ke/diem-trung-binh/{idSanPhamChiTiet}")
-    public ResponseEntity<Double> layDiemTrungBinhSanPham(@PathVariable Integer idSanPhamChiTiet) {
+    @GetMapping("/thong-ke-spct/diem-trung-binh/{idSanPhamChiTiet}")
+    public ResponseEntity<Double> layDiemTrungBinhSanPhamChiTiet(@PathVariable Integer idSanPhamChiTiet) {
 
-        Double diemTrungBinh = danhGiaService.tinhDiemTrungBinhSanPham(idSanPhamChiTiet);
+        Double diemTrungBinh = danhGiaService.tinhDiemTrungBinhSanPhamChiTiet(idSanPhamChiTiet);
+        return ResponseEntity.ok(diemTrungBinh);
+    }
+
+    @GetMapping("/thong-ke/diem-trung-binh/{idSanPham}")
+    public ResponseEntity<Double> layDiemTrungBinhSanPham(@PathVariable Integer idSanPham) {
+
+        Double diemTrungBinh = danhGiaService.tinhDiemTrungBinhSanPham(idSanPham);
         return ResponseEntity.ok(diemTrungBinh);
     }
 
@@ -167,4 +174,5 @@ public class DanhGiaSanPhamClientController {
         return ResponseEntity.ok(responses);
 
     }
+
 }

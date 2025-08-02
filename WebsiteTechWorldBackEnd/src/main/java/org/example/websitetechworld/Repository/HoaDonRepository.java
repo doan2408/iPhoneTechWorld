@@ -56,4 +56,17 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
     public List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
+
+
+    @Query(value = """
+        SELECT 
+               hd.id_hoa_don, 
+               cthd.id_chi_tiet_hoa_don, 
+               cthd.id_san_pham_chi_tiet
+        FROM hoa_don hd
+        JOIN chi_tiet_hoa_don cthd ON cthd.id_hoa_don = hd.id_hoa_don
+        WHERE hd.id_hoa_don = :idHoaDon
+        """, nativeQuery = true)
+    List<Object[]> findHoaDonAndChiTiet(@Param("idHoaDon") Integer idHoaDon);
+
 }

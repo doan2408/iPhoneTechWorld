@@ -381,7 +381,7 @@ public class SanPhamAdminService {
 
         // === Bước 1: Kiểm tra dữ liệu đầu vào ===
 //        validateSanPhamRequest(sanPhamAdminRequest);
-//
+
         // === Bước 2: Kiểm tra model tồn tại ===
         if (sanPhamAdminRequest.getIdModelSanPham() == null) {
             throw new BusinessException("Model sản phẩm không được để trống.");
