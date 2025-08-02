@@ -694,18 +694,22 @@ VALUES
     (N'Wide', N'48MP', N'f/1.6', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.4', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/2.8', N'Optical 3x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.4', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.4', N'Optical 5x', N'ProRAW'),
+
     (N'Wide', N'48MP', N'f/1.8', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.2', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/3.0', N'Optical 4x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.2', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.6', N'Optical 6x', N'ProRAW'),
+
     (N'Wide', N'48MP', N'f/1.7', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.3', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/2.9', N'Optical 3x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.3', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.5', N'Optical 5x', N'ProRAW');
+
+    (N'Wide', N'48MP', N'f/1.5', N'Optical 2x', N'Night Mode'),
+    (N'Ultra Wide', N'12MP', N'f/2.5', N'Digital', N'Panorama'),
+    (N'Telephoto', N'12MP', N'f/2.7', N'Optical 2x', N'Portrait'),
+
+    (N'Wide', N'48MP', N'f/1.4', N'Optical 2x', N'Night Mode'),
+    (N'Ultra Wide', N'12MP', N'f/2.6', N'Digital', N'Panorama'),
+    (N'Telephoto', N'12MP', N'f/2.6', N'Optical 5x', N'Portrait');
 
 -- Table camera_truoc
 INSERT INTO camera_truoc (loai_camera, do_phan_giai, khau_do, loai_zoom, che_do_chup)

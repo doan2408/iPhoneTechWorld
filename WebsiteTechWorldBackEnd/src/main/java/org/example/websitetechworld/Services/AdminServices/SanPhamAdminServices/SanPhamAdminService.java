@@ -140,7 +140,7 @@ public class SanPhamAdminService {
         return new PageImpl<>(sanPhamHienThi,pageable, allHienThi.getTotalElements());
     }
 
-    //detai update sanpham
+    //detail update sanpham
     public SanPhamAdminUpdateResponse getSanPhamById(Integer id) {
         SanPham sanPham = sanPhamRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
@@ -155,21 +155,30 @@ public class SanPhamAdminService {
         response.setIdNhaCungCap(nhaCungCapSp.getNhaCungCap().getId());
         response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
         response.setIdModelSanPham(sanPham.getIdModelSanPham().getIdModelSanPham());
-
-        Set<SanPhamChiTietAdminDetailResponse> chiTietList = sanPham.getSanPhamChiTiets().stream().map(ct -> {
+        // Filter product details that have at least one AVAILABLE imei
+        Set<SanPhamChiTietAdminDetailResponse> chiTietList = sanPham.getSanPhamChiTiets().stream()
+//                .filter(ct -> ct.getImeis() !=null && ct.getImeis().stream()
+//                        .anyMatch(imei -> imei.getTrangThaiImei() == TrangThaiImei.AVAILABLE)
+//                )
+                .map(ct -> {
+                    // only select imei AVAILABLE
+                    Set<Imei> imeiAvailable = ct.getImeis().stream()
+                            .filter(imei -> imei.getTrangThaiImei() == TrangThaiImei.AVAILABLE)
+                            .collect(Collectors.toSet());
             SanPhamChiTietAdminDetailResponse dto = new SanPhamChiTietAdminDetailResponse();
             dto.setId(ct.getId());
-            dto.setSoLuong(ct.getSoLuong());
+//            dto.setSoLuong(ct.getSoLuong());
+            dto.setSoLuong(imeiAvailable.size());
             dto.setGiaBan(ct.getGiaBan());
             dto.setMaSanPhamChiTiet(ct.getMaSanPhamChiTiet());
             dto.setIdMau(ct.getIdMau() != null ? ct.getIdMau().getId() : null);
             dto.setIdRom(ct.getIdRom() != null ? ct.getIdRom().getId() : null);
             // imeis
             if (ct.getImeis() != null) {
-                dto.setImeisInput(ct.getImeis().stream()
+                dto.setImeisInput(imeiAvailable.stream()
                         .map(Imei::getSoImei)
                         .collect(Collectors.joining(", ")));
-                dto.setImeis(ct.getImeis().stream()
+                dto.setImeis(imeiAvailable.stream()
                         .map(i -> {
                             ImeiAdminResponse imeiDto = new ImeiAdminResponse();
                             imeiDto.setSoImei(i.getSoImei());
@@ -925,7 +934,7 @@ public class SanPhamAdminService {
                     imeiReposiory.saveAll(imeiMoi);
 
                     // Cập nhật số lượng dựa trên số IMEI
-                    int soLuongThucTe = imeiReposiory.countByIdSanPhamChiTiet(chiTietSaved);
+                    int soLuongThucTe = imeiReposiory.soLuongImei(TrangThaiImei.AVAILABLE, chiTietSaved.getId());
                     chiTietSaved.setSoLuong(soLuongThucTe);
                     sanPhamChiTietRepository.save(chiTietSaved);
                 } else {
