@@ -30,4 +30,6 @@ public interface NhaCungCapSpRepository extends JpaRepository<NhaCungCapSp, Inte
 
     // Method để kiểm tra tồn tại quan hệ
     boolean existsByNhaCungCapAndSanPham(NhaCungCap nhaCungCap, SanPham sanPham);
+
+    void deleteBySanPham_Id(Integer sanPhamId);
 }
