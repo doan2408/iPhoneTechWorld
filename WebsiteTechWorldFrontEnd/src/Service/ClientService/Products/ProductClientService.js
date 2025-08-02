@@ -1,7 +1,7 @@
 import { id } from "element-plus/es/locales.mjs";
 import api from "@/Service/LoginService/axiosInstance";
 
-const baseURL = "/client";
+const baseURL = "/client/home";
 
 const fetchData = async (url) => {
   try {
@@ -31,7 +31,7 @@ export const getAllSanPham = async ({
     if (giaMax !== null) params.giaMax = giaMax;
     if (sort && sort.trim() !== "") params.sort = sort.trim();
 
-    const response = await api.get(`${baseURL}/home`, { params });
+    const response = await api.get(`${baseURL}`, { params });
     return response.data;
   } catch (e) {
     console.log("error:", e);

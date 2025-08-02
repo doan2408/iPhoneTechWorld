@@ -14,11 +14,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/client")
+@RequestMapping("/client/home")
 public class SanPhamClientController {
     private final SanPhamClientService sanPhamClientService;
 
-    @GetMapping("/home")
+    @GetMapping()
     public ResponseEntity<?> getSanPham(@RequestParam(value = "page", defaultValue = "0") int page,
                                         @RequestParam(value = "tenSanPham", required = false) String tenSanPham,
                                         @RequestParam(value = "idLoai", required = false) Integer idLoai,
