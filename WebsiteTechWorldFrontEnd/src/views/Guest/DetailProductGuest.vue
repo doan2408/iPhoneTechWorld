@@ -406,7 +406,7 @@ onMounted(() => {
       <!-- Cột phải: Thông tin + thông số (45%) -->
       <div class="product-right">
         <div class="product-info">
-          <h1>{{ sanPham?.tenSanPham }}</h1>
+          <h1>{{ sanPham?.tenSanPham }} - {{ sanPham?.maXuatXu }}</h1>
           <router-link class="danhGia" to="#">Đánh giá</router-link> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số

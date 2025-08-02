@@ -117,7 +117,7 @@ public class SanPhamAdminService {
 
     public Page<SanPhamHienThiAdminResponse> getAllSanPham(String keyword, Integer idLoai, String trangThais, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Object[]> allHienThi = sanPhamRepository.getAllHienThi( keyword ,idLoai ,trangThais ,pageable );
+        Page<Object[]> allHienThi = sanPhamRepository.getAllHienThi( keyword ,idLoai ,trangThais, pageable );
 
         List<SanPhamHienThiAdminResponse> sanPhamHienThi = new ArrayList<>();
         for (Object[] hienThi : allHienThi) {
@@ -132,6 +132,7 @@ public class SanPhamAdminService {
             sp.setTenLoai((String) hienThi[4]);
             sp.setSoLuong((Integer) hienThi[5]);
             sp.setUrl((String) hienThi[6]);
+            sp.setMaXuatXu((String) hienThi[7]);
             sanPhamHienThi.add(sp);
 
         }
@@ -436,6 +437,7 @@ public class SanPhamAdminService {
 
         // === Bước 4: Xử lý danh sách chi tiết sản phẩm ===
         Set<SanPhamChiTiet> chiTietSet = new HashSet<>();
+        Map<Integer, Boolean> mauDaCoAnh = new HashMap<>();
         if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
             for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
 
@@ -490,6 +492,23 @@ public class SanPhamAdminService {
 
                 // Lưu SanPhamChiTiet
                 SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
+
+                Integer idMau = rq.getIdMau();
+                String tenMau = mauSacRepository.findById(rq.getIdMau()).map(MauSac::getTenMau).orElse("color");
+
+                System.out.println("id san pham: " + sanPhamAdminRequest.getIdModelSanPham());
+                System.out.println("id color: " + rq.getIdMau());
+                System.out.println("anh: " + rq.getHinhAnhs());
+                // Nếu chưa xử lý màu này
+                if (!mauDaCoAnh.containsKey(idMau)) {
+                    Integer soAnh = hinhAnhRepository.anhQuantityOfSp(sanPhamAdminRequest.getIdModelSanPham(), idMau);
+                    boolean daCoAnh = soAnh > 0 || (rq.getHinhAnhs() != null && !rq.getHinhAnhs().isEmpty());
+                    mauDaCoAnh.put(idMau, daCoAnh);
+                }
+
+                if (!Boolean.TRUE.equals(mauDaCoAnh.get(idMau))) {
+                    throw new BusinessException("Màu " + tenMau + " cần có ít nhất một ảnh.");
+                }
 
                 // Xử lý hình ảnh
                 if (rq.getHinhAnhs() != null && !rq.getHinhAnhs().isEmpty()) {

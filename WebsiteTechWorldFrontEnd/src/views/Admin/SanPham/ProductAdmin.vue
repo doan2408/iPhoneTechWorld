@@ -130,7 +130,7 @@
 
         <el-table-column prop="tenSanPham" label="Tên sản phẩm" show-overflow-tooltip>
           <template #default="{ row }">
-            <span class="product-name">{{ row.tenSanPham }}</span>
+            <span class="product-name">{{ row.tenSanPham }} - {{ row.maXuatXu }}</span>
           </template>
         </el-table-column>
 
@@ -260,7 +260,7 @@ const loadSanPham = async () => {
     isFetching.value = true;
     console.log('Đang tải sản phẩm, trang:', currentPage.value, 'Tìm kiếm:', searchQuery.value, 'Loại:', filters.idLoai, 'Trạng thái:', filters.trangThai);
 
-    const response = await getAllSanPham(currentPage.value - 1, pageSize, searchQuery.value, filters.idLoai, filters.trangThai);
+    const response = await getAllSanPham(currentPage.value - 1, pageSize, searchQuery.value, filters.idLoai, filters.trangThai, filters.maXuatXu);
 
     console.log('Đang tải sản phẩm, trang22222:', currentPage.value, 'Tìm kiếm:', searchQuery.value, 'Loại:', filters.idLoai, 'Trạng thái:', filters.trangThai);
 

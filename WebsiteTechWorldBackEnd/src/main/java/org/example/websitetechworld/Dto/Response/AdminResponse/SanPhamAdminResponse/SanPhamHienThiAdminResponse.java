@@ -31,4 +31,6 @@ public class SanPhamHienThiAdminResponse {
 
     private String url;
 
+    private String maXuatXu;
+
 }
