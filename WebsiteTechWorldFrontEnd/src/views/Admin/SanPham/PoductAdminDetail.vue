@@ -1298,10 +1298,11 @@ const validateForm = () => {
     } else if (!chiTiet.soLuong) {
       error.value = `Biến thể ${index + 1}: Số lượng phải lớn hơn 0`;
       hasError = true;
-    } else if (chiTiet.hinhAnhs.length === 0) {
-      error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 hình ảnh`;
-      hasError = true;
-    }
+    } 
+    // else if (chiTiet.hinhAnhs.length === 0) {
+    //   error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 hình ảnh`;
+    //   hasError = true;
+    // }
 
     const imeis = chiTiet.imeisInput
       .split(",")
