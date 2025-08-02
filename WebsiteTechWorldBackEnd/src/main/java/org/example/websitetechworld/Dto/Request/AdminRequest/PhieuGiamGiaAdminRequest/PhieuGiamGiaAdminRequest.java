@@ -52,7 +52,6 @@ public class PhieuGiamGiaAdminRequest {
     @Size(max = 100, message = "Điều kiện áp dụng không được vượt quá 100 ký tự")
     private String dieuKienApDung;
 
-    @Size(max = 50, message = "Hạng tối thiểu không được vượt quá 50 ký tự")
     private HangKhachHang hangToiThieu;
 
     @NotNull(message = "Số lượng không được để trống")
@@ -62,9 +61,6 @@ public class PhieuGiamGiaAdminRequest {
     @PositiveOrZero(message = "Số điểm cần để đổi phải lớn hơn hoặc bằng 0")
     @DecimalMax(value = "99999999.99", message = "Số điểm cần để đổi không được vượt quá 99999999.99")
     private BigDecimal soDiemCanDeDoi;
-
-    @NotNull(message = "Trạng thái isGlobal không được để trống")
-    private Boolean congKhai;
 
     @NotNull(message = "Trạng thái không được để trống")
     private TrangThaiPhatHanh trangThaiPhatHanh;
