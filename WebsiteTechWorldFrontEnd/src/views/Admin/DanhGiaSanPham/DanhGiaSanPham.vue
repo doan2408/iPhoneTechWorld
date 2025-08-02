@@ -353,7 +353,6 @@ const submitReplyForm = () => {
 };
 
 
-// Xử lý phê duyệt đánh giá
 const handleApprove = async (id) => {
   try {
     await ElMessageBox.confirm('Bạn có chắc muốn phê duyệt đánh giá này?', 'Xác nhận', {
@@ -366,6 +365,7 @@ const handleApprove = async (id) => {
     loadDanhGia();
   } catch (error) {
     if (error === 'cancel' || error === 'close') {
+      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
       return;
     }
     ElMessage.error('Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
@@ -385,6 +385,10 @@ const handleReject = async (id) => {
     ElMessage.success('Từ chối đánh giá thành công');
     loadDanhGia();
   } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
+      return;
+    }
     ElMessage.error('Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi từ chối:', error);
   }
@@ -402,6 +406,10 @@ const handleDelete = async (id) => {
     ElMessage.success('Xóa đánh giá thành công');
     loadDanhGia();
   } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
+      return;
+    }
     ElMessage.error('Lỗi khi xóa đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi xóa:', error);
   }
