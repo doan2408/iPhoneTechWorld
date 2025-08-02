@@ -12,6 +12,7 @@ import {
   View 
 } from '@element-plus/icons-vue'
 import { h } from 'vue';
+import CompareBar from "./Compare/CompareBar.vue";
 
 const showClearFilter = ref(false);
 const filterKeyword = ref("");
@@ -163,6 +164,18 @@ onMounted(() => {
   fetchLoai();
   fetchProducts();
 });
+const compareList = ref([])
+const addToCompare = (product) => {
+  if (!compareList.value.find(p => p.id === product.id)) {
+    compareList.value.push(product)
+  }
+}
+const isInCompareList = (product) => {
+  return compareList.value.some(p => p.id === product.id)
+}
+const removeCompare = (product) => {
+  compareList.value = compareList.value.filter(p => p.id !== product.id)
+}
 </script>
 
 <template>
@@ -182,7 +195,9 @@ onMounted(() => {
         <div class="price-filter">
           <div class="filter-header">
             <div class="filter-icon">
-              <el-icon><PriceTag /></el-icon>
+              <el-icon>
+                <PriceTag />
+              </el-icon>
             </div>
             <div class="filter-content">
               <span class="filter-label">Khoảng giá</span>
@@ -193,30 +208,16 @@ onMounted(() => {
             </div>
           </div>
           <div class="price-slider-container">
-            <el-slider
-              v-model="priceRange"
-              range
-              :min="minPrice"
-              :max="maxPrice"
-              :step="priceStep"
-              :format-tooltip="formatPriceShort"
-              class="price-slider"
-            />
+            <el-slider v-model="priceRange" range :min="minPrice" :max="maxPrice" :step="priceStep"
+              :format-tooltip="formatPriceShort" class="price-slider" />
           </div>
           <div class="quick-price-filters">
-            <el-button
-              v-for="filter in quickPriceFilters"
-              :key="filter.label"
-              size="small"
-              :type="
+            <el-button v-for="filter in quickPriceFilters" :key="filter.label" size="small" :type="
                 priceRange[0] === filter.range[0] &&
                 priceRange[1] === filter.range[1]
                   ? 'primary'
                   : 'default'
-              "
-              @click="applyQuickPriceFilter(filter.range)"
-              class="quick-filter-btn"
-            >
+              " @click="applyQuickPriceFilter(filter.range)" class="quick-filter-btn">
               {{ filter.label }}
             </el-button>
           </div>
@@ -226,43 +227,23 @@ onMounted(() => {
         <div class="chosen-filters" v-if="showClearFilter">
           <div class="chosen-filters-header">
             <span class="chosen-label">Bộ lọc đang áp dụng:</span>
-            <el-button
-              type="danger"
-              size="small"
-              @click="clearFilters"
-              class="clear-btn"
-            >
-              <el-icon><Delete /></el-icon>
+            <el-button type="danger" size="small" @click="clearFilters" class="clear-btn">
+              <el-icon>
+                <Delete />
+              </el-icon>
               Xóa tất cả
             </el-button>
           </div>
           <div class="chosen-tags">
-            <el-tag
-              v-if="priceRange[0] !== minPrice || priceRange[1] !== maxPrice"
-              closable
-              @close="priceRange = [minPrice, maxPrice]"
-              type="info"
-              class="filter-tag"
-            >
+            <el-tag v-if="priceRange[0] !== minPrice || priceRange[1] !== maxPrice" closable
+              @close="priceRange = [minPrice, maxPrice]" type="info" class="filter-tag">
               Giá: {{ formatPriceShort(priceRange[0]) }} -
               {{ formatPriceShort(priceRange[1]) }}
             </el-tag>
-            <el-tag
-              v-if="selectedLoai"
-              closable
-              @close="selectedLoai = ''"
-              type="info"
-              class="filter-tag"
-            >
+            <el-tag v-if="selectedLoai" closable @close="selectedLoai = ''" type="info" class="filter-tag">
               Loại: {{ loaiOptions.find((item) => item.value === selectedLoai)?.label }}
             </el-tag>
-            <el-tag
-              v-if="filterKeyword"
-              closable
-              @close="filterKeyword = ''"
-              type="info"
-              class="filter-tag"
-            >
+            <el-tag v-if="filterKeyword" closable @close="filterKeyword = ''" type="info" class="filter-tag">
               Từ khóa: {{ filterKeyword }}
             </el-tag>
           </div>
@@ -273,19 +254,20 @@ onMounted(() => {
           <div class="filter-item">
             <el-dropdown trigger="click">
               <el-button class="filter-btn">
-                <el-icon><Menu /></el-icon>
+                <el-icon>
+                  <Menu />
+                </el-icon>
                 <span>
                   {{ selectedLoai ? loaiOptions.find((item) => item.value ===selectedLoai)?.label : "Loại" }}
                 </span>
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="option in loaiOptions"
-                    :key="option.value"
-                    @click="selectedLoai = option.value"
-                  >
+                  <el-dropdown-item v-for="option in loaiOptions" :key="option.value"
+                    @click="selectedLoai = option.value">
                     {{ option.label }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -295,37 +277,35 @@ onMounted(() => {
           <div class="filter-item">
             <el-dropdown trigger="click">
               <el-button class="filter-btn">
-                <el-icon><Sort /></el-icon>
+                <el-icon>
+                  <Sort />
+                </el-icon>
                 <span> {{ sortLabel }}</span>
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    @click="
+                  <el-dropdown-item @click="
                       selectedSort = '';
                       currentPage = 1;
                       fetchProducts();
-                    "
-                  >
+                    ">
                     Hủy sắp xếp
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    @click="
+                  <el-dropdown-item @click="
                       selectedSort = 'giaAsc';
                       currentPage = 1;
                       fetchProducts();
-                    "
-                  >
+                    ">
                     Giá thấp đến cao
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    @click="
+                  <el-dropdown-item @click="
                       selectedSort = 'giaDesc';
                       currentPage = 1;
                       fetchProducts();
-                    "
-                  >
+                    ">
                     Giá cao đến thấp
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -340,14 +320,11 @@ onMounted(() => {
         <!-- Search bar -->
         <div class="search-section">
           <div class="search-wrapper">
-            <el-input
-              v-model="filterKeyword"
-              placeholder="Tìm kiếm sản phẩm..."
-              class="search-input"
-              clearable
-            >
+            <el-input v-model="filterKeyword" placeholder="Tìm kiếm sản phẩm..." class="search-input" clearable>
               <template #prefix>
-                <el-icon><Search /></el-icon>
+                <el-icon>
+                  <Search />
+                </el-icon>
               </template>
             </el-input>
           </div>
@@ -359,27 +336,16 @@ onMounted(() => {
         <!-- Products grid -->
         <div class="products-grid" v-show="hasProduct">
           <el-row :gutter="24" class="homeproduct">
-            <el-col
-              v-for="sp in products"
-              :key="sp.id"
-              :xs="24"
-              :sm="12"
-              :md="8"
-              :lg="6"
-              :xl="6"
-              class="product-col"
-            >
+            <el-col v-for="sp in products" :key="sp.id" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" class="product-col">
               <router-link :to="`/client/detail/${sp.id}`" class="product-link">
                 <div class="product-card">
                   <div class="product-image-container">
-                    <img
-                      :src="sp.hinhAnh || '/img/no-image.png'"
-                      alt="product"
-                      class="product-image"
-                    />
+                    <img :src="sp.hinhAnh || '/img/no-image.png'" alt="product" class="product-image" />
                     <div class="product-overlay">
                       <div class="quick-view-btn">
-                        <el-icon><View /></el-icon>
+                        <el-icon>
+                          <View />
+                        </el-icon>
                       </div>
                     </div>
                   </div>
@@ -389,23 +355,29 @@ onMounted(() => {
                   </div>
                 </div>
               </router-link>
+              <el-button v-if="!isInCompareList(sp)" class="add-to-compare" size="small"
+                @click.stop.prevent="addToCompare(sp)">
+                <el-icon>
+                  <Plus />
+                </el-icon>
+                Thêm vào so sánh
+              </el-button>
+
+              <el-button v-else class="already-added" size="small" disabled>
+                <el-icon>
+                  <Check />
+                </el-icon>
+                Đã thêm vào so sánh
+              </el-button>
+              <br><br>
             </el-col>
           </el-row>
         </div>
 
         <!-- Pagination -->
-        <div
-          class="pagination-container"
-          v-show="hasProduct && totalProducts > pageSize"
-        >
-          <el-pagination
-            v-model:current-page="currentPage"
-            :page-size="pageSize"
-            :total="totalProducts"
-            layout="prev, pager, next, jumper"
-            :background="true"
-            class="custom-pagination"
-          />
+        <div class="pagination-container" v-show="hasProduct && totalProducts > pageSize">
+          <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="totalProducts"
+            layout="prev, pager, next, jumper" :background="true" class="custom-pagination" />
         </div>
 
         <!-- Không có sản phẩm -->
@@ -419,6 +391,7 @@ onMounted(() => {
     <!-- Khung khác -->
     <div class="contain-khungSanPham"></div>
   </section>
+  <CompareBar :compareList="compareList" @remove="removeCompare" />
 </template>
 
 <style scoped>
@@ -599,8 +572,8 @@ onMounted(() => {
 }
 
 .search-input {
-  border-radius: 8px;
-  border: 1px solid #ced4da;
+  border-radius: 15px;
+  border: 1px solid #1172d4;
   padding: 10px 14px;
   font-size: 14px;
 }
@@ -826,5 +799,36 @@ onMounted(() => {
   .search-wrapper {
     margin-bottom: 8px;
   }
+}
+.el-button.add-to-compare {
+  background-color: #e6f7ff;
+  border: 1px dashed #409EFF;
+  color: #409EFF;
+  font-weight: 600;
+  font-size: 13px;
+  width: 100%;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  padding: 6px 0;
+}
+
+.el-button.add-to-compare:hover {
+  background-color: #d0ecff;
+  color: #1d78c1;
+}
+
+.el-button.already-added {
+  background-color: #67c23a;
+  color: white;
+  width: 100%;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+}
+
+.el-icon {
+  margin-right: 4px;
 }
 </style>

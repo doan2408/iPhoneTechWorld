@@ -37,6 +37,8 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(String tenSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
 
+    Page<SanPhamChiTiet> findByIdSanPham_MaSanPhamContainingAndIdSanPham_TrangThaiSanPham(String maSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+
     Page<SanPhamChiTiet> findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham trangThaiSanPham, Pageable pageable);
 
 

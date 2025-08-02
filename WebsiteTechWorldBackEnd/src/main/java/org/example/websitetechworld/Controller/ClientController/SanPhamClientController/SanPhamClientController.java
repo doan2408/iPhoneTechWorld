@@ -1,11 +1,11 @@
 package org.example.websitetechworld.Controller.ClientController.SanPhamClientController;
 
 import lombok.RequiredArgsConstructor;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductDetailResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
-import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
+import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Services.ClientServices.SanPhamClientServices.SanPhamClientService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +49,6 @@ public class SanPhamClientController {
             ClientProductDetailResponse response = sanPhamClientService.getChiTietBienThe(idsp, idMau, idRom);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("không có sản phẩm tương ứng");
         }
         return ResponseEntity.notFound().build();
@@ -62,10 +61,34 @@ public class SanPhamClientController {
             return ResponseEntity.ok(response);
         }
         catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("Không có thông số");
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/thongSoCompare/{idSp}")
+    public ResponseEntity<ThongSoCompareResponse> getThongSoCompare(@PathVariable("idSp") Integer idSp) {
+        try {
+            ThongSoCompareResponse response = sanPhamClientService.getThongSoLimitRomMin(idSp);
+            return ResponseEntity.ok(response);
+        }
+        catch (RuntimeException e) {
+            System.err.println("Không có thông số cho sản phẩm id = " + idSp);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    @GetMapping("/cameraSau/{idSp}")
+    public ResponseEntity<List<CameraSauResponse>> getCameraSau(@PathVariable("idSp") Integer idSp) {
+        try {
+            List<CameraSauResponse> cameraSauList = sanPhamClientService.findCameraSauByIdSanPham(idSp);
+            return ResponseEntity.ok(cameraSauList);
+        }
+        catch (RuntimeException e) {
+            System.err.println("Không có thông số cho sản phẩm id = " + idSp);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/anh/{idSp}/mau/{idMau}")
@@ -75,7 +98,6 @@ public class SanPhamClientController {
             return ResponseEntity.ok(listAnh);
         }
         catch (RuntimeException e) {
-            e.printStackTrace();
             System.out.println("did not find images");
         }
         return ResponseEntity.notFound().build();

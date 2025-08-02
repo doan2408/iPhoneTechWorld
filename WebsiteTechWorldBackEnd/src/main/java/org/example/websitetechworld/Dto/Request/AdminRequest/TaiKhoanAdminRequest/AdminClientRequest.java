@@ -47,12 +47,6 @@ public class AdminClientRequest {
 
     private String anh;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Tổng điểm không được âm")
-    private BigDecimal tongDiem;
-
-    @DecimalMin(value = "0.0", inclusive = true, message = "Số điểm hiện tại không được âm")
-    private BigDecimal soDiemHienTai;
-
     private HangThanhVien hangKhachHang;
 
     @NotNull(message = "Trạng thái khách hàng không được để trống")

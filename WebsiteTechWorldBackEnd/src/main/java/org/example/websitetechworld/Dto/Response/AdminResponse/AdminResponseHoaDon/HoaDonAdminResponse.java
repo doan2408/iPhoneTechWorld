@@ -5,6 +5,7 @@ import org.example.websitetechworld.Entity.HoaDon;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,15 +43,15 @@ public class HoaDonAdminResponse {
 
     private BigDecimal thanhTien;
 
-    private LocalDate ngayTao;
-    private LocalDate ngayDatHang;
+    private LocalDateTime ngayTao;
+    private LocalDateTime ngayDatHang;
 
     private String diaChiGiaoHang;
     private String shippingMethod;
 
     private String loaiHoaDon;
     private Boolean isShipping;
-    private LocalDate ngayThanhToan;
+    private LocalDateTime ngayThanhToan;
     private String trangThaiDonHang;
     private String trangThaiThanhToan;
     private Integer idTinhThanh;

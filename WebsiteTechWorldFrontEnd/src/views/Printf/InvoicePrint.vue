@@ -38,6 +38,7 @@
 
         <div class="summary">
             <p><strong>Tổng tiền:</strong> {{ formatCurrency(invoice?.tongTien) }}</p>
+            <p><strong>Phí Ship:</strong> {{ formatCurrency(invoice?.phiShip) }}</p>
             <p><strong>Giảm giá:</strong> {{ formatCurrency(invoice?.soTienGiam) }}</p>
             <p><strong>Thành tiền:</strong> {{ formatCurrency(invoice?.thanhTien) }}</p>
         </div>

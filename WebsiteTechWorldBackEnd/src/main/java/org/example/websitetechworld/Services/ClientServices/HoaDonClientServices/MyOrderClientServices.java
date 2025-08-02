@@ -9,6 +9,7 @@ import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -110,13 +112,14 @@ public class MyOrderClientServices {
         hoaDon.setIsShipping(true);
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
         hoaDon.setShippingMethod(requestThanhToanTongHop.getShippingMethod());
-        hoaDon.setNgayDatHang(LocalDate.now());
+        hoaDon.setNgayDatHang(LocalDateTime.now());
         hoaDon.setSdtNguoiMua(requestThanhToanTongHop.getSdtNguoiNhan());
         hoaDon.setTenNguoiMua(requestThanhToanTongHop.getTenNguoiNhan());
         hoaDon.setDiaChiGiaoHang(requestThanhToanTongHop.getDiaChiGiaoHang());
         hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien());
         hoaDon.setThanhTien(requestThanhToanTongHop.getSoTienKhachDua());
-        hoaDon.setNgayTaoHoaDon(LocalDate.now());
+        hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
+        hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
         return hoaDonRepository.save(hoaDon);
     }

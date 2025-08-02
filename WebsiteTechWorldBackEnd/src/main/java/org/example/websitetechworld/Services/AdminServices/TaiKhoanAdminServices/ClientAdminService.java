@@ -167,8 +167,6 @@ public class ClientAdminService {
 
         request.setAnh("Default.jpg");
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
-        request.setTongDiem(new BigDecimal(0));
-        request.setSoDiemHienTai(new BigDecimal(0));
         HangThanhVien hangThanhVien = new HangThanhVien();
         hangThanhVien.setId(1);
         request.setHangKhachHang(hangThanhVien);

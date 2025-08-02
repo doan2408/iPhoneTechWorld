@@ -26,4 +26,20 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
     List<KhachHangGiamGia> findByIdKhachHang_Id(Integer idKhachHangId);
 
     void deleteByIdPhieuGiamGiaAndIsUser(PhieuGiamGia idPhieuGiamGia, Boolean isUser);
+
+    @Query("SELECT CASE " +
+            "WHEN COUNT(k) > 0 THEN true " +
+            "ELSE false END " +
+            "FROM KhachHangGiamGia k " +
+            "WHERE k.idKhachHang.id = :idKhachHang " +
+            "AND k.idPhieuGiamGia.id = :idPhieuGiamGia " +
+            "AND k.doiBangDiem = true " +
+            "AND MONTH(k.ngayCap) = :thang " +
+            "AND YEAR(k.ngayCap) = :nam")
+    boolean checkSoLanDoiTrong1Thang(
+            @Param("idKhachHang") Integer idKhachHang,
+            @Param("idPhieuGiamGia") Integer idPhieuGiamGia,
+            @Param("thang") int thang,
+            @Param("nam") int nam
+    );
 }

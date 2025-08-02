@@ -120,6 +120,7 @@ public class ClientService {
 
         request.setAnh("Default.jpg");
         request.setTrangThai(TrangThaiKhachHang.ACTIVE);
+
         request.setGioiTinh(true);
         HangThanhVien hangThanhVien = new HangThanhVien();
         hangThanhVien.setId(1);
@@ -146,7 +147,7 @@ public class ClientService {
 //        diaChi.setIdKhachHang(khachHangAdd);
 //        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
 //        diaChiRepository.save(diaChi);
-//        khachHangRepository.save(khachHangAdd);
+        khachHangRepository.save(khachHangAdd);
 
         // ✅ Tạo token dựa trên KhachHang
         String accessToken = jwtService.generateAccessToken(khachHangAdd);

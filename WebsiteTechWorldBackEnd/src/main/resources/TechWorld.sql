@@ -106,17 +106,16 @@ CREATE TABLE hoa_don (
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan NVARCHAR(10),
                          dia_chi_giao_hang NVARCHAR(255),
-                         ngay_dat_hang DATE,
+                         ngay_dat_hang DATETIME,
                          is_shipping BIT,
                          shipping_method NVARCHAR(50),
                          phi_ship DECIMAL(19,2),
                          tong_tien DECIMAL(19,2),
                          so_tien_giam DECIMAL(19,2),
                          thanh_tien DECIMAL(19,2),
-                         ngay_tao_hoa_don DATE,
-                         ngay_tao_don_hang DATE, -- new
+                         ngay_tao_hoa_don DATETIME,
                          loai_hoa_don NVARCHAR(50),
-                         ngay_thanh_toan DATE,
+                         ngay_thanh_toan DATETIME,
                          trang_thai_thanh_toan NVARCHAR(50),
                          is_delete BIT,
                          trang_thai_don_hang NVARCHAR(50)
@@ -398,7 +397,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    id_san_pham_chi_tiet INT,
                                    so_luong INT,
                                    gia DECIMAL(10,2),
-                                   ngay_them DATE DEFAULT CAST(GETDATE() AS DATE),
+                                   ngay_them DATETIME DEFAULT CAST(GETDATE() AS DATETIME),
                                    FOREIGN KEY (id_gio_hang) REFERENCES gio_hang(id_gio_hang) ON DELETE CASCADE,
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
@@ -439,7 +438,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
                                      id_phuong_thuc_thanh_toan INT REFERENCES phuong_thuc_thanh_toan(id_phuong_thuc_thanh_toan),
-                                     so_tien_thanh_toan DECIMAL(10,2)
+                                     so_tien_thanh_toan DECIMAL(18,2)
 );
 
 

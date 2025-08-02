@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -96,7 +97,7 @@ public class HoaDonAdminService {
     public HoaDon createPendingInvoice(){
 
         HoaDon hoaDon = new HoaDon();
-        hoaDon.setNgayTaoHoaDon(LocalDate.now());
+        hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.POS);
         hoaDon.setPhiShip(BigDecimal.ZERO);
         hoaDon.setSoTienGiam(BigDecimal.ZERO);
@@ -181,7 +182,7 @@ public class HoaDonAdminService {
 
         if (response.getMessage().equals("Thanh toán thành công")) {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.SOLD);
-            hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(hoaDon.getChiTietHoaDons().stream().toList());
+//            hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(hoaDon.getChiTietHoaDons().stream().toList());
         }
 
         return response;
@@ -234,7 +235,7 @@ public class HoaDonAdminService {
         invoice.setDiaChiGiaoHang(request.getDiaChiGiaoHang() != null ? request.getDiaChiGiaoHang() : "");
         invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
-        invoice.setNgayDatHang(LocalDate.now());
+        invoice.setNgayDatHang(LocalDateTime.now());
         // Gán maVanDon
         String maVanDon = request.getMaVanDon();
         if (maVanDon == null || maVanDon.trim().isEmpty()) {

@@ -18,6 +18,8 @@ public class SanPhamChiTietHienThiResponse {
 
     private String maSanPhamChiTiet;
 
+    private String maSanPham;
+
     private String tenSanPham;
 
     private String mau;
@@ -33,8 +35,9 @@ public class SanPhamChiTietHienThiResponse {
     public static SanPhamChiTietHienThiResponse converDto(SanPhamChiTiet sanPhamChiTiet){
         SanPhamChiTietHienThiResponse response = new SanPhamChiTietHienThiResponse();
         response.setIdSanPhamChiTiet(sanPhamChiTiet.getId());
+        response.setMaSanPhamChiTiet(sanPhamChiTiet.getMaSanPhamChiTiet());
         if (sanPhamChiTiet.getIdSanPham() != null){
-            response.setMaSanPhamChiTiet(sanPhamChiTiet.getIdSanPham().getMaSanPham());
+            response.setMaSanPham(sanPhamChiTiet.getIdSanPham().getMaSanPham());
             response.setTenSanPham(sanPhamChiTiet.getIdSanPham().getTenSanPham());
         }
         if (sanPhamChiTiet.getIdMau() != null){

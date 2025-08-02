@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.LichSuDiemResponse.LichSuDiemResponse;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
@@ -32,6 +33,8 @@ public class LichSuDiemService {
     private final ChiTietLichSuDiemRepository chiTietLichSuDiemRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     private final HoaDonRepository hoaDonRepository;
+    private final HangServices hangServices;
+    private final ViDiemServices viDiemServices;
 
     private LichSuDiemResponse convertToResponse(LichSuDiem entity) {
         return new LichSuDiemResponse(
@@ -51,6 +54,8 @@ public class LichSuDiemService {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             idKhachHang = userDetails.getId();
         }
+        hangServices.updateHang(idKhachHang);
+        viDiemServices.getDiemKhaDung();
         Page<LichSuDiem> pageResult = lichSuDiemRepository.getLichSuDiem(idKhachHang, fromDate, toDate, pageable);
         return pageResult.map(this::convertToResponse);
     }
@@ -58,6 +63,7 @@ public class LichSuDiemService {
 
     @Transactional
     public String doiDiemNhanVoucher(Integer idPhieuGiamGia) {
+        viDiemServices.getDiemKhaDung();
         List<Map<String, String>> errors = new ArrayList<>();
         // Lấy id khách hàng từ security context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -87,6 +93,21 @@ public class LichSuDiemService {
             throw new ValidationException(errors);
         }
 
+        // ngay doi hien tai
+        LocalDate ngayHienTai = LocalDate.now();
+        YearMonth thangNamHienTai = YearMonth.from(ngayHienTai);
+
+        boolean daDoiTrongThang = khachHangGiamGiaRepository
+                .checkSoLanDoiTrong1Thang(idKhachHang, idPhieuGiamGia, thangNamHienTai.getMonthValue(), thangNamHienTai.getYear());
+
+        if(daDoiTrongThang) {
+            errors.add(Map.of("field", "voucher", "message", "Bạn đã đổi voucher này trong tháng rồi !"));
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
 
         System.out.println("Thời gian offset: " + now);
@@ -96,13 +117,14 @@ public class LichSuDiemService {
         BigDecimal diemConLai = diemCanDoi;
 
         for (LichSuDiem lichSu : lichSuCong) {
+            // tong diem da tru trong 1 ban ghi lich su
             BigDecimal daTru = chiTietLichSuDiemRepository.tongDiemDaTruTheoLichSu(lichSu.getId());
-            BigDecimal diemCon = lichSu.getSoDiem().subtract(daTru); // số điểm khả dụng từ 1 bản ghi lịch sử
-
+            // số điểm khả dụng từ 1 bản ghi lịch sử
+            BigDecimal diemCon = lichSu.getSoDiem().subtract(daTru);
 
             if (diemCon.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-            // điểm khả dụng của 1 bản ghi lịch sử < điểm cần đổi => trừ điểm khả dụng của 1 bản ghi lịch sử về 0
+            // nếu điểm khả dụng của 1 bản ghi lịch sử < điểm cần đổi => trừ điểm khả dụng của 1 bản ghi lịch sử về 0
             BigDecimal diemTru = diemCon.min(diemConLai);
 
             // trừ xong thì tạo 1 bản ghi chi tiết trừ
@@ -149,6 +171,7 @@ public class LichSuDiemService {
         khachHangGiamGia.setDoiBangDiem(true);
 
         khachHangGiamGiaRepository.save(khachHangGiamGia);
+        hangServices.updateHang(idKhachHang);
 
         return "Đổi điểm thành công. Bạn đã nhận được voucher.";
     }
@@ -217,6 +240,8 @@ public class LichSuDiemService {
         lichSuDiem.setThoiGian(OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         lichSuDiem.setHanSuDung(OffsetDateTime.now().plusYears(1)); // +1 năm hsd tính tại lúc điểm vào
         lichSuDiemRepository.save(lichSuDiem);
+        hangServices.updateHang(idKhachHang);
+        viDiemServices.getDiemKhaDung();
     }
 
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   detailSanPham,
@@ -13,21 +13,111 @@ import { CartService } from "@/Service/ClientService/GioHang/CartService";
 
 const route = useRoute();
 const idSanPham = route.params.id;
-
 const router = useRouter();
+
+// Variables existantes
+const sanPham = ref(null);
+const selectedRom = ref(null);
+const selectedMau = ref(null);
+const selectedImage = ref("");
+const bienThe = ref(null);
+const thongSo = ref(null);
+const quantity = ref(1);
+
+// Variables pour la modal (nouvelles)
+const activeTab = ref("thong-tin-hang-hoa");
+const specModalContent = ref(null);
+const specTabsContainer = ref(null);
+const showSpecModal = ref(false);
 
 const formatPrice = (val) => {
   if (!val) return "0₫";
   return new Intl.NumberFormat("vi-VN").format(val) + "₫";
 };
 
-const sanPham = ref(null);
-const selectedRom = ref(null);
-const selectedMau = ref(null);
-const selectedImage = ref("");
-const bienThe = ref(null); //anh, gia, soLuong
-const thongSo = ref(null); //thong so ky thuat specifications
-const quantity = ref(1);
+const formatDiemThuong = (giaBan) => {
+  if (!giaBan) return 0;
+  const diem = giaBan * 0.01;
+  return new Intl.NumberFormat("vi-VN").format(Math.floor(diem));
+};
+
+// Fonctions pour la modal
+const openSpecModal = () => {
+  showSpecModal.value = true;
+};
+
+const closeSpecModal = () => {
+  showSpecModal.value = false;
+};
+
+const scrollTabIntoView = (tabId) => {
+  if (specTabsContainer.value) {
+    const activeTabElement = specTabsContainer.value.querySelector(
+      `[data-tab="${tabId}"]`
+    );
+    if (activeTabElement) {
+      activeTabElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }
+};
+
+const scrollToSection = (sectionId) => {
+  activeTab.value = sectionId;
+  scrollTabIntoView(sectionId);
+
+  if (specModalContent.value) {
+    const targetSection = specModalContent.value.querySelector(
+      `[data-section="${sectionId}"]`
+    );
+    if (targetSection) {
+      const modalContent = specModalContent.value;
+      const headerHeight = 81;
+      const tabsHeight = 49;
+      const elementTop =
+        targetSection.offsetTop - headerHeight - tabsHeight - 10;
+
+      modalContent.scrollTo({
+        top: elementTop,
+        behavior: "smooth",
+      });
+    }
+  }
+};
+
+const handleScroll = () => {
+  if (!specModalContent.value) return;
+
+  const scrollTop = specModalContent.value.scrollTop;
+  const headerHeight = 81;
+  const tabsHeight = 49;
+  const totalOffset = headerHeight + tabsHeight + 20;
+
+  const sections = specModalContent.value.querySelectorAll(
+    ".spec-section[data-section]"
+  );
+
+  let currentSection = "thong-tin-hang-hoa";
+
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    const sectionTop = section.offsetTop - totalOffset;
+    const sectionBottom = sectionTop + section.offsetHeight;
+
+    if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
+      currentSection = section.getAttribute("data-section");
+      break;
+    }
+  }
+
+  if (activeTab.value !== currentSection) {
+    activeTab.value = currentSection;
+    scrollTabIntoView(currentSection);
+  }
+};
 
 const increaseQty = () => {
   if (bienThe.value && quantity.value < bienThe.value.soLuong) {
@@ -106,8 +196,8 @@ const addToCart = async (buy) => {
     const soLuongMoi = quantity.value;
     const soLuongTonKho = bienThe.value.soLuong;
 
-    const idSanPhamChiTiet = bienThe.value.idSpct;
-    const soLuongMoi = quantity.value;
+    // const idSanPhamChiTiet = bienThe.value.idSpct;
+    // const soLuongMoi = quantity.value;
     const tenSanPham = sanPham.value?.tenSanPham || "Sản phẩm không xác định";
     const phienBan = `${
       sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
@@ -176,7 +266,6 @@ const validateCartItem = (idSanPhamChiTiet, soLuongMoi, soLuongTon) => {
   return soLuongHienTai + soLuongMoi <= soLuongTon;
 };
 
-// Gọi API lấy biến thể khi màu hoặc ROM thay đổi
 watch([selectedMau], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
@@ -184,10 +273,24 @@ watch([selectedMau], () => {
 
 watch([selectedRom], () => {
   fetchChiTietBienThe();
-  fetchThongSo(); // chỉ khi ROM đổi mới gọi
+  fetchThongSo();
 });
 
-// Gọi khi component được mount
+watch(showSpecModal, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      if (specModalContent.value) {
+        specModalContent.value.addEventListener("scroll", handleScroll);
+        activeTab.value = "thong-tin-hang-hoa";
+      }
+    });
+  } else {
+    if (specModalContent.value) {
+      specModalContent.value.removeEventListener("scroll", handleScroll);
+    }
+  }
+});
+
 onMounted(() => {
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
@@ -197,23 +300,58 @@ onMounted(() => {
 <template>
   <section class="product-detail">
     <div class="product-container">
-      <!-- Cột trái: Hình ảnh -->
+      <!-- Cột trái: Hình ảnh (55%) -->
       <div class="product-image">
-        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
-          class="main-image" />
-
+        <img
+          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
+          alt="Hình ảnh sản phẩm"
+          class="main-image"
+        />
         <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
             :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
+
+        <!-- Thông số nổi bật -->
+        <div class="featured-specs" v-if="thongSo">
+          <!-- Featured Specs Header với nút -->
+          <div class="featured-specs-header">
+            <h3 class="featured-title">Thông số nổi bật</h3>
+            <button @click="openSpecModal" class="view-specs-btn">
+              Xem thông số
+            </button>
+          </div>
+          <div class="featured-specs-grid">
+            <div class="spec-item">
+              <i class="fas fa-microchip spec-icon"></i>
+              <div class="spec-label">Chip</div>
+              <div class="spec-value">{{ thongSo.cpu }}</div>
+            </div>
+
+            <div class="spec-item">
+              <i class="fas fa-tv spec-icon"></i>
+              <div class="spec-label">Màn hình</div>
+              <div class="spec-value">{{ thongSo.kichThuoc }}</div>
+            </div>
+
+            <div class="spec-item">
+              <i class="fas fa-battery-full spec-icon"></i>
+              <div class="spec-label">Thời lượng pin</div>
+              <div class="spec-value">{{ thongSo.thoiGianSuDung }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Cột phải: Thông tin + thông số -->
+      <!-- Cột phải: Thông tin + thông số (45%) -->
       <div class="product-right">
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }}</h1>
-          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+          <router-link class="danhGia" to="#">Đánh giá</router-link> |
+          <button @click="openSpecModal" class="thong-so-btn">
+            Xem thông số
+          </button>
 
           <!-- Màu sắc -->
           <div class="options">
@@ -244,6 +382,8 @@ onMounted(() => {
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
 
+          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+
           <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
             <h3>Chọn số lượng:</h3>
@@ -256,59 +396,220 @@ onMounted(() => {
             </div>
           </div>
 
+          <div class="banner-tichDiem">
+            <router-link to="/client/doiDiem">
+              <img
+                src="/src/components/images/bannerTichDiem.jpg"
+                alt="Banner tích điểm"
+                class="tich-diem-img"
+              />
+            </router-link>
+          </div>
+
+          <div class="diemTichLuy">
+            <i class="fas fa-coins xu-icon"></i>
+            + {{ formatDiemThuong(bienThe?.giaBan) }} điểm thưởng
+          </div>
+
           <!-- Hành động -->
           <div class="button-group">
             <el-button
               type="primary"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              @click="addToCart(true)"
               class="buy-btn"
+              @click="addToCart(true)"
             >
               Mua ngay
             </el-button>
-
             <el-button
               type="success"
               :icon="ShoppingCart"
               :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              @click="addToCart(false)"
               class="cart-btn"
+              @click="addToCart(false)"
             >
               Thêm vào giỏ hàng
             </el-button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Thông số kỹ thuật -->
-        <div class="product-specs" v-if="thongSo">
-          <h2>Thông số kỹ thuật</h2>
-          <ul class="spec-list">
-            <li><strong>CPU:</strong> {{ thongSo.cpu }}</li>
-            <li><strong>RAM:</strong> {{ thongSo.ram }}</li>
-            <li>
-              <strong>Màn hình:</strong> {{ thongSo.tenManHinh }} ({{
-                thongSo.kichThuoc
-              }})
-            </li>
-            <li><strong>Rom:</strong> {{ thongSo.rom }}</li>
-            <li><strong>Loại màn hình:</strong> {{ thongSo.loaiManHinh }}</li>
-            <li><strong>Độ phân giải:</strong> {{ thongSo.doPhanGiai }}</li>
-            <li><strong>Tần số quét:</strong> {{ thongSo.tanSoQuet }}</li>
-            <li><strong>Độ sáng:</strong> {{ thongSo.doSang }}</li>
-            <li><strong>Chất liệu kính:</strong> {{ thongSo.chatLieuKinh }}</li>
-            <li><strong>Camera sau:</strong> {{ thongSo.cameraSau }}</li>
-            <li><strong>Camera trước:</strong> {{ thongSo.cameraTruoc }}</li>
-            <li><strong>Pin:</strong> {{ thongSo.phienBanPin }}</li>
-            <li><strong>Công suất sạc:</strong> {{ thongSo.congXuatSac }}</li>
-            <li>
-              <strong>Thời gian sử dụng:</strong> {{ thongSo.thoiGianSuDung }}
-            </li>
-            <li>
-              <strong>Số lần sạc tối đa:</strong> {{ thongSo.soLanSacToiDa }}
-            </li>
-            <li><strong>Hệ điều hành:</strong> {{ thongSo.heDieuHanh }}</li>
-            <li><strong>Xuất xứ:</strong> {{ thongSo.xuatXu }}</li>
-          </ul>
+    <!-- Specifications Modal -->
+    <div
+      v-if="showSpecModal"
+      class="spec-modal-overlay"
+      @click="closeSpecModal"
+    >
+      <div class="spec-modal" @click.stop>
+        <div class="spec-modal-header">
+          <h2>Thông số sản phẩm</h2>
+          <br>
+          <h6>{{ sanPham?.tenSanPham }} {{ thongSo?.rom }}</h6>
+          <button @click="closeSpecModal" class="close-btn">×</button>
+        </div>
+        <div class="spec-modal-content" v-if="thongSo" ref="specModalContent">
+          <div class="spec-tabs-wrapper">
+            <div class="spec-tabs" ref="specTabsContainer">
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
+                @click="scrollToSection('thong-tin-hang-hoa')"
+                data-tab="thong-tin-hang-hoa"
+              >
+                Thông tin hàng hóa
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
+                @click="scrollToSection('thiet-ke-trong-luong')"
+                data-tab="thiet-ke-trong-luong"
+              >
+                Thiết kế & Trọng lượng
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'bo-xu-ly' }"
+                @click="scrollToSection('bo-xu-ly')"
+                data-tab="bo-xu-ly"
+              >
+                Bộ xử lý
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'ram' }"
+                @click="scrollToSection('ram')"
+                data-tab="ram"
+              >
+                Lưu trữ
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'man-hinh' }"
+                @click="scrollToSection('man-hinh')"
+                data-tab="man-hinh"
+              >
+                Màn hình
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'camera' }"
+                @click="scrollToSection('camera')"
+                data-tab="camera"
+              >
+                Camera
+              </div>
+              <div
+                class="tab-item"
+                :class="{ active: activeTab === 'pin-sac' }"
+                @click="scrollToSection('pin-sac')"
+                data-tab="pin-sac"
+              >
+                Pin & Sạc
+              </div>
+            </div>
+          </div>
+          <div class="spec-details">
+            <div class="spec-section" data-section="thong-tin-hang-hoa">
+              <h3>Thông tin hàng hóa</h3>
+              <div class="spec-row">
+                <span class="spec-label">Xuất xứ</span>
+                <span class="spec-value">{{ thongSo.xuatXu }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Hệ điều hành</span>
+                <span class="spec-value">{{ thongSo.heDieuHanh }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="thiet-ke-trong-luong">
+              <h3>Thiết kế & Trọng lượng</h3>
+              <div class="spec-row">
+                <span class="spec-label">Kích thước</span>
+                <span class="spec-value">{{ thongSo.kichThuoc }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Chất liệu kính</span>
+                <span class="spec-value">{{ thongSo.chatLieuKinh }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="bo-xu-ly">
+              <h3>Bộ xử lý</h3>
+              <div class="spec-row">
+                <span class="spec-label">CPU</span>
+                <span class="spec-value">{{ thongSo.cpu }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="ram">
+              <h3>Lưu trữ</h3>
+              <div class="spec-row">
+                <span class="spec-label">RAM</span>
+                <span class="spec-value">{{ thongSo.ram }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">ROM</span>
+                <span class="spec-value">{{ thongSo.rom }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="man-hinh">
+              <h3>Màn hình</h3>
+              <div class="spec-row">
+                <span class="spec-label">Tên màn hình</span>
+                <span class="spec-value">{{ thongSo.tenManHinh }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Loại màn hình</span>
+                <span class="spec-value">{{ thongSo.loaiManHinh }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Độ phân giải</span>
+                <span class="spec-value">{{ thongSo.doPhanGiai }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Tần số quét</span>
+                <span class="spec-value">{{ thongSo.tanSoQuet }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Độ sáng</span>
+                <span class="spec-value">{{ thongSo.doSang }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="camera">
+              <h3>Camera</h3>
+              <div class="spec-row">
+                <span class="spec-label">Camera sau</span>
+                <span class="spec-value">{{ thongSo.cameraSau }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Camera trước</span>
+                <span class="spec-value">{{ thongSo.cameraTruoc }}</span>
+              </div>
+            </div>
+
+            <div class="spec-section" data-section="pin-sac">
+              <h3>Pin & Sạc</h3>
+              <div class="spec-row">
+                <span class="spec-label">Pin</span>
+                <span class="spec-value">{{ thongSo.phienBanPin }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Công suất sạc</span>
+                <span class="spec-value">{{ thongSo.congXuatSac }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Thời gian sử dụng</span>
+                <span class="spec-value">{{ thongSo.thoiGianSuDung }}</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Số lần sạc tối đa</span>
+                <span class="spec-value">{{ thongSo.soLanSacToiDa }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -335,8 +636,7 @@ onMounted(() => {
 }
 
 .product-image {
-  flex: 1 1 450px;
-  max-width: 500px;
+  flex: 0 0 55%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -366,6 +666,7 @@ onMounted(() => {
   background: #fafafa;
   border-radius: 6px;
   border: 1px solid #e5e5e5;
+  width: 100%;
 }
 
 .thumbnail {
@@ -388,8 +689,98 @@ onMounted(() => {
   box-shadow: 0 0 0 1px #d70018;
 }
 
+/* Featured Specs Styling */
+.featured-specs {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+/* Featured Specs Header */
+.featured-specs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.view-specs-btn {
+  background: transparent;
+  border: 1px solid #d70018;
+  color: #d70018;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.thong-so-btn {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #04b4ff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-specs-btn:hover {
+  background: #d70018;
+  color: white;
+}
+
+.featured-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+  border-bottom: 2px solid #d70018;
+  padding-bottom: 8px;
+}
+
+.featured-specs-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.spec-item {
+  flex: 1;
+  text-align: center;
+  background-color: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.spec-icon {
+  font-size: 24px;
+  color: #f59e0b;
+  margin-bottom: 6px;
+}
+
+.spec-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.spec-value {
+  font-size: 14px;
+  color: #6b7280;
+}
+
 .product-right {
-  flex: 1 1 450px;
+  flex: 0 0 calc(45% - 30px);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -418,10 +809,59 @@ onMounted(() => {
   display: inline-block;
 }
 
+.danhGia {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #04b4ff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+/* Banner Tích Điểm Styling */
+.banner-tichDiem {
+  margin-top: 15px;
+  width: 100%;
+}
+
+.tich-diem-img {
+  width: 100%;
+  height: auto;
+  max-height: 80px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tich-diem-img:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+.diemTichLuy {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #f59e0b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.xu-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 /* Options styling */
 .options {
-  margin-top: 20px;
-  padding: 12px 0;
+  padding: 5px 0;
 }
 
 .options h3 {
@@ -593,33 +1033,153 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* Specifications */
-.product-specs {
-  background: #ffffff;
+/* Modal Styles */
+.spec-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.3s ease;
+}
+
+.spec-modal {
+  width: 500px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  animation: slideInRight 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 20px;
-  border-radius: 6px;
-  border: 1px solid #e5e5e5;
-}
-
-.product-specs h2 {
-  margin-bottom: 15px;
-  font-size: 18px;
-  color: #333;
-  font-weight: 600;
   border-bottom: 1px solid #e5e5e5;
-  padding-bottom: 8px;
+  background: white;
+  z-index: 20;
+  flex-shrink: 0;
 }
 
-.spec-list {
-  list-style: none;
-  padding: 0;
+.spec-modal-header h2 {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #666;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
-.spec-list li {
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.spec-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-tabs-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.spec-tabs {
+  display: flex;
+  overflow-x: auto;
+  background: #f8f9fa;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.spec-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-item {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tab-item.active {
+  color: #d70018;
+  border-bottom-color: #d70018;
+  background: white;
+  font-weight: 600;
+  position: relative;
+}
+
+.tab-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #d70018;
+}
+
+.tab-item:hover {
+  color: #d70018;
+}
+
+.spec-details {
+  padding: 20px;
+  flex: 1;
+}
+
+.spec-section {
+  margin-bottom: 25px;
+  scroll-margin-top: 100px;
+}
+
+.spec-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.spec-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -627,29 +1187,89 @@ onMounted(() => {
   border-bottom: 1px solid #f5f5f5;
 }
 
-.spec-list li:last-child {
+.spec-row:last-child {
   border-bottom: none;
 }
 
-.spec-list li strong {
+.spec-row .spec-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+  flex: 0 0 40%;
+}
+
+.spec-row .spec-value {
+  font-weight: 400;
   color: #333;
-  font-weight: 500;
-  flex: 0 0 35%;
-  margin-right: 15px;
+  font-size: 14px;
+  text-align: right;
+  flex: 1;
 }
 
-/* Stock info */
-.options:has(.quantity-selector) h3 {
-  color: #52c41a;
-  font-weight: 500;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Responsive */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile responsive for modal */
 @media (max-width: 768px) {
+  .spec-modal {
+    width: 100vw;
+  }
+
+  .spec-tabs {
+    padding: 0 10px;
+  }
+
+  .tab-item {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .spec-details {
+    padding: 15px;
+  }
+
+  .spec-row {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .spec-row .spec-label {
+    flex: none;
+  }
+
+  .spec-row .spec-value {
+    text-align: left;
+  }
+
   .product-container {
     flex-direction: column;
     padding: 15px;
     gap: 20px;
+  }
+
+  .product-image {
+    flex: none;
+  }
+
+  .product-right {
+    flex: none;
   }
 
   .main-image {
@@ -668,10 +1288,6 @@ onMounted(() => {
     font-size: 24px;
   }
 
-  .product-specs {
-    padding: 15px;
-  }
-
   .button-group {
     flex-direction: column;
     gap: 10px;
@@ -681,19 +1297,6 @@ onMounted(() => {
   .cart-btn {
     width: 100%;
     padding: 12px 0;
-  }
-
-  .spec-list li {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-    padding: 10px 0;
-  }
-
-  .spec-list li strong {
-    flex: none;
-    margin-right: 0;
-    margin-bottom: 2px;
   }
 
   .thumbnail {
@@ -716,6 +1319,15 @@ onMounted(() => {
     height: 28px;
     font-size: 13px;
   }
+
+  .featured-specs-grid {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spec-item {
+    padding: 8px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -724,10 +1336,6 @@ onMounted(() => {
   }
 
   .product-info {
-    padding: 12px;
-  }
-
-  .product-specs {
     padding: 12px;
   }
 
@@ -743,6 +1351,26 @@ onMounted(() => {
     padding: 6px 12px;
     font-size: 13px;
     min-width: 60px;
+  }
+
+  .featured-specs {
+    padding: 15px;
+  }
+
+  .featured-title {
+    font-size: 16px;
+  }
+
+  .spec-icon {
+    font-size: 20px;
+  }
+
+  .banner-tichDiem {
+    margin-top: 10px;
+  }
+
+  .tich-diem-img {
+    max-height: 60px;
   }
 }
 </style>
