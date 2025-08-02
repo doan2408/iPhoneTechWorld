@@ -276,7 +276,8 @@ const addToCart = async (buy) => {
     const soLuongTon = bienThe.value.soLuong;
 
     const isValid = validateCartItem(idSanPhamChiTiet, soLuongMoi, soLuongTon);
-
+    console.log("");
+    
     const success = CartService.themVaoGio(
       idSanPhamChiTiet,
       soLuongMoi,

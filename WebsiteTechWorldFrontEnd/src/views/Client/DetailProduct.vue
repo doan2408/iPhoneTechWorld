@@ -270,7 +270,7 @@ const themVaoGio = async (buy) => {
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
-    const soLuongTonKho = bienThe.value.tongSoLuong;
+    const soLuongTonKho = bienThe.value.soLuong;
     if (soLuongTonKho < 0) {
       ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
       return;
@@ -286,6 +286,8 @@ const themVaoGio = async (buy) => {
       }
     }
     const tongSoLuong = soLuongHienTai + quantity.value;
+    console.log(soLuongTonKho);
+    
     if (tongSoLuong > soLuongTonKho) {
       ElMessage.error(
         `Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`
