@@ -353,7 +353,6 @@ const submitReplyForm = () => {
 };
 
 
-// Xử lý phê duyệt đánh giá
 const handleApprove = async (id) => {
   try {
     await ElMessageBox.confirm('Bạn có chắc muốn phê duyệt đánh giá này?', 'Xác nhận', {
@@ -365,6 +364,10 @@ const handleApprove = async (id) => {
     ElMessage.success('Phê duyệt đánh giá thành công');
     loadDanhGia();
   } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
+      return;
+    }
     ElMessage.error('Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi phê duyệt:', error);
   }
