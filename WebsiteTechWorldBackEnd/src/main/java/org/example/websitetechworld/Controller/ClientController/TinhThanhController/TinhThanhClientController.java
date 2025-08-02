@@ -1,40 +1,19 @@
-package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
+package org.example.websitetechworld.Controller.ClientController.TinhThanhController;
 
-import org.example.websitetechworld.Dto.Response.TinhThanhDTO;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.Locale;
 
 @RestController
-@RequestMapping("/admin/tinh-thanh")
-public class TinhThanhController {
+@RequestMapping("/tinh-thanh")
+public class TinhThanhClientController {
     private final RestTemplate restTemplate = new RestTemplate();
 
-
-    @GetMapping("/provinces")
-    public ResponseEntity<?> getProvinces() {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://provinces.open-api.vn/api/?depth=1";
-        String data = restTemplate.getForObject(url, String.class);
-        return ResponseEntity.ok(data);
-    }
-    @GetMapping("/districts/{code}")
-    public ResponseEntity<?> getDistricts(@PathVariable String code) {
-        String url = "http://provinces.open-api.vn/api/p/" + code + "?depth=2";
-        return ResponseEntity.ok(new RestTemplate().getForObject(url, String.class));
-    }
-    @GetMapping("/wards/{code}")
-    public ResponseEntity<?> getWards(@PathVariable String code) {
-        String url = "http://provinces.open-api.vn/api/d/" + code + "?depth=2";
-        return ResponseEntity.ok(new RestTemplate().getForObject(url, String.class));
-    }
     @GetMapping("/geo")
     public ResponseEntity<?> getGeo(@RequestParam String address) {
         try {
-//            String encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8);
             String url = "https://nominatim.openstreetmap.org/search?q=" + address + "&format=json&limit=1";
 
             HttpHeaders headers = new HttpHeaders();
@@ -73,5 +52,4 @@ public class TinhThanhController {
                     .body("Lỗi tính khoảng cách: " + e.getMessage());
         }
     }
-
 }

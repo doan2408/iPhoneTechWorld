@@ -178,7 +178,9 @@ const goToLogin = () => {
         <li>
           <router-link to="/client/products"><i class="fa fa-box"></i> Đơn mua của tôi</router-link>
         </li>
-
+        <li>
+          <router-link to="/client/favorites-page"><i class="fa-regular fa-heart"></i> Yêu thích</router-link>
+        </li>
         <li>
           <router-link to="/client/order-tracking-search"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link>
         </li>

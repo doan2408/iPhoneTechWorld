@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class SanPhamAdminResponse {
     @Enumerated(EnumType.STRING)
     private TrangThaiSanPham trangThaiSanPham;
 
-    private NhaCungCapAdminResponse nhaCungCapAdminResponse;
+    private List<NhaCungCapAdminResponse> nhaCungCaps;
 
     private ModelSanPhamAdminResponse modelSanPhamAdminResponse;
 

@@ -88,7 +88,9 @@
                                 class="radio-field" />
                             <span>Vận chuyển nhanh</span>
                         </div>
-                        <span class="shipping-cost">₫40.000</span>
+                        <span class="shipping-cost">
+                            ₫{{ formatCurrency(phishipDisplay) }}
+                        </span>
                     </label>
                 </div>
             </div>
@@ -272,12 +274,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { getDiaChiByClient } from '@/Service/ClientService/TaiKhoan/DiaChiServices'
 import { useRoute } from 'vue-router';
 import { loadPaymentMethod, thanhToanClient } from "@/Service/ClientService/HoaDon/MyOrderClient";
 import { useToast } from "vue-toastification";
 import router from '@/router';
+import {getLatLon, getDistance} from '@/Service/ClientService/HoaDon/MyOrderClient'
+
 
 const toast = useToast()
 const route = useRoute();
@@ -325,7 +329,12 @@ watch(selectedAddressId, (newVal) => {
             shippingAddress.value = { ...selected }
         }
     }
-}, { immediate: true })
+    nextTick(() => {
+        if (shippingAddress.value && shippingAddress.value.tinhThanhPho) {
+            updatePhiShip();
+        }
+    });
+}, { immediate: false })
 
 // Open Address Modal and sync its state
 const openAddressModal = () => {
@@ -447,7 +456,7 @@ const getShippingCost = computed(() => {
         case 'ghtk':
             return 25000;
         case 'express':
-            return 40000;
+            return phishipDisplay.value;
         default:
             return 0;
     }
@@ -545,6 +554,130 @@ const getIconUrl = (code) => {
 onMounted(async () => {
     fetchPaymentMethods();
 })
+
+const phishipDisplay = ref(0);
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN').format(amount)
+}
+const storeAddress = 'Hà Nội';
+const updatePhiShip = async () => {
+
+    const fullAddress = `${shippingAddress.value.tinhThanhPho}`;
+
+    console.log("Địa chỉ người nhận đầy đủ (fullAddress):", fullAddress);
+    console.log("Địa chỉ cửa hàng (storeAddress):", storeAddress);
+
+    try {
+        const [from, to] = await Promise.all([
+            getLatLonFromAddress(storeAddress),
+            getLatLonFromAddress(fullAddress),
+        ]);
+
+        console.log("Tọa độ cửa hàng (from):", from);
+        console.log("Tọa độ người nhận (to):", to);
+
+        if (!from || !to) {
+            phishipDisplay.value = 30000; // Phí mặc định
+            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Áp dụng phí mặc định: 30,000 VNĐ.");
+            return;
+        }
+
+        const distance = await getDistanceInKm(from, to);
+        console.log("Khoảng cách tính được:", distance);
+
+        // const maxDistance = 50;
+        // let adjustedDistance = distance;
+        // if (distance > maxDistance) {
+        //     console.warn(`Khoảng cách quá lớn (${distance} km), giới hạn về ${maxDistance} km.`);
+        //     adjustedDistance = maxDistance;
+        // }
+
+        phishipDisplay.value = calcPhiShip(distance);
+        console.log(
+            `Khoảng cách: ${distance} km, Phí ship: ${phishipDisplay.value.toLocaleString('vi-VN')} VNĐ`
+        );
+    } catch (err) {
+        console.error("Lỗi khi tính phí ship:", err);
+        phishipDisplay.value = 30000; // Phí mặc định
+        console.log("Áp dụng phí mặc định do lỗi: 30,000 VNĐ");
+    }
+};
+
+
+// Hàm lấy tọa độ từ địa chỉ
+const getLatLonFromAddress = async (address) => {
+    console.log("Đang gọi API lấy tọa độ cho:", address);
+    try {
+        // Thử địa chỉ gốc
+        const res = await getLatLon(address);
+        const parsedData = res.data;
+        console.log("Phản hồi từ API /geo (địa chỉ gốc):", parsedData);
+
+        if (Array.isArray(parsedData) && parsedData.length > 0 && parsedData[0].lat && parsedData[0].lon) {
+            const coords = {
+                lat: parseFloat(parsedData[0].lat),
+                lon: parseFloat(parsedData[0].lon),
+            };
+            console.log(`Tọa độ trả về cho ${address}:`, coords);
+            return coords;
+        }
+
+        // Thử định dạng thay thế (xóa dấu phẩy thừa)
+        const cleanAddress = address.replace(/^,\s*/, '').trim();
+        console.log("Thử định dạng thay thế:", cleanAddress);
+        const altRes = await getLatLon(cleanAddress);
+        const altParsedData = altRes.data;
+        console.log("Phản hồi từ API /geo (thay thế):", altParsedData);
+
+        if (Array.isArray(altParsedData) && altParsedData.length > 0 && altParsedData[0].lat && altParsedData[0].lon) {
+            const coords = {
+                lat: parseFloat(altParsedData[0].lat),
+                lon: parseFloat(altParsedData[0].lon),
+            };
+            console.log(`Tọa độ trả về cho ${cleanAddress}:`, coords);
+            return coords;
+        }
+
+        console.warn("Không tìm thấy tọa độ hợp lệ cho địa chỉ:", address, parsedData);
+        return null;
+    } catch (error) {
+        console.error("Lỗi khi lấy tọa độ cho địa chỉ:", address, error);
+        return null;
+    }
+};
+// Hàm tính khoảng cách giữa 2 tọa độ (đã có sẵn)
+const getDistanceInKm = async (from, to) => {
+    if (from.lat === to.lat && from.lon === to.lon) {
+        console.warn('Hai điểm trùng nhau, khoảng cách = 0 km');
+        return 0;
+    }
+    try {
+        const res = await getDistance(from, to);
+        const parsedData = res.data;
+        const distanceInMeters = parsedData?.routes?.[0]?.distance;
+
+        if (distanceInMeters != null) {
+            return Math.ceil(distanceInMeters / 1000);
+        }
+
+        console.warn('Không lấy được khoảng cách giữa 2 điểm (kiểm tra parsedData):', parsedData);
+        return 0;
+
+    } catch (error) {
+        console.error('Lỗi khi tính khoảng cách giữa 2 điểm:', error);
+        return 0;
+    }
+};
+const calcPhiShip = (km) => {
+    const baseFee = 15000;
+    const additionalFeePerKm = 2000;
+
+    if (km <= 2) return baseFee;
+
+    const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
+
+    return calculatedFee;
+};
 </script>
 
 <style scoped src="@/style/HoaDon/CheckoutForm.css">

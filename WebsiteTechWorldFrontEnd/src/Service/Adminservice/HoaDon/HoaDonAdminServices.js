@@ -135,7 +135,6 @@ export const phieuGiamGia = (id, request) => {
     return api.put('/admin/hoa-don/' +id + '/phieu-giam-gia', request)
 }
 
-
 export const getTinhThanh = () => {
     const url = '/admin/tinh-thanh/provinces'
     return api.get(url)

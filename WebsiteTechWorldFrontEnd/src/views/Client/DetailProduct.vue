@@ -1,5 +1,3 @@
-```vue
-<!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 (function () {
@@ -11,8 +9,6 @@ var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
   s0.parentNode.insertBefore(s1, s0);
 })();
 </script>
-<!--End of Tawk.to Script-->
-
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -23,10 +19,17 @@ import {
   getThongSo,
   getListAnhByMau,
 } from "@/Service/ClientService/Products/ProductClientService";
+import { checkExistsWishList, addNewWishList, deleteWishList } from "@/Service/ClientService/WishList/WishListService";
 import { cartService } from "@/service/ClientService/GioHang/GioHangClientService";
 import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
 import { PhanHoiDanhGiaClientService } from "@/Service/ClientService/PhanHoiDanhGia/PhanHoiDanhGiaClientService";
 import { ShoppingCart } from "@element-plus/icons-vue";
+import headerState from "@/components/Client/modules/headerState";
+import axios from "axios";
+import { useToast } from "vue-toastification";
+const toast = useToast()
+const count = ref(0);
+const store = useStore();
 import { ElMessage, ElRate, ElUpload } from "element-plus";
 import { ElPagination } from "element-plus";
 
@@ -43,10 +46,6 @@ const loadTawkTo = () => {
   window.Tawk_LoadStart = new Date();
 };
 
-import headerState from '@/components/Client/modules/headerState';
-
-const count = ref(0)
-const store = useStore()
 
 if (!store.hasModule('headerState')) {
   store.registerModule('headerState', headerState)
@@ -280,6 +279,7 @@ const fetchSanPhamDetail = async () => {
     if (data.rom.length > 0) selectedRom.value = data.rom[0].id;
     if (data.mau.length > 0) selectedMau.value = data.mau[0].id;
     if (data.hinhAnh?.length > 0) selectedImage.value = data.hinhAnh[0];
+    await checkIfFavorite();
   } catch (error) {
     console.error("Lỗi khi tải chi tiết sản phẩm:", error);
   }
@@ -326,7 +326,7 @@ const themVaoGio = async (buy) => {
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
-    const soLuongTonKho = bienThe.value.tongSoLuong;
+    const soLuongTonKho = bienThe.value.soLuong;
     if (soLuongTonKho < 0) {
       ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
       return;
@@ -342,6 +342,8 @@ const themVaoGio = async (buy) => {
       }
     }
     const tongSoLuong = soLuongHienTai + quantity.value;
+    console.log(soLuongTonKho);
+    
     if (tongSoLuong > soLuongTonKho) {
       ElMessage.error(
         `Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`
@@ -471,11 +473,13 @@ const handlePageChange = (page) => {
 watch([selectedMau], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
+  checkIfFavorite();
 });
 
 watch([selectedRom], () => {
   fetchChiTietBienThe();
   fetchThongSo(); // chỉ khi ROM đổi mới gọi
+  checkIfFavorite();
 });
 
 onMounted(() => {
@@ -506,6 +510,31 @@ watch(showSpecModal, (newVal) => {
     }
   }
 });
+const isFavorite = ref(false)
+const checkIfFavorite = async () => {
+  try {
+    const res = await checkExistsWishList(idSanPham, selectedRom.value, selectedMau.value);
+    isFavorite.value = res.data
+  } catch (err) {
+    console.error('Lỗi kiểm tra wishlist:', err)
+  }
+}
+
+const toggleWishlist = async () => {
+  try {
+    if (isFavorite.value) {
+      await deleteWishList(idSanPham, selectedRom.value, selectedMau.value,null)
+      toast.success("Bỏ yêu thích thành công")
+    } else {
+      await addNewWishList(idSanPham, selectedRom.value, selectedMau.value,null)
+      toast.success("Thêm thành công vào yêu thích")
+    }
+    isFavorite.value = !isFavorite.value
+  } catch (err) {
+    console.error('Lỗi toggle wishlist:', err)
+  }
+}
+// onMounted(checkIfFavorite)
 </script>
 
 <template>
@@ -513,22 +542,13 @@ watch(showSpecModal, (newVal) => {
     <div class="product-container">
       <!-- Cột trái: Hình ảnh (55%) -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
         <!-- Danh sách ảnh thu nhỏ -->
 
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
-          <img
-            v-for="(img, index) in bienThe.hinhAnh"
-            :key="index"
-            :src="img"
-            class="thumbnail"
-            :class="{ active: img === selectedImage }"
-            @click="selectedImage = img"
-          />
+          <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
+            :class="{ active: img === selectedImage }" @click="selectedImage = img" />
         </div>
 
         <!-- Thông số nổi bật -->
@@ -568,18 +588,20 @@ watch(showSpecModal, (newVal) => {
           <a href="#" class="danhGia" @click.prevent="scrollToReviews">Đánh giá</a> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số
+          </button> |
+          <button @click="toggleWishlist" :class="['wishlist-btn', isFavorite ? 'active' : '']"
+            :title="isFavorite ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'">
+            <span v-if="isFavorite">❤️ Bỏ khỏi yêu thích</span>
+            <span v-else>🤍 Thêm vào yêu thích</span>
           </button>
+
 
           <!-- Màu sắc -->
           <div class="options">
             <h3>Chọn màu:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedMau">
-                <el-radio-button
-                  v-for="m in sanPham?.mau"
-                  :key="m.id"
-                  :label="m.id"
-                >
+                <el-radio-button v-for="m in sanPham?.mau" :key="m.id" :label="m.id">
                   {{ m.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -589,11 +611,7 @@ watch(showSpecModal, (newVal) => {
             <h3>Chọn ROM:</h3>
             <div class="option-list">
               <el-radio-group v-model="selectedRom">
-                <el-radio-button
-                  v-for="r in sanPham?.rom"
-                  :key="r.id"
-                  :label="r.id"
-                >
+                <el-radio-button v-for="r in sanPham?.rom" :key="r.id" :label="r.id">
                   {{ r.ten }}
                 </el-radio-button>
               </el-radio-group>
@@ -627,11 +645,7 @@ watch(showSpecModal, (newVal) => {
           </div>
           <div class="banner-tichDiem">
             <router-link to="/client/doiDiem">
-              <img
-                src="/src/components/images/bannerTichDiem.jpg"
-                alt="Banner tích điểm"
-                class="tich-diem-img"
-              />
+              <img src="/src/components/images/bannerTichDiem.jpg" alt="Banner tích điểm" class="tich-diem-img" />
             </router-link>
           </div>
 
@@ -642,21 +656,13 @@ watch(showSpecModal, (newVal) => {
 
           <!-- Hành động -->
           <div class="button-group">
-            <el-button
-              type="primary"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="buy-btn"
-              @click="themVaoGio(true)"
-            >
+            <el-button type="primary" :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="buy-btn"
+              @click="themVaoGio(true)">
               Mua ngay
             </el-button>
-            <el-button
-              type="success"
-              :icon="ShoppingCart"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="cart-btn"
-              @click="themVaoGio(false)"
-            >
+            <el-button type="success" :icon="ShoppingCart"
+              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="cart-btn"
+              @click="themVaoGio(false)">
               Thêm vào giỏ hàng
             </el-button>
           </div>
@@ -664,11 +670,7 @@ watch(showSpecModal, (newVal) => {
       </div>
     </div>
     <!-- Specifications Modal -->
-    <div
-      v-if="showSpecModal"
-      class="spec-modal-overlay"
-      @click="closeSpecModal"
-    >
+    <div v-if="showSpecModal" class="spec-modal-overlay" @click="closeSpecModal">
       <div class="spec-modal" @click.stop>
         <div class="spec-modal-header">
           <h2>Thông số sản phẩm</h2>
@@ -679,60 +681,32 @@ watch(showSpecModal, (newVal) => {
         <div class="spec-modal-content" v-if="thongSo" ref="specModalContent">
           <div class="spec-tabs-wrapper">
             <div class="spec-tabs" ref="specTabsContainer">
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
-                @click="scrollToSection('thong-tin-hang-hoa')"
-                data-tab="thong-tin-hang-hoa"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
+                @click="scrollToSection('thong-tin-hang-hoa')" data-tab="thong-tin-hang-hoa">
                 Thông tin hàng hóa
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
-                @click="scrollToSection('thiet-ke-trong-luong')"
-                data-tab="thiet-ke-trong-luong"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
+                @click="scrollToSection('thiet-ke-trong-luong')" data-tab="thiet-ke-trong-luong">
                 Thiết kế & Trọng lượng
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'bo-xu-ly' }"
-                @click="scrollToSection('bo-xu-ly')"
-                data-tab="bo-xu-ly"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'bo-xu-ly' }" @click="scrollToSection('bo-xu-ly')"
+                data-tab="bo-xu-ly">
                 Bộ xử lý
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'ram' }"
-                @click="scrollToSection('ram')"
-                data-tab="ram"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'ram' }" @click="scrollToSection('ram')"
+                data-tab="ram">
                 Lưu trữ
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'man-hinh' }"
-                @click="scrollToSection('man-hinh')"
-                data-tab="man-hinh"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'man-hinh' }" @click="scrollToSection('man-hinh')"
+                data-tab="man-hinh">
                 Màn hình
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'camera' }"
-                @click="scrollToSection('camera')"
-                data-tab="camera"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'camera' }" @click="scrollToSection('camera')"
+                data-tab="camera">
                 Camera
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'pin-sac' }"
-                @click="scrollToSection('pin-sac')"
-                data-tab="pin-sac"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'pin-sac' }" @click="scrollToSection('pin-sac')"
+                data-tab="pin-sac">
                 Pin & Sạc
               </div>
             </div>
@@ -837,13 +811,10 @@ watch(showSpecModal, (newVal) => {
                 <span class="spec-value">{{ thongSo.soLanSacToiDa }}</span>
               </div>
             </div>
+          </div>
         </div>
       </div>
-
-
     </div>
-    </div>
-
     <div class="product-reviews" ref="reviewsSection">
       <h2>Đánh giá sản phẩm</h2>
       <div class="rating-summary">
@@ -1841,7 +1812,25 @@ watch(showSpecModal, (newVal) => {
     width: 100%;
   }
 }
+.wishlist-btn {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  color: #555;
+}
+.wishlist-btn.active {
+  color: red;
+}
 
+.wishlist-btn:hover {
+  transform: scale(1.2);
+}
+
+.wishlist-btn.active {
+  color: red;
+}
 @media (max-width: 480px) {
   .product-container {
     padding: 10px;
@@ -1884,4 +1873,3 @@ watch(showSpecModal, (newVal) => {
   }
 }
 </style>
-```

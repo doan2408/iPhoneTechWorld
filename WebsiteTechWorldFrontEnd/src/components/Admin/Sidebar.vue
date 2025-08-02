@@ -91,7 +91,7 @@ function toggleOrderMenu() {
 
       <nav>
         <ul>
-          <li><router-link to="/admin/dashboard">Dashboard</router-link></li>
+          <!-- <li><router-link to="/admin/dashboard">Dashboard</router-link></li> -->
 
           <li>
             <router-link to="/admin/statistical" class="icon stats-icon"
@@ -131,10 +131,10 @@ function toggleOrderMenu() {
               <router-link to="/admin/cameraTruoc">Camera trước</router-link>
             </li>
             <li><router-link to="/admin/cameraSau">Camera sau</router-link></li>
-            <li>
+            <!-- <li>
               <router-link to="/admin/products/add">Thêm sản phẩm</router-link>
             </li>
-            <li><router-link to="/admin/categories">Danh mục</router-link></li>
+            <li><router-link to="/admin/categories">Danh mục</router-link></li> -->
           </ul>
 
           <li @click="toggleUserstMenu" v-if="isAdmin" class="menu-toggle">
@@ -176,7 +176,7 @@ function toggleOrderMenu() {
           </li>
 
           <li>
-            <router-link to="/admin/danhGiaSanPham">Quản lý đánh giá sản phẩm</router-link>
+            <router-link to="/admin/danhGiaSanPham">Quản lý bình luận</router-link>
           </li>
         </ul>
       </nav>

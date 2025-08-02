@@ -1620,7 +1620,7 @@ export default {
         const payload = {
           tenSanPham: sanPham.tenSanPham,
           thuongHieu: sanPham.thuongHieu,
-          idNhaCungCap: sanPham.idNhaCungCap,
+          idNhaCungCaps: [sanPham.idNhaCungCap],
           trangThaiSanPham: sanPham.trangThaiSanPham,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {

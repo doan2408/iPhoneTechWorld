@@ -71,9 +71,6 @@ public class PhieuGiamGia {
     @Column(name = "so_diem_can_de_doi", precision = 10, scale = 2)
     private BigDecimal soDiemCanDeDoi;
 
-    @Column(name = "is_global")
-    private Boolean congKhai;
-
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_phieu_giam_gia", length = 50)

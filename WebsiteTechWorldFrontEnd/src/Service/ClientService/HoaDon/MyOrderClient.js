@@ -27,6 +27,24 @@ export const thanhToanClient = (data) => {
     return api.put(baseURL + '/thanh-toan',data);
 }
 
+export const getLatLon = (address) => {
+    return api.get('/tinh-thanh/geo', {
+        params: {
+            address: address
+        }
+    })
+}
+
+export const getDistance = (from, to) => {
+    return api.get('/tinh-thanh/distance', {
+        params: {
+            fromLat: from.lat,
+            fromLon: from.lon,
+            toLat: to.lat,
+            toLon: to.lon
+        }
+    })
+}
 //cuong
 
 export const getHoaDonAndIdChiTietHoaDon = (id) => {

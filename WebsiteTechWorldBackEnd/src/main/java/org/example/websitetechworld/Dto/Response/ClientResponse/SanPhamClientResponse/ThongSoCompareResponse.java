@@ -42,4 +42,13 @@ public class ThongSoCompareResponse {
     private String boNhoDem;
     private String tieuThuDienNang;
     private Date namRaMat;
+
+
+    // camera truoc
+    private String loaiCamera;
+    private String khauDo;
+    private String loaiZoom;
+    private String cheDoChup;
+
+    private String giaoDienNguoiDung;
 }

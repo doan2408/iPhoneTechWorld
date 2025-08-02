@@ -3,13 +3,6 @@
         <!-- Header với tabs hóa đơn -->
         <div class="pos-header">
             <div class="left-section">
-                <!-- Tìm kiếm hàng hóa -->
-                <div class="search-box">
-                    <Search class="search-icon" />
-                    <input v-model="productSearchQuery" type="text" placeholder="Tìm hàng hóa (F3)" class="search-input"
-                        @keydown.f3.prevent="focusProductSearch" />
-                </div>
-
                 <!-- Tabs hóa đơn -->
                 <div class="invoice-tabs">
                     <div v-for="invoice in invoices" :key="invoice.id" @click="selectInvoice(invoice.id)"
@@ -97,9 +90,18 @@
                 <!-- Customer search -->
                 <div class="customer-search">
                     <div class="search-box">
-                        <Search class="search-icon" />
-                        <input v-model="customerSearchQuery" type="text" placeholder="Tìm sản phẩm (F4)"
-                            class="search-input" @keydown.f4.prevent="focusCustomerSearch" @blur="searchCustomer" />
+                        <select v-model="searchType" class="search-select">
+                            <option disabled value="">-- Chọn loại tìm kiếm --</option>
+                            <option value="name">Tên</option>
+                            <option value="ma">Mã</option>
+                        </select>
+
+                        <div class="search-input-wrapper">
+                            <Search class="search-icon" />
+                            <input v-model="customerSearchQuery" type="text"
+                                :placeholder="searchType === 'ma' ? 'Nhập mã sản phẩm' : 'Nhập tên sản phẩm'"
+                                class="search-input" @keydown.f4.prevent="searchCustomer" @blur="searchCustomer" />
+                        </div>
                     </div>
                     <div class="customer-actions">
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
@@ -154,7 +156,8 @@
                 <div v-if="isImeiModalOpen" class="modal-overlay">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>Chọn IMEI cho {{ selectedProductForImei?.tenSanPham }}</h2>
+                            <h2>Chọn IMEI cho {{ selectedProductForImei?.maSanPhamChiTiet }} - {{
+                                selectedProductForImei?.tenSanPham }}</h2>
                             <div class="quantity-input-group">
                                 <label for="quantityToSelect">Số lượng:</label>
                                 <input type="number" id="quantityToSelect" v-model.number="quantityToSelect"
@@ -302,7 +305,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                            currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -346,7 +349,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                ' VNĐ' : 'Chưa tính' }}</p>
+                                    ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -368,17 +371,17 @@
                                                 </option>
                                             </select>
 
-                                            <label>Chọn huyện:</label>
+                                            <!-- <label>Chọn huyện:</label>
                                             <select v-model="selectedHuyen" @change="onHuyenChange" class="select-box"
                                                 :disabled="!selectedTinh">
                                                 <option disabled value="">-- Quận/Huyện --</option>
                                                 <option v-for="h in huyenList" :key="h.code" :value="h">{{ h.name }}
                                                 </option>
-                                            </select>
+                                            </select> -->
 
                                             <label>Chọn Xã:</label>
                                             <select v-model="selectedXa" @change="onXaChange" class="select-box"
-                                                :disabled="!selectedHuyen">
+                                                :disabled="!selectedTinh">
                                                 <option disabled value="">-- Phường/Xã --</option>
                                                 <option v-for="x in xaList" :key="x.code" :value="x">{{ x.name }}
                                                 </option>
@@ -548,7 +551,7 @@ import {
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
-    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa
 } from '@/Service/Adminservice/Products/ProductAdminService';
 import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
@@ -567,6 +570,9 @@ import ConfirmModal from '@/views/Popup/ConfirmModal.vue';
 import QrScanner from '@/views/Admin/Qr/QrScanner.vue';
 import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
 import html2pdf from 'html2pdf.js';
+import provinceData from '@/assets/JsonTinhThanh/province.json'
+import wardData from '@/assets/JsonTinhThanh/ward.json'
+
 // Search queries
 const productSearchQuery = ref('')
 const customerSearchQuery = ref('')
@@ -590,13 +596,16 @@ const currentInvoiceDetail = ref([]);
 //ship
 const isShipping = ref(false);
 const tinhThanhList = ref([])
-const tinhList = ref([])
-const huyenList = ref([])
+// const tinhList = ref([])
+// const huyenList = ref([])
+// const xaList = ref([])
+const tinhList = ref(provinceData)
+const allXaList = ref(Object.values(wardData))  
 const xaList = ref([])
 const selectedTinh = ref('')
-const selectedHuyen = ref('')
+// const selectedHuyen = ref('')
 const selectedXa = ref('')
-const storeAddress = 'Ngọc liệp, Quốc Oai, Hà Nội';
+const storeAddress = 'Hà Nội';
 
 //thanhToan
 const totalProductAmount = ref(0)
@@ -608,6 +617,9 @@ const grandTotal = ref(0)
 const discountList = ref([])
 const selectedDiscount = ref(null)
 const search = ref('')
+
+//search
+const searchType = ref('');
 
 watch(selectedDiscount, (newVal) => {
     console.log('PGG đã chọn:', newVal)
@@ -723,7 +735,7 @@ const danhMucSanPham = async () => {
 }
 
 const loadProducts = async (category) => {
-    selectedCategory.value = category.tenSanPham;
+    // selectedCategory.value = category.tenSanPham;
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
         response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value);
@@ -743,6 +755,10 @@ const itemsPerPage = 12
 const loadTabHoaDon = async () => {
     try {
         const response = await loadHoaDonByIdNhanVien();
+        if (response.data.length == 0) {
+            await addNewInvoice();
+            loadTabHoaDon()
+        }
         console.log('Danh sách hóa đơn từ backend:', response.data);
         //Load các hóa đơn của nhân viên
         // Cập nhật danh sách hóa đơn từ backend, tránh thêm trùng lặp
@@ -963,17 +979,33 @@ const removeFromCart = async () => {
     }
 }
 
-const searchCustomer = () => {
-    // Simulate customer search
-    if (customerSearchQuery.value === '0901234567') {
-        currentInvoice.value.customer = {
-            name: 'Nguyễn Văn A',
-            phone: '0901234567',
-            email: 'nguyenvana@email.com',
-            address: '123 Đường ABC, Quận 1, TP.HCM'
-        }
+const searchCustomer = async () => {
+    const type = searchType.value || 'name';
+
+    if (!customerSearchQuery.value.trim()) {
+        await loadProducts(); 
+        return;
     }
-}
+
+    try {
+        let response;
+        if (type === 'name') {
+            response = await findSanPhamBanHang(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
+        } else if (type === 'ma') {
+            response = await findSanPhamByMa(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
+        }
+
+        products.value = response.data.content;
+        totalPagesProdut.value = response.data.totalPages;
+        console.log('da vao day');
+    } catch (error) {
+        console.error('Search error:', error);
+    }
+};
+
+watch([searchType, customerSearchQuery], () => {
+    searchCustomer();
+});
 
 const clearCustomer = () => {
     currentInvoice.value.customer = { name: '', phone: '', email: '', address: '' }
@@ -1388,8 +1420,8 @@ console.log("tra ve", getImeiStatusClass("Đã đặt trước"))
 
 const getTinhList = async () => {
     try {
-        const res = await getTinhThanh();
-        tinhList.value = res.data
+        // const res = await getTinhThanh();
+        tinhList.value = provinceData
         console.log("Danh sách Tỉnh/Thành phố:", tinhList.value);
     } catch (error) {
         console.error("Lỗi khi lấy danh sách tỉnh:", error);
@@ -1397,16 +1429,20 @@ const getTinhList = async () => {
 }
 
 const onTinhChange = async () => {
-    selectedHuyen.value = null;
+    // selectedHuyen.value = null;
     selectedXa.value = null;
-    huyenList.value = [];
+    // huyenList.value = [];
     xaList.value = [];
-    if (selectedTinh.value?.code) {
+    if (selectedTinh.value?.name) {
         try {
-            const res = await getHuyen(selectedTinh.value.code);
-            const data = res.data;
-            huyenList.value = data.districts || [];
-            console.log("Danh sách Huyện/Quận:", huyenList.value);
+            // const res = await getHuyen(selectedTinh.value.code);
+            // const data = res.data;
+            // huyenList.value = data.districts || [];
+            // console.log("Danh sách Huyện/Quận:", huyenList.value);
+            xaList.value = allXaList.value.filter(ward =>
+                ward.path.includes(selectedTinh.value.name)
+            )
+            console.log("Danh sách Phường/Xã:", xaList.value)
         } catch (error) {
             console.error("Lỗi khi lấy danh sách huyện:", error);
         }
@@ -1415,21 +1451,21 @@ const onTinhChange = async () => {
 };
 
 // Xử lý khi Quận/Huyện thay đổi
-const onHuyenChange = async () => {
-    selectedXa.value = null;
-    xaList.value = [];
-    if (selectedHuyen.value?.code) {
-        try {
-            const res = await getXa(selectedHuyen.value.code);
-            const data = res.data;
-            xaList.value = data.wards || [];
-            console.log("Danh sách Phường/Xã:", xaList.value);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách xã:", error);
-        }
-    }
-    // updatePhiShip();
-};
+// const onHuyenChange = async () => {
+//     selectedXa.value = null;
+//     xaList.value = [];
+//     if (selectedHuyen.value?.code) {
+//         try {
+//             const res = await getXa(selectedHuyen.value.code);
+//             const data = res.data;
+//             xaList.value = data.wards || [];
+//             console.log("Danh sách Phường/Xã:", xaList.value);
+//         } catch (error) {
+//             console.error("Lỗi khi lấy danh sách xã:", error);
+//         }
+//     }
+//     // updatePhiShip();
+// };
 
 const onXaChange = async () => {
     console.log("Xã được chọn:", selectedXa.value);
@@ -1452,9 +1488,9 @@ watch(isShipping, (newVal) => {
         };
         // Reset dropdowns
         selectedTinh.value = null;
-        selectedHuyen.value = null;
+        // selectedHuyen.value = null;
         selectedXa.value = null;
-        huyenList.value = [];
+        // huyenList.value = [];
         xaList.value = [];
     } else {
         console.log('Đã bật giao hàng');
@@ -1466,29 +1502,29 @@ const updatePhiShip = async () => {
     if (!isShipping.value ||
         shippingInfo.value.shippingMethod !== 'express' ||
         !selectedTinh.value?.name ||
-        !selectedHuyen.value?.name ||
+        // !selectedHuyen.value?.name ||
         !selectedXa.value?.name
     ) {
         console.warn("Điều kiện không thỏa mãn:");
         if (!isShipping.value) console.warn("  - isShipping là false");
         if (shippingInfo.value.shippingMethod !== 'express') console.warn("  - shippingMethod không phải 'express'");
         if (!selectedTinh.value?.name) console.warn("  - selectedTinh.name rỗng");
-        if (!selectedHuyen.value?.name) console.warn("  - selectedHuyen.name rỗng");
+        // if (!selectedHuyen.value?.name) console.warn("  - selectedHuyen.name rỗng");
         if (!selectedXa.value?.name) console.warn("  - selectedXa.name rỗng");
         shippingInfo.value.phiShip = null;
         console.warn("Chưa đủ thông tin địa chỉ hoặc giao hàng không được bật/chọn phương thức express. Phí ship: null.");
         return;
     }
 
-    const fullAddress = `${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
+    const fullAddress = `${selectedTinh.value.name}`;
 
     console.log("Địa chỉ người nhận đầy đủ (fullAddress):", fullAddress);
     console.log("Địa chỉ cửa hàng (storeAddress):", storeAddress);
 
     try {
         const [from, to] = await Promise.all([
-            getLatLonFromAddress(storeAddress, selectedTinh, selectedHuyen, selectedXa),
-            getLatLonFromAddress(fullAddress, selectedTinh, selectedHuyen, selectedXa),
+            getLatLonFromAddress(storeAddress, selectedTinh,  selectedXa),
+            getLatLonFromAddress(fullAddress, selectedTinh,  selectedXa),
         ]);
 
         console.log("Tọa độ cửa hàng (from):", from);
@@ -1503,16 +1539,16 @@ const updatePhiShip = async () => {
         const distance = await getDistanceInKm(from, to);
         console.log("Khoảng cách tính được:", distance);
 
-        const maxDistance = 50;
-        let adjustedDistance = distance;
-        if (distance > maxDistance) {
-            console.warn(`Khoảng cách quá lớn (${distance} km), giới hạn về ${maxDistance} km.`);
-            adjustedDistance = maxDistance;
-        }
+        // const maxDistance = 50;
+        // let adjustedDistance = distance;
+        // if (distance > maxDistance) {
+        //     console.warn(`Khoảng cách quá lớn (${distance} km), giới hạn về ${maxDistance} km.`);
+        //     adjustedDistance = maxDistance;
+        // }
 
-        shippingInfo.value.phiShip = calcPhiShip(adjustedDistance);
+        shippingInfo.value.phiShip = calcPhiShip(distance);
         console.log(
-            `Khoảng cách: ${adjustedDistance} km, Phí ship: ${shippingInfo.value.phiShip.toLocaleString('vi-VN')} VNĐ`
+            `Khoảng cách: ${distance} km, Phí ship: ${shippingInfo.value.phiShip.toLocaleString('vi-VN')} VNĐ`
         );
     } catch (err) {
         console.error("Lỗi khi tính phí ship:", err);
@@ -1523,7 +1559,7 @@ const updatePhiShip = async () => {
 
 
 // Hàm lấy tọa độ từ địa chỉ
-const getLatLonFromAddress = async (address, selectedTinh, selectedHuyen, selectedXa) => {
+const getLatLonFromAddress = async (address, selectedTinh,  selectedXa) => {
     console.log("Đang gọi API lấy tọa độ cho:", address);
     try {
         // Thử địa chỉ gốc
@@ -1557,8 +1593,8 @@ const getLatLonFromAddress = async (address, selectedTinh, selectedHuyen, select
         }
 
         // Thử cấp huyện
-        if (selectedHuyen?.value?.name && selectedTinh?.value?.name) {
-            const huyenAddress = `${selectedHuyen.value.name}, ${selectedTinh.value.name}, Việt Nam`;
+        if (selectedTinh?.value?.name) {
+            const huyenAddress = `${selectedTinh.value.name}, Việt Nam`;
             console.log("Thử tìm theo huyện:", huyenAddress);
             const huyenRes = await getLatLon(huyenAddress);
             const huyenParsedData = huyenRes.data;
@@ -1573,8 +1609,7 @@ const getLatLonFromAddress = async (address, selectedTinh, selectedHuyen, select
                 return coords;
             }
         } else {
-            console.warn("Không thể thử cấp huyện do thiếu selectedHuyen hoặc selectedTinh:", {
-                selectedHuyen: selectedHuyen?.value,
+            console.warn("Không thể thử cấp huyện do thiếu selectedTinh:", {
                 selectedTinh: selectedTinh?.value,
             });
         }
@@ -1626,19 +1661,13 @@ const getDistanceInKm = async (from, to) => {
     }
 };
 
-
 const calcPhiShip = (km) => {
     const baseFee = 15000;
-    const additionalFeePerKm = 2000; // Giảm từ 3000 xuống 2000
-    const maxFee = 50000; // Giới hạn phí tối đa 50,000 VNĐ
+    const additionalFeePerKm = 2000;
 
     if (km <= 2) return baseFee;
 
     const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
-    if (calculatedFee > maxFee) {
-        console.warn(`Phí vận chuyển (${calculatedFee} VNĐ) vượt quá giới hạn, sử dụng phí tối đa: ${maxFee} VNĐ`);
-        return maxFee;
-    }
 
     return calculatedFee;
 };
@@ -1694,23 +1723,23 @@ const loadHoaDon = async () => {
                 } else {
                     console.log("Không có mã tỉnh trong hóa đơn.");
                 }
-                if (hoaDon.maHuyen) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    if (huyenList.value.length > 0) {
-                        const foundHuyen = huyenList.value.find(huyen => huyen.code === hoaDon.maHuyen);
-                        if (foundHuyen) {
-                            selectedHuyen.value = foundHuyen;
-                            console.log("Đã gán huyện từ DB:", selectedHuyen.value);
-                            await onHuyenChange();
-                        } else {
-                            console.warn("Không tìm thấy huyện với mã:", hoaDon.maHuyen);
-                        }
-                    } else {
-                        console.warn("Danh sách huyện trống, không thể gán huyện từ DB.");
-                    }
-                } else {
-                    console.log("Không có mã huyện trong hóa đơn.");
-                }
+                // if (hoaDon.maHuyen) {
+                //     await new Promise(resolve => setTimeout(resolve, 50));
+                //     if (huyenList.value.length > 0) {
+                //         const foundHuyen = huyenList.value.find(huyen => huyen.code === hoaDon.maHuyen);
+                //         if (foundHuyen) {
+                //             selectedHuyen.value = foundHuyen;
+                //             console.log("Đã gán huyện từ DB:", selectedHuyen.value);
+                //             await onHuyenChange();
+                //         } else {
+                //             console.warn("Không tìm thấy huyện với mã:", hoaDon.maHuyen);
+                //         }
+                //     } else {
+                //         console.warn("Danh sách huyện trống, không thể gán huyện từ DB.");
+                //     }
+                // } else {
+                //     console.log("Không có mã huyện trong hóa đơn.");
+                // }
 
                 if (hoaDon.maXa) {
                     await new Promise(resolve => setTimeout(resolve, 50));
@@ -1740,9 +1769,9 @@ const loadHoaDon = async () => {
                     shippingMethod: 'express'
                 };
                 selectedTinh.value = null;
-                selectedHuyen.value = null;
+                // selectedHuyen.value = null;
                 selectedXa.value = null;
-                huyenList.value = [];
+                // huyenList.value = [];
                 xaList.value = [];
             }
         }
@@ -1897,13 +1926,13 @@ const confirmShippingInfo = async () => {
     console.log("  shippingInfo:", shippingInfo.value);
     console.log("  isShipping:", isShipping.value);
     console.log("  selectedTinh:", selectedTinh.value);
-    console.log("  selectedHuyen:", selectedHuyen.value);
+    // console.log("  selectedHuyen:", selectedHuyen.value);
     console.log("  selectedXa:", selectedXa.value);
     console.log("  invoiceId:", storedId);
 
 
     // Kiểm tra dữ liệu bắt buộc
-    if (!selectedTinh.value?.name || !selectedHuyen.value?.name || !selectedXa.value?.name) {
+    if (!selectedTinh.value?.name || !selectedXa.value?.name) {
         toast.warning('Vui lòng chọn đầy đủ Tỉnh, Huyện, Xã.');
         return;
     }
@@ -1920,8 +1949,8 @@ const confirmShippingInfo = async () => {
 
     // Tạo địa chỉ đầy đủ cho DB
     const fullAddressForDB = shippingInfo.value.diaChiChiTiet
-        ? `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`
-        : `${selectedXa.value.name}, ${selectedHuyen.value.name}, ${selectedTinh.value.name}`;
+        ? `${shippingInfo.value.diaChiChiTiet}, ${selectedXa.value.name}, ${selectedTinh.value.name}`
+        : `${selectedXa.value.name}, ${selectedTinh.value.name}`;
 
     try {
         const response = await updateTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
@@ -1960,9 +1989,9 @@ const toggleShipping = () => {
             shippingMethod: 'express'
         };
         selectedTinh.value = null;
-        selectedHuyen.value = null;
+        // selectedHuyen.value = null;
         selectedXa.value = null;
-        huyenList.value = [];
+        // huyenList.value = [];
         xaList.value = [];
     } else {
         console.log('Đã bật giao hàng');

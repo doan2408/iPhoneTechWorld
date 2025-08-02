@@ -215,6 +215,9 @@ const addToCompare = (product) => {
     compareList.value.push(product)
   }
 }
+const isInCompareList = (product) => {
+  return compareList.value.some(p => p.id === product.id)
+}
 const removeCompare = (product) => {
   compareList.value = compareList.value.filter(p => p.id !== product.id)
 }
@@ -408,15 +411,21 @@ const removeCompare = (product) => {
                   </div>
                 </div>
               </router-link>
-              <div class="product-footer">
-                <el-button type="text" size="small" @click.stop.prevent="addToCompare(sp)">
-                  <el-icon>
-                    <Plus />
-                  </el-icon>
-                  ✚ Thêm vào so sánh
-                </el-button>
-              </div>
-              <br>
+              <el-button v-if="!isInCompareList(sp)" class="add-to-compare" size="small"
+                @click.stop.prevent="addToCompare(sp)">
+                <el-icon>
+                  <Plus />
+                </el-icon>
+                Thêm vào so sánh
+              </el-button>
+
+              <el-button v-else class="already-added" size="small" disabled>
+                <el-icon>
+                  <Check />
+                </el-icon>
+                Đã thêm vào so sánh
+              </el-button>
+              <br><br>
             </el-col>
           </el-row>
         </div>
@@ -892,19 +901,36 @@ const removeCompare = (product) => {
     margin-bottom: 8px;
   }
 }
-.product-footer {
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 16px;
-  margin-top: 2px;
-  background-color: #fff;
-  text-align: center;
-  transition: box-shadow 0.3s ease;
+.el-button.add-to-compare {
+  background-color: #e6f7ff;
+  border: 1px dashed #409EFF;
+  color: #409EFF;
+  font-weight: 600;
+  font-size: 13px;
+  width: 100%;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  padding: 6px 0;
 }
 
-.product-footer:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.el-button.add-to-compare:hover {
+  background-color: #d0ecff;
+  color: #1d78c1;
+}
+
+.el-button.already-added {
+  background-color: #67c23a;
+  color: white;
+  width: 100%;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+}
+
+.el-icon {
+  margin-right: 4px;
 }
 </style>
 
