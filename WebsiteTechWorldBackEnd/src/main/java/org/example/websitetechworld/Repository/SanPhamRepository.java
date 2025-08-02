@@ -244,6 +244,16 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """, nativeQuery = true)
     ThongSoCompareResponse getThongSoByIdSp(@Param("idSanPham") Integer idSanPham);
 
-
+    @Query(value = """
+        SELECT spct.id_san_pham_chi_tiet FROM san_pham sp
+        INNER JOIN san_pham_chi_tiet spct
+        ON spct.id_san_pham = sp.id_san_pham
+        INNER JOIN rom rom
+        ON spct.id_rom = rom.id_rom
+        INNER JOIN mau_sac ms
+        ON ms.id_mau_sac = spct.id_mau
+        WHERE sp.id_san_pham = :idSanPham AND rom.id_rom = :idRom AND ms.id_mau_sac = :idMauSac
+    """,nativeQuery = true)
+    Integer findIdSpct(@Param("idSanPham") Integer idSanPham, @Param("idRom") Integer idRom, @Param("idMauSac") Integer idMauSac);
 
 }
