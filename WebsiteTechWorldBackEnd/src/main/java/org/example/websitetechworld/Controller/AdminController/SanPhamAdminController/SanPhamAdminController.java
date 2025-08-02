@@ -92,4 +92,9 @@ public class SanPhamAdminController {
 
     }
 
+    @GetMapping("/search-by-ma")
+    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getSanPhamByMa( @RequestParam(value = "maSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
+        return ResponseEntity.ok(sanPhamAdminService.getProductMas(tenSanPham,pageNo, pageSize));
+    }
+
 }

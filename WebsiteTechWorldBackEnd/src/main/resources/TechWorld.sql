@@ -443,7 +443,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
                                      id_phuong_thuc_thanh_toan INT REFERENCES phuong_thuc_thanh_toan(id_phuong_thuc_thanh_toan),
-                                     so_tien_thanh_toan DECIMAL(10,2)
+                                     so_tien_thanh_toan DECIMAL(18,2)
 );
 
 

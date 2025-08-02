@@ -100,6 +100,19 @@ export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
   )
 }
 
+export const findSanPhamByMa = (maSanPham, pageNo, pageSize) => {
+  const urlProduct = '/admin/product'
+  const url = urlProduct + '/search-by-ma';
+  return api.get(url, {
+    params: {
+      maSanPham,
+      pageNo,
+      pageSize
+    }
+  }
+  )
+}
+
 const postDataSpct = async (url, data) => {
   try {
 

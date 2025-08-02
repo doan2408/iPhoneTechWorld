@@ -24,10 +24,15 @@ const stopCamera = async () => {
     }
 }
 
+let isScanning = false
 
 onMounted(async () => {
-    const config = { fps: 10, qrbox: 250 }
+    console.log('QrScanner mounted')
 
+    if (isScanning) return
+    isScanning = true
+
+    const config = { fps: 10, qrbox: 250 }
     html5QrCode = new Html5Qrcode('reader')
 
     try {
@@ -39,8 +44,7 @@ onMounted(async () => {
                 await stopCamera()
             },
             (err) => {
-                // Lỗi khi đang quét (tạm thời)
-                console.warn("Scan error", err)
+                console.warn('Scan error', err)
             }
         )
     } catch (err) {
@@ -49,11 +53,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    if (html5QrCode) {
-        html5QrCode.stop()
-            .then(() => html5QrCode.clear())
-            .catch(err => console.error("Stop error", err))
-    }
+    console.log('QrScanner unmounted')
     stopCamera()
+    isScanning = false
 })
 </script>

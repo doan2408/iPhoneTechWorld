@@ -1017,6 +1017,13 @@ public class SanPhamAdminService {
         return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
     }
 
+    public Page<SanPhamBanHangAdminResponse> getProductMas(String maSanPham, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_MaSanPhamContainingAndIdSanPham_TrangThaiSanPham(maSanPham, TrangThaiSanPham.ACTIVE, pageable);
+
+        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+    }
+
     public Page<String> getProductNameCategory(int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("ten_dong_san_pham").ascending());
         return sanPhamRepo.findTenDongSanPham(pageable);

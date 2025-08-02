@@ -1,18 +1,18 @@
 <template>
     <div class="container">
-        <!-- Product Header with two states -->
+
         <div ref="productHeader" class="product-header" :class="{
             'sticky': isSticky,
-            'compact-mode': isSticky, /* Apply compact styles when sticky */
-            'full-mode': !isSticky /* Apply full styles when not sticky */
+            'compact-mode': isSticky, 
+            'full-mode': !isSticky
         }">
             <div class="header-content">
                 <div class="products-grid">
-                    <!-- Loop 3 slot: 2 sản phẩm + 1 thêm sản phẩm -->
+
                     <div v-for="(product, index) in products" :key="product.id" class="product-item">
-                        <!-- Nếu có sản phẩm -->
+
                         <template v-if="product">
-                            <!-- Full Mode -->
+
                             <div v-if="!isSticky" class="product-full">
                                 <button class="remove-btn" @click="removeFromCompare(product)">
                                     <svg class="remove-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,8 +29,10 @@
 
                                     <div class="product-details">
                                         <div class="price-section-full">
-                                            <div class="current-price-large">{{ product.giaBan }} ₫</div>
-                                            <div class="original-price-large">{{ product.giaGoc || product.giaBan }} ₫
+                                            <div class="current-price-large">{{ formatNumberWithDot(product.giaBan) }} ₫
+                                            </div>
+                                            <div class="original-price-large">{{ formatNumberWithDot(product.giaGoc ||
+                                                product.giaBan) }} ₫
                                             </div>
                                         </div>
                                         <h3 class="product-name-large">{{ product.tenSanPham }} - {{ product.rom[0].ten
@@ -40,7 +42,6 @@
                                 </div>
                             </div>
 
-                            <!-- Compact Mode -->
                             <div v-else class="product-compact">
                                 <img :src="product.hinhAnh?.[0] || '/img/no-image.png'" :alt="product.tenSanPham"
                                     class="product-image-small" />
@@ -54,28 +55,25 @@
                                 </div>
                             </div>
                         </template>
-                        <template v-if="product.length === 2">
-                            <div class="add-product-section">
-                                <button class="add-product-btn" @click="goToProductList">
-                                    <svg class="plus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </button>
-                                <span class="add-product-text">Thêm sản phẩm</span>
-                            </div>
-                        </template>
                     </div>
+                    <template v-if="products.length === 2">
+                        <div class="add-product-section">
+                            <button class="add-product-btn" @click="goToProductList">
+                                <svg class="plus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                            <span class="add-product-text">Thêm sản phẩm</span>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
 
-        <!-- Spacer when sticky -->
         <div v-if="isSticky" class="sticky-spacer" :style="{ height: initialHeaderHeight + 'px' }"></div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Tabs and Options -->
             <div class="tabs-container" :class="{ 'slide-up': isVisible }">
                 <div class="tabs-header">
                     <div class="tabs-nav">
@@ -96,7 +94,6 @@
                     </div>
                 </div>
 
-                <!-- Comparison Table -->
                 <div class="table-content">
                     <div class="highlight-specs-header">
                         <i class="fas fa-gem"></i> Thông số nổi bật
@@ -108,7 +105,8 @@
                             :class="{ 'fade-in': isVisible }">
                             <div class="spec-label-group-title">{{ specGroup.title }}</div>
                             <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
-                                class="spec-value empty-cell-title-hidden">—</div>
+                                class="spec-value empty-cell-title-hidden">—
+                            </div>
                         </div>
 
                         <div v-for="(label, key, itemIndex) in specGroup.items" :key="`spec-item-${groupIndex}-${key}`"
@@ -134,7 +132,6 @@
                 </div>
             </div>
 
-            <!-- Product Information Section -->
             <div class="info-section" :class="{ 'slide-up': isVisible }">
                 <button @click="toggleProductInfo" class="info-toggle">
                     <h3 class="info-title">Thông tin hàng hóa</h3>
@@ -151,7 +148,8 @@
                                 :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
                                 <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
                                 <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
-                                    class="spec-value empty-cell-title-hidden">—</div>
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
                             </div>
 
                             <div v-for="(label, key, itemIndex) in specGroup.items"
@@ -195,7 +193,8 @@
                                 :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
                                 <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
                                 <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
-                                    class="spec-value empty-cell-title-hidden">—</div>
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
                             </div>
 
                             <div v-for="(label, key, itemIndex) in specGroup.items"
@@ -239,7 +238,8 @@
                                 :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
                                 <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
                                 <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
-                                    class="spec-value empty-cell-title-hidden">—</div>
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
                             </div>
 
                             <div v-for="(label, key, itemIndex) in specGroup.items"
@@ -283,7 +283,8 @@
                                 :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
                                 <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
                                 <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
-                                    class="spec-value empty-cell-title-hidden">—</div>
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
                             </div>
 
                             <div v-for="(label, key, itemIndex) in specGroup.items"
@@ -311,21 +312,249 @@
                 </transition>
             </div>
             <br>
+            <div class="info-section" :class="{ 'slide-up': isVisible }">
+                <button @click="toggleCameraTruoc" class="info-toggle">
+                    <h3 class="info-title">Camera trước</h3>
+                    <svg :class="['chevron-icon', { 'rotated': showCameraTruoc }]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <transition name="expand">
+                    <div v-if="showCameraTruoc" class="info-content">
+                        <div v-for="(specGroup, groupIndex) in groupCameraTruoc" :key="`group-${groupIndex}`">
+                            <div class="table-row spec-group-title-row"
+                                :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
+                                <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
+                                <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
+                            </div>
+
+                            <div v-for="(label, key, itemIndex) in specGroup.items"
+                                :key="`spec-item-${groupIndex}-${key}`" class="table-row spec-detail-row"
+                                :style="{ animationDelay: `${(groupIndex * 0.1) + ((itemIndex + 1) * 0.05)}s` }"
+                                :class="{ 'fade-in': isVisible }">
+
+                                <div class="spec-value first-column-detail-value">
+                                    {{ thongSoProduct.length > 0 ? getSpecCameraTruoc(thongSoProduct[0], key) : '—'
+                                    }}
+                                </div>
+
+                                <div v-for="(product, pIndex) in thongSoProduct.slice(1)"
+                                    :key="`spec-value-${groupIndex}-${pIndex + 1}-${key}`" class="spec-value">
+                                    {{ getSpecCameraTruoc(product, key) }}
+                                </div>
+
+                                <div v-for="n in (3 - thongSoProduct.length)"
+                                    :key="`empty-spec-${groupIndex}-${key}-${n}`" class="spec-value empty-cell">
+                                    —
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <br>
+            <div class="info-section" :class="{ 'slide-up': isVisible }">
+                <button @click="toggleCameraSau" class="info-toggle">
+                    <h3 class="info-title">Camera sau</h3>
+                    <svg :class="['chevron-icon', { 'rotated': showCameraSau }]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <transition name="expand">
+                    <div v-if="showCameraSau" class="info-content">
+                        <div v-for="(specGroup, groupIndex) in groupCameraSau" :key="`group-${groupIndex}`">
+                            <div class="table-row spec-group-title-row"
+                                :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
+                                <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
+                                <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
+                                    class="spec-value empty-cell-title-hidden">—</div>
+                            </div>
+
+                            <div class="table-row spec-detail-row" v-for="(label, key, itemIndex) in specGroup.items"
+                                :key="`spec-item-${groupIndex}-${key}`"
+                                :style="{ animationDelay: `${(groupIndex * 0.1) + ((itemIndex + 1) * 0.05)}s` }"
+                                :class="{ 'fade-in': isVisible }">
+
+                                <div class="spec-value first-column-detail-value"
+                                    v-html="listCameraSau.length > 0 ? getSpecCameraSau(listCameraSau[0], key) : '—'">
+                                </div>
+
+                                <div v-for="(product, pIndex) in listCameraSau.slice(1)"
+                                    :key="`spec-value-${groupIndex}-${pIndex + 1}-${key}`" class="spec-value"
+                                    v-html="getSpecCameraSau(product, key)">
+                                </div>
+                                <!-- <div class="spec-value first-column-detail-value"
+                                    v-html="getSpecCameraSau(product, key)"></div> -->
+
+
+                                <!-- Cột 2 & 3 -->
+                                <!-- <div v-for="(product, pIndex) in listCameraSau.slice(1)"
+                                    :key="`spec-value-${groupIndex}-${pIndex + 1}-${key}`" class="spec-value"
+                                    v-html="getSpecCameraSau(product, key)">
+                                </div> -->
+                                <!-- Ô trống nếu chưa đủ 3 sp -->
+                                <div v-for="n in (3 - listCameraSau.length)"
+                                    :key="`empty-spec-${groupIndex}-${key}-${n}`" class="spec-value empty-cell">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <br>
+            <div class="info-section" :class="{ 'slide-up': isVisible }">
+                <button @click="togglePin" class="info-toggle">
+                    <h3 class="info-title">Thông tin pin & sạc</h3>
+                    <svg :class="['chevron-icon', { 'rotated': showPin }]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <transition name="expand">
+                    <div v-if="showPin" class="info-content">
+                        <div v-for="(specGroup, groupIndex) in groupPin" :key="`group-${groupIndex}`">
+                            <div class="table-row spec-group-title-row"
+                                :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
+                                <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
+                                <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
+                            </div>
+
+                            <div v-for="(label, key, itemIndex) in specGroup.items"
+                                :key="`spec-item-${groupIndex}-${key}`" class="table-row spec-detail-row"
+                                :style="{ animationDelay: `${(groupIndex * 0.1) + ((itemIndex + 1) * 0.05)}s` }"
+                                :class="{ 'fade-in': isVisible }">
+
+                                <div class="spec-value first-column-detail-value">
+                                    {{ thongSoProduct.length > 0 ? getSpecPin(thongSoProduct[0], key) : '—'
+                                    }}
+                                </div>
+
+                                <div v-for="(product, pIndex) in thongSoProduct.slice(1)"
+                                    :key="`spec-value-${groupIndex}-${pIndex + 1}-${key}`" class="spec-value">
+                                    {{ getSpecPin(product, key) }}
+                                </div>
+
+                                <div v-for="n in (3 - thongSoProduct.length)"
+                                    :key="`empty-spec-${groupIndex}-${key}-${n}`" class="spec-value empty-cell">
+                                    —
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <br>
+            <div class="info-section" :class="{ 'slide-up': isVisible }">
+                <button @click="toggleHeDieuHanh" class="info-toggle">
+                    <h3 class="info-title">Hệ điều hành</h3>
+                    <svg :class="['chevron-icon', { 'rotated': showHeDieuHanh }]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <transition name="expand">
+                    <div v-if="showHeDieuHanh" class="info-content">
+                        <div v-for="(specGroup, groupIndex) in groupHeDieuHanh" :key="`group-${groupIndex}`">
+                            <div class="table-row spec-group-title-row"
+                                :style="{ animationDelay: `${groupIndex * 0.1}s` }" :class="{ 'fade-in': isVisible }">
+                                <div class="spec-label-group-title"><b>{{ specGroup.title }}</b></div>
+                                <div v-for="n in (3 - 1)" :key="`title-empty-${n}`"
+                                    class="spec-value empty-cell-title-hidden">—
+                                </div>
+                            </div>
+
+                            <div v-for="(label, key, itemIndex) in specGroup.items"
+                                :key="`spec-item-${groupIndex}-${key}`" class="table-row spec-detail-row"
+                                :style="{ animationDelay: `${(groupIndex * 0.1) + ((itemIndex + 1) * 0.05)}s` }"
+                                :class="{ 'fade-in': isVisible }">
+
+                                <div class="spec-value first-column-detail-value">
+                                    {{ thongSoProduct.length > 0 ? getSpecHeDieuHanh(thongSoProduct[0], key) : '—'
+                                    }}
+                                </div>
+
+                                <div v-for="(product, pIndex) in thongSoProduct.slice(1)"
+                                    :key="`spec-value-${groupIndex}-${pIndex + 1}-${key}`" class="spec-value">
+                                    {{ getSpecHeDieuHanh(product, key) }}
+                                </div>
+
+                                <div v-for="n in (3 - thongSoProduct.length)"
+                                    :key="`empty-spec-${groupIndex}-${key}-${n}`" class="spec-value empty-cell">
+                                    —
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <section class="feature-section_luxury">
+                <div class="container_luxury">
+                    <div class="feature-item_luxury">
+                        <div class="icon-wrapper_luxury">
+                            <ShieldCheck class="icon_luxury" />
+                        </div>
+                        <div class="text-content_luxury">
+                            <h3 class="title_luxury">Thương hiệu đảm bảo</h3>
+                            <p class="subtitle_luxury">Nhập khẩu, bảo hành chính hãng</p>
+                        </div>
+                    </div>
+                    <div class="feature-item_luxury">
+                        <div class="icon-wrapper_luxury">
+                            <Repeat2 class="icon_luxury" />
+                        </div>
+                        <div class="text-content_luxury">
+                            <h3 class="title_luxury">Đổi trả dễ dàng</h3>
+                            <p class="subtitle_luxury">Theo chính sách đổi trả tại TechWord</p>
+                        </div>
+                    </div>
+                    <div class="feature-item_luxury">
+                        <div class="icon-wrapper_luxury">
+                            <Truck class="icon_luxury" />
+                        </div>
+                        <div class="text-content_luxury">
+                            <h3 class="title_luxury">Giao hàng tận nơi</h3>
+                            <p class="subtitle_luxury">Trên toàn quốc</p>
+                        </div>
+                    </div>
+                    <div class="feature-item_luxury">
+                        <div class="icon-wrapper_luxury">
+                            <BadgeCheck class="icon_luxury" />
+                        </div>
+                        <div class="text-content_luxury">
+                            <h3 class="title_luxury">Sản phẩm chất lượng</h3>
+                            <p class="subtitle_luxury">Đảm bảo tương thích và độ bền cao</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { detailSanPham, getThongSoLimitRomMin  } from '@/Service/ClientService/Products/ProductClientService'
+import { detailSanPham, getThongSoLimitRomMin, getListCameraSau } from '@/Service/ClientService/Products/ProductClientService'
+import { ShieldCheck, Repeat2, Truck, BadgeCheck } from 'lucide-vue-next'
 
 const activeTab = ref('specs')
 const showDifferencesOnly = ref(false)
 const showProductInfo = ref(true)
 const showBoXuLy = ref(true)
 const showRamVaRom = ref(true)
-const showManHinh =  ref(true)
+const showManHinh = ref(true)
+const showCameraTruoc = ref(true)
 const showCameraSau = ref(true)
+const showPin = ref(true)
+const showHeDieuHanh = ref(true)
 const isSticky = ref(false)
 const isVisible = ref(false)
 const productHeader = ref(null)
@@ -336,6 +565,11 @@ import { useRoute } from 'vue-router'
 import { tr } from 'element-plus/es/locales.mjs'
 
 const route = useRoute()
+
+function formatNumberWithDot(amount) {
+    if (isNaN(amount)) return '0';
+    return amount.toLocaleString('vi-VN');
+}
 
 onMounted(async () => {
     const idsParam = route.query.ids // "1,2,3"
@@ -354,12 +588,12 @@ onMounted(async () => {
     }
 
     products.value = fetchedProducts
-    console.log('prodcut',products.value);
+    console.log('prodcut', products.value);
 })
 
 const thongSoProduct = ref([]);
 onMounted(async () => {
-    const idsParam = route.query.ids 
+    const idsParam = route.query.ids
     if (!idsParam) return
 
     const ids = idsParam.split(',').map(id => parseInt(id))
@@ -377,19 +611,37 @@ onMounted(async () => {
     console.log('Thong so prodcut', thongSoProduct.value);
 })
 
+const listCameraSau = ref([]);
+onMounted(async () => {
+    const idsParam = route.query.ids
+    if (!idsParam) return
+
+    const ids = idsParam.split(',').map(id => parseInt(id))
+    const fetchedCameraSau = []
+    for (const id of ids) {
+        try {
+            const data = await getListCameraSau(id)
+            fetchedCameraSau.push(data)
+        } catch (error) {
+            console.error('Lỗi khi lấy sản phẩm ID:', id, error)
+        }
+    }
+
+    listCameraSau.value = fetchedCameraSau
+})
 const products = ref([]);
 
 const groupedSpecs = ref([
     {
         title: 'Kích thước màn hình',
         items: {
-            screen_size: '' 
+            screen_size: ''
         }
     },
     {
         title: 'Camera',
         items: {
-            camera_specs: '' 
+            camera_specs: ''
         }
     },
     {
@@ -403,11 +655,11 @@ const groupedSpecs = ref([
 // Hàm phương thức
 const getSpecValue = (product, key) => {
     switch (key) {
-        case 'screen_size': 
+        case 'screen_size':
             return `${product.kichThuoc || '?'} - ${product.tenManHinh || '?'}`;
-        case 'camera_specs': 
+        case 'camera_specs':
             return product.doPhanGiai || '—';
-        case 'ram_specs': 
+        case 'ram_specs':
             return product.ram || '—';
         default:
             return '—';
@@ -423,13 +675,13 @@ const groupThongTinHangHoa = ref([
     {
         title: 'Xuất xứ',
         items: {
-            xuat_xu: '' 
+            xuat_xu: ''
         }
     },
     {
         title: 'Thời gian bảo hành',
         items: {
-            thoi_gian_bao_hanh: '' 
+            thoi_gian_bao_hanh: ''
         }
     },
     {
@@ -606,8 +858,144 @@ const getSpecManHinh = (product, key) => {
             return '—';
     }
 };
+
+const groupCameraTruoc = ref([
+    {
+        title: 'Loại camera',
+        items: {
+            loai_camera: ''
+        }
+    },
+    {
+        title: 'Loại zoom',
+        items: {
+            loai_zoom: ''
+        }
+    },
+    {
+        title: 'Chế độ chụp',
+        items: {
+            che_do_chup: ''
+        }
+    },
+]);
+
+
+const getSpecCameraTruoc = (product, key) => {
+    switch (key) {
+        case 'loai_camera':
+            return `${product.loaiCamera || '?'} - ${product.doPhanGiai || '?'} - ${product.khauDo || '?'}`;
+        case 'loai_zoom':
+            return product.loaiZoom || '—';
+        case 'che_do_chup':
+            return product.cheDoChup || '—';
+        default:
+            return '—';
+    }
+};
+
+const groupCameraSau = ref([
+    {
+        title: 'Loại camera',
+        items: {
+            loai_camera: ''
+        }
+    },
+    {
+        title: 'Loại zoom',
+        items: {
+            loai_zoom: ''
+        }
+    },
+    {
+        title: 'Chế độ chụp',
+        items: {
+            che_do_chup: ''
+        }
+    },
+])
+
+const getSpecCameraSau = (cameras, key) => {
+    if (!Array.isArray(cameras)) return '—'
+
+    switch (key) {
+        case 'loai_camera':
+            return cameras.map(cam =>
+                `${cam.loaiCamera || '?'} - ${cam.doPhanGiai || '?'} - ${cam.khauDo || '?'}`
+            ).join('<br/>') || '—'
+
+        case 'loai_zoom':
+            return cameras.map(cam => cam.loaiZoom || '—').join(', ') || '—'
+
+        case 'che_do_chup':
+            return cameras.map(cam => cam.cheDoChup || '—').join(', ') || '—'
+
+        default:
+            return '—'
+    }
+}
+const groupPin = ref([
+    {
+        title: 'Phiên bản',
+        items: {
+            phien_ban: ''
+        }
+    },
+    {
+        title: 'Thời gian sử dụng',
+        items: {
+            thoi_gian_su_dung: ''
+        }
+    },
+    {
+        title: 'Số lần sạc tối đa',
+        items: {
+            so_lan_sac_toi_da: ''
+        }
+    },
+])
+
+const getSpecPin = (product, key) => {
+    switch (key) {
+        case 'phien_ban':
+            return `${product.phienBanPin || '?'} - ${product.congXuatSac || '?'}`;
+        case 'thoi_gian_su_dung':
+            return product.thoiGianSuDung || '—';
+        case 'so_lan_sac_toi_da':
+            return product.soLanSacToiDa || '—';
+        default:
+            return '—';
+    }
+};
+
+const groupHeDieuHanh = ref([
+    {
+        title: 'Phiên bản',
+        items: {
+            phien_ban: ''
+        }
+    },
+    {
+        title: 'Giao diện ứng dụng',
+        items: {
+            giao_dien_ung_dung: ''
+        }
+    },
+])
+
+const getSpecHeDieuHanh = (product, key) => {
+    switch (key) {
+        case 'phien_ban':
+            return product.heDieuHanh || '—';
+        case 'giao_dien_ung_dung':
+            return product.giaoDienNguoiDung || '—';
+        default:
+            return '—';
+    }
+};
+
 onMounted(() => {
-    isVisible.value = true; 
+    isVisible.value = true;
 });
 
 const handleScroll = () => {
@@ -632,8 +1020,17 @@ const toggleRamVaRom = () => {
 const toggleManHinh = () => {
     showManHinh.value = !showManHinh.value
 }
+const toggleCameraTruoc = () => {
+    showCameraTruoc.value = !showCameraTruoc.value
+}
 const toggleCameraSau = () => {
     showCameraSau.value = !showCameraSau.value
+}
+const togglePin = () => {
+    showPin.value = !showPin.value
+}
+const toggleHeDieuHanh = () => {
+    showHeDieuHanh.value = !showHeDieuHanh.value
 }
 
 onMounted(() => {
@@ -793,7 +1190,7 @@ onUnmounted(() => {
 
 .buy-now-btn {
     width: 100%;
-    background-color: #dc2626;
+    background-color: #4059c7;
     color: white;
     border: none;
     padding: 10px 16px;
@@ -973,9 +1370,9 @@ onUnmounted(() => {
 }
 
 .tab-btn.active {
-    background-color: #dc2626;
+    background-color: #4059c7;
     color: white;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 12px rgba(212, 88, 96, 0.3);
 }
 
 .checkbox-section {
@@ -1061,7 +1458,7 @@ onUnmounted(() => {
 }
 
 .highlight-specs-header {
-    background-color: #e0443c;
+    background-color: #4059c7;
     color: white;
     font-weight: bold;
     padding: 12px 15px;
@@ -1435,5 +1832,93 @@ onUnmounted(() => {
         height: 300px;
         /* Adjust based on full header height on mobile */
     }
+}
+.feature-section_luxury {
+    width: 100%;
+    padding: 3rem 0;
+    /* py-12 */
+    background-color: #f8f8f8;
+    /* bg-neutral-50 */
+}
+
+.container_luxury {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    /* gap-8 */
+    padding: 0 1rem;
+    /* px-4 */
+    max-width: 1200px;
+    /* Adjust as needed */
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+
+    /* md breakpoint */
+    .container_luxury {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 0 1.5rem;
+        /* md:px-6 */
+    }
+}
+
+@media (min-width: 1024px) {
+
+    /* lg breakpoint */
+    .container_luxury {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.feature-item_luxury {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    /* gap-4 */
+}
+
+.icon-wrapper_luxury {
+    background-color: #ffffff;
+    padding: 1rem;
+    /* p-4 */
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    /* shadow-sm */
+}
+
+.icon_luxury {
+    width: 2rem;
+    /* w-8 */
+    height: 2rem;
+    /* h-8 */
+    color: #3b82f6;
+    /* Màu xanh dương */
+}
+
+.text-content_luxury {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    /* space-y-1 */
+}
+
+.title_luxury {
+    font-size: 1.125rem;
+    /* text-lg */
+    font-weight: 700;
+    /* font-bold */
+    color: #333;
+    /* A darker color for titles */
+}
+
+.subtitle_luxury {
+    font-size: 0.875rem;
+    /* text-sm */
+    color: #737373;
+    /* text-muted-foreground */
 }
 </style>

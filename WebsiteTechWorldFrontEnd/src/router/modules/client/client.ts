@@ -22,6 +22,7 @@ const clientRoutes: RouteRecordRaw[] = [
       { path: "doiDiem", component: () => import("@/views/Client/TaiKhoanClient/DoiDiem.vue"), meta: { title: "Quy đổi điểm" } },
       { path: "khoangHang", component: () => import("@/views/Client/TaiKhoanClient/KhoangHang.vue"), meta: { title: "Mức hạng" } },
       { path: "compare-page", name: "comparePage", component: () => import("@/views/Client/Compare/CompareProduct.vue"), meta: { title: "So sánh sản phẩm" } },
+      { path: "favorites-page", name: "favoritesPage", component: () => import("@/views/Client/FavoritesPage/PageFavorites.vue"), meta: { title: "Sản phẩm yêu thích" } },
     ],
   },
 ];
