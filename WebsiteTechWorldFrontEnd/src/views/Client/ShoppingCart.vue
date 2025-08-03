@@ -242,7 +242,7 @@ async function fetchCart() {
             }));
         }
         try {
-            count.value = await cartService.cartCount(user.value.id);
+            count.value = await cartService.cartCount(user.value?.id);
         } catch (error) {
             console.error('Lỗi khi tải giỏ hàng:', error);
         }
@@ -384,12 +384,23 @@ const handleCheckout = () => {
     ElMessage.success(`Đang chuyển đến trang thanh toán với ${selectedItems.value.length} sản phẩm`);
     const selectedProducts = JSON.stringify(selectedItems.value);
 
-    router.push({
-        name: 'checkoutForm',
-        query: {
-            products: encodeURIComponent(selectedProducts)
-        }
-    });
+    console.log('product',selectedProducts);
+    
+    if (route.path.startsWith('/client/')) {
+        router.push({
+            path: '/client/checkout-form',
+            query: {
+                products: encodeURIComponent(selectedProducts)
+            }
+        });
+    } else {
+        router.push({
+            name: 'clientDatHang',
+            query: {
+                products: encodeURIComponent(selectedProducts)
+            }
+        });
+    }
     // Implement checkout logic here
 };
 </script>
