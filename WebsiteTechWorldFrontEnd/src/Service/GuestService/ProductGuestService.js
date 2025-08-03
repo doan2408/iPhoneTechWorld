@@ -85,3 +85,21 @@ export const getLoai = async() => {
     throw error.response?.data || "Can't get list of loai"
   }
 };
+
+export const getThongSoLimitRomMin = async (idsp) => {
+  try {
+    const response = await api.get(`${baseURL}/thongSoCompare/${idsp}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Unable to fetch the product specifications";
+  }
+};
+
+export const getListCameraSau = async (idsp) => {
+  try {
+    const response = await api.get(`${baseURL}/cameraSau/${idsp}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Loi";
+  }
+};

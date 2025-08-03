@@ -181,6 +181,8 @@ const filterStar = ref(null);
 const dialogReplyVisible = ref(false);
 const dialogVideoVisible = ref(false);
 const currentVideoUrl = ref('');
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 
 const replyForm = ref({
   idDanhGia: null,
@@ -249,7 +251,7 @@ const loadDanhGia = async () => {
   try {
     // Xác thực filterStar
     if (filterStar.value !== null && (filterStar.value < 1 || filterStar.value > 5)) {
-      ElMessage.error('Số sao không hợp lệ. Vui lòng chọn từ 1 đến 5.');
+      toast.error('Số sao không hợp lệ. Vui lòng chọn từ 1 đến 5.');
       return;
     }
 
@@ -269,7 +271,7 @@ const loadDanhGia = async () => {
     totalPages.value = response.totalPages;
     totalItems.value = response.totalElements;
   } catch (error) {
-    ElMessage.error('Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.');
+    toast.error('Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.');
     console.error('Lỗi khi tải đánh giá:', error);
   } finally {
     loading.value = false;
@@ -333,16 +335,16 @@ const submitReplyForm = () => {
           }
         );
 
-        ElMessage.success('Gửi phản hồi thành công');
+        toast.success('Gửi phản hồi thành công');
         dialogReplyVisible.value = false;
         loadDanhGia();
       } catch (error) {
         //  Bắt lỗi backend trả về
         if (error.response && error.response.data) {
           const message = error.response.data.message || 'Có lỗi xảy ra từ server';
-          ElMessage.error(message);
+          toast.error(message);
         } else {
-          ElMessage.error('Lỗi khi gửi phản hồi. Vui lòng thử lại.');
+          toast.error('Lỗi khi gửi phản hồi. Vui lòng thử lại.');
         }
         console.error('❌ Lỗi khi gửi phản hồi:', error);
       }
@@ -355,62 +357,68 @@ const submitReplyForm = () => {
 
 const handleApprove = async (id) => {
   try {
-    await ElMessageBox.confirm('Bạn có chắc muốn phê duyệt đánh giá này?', 'Xác nhận', {
-      confirmButtonText: 'Phê duyệt',
-      cancelButtonText: 'Hủy',
-      type: 'warning',
-    });
+    await ElMessageBox.confirm(
+      'Bạn có chắc muốn phê duyệt đánh giá này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Phê duyệt',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
     await DanhGiaSanPhamAdminService.pheDuyetDanhGia(id);
-    ElMessage.success('Phê duyệt đánh giá thành công');
+    toast.success('✅ Phê duyệt đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    if (error === 'cancel' || error === 'close') {
-      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
-      return;
-    }
-    ElMessage.error('Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
+    if (error === 'cancel' || error === 'close') return;
+    toast.error('❌ Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi phê duyệt:', error);
   }
 };
 
-// Xử lý từ chối đánh giá
+// ✅ Xử lý từ chối đánh giá
 const handleReject = async (id) => {
   try {
-    await ElMessageBox.confirm('Bạn có chắc muốn từ chối đánh giá này?', 'Xác nhận', {
-      confirmButtonText: 'Từ chối',
-      cancelButtonText: 'Hủy',
-      type: 'warning',
-    });
+    await ElMessageBox.confirm(
+      'Bạn có chắc muốn từ chối đánh giá này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Từ chối',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
     await DanhGiaSanPhamAdminService.tuChoiDanhGia(id);
-    ElMessage.success('Từ chối đánh giá thành công');
+    toast.success('✅ Từ chối đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    if (error === 'cancel' || error === 'close') {
-      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
-      return;
-    }
-    ElMessage.error('Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
+    if (error === 'cancel' || error === 'close') return;
+    toast.error('❌ Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi từ chối:', error);
   }
 };
 
-// Xử lý xóa đánh giá
+// ✅ Xử lý xóa đánh giá
 const handleDelete = async (id) => {
   try {
-    await ElMessageBox.confirm('Bạn có chắc muốn xóa đánh giá này?', 'Xác nhận', {
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy',
-      type: 'danger',
-    });
+    await ElMessageBox.confirm(
+      'Bạn có chắc muốn xóa đánh giá này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+        type: 'danger',
+      }
+    );
+
     await DanhGiaSanPhamAdminService.xoaDanhGia(id);
-    ElMessage.success('Xóa đánh giá thành công');
+    toast.success('✅ Xóa đánh giá thành công');
     loadDanhGia();
   } catch (error) {
-    if (error === 'cancel' || error === 'close') {
-      // Không làm gì cả nếu người dùng huỷ hoặc đóng hộp thoại
-      return;
-    }
-    ElMessage.error('Lỗi khi xóa đánh giá. Vui lòng thử lại.');
+    if (error === 'cancel' || error === 'close') return;
+    toast.error('❌ Lỗi khi xóa đánh giá. Vui lòng thử lại.');
     console.error('Lỗi khi xóa:', error);
   }
 };
