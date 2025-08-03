@@ -83,8 +83,7 @@
               @click="setActiveTab('Hoàn thành')">
               Hoàn thành
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]"
-              @click="setActiveTab('Đã hủy')">
+            <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]" @click="setActiveTab('Đã hủy')">
               Đã hủy
             </button>
             <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
@@ -141,8 +140,7 @@
             Trước
           </button>
           <span v-for="page in totalPages" :key="page">
-            <button :class="['pagination-button', { active: currentPage === page - 1 }]"
-              @click="changePage(page - 1)">
+            <button :class="['pagination-button', { active: currentPage === page - 1 }]" @click="changePage(page - 1)">
               {{ page }}
             </button>
           </span>
@@ -166,14 +164,8 @@
       </div>
     </section>
     <!-- Thêm dialog đánh giá -->
-    <RateOrderDialog 
-      :is-open="isRateDialogOpen" 
-      :order-id="selectedOrderId" 
-     
-      :order-products="selectedOrderProducts" 
-      :id-san-pham-chi-tiet-list="idSanPhamChiTietList"
-      @close="closeRateDialog" 
-      @submit="submitRating" />
+    <RateOrderDialog :is-open="isRateDialogOpen" :order-id="selectedOrderId" :order-products="selectedOrderProducts"
+      :id-san-pham-chi-tiet-list="idSanPhamChiTietList" @close="closeRateDialog" @submit="submitRating" />
   </div>
 </template>
 
@@ -201,6 +193,8 @@ const selectedOrderId = ref(null);
 const selectedOrderProducts = ref([]);
 const idSanPhamChiTietList = ref([]);
 const user = ref(JSON.parse(localStorage.getItem('user')) || null);
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 
 // Bộ lọc
 const filterStatus = ref('all');
@@ -389,9 +383,11 @@ const closeRateDialog = () => {
 };
 
 const submitRating = async (ratingData) => {
+ 
+
   try {
     if (!user.value?.id) {
-      alert('Vui lòng đăng nhập để đánh giá!');
+      toast.warning('⚠️ Vui lòng đăng nhập để đánh giá!');
       return;
     }
 
@@ -405,24 +401,31 @@ const submitRating = async (ratingData) => {
 
     if (!chiTietArray || chiTietArray.length === 0) {
       console.error('Không có chi tiết hóa đơn!');
-      alert('Lỗi: Không tìm thấy chi tiết hóa đơn.');
+      toast.error('❌ Không tìm thấy chi tiết hóa đơn.');
       return;
     }
 
     if (chiTietArray.length !== data.soSao.length) {
       console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
-      alert('Lỗi: Số lượng đánh giá không khớp.');
+      toast.error('❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn.');
       return;
     }
 
-    const isValid = chiTietArray.every((chiTiet, index) => {
-      const rating = data.soSao[index];
-      return chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet;
+    const isValid = data.soSao.every((rating) => {
+      return chiTietArray.some((chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet);
     });
 
+    console.log('🔍 Dữ liệu chi tiết hóa đơn:', chiTietArray);
+
     if (!isValid) {
-      console.error('Dữ liệu không khớp giữa chi tiết hóa đơn và đánh giá!');
-      alert('Lỗi: Dữ liệu đánh giá không khớp.');
+      console.error('Dữ liệu không khớp: Có sản phẩm đánh giá không thuộc hóa đơn!');
+      toast.error('❌ Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này.');
+      return;
+    }
+
+    if (data.soSao.length > chiTietArray.length) {
+      console.error('Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!');
+      toast.error('❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.');
       return;
     }
 
@@ -453,7 +456,7 @@ const submitRating = async (ratingData) => {
     const idDanhGia = danhGiaResponses[0]?.idDanhGia;
     if (!idDanhGia) {
       console.error('Không có idDanhGia trong phản hồi:', danhGiaResponses);
-      alert('Lỗi: Không nhận được idDanhGia từ server.');
+      toast.error('❌ Không nhận được id đánh giá từ máy chủ.');
       return;
     }
 
@@ -465,21 +468,26 @@ const submitRating = async (ratingData) => {
       console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
       mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
     }
+
     await Promise.all(mediaPromises);
 
-    alert('🎉 Gửi đánh giá thành công!');
+    toast.success('🎉 Gửi đánh giá thành công!');
     closeRateDialog();
   } catch (error) {
     console.error('❌ Lỗi khi gửi đánh giá:', error);
 
-    // Kiểm tra lỗi cụ thể từ backend
-    if (error.response && error.response.status === 500 && error.response.data.message === 'Sản phẩm này đã được đánh giá rồi') {
-      alert('Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá.');
+    if (
+      error.response &&
+      error.response.status === 500 &&
+      error.response.data.message === 'Sản phẩm này đã được đánh giá rồi'
+    ) {
+      toast.error('⚠️ Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá.');
     } else {
-      alert('Gửi đánh giá thất bại. Vui lòng thử lại.');
+      toast.error('❌ Gửi đánh giá thất bại. Vui lòng thử lại.');
     }
   }
 };
+
 
 
 
