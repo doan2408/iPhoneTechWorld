@@ -4,9 +4,15 @@ import org.example.websitetechworld.Config.EnvLoader;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@SpringBootApplication
+@SpringBootApplication(
+        scanBasePackages = "org.example.websitetechworld"
+)
+@EnableJpaRepositories("org.example.websitetechworld.Repository")
+@EntityScan("org.example.websitetechworld.Entity")
 public class WebsiteTechWorldApplication implements CommandLineRunner {
 
     public static void main(String[] args) {

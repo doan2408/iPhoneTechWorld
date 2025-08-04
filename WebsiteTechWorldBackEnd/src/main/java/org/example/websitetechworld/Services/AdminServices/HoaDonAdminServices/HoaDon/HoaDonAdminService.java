@@ -102,6 +102,7 @@ public class HoaDonAdminService {
         hoaDon.setPhiShip(BigDecimal.ZERO);
         hoaDon.setSoTienGiam(BigDecimal.ZERO);
         hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
+        hoaDon.setIsDelete(false);
         hoaDon =  hoaDonRepository.save(hoaDon);
         // Refresh để lấy giá trị maHoaDon từ DB (vì nó là cột computed)
         entityManager.refresh(hoaDon);

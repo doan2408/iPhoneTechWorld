@@ -153,6 +153,7 @@ public class MyOrderClientServices {
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
         }
         hoaDon.setIsShipping(true);
+        hoaDon.setIsDelete(false);
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
         hoaDon.setShippingMethod(requestThanhToanTongHop.getShippingMethod());
         hoaDon.setNgayDatHang(LocalDateTime.now());
