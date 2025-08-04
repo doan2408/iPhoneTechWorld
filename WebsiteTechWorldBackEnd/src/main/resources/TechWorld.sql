@@ -105,6 +105,7 @@ CREATE TABLE hoa_don (
                          sdt_nguoi_mua NVARCHAR(10),
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan NVARCHAR(10),
+                         email_nguoi_nhan NVARCHAR(100),
                          dia_chi_giao_hang NVARCHAR(255),
                          ngay_dat_hang DATETIME,
                          is_shipping BIT,

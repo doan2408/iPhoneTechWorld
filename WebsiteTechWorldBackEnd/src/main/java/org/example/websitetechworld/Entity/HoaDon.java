@@ -131,4 +131,9 @@ public class HoaDon {
     @OneToOne(mappedBy = "hoaDon", cascade = CascadeType.ALL, orphanRemoval = true)
     private LichSuDiem lichSuDiem;
 
+    @Size(max = 100)
+    @Nationalized
+    @Column(name = "email_nguoi_nhan", length = 100)
+    private String emailNguoiNhan;
+
 }
