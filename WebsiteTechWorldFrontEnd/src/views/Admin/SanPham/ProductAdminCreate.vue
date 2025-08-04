@@ -1272,7 +1272,6 @@ export default {
 </script>
 
 <style scoped>
-/* Header Styles */
 .page-header {
   background: #fff;
   border-bottom: 1px solid #e4e7ed;
