@@ -56,13 +56,13 @@
                 <div class="categories-section">
                     <h3>Danh mục sản phẩm</h3>
                     <div class="categories-list">
-                        <button class="category-btn" @click="loadProducts({ tenSanPham: 'all' })"
+                        <button class="category-btn" @click="selectedCategory = 'all'; loadProducts()"
                             :class="{ 'active': selectedCategory === 'all' }">
                             <Smartphone class="category-icon" />
                             All
                         </button>
                         <button v-for="category in categoryProduct" :key="category.tenSanPham" @click="selectedCategory = category.tenSanPham,
-                            loadProducts(category)"
+                            loadProducts()"
                             :class="['category-btn', { active: selectedCategory === category.tenSanPham }]">
                             <component :is="category.icon" class="category-icon" />
                             {{ category.tenSanPham }}
@@ -734,7 +734,7 @@ const danhMucSanPham = async () => {
     }
 }
 
-const loadProducts = async (category) => {
+const loadProducts = async () => {
     // selectedCategory.value = category.tenSanPham;
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
@@ -969,7 +969,7 @@ const removeFromCart = async () => {
         const res = await deleteDetailInvoice(itemToDelete.value.idHoaDonChiTiet);
         await loadTabHoaDon();
         showDeleteConfirmModal.value = false;
-        await loadProducts({ tenSanPham: selectedCategory.value });
+        await loadProducts();
         getHdctByImeiDaBan();
         loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
@@ -1051,7 +1051,7 @@ const prevPage = async () => {
 const nextPageProduct = async (category) => {
     if (pageNoProduct.value + 1 < totalPagesProdut.value) {
         pageNoProduct.value++
-        await loadProducts(category)
+        await loadProducts()
     }
 
 }
@@ -1059,7 +1059,7 @@ const nextPageProduct = async (category) => {
 const previousPageProduct = async (category) => {
     if (pageNoProduct.value > 0) {
         pageNoProduct.value--
-        await loadProducts(category)
+        await loadProducts()
     }
 
 }
@@ -1213,7 +1213,7 @@ const confirmImeiSelection = async () => {
     if (selectedImeis.value.length === quantityToSelect.value) {
         await addToCartWithImeis(selectedProductForImei.value, selectedImeis.value);
         closeImeiModal();
-        await loadProducts({ tenSanPham: selectedCategory.value });
+        await loadProducts({});
         getHdctByImeiDaBan();
         loadTabHoaDon()
     } else {
@@ -1819,7 +1819,7 @@ watch(quantityToSelect, (newValue, oldValue) => {
 onMounted(async () => {
     await danhMucSanPham();
     selectedCategory.value = 'all';
-    await loadProducts({ tenSanPham: 'all' });
+    await loadProducts({  });
     await loadTabHoaDon();
     await loadHoaDon();
     await getTinhList();
