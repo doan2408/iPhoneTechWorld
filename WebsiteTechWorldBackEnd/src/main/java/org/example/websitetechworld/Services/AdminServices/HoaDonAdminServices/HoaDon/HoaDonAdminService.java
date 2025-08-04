@@ -143,6 +143,7 @@ public class HoaDonAdminService {
             hoaDon.setIdKhachHang(khachHang);
 //        hoaDon.setTenNguoiNhan(khachHang.getTenKhachHang());
 //        hoaDon.setDiaChi(diaChiDayDu);
+            hoaDon.setIdKhachHang(khachHang);
             hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
         }
