@@ -443,10 +443,58 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
                                      id_phuong_thuc_thanh_toan INT REFERENCES phuong_thuc_thanh_toan(id_phuong_thuc_thanh_toan),
-                                     so_tien_thanh_toan DECIMAL(18,2)
+                                     so_tien_thanh_toan DECIMAL(10,2)
+);
+
+CREATE TABLE danh_gia_san_pham (
+                                   id_danh_gia INT IDENTITY(1,1) PRIMARY KEY,
+                                   id_khach_hang INT NOT NULL,
+                                   id_san_pham_chi_tiet INT NOT NULL,
+                                   id_chi_tiet_hoa_don INT NOT NULL, -- Đảm bảo đã mua hàng
+                                   so_sao INT NOT NULL CHECK (so_sao >= 1 AND so_sao <= 5),
+                                   noi_dung NVARCHAR(500),
+                                   ngay_danh_gia DATETIME DEFAULT GETDATE(),
+                                   trang_thai_danh_gia NVARCHAR(20), -- Hiển thị, Ẩn
+                                   FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang),
+                                   FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
+                                   FOREIGN KEY (id_chi_tiet_hoa_don) REFERENCES chi_tiet_hoa_don(id_chi_tiet_hoa_don)
+);
+
+CREATE TABLE media_danh_gia (
+                                id_media INT IDENTITY(1,1) PRIMARY KEY,
+                                id_danh_gia INT NOT NULL,
+                                loai_media NVARCHAR(10) NOT NULL CHECK (loai_media IN ('IMAGE', 'VIDEO')),
+                                url_media NVARCHAR(500) NOT NULL,
+                                ten_file NVARCHAR(255),
+                                kich_thuoc_file BIGINT, -- Kích thước file tính bằng bytes
+                                thoi_luong_video INT, -- Thời lượng video (giây) - chỉ áp dụng cho video
+                                thu_tu_hien_thi INT DEFAULT 1,
+                                ngay_upload DATETIME DEFAULT GETDATE(),
+                                trang_thai_media_danh_gia NVARCHAR(20) , -- Hiển thị, Ẩn
+                                FOREIGN KEY (id_danh_gia) REFERENCES danh_gia_san_pham(id_danh_gia) ON DELETE CASCADE
 );
 
 
+CREATE TABLE phan_hoi_danh_gia (
+                                   id_phan_hoi INT IDENTITY(1,1) PRIMARY KEY,
+                                   id_danh_gia INT NOT NULL,
+                                   id_nhan_vien INT NOT NULL,
+                                   noi_dung NVARCHAR(500),
+                                   ngay_phan_hoi DATETIME DEFAULT GETDATE(),
+                                   FOREIGN KEY (id_danh_gia) REFERENCES danh_gia_san_pham(id_danh_gia) ON DELETE CASCADE,
+                                   FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id_nhan_vien)
+);
+
+CREATE TABLE wishlist (
+                          id BIGINT PRIMARY KEY IDENTITY,
+                          khac_hang_id INT NOT NULL,
+                          chi_tiet_san_pham_id INT NOT NULL,
+                          created_at DATETIME DEFAULT GETDATE(),
+
+                          CONSTRAINT fk_wishlist_user FOREIGN KEY (khac_hang_id) REFERENCES khach_hang(id_khach_hang),
+                          CONSTRAINT fk_wishlist_product_detail FOREIGN KEY (chi_tiet_san_pham_id) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
+                          CONSTRAINT uc_user_product_detail UNIQUE (khac_hang_id, chi_tiet_san_pham_id)
+);
 -- Table nhan_vien
 
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
@@ -694,18 +742,22 @@ VALUES
     (N'Wide', N'48MP', N'f/1.6', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.4', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/2.8', N'Optical 3x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.4', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.4', N'Optical 5x', N'ProRAW'),
+
     (N'Wide', N'48MP', N'f/1.8', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.2', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/3.0', N'Optical 4x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.2', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.6', N'Optical 6x', N'ProRAW'),
+
     (N'Wide', N'48MP', N'f/1.7', N'Optical 2x', N'Night Mode'),
     (N'Ultra Wide', N'12MP', N'f/2.3', N'Digital', N'Panorama'),
     (N'Telephoto', N'12MP', N'f/2.9', N'Optical 3x', N'Portrait'),
-    (N'Macro', N'12MP', N'f/2.3', N'Digital', N'Macro Mode'),
-    (N'Periscope', N'12MP', N'f/3.5', N'Optical 5x', N'ProRAW');
+
+    (N'Wide', N'48MP', N'f/1.5', N'Optical 2x', N'Night Mode'),
+    (N'Ultra Wide', N'12MP', N'f/2.5', N'Digital', N'Panorama'),
+    (N'Telephoto', N'12MP', N'f/2.7', N'Optical 2x', N'Portrait'),
+
+    (N'Wide', N'48MP', N'f/1.4', N'Optical 2x', N'Night Mode'),
+    (N'Ultra Wide', N'12MP', N'f/2.6', N'Digital', N'Panorama'),
+    (N'Telephoto', N'12MP', N'f/2.6', N'Optical 5x', N'Portrait');
 
 -- Table camera_truoc
 INSERT INTO camera_truoc (loai_camera, do_phan_giai, khau_do, loai_zoom, che_do_chup)
@@ -1647,6 +1699,47 @@ VALUES
     (13, 13, 1, 16000000.00, '2025-05-10'),
     (14, 14, 1, 14000000.00, '2025-05-11'),
     (15, 15, 1, 12000000.00, '2025-05-11');
+
+INSERT INTO danh_gia_san_pham (id_khach_hang, id_san_pham_chi_tiet, id_chi_tiet_hoa_don, so_sao, noi_dung, ngay_danh_gia, trang_thai_danh_gia) VALUES
+                                                                                                                                                   (1, 1, 1, 5, N'Sản phẩm rất tốt, chất lượng vượt mong đợi. Giao hàng nhanh, đóng gói cẩn thận. Sẽ mua lại ở lần sau.', '2024-07-15 10:30:00', N'APPROVED'),
+                                                                                                                                                   (2, 2, 2, 4, N'Sản phẩm đúng như mô tả, chất lượng ổn. Có một chút nhược điểm nhỏ nhưng nhìn chung vẫn hài lòng.', '2024-07-16 14:20:00', N'APPROVED'),
+                                                                                                                                                   (3, 3, 3, 3, N'Sản phẩm bình thường, không có gì đặc biệt. Giá cả hợp lý nhưng chất lượng chưa thực sự ấn tượng.', '2024-07-17 09:15:00', N'APPROVED'),
+                                                                                                                                                   (4, 4, 4, 5, N'Tuyệt vời! Đây là lần mua hàng thành công nhất của tôi. Sản phẩm chất lượng cao, dịch vụ chu đáo.', '2024-07-18 16:45:00', N'APPROVED'),
+                                                                                                                                                   (1, 5, 5, 2, N'Sản phẩm không đúng như kỳ vọng. Chất lượng kém hơn so với hình ảnh quảng cáo. Khá thất vọng.', '2024-07-19 11:00:00', N'APPROVED'),
+                                                                                                                                                   (5, 1, 6, 4, N'Sản phẩm tốt, đúng chất lượng. Dịch vụ giao hàng nhanh chóng. Điểm trừ duy nhất là đóng gói hơi đơn giản.', '2024-07-20 13:30:00', N'APPROVED'),
+                                                                                                                                                   (6, 2, 7, 5, N'Quá hài lòng với sản phẩm này! Chất lượng tuyệt vời, thiết kế đẹp mắt. Nhân viên tư vấn nhiệt tình.', '2024-07-21 08:20:00', N'APPROVED'),
+                                                                                                                                                   (7, 6, 8, 1, N'Sản phẩm có vấn đề nghiêm trọng, không sử dụng được. Đã liên hệ bảo hành nhưng chưa được giải quyết.', '2024-07-22 15:10:00', N'HIDE'),
+                                                                                                                                                   (8, 7, 9, 4, N'Sản phẩm khá tốt, phù hợp với mức giá. Có một số điểm cần cải thiện nhưng tổng thể vẫn ổn.', '2024-07-23 12:40:00', N'APPROVED'),
+                                                                                                                                                   (9, 8, 10, 5, N'Excellent! Sản phẩm chất lượng cao, đáng đồng tiền bát gạo. Sẽ giới thiệu cho bạn bè và người thân.', '2024-07-24 17:55:00', N'APPROVED');
+
+-- Dữ liệu mẫu cho bảng media_danh_gia
+INSERT INTO media_danh_gia (id_danh_gia, loai_media, url_media, ten_file, kich_thuoc_file, thoi_luong_video, thu_tu_hien_thi, ngay_upload, trang_thai_media_danh_gia) VALUES
+                                                                                                                                                                          (1, 'IMAGE', '/uploads/reviews/review_1_img_1.jpg', 'san_pham_thuc_te_1.jpg', 1250000, NULL, 1, '2024-07-15 10:32:00', N'APPROVED'),
+                                                                                                                                                                          (1, 'IMAGE', '/uploads/reviews/review_1_img_2.jpg', 'dong_goi_san_pham_1.jpg', 980000, NULL, 2, '2024-07-15 10:33:00', N'APPROVED'),
+                                                                                                                                                                          (2, 'VIDEO', '/uploads/reviews/review_2_video_1.mp4', 'video_danh_gia_sp2.mp4', 15700000, 45, 1, '2024-07-16 14:25:00', N'APPROVED'),
+                                                                                                                                                                          (4, 'IMAGE', '/uploads/reviews/review_4_img_1.jpg', 'hinh_anh_chat_luong.jpg', 1800000, NULL, 1, '2024-07-18 16:50:00', N'APPROVED'),
+                                                                                                                                                                          (4, 'IMAGE', '/uploads/reviews/review_4_img_2.jpg', 'so_sanh_vs_mota.jpg', 1350000, NULL, 2, '2024-07-18 16:51:00', N'APPROVED'),
+                                                                                                                                                                          (4, 'VIDEO', '/uploads/reviews/review_4_video_1.mp4', 'demo_su_dung_sp.mp4', 22400000, 78, 3, '2024-07-18 16:55:00', N'APPROVED'),
+                                                                                                                                                                          (5, 'IMAGE', '/uploads/reviews/review_5_img_1.jpg', 'loi_san_pham.jpg', 1100000, NULL, 1, '2024-07-19 11:05:00', N'APPROVED'),
+                                                                                                                                                                          (6, 'IMAGE', '/uploads/reviews/review_6_img_1.jpg', 'dong_goi_don_gian.jpg', 750000, NULL, 1, '2024-07-20 13:35:00', N'APPROVED'),
+                                                                                                                                                                          (7, 'IMAGE', '/uploads/reviews/review_7_img_1.jpg', 'thiet_ke_dep_mat.jpg', 1950000, NULL, 1, '2024-07-21 08:25:00', N'APPROVED'),
+                                                                                                                                                                          (7, 'VIDEO', '/uploads/reviews/review_7_video_1.mp4', 'unboxing_experience.mp4', 31200000, 120, 2, '2024-07-21 08:30:00', N'APPROVED'),
+                                                                                                                                                                          (8, 'IMAGE', '/uploads/reviews/review_8_img_1.jpg', 'van_de_san_pham.jpg', 1420000, NULL, 1, '2024-07-22 15:15:00', N'HIDE'),
+                                                                                                                                                                          (9, 'VIDEO', '/uploads/reviews/review_9_video_1.mp4', 'review_chi_tiet.mp4', 18900000, 65, 1, '2024-07-23 12:45:00', N'APPROVED'),
+                                                                                                                                                                          (10, 'IMAGE', '/uploads/reviews/review_10_img_1.jpg', 'san_pham_chat_luong_cao.jpg', 2100000, NULL, 1, '2024-07-24 18:00:00', N'APPROVED'),
+                                                                                                                                                                          (10, 'IMAGE', '/uploads/reviews/review_10_img_2.jpg', 'packaging_professional.jpg', 1650000, NULL, 2, '2024-07-24 18:01:00', N'APPROVED'),
+                                                                                                                                                                          (10, 'VIDEO', '/uploads/reviews/review_10_video_1.mp4', 'danh_gia_tong_quan.mp4', 28700000, 95, 3, '2024-07-24 18:05:00', N'APPROVED');
+
+-- Dữ liệu mẫu cho bảng phan_hoi_danh_gia
+INSERT INTO phan_hoi_danh_gia (id_danh_gia, id_nhan_vien, noi_dung, ngay_phan_hoi) VALUES
+                                                                                       (1, 1, N'Cảm ơn bạn đã để lại đánh giá tích cực! Chúng tôi rất vui khi sản phẩm đáp ứng được mong đợi của bạn. Hy vọng được phục vụ bạn trong những lần mua sắm tiếp theo.', '2024-07-15 15:20:00'),
+                                                                                       (2, 2, N'Cảm ơn bạn đã chia sẻ trải nghiệm. Chúng tôi sẽ ghi nhận ý kiến của bạn để cải thiện sản phẩm trong tương lai. Nếu có bất kỳ vấn đề gì, vui lòng liên hệ với chúng tôi.', '2024-07-16 16:30:00'),
+                                                                                       (5, 3, N'Chúng tôi rất tiếc khi sản phẩm chưa đáp ứng được kỳ vọng của bạn. Đội ngũ chăm sóc khách hàng sẽ liên hệ với bạn để hỗ trợ giải quyết vấn đề này một cách tốt nhất.', '2024-07-19 14:15:00'),
+                                                                                       (7, 1, N'Cảm ơn bạn rất nhiều vì những lời khen ngợi! Chúng tôi luôn nỗ lực để mang đến những sản phẩm chất lượng và dịch vụ tốt nhất cho khách hàng. Rất mong được tiếp tục đồng hành cùng bạn.', '2024-07-21 10:45:00'),
+                                                                                       (8, 4, N'Chúng tôi xin lỗi vì sự bất tiện này và sẽ liên hệ trực tiếp với bạn để xử lý vấn đề bảo hành ngay lập tức. Đội ngũ kỹ thuật sẽ hỗ trợ bạn trong vòng 24h tới.', '2024-07-22 16:00:00'),
+                                                                                       (9, 2, N'Cảm ơn bạn đã đánh giá khách quan về sản phẩm. Ý kiến của bạn rất có giá trị để chúng tôi tiếp tục hoàn thiện sản phẩm. Chúc bạn có những trải nghiệm tốt hơn nữa!', '2024-07-23 14:20:00'),
+                                                                                       (10, 1, N'Thank you so much for your excellent review! We are thrilled that you are satisfied with our product quality. We truly appreciate your recommendation and look forward to serving you again.', '2024-07-24 19:30:00');
+
 
 
 -- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)

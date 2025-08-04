@@ -33,7 +33,7 @@ public class MyOrderClientMapper {
 
     public MyOrderProductClientResponse toMyOrderProductClientResponse(ChiTietHoaDon chiTietHoaDon){
         MyOrderProductClientResponse dto = new MyOrderProductClientResponse();
-        dto.setIdSanPhamChiTiet(chiTietHoaDon.getId());
+        dto.setIdSanPhamChiTiet(chiTietHoaDon.getIdSanPhamChiTiet().getId()); //cường
         dto.setTenSanPham(chiTietHoaDon.getTenSanPham());
         dto.setGiaSanPham(chiTietHoaDon.getDonGia());
         Set<HinhAnh> hinhAnhs  = chiTietHoaDon.getIdSanPhamChiTiet().getHinhAnhs();

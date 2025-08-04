@@ -37,27 +37,29 @@ public class ModelSanPhamService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public static String  formatTenModel(String input) {
+    public static String formatTenModel(String input) {
         if (input == null || input.isEmpty()) {
             return input;
         }
 
         input = input.trim();
-        // Chèn khoảng cách sau từ 'iphone' nếu liền với số, ví dụ "iphone14" → "iphone 14"
+        // Chèn khoảng cách giữa 'iphone' và số, ví dụ "iphone14" → "iphone 14"
         input = input.replaceAll("(?i)(iphone)(\\d)", "$1 $2");
+
+        // Chèn khoảng cách giữa số và chữ (ví dụ: "13Mini" → "13 Mini")
+        input = input.replaceAll("(\\d)([A-Za-z])", "$1 $2");
 
         String[] word = input.split("\\s+");
         StringBuilder sb = new StringBuilder();
 
-        for(int i=0; i<word.length; i++) {
-            if(i==0 && word[i].equalsIgnoreCase("iphone")) {
+        for (int i = 0; i < word.length; i++) {
+            if (i == 0 && word[i].equalsIgnoreCase("iphone")) {
                 sb.append("iPhone");
-            }
-            else {
+            } else {
                 sb.append(word[i]);
             }
 
-            if(i < word.length - 1) {
+            if (i < word.length - 1) {
                 sb.append(" ");
             }
         }

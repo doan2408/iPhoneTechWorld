@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.ClientServices.HoaDonClientService
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
@@ -11,7 +12,6 @@ import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
-import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
 import org.example.websitetechworld.Repository.HoaDonRepository;
@@ -29,8 +29,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class MyOrderClientServices {
@@ -79,7 +84,43 @@ public class MyOrderClientServices {
         KhachHang khachHang = khachHangRepository.findById(idKhachHang).orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
 
         HoaDon hoaDon = new HoaDon();
+        String maVanDon = generateMaVanDon(hoaDon.getId());
+        hoaDon.setMaVanDon(maVanDon);
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
+
+        ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
+        thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
+        thanhToanAdminRequest.setSoTienKhachDua(requestThanhToanTongHop.getSoTienKhachDua());
+
+        String hinhThucThanhToan = requestThanhToanTongHop.getHinhThucThanhToan().name();
+        ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
+        ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
+
+        List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
+        for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+            gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
+        }
+        hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
+
+        if ("Đặt hàng thành công".equals(response.getMessage())) {
+            if (TenHinhThuc.NGAN_HANG.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+            }else {
+                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
+            }
+            hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+
+
+        }
+        return response;
+    }
+
+    public ThanhToanAdminResponse xuLyThanhToanGuest(RequestThanhToanTongHop requestThanhToanTongHop){
+
+        HoaDon hoaDon = new HoaDon();
+        String maVanDon = generateMaVanDon(hoaDon.getId());
+        hoaDon.setMaVanDon(maVanDon);
+        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
         thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
@@ -106,9 +147,11 @@ public class MyOrderClientServices {
         return response;
     }
     private HoaDon saveHoaDon(HoaDon hoaDon, RequestThanhToanTongHop requestThanhToanTongHop, KhachHang khachHang){
-        hoaDon.setIdKhachHang(khachHang);
-        hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
-        hoaDon.setSdtNguoiMua(khachHang.getSdt());
+        if (khachHang != null){
+            hoaDon.setIdKhachHang(khachHang);
+            hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
+            hoaDon.setSdtNguoiMua(khachHang.getSdt());
+        }
         hoaDon.setIsShipping(true);
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
         hoaDon.setShippingMethod(requestThanhToanTongHop.getShippingMethod());
@@ -123,6 +166,30 @@ public class MyOrderClientServices {
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
         return hoaDonRepository.save(hoaDon);
     }
+
+
+    //cuong
+    public List<HoaDonAndChiTietHoaDonClientResponse> getHoaDonAndChiTiet(Integer idHoaDon) {
+        List<Object[]> rawData = hoaDonRepository.findHoaDonAndChiTiet(idHoaDon);
+
+        return rawData.stream()
+                .map(row -> new HoaDonAndChiTietHoaDonClientResponse(
+                        ((Number) row[0]).intValue(),   // id_hoa_don
+                        ((Number) row[1]).intValue(),   // id_chi_tiet_hoa_don
+                        ((Number) row[2]).intValue()    // id_san_pham_chi_tiet
+                ))
+                .collect(Collectors.toList());
+    }
+    private String generateMaVanDon(Integer invoiceId) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder suffix = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            suffix.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return "VD" + invoiceId + "-" + suffix;
+    }
+
 
 
 

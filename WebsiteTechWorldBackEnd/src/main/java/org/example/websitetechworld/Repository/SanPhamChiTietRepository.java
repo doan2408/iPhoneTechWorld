@@ -64,14 +64,12 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
       AND m.id_loai = :idLoai
       AND c.id_mau = :idMau
       AND c.id_rom = :idRom
-      AND ncc_sp.id_nha_cung_cap = :idNhaCungCap
 """, nativeQuery = true)
     Integer existsVariantInLoai(
             @Param("idSp") Integer idSp,
             @Param("idMau") Integer idMau,
             @Param("idRom") Integer idRom,
-            @Param("idLoai") Integer idLoai,
-            @Param("idNhaCungCap") Integer idNhaCungCap
+            @Param("idLoai") Integer idLoai
     );
 
 

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/admin/tinh-thanh")
@@ -59,6 +60,7 @@ public class TinhThanhController {
     ) {
         try {
             String url = String.format(
+                    Locale.US,
                     "https://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
                     fromLon, fromLat, toLon, toLat
             );

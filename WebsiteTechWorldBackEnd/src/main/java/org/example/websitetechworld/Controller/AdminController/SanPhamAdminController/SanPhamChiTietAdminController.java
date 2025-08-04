@@ -54,10 +54,9 @@ public class SanPhamChiTietAdminController {
             @RequestParam Integer idSp,
             @RequestParam Integer idMau,
             @RequestParam Integer idRom,
-            @RequestParam (required = false) Integer idLoai,
-            @RequestParam Integer idNhaCungCap
+            @RequestParam (required = false) Integer idLoai
     ) {
-        boolean exists = sanPhamChiTietAdminService.existsVariantInLoai(idSp, idMau, idRom, idLoai, idNhaCungCap);
+        boolean exists = sanPhamChiTietAdminService.existsVariantInLoai(idSp, idMau, idRom, idLoai);
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 }

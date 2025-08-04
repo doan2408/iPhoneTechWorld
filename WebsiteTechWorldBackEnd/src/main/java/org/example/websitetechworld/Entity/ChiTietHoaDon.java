@@ -10,7 +10,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -54,5 +56,8 @@ public class ChiTietHoaDon {
 
     @OneToMany(mappedBy = "idHoaDonChiTiet",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<ImeiDaBan> imeiDaBans = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "idChiTietHoaDon", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
+    private List<DanhGiaSanPham> danhGiaSanPhams = new ArrayList<>();
 
 }

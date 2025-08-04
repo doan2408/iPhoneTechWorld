@@ -1,20 +1,12 @@
 <template>
-  <el-dialog
-    title="Thêm màu sắc"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
+  <el-dialog title="Thêm màu sắc" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
+    
     <el-form :model="NewMauSac" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Tên màu sắc" prop="tenMau">
         <el-input v-model="NewMauSac.tenMau" autocomplete="off" />
       </el-form-item>
-    </el-form>
-
-    <el-form :model="NewMauSac" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Mã màu" prop="maMau">
-        <el-input v-model="NewMauSac.maMau" autocomplete="off" />
+        <el-color-picker v-model="NewMauSac.maMau" show-alpha />
       </el-form-item>
     </el-form>
 
@@ -27,8 +19,9 @@
 
 <script setup>
 import { postMauSacList } from '@/Service/Adminservice/Products/ProductAdminService';
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import chroma from 'chroma-js'
 
 const emit = defineEmits(['saved']);
 
@@ -77,4 +70,16 @@ async function submitMauSac() {
     }
   });
 }
+
+
+watch(() => NewMauSac.maMau, (newVal) => {
+    if (!newVal) return;
+    try {
+        const hex = chroma(newVal).hex('rgba');
+        NewMauSac.maMau = hex.toLowerCase(); 
+        console.log("11111111111111111111", newVal);
+    } catch (err) {
+        console.warn("Mã màu không hợp lệ:", newVal);
+    }
+});
 </script>

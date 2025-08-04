@@ -52,7 +52,8 @@ const themVaoGio = (
       (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
     );
     const soLuongHienTai = itemHienTai ? itemHienTai.soLuong : 0;
-
+    console.log('denbug',soLuongTon);
+    
     if (soLuongHienTai + soLuong > soLuongTon) {
       return false; 
     }

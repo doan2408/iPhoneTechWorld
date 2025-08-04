@@ -19,7 +19,7 @@ public class WishListClientMapper {
             response.setTenKhachHang(wishlist.getKhacHang().getTenKhachHang());
         }
         if (wishlist.getChiTietSanPham() != null){
-            response.setIdSp(wishlist.getChiTietSanPham().getId());
+            response.setIdSp(wishlist.getChiTietSanPham().getIdSanPham().getId());
             response.setTenSanPham(wishlist.getChiTietSanPham().getIdSanPham().getTenSanPham());
             response.setGiaSanPham(wishlist.getChiTietSanPham().getGiaBan());
             response.setMau(wishlist.getChiTietSanPham().getIdMau().getTenMau());
