@@ -172,10 +172,10 @@ CREATE TABLE dia_chi (
                          id_khach_hang INT,
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan VARCHAR(10),
+                         email_nguoi_nhan NVARCHAR(100),
                          so_nha NVARCHAR(50),
                          ten_duong NVARCHAR(50),
                          xa_phuong NVARCHAR(50),
-                         quan_huyen NVARCHAR(50),
                          tinh_thanh_pho NVARCHAR(50),
                          dia_chi_chinh BIT,
                          FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE
@@ -700,23 +700,23 @@ VALUES
     (15, 15, 750.00, '2025-02-02 00:00:00+07:00');
 
 -- Table dia_chi
-INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
+INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, email_nguoi_nhan, tinh_thanh_pho, dia_chi_chinh)
 VALUES
-    (1, N'Nguyễn Thị Hoa', '0998938493', N'123', N'Đường Láng', N'Đống Đa', N'Đống Đa', N'Hà Nội', 1),
-    (1, N'Nguyễn Văn Hoe', '0998938412', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'Quốc Oai', N'Hà Nội', 0),
-    (2, N'Trần Văn Hùng', '0128473827', N'456', N'Nguyễn Huệ', N'Quận 1', N'Quận 1', N'TP.HCM', 1),
-    (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
-    (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
-    (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1),
-    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
-    (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'Quận 3', N'TP.HCM', 0),
-    (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'Thanh Khê', N'Đà Nẵng', 0),
-    (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'Phong Điền', N'Huế', 0),
-    (5, N'Hoàng Văn Sơn', '0998293042', N'333', N'Trần Duy Hưng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 0),
-    (1, N'Nguyễn Thị Vân', '0998938495', N'777', N'Giải Phóng', N'Hoàng Mai', N'Hoàng Mai', N'Hà Nội', 0),
-    (2, N'Trần Văn Nam', '0128473829', N'999', N'Võ Thị Sáu', N'Quận 7', N'Quận 7', N'TP.HCM', 0),
-    (3, N'Lê Thị Thảo', '0938462738', N'111', N'Lê Đại Hành', N'Liên Chiểu', N'Liên Chiểu', N'Đà Nẵng', 0),
-    (4, N'Phạm Văn Bình', '0293123323', N'444', N'Hai Bà Trưng', N'Phú Lộc', N'Phú Lộc', N'Huế', 0);
+    (1, N'Nguyễn Thị Hoa', '0998938493', N'123', N'Đường Láng', N'Đống Đa', N'a@gmail.com', N'Hà Nội', 1),
+    (1, N'Nguyễn Văn Hoe', '0998938412', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'b@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Văn Hùng', '0128473827', N'456', N'Nguyễn Huệ', N'Quận 1', N'c@gmail.com', N'TP.HCM', 1),
+    (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'd@gmail.com', N'Đà Nẵng', 1),
+    (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'e@gmail.com', N'Huế', 1),
+    (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'f@gmail.com', N'Hà Nội', 1),
+    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'g@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'h@gmail.com', N'TP.HCM', 0),
+    (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'i@gmail.com', N'Đà Nẵng', 0),
+    (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'l@gmail.com', N'Huế', 0),
+    (5, N'Hoàng Văn Sơn', '0998293042', N'333', N'Trần Duy Hưng', N'Cầu Giấy', N'k@gmail.com', N'Hà Nội', 0),
+    (1, N'Nguyễn Thị Vân', '0998938495', N'777', N'Giải Phóng', N'Hoàng Mai', N'm@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Văn Nam', '0128473829', N'999', N'Võ Thị Sáu', N'Quận 7', N'e@gmail.com', N'TP.HCM', 0),
+    (3, N'Lê Thị Thảo', '0938462738', N'111', N'Lê Đại Hành', N'Liên Chiểu', N'fa@gmail.com', N'Đà Nẵng', 0),
+    (4, N'Phạm Văn Bình', '0293123323', N'444', N'Hai Bà Trưng', N'Phú Lộc', N'bk@gmail.com', N'Huế', 0);
 
 -- Table gio_hang
 INSERT INTO gio_hang (id_khach_hang)

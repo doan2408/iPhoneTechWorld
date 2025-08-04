@@ -20,7 +20,7 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
             "dc.soNha," +
             "dc.tenDuong," +
             "dc.xaPhuong," +
-            "dc.quanHuyen," +
+            "dc.emailNguoiNhan," +
             "dc.tinhThanhPho," +
             "dc.diaChiChinh," +
             "dc.idKhachHang.id) " +
@@ -36,7 +36,7 @@ public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> {
             "dc.soNha," +
             "dc.tenDuong," +
             "dc.xaPhuong," +
-            "dc.quanHuyen," +
+            "dc.emailNguoiNhan," +
             "dc.tinhThanhPho," +
             "dc.diaChiChinh," +
             "dc.idKhachHang.id) " +

@@ -63,7 +63,7 @@ public class ClientService {
             diaChiResponse.setSoNha(diaChiChinh.getSoNha());
             diaChiResponse.setTenDuong(diaChiChinh.getTenDuong());
             diaChiResponse.setXaPhuong(diaChiChinh.getXaPhuong());
-            diaChiResponse.setQuanHuyen(diaChiChinh.getQuanHuyen());
+            diaChiResponse.setEmailNguoiNhan(diaChiChinh.getEmailNguoiNhan());
             diaChiResponse.setTinhThanhPho(diaChiChinh.getTinhThanhPho());
             diaChiResponse.setDiaChiChinh(diaChiChinh.getDiaChiChinh());
 

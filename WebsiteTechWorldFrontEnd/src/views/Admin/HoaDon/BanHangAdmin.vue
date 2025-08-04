@@ -35,7 +35,7 @@
                 <button class="action-btn" title="Quay lại">
                     <Undo class="btn-icon" />
                 </button>
-                <button class="action-btn" title="Làm mới">
+                <button class="action-btn" title="Làm mới" @click="reloadPage()">
                     <RotateCcw class="btn-icon" />
                 </button>
                 <button class="action-btn" title="In">
@@ -2170,16 +2170,9 @@ const onScannedImei = async (soImei) => {
         showQRModal.value = false
     }
 }
-// onMounted(async () => {
-//     await loadHoaDon()
-//     console.log('invoice',invoices.value);
-    
-//     // Nếu chưa có hóa đơn nào thì tự tạo mới
-//     if (invoices.value.length === 0) {
-//         await addNewInvoice()
-//     }
-// })
-
+const reloadPage = () =>{
+    loadTabHoaDon()
+}
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>

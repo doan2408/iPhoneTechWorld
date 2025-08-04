@@ -84,9 +84,10 @@ public class MyOrderClientServices {
         KhachHang khachHang = khachHangRepository.findById(idKhachHang).orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
 
         HoaDon hoaDon = new HoaDon();
+        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
         String maVanDon = generateMaVanDon(hoaDon.getId());
         hoaDon.setMaVanDon(maVanDon);
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
+        hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
         thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
@@ -118,9 +119,10 @@ public class MyOrderClientServices {
     public ThanhToanAdminResponse xuLyThanhToanGuest(RequestThanhToanTongHop requestThanhToanTongHop){
 
         HoaDon hoaDon = new HoaDon();
+        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
         String maVanDon = generateMaVanDon(hoaDon.getId());
         hoaDon.setMaVanDon(maVanDon);
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
+        hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
         thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
@@ -157,8 +159,8 @@ public class MyOrderClientServices {
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
         hoaDon.setShippingMethod(requestThanhToanTongHop.getShippingMethod());
         hoaDon.setNgayDatHang(LocalDateTime.now());
-        hoaDon.setSdtNguoiMua(requestThanhToanTongHop.getSdtNguoiNhan());
-        hoaDon.setTenNguoiMua(requestThanhToanTongHop.getTenNguoiNhan());
+        hoaDon.setSdtNguoiNhan(requestThanhToanTongHop.getSdtNguoiNhan());
+        hoaDon.setTenNguoiNhan(requestThanhToanTongHop.getTenNguoiNhan());
         hoaDon.setDiaChiGiaoHang(requestThanhToanTongHop.getDiaChiGiaoHang());
         hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien());
         hoaDon.setThanhTien(requestThanhToanTongHop.getSoTienKhachDua());

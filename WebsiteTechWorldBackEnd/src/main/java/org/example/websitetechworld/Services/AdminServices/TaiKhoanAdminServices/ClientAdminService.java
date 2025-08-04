@@ -64,7 +64,7 @@ public class ClientAdminService {
                     diaChi.setSoNha(dc.getSoNha());
                     diaChi.setTenDuong(dc.getTenDuong());
                     diaChi.setXaPhuong(dc.getXaPhuong());
-                    diaChi.setQuanHuyen(dc.getQuanHuyen());
+                    diaChi.setEmailNguoiNhan(dc.getEmailNguoiNhan());
                     diaChi.setTinhThanhPho(dc.getTinhThanhPho());
                     diaChi.setDiaChiChinh(dc.getDiaChiChinh());
                     return diaChi;

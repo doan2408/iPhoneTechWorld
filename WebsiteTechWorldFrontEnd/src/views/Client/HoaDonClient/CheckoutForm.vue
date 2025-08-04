@@ -290,6 +290,9 @@ const route = useRoute();
 const userAddresses = ref([])
 onMounted(async () => {
     try {
+        
+        const response = await getDiaChiByClient();
+        const data = response.data;
 
         if (Array.isArray(data) && data.length > 0) {
             userAddresses.value = data;

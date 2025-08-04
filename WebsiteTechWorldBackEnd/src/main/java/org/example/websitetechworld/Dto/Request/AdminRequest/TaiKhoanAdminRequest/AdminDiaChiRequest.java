@@ -31,8 +31,8 @@ public class AdminDiaChiRequest {
     @NotBlank(message = "Xã/Phường không được để trống.")
     private String xaPhuong;
 
-    @NotBlank(message = "Quận/Huyện không được để trống.")
-    private String quanHuyen;
+    @NotBlank(message = "Email nguoi nhan không được để trống.")
+    private String emailNguoiNhan;
 
     @NotBlank(message = "Tỉnh/Thành phố không được để trống.")
     private String tinhThanhPho;

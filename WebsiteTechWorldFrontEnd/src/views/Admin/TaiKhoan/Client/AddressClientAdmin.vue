@@ -31,10 +31,10 @@ const formData = reactive({
   id: null,
   tenNguoiNhan: "",
   sdtNguoiNhan: "",
+  emailNguoiNhan: "",
   soNha: "",
   tenDuong: "",
   xaPhuong: "",
-  quanHuyen: "",
   tinhThanhPho: "",
   diaChiChinh: false,
 });
@@ -63,8 +63,8 @@ const rules = {
   xaPhuong: [
     { required: true, message: "Vui lòng nhập xã/phường", trigger: "blur" },
   ],
-  quanHuyen: [
-    { required: true, message: "Vui lòng nhập quận/huyện", trigger: "blur" },
+  emailNguoiNhan: [
+    { required: true, message: "Vui lòng nhập email người nhận", trigger: "blur" },
   ],
   tinhThanhPho: [
     {
@@ -97,7 +97,7 @@ const resetForm = () => {
     soNha: "",
     tenDuong: "",
     xaPhuong: "",
-    quanHuyen: "",
+    emailNguoiNhan: "",
     tinhThanhPho: "",
     diaChiChinh: false,
   });
@@ -155,7 +155,7 @@ const handleSubmit = async () => {
       soNha: formData.soNha,
       tenDuong: formData.tenDuong,
       xaPhuong: formData.xaPhuong,
-      quanHuyen: formData.quanHuyen,
+      emailNguoiNhan: formData.emailNguoiNhan,
       tinhThanhPho: formData.tinhThanhPho,
       diaChiChinh: formData.diaChiChinh,
       idKhachHang: route.params.idClient, // ID khách hàng từ params
@@ -246,27 +246,19 @@ onMounted(() => {
       <h2 v-if="addresses.length == 0">Khách hàng chưa cập nhật địa chỉ</h2>
       <h2 v-else>Địa chỉ giao hàng</h2>
 
-      <el-button
-        type="primary"
-        @click="goToAdd"
-        :disabled="addresses.length >= 5"
-        class="add-address-btn"
-      >
-        <el-icon><Plus /></el-icon>
+      <el-button type="primary" @click="goToAdd" :disabled="addresses.length >= 5" class="add-address-btn">
+        <el-icon>
+          <Plus />
+        </el-icon>
         Thêm địa chỉ ({{ addresses.length }}/5)
       </el-button>
     </div>
 
     <!-- Danh sách địa chỉ -->
     <div class="address-list">
-      <el-card
-        v-for="address in addresses"
-        :key="address.id"
-        class="address-card"
-        :class="{ 'is-default': address.diaChiChinh }"
-        shadow="hover"
-        @click="!address.diaChiChinh && selectAddress(address.id)"
-      >
+      <el-card v-for="address in addresses" :key="address.id" class="address-card"
+        :class="{ 'is-default': address.diaChiChinh }" shadow="hover"
+        @click="!address.diaChiChinh && selectAddress(address.id)">
         <div class="address-content">
           <div class="address-details">
             <el-descriptions :column="1" border>
@@ -281,16 +273,16 @@ onMounted(() => {
               <el-descriptions-item label="Người nhận:">
                 <span>{{
                   address.tenNguoiNhan != null
-                    ? address.tenNguoiNhan
-                    : "Không có thông tin"
-                }}</span>
+                  ? address.tenNguoiNhan
+                  : "Không có thông tin"
+                  }}</span>
               </el-descriptions-item>
               <el-descriptions-item label="Số điện thoại:">
                 <span>{{
                   address.sdtNguoiNhan != null
-                    ? address.sdtNguoiNhan
-                    : "Không có thông tin"
-                }}</span>
+                  ? address.sdtNguoiNhan
+                  : "Không có thông tin"
+                  }}</span>
               </el-descriptions-item>
               <el-descriptions-item label="Địa chỉ:">
                 <span>
@@ -300,52 +292,32 @@ onMounted(() => {
                   }}{{ address.tenDuong ? ", " : "" }}
                   {{ address.xaPhuong != null ? address.xaPhuong : ""
                   }}{{ address.xaPhuong ? ", " : ""
-                  }}{{ address.quanHuyen != null ? address.quanHuyen : ""
-                  }}{{ address.quanHuyen ? ", " : "" }}
-                  {{ address.tinhThanhPho != null ? address.tinhThanhPho : "" }}
+                  }}{{ address.tinhThanhPho != null ? address.tinhThanhPho : "" }}
                 </span>
               </el-descriptions-item>
             </el-descriptions>
           </div>
 
           <div class="address-actions">
-            <el-tag
-              v-if="address.diaChiChinh"
-              type="danger"
-              effect="plain"
-              class="default-tag"
-            >
+            <el-tag v-if="address.diaChiChinh" type="danger" effect="plain" class="default-tag">
               Mặc định
             </el-tag>
 
             <div class="action-buttons">
-              <el-button
-                type="primary"
-                size="small"
-                circle
-                @click.stop="goToEdit(address.id)"
-                title="Chỉnh sửa"
-              >
-                <el-icon><Edit /></el-icon>
+              <el-button type="primary" size="small" circle @click.stop="goToEdit(address.id)" title="Chỉnh sửa">
+                <el-icon>
+                  <Edit />
+                </el-icon>
               </el-button>
 
-              <el-button
-                type="danger"
-                size="small"
-                circle
-                @click.stop
-                title="Xóa"
-              >
-                <el-icon><Delete /></el-icon>
+              <el-button type="danger" size="small" circle @click.stop title="Xóa">
+                <el-icon>
+                  <Delete />
+                </el-icon>
               </el-button>
 
-              <el-button
-                v-if="selectedAddressId === address.id && !address.diaChiChinh"
-                type="success"
-                size="small"
-                @click.stop="setPrimary(address)"
-                class="set-primary-btn"
-              >
+              <el-button v-if="selectedAddressId === address.id && !address.diaChiChinh" type="success" size="small"
+                @click.stop="setPrimary(address)" class="set-primary-btn">
                 Đặt làm mặc địnhhh
               </el-button>
             </div>
@@ -355,106 +327,69 @@ onMounted(() => {
 
       <div class="footer-actions">
         <el-button @click="back" type="info">
-          <el-icon><ArrowLeft /></el-icon>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
           Quay lại
         </el-button>
       </div>
     </div>
 
     <!-- Modal Form -->
-    <el-dialog
-      v-model="isModalVisible"
-      :title="isEditMode ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'"
-      width="600px"
-      :before-close="closeModal"
-    >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-width="140px"
-        label-position="left"
-      >
+    <el-dialog v-model="isModalVisible" :title="isEditMode ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'" width="600px"
+      :before-close="closeModal">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="140px" label-position="left">
         <el-form-item label="Tên người nhận" prop="tenNguoiNhan">
-          <el-input
-            v-model="formData.tenNguoiNhan"
-            placeholder="Nhập tên người nhận"
-            clearable
-            :class="{ 'is-error': errors.tenNguoiNhan }"
-          />
+          <el-input v-model="formData.tenNguoiNhan" placeholder="Nhập tên người nhận" clearable
+            :class="{ 'is-error': errors.tenNguoiNhan }" />
           <div v-if="errors.tenNguoiNhan" class="error-message">
             {{ errors.tenNguoiNhan }}
           </div>
         </el-form-item>
 
         <el-form-item label="Số điện thoại" prop="sdtNguoiNhan">
-          <el-input
-            v-model="formData.sdtNguoiNhan"
-            placeholder="Nhập số điện thoại"
-            clearable
-            maxlength="10"
-            :class="{ 'is-error': errors.sdtNguoiNhan }"
-          />
+          <el-input v-model="formData.sdtNguoiNhan" placeholder="Nhập số điện thoại" clearable maxlength="10"
+            :class="{ 'is-error': errors.sdtNguoiNhan }" />
           <div v-if="errors.sdtNguoiNhan" class="error-message">
             {{ errors.sdtNguoiNhan }}
           </div>
         </el-form-item>
 
+        <el-form-item label="Email người nhận" prop="emailNguoiNhan">
+          <el-input v-model="formData.emailNguoiNhan" placeholder="Nhập email người nhận" clearable
+            :class="{ 'is-error': errors.emailNguoiNhan }" />
+          <div v-if="errors.emailNguoiNhan" class="error-message">
+            {{ errors.emailNguoiNhan }}
+          </div>
+        </el-form-item>
+
         <el-form-item label="Số nhà" prop="soNha">
-          <el-input
-            v-model="formData.soNha"
-            placeholder="Nhập số nhà"
-            clearable
-            :class="{ 'is-error': errors.soNha }"
-          />
+          <el-input v-model="formData.soNha" placeholder="Nhập số nhà" clearable
+            :class="{ 'is-error': errors.soNha }" />
           <div v-if="errors.soNha" class="error-message">
             {{ errors.soNha }}
           </div>
         </el-form-item>
 
         <el-form-item label="Tên đường" prop="tenDuong">
-          <el-input
-            v-model="formData.tenDuong"
-            placeholder="Nhập tên đường"
-            clearable
-            :class="{ 'is-error': errors.tenDuong }"
-          />
+          <el-input v-model="formData.tenDuong" placeholder="Nhập tên đường" clearable
+            :class="{ 'is-error': errors.tenDuong }" />
           <div v-if="errors.tenDuong" class="error-message">
             {{ errors.tenDuong }}
           </div>
         </el-form-item>
 
         <el-form-item label="Xã/Phường" prop="xaPhuong">
-          <el-input
-            v-model="formData.xaPhuong"
-            placeholder="Nhập xã/phường"
-            clearable
-            :class="{ 'is-error': errors.xaPhuong }"
-          />
+          <el-input v-model="formData.xaPhuong" placeholder="Nhập xã/phường" clearable
+            :class="{ 'is-error': errors.xaPhuong }" />
           <div v-if="errors.xaPhuong" class="error-message">
             {{ errors.xaPhuong }}
           </div>
         </el-form-item>
 
-        <el-form-item label="Quận/Huyện" prop="quanHuyen">
-          <el-input
-            v-model="formData.quanHuyen"
-            placeholder="Nhập quận/huyện"
-            clearable
-            :class="{ 'is-error': errors.quanHuyen }"
-          />
-          <div v-if="errors.quanHuyen" class="error-message">
-            {{ errors.quanHuyen }}
-          </div>
-        </el-form-item>
-
         <el-form-item label="Tỉnh/Thành phố" prop="tinhThanhPho">
-          <el-input
-            v-model="formData.tinhThanhPho"
-            placeholder="Nhập tỉnh/thành phố"
-            clearable
-            :class="{ 'is-error': errors.tinhThanhPho }"
-          />
+          <el-input v-model="formData.tinhThanhPho" placeholder="Nhập tỉnh/thành phố" clearable
+            :class="{ 'is-error': errors.tinhThanhPho }" />
           <div v-if="errors.tinhThanhPho" class="error-message">
             {{ errors.tinhThanhPho }}
           </div>
@@ -462,12 +397,8 @@ onMounted(() => {
 
         <el-form-item label="Địa chỉ chính">
           <div class="switch-container">
-            <el-switch
-              v-model="formData.diaChiChinh"
-              @change="handleTogglePrimary"
-              active-color="#13ce66"
-              inactive-color="#ff4949"
-            />
+            <el-switch v-model="formData.diaChiChinh" @change="handleTogglePrimary" active-color="#13ce66"
+              inactive-color="#ff4949" />
             <span v-if="originalPrimaryStatus" class="note">
               (Địa chỉ chính không thể bỏ chọn)
             </span>
@@ -481,12 +412,7 @@ onMounted(() => {
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeModal">Hủy</el-button>
-          <el-button
-            type="primary"
-            @click="handleSubmit"
-            :loading="loading"
-            :disabled="isEditMode && !isFormChanged"
-          >
+          <el-button type="primary" @click="handleSubmit" :loading="loading" :disabled="isEditMode && !isFormChanged">
             {{ isEditMode ? "Cập nhật" : "Thêm mới" }}
           </el-button>
         </div>
