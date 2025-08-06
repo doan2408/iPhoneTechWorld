@@ -7,13 +7,7 @@
           <h1 class="page-title">Quản lý khuyến mãi</h1>
           <p class="page-subtitle">Tạo và quản lý các chương trình khuyến mãi</p>
         </div>
-        <el-button 
-          v-if="isAdmin" 
-          type="primary" 
-          size="large"
-          class="create-btn"
-          @click="openDialog"
-        >
+        <el-button v-if="isAdmin" type="primary" size="large" class="create-btn" @click="openDialog">
           <el-icon class="btn-icon">
             <Plus />
           </el-icon>
@@ -28,12 +22,7 @@
         <div class="filter-group">
           <div class="filter-item">
             <label class="filter-label">Tìm kiếm</label>
-            <el-input
-              v-model="search"
-              placeholder="Tìm kiếm theo mã hoặc tên..."
-              clearable
-              class="filter-input"
-            >
+            <el-input v-model="search" placeholder="Tìm kiếm theo mã hoặc tên..." clearable class="filter-input">
               <template #prefix>
                 <el-icon class="search-icon">
                   <Search />
@@ -41,46 +30,29 @@
               </template>
             </el-input>
           </div>
-          
+
           <div class="filter-item">
             <label class="filter-label">Trạng thái</label>
-            <el-select
-              v-model="trangThaiFilter"
-              placeholder="Chọn trạng thái"
-              clearable
-              class="filter-select"
-            >
+            <el-select v-model="trangThaiFilter" placeholder="Chọn trạng thái" clearable class="filter-select">
               <el-option label="Tất cả" :value="''" />
               <el-option label="Chưa bắt đầu" value="NOT_STARTED" />
               <el-option label="Đang hoạt động" value="ACTIVE" />
               <el-option label="Đã hết hạn" value="EXPIRED" />
             </el-select>
           </div>
-          
+
           <div class="filter-item">
             <label class="filter-label">Ngày bắt đầu</label>
-            <el-date-picker
-              v-model="ngayBatDauFilter"
-              type="date"
-              placeholder="Chọn ngày bắt đầu"
-              value-format="YYYY-MM-DD"
-              clearable
-              class="filter-date"
-            />
+            <el-date-picker v-model="ngayBatDauFilter" type="date" placeholder="Chọn ngày bắt đầu"
+              value-format="YYYY-MM-DD" clearable class="filter-date" />
           </div>
-          
+
           <div class="filter-item">
             <label class="filter-label">Ngày kết thúc</label>
-            <el-date-picker
-              v-model="ngayKetThucFilter"
-              type="date"
-              placeholder="Chọn ngày kết thúc"
-              value-format="YYYY-MM-DD"
-              clearable
-              class="filter-date"
-            />
+            <el-date-picker v-model="ngayKetThucFilter" type="date" placeholder="Chọn ngày kết thúc"
+              value-format="YYYY-MM-DD" clearable class="filter-date" />
           </div>
-          
+
           <div class="filter-actions">
             <el-button @click="clear" class="reset-btn">
               <el-icon>
@@ -95,19 +67,14 @@
 
     <!-- Data Table -->
     <el-card class="table-card" shadow="never">
-      <el-table
-        v-loading="isLoading"
-        :data="phieuGiamGias"
-        class="promotion-table"
-        :row-class-name="getRowClassName"
-        empty-text="Không có dữ liệu"
-      >
+      <el-table v-loading="isLoading" :data="phieuGiamGias" class="promotion-table" :row-class-name="getRowClassName"
+        empty-text="Không có dữ liệu">
         <el-table-column label="STT" width="75" align="center">
           <template #default="scope">
             <span class="row-index">{{ scope.$index + 1 + currentPage * pageSize }}</span>
           </template>
         </el-table-column>
-        
+
         <el-table-column prop="maGiamGia" label="Mã khuyến mãi" min-width="145">
           <template #default="scope">
             <div class="code-cell">
@@ -117,15 +84,15 @@
             </div>
           </template>
         </el-table-column>
-        
-        <el-table-column prop="tenKhuyenMai" label="Tên khuyến mãi" min-width="200">
+
+        <el-table-column prop="tenKhuyenMai" label="Tên khuyến mãi" min-width="170">
           <template #default="scope">
             <div class="name-cell">
               <span class="promotion-name">{{ scope.row.tenKhuyenMai }}</span>
             </div>
           </template>
         </el-table-column>
-        
+
         <el-table-column label="Giá trị giảm" width="140" align="center">
           <template #default="scope">
             <div class="value-cell">
@@ -138,23 +105,27 @@
             </div>
           </template>
         </el-table-column>
-        
-        <el-table-column label="Thời gian" width="145">
+
+        <el-table-column label="Thời gian" width="180">
           <template #default="scope">
             <div class="date-range">
               <div class="date-item">
-                <el-icon class="date-icon"><Calendar /></el-icon>
-                <span>{{ formatDate(scope.row.ngayBatDau) }}</span>
+                <el-icon class="date-icon">
+                  <Calendar />
+                </el-icon>
+                <span>{{ formatDateTime(scope.row.ngayBatDau) }}</span>
               </div>
               <div class="date-separator">→</div>
               <div class="date-item">
-                <el-icon class="date-icon"><Calendar /></el-icon>
-                <span>{{ formatDate(scope.row.ngayKetThuc) }}</span>
+                <el-icon class="date-icon">
+                  <Calendar />
+                </el-icon>
+                <span>{{ formatDateTime(scope.row.ngayKetThuc) }}</span>
               </div>
             </div>
           </template>
         </el-table-column>
-        
+
         <el-table-column prop="soLuong" label="Số lượng" width="110" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.soLuong > 0 ? 'success' : 'danger'" size="small">
@@ -162,7 +133,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        
+
         <el-table-column label="Trạng thái" width="140" align="center">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.trangThaiPhieuGiamGia)" size="small">
@@ -170,59 +141,38 @@
             </el-tag>
           </template>
         </el-table-column>
-        
-        <el-table-column v-if="isAdmin" label="Thao tác" width="120" align="center" fixed="right">
+
+        <el-table-column v-if="isAdmin" label="Thao tác" width="160" align="center" fixed="right">
           <template #default="scope">
             <div class="action-buttons">
+              <el-tooltip content="Xem chi tiết" placement="top">
+                <el-button size="small" type="info" :icon="View" circle @click="viewDetail(scope.row.id)"
+                  class="action-btn detail-btn" />
+              </el-tooltip>
               <el-tooltip content="Chỉnh sửa" placement="top">
-                <el-button
-                  size="small"
-                  type="primary"
-                  :icon="Edit"
-                  circle
-                  @click="viewUpdate(scope.row.id)"
-                  class="action-btn edit-btn"
-                />
+                <el-button size="small" type="primary" :icon="Edit" circle @click="viewUpdate(scope.row.id)"
+                  class="action-btn edit-btn" />
               </el-tooltip>
               <el-tooltip content="Xóa" placement="top">
-                <el-button
-                  size="small"
-                  type="danger"
-                  :icon="Delete"
-                  circle
-                  @click="handleDeletePhieuGiamGia(scope.row.id)"
-                  class="action-btn delete-btn" style="margin-left: 0;"
-                />
+                <el-button size="small" type="danger" :icon="Delete" circle
+                  @click="handleDeletePhieuGiamGia(scope.row.id)" class="action-btn delete-btn" />
               </el-tooltip>
             </div>
           </template>
         </el-table-column>
       </el-table>
-      
+
       <!-- Pagination -->
       <div class="pagination-wrapper">
-        <el-pagination
-          background
-          layout="total, sizes, prev, pager, next, jumper"
-          :current-page="currentPage + 1"
-          :page-size="pageSize"
-          :page-sizes="[5, 10, 20, 50]"
-          :total="total"
-          @current-change="(p) => loadPhieuGiamGia(p - 1)"
-          @size-change="handleSizeChange"
-          class="custom-pagination"
-        />
+        <el-pagination background layout="total, sizes, prev, pager, next, jumper" :current-page="currentPage + 1"
+          :page-size="pageSize" :page-sizes="[5, 10, 20, 50]" :total="total"
+          @current-change="(p) => loadPhieuGiamGia(p - 1)" @size-change="handleSizeChange" class="custom-pagination" />
       </div>
     </el-card>
 
     <!-- Create/Edit Dialog -->
-    <el-dialog
-      v-model="phieuGiamGiaDialogVisible"
-      width="800px"
-      style="margin-top: 30px;"
-      class="promotion-dialog"
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="phieuGiamGiaDialogVisible" width="800px" style="margin-top: 30px;" class="promotion-dialog"
+      :close-on-click-modal="false">
       <div class="dialog-content">
         <el-form :model="formData" label-position="top" class="promotion-form">
           <div class="form-grid">
@@ -231,24 +181,18 @@
               <h3 class="section-title">Thông tin cơ bản</h3>
               <div class="form-row">
                 <el-form-item label="Mã giảm giá" class="form-item">
-                  <el-input
-                    v-model="formData.maGiamGia"
-                    placeholder="Mã tự động"
-                    :class="{ 'error': errors.maGiamGia }"
-                  />
+                  <el-input v-model="formData.maGiamGia" placeholder="Mã tự động"
+                    :class="{ 'error': errors.maGiamGia }" />
                   <span v-if="errors.maGiamGia" class="error-text">{{ errors.maGiamGia }}</span>
                 </el-form-item>
-                
+
                 <el-form-item label="Tên khuyến mãi *" class="form-item">
-                  <el-input
-                    v-model="formData.tenKhuyenMai"
-                    placeholder="Nhập tên khuyến mãi"
-                    :class="{ 'error': errors.tenKhuyenMai }"
-                  />
+                  <el-input v-model="formData.tenKhuyenMai" placeholder="Nhập tên khuyến mãi"
+                    :class="{ 'error': errors.tenKhuyenMai }" />
                   <span v-if="errors.tenKhuyenMai" class="error-text">{{ errors.tenKhuyenMai }}</span>
                 </el-form-item>
               </div>
-              
+
               <div class="form-row">
                 <el-form-item label="Loại khuyến mãi" class="form-item">
                   <el-select v-model="formData.loaiKhuyenMai" placeholder="Chọn loại">
@@ -256,42 +200,24 @@
                     <el-option value="Cố định" label="Số tiền cố định" />
                   </el-select>
                 </el-form-item>
-                
+
                 <el-form-item label="Giá trị khuyến mãi *" class="form-item">
-                  <el-input-number
-                    v-model="formData.giaTriKhuyenMai"
-                    :min="0"
-                    :max="formData.loaiKhuyenMai === 'Phần trăm' ? 100 : undefined"
-                    placeholder="0"
-                    class="full-width"
-                    :class="{ 'error': errors.giaTriKhuyenMai }"
-                  />
+                  <el-input-number v-model="formData.giaTriKhuyenMai" :min="0"
+                    :max="formData.loaiKhuyenMai === 'Phần trăm' ? 100 : undefined" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.giaTriKhuyenMai }" />
                   <span v-if="errors.giaTriKhuyenMai" class="error-text">{{ errors.giaTriKhuyenMai }}</span>
                 </el-form-item>
 
                 <el-form-item label="Giá trị đơn hàng tối thiểu" class="form-item">
-                  <el-input-number
-                    v-model="formData.giaTriDonHangToiThieu"
-                    :min="0"
-                    placeholder="0"
-                    class="full-width"
-                    :class="{ 'error': errors.giaTriDonHangToiThieu }"
-                  />
+                  <el-input-number v-model="formData.giaTriDonHangToiThieu" :min="0" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.giaTriDonHangToiThieu }" />
                   <span v-if="errors.giaTriDonHangToiThieu" class="error-text">{{ errors.giaTriDonHangToiThieu }}</span>
                 </el-form-item>
-                
-                <el-form-item
-                  v-if="formData.loaiKhuyenMai === 'Phần trăm'"
-                  label="Giá trị khuyến mãi tối đa"
-                  class="form-item"
-                >
-                  <el-input-number
-                    v-model="formData.giaTriKhuyenMaiToiDa"
-                    :min="0"
-                    placeholder="0"
-                    class="full-width"
-                    :class="{ 'error': errors.giaTriKhuyenMaiToiDa }"
-                  />
+
+                <el-form-item v-if="formData.loaiKhuyenMai === 'Phần trăm'" label="Giá trị khuyến mãi tối đa"
+                  class="form-item">
+                  <el-input-number v-model="formData.giaTriKhuyenMaiToiDa" :min="0" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.giaTriKhuyenMaiToiDa }" />
                   <span v-if="errors.giaTriKhuyenMaiToiDa" class="error-text">{{ errors.giaTriKhuyenMaiToiDa }}</span>
                 </el-form-item>
               </div>
@@ -301,27 +227,15 @@
             <div class="form-section">
               <h3 class="section-title">Thời gian hiệu lực</h3>
               <div class="form-row">
-                <el-form-item label="Ngày bắt đầu *" class="form-item">
-                  <el-date-picker
-                    v-model="formData.ngayBatDau"
-                    type="date"
-                    placeholder="Chọn ngày bắt đầu"
-                    value-format="YYYY-MM-DD"
-                    class="full-width"
-                    :class="{ 'error': errors.ngayBatDau }"
-                  />
+                <el-form-item label="Thời gian bắt đầu *" class="form-item">
+                  <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian giờ bắt đầu"
+                    value-format="YYYY-MM-DD HH:mm:ss" class="full-width" :class="{ 'error': errors.ngayBatDau }" />
                   <span v-if="errors.ngayBatDau" class="error-text">{{ errors.ngayBatDau }}</span>
                 </el-form-item>
-                
-                <el-form-item label="Ngày kết thúc *" class="form-item">
-                  <el-date-picker
-                    v-model="formData.ngayKetThuc"
-                    type="date"
-                    placeholder="Chọn ngày kết thúc"
-                    value-format="YYYY-MM-DD"
-                    class="full-width"
-                    :class="{ 'error': errors.ngayKetThuc }"
-                  />
+
+                <el-form-item label="Thời gian kết thúc *" class="form-item">
+                  <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian giờ kết thúc"
+                    value-format="YYYY-MM-DD HH:mm:ss" class="full-width" :class="{ 'error': errors.ngayKetThuc }" />
                   <span v-if="errors.ngayKetThuc" class="error-text">{{ errors.ngayKetThuc }}</span>
                 </el-form-item>
               </div>
@@ -332,30 +246,20 @@
               <h3 class="section-title">Cài đặt bổ sung</h3>
               <div class="form-row">
                 <el-form-item label="Số lượng *" class="form-item">
-                  <el-input-number
-                    v-model="formData.soLuong"
-                    :min="1"
-                    placeholder="1"
-                    class="full-width"
-                    :class="{ 'error': errors.soLuong }"
-                  />
+                  <el-input-number v-model="formData.soLuong" :min="1" placeholder="1" class="full-width"
+                    :class="{ 'error': errors.soLuong }" />
                   <span v-if="errors.soLuong" class="error-text">{{ errors.soLuong }}</span>
                 </el-form-item>
-                
+
                 <el-form-item label="Số điểm cần đổi" class="form-item">
-                  <el-input-number
-                    v-model="formData.soDiemCanDeDoi"
-                    :min="0"
-                    placeholder="0"
-                    class="full-width"
-                    :class="{ 'error': errors.soDiemCanDeDoi }"
-                  />
+                  <el-input-number v-model="formData.soDiemCanDeDoi" :min="0" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.soDiemCanDeDoi }" />
                   <span v-if="errors.soDiemCanDeDoi" class="error-text">{{ errors.soDiemCanDeDoi }}</span>
                 </el-form-item>
               </div>
-              
+
               <div class="form-row">
-                
+
                 <el-form-item label="Hạng tối thiểu" class="form-item">
                   <el-select v-model="formData.hangToiThieu" placeholder="Chọn hạng">
                     <el-option value="MEMBER" label="Thành viên" />
@@ -365,33 +269,23 @@
                   </el-select>
                 </el-form-item>
               </div>
-              
+
               <el-form-item label="Điều kiện áp dụng *" class="form-item full-width">
-                <el-input
-                  v-model="formData.dieuKienApDung"
-                  type="textarea"
-                  :rows="3"
-                  placeholder="Nhập điều kiện áp dụng khuyến mãi..."
-                  :class="{ 'error': errors.dieuKienApDung }"
-                />
+                <el-input v-model="formData.dieuKienApDung" type="textarea" :rows="3"
+                  placeholder="Nhập điều kiện áp dụng khuyến mãi..." :class="{ 'error': errors.dieuKienApDung }" />
                 <span v-if="errors.dieuKienApDung" class="error-text">{{ errors.dieuKienApDung }}</span>
               </el-form-item>
-              
+
               <el-form-item label="Trạng thái phát hành" class="form-item">
-                <el-switch
-                  v-model="formData.trangThaiPhatHanh"
-                  :active-value="switchConfig.activeValue"
-                  :inactive-value="switchConfig.inactiveValue"
-                  :active-text="switchConfig.activeText"
-                  :inactive-text="switchConfig.inactiveText"
-                  class="status-switch"
-                />
+                <el-switch v-model="formData.trangThaiPhatHanh" :active-value="switchConfig.activeValue"
+                  :inactive-value="switchConfig.inactiveValue" :active-text="switchConfig.activeText"
+                  :inactive-text="switchConfig.inactiveText" class="status-switch" />
               </el-form-item>
             </div>
           </div>
         </el-form>
       </div>
-      
+
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="phieuGiamGiaDialogVisible = false" size="large" class="cancel-btn">
@@ -403,15 +297,115 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="detailDialogVisible" width="800px" style="margin-top: 30px;" class="promotion-detail-dialog"
+      :close-on-click-modal="false">
+      <div class="dialog-content">
+        <div class="detail-section">
+          <h3 class="section-title">Thông tin cơ bản</h3>
+          <div class="detail-row">
+            <span class="detail-label">Mã giảm giá:</span>
+            <span class="detail-value">{{ detailData.maGiamGia || 'Tự động' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Tên khuyến mãi:</span>
+            <span class="detail-value">{{ detailData.tenKhuyenMai }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Loại khuyến mãi:</span>
+            <span class="detail-value">{{ detailData.loaiKhuyenMai }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Giá trị khuyến mãi:</span>
+            <span class="detail-value">
+              {{ detailData.loaiKhuyenMai === 'Phần trăm' ? `${detailData.giaTriKhuyenMai}%` :
+                formatCurrency(detailData.giaTriKhuyenMai) }}
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Giá trị đơn hàng tối thiểu:</span>
+            <span class="detail-value">{{ formatCurrency(detailData.giaTriDonHangToiThieu) }}</span>
+          </div>
+          <div v-if="detailData.loaiKhuyenMai === 'Phần trăm'" class="detail-row">
+            <span class="detail-label">Giá trị khuyến mãi tối đa:</span>
+            <span class="detail-value">{{ formatCurrency(detailData.giaTriKhuyenMaiToiDa) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">Thời gian hiệu lực</h3>
+          <div class="detail-row">
+            <span class="detail-label">Ngày bắt đầu:</span>
+            <span class="detail-value">{{ formatDateTime(detailData.ngayBatDau) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Ngày kết thúc:</span>
+            <span class="detail-value">{{ formatDateTime(detailData.ngayKetThuc) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">Cài đặt bổ sung</h3>
+          <div class="detail-row">
+            <span class="detail-label">Số lượng:</span>
+            <span class="detail-value">{{ detailData.soLuong }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Số điểm cần đổi:</span>
+            <span class="detail-value">{{ detailData.soDiemCanDeDoi }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Hạng tối thiểu:</span>
+            <span class="detail-value">{{ detailData.hangToiThieu }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Điều kiện áp dụng:</span>
+            <span class="detail-value">{{ detailData.dieuKienApDung }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Trạng thái phát hành:</span>
+            <span class="detail-value">{{ detailData.trangThaiPhatHanh === 'ISSUED' ? 'Phát hành' : 'Chưa phát hành'
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <div class="left">
+            <el-button type="primary" @click="giftPhieuGiamGia('BIRTHDAY')" size="large" class="gift-btn"
+              :loading="isLoading">
+              <el-icon class="btn-icon">
+                <Gift />
+              </el-icon>
+              Tặng sinh nhật
+            </el-button>
+            <el-button type="primary" @click="giftPhieuGiamGia('NEW_CUSTOMER')" size="large" class="gift-btn"
+              :loading="isLoading">
+              <el-icon class="btn-icon">
+                <Gift />
+              </el-icon>
+              Tặng khách hàng mới
+            </el-button>
+          </div>
+          <div class="right">
+            <el-button @click="detailDialogVisible = false" size="large" class="cancel-btn">
+              Đóng
+            </el-button>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, reactive, computed } from "vue";
-import { getAll, detail, add, update, deletePhieuGiamGia } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
+import { getAll, detail, add, update, deletePhieuGiamGia, giftVoucher } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Delete, Plus, Edit, Search, Refresh, Calendar } from '@element-plus/icons-vue';
+import { Delete, Plus, Edit, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
 import store from "@/Service/LoginService/Store";
+import { Gift } from "lucide-vue-next";
 
 // Reactive data
 const isLoading = ref(false);
@@ -425,6 +419,24 @@ const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
 const ngayKetThucFilter = ref(null);
 const phieuGiamGiaDialogVisible = ref(false);
+
+const detailDialogVisible = ref(false);
+const detailData = reactive({
+  id: null,
+  maGiamGia: "",
+  tenKhuyenMai: "",
+  loaiKhuyenMai: "",
+  giaTriKhuyenMai: 0,
+  giaTriDonHangToiThieu: 0,
+  giaTriKhuyenMaiToiDa: 0,
+  ngayBatDau: "",
+  ngayKetThuc: "",
+  hangToiThieu: "",
+  soDiemCanDeDoi: 0,
+  soLuong: 0,
+  dieuKienApDung: "",
+  trangThaiPhatHanh: ""
+});
 
 const formData = reactive({
   id: null,
@@ -474,6 +486,23 @@ const resetForm = () => {
   formData.dieuKienApDung = "";
   formData.trangThaiPhieuGiamGia = "ACTIVE";
   formData.trangThaiPhatHanh = "NOT_ISSUED";
+};
+
+const resetDetailData = () => {
+  detailData.id = null;
+  detailData.maGiamGia = "";
+  detailData.tenKhuyenMai = "";
+  detailData.loaiKhuyenMai = "";
+  detailData.giaTriKhuyenMai = 0;
+  detailData.giaTriDonHangToiThieu = 0;
+  detailData.giaTriKhuyenMaiToiDa = 0;
+  detailData.ngayBatDau = "";
+  detailData.ngayKetThuc = "";
+  detailData.hangToiThieu = "";
+  detailData.soDiemCanDeDoi = 0;
+  detailData.soLuong = 0;
+  detailData.dieuKienApDung = "";
+  detailData.trangThaiPhatHanh = "";
 };
 
 const resetErrors = () => {
@@ -584,7 +613,7 @@ const savePhieuGiamGia = async () => {
     ElMessage.error("Vui lòng kiểm tra các lỗi trong form");
     return;
   }
-  
+
   try {
     isLoading.value = true;
     const payload = {
@@ -593,6 +622,9 @@ const savePhieuGiamGia = async () => {
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
       giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),
       soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
+
+      ngayBatDau: formatToSQLDateTime(formData.ngayBatDau),
+      ngayKetThuc: formatToSQLDateTime(formData.ngayKetThuc),
     };
 
     if (formData.id) {
@@ -602,12 +634,30 @@ const savePhieuGiamGia = async () => {
       await add(payload);
       ElMessage.success("Tạo khuyến mãi thành công!");
     }
-    
+
     phieuGiamGiaDialogVisible.value = false;
     loadPhieuGiamGia(currentPage.value);
   } catch (error) {
     console.error(error);
     ElMessage.error(error.message || "Đã xảy ra lỗi không xác định");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const giftPhieuGiamGia = async (type) => {
+  try {
+    isLoading.value = true;
+
+    if (!detailData.id) {
+      ElMessage.error("Vui lòng tạo hoặc chọn phiếu giảm giá trước khi tặng");
+      return;
+    }
+    await giftVoucher(detailData.id, type);
+    ElMessage.success(`Đã tặng phiếu giảm giá cho ${type === 'BIRTHDAY' ? 'sinh nhật' : 'khách hàng mới'} thành công!`);
+  } catch (error) {
+    console.error(error);
+    ElMessage.error(error.message || "Đã xảy ra lỗi khi tặng phiếu");
   } finally {
     isLoading.value = false;
   }
@@ -620,7 +670,7 @@ const handleDeletePhieuGiamGia = async (id) => {
       cancelButtonText: 'Hủy',
       type: 'warning'
     });
-    
+
     isLoading.value = true;
     await deletePhieuGiamGia(id);
     ElMessage.success("Xóa khuyến mãi thành công!");
@@ -648,6 +698,18 @@ const viewUpdate = async (id) => {
   }
   resetErrors();
 };
+
+const viewDetail = async (id) => {
+  try {
+    const response = await detail(id);
+    Object.assign(detailData, response);
+    detailDialogVisible.value = true;
+  } catch (error) {
+    console.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
+    ElMessage.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
+  }
+};
+
 
 const clear = () => {
   currentPage.value = 0;
@@ -700,11 +762,35 @@ const switchConfig = computed(() => {
   return getTrangThaiSwitchConfig(formData.trangThaiPhatHanh);
 });
 
-const formatDate = (dateStr) => {
+const formatDateTime = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
-  return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
+
+function formatToSQLDateTime(date) {
+  if (!date) return null;
+  const d = new Date(date);
+
+  const pad = (n) => (n < 10 ? '0' + n : n);
+
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  const seconds = pad(d.getSeconds());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
 
 const formatCurrency = (value) => {
   if (value == null) return "0 ₫";
@@ -991,6 +1077,7 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 8px;
+  margin-left: 0;
   transition: all 0.3s ease;
 }
 
@@ -1002,6 +1089,11 @@ onMounted(() => {
 .delete-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.detail-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
 }
 
 /* Pagination */
@@ -1150,6 +1242,50 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.promotion-detail-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.promotion-detail-dialog :deep(.el-dialog__header) {
+  padding: 24px 24px 0;
+  border-bottom: none;
+}
+
+.promotion-detail-dialog :deep(.el-dialog__title) {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.detail-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #374151;
+  flex: 0 0 40%;
+}
+
+.detail-value {
+  color: #1f2937;
+  flex: 0 0 60%;
+  text-align: right;
+}
+
 /* Dialog Footer */
 .dialog-footer {
   padding: 24px;
@@ -1157,6 +1293,16 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 12px;
   border-top: 1px solid #f1f5f9;
+}
+
+.gift-btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: yellow;
+  color: #000;
+  font-weight: 500;
 }
 
 .cancel-btn {
@@ -1190,7 +1336,7 @@ onMounted(() => {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -1200,44 +1346,44 @@ onMounted(() => {
   .promotion-container {
     padding: 16px;
   }
-  
+
   .page-header {
     padding: 24px;
   }
-  
+
   .header-content {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
-  
+
   .page-title {
     font-size: 24px;
   }
-  
+
   .promotion-table :deep(.el-table__header th),
   .promotion-table :deep(.el-table__body td) {
     padding: 12px 8px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .dialog-content {
     max-height: 60vh;
   }
-  
+
   .form-section {
     padding: 16px;
   }
-  
+
   .dialog-footer {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .cancel-btn,
   .save-btn {
     width: 100%;
@@ -1245,16 +1391,17 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
+
   .promotion-table :deep(.el-table__header th),
   .promotion-table :deep(.el-table__body td) {
     padding: 8px 4px;
     font-size: 12px;
   }
-  
+
   .date-range {
     font-size: 10px;
   }
-  
+
   .action-btn {
     width: 28px;
     height: 28px;
