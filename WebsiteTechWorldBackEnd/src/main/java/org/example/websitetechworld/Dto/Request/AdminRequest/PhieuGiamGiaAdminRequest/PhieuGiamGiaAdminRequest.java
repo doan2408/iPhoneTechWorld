@@ -10,6 +10,7 @@ import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,10 +45,10 @@ public class PhieuGiamGiaAdminRequest {
     private BigDecimal giaTriKhuyenMaiToiDa;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
-    private LocalDate ngayBatDau;
+    private LocalDateTime ngayBatDau;
 
     @NotNull(message = "Ngày kết thúc không được để trống")
-    private LocalDate ngayKetThuc;
+    private LocalDateTime ngayKetThuc;
 
     @Size(max = 100, message = "Điều kiện áp dụng không được vượt quá 100 ký tự")
     private String dieuKienApDung;

@@ -12,6 +12,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -50,10 +51,10 @@ public class PhieuGiamGia {
     private BigDecimal giaTriKhuyenMaiToiDa;
 
     @Column(name = "ngay_bat_dau")
-    private LocalDate ngayBatDau;
+    private LocalDateTime ngayBatDau;
 
     @Column(name = "ngay_ket_thuc")
-    private LocalDate ngayKetThuc;
+    private LocalDateTime ngayKetThuc;
 
     @Size(max = 100)
     @Nationalized

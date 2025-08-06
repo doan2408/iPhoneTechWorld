@@ -76,4 +76,13 @@ public class PhieuGiamGiaAdminController {
 //        Page<SanPhamChiTietResponse> danhSachSanPham = phieuGiamGiaAdminService.layDanhSachSanPham(search, page, size);
 //        return ResponseEntity.ok(danhSachSanPham);
 //    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/gift")
+    public ResponseEntity<String> giftPhieuGiamGia (
+            @PathVariable int id,
+            @RequestParam String type) {
+        String result = phieuGiamGiaAdminService.giftPhieuGiamGia(id, type);
+        return ResponseEntity.ok(result);
+    }
 }

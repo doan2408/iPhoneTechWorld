@@ -168,7 +168,7 @@ public class LichSuDiemService {
         khachHangGiamGia.setIdPhieuGiamGia(phieu);
         khachHangGiamGia.setIsUser(false);
         khachHangGiamGia.setNgayCap(LocalDate.now());
-        khachHangGiamGia.setDoiBangDiem(true);
+        khachHangGiamGia.setTrangThai(1);
 
         khachHangGiamGiaRepository.save(khachHangGiamGia);
         hangServices.updateHang(idKhachHang);

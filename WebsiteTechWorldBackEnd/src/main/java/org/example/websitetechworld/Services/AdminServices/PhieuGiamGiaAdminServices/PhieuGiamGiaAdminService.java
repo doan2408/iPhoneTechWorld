@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdmin
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
+import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Repository.*;
@@ -22,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +38,7 @@ public class PhieuGiamGiaAdminService {
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     private final KhachHangRepository khachHangRepository;
-    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final LichSuDiemRepository lichSuDiemRepository;
     private final ModelMapper modelMapper;
     private final MailService mailService;
 
@@ -43,11 +48,12 @@ public class PhieuGiamGiaAdminService {
                                     KhachHangGiamGiaRepository khachHangGiamGiaRepository,
                                     KhachHangRepository khachHangRepository,
                                     ModelMapper modelMapper,
-                                    SanPhamChiTietRepository sanPhamChiTietRepository, MailService mailService) {
+                                    LichSuDiemRepository lichSuDiemRepository,
+                                    MailService mailService) {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
         this.khachHangRepository = khachHangRepository;
-        this.sanPhamChiTietRepository = sanPhamChiTietRepository;
+        this.lichSuDiemRepository = lichSuDiemRepository;
         this.modelMapper = modelMapper;
         this.mailService = mailService;
         cauHinhModelMapper();
@@ -63,7 +69,11 @@ public class PhieuGiamGiaAdminService {
                                                                   int trang, int kichThuoc, String sapXepTheo, String huongSapXep) {
         Sort sapXep = huongSapXep.equalsIgnoreCase("desc") ? Sort.by(sapXepTheo).descending() : Sort.by(sapXepTheo).ascending();
         Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
-        Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.findAll(timKiem, trangThai, ngayBatDau, ngayKetThuc, phanTrang);
+
+        LocalDateTime ngayBatDauDateTime = (ngayBatDau != null) ? ngayBatDau.atStartOfDay() : null;
+        LocalDateTime ngayKetThucDateTime = (ngayKetThuc != null) ? ngayKetThuc.atTime(23, 59, 59, 998) : null;
+
+        Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.findAll(timKiem, trangThai, ngayBatDauDateTime, ngayKetThucDateTime, phanTrang);
         return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
     }
 
@@ -78,7 +88,7 @@ public class PhieuGiamGiaAdminService {
         kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
 //        kiemTraPhieuChoSp(request);
 
-        LocalDate currentDate = LocalDate.now();
+        LocalDateTime currentDate = LocalDateTime.now();
         if (request.getNgayBatDau().isBefore(currentDate)) {
             throw new IllegalStateException("Ngày bắt đầu phải sau ngày hiện tại");
         }
@@ -102,7 +112,7 @@ public class PhieuGiamGiaAdminService {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
 
-        LocalDate currentDate = LocalDate.now();
+        LocalDateTime currentDate = LocalDateTime.now();
         boolean hasStarted = !currentDate.isBefore(phieuGiamGia.getNgayBatDau());
 
         if (isTrangThaiPhatHanhModified(phieuGiamGia, request)) {
@@ -161,7 +171,7 @@ public class PhieuGiamGiaAdminService {
         PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
 
-        LocalDate currentDate = LocalDate.now();
+        LocalDateTime currentDate = LocalDateTime.now();
         boolean hasStarted = !currentDate.isBefore(phieuGiamGia.getNgayBatDau());
 
         if (hasStarted) {
@@ -238,7 +248,7 @@ public class PhieuGiamGiaAdminService {
 
     @Transactional
     public void capNhatTrangThaiPhieuGiamGia () {
-        LocalDate hienTai = LocalDate.now();
+        LocalDateTime hienTai = LocalDateTime.now();
         List<PhieuGiamGia> danhSachPhieu = phieuGiamGiaRepository.findAll();
         for (PhieuGiamGia phieu : danhSachPhieu) {
             TrangThaiPGG trangThaiMoi = xacDinhTrangThaiPhieu(phieu, hienTai);
@@ -287,7 +297,7 @@ public class PhieuGiamGiaAdminService {
 //    }
 
 
-    private void kiemTraNgayHopLe (LocalDate ngayBatDau, LocalDate ngayKetThuc) {
+    private void kiemTraNgayHopLe (LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc) {
         if (ngayBatDau.isAfter(ngayKetThuc)) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
         }
@@ -326,7 +336,7 @@ public class PhieuGiamGiaAdminService {
             KhachHang khachHang = khachHangRepository.findById(idKhachHang)
                     .orElseThrow(() -> new IllegalArgumentException("Khách hàng ID " + idKhachHang + " không tồn tại"));
             if (!khachHangGiamGiaRepository.existsByIdPhieuGiamGiaAndIdKhachHang(phieuGiamGia, khachHang)) {
-                taoKhachHangGiamGia(phieuGiamGia, khachHang);
+                taoKhachHangGiamGia(phieuGiamGia, khachHang, 0);
             }
         }
     }
@@ -346,16 +356,17 @@ public class PhieuGiamGiaAdminService {
         khachHangGiamGiaRepository.deleteAll(banGhiChuaSuDung);
     }
 
-    private void taoKhachHangGiamGia (PhieuGiamGia phieuGiamGia, KhachHang khachHang) {
+    private void taoKhachHangGiamGia (PhieuGiamGia phieuGiamGia, KhachHang khachHang, Integer trangThai) {
         KhachHangGiamGia khachHangGiamGia = new KhachHangGiamGia();
         khachHangGiamGia.setIdPhieuGiamGia(phieuGiamGia);
         khachHangGiamGia.setIdKhachHang(khachHang);
         khachHangGiamGia.setIsUser(false);
         khachHangGiamGia.setNgayCap(LocalDate.now());
+        khachHangGiamGia.setTrangThai(trangThai);
         khachHangGiamGiaRepository.save(khachHangGiamGia);
     }
 
-    private TrangThaiPGG xacDinhTrangThaiPhieu (PhieuGiamGia phieu, LocalDate hienTai) {
+    private TrangThaiPGG xacDinhTrangThaiPhieu (PhieuGiamGia phieu, LocalDateTime hienTai) {
         if (hienTai.isBefore(phieu.getNgayBatDau())) {
             return TrangThaiPGG.NOT_STARTED;
         } else if (hienTai.isAfter(phieu.getNgayKetThuc())) {
@@ -447,6 +458,170 @@ public class PhieuGiamGiaAdminService {
         return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
     }
 
+    @Transactional
+    public String giftPhieuGiamGia (Integer id, String type) {
 
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu giảm giá với ID: " + id));
 
+        if (phieuGiamGia.getTrangThaiPhieuGiamGia() == TrangThaiPGG.EXPIRED) {
+            throw new IllegalStateException("Phiếu giảm giá đã hết hạn");
+        }
+
+        if (phieuGiamGia.getTrangThaiPhatHanh() != TrangThaiPhatHanh.ISSUED) {
+            throw new IllegalStateException("Phiếu giảm giá chưa được phát hành");
+        }
+
+        int trangThaiKhachHangGiamGia = 0;
+        List<KhachHang> eligibleCustomers = switch (type.toUpperCase()) {
+            case "BIRTHDAY" -> {
+                LocalDateTime now = LocalDateTime.now();
+                trangThaiKhachHangGiamGia = 2;
+                yield khachHangRepository.findByMonthOfNgaySinh(now.getMonthValue());
+            }
+            case "NEW_CUSTOMER" -> {
+                LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
+                trangThaiKhachHangGiamGia = 3;
+                yield khachHangRepository.findByNgaySinhAfter(thirtyDaysAgo);
+            }
+            default -> throw new IllegalArgumentException("Loại tặng phiếu không hợp lệ: " + type);
+        };
+
+        if (eligibleCustomers.isEmpty()) {
+            throw new IllegalStateException("Không tìm thấy khách hàng phù hợp để tặng phiếu");
+        }
+
+        List<KhachHang> customersToGift = eligibleCustomers.stream()
+                .filter(kh -> kh.getHangThanhVien().getTenHang() != null && isHangKhachHangDuDieuKien(kh.getHangThanhVien().getTenHang(), phieuGiamGia.getHangToiThieu()))
+                .toList();
+
+        if (customersToGift.isEmpty()) {
+            throw new IllegalStateException("Không có khách hàng nào đủ điều kiện nhận phiếu");
+        }
+
+        for (KhachHang khachHang : customersToGift) {
+            KhachHangGiamGia existingRecord = khachHangGiamGiaRepository
+                    .findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(phieuGiamGia, khachHang, false);
+
+            if (existingRecord != null) {
+                ViDiem viDiem = khachHang.getViDiem();
+                if (viDiem != null && phieuGiamGia.getSoDiemCanDeDoi() != null) {
+                    viDiem.setDiemKhaDung(viDiem.getDiemKhaDung()
+                            .add(phieuGiamGia.getSoDiemCanDeDoi()));
+                    khachHang.setViDiem(viDiem);
+                    khachHangRepository.save(khachHang);
+
+                    LichSuDiem lichSuDiem = new LichSuDiem();
+                    lichSuDiem.setViDiem(viDiem);
+                    lichSuDiem.setSoDiem(phieuGiamGia.getSoDiemCanDeDoi());
+                    lichSuDiem.setLoaiDiem(LoaiDiem.CONG);
+                    lichSuDiem.setGhiChu("Hoàn điểm từ mã: " + phieuGiamGia.getMaGiamGia());
+                    OffsetDateTime thoiGianHienTai = OffsetDateTime.now(ZoneOffset.ofHours(7));
+                    lichSuDiem.setThoiGian(thoiGianHienTai);
+                    lichSuDiem.setHanSuDung(thoiGianHienTai.plusYears(1));
+                    lichSuDiemRepository.save(lichSuDiem);
+
+                    sendGiftNotification(khachHang, phieuGiamGia, false);
+                }
+            } else {
+                taoKhachHangGiamGia(phieuGiamGia, khachHang, trangThaiKhachHangGiamGia);
+                sendGiftNotification(khachHang, phieuGiamGia, true);
+            }
+        }
+
+        return String.format("Đã tặng phiếu giảm giá %s cho %d khách hàng %s thành công",
+                phieuGiamGia.getMaGiamGia(), customersToGift.size(), type.equalsIgnoreCase("BIRTHDAY") ? "sinh nhật" : "mới");
+    }
+
+    private boolean isHangKhachHangDuDieuKien(HangKhachHang hangKhachHang, HangKhachHang hangToiThieu) {
+        if (hangToiThieu == null) return true;
+        int hangKhachHangValue = getHangKhachHangValue(hangKhachHang);
+        int hangToiThieuValue = getHangKhachHangValue(hangToiThieu);
+        return hangKhachHangValue >= hangToiThieuValue;
+    }
+
+    private int getHangKhachHangValue(HangKhachHang hang) {
+        return switch (hang) {
+            case DIAMOND -> 4;
+            case GOLD -> 3;
+            case SILVER -> 2;
+            case MEMBER -> 1;
+            default -> 0;
+        };
+    }
+
+    @Async
+    protected void sendGiftNotification(KhachHang khachHang, PhieuGiamGia phieuGiamGia, Boolean isTangPhieu) {
+        if (khachHang.getEmail() == null || khachHang.getEmail().isBlank()) {
+            return;
+        }
+        try {
+            String subject = phieuGiamGia.getMaGiamGia() + " - Quà tặng từ TechWorld";
+
+            String giaTri = phieuGiamGia.getLoaiKhuyenMai().equalsIgnoreCase("Phần trăm")
+                    ? phieuGiamGia.getGiaTriKhuyenMai() + "%"
+                    : phieuGiamGia.getGiaTriKhuyenMai() + " VNĐ";
+
+            String moTaToiDa = phieuGiamGia.getLoaiKhuyenMai().equalsIgnoreCase("Phần trăm") &&
+                    phieuGiamGia.getGiaTriKhuyenMaiToiDa() != null
+                    ? " (tối đa " + phieuGiamGia.getGiaTriKhuyenMaiToiDa() + " VNĐ)"
+                    : "";
+
+            String thongBao = isTangPhieu
+                    ? """
+                                <p>Vui lòng sử dụng mã này khi thanh toán trên hệ thống của chúng tôi.</p>
+                            """
+                    : String.format("""
+                                <p>Phiếu giảm giá <strong>%s</strong> đã được chuyển đổi thành <strong>%s điểm</strong> 
+                                    vào ví điểm của bạn do phiếu đã được bạn đổi trước đó.</p>
+                                <p>Số điểm hiện tại: <strong>%s</strong></p>
+                            """,
+                            phieuGiamGia.getMaGiamGia(),
+                            phieuGiamGia.getSoDiemCanDeDoi(),
+                            khachHang.getViDiem().getDiemKhaDung()
+            );
+
+            String message = String.format("""
+                        <html>
+                            <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                                <p>Kính gửi <strong>%s</strong>,</p>
+            
+                                <p>Chúc mừng bạn đã nhận được phiếu giảm giá <strong>%s</strong> từ <strong>TechWorld</strong>!</p>
+            
+                                <ul>
+                                    <li><strong>Tên khuyến mãi:</strong> %s</li>
+                                    <li><strong>Giá trị:</strong> %s%s</li>
+                                    <li><strong>Hạn sử dụng:</strong> Từ %s đến %s</li>
+                                    <li><strong>Điều kiện:</strong> %s</li>
+                                </ul>
+        
+                                %s
+            
+                                <p>Trân trọng,<br/>
+                                <strong>TechWorld</strong></p>
+                            </body>
+                        </html>
+                        """,
+                        khachHang.getTenKhachHang(),
+                        phieuGiamGia.getMaGiamGia(),
+                        phieuGiamGia.getTenKhuyenMai(),
+                        giaTri,
+                        moTaToiDa,
+                        formatterDate(phieuGiamGia.getNgayBatDau()),
+                        formatterDate(phieuGiamGia.getNgayKetThuc()),
+                        phieuGiamGia.getDieuKienApDung(),
+                        thongBao
+            );
+
+            mailService.sendMail(khachHang.getEmail(), subject, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String formatterDate (LocalDateTime localDateTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(formatter);
+    }
 }

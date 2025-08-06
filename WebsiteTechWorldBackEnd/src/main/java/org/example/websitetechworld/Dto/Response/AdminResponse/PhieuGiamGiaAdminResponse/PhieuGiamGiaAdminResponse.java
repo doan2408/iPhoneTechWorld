@@ -8,6 +8,7 @@ import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -22,8 +23,8 @@ public class PhieuGiamGiaAdminResponse {
     private BigDecimal giaTriKhuyenMai;
     private BigDecimal giaTriDonHangToiThieu;
     private BigDecimal giaTriKhuyenMaiToiDa;
-    private LocalDate ngayBatDau;
-    private LocalDate ngayKetThuc;
+    private LocalDateTime ngayBatDau;
+    private LocalDateTime ngayKetThuc;
     private String dieuKienApDung;
     private String hangToiThieu;
     private Integer soLuong;

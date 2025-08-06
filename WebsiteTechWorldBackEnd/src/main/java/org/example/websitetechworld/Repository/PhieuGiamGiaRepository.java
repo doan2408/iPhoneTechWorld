@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -29,8 +30,8 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     Page<PhieuGiamGia> findAll (
             @Param("search") String search,
             @Param("trangThai") TrangThaiPGG trangThai,
-            @Param("ngayBatDau") LocalDate ngayBatDau,
-            @Param("ngayKetThuc") LocalDate ngayKetThuc,
+            @Param("ngayBatDau") LocalDateTime ngayBatDau,
+            @Param("ngayKetThuc") LocalDateTime ngayKetThuc,
             Pageable pageable
     );
 
