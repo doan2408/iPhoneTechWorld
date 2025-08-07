@@ -54,7 +54,6 @@ public class HoaDonAdminResponse {
     private LocalDateTime ngayThanhToan;
     private String trangThaiDonHang;
     private String trangThaiThanhToan;
-    private Integer idTinhThanh;
     private String hangKhachHang;
     private String emailNguoiNhan;
 
