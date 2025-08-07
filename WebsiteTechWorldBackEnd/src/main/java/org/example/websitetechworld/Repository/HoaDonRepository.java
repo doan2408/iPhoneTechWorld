@@ -70,4 +70,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
         """, nativeQuery = true)
     List<Object[]> findHoaDonAndChiTiet(@Param("idHoaDon") Integer idHoaDon);
 
+    List<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull();
 }
