@@ -17,6 +17,7 @@ public class RequestThanhToanTongHop {
     private ShippingMethod shippingMethod;
     private String sdtNguoiNhan;
     private String tenNguoiNhan;
+    private String emailNguoiNhan;
     private String diaChiGiaoHang;
     private List<ChiTietSanPhamRequest> sanPhamRequests;
 }

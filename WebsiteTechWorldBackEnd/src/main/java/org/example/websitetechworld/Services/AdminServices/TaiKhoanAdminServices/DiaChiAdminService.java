@@ -29,7 +29,7 @@ public class DiaChiAdminService {
         adminDiaChiRequest.setSoNha(diaChi.getSoNha());
         adminDiaChiRequest.setTenDuong(diaChi.getTenDuong());
         adminDiaChiRequest.setXaPhuong(diaChi.getXaPhuong());
-        adminDiaChiRequest.setQuanHuyen(diaChi.getQuanHuyen());
+        adminDiaChiRequest.setEmailNguoiNhan(diaChi.getEmailNguoiNhan());
         adminDiaChiRequest.setTinhThanhPho(diaChi.getTinhThanhPho());
         adminDiaChiRequest.setDiaChiChinh(diaChi.getDiaChiChinh());
         if(diaChi.getIdKhachHang() != null) {
@@ -46,7 +46,7 @@ public class DiaChiAdminService {
         adminDiaChiRequest.setSoNha(diaChi.getSoNha());
         adminDiaChiRequest.setTenDuong(diaChi.getTenDuong());
         adminDiaChiRequest.setXaPhuong(diaChi.getXaPhuong());
-        adminDiaChiRequest.setQuanHuyen(diaChi.getQuanHuyen());
+        adminDiaChiRequest.setEmailNguoiNhan(diaChi.getEmailNguoiNhan());
         adminDiaChiRequest.setTinhThanhPho(diaChi.getTinhThanhPho());
         adminDiaChiRequest.setDiaChiChinh(diaChi.getDiaChiChinh());
         if(diaChi.getIdKhachHang() != null) {
@@ -62,7 +62,7 @@ public class DiaChiAdminService {
         diaChi.setSoNha(adminDiaChiRequest.getSoNha());
         diaChi.setTenDuong(adminDiaChiRequest.getTenDuong());
         diaChi.setXaPhuong(adminDiaChiRequest.getXaPhuong());
-        diaChi.setQuanHuyen(adminDiaChiRequest.getQuanHuyen());
+        diaChi.setEmailNguoiNhan(adminDiaChiRequest.getEmailNguoiNhan());
         diaChi.setTinhThanhPho(adminDiaChiRequest.getTinhThanhPho());
         diaChi.setDiaChiChinh(adminDiaChiRequest.getDiaChiChinh());
         if (adminDiaChiRequest.getIdKhachHang() != null) {

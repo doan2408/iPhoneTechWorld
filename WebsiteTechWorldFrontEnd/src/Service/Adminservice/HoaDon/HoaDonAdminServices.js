@@ -206,3 +206,9 @@ export const findHdctByImeiDaBan = (pageNo = 0, pageSize = 5, idHoaDon ) => {
 export const findProductByImei = (soImei) => {
     return api.get('/admin/imei/ma-vach/'+soImei)
 }
+
+export const exportAllInvoice = () => {
+    return api.get(url_base + '/export', {
+        responseType: 'blob'
+    })
+}

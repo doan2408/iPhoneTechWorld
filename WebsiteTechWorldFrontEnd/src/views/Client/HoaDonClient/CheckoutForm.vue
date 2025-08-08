@@ -9,9 +9,9 @@
                 <div class="current-address-display">
                     <p class="address-name-display">{{ shippingAddress.tenNguoiNhan }}</p>
                     <p class="address-phone-display">{{ shippingAddress.sdtNguoiNhan }}</p>
+                    <p class="address-phone-display">{{ shippingAddress.emailNguoiNhan }}</p>
                     <p class="address-detail-display">{{ shippingAddress.soNha + ', ' + shippingAddress.tenDuong + ', '
-                        + shippingAddress.xaPhuong
-                        + ', ' + shippingAddress.quanHuyen + ', ' + shippingAddress.tinhThanhPho }}</p>
+                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho }}</p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
                 </div>
             </div>
@@ -159,7 +159,12 @@
                     </div>
                 </div>
                 <button @click="handleBuy" class="buy-button">
-                    Mua hàng
+                    <span v-if="isLoading">
+                        <i class="fas fa-spinner fa-spin"></i> Đang xử lý...
+                    </span>
+                    <span v-else>
+                        Mua hàng
+                    </span>
                 </button>
             </div>
         </div>
@@ -285,11 +290,15 @@ import {getLatLon, getDistance} from '@/Service/ClientService/HoaDon/MyOrderClie
 
 const toast = useToast()
 const route = useRoute();
+const isLoading = ref(false)   
 
 // --- Address Management ---
 const userAddresses = ref([])
 onMounted(async () => {
     try {
+        
+        const response = await getDiaChiByClient();
+        const data = response.data;
 
         if (Array.isArray(data) && data.length > 0) {
             userAddresses.value = data;
@@ -492,6 +501,7 @@ const handleBuy = async () => {
         shippingMethod: selectedShippingMethod.value.toUpperCase(), 
         sdtNguoiNhan: shippingAddress.value.sdtNguoiNhan,
         tenNguoiNhan: shippingAddress.value.tenNguoiNhan,
+        emailNguoiNhan: shippingAddress.value.emailNguoiNhan,
         diaChiGiaoHang: [
             shippingAddress.value.soNha,
             shippingAddress.value.tenDuong,
@@ -515,12 +525,31 @@ const handleBuy = async () => {
         return;
     }
 
-    const res = await thanhToanClient(shippingConfirm);
-    if (res.data.message === 'Đặt hàng thành công') {
-        router.push({ name: 'ordersucces' });
-    }
+    isLoading.value = true;
 
-    toast.success('Đặt hàng thành công')
+    const toastId = toast.info('Đang xử lý đơn hàng...', {
+        timeout: false,
+        closeButton: false,
+    });
+
+    try {
+        const res = await thanhToanClient(shippingConfirm);
+
+        if (res.data.message === 'Đặt hàng thành công') {
+            toast.dismiss(toastId); // Hủy toast loading
+            toast.success('Đặt hàng thành công');
+            router.push({ name: 'ordersucces' });
+        } else {
+            toast.dismiss(toastId);
+            toast.error(res.data.message || 'Có lỗi xảy ra');
+        }
+    } catch (error) {
+        toast.dismiss(toastId);
+        toast.error('Đã xảy ra lỗi. Vui lòng thử lại.');
+        console.error('Lỗi khi thanh toán:', error);
+    } finally {
+        isLoading.value = false; // Kết thúc trạng thái loading
+    }
 }
 
 const paymentMethods = ref([]);

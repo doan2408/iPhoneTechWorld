@@ -9,16 +9,24 @@
                     Ngày đặt: {{ formatDate(order.ngayDatHang) }}
                 </p>
             </div>
-            <div class="order-summary">
-                <div class="total-info">
-                    <span class="total-label">Tổng tiền</span>
-                    <span class="total-amount">{{ formatCurrency(order.thanhTien) }}</span>
-                </div>
+            <div class="info-item">
+                <strong>Trạng thái đơn hàng</strong>
+                <br>
                 <span :class="'status status-' + getStatusKey(order.trangThaiDonHang)">
                     {{ getStatusText(order.trangThaiDonHang) }}
                 </span>
             </div>
+            <div class="order-summary">
+                <div class="total-info">
+                    <span class="total-label"><strong>Tổng tiền</strong></span>
+                    <span class="total-amount">{{ formatCurrency(order.thanhTien) }}</span>
+                </div>
+                <span :class="'payment-status ' + getPaymentStatusClass(order.trangThaiThanhToan)">
+                    {{ getPaymentStatusText(order.trangThaiThanhToan) }}
+                </span>
+            </div>
         </div>
+
 
         <!-- Timeline Section -->
         <div class="timeline-section">
@@ -65,11 +73,19 @@
                                 <User class="avatar-icon" />
                             </div>
                             <div class="customer-details">
-                                <h4>{{ order.tenNguoiNhan }}</h4>
-                                <span class="customer-type">{{ order.maKhachHang }} *Hạng</span>
+                                <h4>{{ order.tenNguoiMua }} ( Người mua )</h4>
+                                <div :class="['customer-type', getCustomerTypeClass(order.hangKhachHang)]">
+                                    <span>{{ getCustomerTypeText(order.hangKhachHang) }}</span>
+                                </div>
                             </div>
                         </div>
+                        <br>
                         <div class="contact-info">
+                            <h5>Thông tin người nhận</h5>
+                            <div class="contact-item">
+                                <User class="icon-small" />
+                                <span>{{ order.tenNguoiNhan }}</span>
+                            </div>
                             <div class="contact-item">
                                 <Phone class="icon-small" />
                                 <span>{{ order.sdtNguoiNhan }}</span>
@@ -77,7 +93,7 @@
                             </div>
                             <div class="contact-item">
                                 <Mail class="icon-small" />
-                                <span>{{ order.sdtNguoiNhan }} *Email</span>
+                                <span>{{ order.emailNguoiNhan }}</span>
                                 <button @click="emailCustomer" class="contact-btn">Email</button>
                             </div>
                         </div>
@@ -92,12 +108,6 @@
                     </div>
                     <div class="card-content">
                         <div class="delivery-info">
-                            <div class="info-item">
-                                <label>Trạng thái</label>
-                                <span :class="'payment-status ' + getPaymentStatusClass(order.trangThaiThanhToan)">
-                                    {{ getPaymentStatusText(order.trangThaiThanhToan) }}
-                                </span>
-                            </div>
                             <div class="info-item">
                                 <label>Địa chỉ giao hàng</label>
                                 <p>{{ order.diaChiGiaoHang }}</p>
@@ -225,7 +235,10 @@ import {
     Truck,
     Printer,
     FileText,
-    Edit
+    Edit,
+    Star,
+    Gem,
+    Crown
 } from 'lucide-vue-next'
 import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
@@ -248,6 +261,32 @@ const viewOrderDetail = async () => {
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
         }
+    }
+}
+
+const getCustomerTypeClass = (type) => {
+    switch (type) {
+        case 'SILVER': return 'silver';
+        case 'GOLD': return 'gold';
+        case 'DIAMOND': return 'diamond';
+        default: return 'member';
+    }
+}
+
+const getCustomerTypeText = (type) => {
+    switch (type) {
+        case 'SILVER': return 'Bạc';
+        case 'GOLD': return 'Vàng';
+        case 'DIAMOND': return 'Kim cương';
+        default: return 'Thành viên';
+    }
+}
+const getCustomerTypeIcon = (type) => {
+    switch (type) {
+        case 'SILVER': return 'fas fa-medal';
+        case 'GOLD': return 'fas fa-trophy';
+        case 'DIAMOND': return 'fas fa-gem';
+        default: return 'fas fa-user';
     }
 }
 
@@ -417,12 +456,12 @@ const callCustomer = () => {
 }
 
 const emailCustomer = () => {
-    window.open(`mailto:${order.customer.email}`)
+    window.open(`mailto:${order.emailNguoiNhan}`)
 }
 
 const callDriver = () => {
     if (order.driver) {
-        window.open(`tel:${order.driver.phone}`)
+        window.open(`tel:${order.sdtNguoiNhan}`)
     }
 }
 

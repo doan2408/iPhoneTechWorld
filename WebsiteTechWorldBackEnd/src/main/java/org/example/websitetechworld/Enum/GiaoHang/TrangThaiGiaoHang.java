@@ -2,6 +2,7 @@ package org.example.websitetechworld.Enum.GiaoHang;
 
 public enum TrangThaiGiaoHang {
     PENDING("Chờ xử lý"),
+    CONFIRM("Xac nhan"),
     PACKED("Đã đóng gói"),
     SHIPPING("Đang giao"),
     DELIVERED("Đã giao"),

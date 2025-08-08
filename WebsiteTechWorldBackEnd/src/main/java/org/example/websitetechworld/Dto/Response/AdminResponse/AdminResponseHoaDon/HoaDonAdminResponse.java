@@ -54,7 +54,8 @@ public class HoaDonAdminResponse {
     private LocalDateTime ngayThanhToan;
     private String trangThaiDonHang;
     private String trangThaiThanhToan;
-    private Integer idTinhThanh;
+    private String hangKhachHang;
+    private String emailNguoiNhan;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
 //    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
@@ -77,7 +78,7 @@ public class HoaDonAdminResponse {
         }
 
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
-        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
+        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
@@ -91,13 +92,15 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setIsShipping(hoaDon.getIsShipping());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
-        hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );
+        hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().name() : null );
         hoaDonAdminResponse.setTrangThaiDonHang(hoaDon.getTrangThaiDonHang() != null ? hoaDon.getTrangThaiDonHang().getDisplayName() : null );
         hoaDonAdminResponse.setShippingMethod(hoaDon.getShippingMethod() != null ? hoaDon.getShippingMethod().getCode() : null);
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
         }
+        hoaDonAdminResponse.setHangKhachHang(hoaDon.getIdKhachHang().getHangThanhVien().getTenHang().name());
+        hoaDonAdminResponse.setEmailNguoiNhan(hoaDon.getEmailNguoiNhan());
         return hoaDonAdminResponse;
     }
 }

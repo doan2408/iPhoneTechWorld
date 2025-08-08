@@ -20,6 +20,7 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.I
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.ClientServices.GioHangClientService.GioHangClientService;
+import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,9 +50,10 @@ public class MyOrderClientServices {
     private final KhachHangRepository khachHangRepository;
     private final ChiTietHoaDonClientServices chiTietHoaDonClientServices;
     private final GioHangClientService gioHangClientService;
+    private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -59,6 +62,7 @@ public class MyOrderClientServices {
         this.chiTietHoaDonClientServices = chiTietHoaDonClientServices;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
         this.gioHangClientService = gioHangClientService;
+        this.emailServicces = emailServicces;
     }
 
 
@@ -84,9 +88,10 @@ public class MyOrderClientServices {
         KhachHang khachHang = khachHangRepository.findById(idKhachHang).orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
 
         HoaDon hoaDon = new HoaDon();
+        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
         String maVanDon = generateMaVanDon(hoaDon.getId());
         hoaDon.setMaVanDon(maVanDon);
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
+        hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
         thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
@@ -109,7 +114,7 @@ public class MyOrderClientServices {
                 hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             }
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
-
+            sendMailFromInvoice(hoaDon);
 
         }
         return response;
@@ -118,9 +123,10 @@ public class MyOrderClientServices {
     public ThanhToanAdminResponse xuLyThanhToanGuest(RequestThanhToanTongHop requestThanhToanTongHop){
 
         HoaDon hoaDon = new HoaDon();
+        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
         String maVanDon = generateMaVanDon(hoaDon.getId());
         hoaDon.setMaVanDon(maVanDon);
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
+        hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
         thanhToanAdminRequest.setHinhThucThanhToan(requestThanhToanTongHop.getHinhThucThanhToan());
@@ -153,11 +159,13 @@ public class MyOrderClientServices {
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
         }
         hoaDon.setIsShipping(true);
+        hoaDon.setIsDelete(false);
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
         hoaDon.setShippingMethod(requestThanhToanTongHop.getShippingMethod());
         hoaDon.setNgayDatHang(LocalDateTime.now());
-        hoaDon.setSdtNguoiMua(requestThanhToanTongHop.getSdtNguoiNhan());
-        hoaDon.setTenNguoiMua(requestThanhToanTongHop.getTenNguoiNhan());
+        hoaDon.setSdtNguoiNhan(requestThanhToanTongHop.getSdtNguoiNhan());
+        hoaDon.setTenNguoiNhan(requestThanhToanTongHop.getTenNguoiNhan());
+        hoaDon.setEmailNguoiNhan(requestThanhToanTongHop.getEmailNguoiNhan());
         hoaDon.setDiaChiGiaoHang(requestThanhToanTongHop.getDiaChiGiaoHang());
         hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien());
         hoaDon.setThanhTien(requestThanhToanTongHop.getSoTienKhachDua());
@@ -190,6 +198,18 @@ public class MyOrderClientServices {
         return "VD" + invoiceId + "-" + suffix;
     }
 
+    public void sendMailFromInvoice(HoaDon hoaDon){
+        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaHoaDon();
+
+        String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
+                + "<p>Xin chào <b>" + hoaDon.getIdKhachHang().getTenKhachHang() + "</b>,</p>"
+                + "<p>Đơn hàng <b>" + hoaDon.getMaVanDon() + "</b> của bạn đã được xác nhận vào ngày "
+                + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
+                + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"
+                + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";
+
+        emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
+    }
 
 
 
