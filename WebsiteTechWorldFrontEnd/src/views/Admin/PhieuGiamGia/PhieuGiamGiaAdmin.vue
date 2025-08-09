@@ -4,14 +4,14 @@
     <div class="page-header">
       <div class="header-content">
         <div class="title-section">
-          <h1 class="page-title">Quản lý khuyến mãi</h1>
-          <p class="page-subtitle">Tạo và quản lý các chương trình khuyến mãi</p>
+          <h1 class="page-title">Quản lý giảm giá</h1>
+          <p class="page-subtitle">Tạo và quản lý các chương trình giảm giá</p>
         </div>
         <el-button v-if="isAdmin" type="primary" size="large" class="create-btn" @click="openDialog">
           <el-icon class="btn-icon">
             <Plus />
           </el-icon>
-          Tạo khuyến mãi
+          Tạo giảm giá
         </el-button>
       </div>
     </div>
@@ -75,7 +75,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="maGiamGia" label="Mã khuyến mãi" min-width="145">
+        <el-table-column prop="maGiamGia" label="Mã giảm giá" min-width="145">
           <template #default="scope">
             <div class="code-cell">
               <el-tag type="info" size="small" class="code-tag">
@@ -85,10 +85,10 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="tenKhuyenMai" label="Tên khuyến mãi" min-width="170">
+        <el-table-column prop="tenGiamGia" label="Tên giảm giá" min-width="170">
           <template #default="scope">
             <div class="name-cell">
-              <span class="promotion-name">{{ scope.row.tenKhuyenMai }}</span>
+              <span class="promotion-name">{{ scope.row.tenGiamGia }}</span>
             </div>
           </template>
         </el-table-column>
@@ -96,11 +96,11 @@
         <el-table-column label="Giá trị giảm" width="140" align="center">
           <template #default="scope">
             <div class="value-cell">
-              <span v-if="scope.row.loaiKhuyenMai === 'Phần trăm'" class="discount-percent">
-                {{ scope.row.giaTriKhuyenMai }}%
+              <span v-if="scope.row.loaiGiamGia === 'Phần trăm'" class="discount-percent">
+                {{ scope.row.giaTriGiamGia }}%
               </span>
               <span v-else class="discount-amount">
-                {{ formatCurrency(scope.row.giaTriKhuyenMai) }}
+                {{ formatCurrency(scope.row.giaTriGiamGia) }}
               </span>
             </div>
           </template>
@@ -186,26 +186,26 @@
                   <span v-if="errors.maGiamGia" class="error-text">{{ errors.maGiamGia }}</span>
                 </el-form-item>
 
-                <el-form-item label="Tên khuyến mãi *" class="form-item">
-                  <el-input v-model="formData.tenKhuyenMai" placeholder="Nhập tên khuyến mãi"
-                    :class="{ 'error': errors.tenKhuyenMai }" />
-                  <span v-if="errors.tenKhuyenMai" class="error-text">{{ errors.tenKhuyenMai }}</span>
+                <el-form-item label="Tên giảm giá *" class="form-item">
+                  <el-input v-model="formData.tenGiamGia" placeholder="Nhập tên giảm giá"
+                    :class="{ 'error': errors.tenGiamGia }" />
+                  <span v-if="errors.tenGiamGia" class="error-text">{{ errors.tenGiamGia }}</span>
                 </el-form-item>
               </div>
 
               <div class="form-row">
-                <el-form-item label="Loại khuyến mãi" class="form-item">
-                  <el-select v-model="formData.loaiKhuyenMai" placeholder="Chọn loại">
+                <el-form-item label="Loại giảm giá" class="form-item">
+                  <el-select v-model="formData.loaiGiamGia" placeholder="Chọn loại">
                     <el-option value="Phần trăm" label="Phần trăm (%)" />
                     <el-option value="Cố định" label="Số tiền cố định" />
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="Giá trị khuyến mãi *" class="form-item">
-                  <el-input-number v-model="formData.giaTriKhuyenMai" :min="0"
-                    :max="formData.loaiKhuyenMai === 'Phần trăm' ? 100 : undefined" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.giaTriKhuyenMai }" />
-                  <span v-if="errors.giaTriKhuyenMai" class="error-text">{{ errors.giaTriKhuyenMai }}</span>
+                <el-form-item label="Giá trị giảm giá *" class="form-item">
+                  <el-input-number v-model="formData.giaTriGiamGia" :min="0"
+                    :max="formData.loaiGiamGia === 'Phần trăm' ? 100 : undefined" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.giaTriGiamGia }" />
+                  <span v-if="errors.giaTriGiamGia" class="error-text">{{ errors.giaTriGiamGia }}</span>
                 </el-form-item>
 
                 <el-form-item label="Giá trị đơn hàng tối thiểu" class="form-item">
@@ -214,11 +214,11 @@
                   <span v-if="errors.giaTriDonHangToiThieu" class="error-text">{{ errors.giaTriDonHangToiThieu }}</span>
                 </el-form-item>
 
-                <el-form-item v-if="formData.loaiKhuyenMai === 'Phần trăm'" label="Giá trị khuyến mãi tối đa"
+                <el-form-item v-if="formData.loaiGiamGia === 'Phần trăm'" label="Giá trị giảm giá tối đa"
                   class="form-item">
-                  <el-input-number v-model="formData.giaTriKhuyenMaiToiDa" :min="0" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.giaTriKhuyenMaiToiDa }" />
-                  <span v-if="errors.giaTriKhuyenMaiToiDa" class="error-text">{{ errors.giaTriKhuyenMaiToiDa }}</span>
+                  <el-input-number v-model="formData.giaTriGiamGiaToiDa" :min="0" placeholder="0" class="full-width"
+                    :class="{ 'error': errors.giaTriGiamGiaToiDa }" />
+                  <span v-if="errors.giaTriGiamGiaToiDa" class="error-text">{{ errors.giaTriGiamGiaToiDa }}</span>
                 </el-form-item>
               </div>
             </div>
@@ -272,7 +272,7 @@
 
               <el-form-item label="Điều kiện áp dụng *" class="form-item full-width">
                 <el-input v-model="formData.dieuKienApDung" type="textarea" :rows="3"
-                  placeholder="Nhập điều kiện áp dụng khuyến mãi..." :class="{ 'error': errors.dieuKienApDung }" />
+                  placeholder="Nhập điều kiện áp dụng giảm giá..." :class="{ 'error': errors.dieuKienApDung }" />
                 <span v-if="errors.dieuKienApDung" class="error-text">{{ errors.dieuKienApDung }}</span>
               </el-form-item>
 
@@ -308,27 +308,27 @@
             <span class="detail-value">{{ detailData.maGiamGia || 'Tự động' }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Tên khuyến mãi:</span>
-            <span class="detail-value">{{ detailData.tenKhuyenMai }}</span>
+            <span class="detail-label">Tên giảm giá:</span>
+            <span class="detail-value">{{ detailData.tenGiamGia }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Loại khuyến mãi:</span>
-            <span class="detail-value">{{ detailData.loaiKhuyenMai }}</span>
+            <span class="detail-label">Loại giảm giá:</span>
+            <span class="detail-value">{{ detailData.loaiGiamGia }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Giá trị khuyến mãi:</span>
+            <span class="detail-label">Giá trị giảm giá:</span>
             <span class="detail-value">
-              {{ detailData.loaiKhuyenMai === 'Phần trăm' ? `${detailData.giaTriKhuyenMai}%` :
-                formatCurrency(detailData.giaTriKhuyenMai) }}
+              {{ detailData.loaiGiamGia === 'Phần trăm' ? `${detailData.giaTriGiamGia}%` :
+                formatCurrency(detailData.giaTriGiamGia) }}
             </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Giá trị đơn hàng tối thiểu:</span>
             <span class="detail-value">{{ formatCurrency(detailData.giaTriDonHangToiThieu) }}</span>
           </div>
-          <div v-if="detailData.loaiKhuyenMai === 'Phần trăm'" class="detail-row">
-            <span class="detail-label">Giá trị khuyến mãi tối đa:</span>
-            <span class="detail-value">{{ formatCurrency(detailData.giaTriKhuyenMaiToiDa) }}</span>
+          <div v-if="detailData.loaiGiamGia === 'Phần trăm'" class="detail-row">
+            <span class="detail-label">Giá trị giảm giá tối đa:</span>
+            <span class="detail-value">{{ formatCurrency(detailData.giaTriGiamGiaToiDa) }}</span>
           </div>
         </div>
 
@@ -424,11 +424,11 @@ const detailDialogVisible = ref(false);
 const detailData = reactive({
   id: null,
   maGiamGia: "",
-  tenKhuyenMai: "",
-  loaiKhuyenMai: "",
-  giaTriKhuyenMai: 0,
+  tenGiamGia: "",
+  loaiGiamGia: "",
+  giaTriGiamGia: 0,
   giaTriDonHangToiThieu: 0,
-  giaTriKhuyenMaiToiDa: 0,
+  giaTriGiamGiaToiDa: 0,
   ngayBatDau: "",
   ngayKetThuc: "",
   hangToiThieu: "",
@@ -441,11 +441,11 @@ const detailData = reactive({
 const formData = reactive({
   id: null,
   maGiamGia: "",
-  tenKhuyenMai: "",
-  loaiKhuyenMai: "Phần trăm",
-  giaTriKhuyenMai: 0,
+  tenGiamGia: "",
+  loaiGiamGia: "Phần trăm",
+  giaTriGiamGia: 0,
   giaTriDonHangToiThieu: 0,
-  giaTriKhuyenMaiToiDa: 0,
+  giaTriGiamGiaToiDa: 0,
   ngayBatDau: "",
   ngayKetThuc: "",
   hangToiThieu: "MEMBER",
@@ -458,10 +458,10 @@ const formData = reactive({
 
 const errors = reactive({
   maGiamGia: "",
-  tenKhuyenMai: "",
-  giaTriKhuyenMai: "",
+  tenGiamGia: "",
+  giaTriGiamGia: "",
   giaTriDonHangToiThieu: "",
-  giaTriKhuyenMaiToiDa: "",
+  giaTriGiamGiaToiDa: "",
   ngayBatDau: "",
   ngayKetThuc: "",
   soDiemCanDeDoi: "",
@@ -473,11 +473,11 @@ const errors = reactive({
 const resetForm = () => {
   formData.id = null;
   formData.maGiamGia = "";
-  formData.tenKhuyenMai = "";
-  formData.loaiKhuyenMai = "Phần trăm";
-  formData.giaTriKhuyenMai = 0;
+  formData.tenGiamGia = "";
+  formData.loaiGiamGia = "Phần trăm";
+  formData.giaTriGiamGia = 0;
   formData.giaTriDonHangToiThieu = 0;
-  formData.giaTriKhuyenMaiToiDa = 0;
+  formData.giaTriGiamGiaToiDa = 0;
   formData.ngayBatDau = "";
   formData.ngayKetThuc = "";
   formData.hangToiThieu = "MEMBER";
@@ -491,11 +491,11 @@ const resetForm = () => {
 const resetDetailData = () => {
   detailData.id = null;
   detailData.maGiamGia = "";
-  detailData.tenKhuyenMai = "";
-  detailData.loaiKhuyenMai = "";
-  detailData.giaTriKhuyenMai = 0;
+  detailData.tenGiamGia = "";
+  detailData.loaiGiamGia = "";
+  detailData.giaTriGiamGia = 0;
   detailData.giaTriDonHangToiThieu = 0;
-  detailData.giaTriKhuyenMaiToiDa = 0;
+  detailData.giaTriGiamGiaToiDa = 0;
   detailData.ngayBatDau = "";
   detailData.ngayKetThuc = "";
   detailData.hangToiThieu = "";
@@ -525,22 +525,22 @@ const validateForm = () => {
     }
   }
 
-  if (!formData.tenKhuyenMai.trim()) {
-    errors.tenKhuyenMai = "Tên khuyến mại là bắt buộc";
+  if (!formData.tenGiamGia.trim()) {
+    errors.tenGiamGia = "Tên giảm giá là bắt buộc";
     isValid = false;
-  } else if (formData.tenKhuyenMai.length < 3) {
-    errors.tenKhuyenMai = "Tên khuyến mại phải có ít nhất 3 ký tự";
+  } else if (formData.tenGiamGia.length < 3) {
+    errors.tenGiamGia = "Tên giảm giá phải có ít nhất 3 ký tự";
     isValid = false;
-  } else if (formData.tenKhuyenMai.length > 255) {
-    errors.tenKhuyenMai = "Tên khuyến mại không được vượt quá 255 ký tự";
+  } else if (formData.tenGiamGia.length > 255) {
+    errors.tenGiamGia = "Tên giảm giá không được vượt quá 255 ký tự";
     isValid = false;
   }
 
-  if (formData.giaTriKhuyenMai <= 0) {
-    errors.giaTriKhuyenMai = "Giá trị khuyến mãi phải lớn hơn 0";
+  if (formData.giaTriGiamGia <= 0) {
+    errors.giaTriGiamGia = "Giá trị giảm giá phải lớn hơn 0";
     isValid = false;
-  } else if (formData.loaiKhuyenMai === "Phần trăm" && formData.giaTriKhuyenMai > 100) {
-    errors.giaTriKhuyenMai = "Giá trị khuyến mãi không được vượt quá 100%";
+  } else if (formData.loaiGiamGia === "Phần trăm" && formData.giaTriGiamGia > 100) {
+    errors.giaTriGiamGia = "Giá trị giảm giá không được vượt quá 100%";
     isValid = false;
   }
 
@@ -561,8 +561,8 @@ const validateForm = () => {
     }
   }
 
-  if (formData.giaTriKhuyenMaiToiDa <= 10000.00) {
-    errors.giaTriKhuyenMaiToiDa = "Giá trị khuyến mãi tối đa không được ít hơn 10000.00";
+  if (formData.giaTriGiamGiaToiDa <= 10000.00) {
+    errors.giaTriGiamGiaToiDa = "Giá trị giảm giá tối đa không được ít hơn 10000.00";
     isValid = false;
   }
 
@@ -618,9 +618,9 @@ const savePhieuGiamGia = async () => {
     isLoading.value = true;
     const payload = {
       ...formData,
-      giaTriKhuyenMai: formData.giaTriKhuyenMai.toString(),
+      giaTriGiamGia: formData.giaTriGiamGia.toString(),
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
-      giaTriKhuyenMaiToiDa: formData.giaTriKhuyenMaiToiDa.toString(),
+      giaTriGiamGiaToiDa: formData.giaTriGiamGiaToiDa.toString(),
       soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
 
       ngayBatDau: formatToSQLDateTime(formData.ngayBatDau),
@@ -629,10 +629,10 @@ const savePhieuGiamGia = async () => {
 
     if (formData.id) {
       await update(formData.id, payload);
-      ElMessage.success("Cập nhật khuyến mãi thành công!");
+      ElMessage.success("Cập nhật giảm giá thành công!");
     } else {
       await add(payload);
-      ElMessage.success("Tạo khuyến mãi thành công!");
+      ElMessage.success("Tạo giảm giá thành công!");
     }
 
     phieuGiamGiaDialogVisible.value = false;
@@ -665,7 +665,7 @@ const giftPhieuGiamGia = async (type) => {
 
 const handleDeletePhieuGiamGia = async (id) => {
   try {
-    await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa khuyến mãi này?", 'Xác nhận', {
+    await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa giảm giá này?", 'Xác nhận', {
       confirmButtonText: 'Xóa',
       cancelButtonText: 'Hủy',
       type: 'warning'
@@ -673,14 +673,14 @@ const handleDeletePhieuGiamGia = async (id) => {
 
     isLoading.value = true;
     await deletePhieuGiamGia(id);
-    ElMessage.success("Xóa khuyến mãi thành công!");
+    ElMessage.success("Xóa giảm giá thành công!");
     loadPhieuGiamGia(currentPage.value);
   } catch (error) {
     if (error === 'cancel') {
       ElMessage.info('Đã hủy xóa');
     } else {
-      console.error(error.message || "Lỗi khi xóa khuyến mãi");
-      ElMessage.error(error.message || "Lỗi khi xóa khuyến mãi");
+      console.error(error.message || "Lỗi khi xóa giảm giá");
+      ElMessage.error(error.message || "Lỗi khi xóa giảm giá");
     }
   } finally {
     isLoading.value = false;
@@ -693,8 +693,8 @@ const viewUpdate = async (id) => {
     Object.assign(formData, response);
     phieuGiamGiaDialogVisible.value = true;
   } catch (error) {
-    console.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
-    ElMessage.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
+    console.error(error.message || "Lỗi khi tải chi tiết giảm giá");
+    ElMessage.error(error.message || "Lỗi khi tải chi tiết giảm giá");
   }
   resetErrors();
 };
@@ -705,8 +705,8 @@ const viewDetail = async (id) => {
     Object.assign(detailData, response);
     detailDialogVisible.value = true;
   } catch (error) {
-    console.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
-    ElMessage.error(error.message || "Lỗi khi tải chi tiết khuyến mãi");
+    console.error(error.message || "Lỗi khi tải chi tiết giảm giá");
+    ElMessage.error(error.message || "Lỗi khi tải chi tiết giảm giá");
   }
 };
 

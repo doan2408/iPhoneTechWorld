@@ -70,22 +70,22 @@ const showOrders = ref(false);
 function toggleOrderMenu() {
   showOrders.value = !showOrders.value;
 }
+
+const showUuDai = ref(false);
+function toggleUuDaiMenu() {
+  showUuDai.value = !showUuDai.value;
+}
 </script>
 
 <template>
   <div class="admin-sidebar">
     <div>
       <div class="logo">
-        <img
-          src="/src/components/images/LogoTechWorld-removebg-preview.png"
-          alt="TechWorld"
-        />
+        <img src="/src/components/images/LogoTechWorld-removebg-preview.png" alt="TechWorld" />
       </div>
       <div class="user-info" v-if="isLoggedIn">
         <router-link to="/admin/staff/infor">
-          <span class="username"
-            ><i class="bi-person-lines-fill"></i> {{ user?.fullName }}</span
-          >
+          <span class="username"><i class="bi-person-lines-fill"></i> {{ user?.fullName }}</span>
         </router-link>
       </div>
 
@@ -94,8 +94,7 @@ function toggleOrderMenu() {
           <!-- <li><router-link to="/admin/dashboard">Dashboard</router-link></li> -->
 
           <li>
-            <router-link to="/admin/statistical" class="icon stats-icon"
-              >Thống Kê
+            <router-link to="/admin/statistical" class="icon stats-icon">Thống Kê
             </router-link>
           </li>
 
@@ -104,11 +103,8 @@ function toggleOrderMenu() {
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
-            <i
-              :class="
-                showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
-              "
-            ></i>
+            <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
+              "></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
             <li><router-link to="/admin/products">Sản phẩm</router-link></li>
@@ -139,9 +135,7 @@ function toggleOrderMenu() {
 
           <li @click="toggleUserstMenu" v-if="isAdmin" class="menu-toggle">
             Quản lý người dùng
-            <i
-              :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
-            ></i>
+            <i :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showUsers" class="submenu">
             <li>
@@ -153,16 +147,12 @@ function toggleOrderMenu() {
           </ul>
 
           <li>
-            <router-link v-if="isStaff" to="/admin/client"
-              >Quản lý khách hàng</router-link
-            >
+            <router-link v-if="isStaff" to="/admin/client">Quản lý khách hàng</router-link>
           </li>
 
           <li @click="toggleOrderMenu" class="menu-toggle">
             Quản lý đơn hàng
-            <i
-              :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
-            ></i>
+            <i :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
@@ -171,9 +161,18 @@ function toggleOrderMenu() {
             </li> -->
           </ul>
 
-          <li>
-            <router-link to="/admin/promotions">Quản lý khuyến mãi</router-link>
+          <li @click="toggleUuDaiMenu" class="menu-toggle">
+            Quản lý ưu đãi
+            <i :class="showUuDai ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
           </li>
+          <ul v-if="showUuDai" class="submenu">
+            <li>
+              <router-link to="/admin/promotions">Khuyến mãi sản phẩm</router-link>
+            </li>
+            <li>
+              <router-link to="/admin/voucher">Phiếu giảm giá</router-link>
+            </li>
+          </ul>
 
           <li>
             <router-link to="/admin/danhGiaSanPham">Quản lý bình luận</router-link>
@@ -187,9 +186,7 @@ function toggleOrderMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login" @click.prevent="handleLogout"
-        >Đăng nhập</router-link
-      >
+      <router-link to="/login" @click.prevent="handleLogout">Đăng nhập</router-link>
     </div>
   </div>
 </template>
@@ -198,13 +195,11 @@ function toggleOrderMenu() {
 .admin-sidebar {
   width: 220px;
   height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #1e3a8a 0%,
-    #3b82f6 30%,
-    #1e40af 70%,
-    #1e3a8a 100%
-  );
+  background: linear-gradient(135deg,
+      #1e3a8a 0%,
+      #3b82f6 30%,
+      #1e40af 70%,
+      #1e3a8a 100%);
   color: white;
   position: fixed;
   top: 0;
@@ -227,23 +222,17 @@ function toggleOrderMenu() {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: radial-gradient(
-      1px 1px at 20px 30px,
+  background-image: radial-gradient(1px 1px at 20px 30px,
       rgba(255, 255, 255, 0.6),
-      transparent
-    ),
+      transparent),
     radial-gradient(1px 1px at 40px 70px, rgba(147, 197, 253, 0.5), transparent),
     radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(
-      1px 1px at 130px 80px,
+    radial-gradient(1px 1px at 130px 80px,
       rgba(191, 219, 254, 0.6),
-      transparent
-    ),
-    radial-gradient(
-      1px 1px at 160px 120px,
+      transparent),
+    radial-gradient(1px 1px at 160px 120px,
       rgba(255, 255, 255, 0.5),
-      transparent
-    );
+      transparent);
   background-repeat: repeat;
   background-size: 200px 150px;
   animation: sidebarStars 6s ease-in-out infinite alternate;
@@ -255,6 +244,7 @@ function toggleOrderMenu() {
   0% {
     opacity: 0.5;
   }
+
   100% {
     opacity: 0.8;
   }
@@ -353,19 +343,22 @@ nav ul {
 }
 
 nav li {
-  margin: 6px 0; /* Giảm margin */
+  margin: 6px 0;
+  /* Giảm margin */
 }
 
 nav a {
   color: #f1f5f9;
   text-decoration: none;
-  padding: 8px 12px; /* Giảm padding */
+  padding: 8px 12px;
+  /* Giảm padding */
   border-radius: 8px;
   display: block;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 13px; /* Giảm font size */
+  font-size: 13px;
+  /* Giảm font size */
 }
 
 nav a:hover {
@@ -393,14 +386,16 @@ nav a.router-link-exact-active {
 .logout-section router-link {
   color: white;
   text-decoration: none;
-  padding: 8px 12px; /* Giảm padding */
+  padding: 8px 12px;
+  /* Giảm padding */
   border-radius: 8px;
   display: block;
   transition: all 0.3s ease;
   background: rgba(239, 68, 68, 0.8);
   text-align: center;
   font-weight: 600;
-  font-size: 13px; /* Giảm font size */
+  font-size: 13px;
+  /* Giảm font size */
 }
 
 .logout-section a:hover {
@@ -415,13 +410,15 @@ nav a.router-link-exact-active {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
-  padding: 8px 12px; /* Giảm padding */
+  padding: 8px 12px;
+  /* Giảm padding */
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   transition: all 0.3s ease;
   color: #f1f5f9;
-  font-size: 13px; /* Giảm font size */
+  font-size: 13px;
+  /* Giảm font size */
 }
 
 .menu-toggle:hover {
@@ -435,20 +432,20 @@ nav a.router-link-exact-active {
   color: #dbeafe;
   flex-shrink: 0;
   margin-left: 8px;
-  font-size: 12px; /* Giảm font size cho icon */
+  font-size: 12px;
+  /* Giảm font size cho icon */
 }
 
 .submenu {
   padding-left: 15px;
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.4) 0%,
-    rgba(96, 165, 250, 0.3) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(59, 130, 246, 0.4) 0%,
+      rgba(96, 165, 250, 0.3) 100%);
   margin-top: 5px;
   border-left: 3px solid #60a5fa;
   border-radius: 10px;
-  padding: 8px 12px; /* Giảm padding */
+  padding: 8px 12px;
+  /* Giảm padding */
   backdrop-filter: blur(5px);
   animation: slideDown 0.3s ease-out;
 }
@@ -458,6 +455,7 @@ nav a.router-link-exact-active {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -465,14 +463,17 @@ nav a.router-link-exact-active {
 }
 
 .submenu li {
-  margin: 4px 0; /* Giảm margin */
+  margin: 4px 0;
+  /* Giảm margin */
 }
 
 .submenu a {
   color: #f1f5f9;
   text-decoration: none;
-  padding: 6px 10px; /* Giảm padding */
-  font-size: 12px; /* Giảm font size */
+  padding: 6px 10px;
+  /* Giảm padding */
+  font-size: 12px;
+  /* Giảm font size */
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -506,6 +507,7 @@ nav a.router-link-exact-active {
   .admin-sidebar {
     width: 180px;
   }
+
   .content-container {
     margin-left: 180px;
     width: calc(100% - 180px);
@@ -528,6 +530,7 @@ nav a.router-link-exact-active {
     width: 100%;
     height: auto;
   }
+
   .content-container {
     margin-left: 0;
     width: 100%;
@@ -552,5 +555,6 @@ nav a.router-link-exact-active {
 .admin-sidebar::-webkit-scrollbar-thumb:hover {
   background: rgba(147, 197, 253, 0.8);
 }
+
 /* Thông KêKê */
 </style>
