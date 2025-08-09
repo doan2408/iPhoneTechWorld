@@ -30,7 +30,7 @@ public interface HangThanhVienRepository extends JpaRepository<HangThanhVien, In
 
     // find hang by khoang diem
     @Query(value = "select h from HangThanhVien h " +
-            "where :diem between h.diemTu and h.diemDen")
+            "where :diem >= h.diemTu and (:diem < h.diemDen or h.diemDen is null)")
     HangThanhVien getHangThanhVien(@Param("diem") BigDecimal diemHienTai);
 
     // hien thi diem xet hang hien tai theo khoang

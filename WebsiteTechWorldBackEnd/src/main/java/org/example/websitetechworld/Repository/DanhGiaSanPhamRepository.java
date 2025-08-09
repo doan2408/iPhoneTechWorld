@@ -143,12 +143,83 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
             Pageable pageable
     );
 
+//
+//    @Query(value = "SELECT url_media FROM media_danh_gia WHERE id_danh_gia = :id AND loai_media = 'IMAGE'", nativeQuery = true)
+//    List<String> findAnhByDanhGiaId(@Param("id") Integer id);
+//
+//    @Query(value = "SELECT url_media FROM media_danh_gia WHERE id_danh_gia = :id AND loai_media = 'VIDEO'", nativeQuery = true)
+//    List<String> findVideoByDanhGiaId(@Param("id") Integer id);
 
-    @Query(value = "SELECT url_media FROM media_danh_gia WHERE id_danh_gia = :id AND loai_media = 'IMAGE'", nativeQuery = true)
-    List<String> findAnhByDanhGiaId(@Param("id") Integer id);
 
-    @Query(value = "SELECT url_media FROM media_danh_gia WHERE id_danh_gia = :id AND loai_media = 'VIDEO'", nativeQuery = true)
-    List<String> findVideoByDanhGiaId(@Param("id") Integer id);
+    @Query(value = """
+
+            SELECT\s
+                dg.id_danh_gia,
+                cthd.id_hoa_don,
+                cthd.id_san_pham_chi_tiet,
+                cthd.id_chi_tiet_hoa_don,
+                dg.id_khach_hang,
+                dg.so_sao,
+                dg.noi_dung,
+                dg.trang_thai_danh_gia,
+                m.id_media,
+                m.loai_media,
+                m.url_media,
+                m.ngay_upload,
+                m.trang_thai_media_danh_gia
+            FROM danh_gia_san_pham dg
+            JOIN chi_tiet_hoa_don cthd ON cthd.id_chi_tiet_hoa_don = dg.id_chi_tiet_hoa_don
+            LEFT JOIN media_danh_gia m ON m.id_danh_gia = dg.id_danh_gia
+            WHERE cthd.id_hoa_don = :idHoaDon
+        """, nativeQuery = true)
+    List<Object[]> getDanhGiaByHoaDon(@Param("idHoaDon") Integer idHoaDon);
+
+
+    @Query(value = """
+    SELECT 
+        CASE 
+            WHEN COUNT(cthd.id_chi_tiet_hoa_don) = 
+                 SUM(CASE 
+                        WHEN dgsp.id_danh_gia IS NOT NULL AND dgsp.id_khach_hang = :idKhachHang 
+                        THEN 1 ELSE 0 
+                     END)
+            THEN CAST(1 AS BIT) 
+            ELSE CAST(0 AS BIT) 
+        END AS da_danh_gia
+    FROM chi_tiet_hoa_don cthd
+    LEFT JOIN danh_gia_san_pham dgsp 
+        ON dgsp.id_chi_tiet_hoa_don = cthd.id_chi_tiet_hoa_don 
+    WHERE cthd.id_hoa_don = :idHoaDon
+    """, nativeQuery = true)
+    boolean checkDaDanhGia(@Param("idHoaDon") Integer idHoaDon,
+                           @Param("idKhachHang") Integer idKhachHang);
+
+
+    @Query(value = """
+    SELECT 
+        CASE 
+            WHEN COUNT(cthd.id_chi_tiet_hoa_don) = 
+                 SUM(CASE 
+                        WHEN dgsp.id_danh_gia IS NOT NULL AND dgsp.id_khach_hang = :idKhachHang 
+                        THEN 1 ELSE 0 
+                     END)
+            THEN CAST(1 AS BIT) 
+            ELSE CAST(0 AS BIT) 
+        END AS da_danh_gia,
+        CASE 
+            WHEN COUNT(phdg.id_phan_hoi) > 0 
+            THEN CAST(1 AS BIT) 
+            ELSE CAST(0 AS BIT) 
+        END AS co_phan_hoi
+    FROM chi_tiet_hoa_don cthd
+    LEFT JOIN danh_gia_san_pham dgsp 
+        ON dgsp.id_chi_tiet_hoa_don = cthd.id_chi_tiet_hoa_don 
+    LEFT JOIN phan_hoi_danh_gia phdg 
+        ON phdg.id_danh_gia = dgsp.id_danh_gia
+    WHERE cthd.id_hoa_don = :idHoaDon
+    """, nativeQuery = true)
+    Map<String, Boolean> checkDaDanhGiaVaPhanHoi(@Param("idHoaDon") Integer idHoaDon,
+                                                 @Param("idKhachHang") Integer idKhachHang);
 
 
 }

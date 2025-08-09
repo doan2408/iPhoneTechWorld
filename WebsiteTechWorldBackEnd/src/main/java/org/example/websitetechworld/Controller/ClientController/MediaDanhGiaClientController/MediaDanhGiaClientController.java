@@ -17,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MediaDanhGiaClientController {
     private final MediaDanhGiaClientService mediaService;
+    private final MediaDanhGiaClientService mediaDanhGiaClientService;
 
     @GetMapping
     public ResponseEntity<List<MediaDanhGiaClientResponse>> getAll() {
@@ -39,10 +40,7 @@ public class MediaDanhGiaClientController {
     public ResponseEntity<?> uploadMedia(
             @RequestParam("file") MultipartFile file,
             @RequestParam("idDanhGia") Integer idDanhGia) throws IOException {
-
-        System.out.println("📂 Nhận được file: " + (file != null ? file.getOriginalFilename() : "null"));
-        System.out.println("📌 idDanhGia: " + idDanhGia);
-
+        
         return ResponseEntity.ok(mediaService.uploadFile(file, idDanhGia));
     }
 
@@ -53,10 +51,18 @@ public class MediaDanhGiaClientController {
         return ResponseEntity.ok(mediaService.update(id, req));
     }
 
+
+    //delete media theo idDanhGia
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         mediaService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Thành công");
+    }
+
+    @DeleteMapping("/delete/{idMedia}")
+    public ResponseEntity<String> deleteIdMedia(@PathVariable Integer idMedia) {
+        mediaDanhGiaClientService.deleteMediaById(idMedia);
+        return ResponseEntity.ok("Xóa media thành công");
     }
 
 }
