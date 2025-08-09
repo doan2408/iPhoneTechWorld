@@ -451,7 +451,6 @@ onMounted(() => {
                 {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).soNha }},
                 {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tenDuong }},
                 {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).xaPhuong }},
-                {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).quanHuyen }},
                 {{ scope.row.diaChi.find((dc) => dc.diaChiChinh).tinhThanhPho }}
               </template>
               <template v-else>Không có</template>

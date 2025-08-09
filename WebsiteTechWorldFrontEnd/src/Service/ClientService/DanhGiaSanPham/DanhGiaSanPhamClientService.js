@@ -29,7 +29,7 @@ export const DanhGiaSanPhamClientService = {
     return response.data;
   },
 
-  async layDanhGiaTheoSanPham (idSanPhamChiTiet, page = 0, size = 10, soSao = null, hasMedia = null) {
+  async layDanhGiaTheoSanPham (idSanPhamChiTiet, page = 0, size = 10, soSao = null, hasMedia = null, idKhachHang) {
     const response = await api.get(`${BASE_URL}/san-pham-chi-tiet/${idSanPhamChiTiet}`, {
       params: {
         page,
@@ -38,6 +38,7 @@ export const DanhGiaSanPhamClientService = {
         sortDir: "desc",
         soSao,
         hasMedia,
+        idKhachHang,
       },
     });
 

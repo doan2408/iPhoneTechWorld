@@ -542,7 +542,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { detailSanPham, getThongSoLimitRomMin, getListCameraSau } from '@/Service/ClientService/Products/ProductClientService'
+import { detailSanPham, getThongSoLimitRomMin, getListCameraSau } from '@/Service/GuestService/ProductGuestService'
 import { ShieldCheck, Repeat2, Truck, BadgeCheck } from 'lucide-vue-next'
 
 const activeTab = ref('specs')

@@ -10,7 +10,7 @@ var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 })();
 </script>
 <script setup>
-import { ref, onMounted, watch, nextTick } from "vue";
+import { ref, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import {
@@ -96,7 +96,7 @@ const comment = ref("");
 const uploadedImages = ref([]);
 const reviews = ref([]);
 const averageRating = ref(0);
-const starDistribution = ref({});
+const starDistribution = reactive({});
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalReviews = ref(0);
@@ -123,16 +123,16 @@ const scrollTabIntoView = (tabId) => {
     );
     if (activeTabElement) {
       const container = specTabsContainer.value;
-      
+
       // Tính toán vị trí để tab luôn ở góc trái với padding 20px
       const targetScrollLeft = activeTabElement.offsetLeft - 20;
-      
+
       // Scroll container để đưa tab về góc trái
       container.scrollTo({
         left: Math.max(0, targetScrollLeft), // Đảm bảo không scroll âm
         behavior: "smooth"
       });
-      
+
       // Debug log
       console.log('Tab scrolled to left:', tabId, targetScrollLeft);
     }
@@ -150,9 +150,9 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
       const containerWidth = container.clientWidth;
       const tabLeft = activeTabElement.offsetLeft;
       const tabWidth = activeTabElement.offsetWidth;
-      
+
       let targetScrollLeft;
-      
+
       switch (position) {
         case 'left':
           // Tab ở góc trái với padding 20px
@@ -169,13 +169,13 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
         default:
           targetScrollLeft = tabLeft - 20;
       }
-      
+
       // Scroll container
       container.scrollTo({
         left: Math.max(0, targetScrollLeft),
         behavior: "smooth"
       });
-      
+
       console.log(`Tab "${tabId}" scrolled to ${position}:`, targetScrollLeft);
     }
   }
@@ -191,21 +191,21 @@ const scrollToSection = (sectionId) => {
       const targetSection = specModalContent.value.querySelector(
         `[data-section="${sectionId}"]`
       );
-      
+
       if (targetSection) {
         const modalContent = specModalContent.value;
         const headerHeight = 81; // Modal header
         const tabsHeight = 49; // Tabs height
-        
+
         // Tính toán vị trí chính xác của section
         const sectionTop = targetSection.offsetTop;
         const scrollPosition = sectionTop - headerHeight - tabsHeight - 10;
-        
+
         // Debug log để kiểm tra
         console.log('Section ID:', sectionId);
         console.log('Section top:', sectionTop);
         console.log('Scroll to:', scrollPosition);
-        
+
         modalContent.scrollTo({
           top: Math.max(0, scrollPosition), // Đảm bảo không scroll âm
           behavior: "smooth",
@@ -318,6 +318,7 @@ const fetchListAnhByMau = async () => {
     bienThe.value.hinhAnh = hinhAnh;
     selectedImage.value = hinhAnh[0];
   }
+  await fetchStarDistribution();
 };
 
 const themVaoGio = async (buy) => {
@@ -343,7 +344,7 @@ const themVaoGio = async (buy) => {
     }
     const tongSoLuong = soLuongHienTai + quantity.value;
     console.log(soLuongTonKho);
-    
+
     if (tongSoLuong > soLuongTonKho) {
       ElMessage.error(
         `Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`
@@ -397,8 +398,11 @@ const fetchReviews = async () => {
       currentPage.value - 1,
       pageSize.value,
       selectedStarFilter.value === 0 ? null : selectedStarFilter.value,
-      hasMediaFilter.value ? true : null
+      hasMediaFilter.value ? true : null,
+      user?.id
     );
+
+    console.log("Đánh giá111:", response);
 
     reviews.value = currentPage.value === 1 ? (response.content || response) : [...reviews.value, ...(response.content || response)];
     totalReviews.value = response.totalElements || response.length;
@@ -424,11 +428,20 @@ const fetchAverageRating = async () => {
 };
 
 const fetchStarDistribution = async () => {
+  if (!bienThe.value?.idSpct) return;
   try {
     const distribution = await DanhGiaSanPhamClientService.thongKeSoSaoSanPham(bienThe.value.idSpct);
-    starDistribution.value = distribution;
+    // ép về reactive object để Vue track thay đổi
+    Object.keys(starDistribution).forEach(k => delete starDistribution[k]); // xóa cũ
+    Object.entries(distribution).forEach(([star, count]) => {
+      starDistribution[star] = count;
+    });
+
+    totalReviews.value = Object.values(distribution).reduce((a, b) => a + b, 0);
+    const totalScore = Object.entries(distribution).reduce((sum, [star, count]) => sum + star * count, 0);
+    averageRating.value = totalReviews.value ? totalScore / totalReviews.value : 0;
   } catch (error) {
-    console.error("Lỗi khi lấy thống kê sao:", error);
+    console.error("❌ Lỗi khi lấy thống kê sao:", error);
   }
 };
 
@@ -494,10 +507,10 @@ watch(showSpecModal, (newVal) => {
       if (specModalContent.value) {
         // Reset scroll position về đầu
         specModalContent.value.scrollTop = 0;
-        
+
         // Add scroll listener
         specModalContent.value.addEventListener("scroll", handleScroll, { passive: true });
-        
+
         // Set default active tab
         activeTab.value = "thong-tin-hang-hoa";
         scrollTabIntoView("thong-tin-hang-hoa");
@@ -523,10 +536,10 @@ const checkIfFavorite = async () => {
 const toggleWishlist = async () => {
   try {
     if (isFavorite.value) {
-      await deleteWishList(idSanPham, selectedRom.value, selectedMau.value,null)
+      await deleteWishList(idSanPham, selectedRom.value, selectedMau.value, null)
       toast.success("Bỏ yêu thích thành công")
     } else {
-      await addNewWishList(idSanPham, selectedRom.value, selectedMau.value,null)
+      await addNewWishList(idSanPham, selectedRom.value, selectedMau.value, null)
       toast.success("Thêm thành công vào yêu thích")
     }
     isFavorite.value = !isFavorite.value
@@ -629,16 +642,8 @@ const toggleWishlist = async () => {
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
 
-              <input
-                type="number"
-                v-model="quantity"
-                min="1"
-                :max="bienThe.soLuong"
-              />
-              <button
-                @click="increaseQty"
-                :disabled="quantity >= bienThe.soLuong"
-              >
+              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
+              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
                 +
               </button>
             </div>
@@ -824,12 +829,16 @@ const toggleWishlist = async () => {
           <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
             <span>{{ star }} sao:</span>
             <div class="progress-bar">
-              <div :style="{ width: ((starDistribution[star] || 0) / totalReviews * 100) + '%' }" class="progress">
-              </div>
+              <div class="progress" :style="{
+                width: totalReviews === 0
+                  ? '100%'
+                  : ((starDistribution[star] || 0) / totalReviews * 100) + '%'
+              }"></div>
             </div>
             <span>{{ starDistribution[star] || 0 }} đánh giá</span>
           </div>
         </div>
+
       </div>
 
       <div class="review-filters">
@@ -844,9 +853,12 @@ const toggleWishlist = async () => {
       </div>
 
       <div class="reviews-list">
-        <div v-for="review in reviews" :key="review.idDanhGia" class="review-item">
+        <div class="review-item" v-for="review in reviews" :key="review.idDanhGia">
           <div class="review-header">
             <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
+            <span v-if="review.trangThaiDanhGia === 'PENDING' && review.idKhachHang === user.id" class="pending-label">
+              Chờ duyệt
+            </span>
             <span class="purchased-label" v-if="review.idChiTietHoaDon">Đã mua hàng</span>
             <el-rate v-model="review.soSao" disabled />
             <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
@@ -1099,8 +1111,10 @@ const toggleWishlist = async () => {
 
 .tich-diem-img {
   width: 100%;
-  height: auto; /* tự co chiều cao */
-  max-height: 80px; /* không vượt quá chiều cao này */
+  height: auto;
+  /* tự co chiều cao */
+  max-height: 80px;
+  /* không vượt quá chiều cao này */
   border-radius: 6px;
   border: 1px solid #e5e5e5;
   transition: all 0.3s ease;
@@ -1115,7 +1129,8 @@ const toggleWishlist = async () => {
 .diemTichLuy {
   margin-top: 8px;
   font-size: 14px;
-  color: #f59e0b; /* màu vàng cam */
+  color: #f59e0b;
+  /* màu vàng cam */
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -1435,7 +1450,8 @@ const toggleWishlist = async () => {
 
 .spec-section {
   margin-bottom: 25px;
-  scroll-margin-top: 100px; /* Offset for sticky header */
+  scroll-margin-top: 100px;
+  /* Offset for sticky header */
 }
 
 .spec-section h3 {
@@ -1479,6 +1495,7 @@ const toggleWishlist = async () => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1488,6 +1505,7 @@ const toggleWishlist = async () => {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -1812,6 +1830,7 @@ const toggleWishlist = async () => {
     width: 100%;
   }
 }
+
 .wishlist-btn {
   border: none;
   background: transparent;
@@ -1820,6 +1839,7 @@ const toggleWishlist = async () => {
   transition: transform 0.2s;
   color: #555;
 }
+
 .wishlist-btn.active {
   color: red;
 }
@@ -1831,6 +1851,7 @@ const toggleWishlist = async () => {
 .wishlist-btn.active {
   color: red;
 }
+
 @media (max-width: 480px) {
   .product-container {
     padding: 10px;

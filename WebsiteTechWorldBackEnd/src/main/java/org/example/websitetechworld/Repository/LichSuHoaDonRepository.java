@@ -28,6 +28,7 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
 			WHERE lshd.idNhanVien.id = :idNhanVien\s
                 AND lshd.hanhDong = 'CREATE'
                 AND hd.trangThaiThanhToan = 'PENDING'
+                AND ( hd.isDelete != true or hd.isDelete is null )
 			GROUP BY hd.id, hd.maHoaDon
 """)
     List<TabHoaDonAdminResponse> findMaHoaDonPendingByNhanVien(@Param("idNhanVien") Integer idNhanVien);
@@ -37,7 +38,7 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
         select count(lshd) from LichSuHoaDon lshd
         join lshd.idNhanVien nv
         join lshd.idHoaDon hd
-        where nv.id = ?1 and hd.trangThaiThanhToan = ?2
+        where nv.id = ?1 and hd.trangThaiThanhToan = ?2 and ( hd.isDelete != true  or hd.isDelete is null )
 """)
     Integer countPendingHoaDonByNhanVien(Integer id, TrangThaiThanhToan trangThaiThanhToan);
 

@@ -26,13 +26,19 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
     LEFT JOIN FETCH d.mediaList m
     WHERE d.idSanPhamChiTiet.id = :idSanPhamChiTiet
     AND (:soSao IS NULL OR d.soSao = :soSao)
-    AND (:hasMedia IS NULL 
-         OR (SIZE(d.mediaList) > 0))
-    AND d.trangThaiDanhGia = 'APPROVED'
+    AND (:hasMedia IS NULL OR SIZE(d.mediaList) > 0)
+    AND (
+         d.trangThaiDanhGia = 'APPROVED'
+         OR (d.trangThaiDanhGia = 'PENDING_APPROVAL' AND d.idKhachHang.id = :idKhachHang)
+    )
     """)
-    List<DanhGiaSanPham> findBySanPhamChiTietAndFilters(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet,
-                                                 @Param("soSao") Integer soSao,
-                                                 @Param("hasMedia") Boolean hasMedia);
+    List<DanhGiaSanPham> findBySanPhamChiTietAndFilters(
+            @Param("idSanPhamChiTiet") Integer idSanPhamChiTiet,
+            @Param("soSao") Integer soSao,
+            @Param("hasMedia") Boolean hasMedia,
+            @Param("idKhachHang") Integer idKhachHang);
+
+
 
 
     // Tìm đánh giá theo khách hàng

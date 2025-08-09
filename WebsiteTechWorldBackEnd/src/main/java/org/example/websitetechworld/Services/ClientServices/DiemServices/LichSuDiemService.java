@@ -207,10 +207,15 @@ public class LichSuDiemService {
             return;
         }
 
-        Integer idKhachHang = hoaDon.getIdKhachHang().getId();
-        if(idKhachHang == null) {
-            return; // khách vãng lai k có id -> không + điểm
+        KhachHang khachHang = hoaDon.getIdKhachHang();
+
+        // Kiểm tra null trước khi gọi bất kỳ phương thức nào
+        if (khachHang == null) {
+            return; // Khách vãng lai, không cộng điểm
         }
+
+        Integer idKhachHang = khachHang.getId();
+
 
         //get ví điểm
         Optional<ViDiem> optionalViDiem  = viDiemRepository.findByIdKhachHang(idKhachHang);

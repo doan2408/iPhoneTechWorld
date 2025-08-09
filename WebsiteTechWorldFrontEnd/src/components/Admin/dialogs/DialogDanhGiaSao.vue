@@ -93,6 +93,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useToast } from 'vue-toastification';
 
 const props = defineProps({
     isOpen: Boolean,
@@ -112,6 +113,7 @@ const videoPreviews = ref([]); // Lưu URL preview
 const isSubmitting = ref(false);
 const isImageDragOver = ref(false); // Trạng thái kéo thả cho ảnh
 const isVideoDragOver = ref(false); // Trạng thái kéo thả cho video
+ const toast = useToast(); // 👈 nếu chưa khai báo trong scope
 
 // Kiểm tra props
 watch(props, () => {
@@ -128,7 +130,7 @@ watch(props, () => {
 
     if (!props.orderProducts || !Array.isArray(props.orderProducts)) {
         console.error('Lỗi: orderProducts không hợp lệ', { orderProducts: props.orderProducts });
-        alert('Dữ liệu sản phẩm không hợp lệ!');
+        toast.error('Dữ liệu sản phẩm không hợp lệ!');
         return;
     }
 
@@ -144,7 +146,7 @@ const setRating = (productId, value) => {
     const product = props.orderProducts.find(p => p.idSanPhamChiTiet == productId);
     if (!product) {
         console.error(`ID sản phẩm chi tiết không hợp lệ: ${productId}`);
-        alert(`ID sản phẩm chi tiết không hợp lệ: ${productId}`);
+        toast.error(`ID sản phẩm chi tiết không hợp lệ: ${productId}`);
         return;
     }
     productRatings.value[productId] = value;
@@ -156,7 +158,7 @@ const handleImageUpload = (event) => {
     const files = event.target.files || event.dataTransfer?.files;
     if (!files || files.length === 0) {
         console.warn('Không có file nào được chọn hoặc kéo thả');
-        alert('Vui lòng chọn hoặc kéo thả ít nhất một ảnh!');
+        toast.warning('Vui lòng chọn hoặc kéo thả ít nhất một ảnh!');
         return;
     }
 
@@ -165,29 +167,29 @@ const handleImageUpload = (event) => {
 
     if (imageFiles.value.length + newFiles.length > MAX_IMAGES) {
         console.warn(`Vượt quá giới hạn ${MAX_IMAGES} ảnh! Hiện có: ${imageFiles.value.length}, thêm: ${newFiles.length}`);
-        alert(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} ảnh!`);
+        toast.warning(`Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} ảnh!`);
         return;
     }
 
     const invalidFiles = newFiles.filter(file => {
         if (!file.type.startsWith('image/')) {
             console.warn(`Tệp không phải ảnh: ${file.name}`);
-            alert(`Tệp ${file.name} không phải là ảnh!`);
+            toast.warning(`Tệp ${file.name} không phải là ảnh!`);
             return true;
         }
         if (file.size > MAX_IMAGE_SIZE) {
             console.warn(`Ảnh vượt quá 5MB: ${file.name}`);
-            alert(`Ảnh ${file.name} vượt quá 5MB!`);
+            toast.warning(`Ảnh ${file.name} vượt quá 5MB!`);
             return true;
         }
         if (!['image/jpeg', 'image/png'].includes(file.type)) {
             console.warn(`Ảnh không đúng định dạng JPG/PNG: ${file.name}`);
-            alert(`Ảnh ${file.name} phải có định dạng JPG hoặc PNG!`);
+            toast.warning(`Ảnh ${file.name} phải có định dạng JPG hoặc PNG!`);
             return true;
         }
         if (imageFiles.value.some(existingFile => existingFile.name === file.name)) {
             console.warn(`Ảnh đã tồn tại: ${file.name}`);
-            alert(`Ảnh ${file.name} đã được thêm trước đó!`);
+            toast.warning(`Ảnh ${file.name} đã được thêm trước đó!`);
             return true;
         }
         return false;
@@ -216,29 +218,29 @@ const handleVideoUpload = (event) => {
 
     if (videoFiles.value.length + files.length > MAX_VIDEOS) {
         console.warn(`Vượt quá giới hạn ${MAX_VIDEOS} video! Hiện có: ${videoFiles.value.length}, thêm: ${files.length}`);
-        alert(`Bạn chỉ có thể tải lên tối đa ${MAX_VIDEOS} video!`);
+        toast.warning(`Bạn chỉ có thể tải lên tối đa ${MAX_VIDEOS} video!`);
         return;
     }
 
     const invalidFiles = files.filter(file => {
         if (!file.type.startsWith('video/')) {
             console.warn(`Tệp không phải video: ${file.name}`);
-            alert(`Tệp ${file.name} không phải là video!`);
+            toast.warning(`Tệp ${file.name} không phải là video!`);
             return true;
         }
         if (file.size > MAX_VIDEO_SIZE) {
             console.warn(`Video vượt quá 50MB: ${file.name}`);
-            alert(`Video ${file.name} vượt quá 50MB!`);
+            toast.warning.warning(`Video ${file.name} vượt quá 50MB!`);
             return true;
         }
         if (!['video/mp4', 'video/webm'].includes(file.type)) {
             console.warn(`Video không đúng định dạng MP4/WebM: ${file.name}`);
-            alert(`Video ${file.name} phải có định dạng MP4 hoặc WebM!`);
+            toast.warning(`Video ${file.name} phải có định dạng MP4 hoặc WebM!`);
             return true;
         }
         if (videoFiles.value.some(existingFile => existingFile.name === file.name)) {
             console.warn(`Video đã tồn tại: ${file.name}`);
-            alert(`Video ${file.name} đã được thêm trước đó!`);
+            toast.warning(`Video ${file.name} đã được thêm trước đó!`);
             return true;
         }
         return false;
@@ -380,7 +382,7 @@ const submitRating = async () => {
   console.log('Ratings trước khi kiểm tra:', soSao);
   if (soSao.length === 0 || soSao.some(r => !r.soSao)) {
     console.warn('Không có đánh giá hợp lệ hoặc chưa đánh giá sản phẩm');
-    alert('Vui lòng đánh giá ít nhất một sản phẩm!');
+    toast.error('Vui lòng đánh giá ít nhất một sản phẩm!');
     isSubmitting.value = false;
     return;
   }
@@ -402,7 +404,7 @@ const submitRating = async () => {
     console.log('Đã emit sự kiện submit với payload');
   } catch (error) {
     console.error('Lỗi khi gửi đánh giá:', error);
-    alert('Gửi đánh giá thất bại. Vui lòng thử lại.');
+    toast.error('Gửi đánh giá thất bại. Vui lòng thử lại.');
   } finally {
     isSubmitting.value = false;
     console.log('isSubmitting được đặt thành false');
