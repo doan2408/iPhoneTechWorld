@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -30,11 +31,16 @@ public class HangServices {
     private final KhachHangRepository khachHangRepository;
 
     // update hang by diem
+    @Transactional
     public void updateHang(Integer idKhachHang) {
         Optional<ViDiem> optionalViDiem = viDiemRepository.findByIdKhachHang(idKhachHang);
-        if(optionalViDiem.isEmpty()) return;
+        if(optionalViDiem.isEmpty()) {
+            System.out.println("not found wallet for idKhachHang: "+ idKhachHang);
+            return;
+        };
         ViDiem viDiem = optionalViDiem.get();
         Integer idViDiem = viDiem.getId();
+        System.out.println("found vi diem: " + idViDiem);
 
         // tinh diem xet hang con hieu luc (diem Cong trong table_lich_su_diem)
         BigDecimal tongDiem = hangRepo.diemXetHang(idViDiem, OffsetDateTime.now());

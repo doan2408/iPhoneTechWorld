@@ -19,6 +19,9 @@ const router = createRouter({
       { path: 'forgot-password', component: () => import('@/views/Authentical/ForgotView.vue'), meta: { title: 'Forgot password'}},
       { path: "verify-code", component: () => import('@/views/Authentical/VerifyCode.vue'), meta: { title: 'Verify'}},
       { path: "reset-password", component: () => import('@/views/Authentical/ResetPassword.vue'), meta: { title: 'Reset password'}},
+      { path: "checkout-form", name: "clientDatHang", component: () => import("@/views/Guest/CheckOutForm/CheckoutFormGuest.vue"), meta: { title: "CheckOutForm" } },
+      { path: "order-succes", name: "successClient", component: () => import("@/views/Guest/OrderSuccesGuest.vue"), meta: { title: "OrderSucces" } },
+      { path: "compare-page", name: "comparePage", component: () => import("@/views/Client/Compare/CompareProduct.vue"), meta: { title: "So sánh sản phẩm" } },
     ]
   },
   

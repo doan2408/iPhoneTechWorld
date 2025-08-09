@@ -1,5 +1,10 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
@@ -29,7 +34,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -63,7 +72,6 @@ public class HoaDonAdminController {
 
     @GetMapping("/{idHoaDon}")
     public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
-        System.out.println(hoaDonAdminService.findByIdHoaDon(idHoaDon));
         return hoaDonAdminService.findById(idHoaDon);
     }
 
@@ -291,6 +299,17 @@ public class HoaDonAdminController {
                                                                              @RequestParam(defaultValue = "10") int pageSize,
                                                                              @PathVariable(value = "hoaDonId") Integer hoaDonId){
         return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId));
+    }
+
+    @GetMapping("/export")
+    public void exportInvoiceToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String fileName = "hoa_don_" + currentDate + ".xlsx";
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+        hoaDonAdminService.exportExcelToResponse(response);
     }
 
     

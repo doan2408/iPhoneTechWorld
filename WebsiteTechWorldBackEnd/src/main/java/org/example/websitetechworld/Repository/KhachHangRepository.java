@@ -77,4 +77,10 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
 
     @Query("SELECT k FROM KhachHang k WHERE k.hangThanhVien = :hangKhachHang")
     List<KhachHang> findByHangKhachHang(HangKhachHang hangKhachHang);
+
+    @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien")
+    List<KhachHang> findAllWithHangThanhVien();
+
+    @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien WHERE kh.id = :id")
+    Optional<KhachHang> findByIdWithHangThanhVien(@Param("id") Integer id);
 }

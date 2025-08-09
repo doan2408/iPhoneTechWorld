@@ -16,8 +16,8 @@
           </button>
         </div>
 
-        <ConfirmModal v-if="showModalCreateInvoice" message="Bạn có chắc muốn tạo hóa đơn mới không?" @confirm="onConfirmCreateInvoice"
-          @cancel="onCancelCreate" />
+        <ConfirmModal v-if="showModalCreateInvoice" message="Bạn có chắc muốn tạo hóa đơn mới không?"
+          @confirm="onConfirmCreateInvoice" @cancel="onCancelCreate" />
       </div>
     </div>
 
@@ -111,7 +111,7 @@
         <input type="date" class="filter-date" v-model="dateFilter" />
 
         <div class="export-actions">
-          <button class="btn btn-outline">
+          <button class="btn btn-outline" @click="exportExcel">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -698,7 +698,7 @@ import { hoaDonDetail } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices"
 import { viewLichSuHoaDon } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import {
   hoaDonSoftDelete,
-  hoaDonHardDelete,
+  hoaDonHardDelete, exportAllInvoice
 } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { doanhThuTheoThang } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { countHoaDonPending } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
@@ -1075,6 +1075,35 @@ watch([searchQuery, statusFilter, typeFilter], () => {
 });
 
 onMounted(() => loadData());
+
+const exportExcel = async () => {
+  try {
+    const response = await exportAllInvoice()
+
+    const blob = new Blob([response.data])
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+
+    const contentDisposition = response.headers['content-disposition']
+    let fileName = 'hoa_don.xlsx'
+
+    if (contentDisposition && contentDisposition.includes('filename=')) {
+      const match = contentDisposition.match(/filename="?([^"]+)"?/)
+      if (match?.[1]) {
+        fileName = match[1]
+      }
+    }
+
+    link.setAttribute('download', fileName)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (error) {
+    console.error('Lỗi khi xuất Excel:', error)
+  }
+}
+
 </script>
 
 <style scoped src="@/style/HoaDon/HoaDon.css"></style>

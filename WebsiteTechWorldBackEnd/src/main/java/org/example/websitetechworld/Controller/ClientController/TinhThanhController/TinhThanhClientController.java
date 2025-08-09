@@ -4,6 +4,8 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Locale;
+
 @RestController
 @RequestMapping("/tinh-thanh")
 public class TinhThanhClientController {
@@ -37,6 +39,7 @@ public class TinhThanhClientController {
     ) {
         try {
             String url = String.format(
+                    Locale.US,
                     "https://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
                     fromLon, fromLat, toLon, toLat
             );

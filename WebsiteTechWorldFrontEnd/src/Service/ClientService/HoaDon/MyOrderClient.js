@@ -32,11 +32,14 @@ export const hoaDonDetail = (id) => {
 }
 
 export const loadPaymentMethod = () => {
-    return api.get('/client/payment-methods');
+    return api.get('/payment-methods');
 }
 
 export const thanhToanClient = (data) => {
     return api.put(baseURL + '/thanh-toan',data);
+}
+export const thanhToanGuest = (data) => {
+    return api.put('/my-order/thanh-toan', data);
 }
 
 export const getLatLon = (address) => {

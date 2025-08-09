@@ -39,7 +39,7 @@ public class LichSuHoaDonAdminServices {
         Integer number = countPendingHoaDonByNhanVien(nhanVienId, TrangThaiThanhToan.PENDING);
         System.out.println();
         if (number > 4) {
-            errors.add(Map.of("message", "Mỗi nhân viên chỉ có thể tạo tối đa 4 hóa đơn chờ"));
+            errors.add(Map.of("message", "Mỗi nhân viên chỉ có thể tạo tối đa 5 hóa đơn chờ"));
         }
 
         if (!errors.isEmpty()) {

@@ -348,7 +348,53 @@ const submitReplyForm = () => {
   });
 };
 
-// Xử lý xóa đánh giá
+
+const handleApprove = async (id) => {
+  try {
+    await ElMessageBox.confirm(
+      'Bạn có chắc muốn phê duyệt đánh giá này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Phê duyệt',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
+    await DanhGiaSanPhamAdminService.pheDuyetDanhGia(id);
+    toast.success('✅ Phê duyệt đánh giá thành công');
+    loadDanhGia();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    toast.error('❌ Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi khi phê duyệt:', error);
+  }
+};
+
+// ✅ Xử lý từ chối đánh giá
+const handleReject = async (id) => {
+  try {
+    await ElMessageBox.confirm(
+      'Bạn có chắc muốn từ chối đánh giá này?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Từ chối',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
+    await DanhGiaSanPhamAdminService.tuChoiDanhGia(id);
+    toast.success('✅ Từ chối đánh giá thành công');
+    loadDanhGia();
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return;
+    toast.error('❌ Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi khi từ chối:', error);
+  }
+};
+
+// ✅ Xử lý xóa đánh giá
 const handleDelete = async (id) => {
   try {
     await ElMessageBox.confirm(

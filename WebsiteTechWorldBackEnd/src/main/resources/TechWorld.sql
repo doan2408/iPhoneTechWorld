@@ -105,6 +105,7 @@ CREATE TABLE hoa_don (
                          sdt_nguoi_mua NVARCHAR(10),
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan NVARCHAR(10),
+                         email_nguoi_nhan NVARCHAR(100),
                          dia_chi_giao_hang NVARCHAR(255),
                          ngay_dat_hang DATETIME,
                          is_shipping BIT,
@@ -171,10 +172,10 @@ CREATE TABLE dia_chi (
                          id_khach_hang INT,
                          ten_nguoi_nhan NVARCHAR(50),
                          sdt_nguoi_nhan VARCHAR(10),
+                         email_nguoi_nhan NVARCHAR(100),
                          so_nha NVARCHAR(50),
                          ten_duong NVARCHAR(50),
                          xa_phuong NVARCHAR(50),
-                         quan_huyen NVARCHAR(50),
                          tinh_thanh_pho NVARCHAR(50),
                          dia_chi_chinh BIT,
                          FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE
@@ -518,10 +519,10 @@ VALUES
 -- Table hang_thanh_vien
 INSERT INTO hang_thanh_vien (ten_hang, diem_tu, diem_den)
 VALUES
-    (N'MEMBER', 0, 499),
-    (N'SILVER', 500, 999),
-    (N'GOLD', 1000, 1999),
-    (N'DIAMOND', 2000, NULL);
+    (N'MEMBER', 0, 100000),
+    (N'SILVER', 100000, 300000),
+    (N'GOLD', 300000, 600000),
+    (N'DIAMOND', 600000, NULL);
 
 -- Table khach_hang
 INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, trang_thai, id_hang_thanh_vien)
@@ -570,57 +571,20 @@ VALUES
 -- Table phieu_giam_gia
 INSERT INTO phieu_giam_gia (ma_giam_gia, ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2026-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 0.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2026-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 10, 100000.00, 1, N'ACTIVE', N'ISSUED'),
     (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-08-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
-    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-07-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, 1, N'ACTIVE', N'ISSUED'),
-    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2026-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, 0, N'ACTIVE', N'ISSUED'),
-    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-07-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, 1, N'NOT_STARTED', N'ISSUED');
-
--- Table hoa_don
-INSERT INTO hoa_don (id_khach_hang, id_phieu_giam_gia, ten_nguoi_mua, sdt_nguoi_mua, ten_nguoi_nhan, dia_chi_giao_hang, ngay_dat_hang, trang_thai_don_hang, phi_ship, tong_tien, so_tien_giam, thanh_tien, ngay_tao_hoa_don, loai_hoa_don, ngay_thanh_toan, trang_thai_thanh_toan, ma_van_don, sdt_nguoi_nhan, is_delete,is_shipping)
-VALUES
-    (1, NULL, N'Nguyễn Văn A', '0911111111', N'Lê Thị B', N'123 ABC', GETDATE(), N'PENDING', 20000, 5400000, 0, 5420000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD001', '0911111111',0,1),
-    (2, 1, N'Trần Thị C', '0922222222', N'Trần Thị C', N'456 DEF', GETDATE(), N'SHIPPING', 25000, 7200000, 200000, 7030000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD002', '0922222222',0,0),
-    (3, NULL, N'Lê Văn D', '0933333333', N'Lê Văn D', N'789 GHI', GETDATE(), N'DELIVERED', 30000, 3500000, 0, 3530000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD003', '0933333333',0,1),
-    (4, 2, N'Phạm Văn E', '0944444444', N'Phạm Văn E', N'101 JKL', GETDATE(), N'PENDING', 20000, 6000000, 300000, 5720000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD004', '0944444444',0,1),
-    (5, 3, N'Hoàng Thị F', '0955555555', N'Hoàng Thị F', N'202 MNO', GETDATE(), N'SHIPPING', 25000, 8000000, 400000, 7625000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD005', '0955555555',0,0),
-    (6, 4, N'Nguyễn Văn G', '0966666666', N'Nguyễn Văn G', N'303 PQR', GETDATE(), N'DELIVERED', 30000, 4500000, 500000, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD006', '0966666666',0,1),
-    (7, NULL, N'Trần Thị H', '0977777777', N'Trần Thị H', N'456 STU', GETDATE(), N'PENDING', 20000, 5500000, 0, 5520000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD007', '0977777777',0,1),
-    (8, 5, N'Lê Văn I', '0988888888', N'Lê Văn I', N'789 VWX', GETDATE(), N'SHIPPING', 25000, 7000000, 100000, 6925000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD008', '0988888888',0,0),
-    (9, NULL, N'Phạm Thị K', '0999999999', N'Phạm Thị K', N'101 YZA', GETDATE(), N'DELIVERED', 30000, 4000000, 0, 4030000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD009', '0999999999',0,0),
-    (10, 1, N'Hoàng Văn L', '0900000000', N'Hoàng Văn L', N'202 BCD', GETDATE(), N'PENDING', 20000, 6500000, 200000, 6320000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD010', '0900000000',0,1),
-    (11, 2, N'Nguyễn Thị M', '0911111112', N'Nguyễn Thị M', N'303 EFG', GETDATE(), N'SHIPPING', 25000, 7500000, 300000, 7225000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD011', '0911111112',0,0),
-    (12, 3, N'Trần Văn N', '0922222223', N'Trần Văn N', N'456 HIJ', GETDATE(), N'DELIVERED', 30000, 5000000, 400000, 4630000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD012', '0922222223',0,1),
-    (13, NULL, N'Lê Thị O', '0933333334', N'Lê Thị O', N'789 KLM', GETDATE(), N'PENDING', 20000, 6000000, 0, 6020000, GETDATE(), N'ONLINE', NULL, N'PENDING', 'VD013', '0933333334',0,1),
-    (14, 4, N'Phạm Văn P', '0944444445', N'Phạm Văn P', N'101 NOP', GETDATE(), N'SHIPPING', 25000, 8000000, 500000, 7525000, GETDATE(), N'POS', GETDATE(), N'PAID', 'VD014', '0944444445',0,0),
-    (15, 5, N'Hoàng Thị Q', '0955555556', N'Hoàng Thị Q', N'202 QRS', GETDATE(), N'DELIVERED', 30000, 4500000, 100000, 4430000, GETDATE(), N'ONLINE', GETDATE(), N'COMPLETED', 'VD015', '0955555556',0,1);
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 150000.00, 500000.00, 300000.00, '2025-06-01', '2025-07-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50000.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500000.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 120000.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120000.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20000.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60000.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600000.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 700000.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110000.00, 1, N'ACTIVE', N'ISSUED'),
+    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2026-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220000.00, 0, N'ACTIVE', N'ISSUED'),
+    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 1000000.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55000.00, 1, N'NOT_STARTED', N'ISSUED'),
+    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700000.00, 0, N'EXPIRED', N'ISSUED'),
+    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 600000.00, 1300000.00, 120000.00, '2025-06-20', '2025-07-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85000.00, 1, N'NOT_STARTED', N'ISSUED');
 
 
--- Table lich_su_hoa_don
-INSERT INTO lich_su_hoa_don (id_nhan_vien, id_hoa_don, hanh_dong, thoi_gian_thay_doi, mo_ta)
-VALUES
-    (1, 1, N'CREATE', '2025-05-02', N'Khách hàng đặt iPhone 16'),
-    (2, 2, N'THANH_TOAN', '2025-04-20', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (3, 3, N'CONFIRM', '2025-05-01', N'Đơn iPhone 14 chờ thanh toán'),
-    (4, 4, N'CREATE', '2025-05-03', N'Khách hàng đặt iPhone 16 Pro'),
-    (5, 5, N'THANH_TOAN', '2025-04-21', N'Thanh toán iPhone 15 tại cửa hàng'),
-    (1, 6, N'CONFIRM', '2025-05-02', N'Đơn iPhone 13 chờ thanh toán'),
-    (2, 7, N'CREATE', '2025-05-04', N'Khách hàng đặt iPhone 16'),
-    (3, 8, N'THANH_TOAN', '2025-04-22', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (4, 9, N'CONFIRM', '2025-05-03', N'Đơn iPhone 14 chờ thanh toán'),
-    (5, 10, N'CREATE', '2025-05-05', N'Khách hàng đặt iPhone 16 Pro'),
-    (1, 11, N'THANH_TOAN', '2025-04-23', N'Thanh toán iPhone 15 tại cửa hàng'),
-    (2, 12, N'CONFIRM', '2025-05-04', N'Đơn iPhone 13 chờ thanh toán'),
-    (3, 13, N'CREATE', '2025-05-06', N'Khách hàng đặt iPhone 16'),
-    (4, 14, N'THANH_TOAN', '2025-04-24', N'Thanh toán iPhone 15 Pro tại cửa hàng'),
-    (5, 15, N'CONFIRM', '2025-05-05', N'Đơn iPhone 14 chờ thanh toán');
 
 -- Table khach_hang_giam_gia
 INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, doi_bang_diem)
@@ -644,78 +608,40 @@ VALUES
 --Table vi_diem
 INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
 VALUES
-    (1, 500.00),
-    (2, 200.00),
-    (3, 100.00),
-    (4, 1500.00),
-    (5, 400.00),
-    (6, 600.00),
-    (7, 200.00),
-    (8, 1250.00),
-    (9, 300.00),
-    (10, 750.00),
-    (11, 150.00),
-    (12, 1000.00),
-    (13, 350.00),
-    (14, 900.00),
-    (15, 450.00);
-
--- Table lich_su_diem
-INSERT INTO lich_su_diem (id_vi_diem, id_hoa_don, so_diem, loai_diem, ghi_chu, thoi_gian, han_su_dung)
-VALUES
-    (1, 1, 1200, 'CONG', N'Đơn hàng tháng 1', '2024-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-    (2, 2, 1500, 'CONG', N'Đơn hàng tháng 2', '2024-02-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-    (3, 3, 1800, 'CONG', N'Đơn hàng tháng 3', '2024-03-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-    (4, 4, 1300, 'CONG', N'Đơn hàng tháng 4', '2024-04-01 00:00:00+07:00', '2025-10-27 00:00:00+07:00'),
-    (5, 5, 1700, 'CONG', N'Đơn hàng tháng 5', '2024-05-01 00:00:00+07:00', '2025-11-28 00:00:00+07:00'),
-    (6, 6, 2000, 'CONG', N'Đơn hàng tháng 6', '2024-06-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-    (7, 7, 1100, 'CONG', N'Đơn hàng tháng 7', '2024-07-01 00:00:00+07:00', '2025-09-29 00:00:00+07:00'),
-    (8, 8, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-01 00:00:00+07:00', '2026-10-31 00:00:00+07:00'),
-    (9, 9, 900,  'CONG', N'Đơn hàng tháng 8', '2024-08-15 00:00:00+07:00', '2025-07-31 00:00:00+07:00'),
-    (10, 10, 1200, 'CONG', N'Đơn hàng tháng 9', '2024-09-01 00:00:00+07:00', '2025-09-25 00:00:00+07:00'),
-    (11, 11, 300, 'CONG', N'Đơn hàng tháng 10', '2024-10-01 00:00:00+07:00', '2025-09-30 00:00:00+07:00'),
-    (12, 12, 2200, 'CONG', N'Đơn hàng tháng 11', '2024-11-01 00:00:00+07:00', '2025-10-31 00:00:00+07:00'),
-    (13, 13, 700, 'CONG', N'Đơn hàng tháng 12', '2024-12-01 00:00:00+07:00', '2025-11-30 00:00:00+07:00'),
-    (14, 14, 700, 'CONG', N'Đơn hàng tháng 1/2025', '2025-01-01 00:00:00+07:00', '2025-12-31 00:00:00+07:00'),
-    (15, 15, 1200, 'CONG', N'Đơn hàng tháng 2/2025', '2025-02-01 00:00:00+07:00', '2026-01-31 00:00:00+07:00');
-
--- Table chi_tiet_lich_su_diem
-INSERT INTO chi_tiet_lich_su_diem (id_khach_hang, id_lich_su_diem, so_diem_da_tru, ngay_tru)
-VALUES
-    (1, 1, 700.00, '2024-01-02 00:00:00+07:00'),
-    (2, 2, 500.00, '2024-02-02 00:00:00+07:00'),
-    (3, 3, 200.00, '2024-03-02 00:00:00+07:00'),
-    (4, 4, 700.00, '2024-04-02 00:00:00+07:00'),
-    (5, 5, 800.00, '2024-05-02 00:00:00+07:00'),
-    (6, 6, 600.00, '2024-06-02 00:00:00+07:00'),
-    (7, 7, 500.00, '2024-07-02 00:00:00+07:00'),
-    (8, 8, 950.00, '2024-08-02 00:00:00+07:00'),
-    (9, 9, 400.00, '2024-08-16 00:00:00+07:00'),
-    (10, 10, 450.00, '2024-09-02 00:00:00+07:00'),
-    (11, 11, 150.00, '2024-10-02 00:00:00+07:00'),
-    (12, 12, 1200.00, '2024-11-02 00:00:00+07:00'),
-    (13, 13, 350.00, '2024-12-02 00:00:00+07:00'),
-    (14, 14, 800.00, '2025-01-02 00:00:00+07:00'),
-    (15, 15, 750.00, '2025-02-02 00:00:00+07:00');
+    (1, 0.00),
+    (2, 0.00),
+    (3, 0.00),
+    (4, 0.00),
+    (5, 0.00),
+    (6, 0.00),
+    (7, 0.00),
+    (8, 0.00),
+    (9, 0.00),
+    (10, 0.00),
+    (11, 0.00),
+    (12, 0.00),
+    (13, 0.00),
+    (14, 0.00),
+    (15, 0.00);
 
 -- Table dia_chi
-INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, quan_huyen, tinh_thanh_pho, dia_chi_chinh)
+INSERT INTO dia_chi (id_khach_hang, ten_nguoi_nhan, sdt_nguoi_nhan, so_nha, ten_duong, xa_phuong, email_nguoi_nhan, tinh_thanh_pho, dia_chi_chinh)
 VALUES
-    (1, N'Nguyễn Thị Hoa', '0998938493', N'123', N'Đường Láng', N'Đống Đa', N'Đống Đa', N'Hà Nội', 1),
-    (1, N'Nguyễn Văn Hoe', '0998938412', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'Quốc Oai', N'Hà Nội', 0),
-    (2, N'Trần Văn Hùng', '0128473827', N'456', N'Nguyễn Huệ', N'Quận 1', N'Quận 1', N'TP.HCM', 1),
-    (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'Hai Châu', N'Đà Nẵng', 1),
-    (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'Thừa Thiên', N'Huế', 1),
-    (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 1),
-    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hoàn Kiếm', N'Hà Nội', 0),
-    (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'Quận 3', N'TP.HCM', 0),
-    (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'Thanh Khê', N'Đà Nẵng', 0),
-    (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'Phong Điền', N'Huế', 0),
-    (5, N'Hoàng Văn Sơn', '0998293042', N'333', N'Trần Duy Hưng', N'Cầu Giấy', N'Cầu Giấy', N'Hà Nội', 0),
-    (1, N'Nguyễn Thị Vân', '0998938495', N'777', N'Giải Phóng', N'Hoàng Mai', N'Hoàng Mai', N'Hà Nội', 0),
-    (2, N'Trần Văn Nam', '0128473829', N'999', N'Võ Thị Sáu', N'Quận 7', N'Quận 7', N'TP.HCM', 0),
-    (3, N'Lê Thị Thảo', '0938462738', N'111', N'Lê Đại Hành', N'Liên Chiểu', N'Liên Chiểu', N'Đà Nẵng', 0),
-    (4, N'Phạm Văn Bình', '0293123323', N'444', N'Hai Bà Trưng', N'Phú Lộc', N'Phú Lộc', N'Huế', 0);
+    (1, N'Nguyễn Thị Hoa', '0998938493', N'123', N'Đường Láng', N'Đống Đa', N'a@gmail.com', N'Hà Nội', 1),
+    (1, N'Nguyễn Văn Hoe', '0998938412', N'1234', N'Đường Bắc Nam', N'Ngọc Liệp', N'b@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Văn Hùng', '0128473827', N'456', N'Nguyễn Huệ', N'Quận 1', N'c@gmail.com', N'TP.HCM', 1),
+    (3, N'Lê Thị Lan', '0938462736', N'789', N'Trần Phú', N'Hai Châu', N'd@gmail.com', N'Đà Nẵng', 1),
+    (4, N'Phạm Văn Minh', '0293123321', N'101', N'Lê Lợi', N'Thừa Thiên', N'e@gmail.com', N'Huế', 1),
+    (5, N'Hoàng Thị Ngọc', '0998293041', N'202', N'Phạm Văn Đồng', N'Cầu Giấy', N'f@gmail.com', N'Hà Nội', 1),
+    (1, N'Nguyễn Văn Tâm', '0998938494', N'555', N'Hoàn Kiếm', N'Hoàn Kiếm', N'g@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Thị Mai', '0128473828', N'666', N'Lý Thường Kiệt', N'Quận 3', N'h@gmail.com', N'TP.HCM', 0),
+    (3, N'Lê Văn Phong', '0938462737', N'888', N'Hùng Vương', N'Thanh Khê', N'i@gmail.com', N'Đà Nẵng', 0),
+    (4, N'Phạm Thị Quỳnh', '0293123322', N'222', N'Nguyễn Trãi', N'Phong Điền', N'l@gmail.com', N'Huế', 0),
+    (5, N'Hoàng Văn Sơn', '0998293042', N'333', N'Trần Duy Hưng', N'Cầu Giấy', N'k@gmail.com', N'Hà Nội', 0),
+    (1, N'Nguyễn Thị Vân', '0998938495', N'777', N'Giải Phóng', N'Hoàng Mai', N'm@gmail.com', N'Hà Nội', 0),
+    (2, N'Trần Văn Nam', '0128473829', N'999', N'Võ Thị Sáu', N'Quận 7', N'e@gmail.com', N'TP.HCM', 0),
+    (3, N'Lê Thị Thảo', '0938462738', N'111', N'Lê Đại Hành', N'Liên Chiểu', N'fa@gmail.com', N'Đà Nẵng', 0),
+    (4, N'Phạm Văn Bình', '0293123323', N'444', N'Hai Bà Trưng', N'Phú Lộc', N'bk@gmail.com', N'Huế', 0);
 
 -- Table gio_hang
 INSERT INTO gio_hang (id_khach_hang)
@@ -1224,24 +1150,6 @@ VALUES
     (15, 5, 3, 3, 18000000.00), -- Hồng Phấn, 512GB
     (15, 9, 3, 2, 18000000.00); -- Đỏ Rực Rỡ, 512GB
 
--- Table chi_tiet_hoa_don
-INSERT INTO chi_tiet_hoa_don (id_hoa_don, id_san_pham_chi_tiet, ten_san_pham, mo_ta, so_luong, don_gia)
-VALUES
-    (1, 2, N'iPhone 16 Thường', N'Ip16', 1, 20000000.00),
-    (2, 3, N'iPhone 16 Pro', N'Ip16Pro', 1, 25000000.00),
-    (3, 4, N'iPhone 15 Thường', N'ip15', 1, 15000000.00),
-    (4, 5, N'iPhone 14 Thường', N'ip14', 1, 12000000.00),
-    (5, 6, N'iPhone 13 Thường', N'ip13', 1, 10000000.00),
-    (6, 7, N'iPhone 16 Plus', N'ip16plus', 1, 22000000.00),
-    (7, 8, N'iPhone 15 Pro', N'ip15pro', 1, 27000000.00),
-    (8, 9, N'iPhone 14 Pro', N'ip14pro', 1, 18000000.00),
-    (9, 10, N'iPhone 13 Pro', N'ip13pro', 1, 13000000.00),
-    (10, 11, N'iPhone 12 Thường', N'ip12', 1, 11000000.00),
-    (11, 12, N'iPhone 16 Pro Max', N'ip16promax', 1, 30000000.00),
-    (12, 13, N'iPhone 15 Pro Max', N'ip15promax', 1, 28000000.00),
-    (13, 14, N'iPhone 14 Plus', N'ip14plus', 1, 16000000.00),
-    (14, 15, N'iPhone 13 Mini', N'ip13mini', 1, 14000000.00),
-    (15, 15, N'iPhone 6 Thường', N'ip6', 1, 12000000.00);
 
 -- Table loai_bao_hanh
 INSERT INTO loai_bao_hanh (ten_loai_bao_hanh, thoi_gian_thang, mo_ta)
@@ -1624,62 +1532,17 @@ VALUES
     (157, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 14 Plus, Trắng Ngọc Trai, 128GB
     (158, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'); -- iPhone 14 Plus, Xanh Biển Sâu, 128GB
 
--- Table imei_da_ban
-INSERT INTO imei_da_ban (id_chi_tiet_hoa_don, so_imei, trang_thai)
-VALUES
-    (1, '987654321000001', N'SOLD'),
-    (2, '987654321000002', N'SOLD'),
-    (3, '987654321000003', N'SOLD'),
-    (4, '987654321000004', N'SOLD'),
-    (5, '987654321000005', N'SOLD'),
-    (6, '987654321000006', N'SOLD'),
-    (7, '987654321000007', N'SOLD'),
-    (8, '987654321000008', N'SOLD'),
-    (9, '987654321000009', N'SOLD'),
-    (10, '987654321000010', N'SOLD'),
-    (11, '987654321000011', N'SOLD'),
-    (12, '987654321000012', N'SOLD'),
-    (13, '987654321000013', N'SOLD'),
-    (14, '987654321000014', N'SOLD'),
-    (15, '987654321000015', N'SOLD');
 
 -- Table phuong_thuc_thanh_toan
 INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, loai_hinh_thuc)
 VALUES
-    (N'Thẻ tín dụng', N'Trực tuyến'),
-    (N'Chuyển khoản ngân hàng', N'Trực tuyến'),
-    (N'Tiền mặt', N'Tại cửa hàng'),
-    (N'Ví Momo', N'Trực tuyến'),
-    (N'Thanh toán khi nhận hàng', N'Tại điểm giao'),
-    (N'Ví ZaloPay', N'Trực tuyến'),
-    (N'Thẻ ghi nợ', N'Trực tuyến'),
-    (N'PayPal', N'Trực tuyến'),
-    (N'Thẻ Visa', N'Trực tuyến'),
-    (N'Thẻ MasterCard', N'Trực tuyến'),
-    (N'Ví ShopeePay', N'Trực tuyến'),
-    (N'VNPay', N'Trực tuyến'),
-    (N'Tiền mặt tại quầy', N'Tại cửa hàng'),
-    (N'Thanh toán trả góp', N'Trực tuyến'),
-    (N'Ví Viettel Money', N'Trực tuyến');
+    (N'TIEN_MAT', N'OFFLINE'),
+    (N'CHUYEN_KHOAN', N'OFFLINE'),
+    (N'NGAN_HANG', N'ONLINE'),
+    (N'COD', N'ONLINE'),
+    (N'VNPAY', N'ONLINE');
 
--- Table chi_tiet_thanh_toan
-INSERT INTO chi_tiet_thanh_toan (id_hoa_don, id_phuong_thuc_thanh_toan, so_tien_thanh_toan)
-VALUES
-    (1, 1, 19830000.00),
-    (2, 3, 14840000.00),
-    (3, 2, 24535000.00),
-    (4, 4, 12000000.00),
-    (5, 5, 10000000.00),
-    (6, 6, 22000000.00),
-    (7, 7, 27000000.00),
-    (8, 8, 18000000.00),
-    (9, 9, 13000000.00),
-    (10, 10, 11000000.00),
-    (11, 11, 30000000.00),
-    (12, 12, 28000000.00),
-    (13, 13, 16000000.00),
-    (14, 14, 14000000.00),
-    (15, 15, 12000000.00);
+
 
 -- Table gio_hang_chi_tiet
 INSERT INTO gio_hang_chi_tiet (id_gio_hang, id_san_pham_chi_tiet, so_luong, gia, ngay_them)
@@ -1699,47 +1562,6 @@ VALUES
     (13, 13, 1, 16000000.00, '2025-05-10'),
     (14, 14, 1, 14000000.00, '2025-05-11'),
     (15, 15, 1, 12000000.00, '2025-05-11');
-
-INSERT INTO danh_gia_san_pham (id_khach_hang, id_san_pham_chi_tiet, id_chi_tiet_hoa_don, so_sao, noi_dung, ngay_danh_gia, trang_thai_danh_gia) VALUES
-                                                                                                                                                   (1, 1, 1, 5, N'Sản phẩm rất tốt, chất lượng vượt mong đợi. Giao hàng nhanh, đóng gói cẩn thận. Sẽ mua lại ở lần sau.', '2024-07-15 10:30:00', N'APPROVED'),
-                                                                                                                                                   (2, 2, 2, 4, N'Sản phẩm đúng như mô tả, chất lượng ổn. Có một chút nhược điểm nhỏ nhưng nhìn chung vẫn hài lòng.', '2024-07-16 14:20:00', N'APPROVED'),
-                                                                                                                                                   (3, 3, 3, 3, N'Sản phẩm bình thường, không có gì đặc biệt. Giá cả hợp lý nhưng chất lượng chưa thực sự ấn tượng.', '2024-07-17 09:15:00', N'APPROVED'),
-                                                                                                                                                   (4, 4, 4, 5, N'Tuyệt vời! Đây là lần mua hàng thành công nhất của tôi. Sản phẩm chất lượng cao, dịch vụ chu đáo.', '2024-07-18 16:45:00', N'APPROVED'),
-                                                                                                                                                   (1, 5, 5, 2, N'Sản phẩm không đúng như kỳ vọng. Chất lượng kém hơn so với hình ảnh quảng cáo. Khá thất vọng.', '2024-07-19 11:00:00', N'APPROVED'),
-                                                                                                                                                   (5, 1, 6, 4, N'Sản phẩm tốt, đúng chất lượng. Dịch vụ giao hàng nhanh chóng. Điểm trừ duy nhất là đóng gói hơi đơn giản.', '2024-07-20 13:30:00', N'APPROVED'),
-                                                                                                                                                   (6, 2, 7, 5, N'Quá hài lòng với sản phẩm này! Chất lượng tuyệt vời, thiết kế đẹp mắt. Nhân viên tư vấn nhiệt tình.', '2024-07-21 08:20:00', N'APPROVED'),
-                                                                                                                                                   (7, 6, 8, 1, N'Sản phẩm có vấn đề nghiêm trọng, không sử dụng được. Đã liên hệ bảo hành nhưng chưa được giải quyết.', '2024-07-22 15:10:00', N'HIDE'),
-                                                                                                                                                   (8, 7, 9, 4, N'Sản phẩm khá tốt, phù hợp với mức giá. Có một số điểm cần cải thiện nhưng tổng thể vẫn ổn.', '2024-07-23 12:40:00', N'APPROVED'),
-                                                                                                                                                   (9, 8, 10, 5, N'Excellent! Sản phẩm chất lượng cao, đáng đồng tiền bát gạo. Sẽ giới thiệu cho bạn bè và người thân.', '2024-07-24 17:55:00', N'APPROVED');
-
--- Dữ liệu mẫu cho bảng media_danh_gia
-INSERT INTO media_danh_gia (id_danh_gia, loai_media, url_media, ten_file, kich_thuoc_file, thoi_luong_video, thu_tu_hien_thi, ngay_upload, trang_thai_media_danh_gia) VALUES
-                                                                                                                                                                          (1, 'IMAGE', '/uploads/reviews/review_1_img_1.jpg', 'san_pham_thuc_te_1.jpg', 1250000, NULL, 1, '2024-07-15 10:32:00', N'APPROVED'),
-                                                                                                                                                                          (1, 'IMAGE', '/uploads/reviews/review_1_img_2.jpg', 'dong_goi_san_pham_1.jpg', 980000, NULL, 2, '2024-07-15 10:33:00', N'APPROVED'),
-                                                                                                                                                                          (2, 'VIDEO', '/uploads/reviews/review_2_video_1.mp4', 'video_danh_gia_sp2.mp4', 15700000, 45, 1, '2024-07-16 14:25:00', N'APPROVED'),
-                                                                                                                                                                          (4, 'IMAGE', '/uploads/reviews/review_4_img_1.jpg', 'hinh_anh_chat_luong.jpg', 1800000, NULL, 1, '2024-07-18 16:50:00', N'APPROVED'),
-                                                                                                                                                                          (4, 'IMAGE', '/uploads/reviews/review_4_img_2.jpg', 'so_sanh_vs_mota.jpg', 1350000, NULL, 2, '2024-07-18 16:51:00', N'APPROVED'),
-                                                                                                                                                                          (4, 'VIDEO', '/uploads/reviews/review_4_video_1.mp4', 'demo_su_dung_sp.mp4', 22400000, 78, 3, '2024-07-18 16:55:00', N'APPROVED'),
-                                                                                                                                                                          (5, 'IMAGE', '/uploads/reviews/review_5_img_1.jpg', 'loi_san_pham.jpg', 1100000, NULL, 1, '2024-07-19 11:05:00', N'APPROVED'),
-                                                                                                                                                                          (6, 'IMAGE', '/uploads/reviews/review_6_img_1.jpg', 'dong_goi_don_gian.jpg', 750000, NULL, 1, '2024-07-20 13:35:00', N'APPROVED'),
-                                                                                                                                                                          (7, 'IMAGE', '/uploads/reviews/review_7_img_1.jpg', 'thiet_ke_dep_mat.jpg', 1950000, NULL, 1, '2024-07-21 08:25:00', N'APPROVED'),
-                                                                                                                                                                          (7, 'VIDEO', '/uploads/reviews/review_7_video_1.mp4', 'unboxing_experience.mp4', 31200000, 120, 2, '2024-07-21 08:30:00', N'APPROVED'),
-                                                                                                                                                                          (8, 'IMAGE', '/uploads/reviews/review_8_img_1.jpg', 'van_de_san_pham.jpg', 1420000, NULL, 1, '2024-07-22 15:15:00', N'HIDE'),
-                                                                                                                                                                          (9, 'VIDEO', '/uploads/reviews/review_9_video_1.mp4', 'review_chi_tiet.mp4', 18900000, 65, 1, '2024-07-23 12:45:00', N'APPROVED'),
-                                                                                                                                                                          (10, 'IMAGE', '/uploads/reviews/review_10_img_1.jpg', 'san_pham_chat_luong_cao.jpg', 2100000, NULL, 1, '2024-07-24 18:00:00', N'APPROVED'),
-                                                                                                                                                                          (10, 'IMAGE', '/uploads/reviews/review_10_img_2.jpg', 'packaging_professional.jpg', 1650000, NULL, 2, '2024-07-24 18:01:00', N'APPROVED'),
-                                                                                                                                                                          (10, 'VIDEO', '/uploads/reviews/review_10_video_1.mp4', 'danh_gia_tong_quan.mp4', 28700000, 95, 3, '2024-07-24 18:05:00', N'APPROVED');
-
--- Dữ liệu mẫu cho bảng phan_hoi_danh_gia
-INSERT INTO phan_hoi_danh_gia (id_danh_gia, id_nhan_vien, noi_dung, ngay_phan_hoi) VALUES
-                                                                                       (1, 1, N'Cảm ơn bạn đã để lại đánh giá tích cực! Chúng tôi rất vui khi sản phẩm đáp ứng được mong đợi của bạn. Hy vọng được phục vụ bạn trong những lần mua sắm tiếp theo.', '2024-07-15 15:20:00'),
-                                                                                       (2, 2, N'Cảm ơn bạn đã chia sẻ trải nghiệm. Chúng tôi sẽ ghi nhận ý kiến của bạn để cải thiện sản phẩm trong tương lai. Nếu có bất kỳ vấn đề gì, vui lòng liên hệ với chúng tôi.', '2024-07-16 16:30:00'),
-                                                                                       (5, 3, N'Chúng tôi rất tiếc khi sản phẩm chưa đáp ứng được kỳ vọng của bạn. Đội ngũ chăm sóc khách hàng sẽ liên hệ với bạn để hỗ trợ giải quyết vấn đề này một cách tốt nhất.', '2024-07-19 14:15:00'),
-                                                                                       (7, 1, N'Cảm ơn bạn rất nhiều vì những lời khen ngợi! Chúng tôi luôn nỗ lực để mang đến những sản phẩm chất lượng và dịch vụ tốt nhất cho khách hàng. Rất mong được tiếp tục đồng hành cùng bạn.', '2024-07-21 10:45:00'),
-                                                                                       (8, 4, N'Chúng tôi xin lỗi vì sự bất tiện này và sẽ liên hệ trực tiếp với bạn để xử lý vấn đề bảo hành ngay lập tức. Đội ngũ kỹ thuật sẽ hỗ trợ bạn trong vòng 24h tới.', '2024-07-22 16:00:00'),
-                                                                                       (9, 2, N'Cảm ơn bạn đã đánh giá khách quan về sản phẩm. Ý kiến của bạn rất có giá trị để chúng tôi tiếp tục hoàn thiện sản phẩm. Chúc bạn có những trải nghiệm tốt hơn nữa!', '2024-07-23 14:20:00'),
-                                                                                       (10, 1, N'Thank you so much for your excellent review! We are thrilled that you are satisfied with our product quality. We truly appreciate your recommendation and look forward to serving you again.', '2024-07-24 19:30:00');
-
 
 
 -- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)

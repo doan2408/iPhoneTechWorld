@@ -24,7 +24,7 @@ public class AdminDiaChiResponse {
 
     private String xaPhuong;
 
-    private String quanHuyen;
+    private String emailNguoiNhan;
 
     private String tinhThanhPho;
 

@@ -32,6 +32,11 @@ public class DiaChi {
     @Column(name = "sdt_nguoi_nhan", length = 10)
     private String sdtNguoiNhan;
 
+    @Size(max = 100)
+    @Nationalized
+    @Column(name = "email_nguoi_nhan", length = 100)
+    private String emailNguoiNhan;
+
     @Size(max = 50)
     @Nationalized
     @Column(name = "so_nha", length = 50)
@@ -49,11 +54,6 @@ public class DiaChi {
 
     @Size(max = 50)
     @Nationalized
-    @Column(name = "quan_huyen", length = 50)
-    private String quanHuyen;
-
-    @Size(max = 50)
-    @Nationalized
     @Column(name = "tinh_thanh_pho", length = 50)
     private String tinhThanhPho;
 
@@ -61,6 +61,6 @@ public class DiaChi {
     private Boolean diaChiChinh;
 
     public String getDiaChiDayDu() {
-        return soNha + ", " + tenDuong + ", " + xaPhuong + ", " + quanHuyen + ", " + tinhThanhPho;
+        return soNha + ", " + tenDuong + ", " + xaPhuong + ", " + tinhThanhPho;
     }
 }

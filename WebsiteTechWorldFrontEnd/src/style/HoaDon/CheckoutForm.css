@@ -675,7 +675,7 @@
     width: 100%;
     margin-top: 30px;
     padding: 15px 30px;
-    background-color: #f08080;
+    background-color: #ff0000;
     /* Light coral/pinkish-red */
     color: #ffffff;
     font-size: 20px;
@@ -972,4 +972,17 @@
     font-style: italic;
     color: #6c757d;
     font-size: 0.9em;
+}
+.select-box {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.select-box {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
 }
