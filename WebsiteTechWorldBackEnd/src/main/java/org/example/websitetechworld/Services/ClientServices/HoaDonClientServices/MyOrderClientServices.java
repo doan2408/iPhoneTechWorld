@@ -149,6 +149,7 @@ public class MyOrderClientServices {
                 hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             }
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+            sendMailFromInvoice(hoaDon);
         }
         return response;
     }
@@ -199,10 +200,10 @@ public class MyOrderClientServices {
     }
 
     public void sendMailFromInvoice(HoaDon hoaDon){
-        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaHoaDon();
+        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaVanDon();
 
         String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
-                + "<p>Xin chào <b>" + hoaDon.getIdKhachHang().getTenKhachHang() + "</b>,</p>"
+                + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
                 + "<p>Đơn hàng <b>" + hoaDon.getMaVanDon() + "</b> của bạn đã được xác nhận vào ngày "
                 + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
                 + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"

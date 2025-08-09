@@ -69,7 +69,9 @@ public class HoaDonAdminResponse {
         if (hoaDon.getIdKhachHang() != null){
             hoaDonAdminResponse.setIdKhachHang(hoaDon.getIdKhachHang().getId());
             hoaDonAdminResponse.setMaKhachHang(hoaDon.getIdKhachHang().getMaKhachHang());
+            hoaDonAdminResponse.setHangKhachHang(hoaDon.getIdKhachHang().getHangThanhVien().getTenHang().name());
             hoaDonAdminResponse.setTenKhachHang(hoaDon.getIdKhachHang().getTenKhachHang());
+
         }
         if (hoaDon.getIdPhieuGiamGia() != null){
             hoaDonAdminResponse.setIdPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getId());
@@ -78,9 +80,8 @@ public class HoaDonAdminResponse {
         }
 
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
-        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiMua());
+        hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
         hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
-        hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
         hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiNhan());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
@@ -99,7 +100,6 @@ public class HoaDonAdminResponse {
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
         }
-        hoaDonAdminResponse.setHangKhachHang(hoaDon.getIdKhachHang().getHangThanhVien().getTenHang().name());
         hoaDonAdminResponse.setEmailNguoiNhan(hoaDon.getEmailNguoiNhan());
         return hoaDonAdminResponse;
     }

@@ -72,7 +72,6 @@ public class HoaDonAdminController {
 
     @GetMapping("/{idHoaDon}")
     public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
-        System.out.println(hoaDonAdminService.findByIdHoaDon(idHoaDon));
         return hoaDonAdminService.findById(idHoaDon);
     }
 

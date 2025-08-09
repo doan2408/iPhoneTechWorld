@@ -9,6 +9,7 @@
                 <div class="current-address-display">
                     <p class="address-name-display">{{ shippingAddress.name || '' }}</p>
                     <p class="address-phone-display">{{ shippingAddress.phone || ''}}</p>
+                    <p class="address-phone-display">{{ shippingAddress.email || '' }}</p>
                     <p v-if="shippingAddress.address" class="address-detail-display">
                         {{ shippingAddress.address }}
                     </p>
@@ -186,6 +187,11 @@
                                     <input id="modal-phone" v-model="modalNewAddress.phone" type="tel"
                                         placeholder="Nhập số điện thoại" class="input-field" />
                                 </div>
+                                <div>
+                                    <label for="modal-phone" class="label">Email</label>
+                                    <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
+                                        placeholder="Nhập email người nhận" class="input-field" />
+                                </div>
                                 <label>Chọn tỉnh:</label>
                                 <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
                                     <option disabled value="">-- Tỉnh/Thành phố --</option>
@@ -269,6 +275,7 @@ import { add } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminServic
 
 const toast = useToast()
 const route = useRoute();
+const isLoading = ref(false)   
 
 // --- Address Management ---
 const userAddresses = ref([])
@@ -293,12 +300,13 @@ const isAddressModalOpen = ref(false)
 const selectedAddressId = ref(userAddresses.value.length > 0 ? userAddresses.value[0].id : 'new')
 const modalSelectedAddressId = ref(selectedAddressId.value) // State for modal's radio selection
 
-const newAddress = ref({ name: '', phone: '', address: '' })
-const modalNewAddress = ref({ name: '', phone: '', address: '' }) // State for modal's new address form
+const newAddress = ref({ name: '', phone: '', email: '', address: '' })
+const modalNewAddress = ref({ name: '', phone: '', email: '', address: '' }) // State for modal's new address form
 
 const shippingAddress = ref({ // This holds the final address for checkout
     name: '',
     phone: '',
+    email: '',
     address: '',
 })
 watch(() => modalNewAddress.value.name, (newVal) => {
@@ -308,6 +316,10 @@ watch(() => modalNewAddress.value.name, (newVal) => {
 watch(() => modalNewAddress.value.phone, (newVal) => {
     shippingAddress.value.phone = newVal;
 });
+watch(() => modalNewAddress.value.email, (newVal) => {
+    shippingAddress.value.email = newVal;
+});
+
 
 function confirmAddressSelection() {
   if (modalSelectedAddressId.value === 'new') {
@@ -335,6 +347,7 @@ function applySelectedAddress() {
         shippingAddress.value = {
             name: modalNewAddress.value.name,
             phone: modalNewAddress.value.phone,
+            email: modalNewAddress.value.email,
             address: fullAddress, 
         };
     } else {
@@ -362,7 +375,7 @@ const openAddressModal = () => {
     if (selectedAddressId.value === 'new') {
         modalNewAddress.value = { ...newAddress.value }; // Copy current new address data
     } else {
-        modalNewAddress.value = { name: '', phone: '', address: '' }; // Clear new address form if existing is selected
+        modalNewAddress.value = { name: '', phone: '',email: '', address: '' }; // Clear new address form if existing is selected
     }
     isAddressModalOpen.value = true;
 };
@@ -491,6 +504,7 @@ const handleBuy = async () => {
         shippingMethod: selectedShippingMethod.value.toUpperCase(),
         sdtNguoiNhan: shippingAddress.value.phone,
         tenNguoiNhan: shippingAddress.value.name,
+        emailNguoiNhan: shippingAddress.value.email,
         diaChiGiaoHang: [
             shippingAddress.value.address
         ].filter(Boolean).join(', '),
@@ -510,12 +524,31 @@ const handleBuy = async () => {
         return;
     }
 
-    const res = await thanhToanGuest(shippingConfirm);
-    if (res.data.message === 'Đặt hàng thành công') {
-        router.push({ name: 'successClient' });
-    }
+    isLoading.value = true;
 
-    toast.success('Đặt hàng thành công')
+    const toastId = toast.info('Đang xử lý đơn hàng...', {
+        timeout: false,
+        closeButton: false,
+    });
+
+    try {
+        const res = await thanhToanGuest(shippingConfirm);
+
+        if (res.data.message === 'Đặt hàng thành công') {
+            toast.dismiss(toastId); // Hủy toast loading
+            toast.success('Đặt hàng thành công');
+            router.push({ name: 'successClient' });
+        } else {
+            toast.dismiss(toastId);
+            toast.error(res.data.message || 'Có lỗi xảy ra');
+        }
+    } catch (error) {
+        toast.dismiss(toastId);
+        toast.error('Đã xảy ra lỗi. Vui lòng thử lại.');
+        console.error('Lỗi khi thanh toán:', error);
+    } finally {
+        isLoading.value = false; // Kết thúc trạng thái loading
+    }
 }
 
 const paymentMethods = ref([]);
