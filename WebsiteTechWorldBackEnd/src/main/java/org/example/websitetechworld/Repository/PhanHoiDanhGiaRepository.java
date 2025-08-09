@@ -12,9 +12,12 @@ import java.util.Optional;
 @Repository
 public interface PhanHoiDanhGiaRepository extends JpaRepository<PhanHoiDanhGia, Integer> {
 //    List<PhanHoiDanhGia> findByIdDanhGia(Integer idDanhGia);
+    List<PhanHoiDanhGia> findByDanhGiaSanPhamIdDanhGia(Integer idDanhGia);
 
     Optional<PhanHoiDanhGia> findByDanhGiaSanPham_IdDanhGia(Integer idDanhGia);
 
     @Query("SELECT p FROM PhanHoiDanhGia p WHERE p.danhGiaSanPham.idDanhGia = :idDanhGia")
     List<PhanHoiDanhGia> findListByIdDanhGia(@Param("idDanhGia") Integer idDanhGia);
+
+
 }
