@@ -557,6 +557,14 @@ const handleBuy = async () => {
     }
 }
 
+onMounted(() => {
+    const responseCode = route.query.vnp_ResponseCode;
+
+    if (responseCode === '24') {
+        router.push({ name: 'shoppingCardClient' });
+    }
+});
+
 const paymentMethods = ref([]);
 const selectedPaymentMethod = ref(null);
 const agreedToTerms = ref(false);

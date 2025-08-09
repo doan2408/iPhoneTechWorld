@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.ClientServices.HoaDonClientService
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
@@ -15,6 +16,7 @@ import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
+import org.example.websitetechworld.Repository.ChiTietHoaDonRepository;
 import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
@@ -25,21 +27,14 @@ import org.example.websitetechworld.Services.ClientServices.GioHangClientService
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
@@ -47,6 +42,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @Service
 public class MyOrderClientServices {
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
+    private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -59,7 +55,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces,DanhGiaSanPhamRepository danhGiaSanPhamRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -70,6 +66,7 @@ public class MyOrderClientServices {
         this.gioHangClientService = gioHangClientService;
         this.danhGiaSanPhamRepository = danhGiaSanPhamRepository;
         this.emailServicces = emailServicces;
+        this.chiTietHoaDonRepository = chiTietHoaDonRepository;
     }
 
 
@@ -139,9 +136,6 @@ public class MyOrderClientServices {
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
-        for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-            gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-        }
         hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
 
         if ("Đặt hàng thành công".equals(response.getMessage())) {
@@ -151,6 +145,9 @@ public class MyOrderClientServices {
                 hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             }
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
+            }
             sendMailFromInvoice(hoaDon);
 
         }
@@ -174,9 +171,7 @@ public class MyOrderClientServices {
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
-        for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-            gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-        }
+
         hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
 
         if ("Đặt hàng thành công".equals(response.getMessage())) {
@@ -186,6 +181,9 @@ public class MyOrderClientServices {
                 hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             }
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
+            }
             sendMailFromInvoice(hoaDon);
         }
         return response;
@@ -248,6 +246,26 @@ public class MyOrderClientServices {
 
         emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
     }
+
+    public List<Integer> getHoaDonChiTietIdsByMaHoaDon(String maHoaDon) {
+        List<HoaDon> danhSachHoaDon = hoaDonRepository.findByMaHoaDon(maHoaDon);
+
+        if (danhSachHoaDon.isEmpty()) {
+            return Collections.emptyList();
+        }
+        HoaDon hoaDon = danhSachHoaDon.get(0);
+
+        List<ChiTietHoaDon> danhSachHDCT = chiTietHoaDonRepository.findByIdHoaDon_Id(hoaDon.getId());
+
+        return danhSachHDCT.stream()
+                .map(ChiTietHoaDon::getId)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteHoaDonById(Integer id){
+        hoaDonRepository.deleteById(id);
+    }
+
 
 
 

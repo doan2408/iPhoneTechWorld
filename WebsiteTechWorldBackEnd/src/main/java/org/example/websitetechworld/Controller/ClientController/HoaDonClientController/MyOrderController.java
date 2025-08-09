@@ -6,6 +6,9 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
+import org.example.websitetechworld.Entity.ChiTietHoaDon;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -21,9 +24,13 @@ import java.util.List;
 @RequestMapping("/client/my-order")
 public class MyOrderController {
     private final MyOrderClientServices myOrderClientServices;
+    private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
+    private final HoaDonAdminService hoaDonAdminService;
 
-    public MyOrderController(MyOrderClientServices myOrderClientServices) {
+    public MyOrderController(MyOrderClientServices myOrderClientServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, HoaDonAdminService hoaDonAdminService) {
         this.myOrderClientServices = myOrderClientServices;
+        this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
+        this.hoaDonAdminService = hoaDonAdminService;
     }
 
     @GetMapping()
@@ -81,5 +88,27 @@ public class MyOrderController {
     @GetMapping("/{idHoaDon}/chi-tiet")
     public List<HoaDonAndChiTietHoaDonClientResponse> getHoaDonChiTiet(@PathVariable Integer idHoaDon) {
         return myOrderClientServices.getHoaDonAndChiTiet(idHoaDon);
+    }
+
+    @DeleteMapping("/hdct/{maHd}")
+    public ResponseEntity<?> deleteChiTietHoaDon(@PathVariable String maHd) {
+        try {
+            List<Integer> listIdHdct = myOrderClientServices.getHoaDonChiTietIdsByMaHoaDon(maHd);
+            if (listIdHdct.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Không tìm thấy chi tiết hóa đơn để xóa.");
+            }
+            for (Integer hdctId : listIdHdct) {
+                // Gọi service để xóa chi tiết hóa đơn
+                hoaDonChiTietAdminServices.deleleHdct(hdctId);
+            }
+            String idHoaDonString = maHd.substring(2);
+            Integer idHoaDon = Integer.parseInt(idHoaDonString);
+            myOrderClientServices.deleteHoaDonById(idHoaDon);
+            return ResponseEntity.ok("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Xóa thất bại: " + e.getMessage());
+        }
     }
 }

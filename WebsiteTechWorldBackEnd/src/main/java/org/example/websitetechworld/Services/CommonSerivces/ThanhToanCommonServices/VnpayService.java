@@ -44,14 +44,14 @@ public class VnpayService {
         return isAdmin;
     }
 
-    public String createPaymentUrl(long amount, String orderInfo, String ipAddress) throws Exception {
+    public String createPaymentUrl(String orderId,long amount, String orderInfo, String ipAddress) throws Exception {
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(amount * 100)); // nhân 100
         vnp_Params.put("vnp_CurrCode", "VND");
-        vnp_Params.put("vnp_TxnRef", String.valueOf(System.currentTimeMillis()));
+        vnp_Params.put("vnp_TxnRef", orderId);
         vnp_Params.put("vnp_OrderInfo", orderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_Locale", "vn");

@@ -52,7 +52,16 @@ public class VnpayStrategy implements ThanhToanStrategy {
             System.out.println("[DEBUG BACKEND] Số tiền nhận từ FE: " + soTien);
             System.out.println("[DEBUG BACKEND] Số tiền gửi VNPay: " + amount);
 
-            String paymentUrl = vnpayService.createPaymentUrl(
+            String maHoaDon = null;
+            if (hoaDon.getId() < 10) {
+                maHoaDon =  "HD00" + hoaDon.getId();
+            } else if (hoaDon.getId()  < 100) {
+                maHoaDon =  "HD0" + hoaDon.getId();
+            } else {
+                maHoaDon = "HD" + hoaDon.getId();
+            }
+
+            String paymentUrl = vnpayService.createPaymentUrl(maHoaDon,
                     amount,
                     "Thanh toan don hang " + hoaDon.getMaVanDon(),
                     ipAddress

@@ -65,3 +65,8 @@ export const getDistance = (from, to) => {
 export const getHoaDonAndIdChiTietHoaDon = (id) => {
     return api.get(`${baseURL}/${id}/chi-tiet`);
 };
+
+export const deleteHoaDon = (maHd) => {
+    return api.delete(`${baseURL}/hdct/`+maHd);
+};
+

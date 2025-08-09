@@ -12,7 +12,7 @@ const router = createRouter({
     children: [
       { path: '', component: () => import('@/views/Guest/Home.vue'), meta: { title: 'Trang Chủ'} },
       {path: 'detail/:id', component: () => import('@/views/Guest/DetailProductGuest.vue'), meta: { title: 'Buy'} },
-      {path: 'shopping-cart', component: () => import('@/views/Client/ShoppingCart.vue'), meta: { title: 'Cart'} },
+      {path: 'shopping-cart',name: "shoppingCardGuest", component: () => import('@/views/Client/ShoppingCart.vue'), meta: { title: 'Cart'} },
       // { path: 'home', component: () => import('@/views/Client/Home.vue'), meta: { title: 'Trang Chủ'} },
       { path: 'login', component: () => import('@/views/Authentical/LoginView.vue'), meta: { title: 'Login'} },
       { path: 'category', component: () => import('@/views/Client/Category.vue'), meta: { title: 'Category'} },
