@@ -54,7 +54,8 @@ public class HoaDonAdminResponse {
     private LocalDateTime ngayThanhToan;
     private String trangThaiDonHang;
     private String trangThaiThanhToan;
-    private Integer idTinhThanh;
+    private String hangKhachHang;
+    private String emailNguoiNhan;
 
     private List<ChiTietHoaDonAdminResponse> chiTietHoaDonAdminResponseList;
 //    private List<ChiTietThanhToanAdminResponse> chiTietThanhToanAdminResponseList;
@@ -68,7 +69,9 @@ public class HoaDonAdminResponse {
         if (hoaDon.getIdKhachHang() != null){
             hoaDonAdminResponse.setIdKhachHang(hoaDon.getIdKhachHang().getId());
             hoaDonAdminResponse.setMaKhachHang(hoaDon.getIdKhachHang().getMaKhachHang());
+            hoaDonAdminResponse.setHangKhachHang(hoaDon.getIdKhachHang().getHangThanhVien().getTenHang().name());
             hoaDonAdminResponse.setTenKhachHang(hoaDon.getIdKhachHang().getTenKhachHang());
+
         }
         if (hoaDon.getIdPhieuGiamGia() != null){
             hoaDonAdminResponse.setIdPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getId());
@@ -79,7 +82,6 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setTenNguoiNhan(hoaDon.getTenNguoiNhan());
         hoaDonAdminResponse.setDiaChiGiaoHang(hoaDon.getDiaChiGiaoHang());
-        hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());
         hoaDonAdminResponse.setSdtNguoiMua(hoaDon.getSdtNguoiMua());
         hoaDonAdminResponse.setSdtNguoiNhan(hoaDon.getSdtNguoiNhan());
         hoaDonAdminResponse.setPhiShip(hoaDon.getPhiShip());
@@ -91,13 +93,14 @@ public class HoaDonAdminResponse {
         hoaDonAdminResponse.setIsShipping(hoaDon.getIsShipping());
         hoaDonAdminResponse.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         hoaDonAdminResponse.setNgayThanhToan(hoaDon.getNgayThanhToan());
-        hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null );
+        hoaDonAdminResponse.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().name() : null );
         hoaDonAdminResponse.setTrangThaiDonHang(hoaDon.getTrangThaiDonHang() != null ? hoaDon.getTrangThaiDonHang().getDisplayName() : null );
         hoaDonAdminResponse.setShippingMethod(hoaDon.getShippingMethod() != null ? hoaDon.getShippingMethod().getCode() : null);
         if (hoaDon.getChiTietHoaDons() != null){
             hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(hoaDon.getChiTietHoaDons().stream()
                     .map(ChiTietHoaDonAdminResponse::convertDto).collect(Collectors.toList()));
         }
+        hoaDonAdminResponse.setEmailNguoiNhan(hoaDon.getEmailNguoiNhan());
         return hoaDonAdminResponse;
     }
 }

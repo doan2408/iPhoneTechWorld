@@ -81,10 +81,11 @@ public class DanhGiaSanPhamClientController {
     public ResponseEntity<List<DanhGiaSanPhamClientResponse>> layDanhGiaTheoSanPhamChiTiet(
             @PathVariable Integer idSanPhamChiTiet,
             @RequestParam(required = false) Integer soSao,
-            @RequestParam(required = false) Boolean hasMedia
+            @RequestParam(required = false) Boolean hasMedia,
+            @RequestParam(required = false) Integer idKhachHang
     ) {
         List<DanhGiaSanPhamClientResponse> responses =
-                danhGiaService.layDanhGiaTheoSanPhamChiTiet(idSanPhamChiTiet, soSao, hasMedia);
+                danhGiaService.layDanhGiaTheoSanPhamChiTiet(idSanPhamChiTiet, soSao, hasMedia, idKhachHang);
         return ResponseEntity.ok(responses);
     }
 

@@ -7,11 +7,15 @@
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
                 <div class="current-address-display">
-                    <p class="address-name-display">{{ shippingAddress.tenNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.sdtNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.emailNguoiNhan }}</p>
-                    <p class="address-detail-display">{{ shippingAddress.soNha + ', ' + shippingAddress.tenDuong + ', '
-                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho }}</p>
+                    <p class="address-name-display">{{ shippingAddress.name || '' }}</p>
+                    <p class="address-phone-display">{{ shippingAddress.phone || ''}}</p>
+                    <p class="address-phone-display">{{ shippingAddress.email || '' }}</p>
+                    <p v-if="shippingAddress.address" class="address-detail-display">
+                        {{ shippingAddress.address }}
+                    </p>
+                    <p v-else class="address-detail-display text-gray-400">
+                        Chưa có địa chỉ nhận hàng
+                    </p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
                 </div>
             </div>
@@ -159,12 +163,7 @@
                     </div>
                 </div>
                 <button @click="handleBuy" class="buy-button">
-                    <span v-if="isLoading">
-                        <i class="fas fa-spinner fa-spin"></i> Đang xử lý...
-                    </span>
-                    <span v-else>
-                        Mua hàng
-                    </span>
+                    Mua hàng
                 </button>
             </div>
         </div>
@@ -173,42 +172,8 @@
         <transition name="modal-fade">
             <div v-if="isAddressModalOpen" class="modal-overlay" @click.self="closeAddressModal">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Chọn Địa chỉ giao hàng</h3>
-                        <button class="modal-close-button" @click="closeAddressModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="lucide lucide-x">
-                                <path d="M18 6 6 18" />
-                                <path d="m6 6 12 12" />
-                            </svg>
-                        </button>
-                    </div>
                     <div class="modal-body">
                         <div class="address-modal-content">
-                            <div class="radio-group address-modal-options">
-                                <label v-for="address in userAddresses" :key="address.id"
-                                    class="radio-option address-option">
-                                    <div class="radio-content">
-                                        <input type="radio" name="modal-shipping-address" :value="address.id"
-                                            v-model="modalSelectedAddressId" class="radio-field" />
-                                        <div class="address-info">
-                                            <span class="address-name">{{ address.tenNguoiNhan+ '-' }}</span>
-                                            <span class="address-phone">{{ address.sdtNguoiNhan+ '-' }}</span>
-                                            <span class="address-detail">{{ address.soNha + ', ' + address.tenDuong +
-                                                ','+ address.xaPhuong
-                                                + ', ' + address.quanHuyen + ', ' + address.tinhThanhPho }}</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="radio-option address-option">
-                                    <div class="radio-content">
-                                        <input type="radio" name="modal-shipping-address" value="new"
-                                            v-model="modalSelectedAddressId" class="radio-field" />
-                                        <span class="address-name">Thêm địa chỉ mới</span>
-                                    </div>
-                                </label>
-                            </div>
 
                             <div v-if="modalSelectedAddressId === 'new'"
                                 class="form-grid address-form-fields modal-new-address-form">
@@ -223,8 +188,26 @@
                                         placeholder="Nhập số điện thoại" class="input-field" />
                                 </div>
                                 <div>
+                                    <label for="modal-phone" class="label">Email</label>
+                                    <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
+                                        placeholder="Nhập email người nhận" class="input-field" />
+                                </div>
+                                <label>Chọn tỉnh:</label>
+                                <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
+                                    <option disabled value="">-- Tỉnh/Thành phố --</option>
+                                    <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
+                                    </option>
+                                </select>
+                                <label>Chọn Xã:</label>
+                                <select v-model="selectedXa" @change="onXaChange" class="select-box"
+                                    :disabled="!selectedTinh">
+                                    <option disabled value="">-- Phường/Xã --</option>
+                                    <option v-for="x in xaList" :key="x.code" :value="x">{{ x.name }}
+                                    </option>
+                                </select>
+                                <div>
                                     <label for="modal-address" class="label">Địa chỉ</label>
-                                    <input id="modal-address" v-model="modalNewAddress.address" type="text"
+                                    <input id="modal-address" v-model="addressDetail" type="text"
                                         placeholder="Nhập địa chỉ chi tiết" class="input-field" />
                                 </div>
                             </div>
@@ -282,11 +265,13 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { getDiaChiByClient } from '@/Service/ClientService/TaiKhoan/DiaChiServices'
 import { useRoute } from 'vue-router';
-import { loadPaymentMethod, thanhToanClient } from "@/Service/ClientService/HoaDon/MyOrderClient";
+import { loadPaymentMethod, thanhToanGuest } from "@/Service/ClientService/HoaDon/MyOrderClient";
 import { useToast } from "vue-toastification";
 import router from '@/router';
-import {getLatLon, getDistance} from '@/Service/ClientService/HoaDon/MyOrderClient'
-
+import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import provinceData from '@/assets/JsonTinhThanh/province.json'
+import wardData from '@/assets/JsonTinhThanh/ward.json'
+import { add } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
 
 const toast = useToast()
 const route = useRoute();
@@ -294,54 +279,95 @@ const isLoading = ref(false)
 
 // --- Address Management ---
 const userAddresses = ref([])
-onMounted(async () => {
-    try {
-        
-        const response = await getDiaChiByClient();
-        const data = response.data;
 
-        if (Array.isArray(data) && data.length > 0) {
-            userAddresses.value = data;
-            selectedAddressId.value = data[0].id; 
-            console.log('Dữ liệu địa chỉ trả về:', data);
-        } else {
-            userAddresses.value = [];
-            selectedAddressId.value = 'new'; 
-        }
-    } catch (error) {
-        console.error('Lỗi khi tải địa chỉ:', error);
-    }
+const formattedAddress = computed(() => {
+    const a = shippingAddress.value;
+    if (!a) return '';
+
+    // Gom các phần của địa chỉ thành mảng, rồi lọc bỏ null/undefined/chuỗi rỗng
+    const parts = [
+        a.soNha,
+        a.tenDuong,
+        a.xaPhuong,
+        a.quanHuyen,
+        a.tinhThanhPho
+    ].filter(Boolean); // Lọc bỏ các giá trị falsy
+
+    return parts.join(', ');
 });
 
 const isAddressModalOpen = ref(false)
 const selectedAddressId = ref(userAddresses.value.length > 0 ? userAddresses.value[0].id : 'new')
 const modalSelectedAddressId = ref(selectedAddressId.value) // State for modal's radio selection
 
-const newAddress = ref({ name: '', phone: '', address: '' })
-const modalNewAddress = ref({ name: '', phone: '', address: '' }) // State for modal's new address form
+const newAddress = ref({ name: '', phone: '', email: '', address: '' })
+const modalNewAddress = ref({ name: '', phone: '', email: '', address: '' }) // State for modal's new address form
 
 const shippingAddress = ref({ // This holds the final address for checkout
     name: '',
     phone: '',
+    email: '',
     address: '',
 })
+watch(() => modalNewAddress.value.name, (newVal) => {
+    shippingAddress.value.name = newVal;
+});
+
+watch(() => modalNewAddress.value.phone, (newVal) => {
+    shippingAddress.value.phone = newVal;
+});
+watch(() => modalNewAddress.value.email, (newVal) => {
+    shippingAddress.value.email = newVal;
+});
+
+
+function confirmAddressSelection() {
+  if (modalSelectedAddressId.value === 'new') {
+    shippingAddress.value = { ...modalNewAddress.value };
+      applySelectedAddress();
+  } else {
+    const selected = userAddresses.value.find(addr => addr.id === modalSelectedAddressId.value);
+    if (selected) shippingAddress.value = selected;
+  }
+  isAddressModalOpen.value = false;
+}
 
 // Initialize shippingAddress based on initial selectedAddressId
-watch(selectedAddressId, (newVal) => {
-    if (newVal === 'new') {
-        shippingAddress.value = { name: '', phone: '', address: '' }
+watch(selectedAddressId, () => {
+    applySelectedAddress();
+});
+
+
+function applySelectedAddress() {
+    if (modalSelectedAddressId.value === 'new') {
+        const fullAddress = [addressDetail.value, selectedXa.value?.name, selectedTinh.value?.name]
+            .filter(Boolean)
+            .join(', ');
+
+        shippingAddress.value = {
+            name: modalNewAddress.value.name,
+            phone: modalNewAddress.value.phone,
+            email: modalNewAddress.value.email,
+            address: fullAddress, 
+        };
     } else {
-        const selected = userAddresses.value.find(addr => addr.id === newVal)
+        const selected = userAddresses.value.find(
+            (addr) => addr.id === modalSelectedAddressId.value
+        );
+
         if (selected) {
-            shippingAddress.value = { ...selected }
+            shippingAddress.value = { ...selected };
         }
     }
+
     nextTick(() => {
-        if (shippingAddress.value && shippingAddress.value.tinhThanhPho) {
+        if (shippingAddress.value) {
             updatePhiShip();
         }
     });
-}, { immediate: false })
+
+    isAddressModalOpen.value = false;
+}
 
 // Open Address Modal and sync its state
 const openAddressModal = () => {
@@ -349,7 +375,7 @@ const openAddressModal = () => {
     if (selectedAddressId.value === 'new') {
         modalNewAddress.value = { ...newAddress.value }; // Copy current new address data
     } else {
-        modalNewAddress.value = { name: '', phone: '', address: '' }; // Clear new address form if existing is selected
+        modalNewAddress.value = { name: '', phone: '',email: '', address: '' }; // Clear new address form if existing is selected
     }
     isAddressModalOpen.value = true;
 };
@@ -358,29 +384,6 @@ const closeAddressModal = () => {
     isAddressModalOpen.value = false;
 };
 
-const confirmAddressSelection = () => {
-    if (modalSelectedAddressId.value === 'new') {
-        if (modalNewAddress.value.name && modalNewAddress.value.phone && modalNewAddress.value.address) {
-            const newId = (userAddresses.value.length + 1).toString();
-            const savedAddress = { id: newId, ...modalNewAddress.value };
-            userAddresses.value.push(savedAddress);
-            selectedAddressId.value = newId; // Update main form's selected ID
-            shippingAddress.value = { ...savedAddress }; // Update main form's shipping address
-            modalNewAddress.value = { name: '', phone: '', address: '' }; // Clear modal's new address fields
-            closeAddressModal();
-            alert('Địa chỉ mới đã được lưu và chọn!');
-        } else {
-            alert('Vui lòng điền đầy đủ thông tin địa chỉ mới.');
-        }
-    } else {
-        selectedAddressId.value = modalSelectedAddressId.value; // Update main form's selected ID
-        const selected = userAddresses.value.find(addr => addr.id === selectedAddressId.value);
-        if (selected) {
-            shippingAddress.value = { ...selected }; // Update main form's shipping address
-        }
-        closeAddressModal();
-    }
-}
 
 // --- Voucher Management ---
 const isVoucherModalOpen = ref(false)
@@ -489,38 +492,34 @@ const calculateSubtotal = computed(() => {
 const calculateTotal = computed(() => {
     return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0);
 })
-console.log('total',calculateTotal.value)
+console.log('total', calculateTotal.value)
 
 
 const handleBuy = async () => {
     const shippingConfirm = {
-        hinhThucThanhToan: selectedPaymentMethod.value, 
+        hinhThucThanhToan: selectedPaymentMethod.value,
         soTienKhachDua: calculateTotal.value,
         thanhTien: calculateTotal.value,
-        phiShip: getShippingCost.value, 
-        shippingMethod: selectedShippingMethod.value.toUpperCase(), 
-        sdtNguoiNhan: shippingAddress.value.sdtNguoiNhan,
-        tenNguoiNhan: shippingAddress.value.tenNguoiNhan,
-        emailNguoiNhan: shippingAddress.value.emailNguoiNhan,
+        phiShip: getShippingCost.value,
+        shippingMethod: selectedShippingMethod.value.toUpperCase(),
+        sdtNguoiNhan: shippingAddress.value.phone,
+        tenNguoiNhan: shippingAddress.value.name,
+        emailNguoiNhan: shippingAddress.value.email,
         diaChiGiaoHang: [
-            shippingAddress.value.soNha,
-            shippingAddress.value.tenDuong,
-            shippingAddress.value.xaPhuong,
-            shippingAddress.value.quanHuyen,
-            shippingAddress.value.tinhThanhPho
+            shippingAddress.value.address
         ].filter(Boolean).join(', '),
         sanPhamRequests: product.value.map(p => ({
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
         }))
     };
-    console.log('shipping',shippingConfirm);
+    console.log('shipping', shippingConfirm);
     if (getShippingCost.value == 0) {
         toast.warning('Chưa chọn phương thức giao hàng')
         return
     }
 
-    if (!shippingAddress.value.tenNguoiNhan || !shippingAddress.value.sdtNguoiNhan || !shippingConfirm.diaChiGiaoHang) {
+    if (!shippingAddress.value.phone || !shippingAddress.value.name || !shippingConfirm.diaChiGiaoHang) {
         alert('Vui lòng chọn hoặc nhập địa chỉ giao hàng.');
         return;
     }
@@ -533,12 +532,12 @@ const handleBuy = async () => {
     });
 
     try {
-        const res = await thanhToanClient(shippingConfirm);
+        const res = await thanhToanGuest(shippingConfirm);
 
         if (res.data.message === 'Đặt hàng thành công') {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
-            router.push({ name: 'ordersucces' });
+            router.push({ name: 'successClient' });
         } else {
             toast.dismiss(toastId);
             toast.error(res.data.message || 'Có lỗi xảy ra');
@@ -587,9 +586,19 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
 const storeAddress = 'Hà Nội';
+const selectedTinh = ref('')
+const selectedXa = ref('')
+const addressDetail = ref('')
+const tinhList = ref(provinceData)
+const allXaList = ref(Object.values(wardData))
+const xaList = ref([])
+const tinhThanhList = ref([])
 const updatePhiShip = async () => {
 
-    const fullAddress = `${shippingAddress.value.tinhThanhPho}`;
+
+    const fullAddress = [selectedTinh.value?.name]
+        .filter(Boolean)
+        .join(', ');
 
     console.log("Địa chỉ người nhận đầy đủ (fullAddress):", fullAddress);
     console.log("Địa chỉ cửa hàng (storeAddress):", storeAddress);
@@ -705,8 +714,29 @@ const calcPhiShip = (km) => {
 
     return calculatedFee;
 };
+const onTinhChange = async () => {
+    selectedXa.value = '';
+    xaList.value = [];
+    if (selectedTinh.value?.name) {
+        try {
+            xaList.value = allXaList.value.filter(ward =>
+                ward.path.includes(selectedTinh.value.name)
+            )
+            console.log("Danh sách Phường/Xã:", xaList.value)
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách huyện:", error);
+        }
+    }
+};
+const onXaChange = async () => {
+    console.log("Xã được chọn:", selectedXa.value);
+    phishipDisplay.value = null;
+    if (selectedXa.value) {
+        console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
+    }
+};
+
+
 </script>
 
-<style scoped src="@/style/HoaDon/CheckoutForm.css">
-
-</style>
+<style scoped src="@/style/HoaDon/CheckoutForm.css"></style>

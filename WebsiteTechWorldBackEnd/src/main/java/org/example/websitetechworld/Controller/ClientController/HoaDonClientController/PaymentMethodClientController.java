@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/client/payment-methods")
+@RequestMapping("/payment-methods")
 public class PaymentMethodClientController {
 
     private final PaymentMethodServices paymentMethodServices;

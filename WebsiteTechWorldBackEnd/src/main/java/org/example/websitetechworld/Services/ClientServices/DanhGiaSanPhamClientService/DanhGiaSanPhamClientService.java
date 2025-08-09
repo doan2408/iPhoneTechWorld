@@ -148,8 +148,8 @@ public class DanhGiaSanPhamClientService {
     }
 
     @Transactional
-    public List<DanhGiaSanPhamClientResponse> layDanhGiaTheoSanPhamChiTiet(Integer idSanPhamChiTiet, Integer soSao, Boolean hasMedia) {
-        List<DanhGiaSanPham> danhGias = danhGiaRepository.findBySanPhamChiTietAndFilters(idSanPhamChiTiet, soSao, hasMedia);
+    public List<DanhGiaSanPhamClientResponse> layDanhGiaTheoSanPhamChiTiet(Integer idSanPhamChiTiet, Integer soSao, Boolean hasMedia, Integer idKhachHang) {
+        List<DanhGiaSanPham> danhGias = danhGiaRepository.findBySanPhamChiTietAndFilters(idSanPhamChiTiet, soSao, hasMedia, idKhachHang);
 
         return danhGias.stream()
                 .map(this::chuyenDoiSangResponse)
