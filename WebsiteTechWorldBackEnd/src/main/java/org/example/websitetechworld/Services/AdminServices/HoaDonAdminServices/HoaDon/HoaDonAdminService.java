@@ -249,11 +249,11 @@ public class HoaDonAdminService {
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
         invoice.setNgayDatHang(LocalDateTime.now());
         // Gán maVanDon
-        String maVanDon = request.getMaVanDon();
-        if (maVanDon == null || maVanDon.trim().isEmpty()) {
-            maVanDon = generateMaVanDon(id);
-        }
-        invoice.setMaVanDon(maVanDon);
+//        String maVanDon = request.getMaVanDon();
+//        if (maVanDon == null || maVanDon.trim().isEmpty()) {
+//            maVanDon = generateMaVanDon(id);
+//        }
+//        invoice.setMaVanDon(maVanDon);
 
         // Gán shippingMethod
         invoice.setShippingMethod(request.getShippingMethod() != null ?
@@ -292,6 +292,15 @@ public class HoaDonAdminService {
             throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
         }
     }
+
+    public void updateMaVanDon(Integer idHoaDon) {
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon).orElseThrow(
+                () -> new IllegalArgumentException(("Hoa don ko ton tai"))
+        );
+        hoaDon.setMaVanDon(generateMaVanDon(idHoaDon));
+        hoaDonRepository.save(hoaDon);
+    }
+
     private String generateMaVanDon(Integer invoiceId) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();

@@ -99,7 +99,6 @@ public class MyOrderController {
                         .body("Không tìm thấy chi tiết hóa đơn để xóa.");
             }
             for (Integer hdctId : listIdHdct) {
-                // Gọi service để xóa chi tiết hóa đơn
                 hoaDonChiTietAdminServices.deleleHdct(hdctId);
             }
             String idHoaDonString = maHd.substring(2);

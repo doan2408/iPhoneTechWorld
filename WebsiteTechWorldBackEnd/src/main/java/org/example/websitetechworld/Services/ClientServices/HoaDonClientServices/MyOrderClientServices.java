@@ -123,8 +123,8 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
-        String maVanDon = generateMaVanDon(hoaDon.getId());
-        hoaDon.setMaVanDon(maVanDon);
+//        String maVanDon = generateMaVanDon(hoaDon.getId());
+//        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
@@ -158,8 +158,8 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
-        String maVanDon = generateMaVanDon(hoaDon.getId());
-        hoaDon.setMaVanDon(maVanDon);
+//        String maVanDon = generateMaVanDon(hoaDon.getId());
+//        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
@@ -235,11 +235,19 @@ public class MyOrderClientServices {
     }
 
     public void sendMailFromInvoice(HoaDon hoaDon){
-        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaVanDon();
+        String maHoaDon = null;
+        if (hoaDon.getId() < 10) {
+            maHoaDon =  "HD00" + hoaDon.getId();
+        } else if (hoaDon.getId()  < 100) {
+            maHoaDon =  "HD0" + hoaDon.getId();
+        } else {
+            maHoaDon = "HD" + hoaDon.getId();
+        }
+        String subject = "Xác nhận đơn hàng #" + maHoaDon;
 
         String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
                 + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
-                + "<p>Đơn hàng <b>" + hoaDon.getMaVanDon() + "</b> của bạn đã được xác nhận vào ngày "
+                + "<p>Đơn hàng <b>" + maHoaDon + "</b> của bạn đã được xác nhận vào ngày "
                 + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
                 + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"
                 + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";

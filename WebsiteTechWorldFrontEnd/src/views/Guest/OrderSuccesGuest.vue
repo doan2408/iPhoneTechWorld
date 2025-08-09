@@ -23,9 +23,28 @@
 <script setup>
 import router from '@/router';
 import { CheckCircleIcon } from 'lucide-vue-next';
+import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { deleteHoaDonGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
+
+const route = useRoute();
+
 const viewMyOrder = () => {
     router.push({ name: 'myorder' });
 }
+
+
+
+onMounted(() => {
+    const responseCode = route.query.vnp_ResponseCode;
+    const orderId = route.query.vnp_TxnRef;
+
+
+    if (responseCode === '24' && orderId) {
+        deleteHoaDonGuest(orderId)
+        router.push({ name: 'shoppingCardGuest' });
+    }
+});
 </script>
 
 <style scoped>

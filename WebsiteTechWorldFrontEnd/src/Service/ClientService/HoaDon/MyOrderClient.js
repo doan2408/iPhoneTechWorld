@@ -70,3 +70,7 @@ export const deleteHoaDon = (maHd) => {
     return api.delete(`${baseURL}/hdct/`+maHd);
 };
 
+export const deleteHoaDonGuest = (maHd) => {
+    return api.delete(`/my-order/hdct/` + maHd);
+};
+
