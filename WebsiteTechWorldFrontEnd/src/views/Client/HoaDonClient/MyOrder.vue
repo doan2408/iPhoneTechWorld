@@ -128,8 +128,11 @@
               <div class="order-actions">
                 <button class="action-button buy-again-button">Mua Lại</button>
                 <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
-                <button v-if="order.trangThaiThanhToan === 'Hoàn tất'" class="action-button rate-button"
-                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">Đánh giá</button>
+                <button v-if="order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia"
+                  class="action-button rate-button"
+                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
+                  Đánh giá
+                </button>
               </div>
             </div>
           </div>
@@ -223,18 +226,56 @@ const totalRevenue = computed(() =>
   allOrderValue.value.reduce((sum, order) => sum + order.thanhTien, 0)
 );
 
+// const allMyOrde = async () => {
+//   try {
+//     const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
+//     allOrderValue.value = res.data.content || [];
+//     totalElements.value = res.data.totalElements || 0;
+//     totalPages.value = res.data.totalPages || 0;
+//     console.log('Dữ liệu đơn hàng:', res);
+//   } catch (error) {
+//     console.error('Lỗi khi lấy đơn hàng:', error);
+//     alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+//   }
+// };
+
 const allMyOrde = async () => {
   try {
-    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
-    allOrderValue.value = res.data.content || [];
+    if (!user.value?.id) {
+      toast.error('Vui lòng đăng nhập để xem đơn hàng!');
+      return;
+    }
+
+    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value, user.value.id);
+    console.log("📦 Dữ liệu thô từ getMyOrder:", res);
+
+    const orders = res.data.content || []; // ✅ Sửa ở đây!
+    console.log("✅ Danh sách đơn hàng:", orders);
+
+    const ordersWithCheck = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          const response = await DanhGiaSanPhamClientService.checkDanhGia(order.idHoaDon, user.value.id);
+          console.log("✅ Kết quả check:", response);
+          return { ...order, daDanhGia: response.daDanhGia };
+        } catch (err) {
+          console.error(`❌ Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`, err);
+          return { ...order, daDanhGia: false };
+        }
+      })
+    );
+
+    allOrderValue.value = ordersWithCheck;
     totalElements.value = res.data.totalElements || 0;
     totalPages.value = res.data.totalPages || 0;
-    console.log('Dữ liệu đơn hàng:', res);
+
+    console.log("🎯 Dữ liệu đơn hàng sau check đánh giá:", ordersWithCheck);
   } catch (error) {
-    console.error('Lỗi khi lấy đơn hàng:', error);
-    alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+    console.error('❌ Lỗi khi lấy đơn hàng:', error);
+    toast.error('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
   }
 };
+
 
 const changePage = (page) => {
   currentPage.value = page;
@@ -383,7 +424,7 @@ const closeRateDialog = () => {
 };
 
 const submitRating = async (ratingData) => {
- 
+
 
   try {
     if (!user.value?.id) {
@@ -472,6 +513,7 @@ const submitRating = async (ratingData) => {
     await Promise.all(mediaPromises);
 
     toast.success('🎉 Gửi đánh giá thành công!');
+    await allMyOrde();
     closeRateDialog();
   } catch (error) {
     console.error('❌ Lỗi khi gửi đánh giá:', error);
@@ -487,8 +529,6 @@ const submitRating = async (ratingData) => {
     }
   }
 };
-
-
 
 
 onMounted(async () => {

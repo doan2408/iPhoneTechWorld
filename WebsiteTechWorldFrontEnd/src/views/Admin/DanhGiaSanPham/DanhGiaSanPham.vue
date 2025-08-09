@@ -88,14 +88,6 @@
         </el-table-column>
         <el-table-column label="Hành động" width="350" align="center">
           <template #default="{ row }">
-            <el-button type="success" size="small" :disabled="row.trangThaiDanhGia === 'APPROVED'"
-              @click="handleApprove(row.idDanhGia)" class="mr-2 hover:bg-green-600 transition">
-              Phê duyệt
-            </el-button>
-            <el-button type="warning" size="small" :disabled="row.trangThaiDanhGia === 'REFUSE'"
-              @click="handleReject(row.idDanhGia)" class="mr-2 hover:bg-yellow-600 transition">
-              Từ chối
-            </el-button>
             <el-button type="info" size="small" @click="openReplyDialog(row)" class="mr-2 hover:bg-blue-600 transition">
               Phản hồi
             </el-button>
@@ -114,53 +106,60 @@
     </el-card>
 
     <!-- Dialog phản hồi -->
-    <el-dialog title="Phản hồi đánh giá" v-model="dialogReplyVisible" width="40%" :before-close="handleCloseReplyDialog"
-      class="rounded-lg">
-      <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top" class="p-4">
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Thông tin đánh giá</h3>
-          <div class="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <p><strong>Khách hàng:</strong> {{ replyForm.tenKhachHang }}</p>
-              <p><strong>Sản phẩm:</strong> {{ replyForm.tenSanPham }} ({{ replyForm.maSanPhamChiTiet }})</p>
-              <p><strong>Màu sắc:</strong> {{ replyForm.tenMau }}</p>
-              <p><strong>RAM/ROM:</strong> {{ replyForm.dungLuongRam }}/{{ replyForm.dungLuongRom }}</p>
-              <p><strong>Đánh giá:</strong> {{ replyForm.noiDung }}</p>
-              <p><strong>Số sao:</strong></p>
-              <el-rate v-model="replyForm.soSao" disabled :max="5" class="text-yellow-400" />
+    <el-dialog title="Phản hồi đánh giá" v-model="dialogReplyVisible" width="60%" :before-close="handleCloseReplyDialog"
+      class="rounded-xl shadow-2xl bg-white">
+      <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top" class="p-6">
+        <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Thông tin đánh giá</h3>
+          <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <p class="text-gray-700"><strong class="text-gray-900">Khách hàng:</strong> {{ replyForm.tenKhachHang }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Sản phẩm:</strong> {{ replyForm.tenSanPham }} ({{ replyForm.maSanPhamChiTiet }})</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Màu sắc:</strong> {{ replyForm.tenMau }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">RAM/ROM:</strong> {{ replyForm.dungLuongRam }}/{{ replyForm.dungLuongRom }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Đánh giá:</strong> {{ replyForm.noiDung }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Số sao:</strong></p>
+              <el-rate v-model="replyForm.soSao" disabled :max="5" class="text-yellow-400 text-lg" />
             </div>
-            <div>
-              <p><strong>Ảnh đánh giá:</strong></p>
-              <div class="flex flex-wrap gap-2">
+            <div class="space-y-3">
+              <p class="text-gray-700"><strong class="text-gray-900">Ảnh đánh giá:</strong></p>
+              <div class="flex flex-wrap gap-3">
                 <el-image v-for="(img, index) in replyForm.anhUrls" :key="index" :src="img"
-                  class="w-20 h-20 rounded-md border border-gray-200 hover:border-blue-400 transition" fit="cover"
-                  :preview-src-list="replyForm.anhUrls" :initial-index="index" />
+                  class="w-24 h-24 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm"
+                  fit="cover" :preview-src-list="replyForm.anhUrls" :initial-index="index" />
               </div>
-              <p class="mt-2"><strong>Video đánh giá:</strong></p>
-              <div class="flex flex-wrap gap-2">
+              <p class="mt-3 text-gray-700"><strong class="text-gray-900">Video đánh giá:</strong></p>
+              <div class="flex flex-wrap gap-3">
                 <video v-for="(vid, idx) in replyForm.videoUrls" :key="idx" :src="vid"
-                  class="w-24 h-16 rounded-md border border-gray-200 hover:border-blue-400 transition" controls></video>
+                  class="w-28 h-20 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm"
+                  controls></video>
               </div>
             </div>
           </div>
         </div>
-        <el-form-item label="Nội dung phản hồi" prop="noiDungPhanHoi">
-          <el-input type="textarea" v-model="replyForm.noiDungPhanHoi" placeholder="Nhập nội dung phản hồi" :rows="4"
-            class="w-full" :disabled="false" />
+        <el-form-item label="Nội dung phản hồi" prop="noiDungPhanHoi" class="mb-6">
+          <el-input type="textarea" v-model="replyForm.noiDungPhanHoi" placeholder="Nhập nội dung phản hồi" :rows="5"
+            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-300" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer flex justify-end gap-3 p-4">
-          <el-button @click="dialogReplyVisible = false" class="hover:bg-gray-100 transition">Hủy</el-button>
-          <el-button type="primary" @click="submitReplyForm" class="hover:bg-blue-600 transition">Gửi</el-button>
+        <span class="dialog-footer flex justify-end gap-4 p-6">
+          <el-button @click="dialogReplyVisible = false"
+            class="bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 rounded-lg px-6 py-2">
+            Hủy
+          </el-button>
+          <el-button type="primary" @click="submitReplyForm"
+            class="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 rounded-lg px-6 py-2">
+            Gửi
+          </el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- Dialog xem video đánh giá -->
-    <el-dialog v-model="dialogVideoVisible" width="700px" class="rounded-lg" :close-on-click-modal="true"
+    <el-dialog v-model="dialogVideoVisible" width="700px" class="rounded-xl shadow-2xl bg-white" :close-on-click-modal="true"
       title="Xem video đánh giá">
-      <video v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-auto rounded-md" controls></video>
+      <video v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-auto rounded-lg shadow-sm" controls></video>
     </el-dialog>
   </div>
 </template>
@@ -169,7 +168,9 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { DanhGiaSanPhamAdminService } from '@/Service/Adminservice/DanhGiaSanPhamAdminService/DanhGiaSanPhamAdminService';
+import { useToast } from 'vue-toastification';
 
+const toast = useToast();
 const dataReview = ref([]);
 const loading = ref(false);
 const currentPage = ref(1);
@@ -181,8 +182,6 @@ const filterStar = ref(null);
 const dialogReplyVisible = ref(false);
 const dialogVideoVisible = ref(false);
 const currentVideoUrl = ref('');
-import { useToast } from 'vue-toastification';
-const toast = useToast();
 
 const replyForm = ref({
   idDanhGia: null,
@@ -198,11 +197,12 @@ const replyForm = ref({
   videoUrls: [],
   noiDungPhanHoi: '',
 });
+
 const replyRules = ref({
   noiDungPhanHoi: [{ required: true, message: 'Vui lòng nhập nội dung phản hồi', trigger: 'blur' }],
 });
-const replyFormRef = ref(null);
 
+const replyFormRef = ref(null);
 const user = ref(JSON.parse(localStorage.getItem('user')) || null);
 
 // Ánh xạ trạng thái sang tiếng Việt
@@ -241,7 +241,7 @@ const indexMethod = (index) => {
 const resetFilters = () => {
   filterStar.value = null;
   filterStatus.value = null;
-  currentPage.value = 1; // Đặt lại về trang đầu tiên
+  currentPage.value = 1;
   loadDanhGia();
 };
 
@@ -249,12 +249,10 @@ const resetFilters = () => {
 const loadDanhGia = async () => {
   loading.value = true;
   try {
-    // Xác thực filterStar
     if (filterStar.value !== null && (filterStar.value < 1 || filterStar.value > 5)) {
       toast.error('Số sao không hợp lệ. Vui lòng chọn từ 1 đến 5.');
       return;
     }
-
     const response = await DanhGiaSanPhamAdminService.layTatCaDanhGiaAdmin(
       currentPage.value - 1,
       pageSize.value,
@@ -300,7 +298,6 @@ const openReplyDialog = (row) => {
     videoUrls: row.videoUrls,
     noiDungPhanHoi: row.noiDungPhanHoi || '',
   };
-  console.log('Opening dialog, replyForm:', replyForm.value);
   dialogReplyVisible.value = true;
 };
 
@@ -314,8 +311,9 @@ const handleCloseReplyDialog = (done) => {
     .then(() => {
       done();
     })
-    .catch(() => { });
+    .catch(() => {});
 };
+
 // Gửi phản hồi
 const submitReplyForm = () => {
   replyFormRef.value.validate(async (valid) => {
@@ -325,8 +323,6 @@ const submitReplyForm = () => {
         if (!idNhanVien) {
           throw new Error('ID nhân viên không tồn tại. Vui lòng đăng nhập lại.');
         }
-        console.log('Submitting replyForm1111111111111111111:', replyForm.value.noiDungPhanHoi);
-
         await DanhGiaSanPhamAdminService.phanHoiDanhGia(
           replyForm.value.idDanhGia,
           {
@@ -334,12 +330,10 @@ const submitReplyForm = () => {
             idNhanVien: idNhanVien,
           }
         );
-
         toast.success('Gửi phản hồi thành công');
         dialogReplyVisible.value = false;
         loadDanhGia();
       } catch (error) {
-        //  Bắt lỗi backend trả về
         if (error.response && error.response.data) {
           const message = error.response.data.message || 'Có lỗi xảy ra từ server';
           toast.error(message);
@@ -354,54 +348,7 @@ const submitReplyForm = () => {
   });
 };
 
-
-// Xử lý phê duyệt đánh giá
-const handleApprove = async (id) => {
-  try {
-    await ElMessageBox.confirm(
-      'Bạn có chắc muốn phê duyệt đánh giá này?',
-      'Xác nhận',
-      {
-        confirmButtonText: 'Phê duyệt',
-        cancelButtonText: 'Hủy',
-        type: 'warning',
-      }
-    );
-
-    await DanhGiaSanPhamAdminService.pheDuyetDanhGia(id);
-    toast.success('✅ Phê duyệt đánh giá thành công');
-    loadDanhGia();
-  } catch (error) {
-    if (error === 'cancel' || error === 'close') return;
-    toast.error('❌ Lỗi khi phê duyệt đánh giá. Vui lòng thử lại.');
-    console.error('Lỗi khi phê duyệt:', error);
-  }
-};
-
-// ✅ Xử lý từ chối đánh giá
-const handleReject = async (id) => {
-  try {
-    await ElMessageBox.confirm(
-      'Bạn có chắc muốn từ chối đánh giá này?',
-      'Xác nhận',
-      {
-        confirmButtonText: 'Từ chối',
-        cancelButtonText: 'Hủy',
-        type: 'warning',
-      }
-    );
-
-    await DanhGiaSanPhamAdminService.tuChoiDanhGia(id);
-    toast.success('✅ Từ chối đánh giá thành công');
-    loadDanhGia();
-  } catch (error) {
-    if (error === 'cancel' || error === 'close') return;
-    toast.error('❌ Lỗi khi từ chối đánh giá. Vui lòng thử lại.');
-    console.error('Lỗi khi từ chối:', error);
-  }
-};
-
-// ✅ Xử lý xóa đánh giá
+// Xử lý xóa đánh giá
 const handleDelete = async (id) => {
   try {
     await ElMessageBox.confirm(
@@ -413,7 +360,6 @@ const handleDelete = async (id) => {
         type: 'danger',
       }
     );
-
     await DanhGiaSanPhamAdminService.xoaDanhGia(id);
     toast.success('✅ Xóa đánh giá thành công');
     loadDanhGia();
@@ -503,11 +449,32 @@ video {
 
 .el-dialog {
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff;
+}
+
+.el-dialog__header {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.el-dialog__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.el-dialog__body {
+  padding: 0;
 }
 
 .el-form-item__label {
   font-weight: 500;
   color: #374151;
+  font-size: 16px;
 }
 
 .el-input,
@@ -518,6 +485,8 @@ video {
 
 .el-textarea__inner {
   pointer-events: auto !important;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .el-pagination {
@@ -555,13 +524,6 @@ video {
 .el-table-column .el-image,
 .el-table-column video {
   vertical-align: middle;
-}
-
-.el-dialog .el-image,
-.el-dialog video {
-  width: 80px !important;
-  height: 60px !important;
-  margin-right: 8px;
 }
 
 .el-table {

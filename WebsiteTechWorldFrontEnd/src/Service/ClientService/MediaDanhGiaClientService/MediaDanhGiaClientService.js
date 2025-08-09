@@ -39,8 +39,17 @@ export const MediaDanhGiaClientService = {
     return response.data; // Trả về MediaDanhGiaClientResponse
   },
 
-  async delete(id) {
+  async deleteMedia(id) {
     const response = await api.delete(`${BASE_URL}/${id}`);
     return response.data; // Trả về void hoặc thông tin xóa
   },
+
+  async deleteByIdMedia(idMedia) {
+    if (!idMedia) {
+      throw new Error("idMedia là bắt buộc");
+    }
+    const response = await api.delete(`${BASE_URL}/delete/${idMedia}`);
+    return response.data;
+  }
+
 };

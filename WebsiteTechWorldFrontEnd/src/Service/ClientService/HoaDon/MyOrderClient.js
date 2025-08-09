@@ -10,6 +10,18 @@ export const getMyOrder = async (pageNo,pageSize) => {
         }
     });
 };  
+
+
+export const getMyReview = async (pageNo,pageSize) => {
+    return  await api.get(baseURL + '/review',{
+        params : {
+            pageNo,
+            pageSize
+        }
+    });
+};  
+
+
 export const findIdHoaDonByMVD = async (maVanDon) => {
     return await api.get(baseURL +'/mvd/'+ maVanDon);
 };  
