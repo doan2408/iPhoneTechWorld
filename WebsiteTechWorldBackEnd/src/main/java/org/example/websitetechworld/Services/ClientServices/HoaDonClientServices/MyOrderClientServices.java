@@ -11,6 +11,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.PhieuGiamGia;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
@@ -123,6 +124,9 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
+        PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
+        phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
+        hoaDon.setIdPhieuGiamGia(phieuGiamGia);
 //        String maVanDon = generateMaVanDon(hoaDon.getId());
 //        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);

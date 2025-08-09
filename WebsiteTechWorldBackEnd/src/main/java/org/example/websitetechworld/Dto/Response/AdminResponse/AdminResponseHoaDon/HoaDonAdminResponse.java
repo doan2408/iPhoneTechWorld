@@ -76,7 +76,7 @@ public class HoaDonAdminResponse {
         if (hoaDon.getIdPhieuGiamGia() != null){
             hoaDonAdminResponse.setIdPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getId());
             hoaDonAdminResponse.setMaPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getMaGiamGia());
-            hoaDonAdminResponse.setTenPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getTenKhuyenMai());
+            hoaDonAdminResponse.setTenPhieuGiamGia(hoaDon.getIdPhieuGiamGia().getTenGiamGia());
         }
 
         hoaDonAdminResponse.setTenNguoiMua(hoaDon.getTenNguoiMua());

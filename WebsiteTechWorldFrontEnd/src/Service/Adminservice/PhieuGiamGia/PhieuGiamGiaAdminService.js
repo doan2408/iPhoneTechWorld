@@ -63,3 +63,12 @@ export const getAllSanPham = async (params) => {
     throw error.response?.data || new Error('Lỗi khi lấy danh sách sản phẩm');
   }
 };
+
+export const giftVoucher = async (id, type) => {
+  try {
+    await api.post(`${baseURL}/${id}/gift?type=${type}`);
+  } catch (error) {
+    console.error('Lỗi khi thêm khách hàng giảm giá:', error);
+    throw error.response?.data || new Error('Lỗi khi thêm khách hàng giảm giá');
+  }
+};

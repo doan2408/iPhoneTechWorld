@@ -305,7 +305,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }}</b></span>
+                        currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -349,7 +349,7 @@
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -407,14 +407,19 @@
                             </div>
                         </div>
 
-                        <div class="discount-section" style="padding-top: 0;">
+                        <div class="discount-section" style="padding-top: 0; width: 400px;">
                             <h4>Chọn phiếu giảm giá</h4>
-                            <label>Chọn phiếu giảm giá</label>
-                            <select v-model="selectedDiscount" class="select-box">
-                                <option disabled value="">-- Chọn phiếu giảm giá --</option>
-                                <option v-for="discount in discountList" :key="discount.id" :value="discount">{{
-                                    discount.tenKhuyenMai }}</option>
-                            </select>
+                            <div v-if="selectedDiscount">
+                                {{ selectedDiscount.tenGiamGia }}
+                                <button @click="clearDiscount" class="confirm-btn"
+                                    style="background-color: red; color: white; margin-left: 10px;">Xóa</button>
+                            </div>
+                            <div v-else>
+                                <span>Chưa chọn phiếu giảm giá</span>
+                            </div>
+                            <button @click="openVoucherModal" class="confirm-btn" style="background-color: #000;">
+                                Chọn phiếu giảm giá
+                            </button>
                         </div>
                     </div>
 
@@ -540,6 +545,32 @@
             </div>
         </div>
     </div>
+
+    <transition name="modal-fade">
+        <div v-if="isVoucherModalOpen" class="modal-overlay" @click.self="closeVoucherModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Chọn phiếu giảm giá</h3>
+                    <button class="modal-close-button" @click="closeVoucherModal">
+                        ✕
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="voucher-list">
+                        <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
+                            <div>
+                                <strong>{{ discount.tenGiamGia }}</strong>
+                                <small>Giảm: {{ discount.giaTriGiamGia }}%</small>
+                            </div>
+                            <button @click="applyDiscount(discount)" class="apply-button">
+                                Áp dụng
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </transition>
 </template>
 
 <script setup>
@@ -600,7 +631,7 @@ const tinhThanhList = ref([])
 // const huyenList = ref([])
 // const xaList = ref([])
 const tinhList = ref(provinceData)
-const allXaList = ref(Object.values(wardData))  
+const allXaList = ref(Object.values(wardData))
 const xaList = ref([])
 const selectedTinh = ref('')
 // const selectedHuyen = ref('')
@@ -652,13 +683,13 @@ const calculateTotal = () => {
         }
     }
 
-    if (selectedDiscount.value?.loaiKhuyenMai === 'Phần trăm') {
-        discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriKhuyenMai / 100;
-        if (selectedDiscount.value?.giaTriKhuyenMaiToiDa < discountAmount.value) {
-            discountAmount.value = selectedDiscount.value?.giaTriKhuyenMaiToiDa
+    if (selectedDiscount.value?.loaiGiamGia === 'Phần trăm') {
+        discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriGiamGia / 100;
+        if (selectedDiscount.value?.giaTriGiamGiaToiDa < discountAmount.value) {
+            discountAmount.value = selectedDiscount.value?.giaTriGiamGiaToiDa
         }
-    } else if (selectedDiscount.value?.giaTriKhuyenMai) {
-        discountAmount.value = selectedDiscount.value.giaTriKhuyenMai;
+    } else if (selectedDiscount.value?.giaTriGiamGia) {
+        discountAmount.value = selectedDiscount.value.giaTriGiamGia;
     } else {
         discountAmount.value = 0;
     }
@@ -705,8 +736,8 @@ watch(
     () => {
         calculateTotal()
         if (selectedDiscount.value != null) {
-        apPhieuGiamGia(selectedDiscount.value.id)
-    }
+            apPhieuGiamGia(selectedDiscount.value.id)
+        }
     }
 )
 
@@ -983,7 +1014,7 @@ const searchCustomer = async () => {
     const type = searchType.value || 'name';
 
     if (!customerSearchQuery.value.trim()) {
-        await loadProducts(); 
+        await loadProducts();
         return;
     }
 
@@ -1523,8 +1554,8 @@ const updatePhiShip = async () => {
 
     try {
         const [from, to] = await Promise.all([
-            getLatLonFromAddress(storeAddress, selectedTinh,  selectedXa),
-            getLatLonFromAddress(fullAddress, selectedTinh,  selectedXa),
+            getLatLonFromAddress(storeAddress, selectedTinh, selectedXa),
+            getLatLonFromAddress(fullAddress, selectedTinh, selectedXa),
         ]);
 
         console.log("Tọa độ cửa hàng (from):", from);
@@ -1559,7 +1590,7 @@ const updatePhiShip = async () => {
 
 
 // Hàm lấy tọa độ từ địa chỉ
-const getLatLonFromAddress = async (address, selectedTinh,  selectedXa) => {
+const getLatLonFromAddress = async (address, selectedTinh, selectedXa) => {
     console.log("Đang gọi API lấy tọa độ cho:", address);
     try {
         // Thử địa chỉ gốc
@@ -1692,7 +1723,7 @@ const loadHoaDon = async () => {
                 const selected = discountList.value.find(
                     discount => discount.id === hoaDon.idPhieuGiamGia
                 );
-                selectedDiscount.value = selected || ''; 
+                selectedDiscount.value = selected || '';
             } else {
                 selectedDiscount.value = null;
             }
@@ -1819,7 +1850,7 @@ watch(quantityToSelect, (newValue, oldValue) => {
 onMounted(async () => {
     await danhMucSanPham();
     selectedCategory.value = 'all';
-    await loadProducts({  });
+    await loadProducts({});
     await loadTabHoaDon();
     await loadHoaDon();
     await getTinhList();
@@ -2004,7 +2035,7 @@ const fetchPaymentMethods = async () => {
         const response = await loadPaymentMethod();
         paymentMethods.value = response.data;
         if (paymentMethods.value.length > 0) {
-            selectedPaymentMethod.value = paymentMethods.value[0].code; 
+            selectedPaymentMethod.value = paymentMethods.value[0].code;
         }
     } catch (error) {
         console.error('Lỗi khi tải phương thức thanh toán:', error);
@@ -2015,11 +2046,11 @@ const fetchPaymentMethods = async () => {
 const getIconUrl = (code) => {
     switch (code) {
         case 'TIEN_MAT':
-            return '/icons/cod.png'; 
+            return '/icons/cod.png';
         case 'NGAN_HANG':
-            return '/icons/bank.png'; 
+            return '/icons/bank.png';
         default:
-            return '/icons/default.png'; 
+            return '/icons/default.png';
     }
 };
 
@@ -2079,7 +2110,7 @@ const processPayment = async () => {
 };
 
 const printInvoice = () => {
-    if (invoiceRef.value) { 
+    if (invoiceRef.value) {
         const element = invoiceRef.value.$el;
         const opt = {
             margin: 1,
@@ -2089,8 +2120,8 @@ const printInvoice = () => {
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-            pdf.autoPrint(); 
-            window.open(pdf.output('bloburl'), '_blank'); 
+            pdf.autoPrint();
+            window.open(pdf.output('bloburl'), '_blank');
         }).catch((error) => {
             console.error('Lỗi khi tạo PDF:', error);
         });
@@ -2170,9 +2201,29 @@ const onScannedImei = async (soImei) => {
         showQRModal.value = false
     }
 }
-const reloadPage = () =>{
+const reloadPage = () => {
     loadTabHoaDon()
 }
+
+const isVoucherModalOpen = ref(false);
+
+const openVoucherModal = () => {
+    isVoucherModalOpen.value = true;
+};
+
+const closeVoucherModal = () => {
+    isVoucherModalOpen.value = false;
+};
+
+const applyDiscount = (discount) => {
+    selectedDiscount.value = discount;
+    isVoucherModalOpen.value = false;
+};
+
+const clearDiscount = () => {
+    selectedDiscount.value = null;
+};
+
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>

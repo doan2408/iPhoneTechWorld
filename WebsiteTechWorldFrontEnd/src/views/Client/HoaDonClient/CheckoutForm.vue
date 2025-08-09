@@ -101,7 +101,7 @@
                 <div class="voucher-display-area">
                     <div v-if="appliedVoucher.code" class="applied-voucher-info">
                         <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ appliedVoucher.code
-                                }}</strong></span>
+                        }}</strong></span>
                         <span class="applied-voucher-discount">- ₫{{ appliedVoucher.discount.toLocaleString() }}</span>
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
@@ -193,10 +193,10 @@
                                         <input type="radio" name="modal-shipping-address" :value="address.id"
                                             v-model="modalSelectedAddressId" class="radio-field" />
                                         <div class="address-info">
-                                            <span class="address-name">{{ address.tenNguoiNhan+ '-' }}</span>
-                                            <span class="address-phone">{{ address.sdtNguoiNhan+ '-' }}</span>
+                                            <span class="address-name">{{ address.tenNguoiNhan + '-' }}</span>
+                                            <span class="address-phone">{{ address.sdtNguoiNhan + '-' }}</span>
                                             <span class="address-detail">{{ address.soNha + ', ' + address.tenDuong +
-                                                ','+ address.xaPhuong
+                                                ',' + address.xaPhuong
                                                 + ', ' + address.quanHuyen + ', ' + address.tinhThanhPho }}</span>
                                         </div>
                                     </div>
@@ -216,16 +216,19 @@
                                     <label for="modal-name" class="label">Họ và tên</label>
                                     <input id="modal-name" v-model="modalNewAddress.name" type="text"
                                         placeholder="Nhập họ và tên" class="input-field" />
+                                    <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Số điện thoại</label>
                                     <input id="modal-phone" v-model="modalNewAddress.phone" type="tel"
                                         placeholder="Nhập số điện thoại" class="input-field" />
+                                    <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-address" class="label">Địa chỉ</label>
                                     <input id="modal-address" v-model="modalNewAddress.address" type="text"
                                         placeholder="Nhập địa chỉ chi tiết" class="input-field" />
+                                    <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
                                 </div>
                             </div>
                         </div>
@@ -258,11 +261,21 @@
                             <div class="voucher-input-group">
                                 <input v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
                                     class="input-field flex-grow" />
-                                <button @click="handleApplyVoucherInModal" class="apply-button">Áp dụng</button>
                             </div>
+                            <ul class="voucher-list">
+                                <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
+                                    <div>
+                                        <strong>{{ discount.tenGiamGia }}</strong>
+                                        <small>Giảm: {{ discount.giaTriGiamGia }}%</small>
+                                    </div>
+                                    <button @click="applyDiscount(discount)" class="apply-button">
+                                        Áp dụng
+                                    </button>
+                                </li>
+                            </ul>
                             <div v-if="modalAppliedVoucher.code" class="applied-voucher-info">
                                 <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ modalAppliedVoucher.code
-                                        }}</strong></span>
+                                }}</strong></span>
                                 <span class="applied-voucher-discount">- ₫{{
                                     modalAppliedVoucher.discount.toLocaleString() }}</span>
                             </div>
@@ -285,28 +298,46 @@ import { useRoute } from 'vue-router';
 import { loadPaymentMethod, thanhToanClient } from "@/Service/ClientService/HoaDon/MyOrderClient";
 import { useToast } from "vue-toastification";
 import router from '@/router';
-import {getLatLon, getDistance} from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 
+import { useStore } from "vuex";
+import headerState from "@/components/Client/modules/headerState";
+
+import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
+
+const store = useStore();
+const count = ref(0);
+
+if (!store.hasModule('headerState')) {
+    store.registerModule('headerState', headerState)
+}
+
+const guiLenHeader = () => {
+    store.commit("headerState/setCartItemCount", count.value);
+};
+
+const idKhachHang = JSON.parse(localStorage.getItem("selectedInvoiceId")) || [];
 
 const toast = useToast()
 const route = useRoute();
-const isLoading = ref(false)   
+const isLoading = ref(false)
 
 // --- Address Management ---
 const userAddresses = ref([])
 onMounted(async () => {
     try {
-        
+
         const response = await getDiaChiByClient();
         const data = response.data;
 
         if (Array.isArray(data) && data.length > 0) {
             userAddresses.value = data;
-            selectedAddressId.value = data[0].id; 
+            selectedAddressId.value = data[0].id;
             console.log('Dữ liệu địa chỉ trả về:', data);
         } else {
             userAddresses.value = [];
-            selectedAddressId.value = 'new'; 
+            selectedAddressId.value = 'new';
         }
     } catch (error) {
         console.error('Lỗi khi tải địa chỉ:', error);
@@ -358,9 +389,32 @@ const closeAddressModal = () => {
     isAddressModalOpen.value = false;
 };
 
+const errors = ref({});
+
+const validateNewAddress = () => {
+    errors.value = {};
+
+    if (!modalNewAddress.value.name?.trim()) {
+        errors.value.name = "Vui lòng nhập họ và tên";
+    }
+
+    if (!modalNewAddress.value.phone?.trim()) {
+        errors.value.phone = "Vui lòng nhập số điện thoại";
+    } else if (!/^0\d{9}$/.test(modalNewAddress.value.phone)) {
+        errors.value.phone = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)";
+    }
+
+    if (!modalNewAddress.value.address?.trim()) {
+        errors.value.address = "Vui lòng nhập địa chỉ";
+    }
+
+    return Object.keys(errors.value).length === 0;
+};
+
 const confirmAddressSelection = () => {
     if (modalSelectedAddressId.value === 'new') {
-        if (modalNewAddress.value.name && modalNewAddress.value.phone && modalNewAddress.value.address) {
+        errors.value = {};
+        if (validateNewAddress()) {
             const newId = (userAddresses.value.length + 1).toString();
             const savedAddress = { id: newId, ...modalNewAddress.value };
             userAddresses.value.push(savedAddress);
@@ -368,9 +422,7 @@ const confirmAddressSelection = () => {
             shippingAddress.value = { ...savedAddress }; // Update main form's shipping address
             modalNewAddress.value = { name: '', phone: '', address: '' }; // Clear modal's new address fields
             closeAddressModal();
-            alert('Địa chỉ mới đã được lưu và chọn!');
-        } else {
-            alert('Vui lòng điền đầy đủ thông tin địa chỉ mới.');
+            toast.success('Địa chỉ mới đã được lưu và chọn!');
         }
     } else {
         selectedAddressId.value = modalSelectedAddressId.value; // Update main form's selected ID
@@ -391,6 +443,19 @@ const modalAppliedVoucher = ref({ code: '', discount: 0 }); // Voucher applied i
 const voucherError = ref(''); // Main form's error
 const modalVoucherError = ref(''); // Error inside the modal
 
+const discountList = ref([])
+const selectedDiscount = ref(null)
+const giam = ref(0)
+
+const loadDiscountList = async () => {
+    try {
+        const response = await getAllPhieuGiamGia(modalVoucherCode.value, idKhachHang, calculateSubtotal.value)
+        discountList.value = response.data
+    } catch (err) {
+        console.error(err || "Lỗi lấy danh sách phiếu giảm giá");
+    }
+}
+
 // Open Voucher Modal and sync its state
 const openVoucherModal = () => {
     modalVoucherCode.value = voucherCode.value; // Sync current voucher code
@@ -403,6 +468,25 @@ const closeVoucherModal = () => {
     isVoucherModalOpen.value = false;
 };
 
+const applyDiscount = (discount) => {
+    selectedDiscount.value = discount;
+
+        console.log('1', selectedDiscount.value)
+    if (selectedDiscount.value?.loaiGiamGia === 'Phần trăm') {
+        giam.value = calculateSubtotal.value * selectedDiscount.value?.giaTriGiamGia / 100;
+        if (selectedDiscount.value?.giaTriGiamGiaToiDa < giam.value) {
+            giam.value = selectedDiscount.value?.giaTriGiamGiaToiDa
+        }
+    } else if (selectedDiscount.value?.giaTriGiamGia) {
+        giam.value = selectedDiscount.value.giaTriGiamGia;
+    } 
+
+    const giamGia = { code: discount.maGiamGia, discount: giam.value }
+    calculateTotal.value = calculateTotal.value - giamGia
+    appliedVoucher.value = giamGia
+    isVoucherModalOpen.value = false;
+};
+
 const handleApplyVoucherInModal = () => {
     modalVoucherError.value = '';
     modalAppliedVoucher.value = { code: '', discount: 0 };
@@ -411,6 +495,7 @@ const handleApplyVoucherInModal = () => {
 
     if (code === 'FREESHIP') {
         modalAppliedVoucher.value = { code: 'FREESHIP', discount: getShippingCost.value };
+        console.log('FREESHIP', modalAppliedVoucher.value)
         alert('Mã giảm giá FREESHIP đã được áp dụng! Miễn phí vận chuyển.');
     } else if (code === 'SALE50') {
         modalAppliedVoucher.value = { code: 'SALE50', discount: 50000 };
@@ -424,7 +509,6 @@ const handleApplyVoucherInModal = () => {
     appliedVoucher.value = { ...modalAppliedVoucher.value };
     voucherCode.value = modalVoucherCode.value; // Keep main form's input synced
 };
-
 
 // --- Other Checkout Data ---
 const selectedShippingMethod = ref('standard')
@@ -442,11 +526,13 @@ onMounted(() => {
             console.error('Lỗi parse dữ liệu sản phẩm:', e);
         }
     }
+    loadDiscountList();
 });
 
 watch(product, (newVal) => {
     console.log("👀 product thay đổi:", newVal);
     console.log("💵 Subtotal mới:", calculateSubtotal.value);
+    loadDiscountList()
 });
 
 const insurance = ref({
@@ -487,18 +573,18 @@ const calculateSubtotal = computed(() => {
 });
 
 const calculateTotal = computed(() => {
-    return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0);
+    return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0) - Number(giam.value || 0);
 })
-console.log('total',calculateTotal.value)
+console.log('total', calculateTotal.value)
 
 
 const handleBuy = async () => {
     const shippingConfirm = {
-        hinhThucThanhToan: selectedPaymentMethod.value, 
+        hinhThucThanhToan: selectedPaymentMethod.value,
         soTienKhachDua: calculateTotal.value,
         thanhTien: calculateTotal.value,
-        phiShip: getShippingCost.value, 
-        shippingMethod: selectedShippingMethod.value.toUpperCase(), 
+        phiShip: getShippingCost.value,
+        shippingMethod: selectedShippingMethod.value.toUpperCase(),
         sdtNguoiNhan: shippingAddress.value.sdtNguoiNhan,
         tenNguoiNhan: shippingAddress.value.tenNguoiNhan,
         emailNguoiNhan: shippingAddress.value.emailNguoiNhan,
@@ -512,9 +598,9 @@ const handleBuy = async () => {
         sanPhamRequests: product.value.map(p => ({
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
-        }))
+        })),
+        idPhieuGiamGia: selectedDiscount.value?.id 
     };
-    console.log('shipping',shippingConfirm);
     if (getShippingCost.value == 0) {
         toast.warning('Chưa chọn phương thức giao hàng')
         return
@@ -543,6 +629,12 @@ const handleBuy = async () => {
         if (res.data.message === 'Đặt hàng thành công') {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
+            try {
+                count.value = await cartService.cartCount(idKhachHang);
+            } catch (error) {
+                console.error("Lỗi khi tải giỏ hàng:", error);
+            }
+            guiLenHeader();
             router.push({ name: 'ordersucces' });
         } else {
             toast.dismiss(toastId);
@@ -720,6 +812,4 @@ const calcPhiShip = (km) => {
 };
 </script>
 
-<style scoped src="@/style/HoaDon/CheckoutForm.css">
-
-</style>
+<style scoped src="@/style/HoaDon/CheckoutForm.css"></style>
