@@ -535,6 +535,11 @@ const handleBuy = async () => {
     try {
         const res = await thanhToanClient(shippingConfirm);
 
+        if (res.data.message === 'REDIRECT_VNPAY') {
+            window.location.href = res.data.paymentUrl;
+            return; 
+        }
+
         if (res.data.message === 'Đặt hàng thành công') {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
