@@ -23,4 +23,6 @@ public class PhanHoiDanhGiaClientController {
         List<PhanHoiDanhGiaClientResponse> responses = phanHoiDanhGiaClientService.getPhanHoiDanhTheoDanhGia(idDanhGia);
         return ResponseEntity.ok(responses);
     }
+
+
 }

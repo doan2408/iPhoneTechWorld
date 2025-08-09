@@ -10,6 +10,8 @@ import org.example.websitetechworld.Services.AdminServices.PhanHoiAdminService.P
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/phan-hoi-danh-gia")
@@ -32,4 +34,10 @@ public class PhanHoiDanhGiaAdminController {
         service.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/danh-gia/{idDanhGia}")
+    public ResponseEntity<List<PhanHoiDanhGiaAdminResponse>> getPhanHoiByDanhGia(@PathVariable Integer idDanhGia) {
+        return ResponseEntity.ok(service.getPhanHoiByDanhGia(idDanhGia));
+    }
+
 }
