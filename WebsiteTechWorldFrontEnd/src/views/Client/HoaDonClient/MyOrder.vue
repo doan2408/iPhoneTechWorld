@@ -127,7 +127,7 @@
               </div>
               <div class="order-actions">
                 <button class="action-button buy-again-button">Mua Lại</button>
-                <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
+                <button class="action-button contact-seller-button" @click="contactSeller">Liên Hệ Người Bán</button>
                 <button v-if="order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia"
                   class="action-button rate-button"
                   @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
@@ -225,6 +225,33 @@ const pendingOrders = computed(() =>
 const totalRevenue = computed(() =>
   allOrderValue.value.reduce((sum, order) => sum + order.thanhTien, 0)
 );
+
+onMounted(() => {
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+  const s1 = document.createElement('script');
+  const s0 = document.getElementsByTagName('script')[0];
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  s0.parentNode.insertBefore(s1, s0);
+});
+
+
+const contactSeller = () => {
+  if (window.Tawk_API?.toggle) {
+    window.Tawk_API.toggle();
+  } else {
+    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
+    setTimeout(() => {
+      if (!window.Tawk_API?.toggle) {
+        toast.error('Không thể mở chat. Vui lòng thử lại sau.');
+      }
+    }, 5000);
+  }
+};
+
 
 // const allMyOrde = async () => {
 //   try {
