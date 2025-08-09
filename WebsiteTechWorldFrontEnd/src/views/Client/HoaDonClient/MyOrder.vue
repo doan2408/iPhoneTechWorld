@@ -98,6 +98,9 @@
             Không tìm thấy đơn hàng nào phù hợp.
           </div>
           <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
+            <div class="order-mvd" style="margin: 10px 3px;">
+                <b>Mã vận đơn: {{ order.maVanDon }}</b>
+              </div>
             <div class="order-status-bar">
               <div class="order-status">
                 🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
