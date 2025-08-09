@@ -519,10 +519,10 @@ VALUES
 -- Table hang_thanh_vien
 INSERT INTO hang_thanh_vien (ten_hang, diem_tu, diem_den)
 VALUES
-    (N'MEMBER', 0, 50000),
-    (N'SILVER', 50000, 100000),
-    (N'GOLD', 100000, 150000),
-    (N'DIAMOND', 150000, NULL);
+    (N'MEMBER', 0, 100000),
+    (N'SILVER', 100000, 300000),
+    (N'GOLD', 300000, 600000),
+    (N'DIAMOND', 600000, NULL);
 
 -- Table khach_hang
 INSERT INTO khach_hang (ten_khach_hang, sdt, tai_khoan, mat_khau, email, ngay_sinh, gioi_tinh, anh, trang_thai, id_hang_thanh_vien)
