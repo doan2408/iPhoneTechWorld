@@ -424,8 +424,6 @@ const closeRateDialog = () => {
 };
 
 const submitRating = async (ratingData) => {
-
-
   try {
     if (!user.value?.id) {
       toast.warning('⚠️ Vui lòng đăng nhập để đánh giá!');
@@ -440,19 +438,20 @@ const submitRating = async (ratingData) => {
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(data.idHoaDon);
     const chiTietArray = chiTietList.data;
 
-    if (!chiTietArray || chiTietArray.length === 0) {
+    if (!chiTietArray || !Array.isArray(chiTietArray) || chiTietArray.length === 0) {
       console.error('Không có chi tiết hóa đơn!');
       toast.error('❌ Không tìm thấy chi tiết hóa đơn.');
       return;
     }
 
-    if (chiTietArray.length !== data.soSao.length) {
+    // Sử dụng data.ratings thay vì data.soSao
+    if (chiTietArray.length !== data.ratings.length) {
       console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
       toast.error('❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn.');
       return;
     }
 
-    const isValid = data.soSao.every((rating) => {
+    const isValid = data.ratings.every((rating) => {
       return chiTietArray.some((chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet);
     });
 
@@ -464,13 +463,13 @@ const submitRating = async (ratingData) => {
       return;
     }
 
-    if (data.soSao.length > chiTietArray.length) {
+    if (data.ratings.length > chiTietArray.length) {
       console.error('Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!');
       toast.error('❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.');
       return;
     }
 
-    const danhGiaPromises = data.soSao.map(async (chiTiet, index) => {
+    const danhGiaPromises = data.ratings.map(async (rating, index) => {
       if (!chiTietArray[index]?.idChiTietHoaDon) {
         throw new Error(`Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`);
       }
@@ -479,9 +478,9 @@ const submitRating = async (ratingData) => {
         idHoaDon: data.idHoaDon,
         idSanPhamChiTiet: chiTietArray[index].idSanPhamChiTiet,
         idChiTietHoaDon: chiTietArray[index].idChiTietHoaDon,
-        idKhachHang: data.idKhachHang,
-        soSao: chiTiet.soSao,
-        noiDung: data.noiDung,
+        idKhachHang: user.value.id,
+        soSao: rating.soSao,
+        noiDung: rating.noiDung,
         trangThaiDanhGia: data.trangThaiDanhGia,
       };
 
@@ -501,13 +500,15 @@ const submitRating = async (ratingData) => {
       return;
     }
 
-    for (const file of data.imageFiles) {
-      console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
-    }
-    for (const file of data.videoFiles) {
-      console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+    for (const rating of data.ratings) {
+      for (const file of rating.imageFiles) {
+        console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+      }
+      for (const file of rating.videoFiles) {
+        console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+      }
     }
 
     await Promise.all(mediaPromises);

@@ -205,6 +205,7 @@ const allMyOrders = async () => {
       }
       return true;
     });
+    
 
     totalElements.value = filteredOrders.value.length;
     totalPages.value = Math.ceil(totalElements.value / pageSizeMyOrder.value);
@@ -403,7 +404,7 @@ const closeRateDialog = () => {
 
 // Hàm gửi/cập nhật đánh giá
 const submitRating = async ({ payload }) => {
-  console.log('submitRating received payload:', JSON.stringify(payload, null, 2));
+  console.log('submitRating nhận payload:', JSON.stringify(payload, null, 2));
   try {
     if (!user.value?.id) {
       toast.error('Vui lòng đăng nhập để đánh giá!');
@@ -411,17 +412,17 @@ const submitRating = async ({ payload }) => {
     }
 
     const { idHoaDon, ratings, trangThaiDanhGia } = payload;
-    console.log('Fetching chiTietList for idHoaDon:', idHoaDon);
+    console.log('Đang lấy chiTietList cho idHoaDon:', idHoaDon);
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(idHoaDon);
 
     if (!Array.isArray(chiTietList.data) || chiTietList.data.length === 0) {
-      console.error('Invalid chiTietList data:', chiTietList);
+      console.error('Dữ liệu chiTietList không hợp lệ:', chiTietList);
       toast.error('Không tìm thấy chi tiết hóa đơn!');
       return;
     }
 
     if (chiTietList.data.length !== ratings.length) {
-      console.error('Ratings count does not match chiTietList:', {
+      console.error('Số lượng đánh giá không khớp với chiTietList:', {
         ratingsCount: ratings.length,
         chiTietListCount: chiTietList.data.length,
       });
@@ -434,20 +435,20 @@ const submitRating = async ({ payload }) => {
     );
 
     if (!isValid) {
-      console.error('Invalid ratings data:', ratings);
+      console.error('Dữ liệu đánh giá không hợp lệ:', ratings);
       toast.error('Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này!');
       return;
     }
 
     if (isEditing.value) {
-      // Chế độ chỉnh sửa
-      console.log('Processing update for ratings:', ratings);
+      // Chế độ chỉnh sửa (giữ nguyên logic hiện tại)
+      console.log('Đang xử lý cập nhật cho ratings:', ratings);
       const updatePromises = ratings.map(async (rating) => {
         const existing = existingRatingData.value.find(r => r.idSanPhamChiTiet === rating.idSanPhamChiTiet);
         if (!existing) {
-          console.error(`No existing rating found for product ${rating.idSanPhamChiTiet}`);
+          console.error(`Không tìm thấy đánh giá hiện có cho sản phẩm ${rating.idSanPhamChiTiet}`);
           toast.error(`Không tìm thấy đánh giá hiện có cho sản phẩm ${rating.idSanPhamChiTiet}!`);
-          return { status: 'rejected', reason: `No existing rating for ${rating.idSanPhamChiTiet}` };
+          return { status: 'rejected', reason: `Không có đánh giá hiện có cho ${rating.idSanPhamChiTiet}` };
         }
 
         const request = {
@@ -461,58 +462,74 @@ const submitRating = async ({ payload }) => {
         };
 
         try {
-          // Cập nhật đánh giá
-          console.log(`Updating rating for product ${rating.idSanPhamChiTiet} with idDanhGia ${existing.idDanhGia}`);
+          console.log(`Đang cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} với idDanhGia ${existing.idDanhGia}`);
           const updateResponse = await DanhGiaSanPhamClientService.capNhatDanhGia(existing.idDanhGia, request);
-          console.log(`Update successful for product ${rating.idSanPhamChiTiet}:`, updateResponse);
+          console.log(`Cập nhật thành công cho sản phẩm ${rating.idSanPhamChiTiet}:`, updateResponse);
 
-          // Xóa media đã chọn
-          // if (rating.deletedMediaIds && rating.deletedMediaIds.length > 0) {
-          //   console.log(`Deleting media for product ${rating.idSanPhamChiTiet}:`, rating.deletedMediaIds);
-          //   const deletePromises = rating.deletedMediaIds.map(async (mediaId) => {
-          //     try {
-          //       await MediaDanhGiaClientService.deleteByIdMedia(mediaId);
-          //       console.log(`Deleted media ${mediaId} successfully`);
-          //       return { status: 'fulfilled', value: mediaId };
-          //     } catch (err) {
-          //       console.error(`Error deleting media ${mediaId} for product ${rating.idSanPhamChiTiet}:`, err);
-          //       toast.error(`Không thể xóa media ${mediaId}`);
-          //       return { status: 'rejected', reason: err };
-          //     }
-          //   });
-          //   await Promise.allSettled(deletePromises);
-          // }
-
-          // Upload media mới
-          const mediaPromises = [
-            ...rating.imageFiles.map(async (file) => {
+          if (rating.deletedMediaIds && Array.isArray(rating.deletedMediaIds) && rating.deletedMediaIds.length > 0) {
+            console.log(`Đang xóa media cho sản phẩm ${rating.idSanPhamChiTiet}:`, rating.deletedMediaIds);
+            const deletePromises = rating.deletedMediaIds.map(async (mediaId) => {
               try {
-                const uploadResponse = await MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia);
-                console.log(`Uploaded image ${file.name} successfully`);
-                return { status: 'fulfilled', value: uploadResponse };
+                await MediaDanhGiaClientService.deleteByIdMedia(mediaId);
+                console.log(`Xóa media ${mediaId} thành công`);
+                return { status: 'fulfilled', value: mediaId };
               } catch (err) {
-                console.error(`Error uploading image ${file.name} for product ${rating.idSanPhamChiTiet}:`, err);
-                toast.error(`Không thể upload ảnh ${file.name}`);
+                console.error(`Lỗi khi xóa media ${mediaId} cho sản phẩm ${rating.idSanPhamChiTiet}:`, err);
+                toast.error(`Không thể xóa media ${mediaId}`);
                 return { status: 'rejected', reason: err };
               }
-            }),
-            ...rating.videoFiles.map(async (file) => {
-              try {
-                const uploadResponse = await MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia);
-                console.log(`Uploaded video ${file.name} successfully`);
-                return { status: 'fulfilled', value: uploadResponse };
-              } catch (err) {
-                console.error(`Error uploading video ${file.name} for product ${rating.idSanPhamChiTiet}:`, err);
-                toast.error(`Không thể upload video ${file.name}`);
-                return { status: 'rejected', reason: err };
+            });
+            await Promise.allSettled(deletePromises);
+          }
+
+          const mediaPromises = [];
+          if (Array.isArray(rating.imageFiles)) {
+            rating.imageFiles.forEach(file => {
+              if (file && file.name && file.size && file.type) {
+                mediaPromises.push(
+                  MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia)
+                    .then(uploadResponse => {
+                      console.log(`Tải lên ảnh ${file.name} thành công`);
+                      return { status: 'fulfilled', value: uploadResponse };
+                    })
+                    .catch(err => {
+                      console.error(`Lỗi khi tải lên ảnh ${file.name} cho sản phẩm ${rating.idSanPhamChiTiet}:`, err);
+                      toast.error(`Không thể tải lên ảnh ${file.name}`);
+                      return { status: 'rejected', reason: err };
+                    })
+                );
+              } else {
+                console.warn(`Tệp ảnh không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
-            }),
-          ];
+            });
+          }
+
+          if (Array.isArray(rating.videoFiles)) {
+            rating.videoFiles.forEach(file => {
+              if (file && file.name && file.size && file.type) {
+                mediaPromises.push(
+                  MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia)
+                    .then(uploadResponse => {
+                      console.log(`Tải lên video ${file.name} thành công`);
+                      return { status: 'fulfilled', value: uploadResponse };
+                    })
+                    .catch(err => {
+                      console.error(`Lỗi khi tải lên video ${file.name} cho sản phẩm ${rating.idSanPhamChiTiet}:`, err);
+                      toast.error(`Không thể tải lên video ${file.name}`);
+                      return { status: 'rejected', reason: err };
+                    })
+                );
+              } else {
+                console.warn(`Tệp video không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
+              }
+            });
+          }
+
           await Promise.allSettled(mediaPromises);
 
           return { status: 'fulfilled', value: updateResponse };
         } catch (error) {
-          console.error(`Error updating rating for product ${rating.idSanPhamChiTiet}:`, error);
+          console.error(`Lỗi khi cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, error);
           toast.error(`Cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} thất bại`);
           return { status: 'rejected', reason: error };
         }
@@ -521,14 +538,14 @@ const submitRating = async ({ payload }) => {
       const updateResults = await Promise.allSettled(updatePromises);
       const hasErrors = updateResults.some(result => result.status === 'rejected');
       if (hasErrors) {
-        console.error('Update errors:', updateResults.filter(r => r.status === 'rejected'));
+        console.error('Lỗi cập nhật:', updateResults.filter(r => r.status === 'rejected'));
         toast.error('Cập nhật một số đánh giá thất bại!');
-        return; // Không đóng dialog khi có lỗi
+        return;
       }
       toast.success('Cập nhật đánh giá thành công!');
     } else {
       // Chế độ tạo mới
-      console.log('Processing create for ratings:', ratings);
+      console.log('Đang xử lý tạo mới cho ratings:', ratings);
       const danhGiaPromises = ratings.map(async (rating) => {
         const request = {
           idHoaDon,
@@ -542,37 +559,62 @@ const submitRating = async ({ payload }) => {
 
         try {
           const danhGiaResponse = await DanhGiaSanPhamClientService.taoMoiDanhGia(request);
-          console.log(`Created rating for product ${rating.idSanPhamChiTiet}:`, danhGiaResponse);
+          console.log(`Tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, danhGiaResponse);
 
-          const mediaPromises = [
-            ...rating.imageFiles.map(async (file) => {
-              try {
-                const uploadResponse = await MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia);
-                console.log(`Uploaded image ${file.name} successfully`);
-                return { status: 'fulfilled', value: uploadResponse };
-              } catch (err) {
-                console.error(`Error uploading image ${file.name} for product ${rating.idSanPhamChiTiet}:`, err);
-                toast.error(`Không thể upload ảnh ${file.name}`);
-                return { status: 'rejected', reason: err };
+          const mediaPromises = [];
+          // Xác thực và xử lý tệp ảnh
+          if (Array.isArray(rating.imageFiles)) {
+            rating.imageFiles.forEach(file => {
+              if (file && file.name && file.size && file.type) {
+                mediaPromises.push(
+                  MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia)
+                    .then(uploadResponse => {
+                      console.log(`Tải lên ảnh ${file.name} thành công`);
+                      return { status: 'fulfilled', value: uploadResponse };
+                    })
+                    .catch(err => {
+                      console.error(`Lỗi khi tải lên ảnh ${file.name} cho sản phẩm ${rating.idSanPhamChiTiet}:`, err);
+                      toast.error(`Không thể tải lên ảnh ${file.name}`);
+                      return { status: 'rejected', reason: err };
+                    })
+                );
+              } else {
+                console.warn(`Tệp ảnh không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
-            }),
-            ...rating.videoFiles.map(async (file) => {
-              try {
-                const uploadResponse = await MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia);
-                console.log(`Uploaded video ${file.name} successfully`);
-                return { status: 'fulfilled', value: uploadResponse };
-              } catch (err) {
-                console.error(`Error uploading video ${file.name} for product ${rating.idSanPhamChiTiet}:`, err);
-                toast.error(`Không thể upload video ${file.name}`);
-                return { status: 'rejected', reason: err };
+            });
+          } else {
+            console.warn(`imageFiles không phải là mảng cho sản phẩm ${rating.idSanPhamChiTiet}:`, rating.imageFiles);
+          }
+
+          // Xác thực và xử lý tệp video
+          if (Array.isArray(rating.videoFiles)) {
+            rating.videoFiles.forEach(file => {
+              if (file && file.name && file.size && file.type) {
+                mediaPromises.push(
+                  MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia)
+                    .then(uploadResponse => {
+                      console.log(`Tải lên video ${file.name} thành công`);
+                      return { status: 'fulfilled', value: uploadResponse };
+                    })
+                    .catch(err => {
+                      console.error(`Lỗi khi tải lên video ${file.name} cho sản phẩm ${rating.idSanPhamChiTiet}:`, err);
+                      toast.error(`Không thể tải lên video ${file.name}`);
+                      return { status: 'rejected', reason: err };
+                    })
+                );
+              } else {
+                console.warn(`Tệp video không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
-            }),
-          ];
+            });
+          } else {
+            console.warn(`videoFiles không phải là mảng cho sản phẩm ${rating.idSanPhamChiTiet}:`, rating.videoFiles);
+          }
+
           await Promise.allSettled(mediaPromises);
 
           return { status: 'fulfilled', value: danhGiaResponse };
         } catch (error) {
-          console.error(`Error creating rating for product ${rating.idSanPhamChiTiet}:`, error);
+          console.error(`Lỗi khi tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, error);
           toast.error(`Tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} thất bại`);
           return { status: 'rejected', reason: error };
         }
@@ -581,19 +623,18 @@ const submitRating = async ({ payload }) => {
       const danhGiaResults = await Promise.allSettled(danhGiaPromises);
       const hasErrors = danhGiaResults.some(result => result.status === 'rejected');
       if (hasErrors) {
-        console.error('Create errors:', danhGiaResults.filter(r => r.status === 'rejected'));
+        console.error('Lỗi tạo đánh giá:', danhGiaResults.filter(r => r.status === 'rejected'));
         toast.error('Tạo một số đánh giá thất bại!');
-        return; // Không đóng dialog khi có lỗi
+        return;
       }
       toast.success('Gửi đánh giá thành công!');
     }
 
-    // Chỉ làm mới và đóng dialog khi không có lỗi
-    console.log('Refreshing orders and closing dialog');
+    console.log('Đang làm mới danh sách đơn hàng và đóng dialog');
     await allMyOrders();
     closeRateDialog();
   } catch (error) {
-    console.error('Error in submitRating:', error);
+    console.error('Lỗi trong submitRating:', error);
     toast.error(`Gửi/cập nhật đánh giá thất bại: ${error.response?.data?.message || 'Lỗi không xác định'}`);
   }
 };

@@ -325,6 +325,9 @@ const handleImageUpload = (event, productId) => {
     imagePreviews.value[productId] = [...(imagePreviews.value[productId] || []), { file, url: previewUrl }];
     console.log(`Thêm ảnh cho productId ${productId}: ${file.name}, URL: ${previewUrl}`);
   });
+
+  // Cập nhật imageFiles.value để đảm bảo Vue reactivity
+  imageFiles.value = { ...imageFiles.value };
 };
 
 const handleVideoUpload = (event, productId) => {
@@ -421,19 +424,14 @@ const removeVideo = (productId, index) => {
   videoPreviews.value = { ...videoPreviews.value };
 };
 
-const removeExistingMedia = async (productId, id) => {
-  console.log(`Xóa media hiện có với id ${id} cho productId ${productId}:`, existingMedia.value[productId].find(m => m.id === id)?.url);
-  try {
-    await MediaDanhGiaClientService.deleteByIdMedia(id); // Gọi API xóa media
-    existingMedia.value[productId] = existingMedia.value[productId].filter(m => m.id !== id);
-    deletedMediaIds.value[productId] = [...(deletedMediaIds.value[productId] || []), id]; // Lưu ID media đã xóa
-    existingMedia.value = { ...existingMedia.value };
-    deletedMediaIds.value = { ...deletedMediaIds.value };
-    console.log(`Updated deletedMediaIds for productId ${productId}:`, deletedMediaIds.value[productId]);
-  } catch (error) {
-    console.error(`Lỗi xóa media ${id} cho productId ${productId}:`, error);
-    toast.error(`Không thể xóa media ${id}`);
-  }
+const removeExistingMedia = (productId, id) => {
+  console.log(`Đánh dấu xóa media với id ${id} cho productId ${productId}:`, existingMedia.value[productId].find(m => m.id === id)?.url);
+  // Không gọi API xóa ngay lập tức
+  existingMedia.value[productId] = existingMedia.value[productId].filter(m => m.id !== id); // Cập nhật giao diện
+  deletedMediaIds.value[productId] = [...(deletedMediaIds.value[productId] || []), id]; // Lưu ID media để xóa sau
+  existingMedia.value = { ...existingMedia.value };
+  deletedMediaIds.value = { ...deletedMediaIds.value };
+  console.log(`Updated deletedMediaIds for productId ${productId}:`, deletedMediaIds.value[productId]);
 };
 
 const closeDialog = () => {

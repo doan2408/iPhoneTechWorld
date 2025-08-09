@@ -11,7 +11,7 @@ export const getMyOrder = async (pageNo,pageSize) => {
     });
 };  
 
-
+//bảng đánh giá
 export const getMyReview = async (pageNo,pageSize) => {
     return  await api.get(baseURL + '/review',{
         params : {
