@@ -97,18 +97,18 @@ public class DanhGiaSanPhamAdminService {
     }
 
     // Xóa đánh giá
-    @Transactional
-    public void xoaDanhGia(Integer id) {
-        if (!danhGiaSanPhamRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
-        }
-
-        // Xóa media trước
-        mediaDanhGiaRepository.deleteByDanhGiaSanPham_IdDanhGia(id);
-
-        // Xóa đánh giá
-        danhGiaSanPhamRepository.deleteById(id);
-    }
+//    @Transactional
+//    public void xoaDanhGia(Integer id) {
+//        if (!danhGiaSanPhamRepository.existsById(id)) {
+//            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
+//        }
+//
+//        // Xóa media trước
+//        mediaDanhGiaRepository.deleteByDanhGiaSanPham_IdDanhGia(id);
+//
+//        // Xóa đánh giá
+//        danhGiaSanPhamRepository.deleteById(id);
+//    }
 
 
     // Phản hồi đánh giá

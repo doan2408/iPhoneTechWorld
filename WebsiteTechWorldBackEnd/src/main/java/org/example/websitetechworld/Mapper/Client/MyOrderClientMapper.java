@@ -2,6 +2,7 @@ package org.example.websitetechworld.Mapper.Client;
 
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderProductClientResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HinhAnh;
 import org.example.websitetechworld.Entity.HoaDon;
@@ -47,4 +48,24 @@ public class MyOrderClientMapper {
         dto.setColorName(chiTietHoaDon.getIdSanPhamChiTiet().getIdMau().getTenMau());
         return dto;
     }
+
+
+    public MyReviewClientResponse toMyReviewClientResponse(HoaDon hoaDon){
+        MyReviewClientResponse dto = new MyReviewClientResponse();
+        dto.setIdHoaDon(hoaDon.getId());
+        dto.setMaVanDon(hoaDon.getMaVanDon());
+        if (hoaDon.getTrangThaiDonHang() != null ){
+            dto.setTrangThaiGiaoHang(hoaDon.getTrangThaiDonHang().getDisplayName());
+        }
+        if (hoaDon.getTrangThaiThanhToan() != null){
+            dto.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan().getDisplayName());
+        }
+        dto.setThanhTien(hoaDon.getThanhTien());
+        dto.setMyOrderClientResponseList(
+                hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)
+                        .collect(Collectors.toList())
+        );
+        return dto;
+    }
+
 }

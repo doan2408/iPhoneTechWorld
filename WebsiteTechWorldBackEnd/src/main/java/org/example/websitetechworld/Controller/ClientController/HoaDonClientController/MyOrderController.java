@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,18 @@ public class MyOrderController {
         }
         return myOrderClientResponses;
         }
+
+    @GetMapping("/review")
+    public Page<MyReviewClientResponse> myReview(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
+                                               @RequestParam(defaultValue = "10",value = "pageSize") int pageSize) {
+        Page<MyReviewClientResponse> myOrderClientResponses = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails){
+            Integer userLoginId = customUserDetails.getId();
+            myOrderClientResponses = myOrderClientServices.getReview(userLoginId,pageNo,pageSize);
+        }
+        return myOrderClientResponses;
+    }
 
     @GetMapping("/mvd/{maVanDon}")
     public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon) {
