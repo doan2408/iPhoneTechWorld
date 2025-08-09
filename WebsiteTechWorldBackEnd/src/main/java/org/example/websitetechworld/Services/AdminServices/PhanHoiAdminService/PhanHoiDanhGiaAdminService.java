@@ -13,24 +13,26 @@ import org.example.websitetechworld.Repository.PhanHoiDanhGiaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PhanHoiDanhGiaAdminService {
 
-    private final PhanHoiDanhGiaRepository repository;
-
     private final NhanVienRepository nhanVienRepository;
 
-    private final DanhGiaSanPhamRepository danhSachSanPhamRepository;
+    private final DanhGiaSanPhamRepository danhGiaSanPhamRepository;
+
+    private final PhanHoiDanhGiaRepository phanHoiDanhGiaRepository;
 
 
     public PhanHoiDanhGiaAdminResponse create(Integer idDanhGia ,PhanHoiDanhGiaAdminRequest dto) {
-        DanhGiaSanPham danhGiaSanPham = danhSachSanPhamRepository.findById(idDanhGia)
+        DanhGiaSanPham danhGiaSanPham = danhGiaSanPhamRepository.findById(idDanhGia)
                 .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
 
-        Optional<PhanHoiDanhGia> existing = repository.findByDanhGiaSanPham_IdDanhGia(idDanhGia);
+        Optional<PhanHoiDanhGia> existing = phanHoiDanhGiaRepository.findByDanhGiaSanPham_IdDanhGia(idDanhGia);
         if (existing.isPresent()) {
             throw new RuntimeException("Đánh giá này đã được phản hồi. Vui lòng chỉnh sửa phản hồi hiện có.");
         }
@@ -53,7 +55,7 @@ public class PhanHoiDanhGiaAdminService {
         phanHoi.setNgayPhanHoi(LocalDateTime.now());
         phanHoi.setNhanVien(nhanVien);
 
-        PhanHoiDanhGia saved = repository.save(phanHoi);
+        PhanHoiDanhGia saved = phanHoiDanhGiaRepository.save(phanHoi);
 
         // 6. Trả về response
         PhanHoiDanhGiaAdminResponse response = new PhanHoiDanhGiaAdminResponse();
@@ -66,7 +68,7 @@ public class PhanHoiDanhGiaAdminService {
     }
 
     public PhanHoiDanhGia update(Integer id, PhanHoiDanhGiaAdminRequest dto) {
-        PhanHoiDanhGia phanHoi = repository.findById(id)
+        PhanHoiDanhGia phanHoi = phanHoiDanhGiaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Phản hồi không tồn tại"));
 
         phanHoi.setNoiDungPhanHoi(dto.getNoiDungPhanHoi());
@@ -74,10 +76,43 @@ public class PhanHoiDanhGiaAdminService {
                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
         phanHoi.setNhanVien(nhanVien);
 
-        return repository.save(phanHoi);
+        return phanHoiDanhGiaRepository.save(phanHoi);
     }
 
     public void delete(Integer id) {
-        repository.deleteById(id);
+        phanHoiDanhGiaRepository.deleteById(id);
+    }
+
+    public List<PhanHoiDanhGiaAdminResponse> getPhanHoiByDanhGia(Integer idDanhGia) {
+        findDanhGia(idDanhGia); // Kiểm tra đánh giá tồn tại
+        return phanHoiDanhGiaRepository.findByDanhGiaSanPhamIdDanhGia(idDanhGia)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    private PhanHoiDanhGiaAdminResponse convertToResponse(PhanHoiDanhGia phanHoi) {
+        PhanHoiDanhGiaAdminResponse response = new PhanHoiDanhGiaAdminResponse();
+        response.setIdPhanHoi(phanHoi.getIdPhanHoi());
+        response.setNoiDungPhanHoi(phanHoi.getNoiDungPhanHoi());
+        response.setNgayPhanHoi(phanHoi.getNgayPhanHoi());
+        response.setDanhGiaSanPham(phanHoi.getDanhGiaSanPham().getIdDanhGia());
+        response.setIdNhanVien(phanHoi.getNhanVien().getId());
+        return response;
+    }
+
+    private DanhGiaSanPham findDanhGia(Integer id) {
+        return danhGiaSanPhamRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Đánh giá với ID " + id + " không tồn tại"));
+    }
+
+    private NhanVien findNhanVien(Integer id) {
+        return nhanVienRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nhân viên với ID " + id + " không tồn tại"));
+    }
+
+    private PhanHoiDanhGia findPhanHoi(Integer id) {
+        return phanHoiDanhGiaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Phản hồi với ID " + id + " không tồn tại"));
     }
 }
