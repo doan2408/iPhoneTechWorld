@@ -20,4 +20,5 @@ public class RequestThanhToanTongHop {
     private String emailNguoiNhan;
     private String diaChiGiaoHang;
     private List<ChiTietSanPhamRequest> sanPhamRequests;
+    private Integer idPhieuGiamGia;
 }

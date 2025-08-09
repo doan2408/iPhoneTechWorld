@@ -9,6 +9,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
+import org.example.websitetechworld.Entity.PhieuGiamGia;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
@@ -91,6 +92,9 @@ public class MyOrderClientServices {
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
         String maVanDon = generateMaVanDon(hoaDon.getId());
         hoaDon.setMaVanDon(maVanDon);
+        PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
+        phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
+        hoaDon.setIdPhieuGiamGia(phieuGiamGia);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
