@@ -35,6 +35,9 @@ public class GiaoHangAdminController {
                                           @RequestBody CapNhatTrangThaiDTO request) {
         TrangThaiGiaoHang trangThai;
         try {
+            if ("Sẵn sàng giao".equals(request.getTrangThaiDonHang())){
+                hoaDonAdminService.updateMaVanDon(idHoaDon);
+            }
             trangThai = TrangThaiGiaoHang.valueOf(request.getTrangThaiDonHang().toUpperCase());
         } catch (IllegalArgumentException e) {
             trangThai = TrangThaiGiaoHang.fromDisplayName(request.getTrangThaiDonHang());

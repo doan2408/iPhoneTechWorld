@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.ClientController.DanhGiaSanPhamC
 
 import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.ClientRequest.DanhGiaSanPhamClientRequest.DanhGiaSanPhamClientRequest;
+import org.example.websitetechworld.Dto.Response.ClientResponse.DanhGiaSanPhamClientResponse.DanhGiaAndHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.DanhGiaSanPhamClientResponse.DanhGiaSanPhamClientResponse;
 import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiDanhGia;
 import org.example.websitetechworld.Services.ClientServices.DanhGiaSanPhamClientService.DanhGiaSanPhamClientService;
@@ -174,6 +175,39 @@ public class DanhGiaSanPhamClientController {
         Page<DanhGiaSanPhamClientResponse> responses = danhGiaService.layDanhGiaTheoTrang(page, size, sortBy, sortDir);
         return ResponseEntity.ok(responses);
 
+    }
+
+    @GetMapping("/hoa-don/{idHoaDon}")
+    public ResponseEntity<List<DanhGiaAndHoaDonClientResponse>> getDanhGiaByHoaDon(@PathVariable Integer idHoaDon) {
+        List<DanhGiaAndHoaDonClientResponse> danhGiaList = danhGiaService.getDanhGiaByHoaDon(idHoaDon);
+        return ResponseEntity.ok(danhGiaList);
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Object>> checkDanhGia(
+            @RequestParam Integer idHoaDon,
+            @RequestParam Integer idKhachHang) {
+        try {
+            Map<String, Object> result = danhGiaService.checkDaDanhGia(idHoaDon, idKhachHang);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Không thể kiểm tra trạng thái đánh giá"));
+        }
+    }
+
+    @GetMapping("/checkDaDanhGiaVaPhanHoi")
+    public ResponseEntity<Map<String, Boolean>> checkDaDanhGiaVaPhanHoi(
+            @RequestParam("idHoaDon") Integer idHoaDon,
+            @RequestParam("idKhachHang") Integer idKhachHang) {
+        try {
+            Map<String, Boolean> result = danhGiaService.checkDaDanhGiaVaPhanHoi(idHoaDon, idKhachHang);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", false));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", false));
+        }
     }
 
 }

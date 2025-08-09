@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.ClientServices.MediaDanhGiaClientService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.ClientRequest.MediaDanhGiaClientRequest.MediaDanhGiaClientRequest;
 import org.example.websitetechworld.Dto.Response.ClientResponse.MediaDanhGiaClientResponse.MediaDanhGiaClientResponse;
@@ -9,6 +10,7 @@ import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.MediaDanhGiaRepository;
 import org.example.websitetechworld.Services.CloudinaryService.CloudinaryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -70,7 +72,7 @@ public class MediaDanhGiaClientService {
         media.setTenFile(file.getOriginalFilename());
         media.setKichThuocFile(BigInteger.valueOf(file.getSize()));
         media.setNgayUpload(LocalDateTime.now());
-        media.setTrangThaiMedia(TrangThaiMedia.PENDING_APPROVAL);
+        media.setTrangThaiMedia(TrangThaiMedia.APPROVED);
 
         if ("VIDEO".equals(uploadInfo.get("resource_type")) && uploadInfo.get("duration") != null) {
             media.setThoiLuongVideo((Integer) uploadInfo.get("duration"));
@@ -102,10 +104,23 @@ public class MediaDanhGiaClientService {
         return toResponse(mediaRepo.save(media));
     }
 
+    @Transactional
     public void delete(Integer id) {
-        if (!mediaRepo.existsById(id)) {
-            throw new RuntimeException("Media không tồn tại id: " + id);
+        if (!danhGiaRepo.existsById(id)) {
+            throw new RuntimeException("Đánh giá không tồn tại id: " + id);
         }
-        mediaRepo.deleteById(id);
+        mediaRepo.deleteByDanhGiaSanPham_IdDanhGia(id);
+    }
+
+    @Transactional
+    public void deleteMediaById(Integer idMedia) {
+        // Kiểm tra tồn tại trước khi xóa (optional)
+        boolean exists = mediaRepo.existsById(idMedia);
+        if (!exists) {
+            throw new EntityNotFoundException("Media với id " + idMedia + " không tồn tại");
+        }
+
+        // Xóa media
+        mediaRepo.deleteByIdMedia(idMedia);
     }
 }

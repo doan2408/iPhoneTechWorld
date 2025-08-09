@@ -14,6 +14,52 @@ export const DanhGiaSanPhamClientService = {
     return response.data;
   },
 
+  async getDanhGiaByHoaDonAndKhachHang(idHoaDon, idKhachHang) {
+    try {
+      const response = await this.layDanhGiaTheoHoaDon(idHoaDon);
+      const danhGia = response.data.find(dg => dg.idKhachHang === idKhachHang);
+      return danhGia || null;
+    } catch (error) {
+      console.error('Lỗi khi lấy đánh giá theo hóa đơn và khách hàng:', error);
+      throw error;
+    }
+  },
+
+  async layDanhGiaTheoHoaDon(idHoaDon) {
+    try {
+      const response = await api.get(`${BASE_URL}/hoa-don/${idHoaDon}`);
+      return response;
+    } catch (error) {
+      console.error('Lỗi khi lấy đánh giá theo hóa đơn:', error);
+      throw error;
+    }
+  },
+
+  async checkDanhGia(idHoaDon, idKhachHang){
+    try {
+        const response = await api.get(`${BASE_URL}/check`, {
+            params: { idHoaDon, idKhachHang },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra đánh giá:', error);
+        throw error;
+    }
+  },
+
+    async checkDanhGiaVaDaPhanHoi(idHoaDon, idKhachHang){
+    try {
+        const response = await api.get(`${BASE_URL}/checkDaDanhGiaVaPhanHoi`, {
+            params: { idHoaDon, idKhachHang },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra đánh giá:', error);
+        throw error;
+    }
+  },
+
+
   async xoaDanhGia(id) {
     const response = await api.delete(`${BASE_URL}/${id}`);
     return response.data;
@@ -23,6 +69,7 @@ export const DanhGiaSanPhamClientService = {
     const response = await api.get(`${BASE_URL}/${id}`);
     return response.data;
   },
+
 
   async layTatCaDanhGia() {
     const response = await api.get(BASE_URL);
@@ -105,4 +152,5 @@ export const DanhGiaSanPhamClientService = {
     });
     return response.data.url; // Adjust based on your upload endpoint response
   },
+
 };

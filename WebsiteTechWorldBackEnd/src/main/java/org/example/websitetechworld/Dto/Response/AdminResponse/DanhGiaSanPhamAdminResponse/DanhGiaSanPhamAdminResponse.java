@@ -24,7 +24,7 @@ public class DanhGiaSanPhamAdminResponse {
     private String tenMau;
     private String dungLuongRam;
     private String dungLuongRom;
-    private Integer soSao; // Sửa từ int thành Integer để hỗ trợ null
+    private Integer soSao;
     private String noiDung;
     private String noiDungPhanHoi;
     private LocalDateTime ngayDanhGia;

@@ -4,8 +4,10 @@ import org.example.websitetechworld.Config.EnvLoader;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@EnableAsync
 @SpringBootApplication
 public class WebsiteTechWorldApplication implements CommandLineRunner {
 
@@ -17,8 +19,8 @@ public class WebsiteTechWorldApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode("password123");  // Mã hóa mật khẩu
+        String encodedPassword = encoder.encode("password123");
 
-        System.out.println(encodedPassword);  // In ra mật khẩu đã mã hóa để dùng cho SQL
+        System.out.println(encodedPassword);
     }
 }

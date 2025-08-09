@@ -621,6 +621,11 @@ const handleBuy = async () => {
     try {
         const res = await thanhToanClient(shippingConfirm);
 
+        if (res.data.message === 'REDIRECT_VNPAY') {
+            window.location.href = res.data.paymentUrl;
+            return; 
+        }
+
         if (res.data.message === 'Đặt hàng thành công') {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
@@ -643,6 +648,14 @@ const handleBuy = async () => {
         isLoading.value = false; // Kết thúc trạng thái loading
     }
 }
+
+onMounted(() => {
+    const responseCode = route.query.vnp_ResponseCode;
+
+    if (responseCode === '24') {
+        router.push({ name: 'shoppingCardClient' });
+    }
+});
 
 const paymentMethods = ref([]);
 const selectedPaymentMethod = ref(null);

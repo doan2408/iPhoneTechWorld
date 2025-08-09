@@ -196,15 +196,17 @@ public class LichSuDiemService {
         }
 
         // check valid status
-        boolean isShipping = hoaDon.getIsShipping();
-        String trangThaiThanhToan = hoaDon.getTrangThaiThanhToan().name();
-        String trangThaiGiaoHang = hoaDon.getTrangThaiDonHang().name();
+        if (hoaDon.getIsShipping() != null) {
+            boolean isShipping = hoaDon.getIsShipping();
+            String trangThaiThanhToan = hoaDon.getTrangThaiThanhToan().name();
+            String trangThaiGiaoHang = hoaDon.getTrangThaiDonHang().name();
 
-        boolean valid = (isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan) && "DELIVERED".equalsIgnoreCase(trangThaiGiaoHang))
-                || (!isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan));
+            boolean valid = (isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan) && "DELIVERED".equalsIgnoreCase(trangThaiGiaoHang))
+                    || (!isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan));
 
-        if(!valid) {
-            return;
+            if(!valid) {
+                return;
+            }
         }
 
         KhachHang khachHang = hoaDon.getIdKhachHang();

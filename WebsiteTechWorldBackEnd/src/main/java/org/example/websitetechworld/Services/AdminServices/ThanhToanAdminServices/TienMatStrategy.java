@@ -8,6 +8,7 @@ import org.example.websitetechworld.Entity.PhuongThucThanhToan;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Repository.ChiTietThanhToanRepository;
 import org.example.websitetechworld.Repository.PhuongThucThanhToanRepository;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
 import org.springframework.stereotype.Component;
 
@@ -20,10 +21,12 @@ public class TienMatStrategy implements ThanhToanStrategy {
 
     private final ChiTietThanhToanRepository chiTietThanhToanRepository;
     private final PhuongThucThanhToanRepository phuongThucThanhToanRepository;
+    private final LichSuDiemService lichSuDiemService;
 
-    public TienMatStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository) {
+    public TienMatStrategy(ChiTietThanhToanRepository chiTietThanhToanRepository, PhuongThucThanhToanRepository phuongThucThanhToanRepository, LichSuDiemService lichSuDiemService) {
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
         this.phuongThucThanhToanRepository = phuongThucThanhToanRepository;
+        this.lichSuDiemService = lichSuDiemService;
     }
 
 
@@ -40,6 +43,7 @@ public class TienMatStrategy implements ThanhToanStrategy {
 
         if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+            lichSuDiemService.congDiemTuHoaDon(hoaDon.getId());
         }else {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.PAID);
         }
@@ -53,6 +57,6 @@ public class TienMatStrategy implements ThanhToanStrategy {
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
         chiTietThanhToanRepository.save(cttt);
 
-        return new ThanhToanAdminResponse("Thanh toán thành công", tienThua);
+        return new ThanhToanAdminResponse("Thanh toán thành công", tienThua,null);
     }
 }

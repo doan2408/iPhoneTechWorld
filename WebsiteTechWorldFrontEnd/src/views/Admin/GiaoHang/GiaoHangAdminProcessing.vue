@@ -3,7 +3,8 @@
         <!-- Order Header -->
         <div class="order-header">
             <div class="order-info">
-                <h1>Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-if="order.maVanDon">Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-else>Hóa đơn #{{ order.maHoaDon }} </h1>
                 <p class="order-date">
                     <Clock class="icon-small" />
                     Ngày đặt: {{ formatDate(order.ngayDatHang) }}
@@ -267,8 +268,7 @@
                     GIAO THẤT BẠI
                 </button>
 
-                <button v-if="canReturn" @click="updateOrderStatus('Đã trả lại')"
-                    class="action-btn cancel-btn">
+                <button v-if="canReturn" @click="updateOrderStatus('Đã trả lại')" class="action-btn cancel-btn">
                     <X class="icon-small" />
                     TRẢ HÀNG
                 </button>
@@ -554,6 +554,8 @@ const updateOrderStatus = async (newStatus) => {
         order.trangThaiDonHang = newStatus
         console.log(response.data)
         console.log(`Order status updated to: ${newStatus}`)
+        await viewOrderDetail();
+        
     } catch (error) {
         console.error('Failed to update order status:', error.response?.data || error.message)
     }
