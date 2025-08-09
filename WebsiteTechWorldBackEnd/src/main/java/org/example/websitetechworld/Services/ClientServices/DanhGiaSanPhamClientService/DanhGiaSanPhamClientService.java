@@ -2,9 +2,12 @@ package org.example.websitetechworld.Services.ClientServices.DanhGiaSanPhamClien
 
 
 import org.example.websitetechworld.Dto.Request.ClientRequest.DanhGiaSanPhamClientRequest.DanhGiaSanPhamClientRequest;
+import org.example.websitetechworld.Dto.Response.ClientResponse.DanhGiaSanPhamClientResponse.DanhGiaAndHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.DanhGiaSanPhamClientResponse.DanhGiaSanPhamClientResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.MediaDanhGiaClientResponse.MediaReviewClientResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiDanhGia;
+import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiMedia;
 import org.example.websitetechworld.Repository.ChiTietHoaDonRepository;
 import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
@@ -17,10 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,7 +53,7 @@ public class DanhGiaSanPhamClientService {
         danhGia.setNoiDung(request.getNoiDung());
         danhGia.setNgayDanhGia(LocalDateTime.now());
         danhGia.setTrangThaiDanhGia(
-                request.getTrangThaiDanhGia() != null ? request.getTrangThaiDanhGia() : TrangThaiDanhGia.PENDING_APPROVAL
+                request.getTrangThaiDanhGia() != null ? request.getTrangThaiDanhGia() : TrangThaiDanhGia.APPROVED
         );
 
         // 3. Kiểm tra và set khách hàng
@@ -240,6 +242,78 @@ public class DanhGiaSanPhamClientService {
         Page<DanhGiaSanPham> danhGiaPage = danhGiaRepository.findAll(pageable);
 
         return danhGiaPage.map(this::chuyenDoiSangResponse);
+    }
+
+    public List<DanhGiaAndHoaDonClientResponse> getDanhGiaByHoaDon(Integer idHoaDon) {
+        // Kiểm tra đầu vào
+        if (idHoaDon == null) {
+            throw new IllegalArgumentException("ID hóa đơn không được để trống");
+        }
+
+        // Gọi repository để lấy dữ liệu
+        List<Object[]> results = danhGiaRepository.getDanhGiaByHoaDon(idHoaDon);
+        Map<Integer, DanhGiaAndHoaDonClientResponse> danhGiaMap = new HashMap<>();
+
+        // Chuyển đổi kết quả từ Object[] sang DanhGiaHoaDonResponse
+        for (Object[] result : results) {
+            Integer idDanhGia = result[0] != null ? (Integer) result[0] : null;
+            DanhGiaAndHoaDonClientResponse dto = danhGiaMap.computeIfAbsent(idDanhGia, k -> {
+                DanhGiaAndHoaDonClientResponse newDto = new DanhGiaAndHoaDonClientResponse();
+                newDto.setIdDanhGia(idDanhGia);
+                newDto.setIdHoaDon(result[1] != null ? (Integer) result[1] : null);
+                newDto.setIdSanPhamChiTiet(result[2] != null ? (Integer) result[2] : null);
+                newDto.setIdChiTietHoaDon(result[3] != null ? (Integer) result[3] : null);
+                newDto.setIdKhachHang(result[4] != null ? (Integer) result[4] : null);
+                newDto.setSoSao(result[5] != null ? (Integer) result[5] : null);
+                newDto.setNoiDung(result[6] != null ? (String) result[6] : null);
+                newDto.setTrangThaiDanhGia(result[7] != null ? TrangThaiDanhGia.valueOf((String) result[7]) : null);
+                newDto.setReviewClientResponsesList(new ArrayList<>());
+                return newDto;
+            });
+
+            // Xử lý media
+            if (result[8] != null) { // Kiểm tra xem có bản ghi media không
+                MediaReviewClientResponse media = new MediaReviewClientResponse();
+                media.setIdMedia(result[8] != null ? (Integer) result[8] : null);
+                media.setLoaiMedia(result[9] != null ? (String) result[9] : null);
+                media.setUrlMedia(result[10] != null ? (String) result[10] : null);
+                media.setNgayUpload(result[11] != null ? ((Timestamp) result[11]).toLocalDateTime() : null);
+                media.setTrangThaiMedia(result[12] != null ? TrangThaiMedia.valueOf((String) result[12]) : null);
+                media.setIdDanhGia(idDanhGia);
+                dto.getReviewClientResponsesList().add(media);
+            }
+        }
+
+        return new ArrayList<>(danhGiaMap.values());
+    }
+
+    public Map<String, Object> checkDaDanhGia(Integer idHoaDon, Integer idKhachHang) {
+        boolean daDanhGia = danhGiaRepository.checkDaDanhGia(idHoaDon, idKhachHang);
+        Map<String, Object> response = new HashMap<>();
+        response.put("idHoaDon", idHoaDon);
+        response.put("idKhachHang", idKhachHang);
+        response.put("daDanhGia", daDanhGia);
+        return response;
+    }
+
+    public Map<String, Boolean> checkDaDanhGiaVaPhanHoi(Integer idHoaDon, Integer idKhachHang) {
+        // Kiểm tra tham số đầu vào
+        if (idHoaDon == null || idKhachHang == null) {
+            throw new IllegalArgumentException("idHoaDon và idKhachHang không được null");
+        }
+
+        // Gọi repository để thực hiện truy vấn
+        Map<String, Boolean> result = danhGiaRepository.checkDaDanhGiaVaPhanHoi(idHoaDon, idKhachHang);
+
+        // Nếu không có kết quả, trả về giá trị mặc định
+        if (result == null) {
+            Map<String, Boolean> defaultResult = new HashMap<>();
+            defaultResult.put("daDanhGia", false);
+            defaultResult.put("coPhanHoi", false);
+            return defaultResult;
+        }
+
+        return result;
     }
 
     // Helper method to convert entity to response DTO

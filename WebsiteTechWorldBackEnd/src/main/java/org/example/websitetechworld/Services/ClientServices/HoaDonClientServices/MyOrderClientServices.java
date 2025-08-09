@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
@@ -14,6 +15,7 @@ import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
+import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.HoaDonRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -28,10 +30,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,9 +50,10 @@ public class MyOrderClientServices {
     private final KhachHangRepository khachHangRepository;
     private final ChiTietHoaDonClientServices chiTietHoaDonClientServices;
     private final GioHangClientService gioHangClientService;
+    private final DanhGiaSanPhamRepository danhGiaSanPhamRepository;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService) {
+    public MyOrderClientServices(DanhGiaSanPhamRepository danhGiaSanPhamRepository, HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -56,6 +62,7 @@ public class MyOrderClientServices {
         this.chiTietHoaDonClientServices = chiTietHoaDonClientServices;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
         this.gioHangClientService = gioHangClientService;
+        this.danhGiaSanPhamRepository = danhGiaSanPhamRepository;
     }
 
 
@@ -67,6 +74,36 @@ public class MyOrderClientServices {
                 .map(hoaDon -> myOrderClientMapper.toMyOrderClientResponse(hoaDon))
                 .toList();
         return new PageImpl<>(content,pageable,lstHoaDon.getTotalElements());
+    }
+
+
+    public Page<MyReviewClientResponse> getReview(Integer userLoginId, Integer pageNo, Integer pageSize) {
+        // Khởi tạo phân trang
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
+
+        List<MyReviewClientResponse> content = lstHoaDon
+                .stream()
+                .map(hoaDon -> {
+                    MyReviewClientResponse dto = myOrderClientMapper.toMyReviewClientResponse(hoaDon);
+
+                    // Gọi truy vấn kiểm tra đánh giá và phản hồi
+                    Map<String, Boolean> check = danhGiaSanPhamRepository.checkDaDanhGiaVaPhanHoi(hoaDon.getId(), userLoginId);
+
+                    // Xử lý kết quả từ Map
+                    if (check != null && check.containsKey("da_danh_gia") && check.containsKey("co_phan_hoi")) {
+                        dto.setDaDanhGia(check.get("da_danh_gia"));
+                        dto.setCoPhanHoi(check.get("co_phan_hoi"));
+                    } else {
+                        dto.setDaDanhGia(false);
+                        dto.setCoPhanHoi(false);
+                    }
+
+                    return dto;
+                })
+                .toList();
+
+        return new PageImpl<>(content, pageable, lstHoaDon.getTotalElements());
     }
 
     public List<Integer> findIdHoaDonByMVD(String maVanDon){

@@ -16,4 +16,9 @@ public interface MediaDanhGiaRepository extends JpaRepository<MediaDanhGia, Inte
     @Modifying
     @Query("DELETE FROM MediaDanhGia m WHERE m.danhGiaSanPham.idDanhGia = :idDanhGia")
     void deleteByDanhGiaSanPham_IdDanhGia(@Param("idDanhGia") Integer idDanhGia);
+
+    @Modifying
+    @Query("DELETE FROM MediaDanhGia m WHERE m.idMedia = :idMedia")
+    void deleteByIdMedia(@Param("idMedia") Integer idMedia);
+
 }

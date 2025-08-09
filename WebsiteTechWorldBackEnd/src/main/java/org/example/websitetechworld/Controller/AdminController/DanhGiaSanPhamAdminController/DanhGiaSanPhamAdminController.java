@@ -53,15 +53,15 @@ public class DanhGiaSanPhamAdminController {
     }
 
     // Xóa đánh giá
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> xoaDanhGia(@PathVariable Integer id) {
-        try {
-            danhGiaSanPhamAdminService.xoaDanhGia(id);
-            return ResponseEntity.ok("Xóa thành công");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<String> xoaDanhGia(@PathVariable Integer id) {
+//        try {
+//            danhGiaSanPhamAdminService.xoaDanhGia(id);
+//            return ResponseEntity.ok("Xóa thành công");
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     // Phản hồi đánh giá
 //    @PostMapping("/{id}/phan-hoi")
