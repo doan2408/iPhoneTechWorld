@@ -22,7 +22,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query("""
         SELECT p FROM PhieuGiamGia p
-        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenKhuyenMai LIKE %:search%)
+        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenGiamGia LIKE %:search%)
           AND (:trangThai IS NULL OR p.trangThaiPhieuGiamGia = :trangThai)
           AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)
@@ -54,7 +54,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query("""
         SELECT p FROM PhieuGiamGia p
-        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenKhuyenMai LIKE %:search%)
+        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenGiamGia LIKE %:search%)
           AND (:trangThai IS NULL OR p.trangThaiPhieuGiamGia = :trangThai)
           AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)

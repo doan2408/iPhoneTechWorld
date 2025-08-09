@@ -22,27 +22,27 @@ public class PhieuGiamGiaAdminRequest {
     @Size(max = 10, message = "Mã giảm giá không được vượt quá 10 ký tự")
     private String maGiamGia;
 
-    @NotBlank(message = "Tên khuyến mãi không được để trống")
-    @Size(max = 50, message = "Tên khuyến mãi không được vượt quá 50 ký tự")
-    private String tenKhuyenMai;
+    @NotBlank(message = "Tên giảm giá không được để trống")
+    @Size(max = 50, message = "Tên giảm giá không được vượt quá 50 ký tự")
+    private String tenGiamGia;
 
-    @NotBlank(message = "Loại khuyến mãi không được để trống")
-    private String loaiKhuyenMai;
+    @NotBlank(message = "Loại giảm giá không được để trống")
+    private String loaiGiamGia;
 
-    @NotNull(message = "Giá trị khuyến mãi không được để trống")
-    @Positive(message = "Giá trị khuyến mãi phải lớn hơn 0")
-    @DecimalMax(value = "99999999.99", message = "Giá trị khuyến mãi không được vượt quá 99999999.99")
-    private BigDecimal giaTriKhuyenMai;
+    @NotNull(message = "Giá trị giảm giá không được để trống")
+    @Positive(message = "Giá trị giảm giá phải lớn hơn 0")
+    @DecimalMax(value = "99999999.99", message = "Giá trị giảm giá không được vượt quá 99999999.99")
+    private BigDecimal giaTriGiamGia;
 
     @NotNull(message = "Giá trị đơn hàng tối thiểu không được để trống")
     @PositiveOrZero(message = "Giá trị đơn hàng tối thiểu phải lớn hơn hoặc bằng 0")
     @DecimalMax(value = "99999999.99", message = "Giá trị đơn hàng tối thiểu không được vượt quá 99999999.99")
     private BigDecimal giaTriDonHangToiThieu;
 
-    @PositiveOrZero(message = "Giá trị khuyến mãi tối đa phải lớn hơn hoặc bằng 0")
-    @DecimalMin(value = "10000.00", message = "Giá trị khuyến mãi tối đa không được ít hơn 10000.00")
-    @DecimalMax(value = "99999999.99", message = "Giá trị khuyến mãi tối đa không được vượt quá 99999999.99")
-    private BigDecimal giaTriKhuyenMaiToiDa;
+    @PositiveOrZero(message = "Giá trị giảm giá tối đa phải lớn hơn hoặc bằng 0")
+    @DecimalMin(value = "10000.00", message = "Giá trị giảm giá tối đa không được ít hơn 10000.00")
+    @DecimalMax(value = "99999999.99", message = "Giá trị giảm giá tối đa không được vượt quá 99999999.99")
+    private BigDecimal giaTriGiamGiaToiDa;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
     private LocalDateTime ngayBatDau;

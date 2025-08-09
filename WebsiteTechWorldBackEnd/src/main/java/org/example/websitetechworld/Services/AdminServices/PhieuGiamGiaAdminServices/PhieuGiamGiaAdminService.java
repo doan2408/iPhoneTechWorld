@@ -141,7 +141,7 @@ public class PhieuGiamGiaAdminService {
             if (phieuGiamGia.getNgayKetThuc().equals(request.getNgayKetThuc())) {
                 notifyAffectedCustomers(phieuGiamGia);
             }
-            phieuGiamGia.setTenKhuyenMai(request.getTenKhuyenMai());
+            phieuGiamGia.setTenGiamGia(request.getTenGiamGia());
             phieuGiamGia.setSoLuong(request.getSoLuong());
             phieuGiamGia.setNgayKetThuc(request.getNgayKetThuc());
             phieuGiamGia.setSoDiemCanDeDoi(request.getSoDiemCanDeDoi());
@@ -217,7 +217,7 @@ public class PhieuGiamGiaAdminService {
                                     
                                     Phiếu giảm giá %s đã được cập nhật/hủy bỏ. Vui lòng kiểm tra lại trong hệ thống.
                                     
-                                    TechWorld""", kh.getTenKhachHang(), phieu.getTenKhuyenMai()));
+                                    TechWorld""", kh.getTenKhachHang(), phieu.getTenGiamGia()));
                     idKhachHangDaGuiMail.add(idKhach);
                 }
             }
@@ -558,13 +558,13 @@ public class PhieuGiamGiaAdminService {
         try {
             String subject = phieuGiamGia.getMaGiamGia() + " - Quà tặng từ TechWorld";
 
-            String giaTri = phieuGiamGia.getLoaiKhuyenMai().equalsIgnoreCase("Phần trăm")
-                    ? phieuGiamGia.getGiaTriKhuyenMai() + "%"
-                    : phieuGiamGia.getGiaTriKhuyenMai() + " VNĐ";
+            String giaTri = phieuGiamGia.getLoaiGiamGia().equalsIgnoreCase("Phần trăm")
+                    ? phieuGiamGia.getGiaTriGiamGia() + "%"
+                    : phieuGiamGia.getGiaTriGiamGia() + " VNĐ";
 
-            String moTaToiDa = phieuGiamGia.getLoaiKhuyenMai().equalsIgnoreCase("Phần trăm") &&
-                    phieuGiamGia.getGiaTriKhuyenMaiToiDa() != null
-                    ? " (tối đa " + phieuGiamGia.getGiaTriKhuyenMaiToiDa() + " VNĐ)"
+            String moTaToiDa = phieuGiamGia.getLoaiGiamGia().equalsIgnoreCase("Phần trăm") &&
+                    phieuGiamGia.getGiaTriGiamGiaToiDa() != null
+                    ? " (tối đa " + phieuGiamGia.getGiaTriGiamGiaToiDa() + " VNĐ)"
                     : "";
 
             String thongBao = isTangPhieu
@@ -604,7 +604,7 @@ public class PhieuGiamGiaAdminService {
                         """,
                         khachHang.getTenKhachHang(),
                         phieuGiamGia.getMaGiamGia(),
-                        phieuGiamGia.getTenKhuyenMai(),
+                        phieuGiamGia.getTenGiamGia(),
                         giaTri,
                         moTaToiDa,
                         formatterDate(phieuGiamGia.getNgayBatDau()),

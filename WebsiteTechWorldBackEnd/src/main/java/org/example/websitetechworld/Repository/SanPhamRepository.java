@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ClientProductResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoCompareResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.ThongSoResponse;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
@@ -267,4 +269,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """,nativeQuery = true)
     Integer findIdSpct(@Param("idSanPham") Integer idSanPham, @Param("idRom") Integer idRom, @Param("idMauSac") Integer idMauSac);
 
+    List<SanPham> findByMaSanPhamContainingIgnoreCaseOrTenSanPhamContainingIgnoreCase(String maSanPham, String tenSanPham);
+
+    SanPham findBySanPhamChiTiets(Set<SanPhamChiTiet> sanPhamChiTiets);
 }

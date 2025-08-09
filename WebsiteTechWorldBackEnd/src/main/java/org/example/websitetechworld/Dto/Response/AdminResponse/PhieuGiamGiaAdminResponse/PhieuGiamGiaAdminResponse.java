@@ -18,11 +18,11 @@ public class PhieuGiamGiaAdminResponse {
 
     private Integer id;
     private String maGiamGia;
-    private String tenKhuyenMai;
-    private String loaiKhuyenMai;
-    private BigDecimal giaTriKhuyenMai;
+    private String tenGiamGia;
+    private String loaiGiamGia;
+    private BigDecimal giaTriGiamGia;
     private BigDecimal giaTriDonHangToiThieu;
-    private BigDecimal giaTriKhuyenMaiToiDa;
+    private BigDecimal giaTriGiamGiaToiDa;
     private LocalDateTime ngayBatDau;
     private LocalDateTime ngayKetThuc;
     private String dieuKienApDung;

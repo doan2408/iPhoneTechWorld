@@ -2,6 +2,8 @@ package org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResp
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.websitetechworld.Entity.SanPham;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,5 +30,5 @@ public class SanPhamChiTietResponse {
     private Set<ImeiAdminResponse> imeis;
 
     private Set<HinhAnhAdminResponse> hinhAnhs;
-
+    private Integer idSanPham;
 }

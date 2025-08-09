@@ -157,7 +157,7 @@ public class LichSuDiemService {
         lichSuTru.setViDiem(viDiem);
         lichSuTru.setSoDiem(diemCanDoi);
         lichSuTru.setLoaiDiem(LoaiDiem.TRU);
-        lichSuTru.setGhiChu("Đổi điểm lấy voucher " + phieu.getTenKhuyenMai());
+        lichSuTru.setGhiChu("Đổi điểm lấy voucher " + phieu.getTenGiamGia());
         lichSuTru.setThoiGian(OffsetDateTime.now(ZoneOffset.UTC));
         lichSuDiemRepository.save(lichSuTru);
 
