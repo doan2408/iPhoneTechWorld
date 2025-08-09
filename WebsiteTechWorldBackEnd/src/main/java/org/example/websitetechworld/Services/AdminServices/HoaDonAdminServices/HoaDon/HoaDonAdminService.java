@@ -189,12 +189,16 @@ public class HoaDonAdminService {
         if (hoaDon.getTrangThaiThanhToan() == TrangThaiThanhToan.PAID) {
             throw new IllegalArgumentException("Hóa đơn đã được thanh toán.");
         }
+        if (hoaDon.getSoTienGiam() != null){
+            hoaDon.setSoTienGiam(request.getSoTienGiam());
+        }
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
 
         if (response.getMessage().equals("Thanh toán thành công")) {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.SOLD);
+            updateTongTien(hoaDon.getId());
         }
 
         return response;

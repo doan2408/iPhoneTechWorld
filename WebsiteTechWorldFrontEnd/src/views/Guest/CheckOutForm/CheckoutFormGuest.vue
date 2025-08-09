@@ -387,7 +387,7 @@ function confirmAddressSelection() {
             const selected = userAddresses.value.find(addr => addr.id === modalSelectedAddressId.value);
             if (selected) shippingAddress.value = selected;
         }
-        isAddressModalOpen.value = false;s
+        isAddressModalOpen.value = false;
     }
 }
 

@@ -547,8 +547,8 @@
     </div>
 
     <transition name="modal-fade">
-        <div v-if="isVoucherModalOpen" class="modal-overlay" @click.self="closeVoucherModal">
-            <div class="modal-content">
+        <div v-if="isVoucherModalOpen" class="modal-overlay-pgg" @click.self="closeVoucherModal">
+            <div class="modal-content-pgg">
                 <div class="modal-header">
                     <h3 class="modal-title">Chọn phiếu giảm giá</h3>
                     <button class="modal-close-button" @click="closeVoucherModal">
@@ -2076,7 +2076,8 @@ const processPayment = async () => {
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip
+        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip,
+        soTienGiam: discountAmount.value
     };
     console.log("tien khach dua", paymentPayload);
     console.log(paymentPayload.soTienKhachDua);
