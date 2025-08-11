@@ -885,4 +885,16 @@
     /* Để icon không bị dính vào lề */
 }
 
+.custom-popconfirm {
+    max-width: 400px !important;
+    /* tăng chiều rộng */
+    font-size: 16px !important;
+    /* chữ to hơn */
+    padding: 16px !important;
+    /* thêm khoảng trống */
+}
 
+.custom-popconfirm .el-popconfirm__main {
+    white-space: normal;
+    /* cho phép xuống dòng nếu dài */
+}

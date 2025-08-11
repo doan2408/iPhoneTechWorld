@@ -120,73 +120,78 @@
         <!-- Action Buttons -->
         <div class="actions-section">
             <div class="left-actions">
-                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)" @click="updateStatusInvoicePaid('PAID')"
+                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)"
+                    @click="openConfirm('Xác nhận đã nhận tiền?', () => updateStatusInvoicePaid('PAID'))"
                     class="action-btn complete-btn">
-                    <CheckCircle class="icon-small" />
-                    ĐÃ NHẬN TIỀN
-                </button>
-                <button v-if="canConfirm" @click="updateOrderStatus('Đã xác nhận')" class="action-btn confirm-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN DƠN HÀNG
+                    <CheckCircle class="icon-small" /> ĐÃ NHẬN TIỀN
                 </button>
 
-                <button v-if="canPack" @click="updateOrderStatus('Đã đóng gói')" class="action-btn pack-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN ĐÓNG GÓI
+                <button v-if="canConfirm"
+                    @click="openConfirm('Xác nhận đơn hàng?', () => updateOrderStatus('Đã xác nhận'))"
+                    class="action-btn confirm-btn">
+                    <CheckCircle class="icon-small" /> XÁC NHẬN ĐƠN HÀNG
                 </button>
 
-                <button v-if="canReady" @click="updateOrderStatus('Sẵn sàng giao')" class="action-btn ready-btn">
-                    <CheckCircle class="icon-small" />
-                    SẴN SÀNG GIAO
+                <button v-if="canPack"
+                    @click="openConfirm('Xác nhận đóng gói?', () => updateOrderStatus('Đã đóng gói'))"
+                    class="action-btn pack-btn">
+                    <CheckCircle class="icon-small" /> XÁC NHẬN ĐÓNG GÓI
                 </button>
 
-                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'" @click="updateOrderStatus('Đang giao')"
+                <button v-if="canReady"
+                    @click="openConfirm('Xác nhận sẵn sàng giao?', () => updateOrderStatus('Sẵn sàng giao'))"
+                    class="action-btn ready-btn" :disabled="isProcessing">
+                    <CheckCircle class="icon-small" /> SẴN SÀNG GIAO
+                </button>
+
+                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'"
+                    @click="openConfirm('Bắt đầu giao hàng?', () => updateOrderStatus('Đang giao'))"
                     class="action-btn ship-btn">
-                    <Truck class="icon-small" />
-                    BẮT ĐẦU GIAO HÀNG
+                    <Truck class="icon-small" /> BẮT ĐẦU GIAO HÀNG
                 </button>
 
-                <button v-if="order.trangThaiDonHang === 'Đang giao'" @click="updateOrderStatus('Đã giao')"
+                <button v-if="order.trangThaiDonHang === 'Đang giao'"
+                    @click="openConfirm('Xác nhận hoàn thành?', () => updateOrderStatus('Đã giao'))"
                     class="action-btn complete-btn">
-                    <CheckCircle class="icon-small" />
-                    HOÀN THÀNH
+                    <CheckCircle class="icon-small" /> HOÀN THÀNH
                 </button>
 
-                <button v-if="canCancel" @click="updateOrderStatus('Đã hủy')" class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    HỦY ĐƠN
-                </button>
-
-                <button v-if="canShippingFalse" @click="updateOrderStatus('Giao thất bại')"
+                <button v-if="canCancel"
+                    @click="openConfirm('Bạn có chắc muốn hủy đơn?', () => updateOrderStatus('Đã hủy'))"
                     class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    GIAO THẤT BẠI
+                    <X class="icon-small" /> HỦY ĐƠN
                 </button>
 
-                <button v-if="canReturn" @click="updateOrderStatus('Trả hàng')" class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    TRẢ HÀNG
+                <button v-if="canShippingFalse"
+                    @click="openConfirm('Xác nhận giao thất bại?', () => updateOrderStatus('Giao thất bại'))"
+                    class="action-btn cancel-btn">
+                    <X class="icon-small" /> GIAO THẤT BẠI
+                </button>
+
+                <button v-if="canReturn" @click="openConfirm('Xác nhận trả hàng?', () => updateOrderStatus('Trả hàng'))"
+                    class="action-btn cancel-btn">
+                    <X class="icon-small" /> TRẢ HÀNG
                 </button>
             </div>
-
 
             <div class="right-actions">
                 <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" />
-                    IN HÓA ĐƠN
+                    <Printer class="icon-small" /> IN HÓA ĐƠN
                 </button>
 
                 <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" />
-                    IN PHIẾU GIAO HÀNG
+                    <FileText class="icon-small" /> IN PHIẾU GIAO HÀNG
                 </button>
 
                 <button @click="editOrder" class="action-btn edit-btn">
-                    <Edit class="icon-small" />
-                    CHỈNH SỬA
+                    <Edit class="icon-small" /> CHỈNH SỬA
                 </button>
             </div>
         </div>
+
+        <!-- Confirm Modal -->
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+            @cancel="showConfirm = false" />
 
         <br><br>
 
@@ -314,12 +319,14 @@ import { hoaDonDetail, changeStatusInvoice } from '@/Service/Adminservice/HoaDon
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import { useToast } from "vue-toastification";
 
 const order = reactive({})
 const route = useRoute()
 const statusUpdate = null;
 const statusFlase = ['Trả hàng', 'Giao thất bại','Đã hủy']
-
+const toast = useToast()
 
 // ham view giao hang
 const viewOrderDetail = async () => {
@@ -553,23 +560,26 @@ const getPaymentStatusClass = (status) => {
 
     return statusClassMap[status.toUpperCase()] || 'pending';
 };
-
+const isProcessing = ref(false);
 const updateOrderStatus = async (newStatus) => {
-    const id = route.params.id
+    const id = route.params.id;
     try {
-        console.log(id)
-        console.log(newStatus)
-        const response = await changeStatusOrder(id, newStatus)
-        // Cập nhật trạng thái sau khi API thành công
-        order.trangThaiDonHang = newStatus
-        console.log(response.data)
-        console.log(`Order status updated to: ${newStatus}`)
+        if (newStatus === 'Sẵn sàng giao'){
+            isProcessing.value = true;
+            toast.info("Đang tạo mã vận đơn...", { autoClose: 2000 });
+        }
+        const response = await changeStatusOrder(id, newStatus);
+        order.trangThaiDonHang = newStatus;
+        console.log(response.data);
+        console.log(`Order status updated to: ${newStatus}`);
         await viewOrderDetail();
-        
     } catch (error) {
-        console.error('Failed to update order status:', error.response?.data || error.message)
+        console.error('Failed to update order status:', error.response?.data || error.message);
+    } finally {
+        isProcessing.value = false;
     }
-}
+};
+
 
 const updateStatusInvoicePaid = async (newStatus) => {
     const id = route.params.id
@@ -614,6 +624,21 @@ const editOrder = () => {
 onMounted(() => {
     viewOrderDetail()
 })
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
+}
 </script>
 
 <style scoped src="@/style/GiaoHang/GiaoHangProcessing.css">
