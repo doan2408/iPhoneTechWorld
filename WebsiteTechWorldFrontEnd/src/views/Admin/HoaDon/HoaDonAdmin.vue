@@ -220,7 +220,7 @@
               </td>
               <td class="table-td">
                 <span class="status-badge" :class="getStatusBadgeClass(hoaDon.trangThaiThanhToan)">
-                  {{ hoaDon.trangThaiThanhToan }}
+                  {{ hoaDon.trangThaiThanhToan != 'Chờ xử lý' ? hoaDon.trangThaiThanhToan : 'Chưa thanh toán' }}
                 </span>
               </td>
               <td class="table-td">

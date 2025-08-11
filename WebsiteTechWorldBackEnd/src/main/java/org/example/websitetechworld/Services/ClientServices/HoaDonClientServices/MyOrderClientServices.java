@@ -124,9 +124,6 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
-        PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
-        phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
-        hoaDon.setIdPhieuGiamGia(phieuGiamGia);
 //        String maVanDon = generateMaVanDon(hoaDon.getId());
 //        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
@@ -198,6 +195,11 @@ public class MyOrderClientServices {
             hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
         }
+        if (requestThanhToanTongHop.getIdPhieuGiamGia() != null){
+            PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
+            phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
+            hoaDon.setIdPhieuGiamGia(phieuGiamGia);
+        }
         hoaDon.setIsShipping(true);
         hoaDon.setIsDelete(false);
         hoaDon.setPhiShip(requestThanhToanTongHop.getPhiShip());
@@ -252,6 +254,20 @@ public class MyOrderClientServices {
         String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
                 + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
                 + "<p>Đơn hàng <b>" + maHoaDon + "</b> của bạn đã được xác nhận vào ngày "
+                + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
+                + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"
+                + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";
+
+        emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
+    }
+
+    public void sendMailByyMaVanDon(HoaDon hoaDon){
+        String maHoaDon = null;
+        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaVanDon();
+
+        String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
+                + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
+                + "<p>Đơn hàng <b>" + hoaDon.getMaHoaDon() + "</b> của bạn đã được xác nhận vào ngày "
                 + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
                 + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"
                 + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";

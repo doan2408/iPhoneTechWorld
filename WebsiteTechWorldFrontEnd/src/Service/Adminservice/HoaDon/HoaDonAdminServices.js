@@ -212,3 +212,10 @@ export const exportAllInvoice = () => {
         responseType: 'blob'
     })
 }
+
+
+export const changeStatusInvoice = (id, status) => {
+    const url = url_base + '/' + id + '/status'
+    const body = { trangThaiThanhToan: status }
+    return api.put(url, body)
+}
