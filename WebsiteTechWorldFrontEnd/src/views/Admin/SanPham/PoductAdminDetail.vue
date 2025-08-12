@@ -37,7 +37,8 @@
           <el-col :span="12">
             <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
               <el-select
-                v-model="sanPhamModel.idNhaCungCap"
+                v-model="sanPhamModel.idNhaCungCaps"
+                multiple
                 placeholder="Chọn nhà cung cấp"
                 style="width: 100%"
               >
@@ -656,7 +657,7 @@ const rules = {
       trigger: "blur",
     },
   ],
-  idNhaCungCap: [
+  idNhaCungCaps: [
     {
       required: true,
       message: "Vui lòng chọn nhà cung cấp",
@@ -1088,7 +1089,7 @@ const fetchSanPham = async (productId) => {
     sanPhamModel.maSanPham = response.maSanPham || "";
     sanPhamModel.tenSanPham = response.tenSanPham;
     sanPhamModel.thuongHieu = response.thuongHieu;
-    sanPhamModel.idNhaCungCap = response.idNhaCungCap;
+    sanPhamModel.idNhaCungCaps = response.idNhaCungCaps;
     sanPhamModel.trangThaiSanPham = response.trangThaiSanPham;
     sanPhamModel.idModelSanPham = response.idModelSanPham;
     sanPhamModel.sanPhamChiTiets = response.sanPhamChiTiets.map((chiTiet) => ({
@@ -1267,7 +1268,7 @@ const validateForm = () => {
   } else if (!sanPhamModel.thuongHieu) {
     error.value = "Vui lòng nhập thương hiệu";
     hasError = true;
-  } else if (!sanPhamModel.idNhaCungCap) {
+  } else if (!sanPhamModel.idNhaCungCaps) {
     error.value = "Vui lòng chọn nhà cung cấp";
     hasError = true;
   } else if (!sanPhamModel.trangThaiSanPham) {
@@ -1385,7 +1386,7 @@ const submitForm = async () => {
       maSanPham: sanPhamModel.maSanPham,
       tenSanPham: sanPhamModel.tenSanPham,
       thuongHieu: sanPhamModel.thuongHieu,
-      idNhaCungCap: sanPhamModel.idNhaCungCap,
+      idNhaCungCaps: sanPhamModel.idNhaCungCaps,
       trangThaiSanPham: sanPhamModel.trangThaiSanPham,
       idModelSanPham: sanPhamModel.idModelSanPham,
       sanPhamChiTiets: sanPhamModel.sanPhamChiTiets.map((chiTiet, index) => {

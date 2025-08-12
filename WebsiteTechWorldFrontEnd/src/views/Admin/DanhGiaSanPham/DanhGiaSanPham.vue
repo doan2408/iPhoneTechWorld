@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="container mx-auto p-6">
     <el-card class="shadow-xl bg-white">
@@ -22,7 +21,8 @@
             <el-option label="Từ chối" value="REFUSE" />
             <el-option label="Ẩn" value="HIDE" />
           </el-select>
-          <el-button type="default" @click="resetFilters" class="hover:bg-gray-100 transition"
+          <el-button type="default" @click="resetFilters"
+            class="hover:bg-gray-100 transition"
             style="margin-left: 10px; width: 150px;">
             Xóa bộ lọc
           </el-button>
@@ -73,7 +73,14 @@
             <span v-else class="text-gray-500">Không có video</span>
           </template>
         </el-table-column>
-        <el-table-column prop="noiDungPhanHoi" label="Phản hồi" width="300" />
+        <el-table-column prop="noiDungPhanHoi" label="Phản hồi" width="300">
+          <template #default="{ row }">
+            <div v-if="row.noiDungPhanHoi" class="text-sm text-gray-700">
+              {{ row.noiDungPhanHoi }}
+            </div>
+            <span v-else class="text-gray-400 italic">Chưa có phản hồi</span>
+          </template>
+        </el-table-column>
         <el-table-column label="Trạng thái" width="150" align="center">
           <template #default="{ row }">
             <span :class="{
@@ -86,23 +93,36 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="Hành động" width="350" align="center">
+        <el-table-column label="Hành động" width="400" align="center">
           <template #default="{ row }">
-            <el-button type="success" size="small" :disabled="row.trangThaiDanhGia === 'APPROVED'"
-              @click="handleApprove(row.idDanhGia)" class="mr-2 hover:bg-green-600 transition">
-              Phê duyệt
-            </el-button>
-            <el-button type="warning" size="small" :disabled="row.trangThaiDanhGia === 'REFUSE'"
-              @click="handleReject(row.idDanhGia)" class="mr-2 hover:bg-yellow-600 transition">
-              Từ chối
-            </el-button>
-            <el-button type="info" size="small" @click="openReplyDialog(row)" class="mr-2 hover:bg-blue-600 transition">
-              Phản hồi
-            </el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row.idDanhGia)"
-              class="hover:bg-red-600 transition">
-              Xóa
-            </el-button>
+            <div class="flex gap-2 justify-center">
+              <el-button 
+                v-if="!row.noiDungPhanHoi" 
+                type="info" 
+                size="small" 
+                @click="openReplyDialog(row)" 
+                class="hover:bg-blue-600 transition"
+              >
+                Phản hồi
+              </el-button>
+              <el-button 
+                v-else 
+                type="warning" 
+                size="small" 
+                @click="openUpdateReplyDialog(row)" 
+                class="hover:bg-orange-600 transition"
+              >
+                Cập nhật phản hồi
+              </el-button>
+              <el-button 
+                type="danger" 
+                size="small" 
+                @click="handleDelete(row.idDanhGia)"
+                class="hover:bg-red-600 transition"
+              >
+                Xóa
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -114,53 +134,118 @@
     </el-card>
 
     <!-- Dialog phản hồi -->
-    <el-dialog title="Phản hồi đánh giá" v-model="dialogReplyVisible" width="40%" :before-close="handleCloseReplyDialog"
-      class="rounded-lg">
-      <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top" class="p-4">
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Thông tin đánh giá</h3>
-          <div class="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <p><strong>Khách hàng:</strong> {{ replyForm.tenKhachHang }}</p>
-              <p><strong>Sản phẩm:</strong> {{ replyForm.tenSanPham }} ({{ replyForm.maSanPhamChiTiet }})</p>
-              <p><strong>Màu sắc:</strong> {{ replyForm.tenMau }}</p>
-              <p><strong>RAM/ROM:</strong> {{ replyForm.dungLuongRam }}/{{ replyForm.dungLuongRom }}</p>
-              <p><strong>Đánh giá:</strong> {{ replyForm.noiDung }}</p>
-              <p><strong>Số sao:</strong></p>
-              <el-rate v-model="replyForm.soSao" disabled :max="5" class="text-yellow-400" />
+    <el-dialog
+      :title="isUpdateMode ? 'Cập nhật phản hồi đánh giá' : 'Phản hồi đánh giá'"
+      v-model="dialogReplyVisible"
+      width="60%"
+      :before-close="handleCloseReplyDialog"
+      class="rounded-xl shadow-2xl bg-white"
+    >
+      <el-form :model="replyForm" :rules="replyRules" ref="replyFormRef" label-position="top" class="p-6">
+        <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Thông tin đánh giá</h3>
+          <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <p class="text-gray-700"><strong class="text-gray-900">Khách hàng:</strong> {{ replyForm.tenKhachHang }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Sản phẩm:</strong> {{ replyForm.tenSanPham }} ({{ replyForm.maSanPhamChiTiet }})</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Màu sắc:</strong> {{ replyForm.tenMau }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">RAM/ROM:</strong> {{ replyForm.dungLuongRam }}/{{ replyForm.dungLuongRom }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Đánh giá:</strong> {{ replyForm.noiDung }}</p>
+              <p class="text-gray-700"><strong class="text-gray-900">Số sao:</strong></p>
+              <el-rate v-model="replyForm.soSao" disabled :max="5" class="text-yellow-400 text-lg" />
             </div>
-            <div>
-              <p><strong>Ảnh đánh giá:</strong></p>
-              <div class="flex flex-wrap gap-2">
-                <el-image v-for="(img, index) in replyForm.anhUrls" :key="index" :src="img"
-                  class="w-20 h-20 rounded-md border border-gray-200 hover:border-blue-400 transition" fit="cover"
-                  :preview-src-list="replyForm.anhUrls" :initial-index="index" />
+            <div class="space-y-3">
+              <p class="text-gray-700"><strong class="text-gray-900">Ảnh đánh giá:</strong></p>
+              <div class="flex flex-wrap gap-3">
+                <el-image
+                  v-for="(img, index) in replyForm.anhUrls"
+                  :key="index"
+                  :src="img"
+                  class="w-24 h-24 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm"
+                  fit="cover"
+                  :preview-src-list="replyForm.anhUrls"
+                  :initial-index="index"
+                />
               </div>
-              <p class="mt-2"><strong>Video đánh giá:</strong></p>
-              <div class="flex flex-wrap gap-2">
-                <video v-for="(vid, idx) in replyForm.videoUrls" :key="idx" :src="vid"
-                  class="w-24 h-16 rounded-md border border-gray-200 hover:border-blue-400 transition" controls></video>
+              <p class="mt-3 text-gray-700"><strong class="text-gray-900">Video đánh giá:</strong></p>
+              <div class="flex flex-wrap gap-3">
+                <video
+                  v-for="(vid, idx) in replyForm.videoUrls"
+                  :key="idx"
+                  :src="vid"
+                  class="w-28 h-20 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm"
+                  controls
+                ></video>
               </div>
             </div>
           </div>
         </div>
-        <el-form-item label="Nội dung phản hồi" prop="noiDungPhanHoi">
-          <el-input type="textarea" v-model="replyForm.noiDungPhanHoi" placeholder="Nhập nội dung phản hồi" :rows="4"
-            class="w-full" :disabled="false" />
+
+        <!-- Hiển thị phản hồi hiện tại nếu đang ở chế độ cập nhật -->
+        <div v-if="isUpdateMode && originalReplyContent" class="mb-6 bg-blue-50 p-4 rounded-lg shadow-sm">
+          <h4 class="text-lg font-semibold text-blue-800 mb-2">Phản hồi hiện tại:</h4>
+          <p class="text-blue-700 italic">"{{ originalReplyContent }}"</p>
+        </div>
+
+        <el-form-item label="Chọn gợi ý phản hồi" class="mb-6">
+          <el-select
+            v-model="selectedSuggestion"
+            placeholder="Chọn gợi ý phản hồi"
+            class="w-full"
+            @change="applySuggestion"
+            clearable
+          >
+            <el-option
+              v-for="(suggestion, index) in replySuggestions[replyForm.soSao] || []"
+              :key="index"
+              :label="suggestion"
+              :value="suggestion"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item 
+          :label="isUpdateMode ? 'Nội dung phản hồi mới' : 'Nội dung phản hồi'" 
+          prop="noiDungPhanHoi" 
+          class="mb-6"
+        >
+          <el-input
+            type="textarea"
+            v-model="replyForm.noiDungPhanHoi"
+            :placeholder="isUpdateMode ? 'Nhập nội dung phản hồi mới' : 'Nhập nội dung phản hồi'"
+            :rows="5"
+            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-300"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer flex justify-end gap-3 p-4">
-          <el-button @click="dialogReplyVisible = false" class="hover:bg-gray-100 transition">Hủy</el-button>
-          <el-button type="primary" @click="submitReplyForm" class="hover:bg-blue-600 transition">Gửi</el-button>
+        <span class="dialog-footer flex justify-end gap-4 p-6">
+          <el-button
+            @click="dialogReplyVisible = false"
+            class="bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 rounded-lg px-6 py-2"
+          >
+            Hủy
+          </el-button>
+          <el-button
+            type="primary"
+            @click="submitReplyForm"
+            :loading="submitting"
+            class="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 rounded-lg px-6 py-2"
+          >
+            {{ isUpdateMode ? 'Cập nhật' : 'Gửi' }}
+          </el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- Dialog xem video đánh giá -->
-    <el-dialog v-model="dialogVideoVisible" width="700px" class="rounded-lg" :close-on-click-modal="true"
-      title="Xem video đánh giá">
-      <video v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-auto rounded-md" controls></video>
+    <el-dialog
+      v-model="dialogVideoVisible"
+      width="700px"
+      class="rounded-xl shadow-2xl bg-white"
+      :close-on-click-modal="true"
+      title="Xem video đánh giá"
+    >
+      <video v-if="currentVideoUrl" :src="currentVideoUrl" class="w-full h-auto rounded-lg shadow-sm" controls></video>
     </el-dialog>
   </div>
 </template>
@@ -169,9 +254,13 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { DanhGiaSanPhamAdminService } from '@/Service/Adminservice/DanhGiaSanPhamAdminService/DanhGiaSanPhamAdminService';
+import { useToast } from 'vue-toastification';
+import { PhanHoiDanhGiaAdminService } from '@/Service/Adminservice/PhanHoiSanPhamService/PhanHoiDanhGiaAdminService';
 
+const toast = useToast();
 const dataReview = ref([]);
 const loading = ref(false);
+const submitting = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
@@ -181,11 +270,13 @@ const filterStar = ref(null);
 const dialogReplyVisible = ref(false);
 const dialogVideoVisible = ref(false);
 const currentVideoUrl = ref('');
-import { useToast } from 'vue-toastification';
-const toast = useToast();
+const selectedSuggestion = ref('');
+const isUpdateMode = ref(false);
+const originalReplyContent = ref('');
 
 const replyForm = ref({
   idDanhGia: null,
+  idPhanHoi: null,
   tenKhachHang: '',
   tenSanPham: '',
   maSanPhamChiTiet: '',
@@ -198,11 +289,40 @@ const replyForm = ref({
   videoUrls: [],
   noiDungPhanHoi: '',
 });
+
 const replyRules = ref({
   noiDungPhanHoi: [{ required: true, message: 'Vui lòng nhập nội dung phản hồi', trigger: 'blur' }],
 });
-const replyFormRef = ref(null);
 
+const replySuggestions = ref({
+  1: [
+    'Cảm ơn bạn đã chia sẻ trải nghiệm. Chúng tôi rất tiếc vì sản phẩm chưa đáp ứng mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ để chúng tôi có thể giải quyết vấn đề nhanh chóng!',
+    'Chúng tôi xin lỗi vì trải nghiệm không như ý. Bạn có thể cung cấp thêm chi tiết về vấn đề gặp phải để chúng tôi cải thiện và hỗ trợ tốt hơn không?',
+    'Cảm ơn ý kiến quý giá của bạn. Chúng tôi sẽ xem xét kỹ lưỡng để nâng cấp chất lượng sản phẩm và dịch vụ trong tương lai.'
+  ],
+  2: [
+    'Cảm ơn bạn đã để lại đánh giá. Chúng tôi rất trân trọng ý kiến của bạn và sẽ nỗ lực cải thiện để mang đến trải nghiệm tốt hơn.',
+    'Chúng tôi rất tiếc vì sản phẩm chưa hoàn toàn làm bạn hài lòng. Bạn có thể chia sẻ thêm thông tin để chúng tôi hỗ trợ kịp thời không?',
+    'Ý kiến của bạn giúp chúng tôi hoàn thiện hơn. Chúng tôi sẽ xem xét và cải tiến sản phẩm dựa trên phản hồi của bạn.'
+  ],
+  3: [
+    'Cảm ơn bạn đã dành thời gian đánh giá. Chúng tôi sẽ tiếp tục cải thiện để mang đến sản phẩm và dịch vụ tốt hơn cho bạn!',
+    'Rất trân trọng ý kiến của bạn. Chúng tôi sẽ ghi nhận để nâng cao chất lượng sản phẩm và trải nghiệm khách hàng.',
+    'Cảm ơn bạn đã chia sẻ cảm nhận. Chúng tôi hy vọng sẽ mang đến trải nghiệm tuyệt vời hơn trong lần mua sắm tiếp theo!'
+  ],
+  4: [
+    'Cảm ơn bạn đã yêu thích sản phẩm của chúng tôi! Sự hài lòng của bạn là động lực để chúng tôi tiếp tục cải tiến.',
+    'Rất vui khi bạn đánh giá cao sản phẩm. Chúng tôi sẽ nỗ lực để duy trì chất lượng và mang đến những trải nghiệm tốt hơn nữa!',
+    'Cảm ơn bạn đã ủng hộ! Chúng tôi mong được phục vụ bạn với những sản phẩm chất lượng hơn trong tương lai.'
+  ],
+  5: [
+    'Cảm ơn bạn đã đánh giá 5 sao! Sự yêu mến của bạn là nguồn động lực lớn để chúng tôi tiếp tục mang đến những sản phẩm tuyệt vời.',
+    'Chúng tôi rất hạnh phúc khi bạn hài lòng với sản phẩm! Mong được đồng hành cùng bạn trong những lần mua sắm tiếp theo.',
+    'Cảm ơn bạn đã tin tưởng và ủng hộ! Chúng tôi sẽ tiếp tục nỗ lực để mang đến những trải nghiệm hoàn hảo hơn.'
+  ],
+});
+
+const replyFormRef = ref(null);
 const user = ref(JSON.parse(localStorage.getItem('user')) || null);
 
 // Ánh xạ trạng thái sang tiếng Việt
@@ -241,7 +361,7 @@ const indexMethod = (index) => {
 const resetFilters = () => {
   filterStar.value = null;
   filterStatus.value = null;
-  currentPage.value = 1; // Đặt lại về trang đầu tiên
+  currentPage.value = 1;
   loadDanhGia();
 };
 
@@ -249,12 +369,10 @@ const resetFilters = () => {
 const loadDanhGia = async () => {
   loading.value = true;
   try {
-    // Xác thực filterStar
     if (filterStar.value !== null && (filterStar.value < 1 || filterStar.value > 5)) {
       toast.error('Số sao không hợp lệ. Vui lòng chọn từ 1 đến 5.');
       return;
     }
-
     const response = await DanhGiaSanPhamAdminService.layTatCaDanhGiaAdmin(
       currentPage.value - 1,
       pageSize.value,
@@ -284,10 +402,17 @@ const handlePageChange = (page) => {
   loadDanhGia();
 };
 
-// Mở dialog phản hồi
+// Mở dialog phản hồi mới
 const openReplyDialog = (row) => {
+  if (row.noiDungPhanHoi) {
+    toast.error('Đánh giá này đã có phản hồi. Vui lòng chọn "Cập nhật phản hồi".');
+    return;
+  }
+  isUpdateMode.value = false;
+  originalReplyContent.value = '';
   replyForm.value = {
     idDanhGia: row.idDanhGia,
+    idPhanHoi: null,
     tenKhachHang: row.tenKhachHang,
     tenSanPham: row.tenSanPham,
     maSanPhamChiTiet: row.maSanPhamChiTiet,
@@ -298,10 +423,61 @@ const openReplyDialog = (row) => {
     noiDung: row.noiDung,
     anhUrls: row.anhUrls,
     videoUrls: row.videoUrls,
-    noiDungPhanHoi: row.noiDungPhanHoi || '',
+    noiDungPhanHoi: '',
   };
-  console.log('Opening dialog, replyForm:', replyForm.value);
+  selectedSuggestion.value = '';
   dialogReplyVisible.value = true;
+};
+
+// Mở dialog cập nhật phản hồi
+// Mở dialog cập nhật phản hồi
+const openUpdateReplyDialog = async (row) => {
+  try {
+    console.log('Mở dialog cập nhật phản hồi cho đánh giá:', row.idDanhGia);
+    isUpdateMode.value = true;
+    originalReplyContent.value = row.noiDungPhanHoi;
+
+    // Lấy thông tin chi tiết phản hồi
+    const phanHoiData = await DanhGiaSanPhamAdminService.layPhanHoiDanhGia(row.idDanhGia);
+    console.log('Dữ liệu phản hồi:', phanHoiData); // Debug log
+
+    // Kiểm tra dữ liệu trả về là mảng và có phần tử đầu tiên
+    if (!phanHoiData || !Array.isArray(phanHoiData) || phanHoiData.length === 0 || !phanHoiData[0].idPhanHoi) {
+      throw new Error('Không tìm thấy ID phản hồi để cập nhật.');
+    }
+
+    // Lấy phần tử đầu tiên của mảng
+    const phanHoi = phanHoiData[0];
+
+    replyForm.value = {
+      idDanhGia: row.idDanhGia,
+      idPhanHoi: phanHoi.idPhanHoi, // Sử dụng idPhanHoi thay vì id
+      tenKhachHang: row.tenKhachHang,
+      tenSanPham: row.tenSanPham,
+      maSanPhamChiTiet: row.maSanPhamChiTiet,
+      tenMau: row.tenMau,
+      dungLuongRam: row.dungLuongRam,
+      dungLuongRom: row.dungLuongRom,
+      soSao: row.soSao,
+      noiDung: row.noiDung,
+      anhUrls: row.anhUrls,
+      videoUrls: row.videoUrls,
+      noiDungPhanHoi: phanHoi.noiDungPhanHoi || row.noiDungPhanHoi || '',
+    };
+    selectedSuggestion.value = '';
+    dialogReplyVisible.value = true;
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin phản hồi:', error);
+    toast.error('Không thể tải thông tin phản hồi. Vui lòng thử lại.');
+    dialogReplyVisible.value = false;
+  }
+};
+
+// Áp dụng gợi ý phản hồi
+const applySuggestion = (suggestion) => {
+  if (suggestion) {
+    replyForm.value.noiDungPhanHoi = suggestion;
+  }
 };
 
 // Đóng dialog phản hồi
@@ -314,39 +490,55 @@ const handleCloseReplyDialog = (done) => {
     .then(() => {
       done();
     })
-    .catch(() => { });
+    .catch(() => {});
 };
-// Gửi phản hồi
+
+// Gửi phản hồi hoặc cập nhật phản hồi
 const submitReplyForm = () => {
   replyFormRef.value.validate(async (valid) => {
     if (valid) {
+      submitting.value = true;
       try {
         const idNhanVien = user.value?.id;
         if (!idNhanVien) {
           throw new Error('ID nhân viên không tồn tại. Vui lòng đăng nhập lại.');
         }
-        console.log('Submitting replyForm1111111111111111111:', replyForm.value.noiDungPhanHoi);
 
-        await DanhGiaSanPhamAdminService.phanHoiDanhGia(
-          replyForm.value.idDanhGia,
-          {
-            noiDungPhanHoi: replyForm.value.noiDungPhanHoi,
-            idNhanVien: idNhanVien,
+        if (isUpdateMode.value) {
+          if (!replyForm.value.idPhanHoi) {
+            throw new Error('ID phản hồi không tồn tại để cập nhật.');
           }
-        );
-
-        toast.success('Gửi phản hồi thành công');
+          await PhanHoiDanhGiaAdminService.capNhatPhanHoi(
+            replyForm.value.idPhanHoi,
+            {
+              noiDungPhanHoi: replyForm.value.noiDungPhanHoi,
+              idNhanVien: idNhanVien,
+            }
+          );
+          toast.success('Cập nhật phản hồi thành công');
+        } else {
+          await PhanHoiDanhGiaAdminService.phanHoiDanhGia(
+            replyForm.value.idDanhGia,
+            {
+              noiDungPhanHoi: replyForm.value.noiDungPhanHoi,
+              idNhanVien: idNhanVien,
+            }
+          );
+          toast.success('Gửi phản hồi thành công');
+        }
+        
         dialogReplyVisible.value = false;
         loadDanhGia();
       } catch (error) {
-        //  Bắt lỗi backend trả về
-        if (error.response && error.response.data) {
-          const message = error.response.data.message || 'Có lỗi xảy ra từ server';
-          toast.error(message);
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.error(error.response.data.message);
         } else {
-          toast.error('Lỗi khi gửi phản hồi. Vui lòng thử lại.');
+          const action = isUpdateMode.value ? 'cập nhật' : 'gửi';
+          toast.error(`Lỗi khi ${action} phản hồi: ${error.message}`);
         }
-        console.error('❌ Lỗi khi gửi phản hồi:', error);
+        console.error('❌ Lỗi khi xử lý phản hồi:', error);
+      } finally {
+        submitting.value = false;
       }
     } else {
       console.log('Form validation failed');
@@ -412,7 +604,6 @@ const handleDelete = async (id) => {
         type: 'danger',
       }
     );
-
     await DanhGiaSanPhamAdminService.xoaDanhGia(id);
     toast.success('✅ Xóa đánh giá thành công');
     loadDanhGia();
@@ -502,11 +693,32 @@ video {
 
 .el-dialog {
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff;
+}
+
+.el-dialog__header {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.el-dialog__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.el-dialog__body {
+  padding: 0;
 }
 
 .el-form-item__label {
   font-weight: 500;
   color: #374151;
+  font-size: 16px;
 }
 
 .el-input,
@@ -517,6 +729,8 @@ video {
 
 .el-textarea__inner {
   pointer-events: auto !important;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .el-pagination {
@@ -556,13 +770,6 @@ video {
   vertical-align: middle;
 }
 
-.el-dialog .el-image,
-.el-dialog video {
-  width: 80px !important;
-  height: 60px !important;
-  margin-right: 8px;
-}
-
 .el-table {
   font-size: 15px;
 }
@@ -572,4 +779,3 @@ video {
   padding: 8px 6px;
 }
 </style>
-```

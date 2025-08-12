@@ -157,7 +157,7 @@ public class LichSuDiemService {
         lichSuTru.setViDiem(viDiem);
         lichSuTru.setSoDiem(diemCanDoi);
         lichSuTru.setLoaiDiem(LoaiDiem.TRU);
-        lichSuTru.setGhiChu("Đổi điểm lấy voucher " + phieu.getTenKhuyenMai());
+        lichSuTru.setGhiChu("Đổi điểm lấy voucher " + phieu.getTenGiamGia());
         lichSuTru.setThoiGian(OffsetDateTime.now(ZoneOffset.UTC));
         lichSuDiemRepository.save(lichSuTru);
 
@@ -168,7 +168,7 @@ public class LichSuDiemService {
         khachHangGiamGia.setIdPhieuGiamGia(phieu);
         khachHangGiamGia.setIsUser(false);
         khachHangGiamGia.setNgayCap(LocalDate.now());
-        khachHangGiamGia.setDoiBangDiem(true);
+        khachHangGiamGia.setTrangThai(1);
 
         khachHangGiamGiaRepository.save(khachHangGiamGia);
         hangServices.updateHang(idKhachHang);
@@ -196,15 +196,17 @@ public class LichSuDiemService {
         }
 
         // check valid status
-        boolean isShipping = hoaDon.getIsShipping();
-        String trangThaiThanhToan = hoaDon.getTrangThaiThanhToan().name();
-        String trangThaiGiaoHang = hoaDon.getTrangThaiDonHang().name();
+        if (hoaDon.getIsShipping() != null) {
+            boolean isShipping = hoaDon.getIsShipping();
+            String trangThaiThanhToan = hoaDon.getTrangThaiThanhToan().name();
+            String trangThaiGiaoHang = hoaDon.getTrangThaiDonHang().name();
 
-        boolean valid = (isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan) && "DELIVERED".equalsIgnoreCase(trangThaiGiaoHang))
-                || (!isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan));
+            boolean valid = (isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan) && "DELIVERED".equalsIgnoreCase(trangThaiGiaoHang))
+                    || (!isShipping && "COMPLETED".equalsIgnoreCase(trangThaiThanhToan));
 
-        if(!valid) {
-            return;
+            if(!valid) {
+                return;
+            }
         }
 
         KhachHang khachHang = hoaDon.getIdKhachHang();

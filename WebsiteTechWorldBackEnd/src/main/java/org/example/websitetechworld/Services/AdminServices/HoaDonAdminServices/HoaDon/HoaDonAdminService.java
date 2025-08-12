@@ -22,6 +22,7 @@ import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
+import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -56,8 +58,9 @@ public class HoaDonAdminService {
     private final HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_sanPhamAdminServices;
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final EntityManager entityManager;
+    private final EmailServicces emailServicces;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -69,6 +72,7 @@ public class HoaDonAdminService {
         hoaDonChiTiet_sanPhamAdminServices = hoaDonChiTietSanPhamAdminServices;
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
         this.entityManager = entityManager;
+        this.emailServicces = emailServicces;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -189,13 +193,16 @@ public class HoaDonAdminService {
         if (hoaDon.getTrangThaiThanhToan() == TrangThaiThanhToan.PAID) {
             throw new IllegalArgumentException("Hóa đơn đã được thanh toán.");
         }
+        if (hoaDon.getSoTienGiam() != null){
+            hoaDon.setSoTienGiam(request.getSoTienGiam());
+        }
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
 
         if (response.getMessage().equals("Thanh toán thành công")) {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.SOLD);
-//            hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(hoaDon.getChiTietHoaDons().stream().toList());
+            updateTongTien(hoaDon.getId());
         }
 
         return response;
@@ -250,11 +257,11 @@ public class HoaDonAdminService {
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
         invoice.setNgayDatHang(LocalDateTime.now());
         // Gán maVanDon
-        String maVanDon = request.getMaVanDon();
-        if (maVanDon == null || maVanDon.trim().isEmpty()) {
-            maVanDon = generateMaVanDon(id);
-        }
-        invoice.setMaVanDon(maVanDon);
+//        String maVanDon = request.getMaVanDon();
+//        if (maVanDon == null || maVanDon.trim().isEmpty()) {
+//            maVanDon = generateMaVanDon(id);
+//        }
+//        invoice.setMaVanDon(maVanDon);
 
         // Gán shippingMethod
         invoice.setShippingMethod(request.getShippingMethod() != null ?
@@ -293,6 +300,16 @@ public class HoaDonAdminService {
             throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
         }
     }
+
+    public void updateMaVanDon(Integer idHoaDon) {
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon).orElseThrow(
+                () -> new IllegalArgumentException(("Hoa don ko ton tai"))
+        );
+        hoaDon.setMaVanDon(generateMaVanDon(idHoaDon));
+        sendMailByyMaVanDon(hoaDon);
+        hoaDonRepository.save(hoaDon);
+    }
+
     private String generateMaVanDon(Integer invoiceId) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
@@ -394,6 +411,32 @@ public class HoaDonAdminService {
         } else {
             cell.setCellValue(value.toString());
         }
+    }
+
+    public void sendMailByyMaVanDon(HoaDon hoaDon){
+        String maHoaDon = null;
+        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaVanDon();
+
+        String html = "<h2 style='color:#2c3e50;'>Cảm ơn bạn đã đặt hàng!</h2>"
+                + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
+                + "<p>Đơn hàng <b>" + hoaDon.getMaHoaDon() + "</b> của bạn đã được xác nhận vào ngày "
+                + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".</p>"
+                + "<p><i>Chúng tôi sẽ sớm liên hệ với bạn để giao hàng.</i></p>"
+                + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";
+
+        emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
+    }
+
+    public void updateStatus(Integer idHoaDon, TrangThaiThanhToan newStatus) {
+        Optional<HoaDon> optionalHoaDon = hoaDonRepository.findById(idHoaDon);
+        if (!optionalHoaDon.isPresent()) {
+            throw new IllegalArgumentException("Không tìm thấy hoa don hàng với ID: " + idHoaDon);
+        }
+        HoaDon hoaDon = optionalHoaDon.get();
+        hoaDon.setTrangThaiThanhToan(newStatus);
+        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+
+        hoaDonRepository.save(hoaDon);
     }
 
 

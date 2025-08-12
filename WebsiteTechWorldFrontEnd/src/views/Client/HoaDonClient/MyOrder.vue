@@ -98,6 +98,9 @@
             Không tìm thấy đơn hàng nào phù hợp.
           </div>
           <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
+            <div class="order-mvd" style="margin: 10px 3px;">
+                <b>Mã vận đơn: {{ order.maVanDon }}</b>
+              </div>
             <div class="order-status-bar">
               <div class="order-status">
                 🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
@@ -127,9 +130,12 @@
               </div>
               <div class="order-actions">
                 <button class="action-button buy-again-button">Mua Lại</button>
-                <button class="action-button contact-seller-button">Liên Hệ Người Bán</button>
-                <button v-if="order.trangThaiThanhToan === 'Hoàn tất'" class="action-button rate-button"
-                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">Đánh giá</button>
+                <button class="action-button contact-seller-button" @click="contactSeller">Liên Hệ Người Bán</button>
+                <button v-if="order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia"
+                  class="action-button rate-button"
+                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
+                  Đánh giá
+                </button>
               </div>
             </div>
           </div>
@@ -223,18 +229,83 @@ const totalRevenue = computed(() =>
   allOrderValue.value.reduce((sum, order) => sum + order.thanhTien, 0)
 );
 
-const allMyOrde = async () => {
-  try {
-    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
-    allOrderValue.value = res.data.content || [];
-    totalElements.value = res.data.totalElements || 0;
-    totalPages.value = res.data.totalPages || 0;
-    console.log('Dữ liệu đơn hàng:', res);
-  } catch (error) {
-    console.error('Lỗi khi lấy đơn hàng:', error);
-    alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+onMounted(() => {
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+  const s1 = document.createElement('script');
+  const s0 = document.getElementsByTagName('script')[0];
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  s0.parentNode.insertBefore(s1, s0);
+});
+
+
+const contactSeller = () => {
+  if (window.Tawk_API?.toggle) {
+    window.Tawk_API.toggle();
+  } else {
+    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
+    setTimeout(() => {
+      if (!window.Tawk_API?.toggle) {
+        toast.error('Không thể mở chat. Vui lòng thử lại sau.');
+      }
+    }, 5000);
   }
 };
+
+
+// const allMyOrde = async () => {
+//   try {
+//     const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
+//     allOrderValue.value = res.data.content || [];
+//     totalElements.value = res.data.totalElements || 0;
+//     totalPages.value = res.data.totalPages || 0;
+//     console.log('Dữ liệu đơn hàng:', res);
+//   } catch (error) {
+//     console.error('Lỗi khi lấy đơn hàng:', error);
+//     alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+//   }
+// };
+
+const allMyOrde = async () => {
+  try {
+    if (!user.value?.id) {
+      toast.error('Vui lòng đăng nhập để xem đơn hàng!');
+      return;
+    }
+
+    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value, user.value.id);
+    console.log("📦 Dữ liệu thô từ getMyOrder:", res);
+
+    const orders = res.data.content || []; // ✅ Sửa ở đây!
+    console.log("✅ Danh sách đơn hàng:", orders);
+
+    const ordersWithCheck = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          const response = await DanhGiaSanPhamClientService.checkDanhGia(order.idHoaDon, user.value.id);
+          console.log("✅ Kết quả check:", response);
+          return { ...order, daDanhGia: response.daDanhGia };
+        } catch (err) {
+          console.error(`❌ Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`, err);
+          return { ...order, daDanhGia: false };
+        }
+      })
+    );
+
+    allOrderValue.value = ordersWithCheck;
+    totalElements.value = res.data.totalElements || 0;
+    totalPages.value = res.data.totalPages || 0;
+
+    console.log("🎯 Dữ liệu đơn hàng sau check đánh giá:", ordersWithCheck);
+  } catch (error) {
+    console.error('❌ Lỗi khi lấy đơn hàng:', error);
+    toast.error('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+  }
+};
+
 
 const changePage = (page) => {
   currentPage.value = page;
@@ -383,8 +454,6 @@ const closeRateDialog = () => {
 };
 
 const submitRating = async (ratingData) => {
- 
-
   try {
     if (!user.value?.id) {
       toast.warning('⚠️ Vui lòng đăng nhập để đánh giá!');
@@ -399,19 +468,20 @@ const submitRating = async (ratingData) => {
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(data.idHoaDon);
     const chiTietArray = chiTietList.data;
 
-    if (!chiTietArray || chiTietArray.length === 0) {
+    if (!chiTietArray || !Array.isArray(chiTietArray) || chiTietArray.length === 0) {
       console.error('Không có chi tiết hóa đơn!');
       toast.error('❌ Không tìm thấy chi tiết hóa đơn.');
       return;
     }
 
-    if (chiTietArray.length !== data.soSao.length) {
+    // Sử dụng data.ratings thay vì data.soSao
+    if (chiTietArray.length !== data.ratings.length) {
       console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
       toast.error('❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn.');
       return;
     }
 
-    const isValid = data.soSao.every((rating) => {
+    const isValid = data.ratings.every((rating) => {
       return chiTietArray.some((chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet);
     });
 
@@ -423,13 +493,13 @@ const submitRating = async (ratingData) => {
       return;
     }
 
-    if (data.soSao.length > chiTietArray.length) {
+    if (data.ratings.length > chiTietArray.length) {
       console.error('Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!');
       toast.error('❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.');
       return;
     }
 
-    const danhGiaPromises = data.soSao.map(async (chiTiet, index) => {
+    const danhGiaPromises = data.ratings.map(async (rating, index) => {
       if (!chiTietArray[index]?.idChiTietHoaDon) {
         throw new Error(`Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`);
       }
@@ -438,9 +508,9 @@ const submitRating = async (ratingData) => {
         idHoaDon: data.idHoaDon,
         idSanPhamChiTiet: chiTietArray[index].idSanPhamChiTiet,
         idChiTietHoaDon: chiTietArray[index].idChiTietHoaDon,
-        idKhachHang: data.idKhachHang,
-        soSao: chiTiet.soSao,
-        noiDung: data.noiDung,
+        idKhachHang: user.value.id,
+        soSao: rating.soSao,
+        noiDung: rating.noiDung,
         trangThaiDanhGia: data.trangThaiDanhGia,
       };
 
@@ -460,18 +530,21 @@ const submitRating = async (ratingData) => {
       return;
     }
 
-    for (const file of data.imageFiles) {
-      console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
-    }
-    for (const file of data.videoFiles) {
-      console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-      mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+    for (const rating of data.ratings) {
+      for (const file of rating.imageFiles) {
+        console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+      }
+      for (const file of rating.videoFiles) {
+        console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
+        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+      }
     }
 
     await Promise.all(mediaPromises);
 
     toast.success('🎉 Gửi đánh giá thành công!');
+    await allMyOrde();
     closeRateDialog();
   } catch (error) {
     console.error('❌ Lỗi khi gửi đánh giá:', error);
@@ -487,8 +560,6 @@ const submitRating = async (ratingData) => {
     }
   }
 };
-
-
 
 
 onMounted(async () => {

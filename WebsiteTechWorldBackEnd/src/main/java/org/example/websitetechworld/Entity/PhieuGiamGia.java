@@ -12,6 +12,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,28 +33,28 @@ public class PhieuGiamGia {
 
     @Size(max = 50)
     @Nationalized
-    @Column(name = "ten_khuyen_mai", length = 50)
-    private String tenKhuyenMai;
+    @Column(name = "ten_giam_gia", length = 50)
+    private String tenGiamGia;
 
     @Size(max = 50)
     @Nationalized
-    @Column(name = "loai_khuyen_mai", length = 50)
-    private String loaiKhuyenMai;
+    @Column(name = "loai_giam_gia", length = 50)
+    private String loaiGiamGia;
 
-    @Column(name = "gia_tri_khuyen_mai", precision = 10, scale = 2)
-    private BigDecimal giaTriKhuyenMai;
+    @Column(name = "gia_tri_giam_gia", precision = 10, scale = 2)
+    private BigDecimal giaTriGiamGia;
 
     @Column(name = "gia_tri_don_hang_toi_thieu", precision = 10, scale = 2)
     private BigDecimal giaTriDonHangToiThieu;
 
-    @Column(name = "gia_tri_khuyen_mai_toi_da", precision = 10, scale = 2)
-    private BigDecimal giaTriKhuyenMaiToiDa;
+    @Column(name = "gia_tri_giam_gia_toi_da", precision = 10, scale = 2)
+    private BigDecimal giaTriGiamGiaToiDa;
 
     @Column(name = "ngay_bat_dau")
-    private LocalDate ngayBatDau;
+    private LocalDateTime ngayBatDau;
 
     @Column(name = "ngay_ket_thuc")
-    private LocalDate ngayKetThuc;
+    private LocalDateTime ngayKetThuc;
 
     @Size(max = 100)
     @Nationalized

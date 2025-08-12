@@ -75,7 +75,7 @@
             </div>
 
             <!-- Phương thức vận chuyển -->
-            <div class="section">
+            <div v-if="shippingAddress.address" class="section">
                 <h2 class="section-title">Phương thức vận chuyển</h2>
                 <div class="radio-group">
                     <label class="radio-option">
@@ -181,16 +181,19 @@
                                     <label for="modal-name" class="label">Họ và tên</label>
                                     <input id="modal-name" v-model="modalNewAddress.name" type="text"
                                         placeholder="Nhập họ và tên" class="input-field" />
+                                        <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Số điện thoại</label>
                                     <input id="modal-phone" v-model="modalNewAddress.phone" type="tel"
                                         placeholder="Nhập số điện thoại" class="input-field" />
+                                        <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Email</label>
                                     <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
                                         placeholder="Nhập email người nhận" class="input-field" />
+                                        <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
                                 </div>
                                 <label>Chọn tỉnh:</label>
                                 <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
@@ -198,6 +201,8 @@
                                     <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
                                     </option>
                                 </select>
+                                <span v-if="errors.tinh" class="error-text">{{ errors.tinh }}</span>
+
                                 <label>Chọn Xã:</label>
                                 <select v-model="selectedXa" @change="onXaChange" class="select-box"
                                     :disabled="!selectedTinh">
@@ -205,10 +210,13 @@
                                     <option v-for="x in xaList" :key="x.code" :value="x">{{ x.name }}
                                     </option>
                                 </select>
+                                <span v-if="errors.xa" class="error-text">{{ errors.xa }}</span>
+
                                 <div>
                                     <label for="modal-address" class="label">Địa chỉ</label>
                                     <input id="modal-address" v-model="addressDetail" type="text"
                                         placeholder="Nhập địa chỉ chi tiết" class="input-field" />
+                                        <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
                                 </div>
                             </div>
                         </div>
@@ -241,8 +249,18 @@
                             <div class="voucher-input-group">
                                 <input v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
                                     class="input-field flex-grow" />
-                                <button @click="handleApplyVoucherInModal" class="apply-button">Áp dụng</button>
                             </div>
+                            <ul class="voucher-list">
+                                <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
+                                    <div>
+                                        <strong>{{ discount.tenGiamGia }}</strong>
+                                        <small>Giảm: {{ discount.giaTriGiamGia }}%</small>
+                                    </div>
+                                    <button @click="applyDiscount(discount)" class="apply-button">
+                                        Áp dụng
+                                    </button>
+                                </li>
+                            </ul>
                             <div v-if="modalAppliedVoucher.code" class="applied-voucher-info">
                                 <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ modalAppliedVoucher.code
                                         }}</strong></span>
@@ -272,6 +290,9 @@ import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderCl
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
 import { add } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
+
+import { CartService } from "@/Service/ClientService/GioHang/CartService";
+import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
 
 const toast = useToast()
 const route = useRoute();
@@ -320,16 +341,54 @@ watch(() => modalNewAddress.value.email, (newVal) => {
     shippingAddress.value.email = newVal;
 });
 
+const errors = ref({});
+
+const validateAddressForm = () => {
+  errors.value = {};
+
+  if (!modalNewAddress.value.name?.trim()) {
+    errors.value.name = "Vui lòng nhập họ và tên";
+  }
+
+  if (!modalNewAddress.value.phone?.trim()) {
+    errors.value.phone = "Vui lòng nhập số điện thoại";
+  } else if (!/^0\d{9}$/.test(modalNewAddress.value.phone)) {
+    errors.value.phone = "Số điện thoại không hợp lệ";
+  }
+
+  if (!modalNewAddress.value.email?.trim()) {
+    errors.value.email = "Vui lòng nhập email";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(modalNewAddress.value.email)) {
+    errors.value.email = "Email không hợp lệ";
+  }
+
+  if (!selectedTinh.value) {
+    errors.value.tinh = "Vui lòng chọn tỉnh/thành phố";
+  }
+
+  if (!selectedXa.value) {
+    errors.value.xa = "Vui lòng chọn xã/phường";
+  }
+
+  if (!addressDetail.value?.trim()) {
+    errors.value.address = "Vui lòng nhập địa chỉ chi tiết";
+  }
+
+  return Object.keys(errors.value).length === 0;
+};
+
 
 function confirmAddressSelection() {
-  if (modalSelectedAddressId.value === 'new') {
-    shippingAddress.value = { ...modalNewAddress.value };
-      applySelectedAddress();
-  } else {
-    const selected = userAddresses.value.find(addr => addr.id === modalSelectedAddressId.value);
-    if (selected) shippingAddress.value = selected;
-  }
-  isAddressModalOpen.value = false;
+    if (validateAddressForm()) {
+        if (modalSelectedAddressId.value === 'new') {
+            shippingAddress.value = { ...modalNewAddress.value };
+            applySelectedAddress();
+        } else {
+            const selected = userAddresses.value.find(addr => addr.id === modalSelectedAddressId.value);
+            if (selected) shippingAddress.value = selected;
+        }
+        isAddressModalOpen.value = false;
+    }
 }
 
 // Initialize shippingAddress based on initial selectedAddressId
@@ -371,6 +430,8 @@ function applySelectedAddress() {
 
 // Open Address Modal and sync its state
 const openAddressModal = () => {
+    errors.value = {};
+
     modalSelectedAddressId.value = selectedAddressId.value;
     if (selectedAddressId.value === 'new') {
         modalNewAddress.value = { ...newAddress.value }; // Copy current new address data
@@ -394,6 +455,19 @@ const modalAppliedVoucher = ref({ code: '', discount: 0 }); // Voucher applied i
 const voucherError = ref(''); // Main form's error
 const modalVoucherError = ref(''); // Error inside the modal
 
+const discountList = ref([])
+const selectedDiscount = ref(null)
+const giam = ref(0)
+
+const loadDiscountList = async () => {
+    try {
+        const response = await getAllPhieuGiamGia(modalVoucherCode.value, null, calculateSubtotal.value)
+        discountList.value = response.data
+    } catch (err) {
+        console.error(err || "Lỗi lấy danh sách phiếu giảm giá");
+    }
+}
+
 // Open Voucher Modal and sync its state
 const openVoucherModal = () => {
     modalVoucherCode.value = voucherCode.value; // Sync current voucher code
@@ -403,6 +477,25 @@ const openVoucherModal = () => {
 };
 
 const closeVoucherModal = () => {
+    isVoucherModalOpen.value = false;
+};
+
+const applyDiscount = (discount) => {
+    selectedDiscount.value = discount;
+
+        console.log('1', selectedDiscount.value)
+    if (selectedDiscount.value?.loaiGiamGia === 'Phần trăm') {
+        giam.value = calculateSubtotal.value * selectedDiscount.value?.giaTriGiamGia / 100;
+        if (selectedDiscount.value?.giaTriGiamGiaToiDa < giam.value) {
+            giam.value = selectedDiscount.value?.giaTriGiamGiaToiDa
+        }
+    } else if (selectedDiscount.value?.giaTriGiamGia) {
+        giam.value = selectedDiscount.value.giaTriGiamGia;
+    } 
+
+    const giamGia = { code: discount.maGiamGia, discount: giam.value }
+    calculateTotal.value = calculateTotal.value - giamGia
+    appliedVoucher.value = giamGia
     isVoucherModalOpen.value = false;
 };
 
@@ -445,11 +538,13 @@ onMounted(() => {
             console.error('Lỗi parse dữ liệu sản phẩm:', e);
         }
     }
+    loadDiscountList()
 });
 
 watch(product, (newVal) => {
     console.log("👀 product thay đổi:", newVal);
     console.log("💵 Subtotal mới:", calculateSubtotal.value);
+    loadDiscountList()
 });
 
 const insurance = ref({
@@ -490,10 +585,9 @@ const calculateSubtotal = computed(() => {
 });
 
 const calculateTotal = computed(() => {
-    return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0);
+    return Number(calculateSubtotal.value || 0) + Number(getShippingCost.value || 0) - Number(giam.value || 0);
 })
 console.log('total', calculateTotal.value)
-
 
 const handleBuy = async () => {
     const shippingConfirm = {
@@ -511,7 +605,8 @@ const handleBuy = async () => {
         sanPhamRequests: product.value.map(p => ({
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
-        }))
+        })),
+        idPhieuGiamGia: selectedDiscount.value?.id 
     };
     console.log('shipping', shippingConfirm);
     if (getShippingCost.value == 0) {
@@ -534,9 +629,17 @@ const handleBuy = async () => {
     try {
         const res = await thanhToanGuest(shippingConfirm);
 
+        if (res.data.message === 'REDIRECT_VNPAY') {
+            window.location.href = res.data.paymentUrl;
+            return;
+        }
+
         if (res.data.message === 'Đặt hàng thành công') {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
+            product.value.forEach(p => {
+                const success = CartService.xoaSanPhamKhoiGio(p.idSanPhamChiTiet)
+            });
             router.push({ name: 'successClient' });
         } else {
             toast.dismiss(toastId);

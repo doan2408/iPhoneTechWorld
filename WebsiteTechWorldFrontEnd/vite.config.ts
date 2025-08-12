@@ -22,6 +22,10 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
+    allowedHosts: [
+      'localhost',
+      '329c8f9a0365.ngrok-free.app' // Thay thế bằng địa chỉ ngrok của bạn
+    ],
     // hmr: {
     //   protocol: 'ws',
     //   host: '172.17.192.1', // hoặc IP thật nếu truy cập từ máy khác

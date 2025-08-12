@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -21,7 +22,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query("""
         SELECT p FROM PhieuGiamGia p
-        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenKhuyenMai LIKE %:search%)
+        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenGiamGia LIKE %:search%)
           AND (:trangThai IS NULL OR p.trangThaiPhieuGiamGia = :trangThai)
           AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)
@@ -29,8 +30,8 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     Page<PhieuGiamGia> findAll (
             @Param("search") String search,
             @Param("trangThai") TrangThaiPGG trangThai,
-            @Param("ngayBatDau") LocalDate ngayBatDau,
-            @Param("ngayKetThuc") LocalDate ngayKetThuc,
+            @Param("ngayBatDau") LocalDateTime ngayBatDau,
+            @Param("ngayKetThuc") LocalDateTime ngayKetThuc,
             Pageable pageable
     );
 
@@ -53,7 +54,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query("""
         SELECT p FROM PhieuGiamGia p
-        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenKhuyenMai LIKE %:search%)
+        WHERE (:search IS NULL OR p.maGiamGia LIKE %:search% OR p.tenGiamGia LIKE %:search%)
           AND (:trangThai IS NULL OR p.trangThaiPhieuGiamGia = :trangThai)
           AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)

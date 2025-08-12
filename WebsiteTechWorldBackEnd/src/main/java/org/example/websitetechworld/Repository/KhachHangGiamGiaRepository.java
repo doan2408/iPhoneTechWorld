@@ -33,7 +33,7 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
             "FROM KhachHangGiamGia k " +
             "WHERE k.idKhachHang.id = :idKhachHang " +
             "AND k.idPhieuGiamGia.id = :idPhieuGiamGia " +
-            "AND k.doiBangDiem = true " +
+            "AND k.trangThai = 1 " +
             "AND MONTH(k.ngayCap) = :thang " +
             "AND YEAR(k.ngayCap) = :nam")
     boolean checkSoLanDoiTrong1Thang(
@@ -42,4 +42,8 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
             @Param("thang") int thang,
             @Param("nam") int nam
     );
+
+    KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHang(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang);
+
+    KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang, Boolean isUser);
 }

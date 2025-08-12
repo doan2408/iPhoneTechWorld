@@ -50,6 +50,17 @@ export const DanhGiaSanPhamAdminService = {
         }
     },
 
+    async layPhanHoiDanhGia(idDanhGia) {
+        try {
+            const response = await api.get(`/admin/phan-hoi-danh-gia/danh-gia/${idDanhGia}`);
+            console.log('Dữ liệu phản hồi:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error(`Lỗi khi lấy phản hồi đánh giá với ID ${idDanhGia}:`, error);
+            throw error;
+        }
+    },
+
     // Phản hồi đánh giá
     async phanHoiDanhGia(idDanhGia, data) {
         try {
@@ -63,7 +74,22 @@ export const DanhGiaSanPhamAdminService = {
             console.error(`Lỗi khi phản hồi đánh giá với ID ${idDanhGia}:`, error);
             throw error;
         }
-    }
+    },
+
+      async capNhatPhanHoi(idPhanHoi, data) {
+        try {
+        const response = await api.put(`${BASE_URL}/${idPhanHoi}`, {
+            noiDungPhanHoi: data.noiDungPhanHoi,
+            idNhanVien: data.idNhanVien
+        });
+        return response.data;
+        } catch (error) {
+        console.error(`Lỗi khi cập nhật phản hồi ID ${idPhanHoi}:`, error);
+        throw error;
+        }
+    },
+
+
 };
 
 

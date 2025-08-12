@@ -9,5 +9,6 @@ import java.math.BigDecimal;
 public class ThanhToanAdminRequest {
     private TenHinhThuc hinhThucThanhToan;
     private BigDecimal soTienKhachDua;
-
+    private String paymentUrl;
+    private BigDecimal soTienGiam;
 }

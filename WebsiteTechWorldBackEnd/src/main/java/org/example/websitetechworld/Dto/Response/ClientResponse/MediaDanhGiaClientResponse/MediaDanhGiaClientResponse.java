@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class MediaDanhGiaClientResponse {
-
     private Integer idMedia;
     private String loaiMedia;
     private String urlMedia;
@@ -20,6 +19,4 @@ public class MediaDanhGiaClientResponse {
     private LocalDateTime ngayUpload;
     private TrangThaiMedia trangThaiMedia;
     private Integer idDanhGia;
-
-
 }

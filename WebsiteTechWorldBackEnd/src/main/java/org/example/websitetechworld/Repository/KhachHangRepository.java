@@ -14,6 +14,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -78,9 +80,17 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
     @Query("SELECT k FROM KhachHang k WHERE k.hangThanhVien = :hangKhachHang")
     List<KhachHang> findByHangKhachHang(HangKhachHang hangKhachHang);
 
+
+    @Query("SELECT k FROM KhachHang k WHERE MONTH(k.ngaySinh) = :month")
+    List<KhachHang> findByMonthOfNgaySinh(@Param("month") int month);
+
+
+    List<KhachHang> findByNgaySinhAfter(LocalDate ngaySinhAfter);
+
     @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien")
     List<KhachHang> findAllWithHangThanhVien();
 
     @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien WHERE kh.id = :id")
     Optional<KhachHang> findByIdWithHangThanhVien(@Param("id") Integer id);
+
 }

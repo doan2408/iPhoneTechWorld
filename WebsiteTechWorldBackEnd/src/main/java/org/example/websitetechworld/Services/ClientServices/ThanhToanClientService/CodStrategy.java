@@ -51,6 +51,6 @@ public class CodStrategy implements ThanhToanStrategy {
         cttt.setSoTienThanhToan(hoaDon.getThanhTien());
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
         chiTietThanhToanRepository.save(cttt);
-        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien());
+        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien(),null);
     }
 }

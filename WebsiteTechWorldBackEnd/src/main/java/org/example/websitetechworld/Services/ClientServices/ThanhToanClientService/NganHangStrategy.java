@@ -61,6 +61,6 @@ public class NganHangStrategy implements ThanhToanStrategy {
 
         chiTietThanhToanRepository.save(cttt);
 
-        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien());
+        return new ThanhToanAdminResponse("Đặt hàng thành công",hoaDon.getThanhTien(),null);
     }
 }

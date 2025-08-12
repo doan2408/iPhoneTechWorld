@@ -10,6 +10,18 @@ export const getMyOrder = async (pageNo,pageSize) => {
         }
     });
 };  
+
+//bảng đánh giá
+export const getMyReview = async (pageNo,pageSize) => {
+    return  await api.get(baseURL + '/review',{
+        params : {
+            pageNo,
+            pageSize
+        }
+    });
+};  
+
+
 export const findIdHoaDonByMVD = async (maVanDon) => {
     return await api.get(baseURL +'/mvd/'+ maVanDon);
 };  
@@ -53,3 +65,12 @@ export const getDistance = (from, to) => {
 export const getHoaDonAndIdChiTietHoaDon = (id) => {
     return api.get(`${baseURL}/${id}/chi-tiet`);
 };
+
+export const deleteHoaDon = (maHd) => {
+    return api.delete(`${baseURL}/hdct/`+maHd);
+};
+
+export const deleteHoaDonGuest = (maHd) => {
+    return api.delete(`/my-order/hdct/` + maHd);
+};
+

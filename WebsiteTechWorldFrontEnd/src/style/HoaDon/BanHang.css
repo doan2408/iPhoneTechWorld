@@ -2901,3 +2901,219 @@ input:checked+.slider:before {
         /* Khoảng cách trên nút */
     }   }
 
+/* Discount Section */
+.discount-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    transition: box-shadow 0.2s;
+}
+
+.discount-section:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.discount-section h4 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.discount-section > div {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.discount-section strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.discount-section span {
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+}
+
+
+/* Voucher Modal */
+.modal-overlay-pgg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content-pgg {
+    background: #fff;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.modal-close-button {
+    background: none;
+    color: #6b7280;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close-button:hover {
+    color: #374151;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.voucher-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.voucher-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: background 0.2s;
+}
+
+.voucher-item:hover {
+    background: #f0f9ff;
+}
+
+.voucher-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.voucher-item strong {
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.voucher-item small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.apply-button {
+    padding: 8px 12px;
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.apply-button:hover {
+    background: #4338ca;
+}
+
+/* Modal Transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.3s;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+.modal-fade-enter-from .modal-content,
+.modal-fade-leave-to .modal-content {
+    transform: scale(0.95);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: 500px;
+    }
+    .voucher-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px;
+    }
+    .apply-button {
+        width: 100%;
+    }
+    .discount-section {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 90%;
+        max-width: 300px;
+    }
+    .modal-title,
+    .discount-section h4 {
+        font-size: 14px;
+    }
+    .modal-close-button {
+        font-size: 14px;
+    }
+    .voucher-item strong {
+        font-size: 13px;
+    }
+    .voucher-item small {
+        font-size: 11px;
+    }
+}
+
+/* Scrollbar */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

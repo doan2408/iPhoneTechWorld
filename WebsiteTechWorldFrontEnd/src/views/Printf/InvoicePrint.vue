@@ -33,7 +33,7 @@
                     <td>{{ formatCurrency(item.giaBan) }}</td>
                 </tr>
             </tbody>
-        </table>
+        </table>    
         <p v-else>Không có sản phẩm trong hóa đơn.</p>
 
         <div class="summary">

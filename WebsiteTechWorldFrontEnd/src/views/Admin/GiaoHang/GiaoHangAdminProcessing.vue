@@ -3,7 +3,8 @@
         <!-- Order Header -->
         <div class="order-header">
             <div class="order-info">
-                <h1>Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-if="order.maVanDon">Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-else>Hóa đơn #{{ order.maHoaDon }} </h1>
                 <p class="order-date">
                     <Clock class="icon-small" />
                     Ngày đặt: {{ formatDate(order.ngayDatHang) }}
@@ -116,6 +117,79 @@
             </div>
         </div>
 
+        <!-- Action Buttons -->
+        <div class="actions-section">
+            <div class="left-actions">
+                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)" @click="updateStatusInvoicePaid('PAID')"
+                    class="action-btn complete-btn">
+                    <CheckCircle class="icon-small" />
+                    ĐÃ NHẬN TIỀN
+                </button>
+                <button v-if="canConfirm" @click="updateOrderStatus('Đã xác nhận')" class="action-btn confirm-btn">
+                    <CheckCircle class="icon-small" />
+                    XÁC NHẬN DƠN HÀNG
+                </button>
+
+                <button v-if="canPack" @click="updateOrderStatus('Đã đóng gói')" class="action-btn pack-btn">
+                    <CheckCircle class="icon-small" />
+                    XÁC NHẬN ĐÓNG GÓI
+                </button>
+
+                <button v-if="canReady" @click="updateOrderStatus('Sẵn sàng giao')" class="action-btn ready-btn">
+                    <CheckCircle class="icon-small" />
+                    SẴN SÀNG GIAO
+                </button>
+
+                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'" @click="updateOrderStatus('Đang giao')"
+                    class="action-btn ship-btn">
+                    <Truck class="icon-small" />
+                    BẮT ĐẦU GIAO HÀNG
+                </button>
+
+                <button v-if="order.trangThaiDonHang === 'Đang giao'" @click="updateOrderStatus('Đã giao')"
+                    class="action-btn complete-btn">
+                    <CheckCircle class="icon-small" />
+                    HOÀN THÀNH
+                </button>
+
+                <button v-if="canCancel" @click="updateOrderStatus('Đã hủy')" class="action-btn cancel-btn">
+                    <X class="icon-small" />
+                    HỦY ĐƠN
+                </button>
+
+                <button v-if="canShippingFalse" @click="updateOrderStatus('Giao thất bại')"
+                    class="action-btn cancel-btn">
+                    <X class="icon-small" />
+                    GIAO THẤT BẠI
+                </button>
+
+                <button v-if="canReturn" @click="updateOrderStatus('Trả hàng')" class="action-btn cancel-btn">
+                    <X class="icon-small" />
+                    TRẢ HÀNG
+                </button>
+            </div>
+
+
+            <div class="right-actions">
+                <button @click="printInvoice" class="action-btn print-btn">
+                    <Printer class="icon-small" />
+                    IN HÓA ĐƠN
+                </button>
+
+                <button @click="printDeliveryNote" class="action-btn delivery-btn">
+                    <FileText class="icon-small" />
+                    IN PHIẾU GIAO HÀNG
+                </button>
+
+                <button @click="editOrder" class="action-btn edit-btn">
+                    <Edit class="icon-small" />
+                    CHỈNH SỬA
+                </button>
+            </div>
+        </div>
+
+        <br><br>
+
         <!-- Delivery Details Section -->
         <div class="delivery-details">
             <div class="details-grid">
@@ -226,71 +300,7 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="actions-section">
-            <div class="left-actions">
-                <button v-if="canConfirm" @click="updateOrderStatus('Đã xác nhận')" class="action-btn confirm-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN DƠN HÀNG
-                </button>
 
-                <button v-if="canPack" @click="updateOrderStatus('Đã đóng gói')" class="action-btn pack-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN ĐÓNG GÓI
-                </button>
-
-                <button v-if="canReady" @click="updateOrderStatus('Sẵn sàng giao')" class="action-btn ready-btn">
-                    <CheckCircle class="icon-small" />
-                    SẴN SÀNG GIAO
-                </button>
-
-                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'" @click="updateOrderStatus('Đang giao')"
-                    class="action-btn ship-btn">
-                    <Truck class="icon-small" />
-                    BẮT ĐẦU GIAO HÀNG
-                </button>
-
-                <button v-if="order.trangThaiDonHang === 'Đang giao'" @click="updateOrderStatus('Đã giao')"
-                    class="action-btn complete-btn">
-                    <CheckCircle class="icon-small" />
-                    HOÀN THÀNH
-                </button>
-
-                <button v-if="canCancel" @click="updateOrderStatus('Đã hủy')" class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    HỦY ĐƠN
-                </button>
-
-                <button v-if="canShippingFalse" @click="updateOrderStatus('Giao thất bại')"
-                    class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    GIAO THẤT BẠI
-                </button>
-
-                <button v-if="canReturn" @click="updateOrderStatus('Đã trả lại')"
-                    class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    TRẢ HÀNG
-                </button>
-            </div>
-
-            <div class="right-actions">
-                <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" />
-                    IN HÓA ĐƠN
-                </button>
-
-                <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" />
-                    IN PHIẾU GIAO HÀNG
-                </button>
-
-                <button @click="editOrder" class="action-btn edit-btn">
-                    <Edit class="icon-small" />
-                    CHỈNH SỬA
-                </button>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -300,7 +310,7 @@ import {
     Clock, User, Phone, Mail, MapPin, Package, CreditCard, ScrollText, Check, XCircle, AlertTriangle,
     CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw
 } from 'lucide-vue-next'
-import { hoaDonDetail } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
+import { hoaDonDetail, changeStatusInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
@@ -308,7 +318,7 @@ import { id } from 'element-plus/es/locales.mjs'
 const order = reactive({})
 const route = useRoute()
 const statusUpdate = null;
-
+const statusFlase = ['Trả hàng', 'Giao thất bại','Đã hủy']
 
 
 // ham view giao hang
@@ -522,7 +532,7 @@ const getPaymentStatusText = (status) => {
         PENDING: 'Chưa thanh toán',
         CONFIRMED: 'Chưa thanh toán',
         PAID: 'Đã thanh toán',
-        COMPLETED: 'Đã thanh toán',
+        COMPLETED: 'Hoàn tất',
         CANCELLED: 'Hủy',
         REFUNDED: 'Hoàn tiền',
     };
@@ -536,7 +546,7 @@ const getPaymentStatusClass = (status) => {
         PENDING: 'pending',
         CONFIRMED: 'pending',
         PAID: 'paid',
-        COMPLETED: 'paid',
+        COMPLETED: 'completed',
         CANCELLED: 'cancelled',
         REFUNDED: 'refunded'
     };
@@ -554,8 +564,23 @@ const updateOrderStatus = async (newStatus) => {
         order.trangThaiDonHang = newStatus
         console.log(response.data)
         console.log(`Order status updated to: ${newStatus}`)
+        await viewOrderDetail();
+        
     } catch (error) {
         console.error('Failed to update order status:', error.response?.data || error.message)
+    }
+}
+
+const updateStatusInvoicePaid = async (newStatus) => {
+    const id = route.params.id
+    try {
+        const response = await changeStatusInvoice(id, newStatus)
+        // Cập nhật trạng thái sau khi API thành công
+        order.trangThaiThanhToan = newStatus
+        await viewOrderDetail();
+
+    } catch (error) {
+        console.error('Failed to update invoice status:', error.response?.data || error.message)
     }
 }
 

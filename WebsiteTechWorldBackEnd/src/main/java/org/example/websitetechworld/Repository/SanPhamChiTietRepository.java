@@ -99,4 +99,8 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             @Param("mauId") Integer mauId,
             @Param("romId") Integer romId);
 
+    @Query("SELECT spct FROM SanPhamChiTiet spct WHERE spct.idSanPham.id IN :sanPhamIds")
+    List<SanPhamChiTiet> findBySanPhamIds(@Param("sanPhamIds") List<Integer> sanPhamIds);
+
+    List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
 }
