@@ -124,8 +124,6 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
-//        String maVanDon = generateMaVanDon(hoaDon.getId());
-//        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
@@ -137,21 +135,18 @@ public class MyOrderClientServices {
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
-        hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
 
-        if ("Đặt hàng thành công".equals(response.getMessage())) {
-            if (TenHinhThuc.NGAN_HANG.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
-            }else {
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
-            }
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+            hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
-            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-            }
-            sendMailFromInvoice(hoaDon);
-
         }
+        for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+            gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
+        }
+        sendMailFromInvoice(hoaDon);
+
+
         return response;
     }
 
