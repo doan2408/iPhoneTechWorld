@@ -15,7 +15,7 @@
                 <button  class="button primary-button" @click="viewMyOrder">
                     Xem đơn hàng của bạn
                 </button>
-                <a href="/" class="button secondary-button">
+                <a href="/client/home" class="button secondary-button">
                     Tiếp tục mua sắm
                 </a>
             </div>

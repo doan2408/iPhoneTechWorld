@@ -240,7 +240,7 @@ const removeCompare = (product) => {
         <!-- Filters & Results Header -->
         <div class="content-header">
           <div class="results-info">
-            <h2 class="results-title">
+            <h5 class="results-title">
               <span class="results-count" v-if="totalProducts > 0">{{
                 totalProducts
               }}</span>
@@ -248,7 +248,7 @@ const removeCompare = (product) => {
               <span v-if="filterKeyword" class="search-term"
                 >cho "{{ filterKeyword }}"</span
               >
-            </h2>
+            </h5>
             <p class="results-subtitle">
               Được cập nhật {{ new Date().toLocaleDateString("vi-VN") }}
             </p>
@@ -256,47 +256,40 @@ const removeCompare = (product) => {
 
           <div class="view-controls">
             <div class="sort-control">
-              <el-dropdown trigger="click" class="sort-dropdown">
-                <el-button class="sort-btn">
-                  <el-icon><Sort /></el-icon>
-                  <span>{{ sortLabel }}</span>
-                  <el-icon><ArrowDown /></el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu class="custom-dropdown">
-                    <el-dropdown-item
-                      @click="
-                        selectedSort = '';
-                        currentPage = 1;
-                        fetchProducts();
-                      "
-                    >
-                      <el-icon><Refresh /></el-icon>
-                      Mặc định
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      @click="
-                        selectedSort = 'giaAsc';
-                        currentPage = 1;
-                        fetchProducts();
-                      "
-                    >
-                      <el-icon><SortUp /></el-icon>
-                      Giá thấp đến cao
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      @click="
-                        selectedSort = 'giaDesc';
-                        currentPage = 1;
-                        fetchProducts();
-                      "
-                    >
-                      <el-icon><SortDown /></el-icon>
-                      Giá cao đến thấp
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+              <div class="sort-buttons">
+                <button 
+                  :class="['sort-text-btn', { active: selectedSort === '' }]"
+                  @click="
+                    selectedSort = '';
+                    currentPage = 1;
+                    fetchProducts();
+                  "
+                >
+                  Mặc định
+                </button>
+                <span class="sort-separator">•</span>
+                <button 
+                  :class="['sort-text-btn', { active: selectedSort === 'giaAsc' }]"
+                  @click="
+                    selectedSort = 'giaAsc';
+                    currentPage = 1;
+                    fetchProducts();
+                  "
+                >
+                  Giá tăng dần
+                </button>
+                <span class="sort-separator">•</span>
+                <button 
+                  :class="['sort-text-btn', { active: selectedSort === 'giaDesc' }]"
+                  @click="
+                    selectedSort = 'giaDesc';
+                    currentPage = 1;
+                    fetchProducts();
+                  "
+                >
+                  Giá giảm dần
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -628,8 +621,8 @@ const removeCompare = (product) => {
 
 /* Hero Search Section */
 .hero-search-section {
-  margin-top: 10px;
-  background: linear-gradient(135deg, #48cbd2 0%, #a7cfeb 100%);
+  margin: 10px;
+  background: linear-gradient(135deg, #48cbd2 0%, #007afc 100%);
   padding: 60px 0;
   position: relative;
   overflow: hidden;
@@ -806,15 +799,15 @@ const removeCompare = (product) => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.results-info h2 {
-  font-size: 2rem;
-  font-weight: 700;
+.results-info h5 {
+  font-weight: 500;
   color: #1e293b;
   margin: 0 0 8px 0;
 }
 
 .results-count {
   color: #66ea7c;
+  font-weight: 700;
 }
 
 .search-term {
@@ -834,21 +827,46 @@ const removeCompare = (product) => {
   align-items: center;
 }
 
-.sort-btn {
-  background: white;
-  border: 2px solid #e2e8f0;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
+.sort-control {
+  display: flex;
+  align-items: center;
+}
+
+.sort-buttons {
+  padding-top: 30px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.sort-btn:hover {
-  border-color: #0be658;
-  background: #f8fafc;
+.sort-text-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.sort-text-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.sort-text-btn.active {
+  color: #0ea5e9;
+  background: #f0f9ff;
+  font-weight: 600;
+}
+
+.sort-separator {
+  color: #cbd5e1;
+  font-weight: 400;
+  font-size: 12px;
 }
 
 .view-toggle {
