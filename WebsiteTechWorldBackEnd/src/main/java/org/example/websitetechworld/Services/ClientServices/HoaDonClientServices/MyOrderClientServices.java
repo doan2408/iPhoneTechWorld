@@ -170,15 +170,10 @@ public class MyOrderClientServices {
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
 
-        hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
-
-        if ("Đặt hàng thành công".equals(response.getMessage())) {
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+            hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
-            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-            }
-            sendMailFromInvoice(hoaDon);
         }
         return response;
     }

@@ -465,7 +465,7 @@ const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
 const canPack = computed(() => order.trangThaiDonHang === 'Đã xác nhận');
 const canReady = computed(() => order.trangThaiDonHang === 'Đã đóng gói');
 const canCancel = computed(() =>
-    ['Chờ xử lý', 'Đã xác nhận','Đã đóng gói'].includes(order.trangThaiDonHang)
+    ['Chờ xử lý'].includes(order.trangThaiDonHang)
 );
 const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
 const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao');

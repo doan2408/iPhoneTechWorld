@@ -438,6 +438,12 @@ public class HoaDonAdminService {
         HoaDon hoaDon = optionalHoaDon.get();
         hoaDon.setTrangThaiThanhToan(newStatus);
         List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
+
+        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        }
+        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
