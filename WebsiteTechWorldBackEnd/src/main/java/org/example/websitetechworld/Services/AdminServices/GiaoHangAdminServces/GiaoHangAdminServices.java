@@ -51,7 +51,11 @@ public class GiaoHangAdminServices {
         }
         HoaDon hoaDon = optionalGiaoHang.get();
         hoaDon.setTrangThaiDonHang(newStatus);
-        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+        List<ChiTietHoaDon> danhSachChiTiet = getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
+        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())){
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+        }
         if (TrangThaiGiaoHang.CONFIRM.equals(newStatus)) {
             Optional<ChiTietThanhToan> chiTietThanhToanDauTien = hoaDon.getChiTietThanhToans()
                     .stream()
@@ -61,9 +65,8 @@ public class GiaoHangAdminServices {
                     .map(ct -> ct.getIdPhuongThucThanhToan().getTenPhuongThuc().name());
 
             if ("COD".equals(tenPhuongThuc.orElse(""))) {
-                List<ChiTietHoaDon> danhSachChiTiet = getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
                 hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
                 hoaDonChiTiet_SanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
                 for (ChiTietHoaDon chiTietHoaDon : danhSachChiTiet) {
                     gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());

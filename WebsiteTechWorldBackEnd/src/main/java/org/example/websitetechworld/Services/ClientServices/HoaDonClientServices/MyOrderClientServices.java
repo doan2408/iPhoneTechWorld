@@ -138,12 +138,14 @@ public class MyOrderClientServices {
 
         if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
             hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
-            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+        }else {
+            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
+            }
         }
-        for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-            gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-        }
+
         sendMailFromInvoice(hoaDon);
 
 
@@ -171,11 +173,7 @@ public class MyOrderClientServices {
         hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
 
         if ("Đặt hàng thành công".equals(response.getMessage())) {
-            if (TenHinhThuc.NGAN_HANG.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
-            }else {
                 hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
-            }
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
             for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
                 gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());

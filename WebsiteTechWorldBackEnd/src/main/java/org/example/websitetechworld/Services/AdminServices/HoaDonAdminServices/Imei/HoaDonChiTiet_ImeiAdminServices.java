@@ -121,7 +121,7 @@ public class HoaDonChiTiet_ImeiAdminServices {
                 throw new IllegalArgumentException("Không đủ IMEI cho chi tiết hóa đơn: " + chiTietHoaDon.getId());
             }
             for (ImeiDaBan imeiDaBan: imeiDaBans) {
-                if (imeiDaBan.getTrangThai() != TrangThaiImei.RESERVED) {
+                if (imeiDaBan.getTrangThai() != TrangThaiImei.RESERVED ) {
                     throw new IllegalArgumentException("IMEI không ở trạng thái đặt trước: " + imeiDaBan.getSoImei());
                 }
                 Imei imei = imeiReposiory.findBySoImei(imeiDaBan.getSoImei());
