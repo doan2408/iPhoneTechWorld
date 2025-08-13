@@ -213,12 +213,24 @@ public class HoaDonAdminService {
 
     public void hoaDonSoftDelete (Integer id){
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+
+        boolean hasDetails = chiTietHoaDonRepository.existsByIdHoaDon(hoaDon);
+        if (hasDetails) {
+            throw new IllegalStateException("Hóa đơn này đã có sản phẩm, không thể xóa.");
+        }
+
         hoaDon.setIsDelete(true);
         hoaDonRepository.save(hoaDon);
     }
 
     public void hoaDonHardDelete (Integer id){
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+
+        boolean hasDetails = chiTietHoaDonRepository.existsByIdHoaDon(hoaDon);
+        if (hasDetails) {
+            throw new IllegalStateException("Hóa đơn này đã có sản phẩm, không thể xóa.");
+        }
+
         hoaDonRepository.delete(hoaDon);
     }
 
