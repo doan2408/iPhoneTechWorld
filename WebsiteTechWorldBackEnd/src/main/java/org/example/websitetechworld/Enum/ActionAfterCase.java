@@ -3,8 +3,12 @@ package org.example.websitetechworld.Enum;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
 
 public enum ActionAfterCase {
-    FAILED_DELIVERY("Giao hàng không thành công"),
-    RETURN("Đã xác nhận");
+    RETRY("Giao lại"),
+    CANCEL("Hủy bỏ"),
+    HOLD("Giữ"),
+    RETURN_TO_STOCK("Trả lại kho"),
+    REFUND("Hoàn tiền"),
+    EXCHANGE("Trao đổi");
 
     private final String displayName;
 
