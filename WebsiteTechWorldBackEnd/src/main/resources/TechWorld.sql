@@ -3,6 +3,7 @@ GO
 USE TechWorld;
 GO
 
+--1
 CREATE TABLE nhan_vien (
                            id_nhan_vien INT IDENTITY(1,1) PRIMARY KEY,
                            ma_nhan_vien AS (
@@ -24,6 +25,7 @@ CREATE TABLE nhan_vien (
                            ngay_sinh DATE
 );
 
+--2
 CREATE TABLE hang_thanh_vien (
                                  id_hang_thanh_vien INT IDENTITY(1,1) PRIMARY KEY,
                                  ten_hang NVARCHAR(50),
@@ -31,6 +33,7 @@ CREATE TABLE hang_thanh_vien (
                                  diem_den INT,         -- Tới điểm -- khoảng diem de xet hang
 );
 
+--3
 CREATE TABLE khach_hang (
                             id_khach_hang INT IDENTITY(1,1) PRIMARY KEY,
                             ma_khach_hang AS (
@@ -52,7 +55,7 @@ CREATE TABLE khach_hang (
                             id_hang_thanh_vien INT REFERENCES hang_thanh_vien (id_hang_thanh_vien)
 );
 
-
+--4
 CREATE TABLE user_tokens (
                              id INT IDENTITY(1,1) PRIMARY KEY,
                              token VARCHAR(255) NOT NULL,
@@ -67,25 +70,26 @@ CREATE TABLE user_tokens (
                              CONSTRAINT FK_Token_KhachHang FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang)
 );
 
+--5
 CREATE TABLE phieu_giam_gia (
                                 id_phieu_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
                                 ma_giam_gia NVARCHAR(50),
-                                ten_khuyen_mai NVARCHAR(50),
-                                loai_khuyen_mai NVARCHAR(50),
-                                gia_tri_khuyen_mai DECIMAL(10,2),
+                                ten_giam_gia NVARCHAR(50),
+                                loai_giam_gia NVARCHAR(50),
+                                gia_tri_giam_gia DECIMAL(10,2),
                                 gia_tri_don_hang_toi_thieu DECIMAL(10,2),
-                                gia_tri_khuyen_mai_toi_da DECIMAL(10,2),
-                                ngay_bat_dau DATE,
-                                ngay_ket_thuc DATE,
+                                gia_tri_giam_gia_toi_da DECIMAL(10,2),
+                                ngay_bat_dau DATETIME,
+                                ngay_ket_thuc DATETIME,
                                 dieu_kien_ap_dung NVARCHAR(100),
                                 hang_toi_thieu NVARCHAR(50),
                                 so_luong INT,
                                 so_diem_can_de_doi DECIMAL(10,2),
-                                is_global BIT,
                                 trang_thai_phieu_giam_gia NVARCHAR(50),
                                 trang_thai_phat_hanh NVARCHAR(50)
 );
 
+--6
 CREATE TABLE hoa_don (
                          id_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
 
@@ -122,6 +126,7 @@ CREATE TABLE hoa_don (
                          trang_thai_don_hang NVARCHAR(50)
 );
 
+--7
 CREATE TABLE lich_su_hoa_don (
                                  id_lich_su_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
                                  id_nhan_vien INT,
@@ -133,21 +138,24 @@ CREATE TABLE lich_su_hoa_don (
                                  FOREIGN KEY (id_hoa_Don) REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE
 );
 
+--8
 CREATE TABLE khach_hang_giam_gia (
                                      id_khach_hang_giam_gia INT IDENTITY(1,1) PRIMARY KEY,
                                      id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
                                      id_phieu_giam_gia INT REFERENCES phieu_giam_gia(id_phieu_giam_gia) ON DELETE CASCADE,
                                      is_user BIT,
                                      ngay_cap DATE,
-                                     doi_bang_diem BIT
+                                     trang_thai INT
 );
 
+--9
 CREATE TABLE vi_diem (
                          id_vi_diem INT IDENTITY(1,1) PRIMARY KEY,
                          id_khach_hang INT REFERENCES khach_hang(id_khach_hang),
                          diem_kha_dung DECIMAL(10,2) NOT NULL DEFAULT 0 -- điểm có thể sử dụng được
 );
 
+--10
 CREATE TABLE lich_su_diem (
                               id_lich_su_diem INT IDENTITY(1,1) PRIMARY KEY,
                               id_vi_diem INT REFERENCES vi_diem (id_vi_diem),
@@ -159,6 +167,7 @@ CREATE TABLE lich_su_diem (
                               han_su_dung DATETIMEOFFSET NULL -- dùng cho điểm cộng
 );
 
+--11
 CREATE TABLE chi_tiet_lich_su_diem (
                                        id INT IDENTITY(1,1) PRIMARY KEY,
                                        id_khach_hang INT REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE,
@@ -167,6 +176,7 @@ CREATE TABLE chi_tiet_lich_su_diem (
                                        ngay_tru DATETIMEOFFSET
 );
 
+--12
 CREATE TABLE dia_chi (
                          id_dia_chi INT IDENTITY(1,1) PRIMARY KEY,
                          id_khach_hang INT,
@@ -181,13 +191,14 @@ CREATE TABLE dia_chi (
                          FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE
 );
 
+--13
 CREATE TABLE gio_hang (
                           id_gio_hang INT IDENTITY(1,1) PRIMARY KEY,
                           id_khach_hang INT UNIQUE,
                           FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_khach_hang) ON DELETE CASCADE
 );
 
-
+--14
 CREATE TABLE camera_sau (
                             id_camera_sau INT IDENTITY(1,1) PRIMARY KEY,
                             loai_camera NVARCHAR(100),
@@ -197,7 +208,7 @@ CREATE TABLE camera_sau (
                             che_do_chup NVARCHAR(50)
 );
 
-
+--15
 CREATE TABLE camera_truoc (
                               id_camera_truoc INT IDENTITY(1,1) PRIMARY KEY,
                               loai_camera NVARCHAR(100),
@@ -207,6 +218,8 @@ CREATE TABLE camera_truoc (
                               che_do_chup NVARCHAR(50)
 );
 
+
+--16
 CREATE TABLE cpu (
                      id_cpu INT IDENTITY(1,1) PRIMARY KEY,
                      chip_xu_ly NVARCHAR(50),
@@ -219,17 +232,20 @@ CREATE TABLE cpu (
                      nam_ra_mat DATE
 );
 
+--17
 CREATE TABLE loai (
                       id_loai INT IDENTITY(1,1) PRIMARY KEY,
                       ten_loai NVARCHAR(50)
 );
 
+--18
 CREATE TABLE xuat_xu (
                          id_xuat_xu INT IDENTITY(1,1) PRIMARY KEY,
                          ma_xuat_xu NVARCHAR(10),
                          ten_quoc_gia NVARCHAR(50)
 );
 
+--19
 CREATE TABLE pin (
                      id_pin INT IDENTITY(1,1) PRIMARY KEY,
                      phien_ban NVARCHAR(50),
@@ -238,6 +254,7 @@ CREATE TABLE pin (
                      so_lan_sac_toi_da NVARCHAR(50)
 );
 
+--20
 CREATE TABLE he_dieu_hanh (
                               id_he_dieu_hanh INT IDENTITY(1,1) PRIMARY KEY,
                               phien_ban NVARCHAR(50),
@@ -245,6 +262,8 @@ CREATE TABLE he_dieu_hanh (
                               giao_dien_nguoi_dung NVARCHAR(50)
 );
 
+
+--21
 CREATE TABLE man_hinh (
                           id_man_hinh INT IDENTITY(1,1) PRIMARY KEY,
                           ten_man_hinh NVARCHAR(50),
@@ -256,6 +275,7 @@ CREATE TABLE man_hinh (
                           chat_lieu_kinh NVARCHAR(50)
 );
 
+--22
 CREATE TABLE rom (
                      id_rom INT IDENTITY(1,1) PRIMARY KEY,
                      dung_luong_rom NVARCHAR(50),
@@ -265,6 +285,7 @@ CREATE TABLE rom (
                      nam_ra_mat DATE
 );
 
+--23
 CREATE TABLE ram (
                      id_ram INT IDENTITY(1,1) PRIMARY KEY,
                      dung_luong_ram NVARCHAR(50),
@@ -274,12 +295,14 @@ CREATE TABLE ram (
                      nam_ra_mat DATE
 );
 
+--24
 CREATE TABLE mau_sac (
                          id_mau_sac INT IDENTITY(1,1) PRIMARY KEY,
                          ten_mau NVARCHAR(50),
                          hex_color NVARCHAR(10)
 );
 
+--25
 CREATE TABLE nha_cung_cap (
                               id_nha_cung_cap INT IDENTITY(1,1) PRIMARY KEY,
                               ten_nha_cung_cap NVARCHAR(50),
@@ -288,6 +311,7 @@ CREATE TABLE nha_cung_cap (
                               email VARCHAR(50)
 );
 
+--26
 CREATE TABLE model_san_pham (
                                 id_model_san_pham INT IDENTITY(1,1) PRIMARY KEY,
                                 ma_model_san_pham AS (
@@ -311,6 +335,7 @@ CREATE TABLE model_san_pham (
                                 trang_thai NVARCHAR(50)
 );
 
+--27
 CREATE TABLE model_camera_sau (
                                   id_model_san_pham INT,
                                   id_camera_sau INT,
@@ -320,6 +345,7 @@ CREATE TABLE model_camera_sau (
                                   FOREIGN KEY (id_camera_sau) REFERENCES camera_sau(id_camera_sau) ON DELETE CASCADE
 );
 
+--28
 CREATE TABLE san_pham (
                           id_san_pham INT IDENTITY(1,1) PRIMARY KEY,
                           ma_san_pham AS (
@@ -335,12 +361,14 @@ CREATE TABLE san_pham (
                           id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham) ON DELETE CASCADE
 );
 
+--29
 CREATE TABLE nha_cung_cap_sp (
                                  id_nha_cung_cap_sp INT IDENTITY(1,1) PRIMARY KEY,
                                  id_nha_cung_cap INT references nha_cung_cap(id_nha_cung_cap),
                                  id_san_pham INT references san_pham(id_san_pham)
 )
 
+--30
 CREATE TABLE san_pham_chi_tiet (
                                    id_san_pham_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
                                    ma_san_pham_chi_tiet AS (
@@ -355,6 +383,28 @@ CREATE TABLE san_pham_chi_tiet (
                                    id_rom INT REFERENCES rom(id_rom),
                                    so_luong INT,
                                    gia_ban DECIMAL(10,2)
+);
+
+--31
+CREATE TABLE khuyen_mai (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+	ma_khuyen_mai NVARCHAR(50),
+    ten_khuyen_mai VARCHAR(255),
+    mo_ta TEXT,
+    phan_tram_giam INT,
+    ngay_bat_dau DATETIME,
+    ngay_ket_thuc DATETIME,
+    doi_tuong_ap_dung NVARCHAR(50), 
+    trang_thai NVARCHAR(50) -- ENUM('DANG_HOAT_DONG', 'HET_HAN')
+);
+
+--32
+CREATE TABLE khuyen_mai_san_pham_chi_tiet (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    id_san_pham_chi_tiet INT,
+    id_khuyen_mai INT,
+    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
+    FOREIGN KEY (id_khuyen_mai) REFERENCES khuyen_mai(id)
 );
 
 CREATE TABLE loai_bao_hanh (
@@ -383,6 +433,7 @@ CREATE TABLE lich_su_bao_hanh (
                                   trang_thai NVARCHAR(50)
 );
 
+--36
 CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -390,6 +441,7 @@ CREATE TABLE imei (
                       trang_thai_imei NVARCHAR(50),
 );
 
+--37
 CREATE TABLE hinh_anh (
                           id_hinh_anh INT IDENTITY(1,1) PRIMARY KEY,
                           id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -397,6 +449,7 @@ CREATE TABLE hinh_anh (
                           image_public_id VARCHAR(100)
 );
 
+--38
 CREATE TABLE gio_hang_chi_tiet (
                                    id_gio_hang_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
                                    id_gio_hang INT,
@@ -408,6 +461,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
 
+--39
 CREATE TABLE chi_tiet_hoa_don (
                                   id_chi_tiet_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
                                   id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
@@ -427,6 +481,7 @@ CREATE TABLE chi_tiet_hoa_don (
                                   don_gia DECIMAL(10,2)
 );
 
+--40
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
@@ -434,12 +489,14 @@ CREATE TABLE imei_da_ban (
                              trang_thai NVARCHAR(50)
 );
 
+--41
 CREATE TABLE phuong_thuc_thanh_toan (
                                         id_phuong_thuc_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                         ten_phuong_thuc NVARCHAR(50),
                                         loai_hinh_thuc NVARCHAR(50)
 );
 
+--42
 CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
@@ -447,6 +504,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      so_tien_thanh_toan DECIMAL(10,2)
 );
 
+--43
 CREATE TABLE danh_gia_san_pham (
                                    id_danh_gia INT IDENTITY(1,1) PRIMARY KEY,
                                    id_khach_hang INT NOT NULL,
@@ -461,6 +519,7 @@ CREATE TABLE danh_gia_san_pham (
                                    FOREIGN KEY (id_chi_tiet_hoa_don) REFERENCES chi_tiet_hoa_don(id_chi_tiet_hoa_don)
 );
 
+--44
 CREATE TABLE media_danh_gia (
                                 id_media INT IDENTITY(1,1) PRIMARY KEY,
                                 id_danh_gia INT NOT NULL,
@@ -475,7 +534,7 @@ CREATE TABLE media_danh_gia (
                                 FOREIGN KEY (id_danh_gia) REFERENCES danh_gia_san_pham(id_danh_gia) ON DELETE CASCADE
 );
 
-
+--45
 CREATE TABLE phan_hoi_danh_gia (
                                    id_phan_hoi INT IDENTITY(1,1) PRIMARY KEY,
                                    id_danh_gia INT NOT NULL,
@@ -486,6 +545,7 @@ CREATE TABLE phan_hoi_danh_gia (
                                    FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id_nhan_vien)
 );
 
+--46
 CREATE TABLE wishlist (
                           id BIGINT PRIMARY KEY IDENTITY,
                           khac_hang_id INT NOT NULL,
@@ -569,41 +629,40 @@ VALUES
 
 
 -- Table phieu_giam_gia
-INSERT INTO phieu_giam_gia (ma_giam_gia, ten_khuyen_mai, loai_khuyen_mai, gia_tri_khuyen_mai, gia_tri_don_hang_toi_thieu, gia_tri_khuyen_mai_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, is_global, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
+INSERT INTO phieu_giam_gia (ma_giam_gia, ten_giam_gia, loai_giam_gia, gia_tri_giam_gia, gia_tri_don_hang_toi_thieu, gia_tri_giam_gia_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2026-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 10, 100000.00, 1, N'ACTIVE', N'ISSUED'),
-    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-08-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, 0, N'NOT_STARTED', N'ISSUED'),
-    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 150000.00, 500000.00, 300000.00, '2025-06-01', '2025-07-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50000.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500000.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 120000.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120000.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20000.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60000.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600000.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 700000.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110000.00, 1, N'ACTIVE', N'ISSUED'),
-    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2026-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220000.00, 0, N'ACTIVE', N'ISSUED'),
-    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 1000000.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55000.00, 1, N'NOT_STARTED', N'ISSUED'),
-    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700000.00, 0, N'EXPIRED', N'ISSUED'),
-    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 600000.00, 1300000.00, 120000.00, '2025-06-20', '2025-07-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85000.00, 1, N'NOT_STARTED', N'ISSUED');
-
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2026-06-01', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 0.00, N'ACTIVE', N'ISSUED'),
+    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-08-15', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-07-07', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-04-01', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500.00, N'EXPIRED', N'ISSUED'),
+    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-07-15', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-07-07', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-05-01', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600.00, N'EXPIRED', N'ISSUED'),
+    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-06-15', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110.00, N'ACTIVE', N'ISSUED'),
+    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2026-05-20', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220.00, N'ACTIVE', N'ISSUED'),
+    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-07-22', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-04-15', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700.00, N'EXPIRED', N'ISSUED'),
+    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-07-30', N'Áp dụng iPhone 14', N'GOLD', 160, 85.00, N'NOT_STARTED', N'ISSUED');
 
 
 -- Table khach_hang_giam_gia
-INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, doi_bang_diem)
+INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, trang_thai)
 VALUES
-    (1, 2, 1, GETDATE(), 0),
-    (2, 2, 0, GETDATE(), 0),
-    (3, 4, 0, GETDATE(), 0),
-    (4, 4, 1, GETDATE(), 0),
-    (5, 2, 1, GETDATE(), 0),
-    (1, 2, 1, GETDATE(), 0),
-    (2, 6, 0, GETDATE(), 0),
-    (3, 6, 0, GETDATE(), 0),
-    (4, 7, 1, GETDATE(), 0),
-    (5, 2, 1, GETDATE(), 0),
-    (1, 6, 1, GETDATE(), 0),
-    (2, 6, 0, GETDATE(), 0),
-    (3, 4, 0, GETDATE(), 0),
-    (4, 4, 1, GETDATE(), 0),
-    (5, 2, 1, GETDATE(), 0);
+    (1, 2, 1, GETDATE(), 1),
+    (2, 2, 0, GETDATE(), 1),
+    (3, 4, 0, GETDATE(), 1),
+    (4, 4, 1, GETDATE(), 1),
+    (5, 2, 1, GETDATE(), 1),
+    (1, 2, 1, GETDATE(), 1),
+    (2, 6, 0, GETDATE(), 1),
+    (3, 6, 0, GETDATE(), 1),
+    (4, 7, 1, GETDATE(), 1),
+    (5, 2, 1, GETDATE(), 1),
+    (1, 6, 1, GETDATE(), 1),
+    (2, 6, 0, GETDATE(), 1),
+    (3, 4, 0, GETDATE(), 1),
+    (4, 4, 1, GETDATE(), 1),
+    (5, 2, 1, GETDATE(), 1);
 
 --Table vi_diem
 INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
