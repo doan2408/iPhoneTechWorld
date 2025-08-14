@@ -123,7 +123,8 @@ CREATE TABLE hoa_don (
                          ngay_thanh_toan DATETIME,
                          trang_thai_thanh_toan NVARCHAR(50),
                          is_delete BIT,
-                         trang_thai_don_hang NVARCHAR(50)
+                         trang_thai_don_hang NVARCHAR(50),
+						 thoi_gian_huy DATETIME
 );
 
 --7
@@ -407,6 +408,16 @@ CREATE TABLE khuyen_mai_san_pham_chi_tiet (
     FOREIGN KEY (id_khuyen_mai) REFERENCES khuyen_mai(id)
 );
 
+
+--33
+CREATE TABLE imei (
+                      id_imei INT IDENTITY(1,1) PRIMARY KEY,
+                      id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
+                      so_imei VARCHAR(70),
+                      trang_thai_imei NVARCHAR(50),
+);
+
+--34
 CREATE TABLE loai_bao_hanh (
                                id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
                                ten_loai_bao_hanh NVARCHAR(100),
@@ -414,16 +425,18 @@ CREATE TABLE loai_bao_hanh (
                                mo_ta NVARCHAR(255)
 );
 
+--35
 CREATE TABLE bao_hanh (
                           id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
                           id_khach_hang INT,
-                          id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
+                          id_imei INT REFERENCES imei(id_imei),
                           ngay_bat_dau DATE,
                           ngay_ket_thuc DATE,
                           id_loai_bao_hanh INT REFERENCES loai_bao_hanh(id_loai_bao_hanh),
                           trang_thai_bao_hanh NVARCHAR(50)
 );
 
+--36
 CREATE TABLE lich_su_bao_hanh (
                                   id INT IDENTITY(1,1) PRIMARY KEY,
                                   id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
@@ -433,13 +446,6 @@ CREATE TABLE lich_su_bao_hanh (
                                   trang_thai NVARCHAR(50)
 );
 
---36
-CREATE TABLE imei (
-                      id_imei INT IDENTITY(1,1) PRIMARY KEY,
-                      id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
-                      so_imei VARCHAR(70),
-                      trang_thai_imei NVARCHAR(50),
-);
 
 --37
 CREATE TABLE hinh_anh (
@@ -501,7 +507,8 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
                                      id_phuong_thuc_thanh_toan INT REFERENCES phuong_thuc_thanh_toan(id_phuong_thuc_thanh_toan),
-                                     so_tien_thanh_toan DECIMAL(10,2)
+                                     so_tien_thanh_toan DECIMAL(10,2),
+									 thoi_gian_thanh_toan DATETIME
 );
 
 --43
@@ -556,8 +563,31 @@ CREATE TABLE wishlist (
                           CONSTRAINT fk_wishlist_product_detail FOREIGN KEY (chi_tiet_san_pham_id) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
                           CONSTRAINT uc_user_product_detail UNIQUE (khac_hang_id, chi_tiet_san_pham_id)
 );
--- Table nhan_vien
 
+--47 Bảng lý do xử lý
+CREATE TABLE ly_do_xu_ly (
+    id_ly_do INT IDENTITY(1,1) PRIMARY KEY,
+    ten_ly_do NVARCHAR(255) NOT NULL,
+    loai_vu_viec NVARCHAR(20) NOT NULL -- FAILED_DELIVERY, RETURN
+);
+
+--48 Bảng xử lý sau bán hàng
+CREATE TABLE xu_ly_sau_ban_hang (
+    id_xu_ly_sau_ban_hang INT IDENTITY(1,1) PRIMARY KEY,
+    id_hoa_don INT NOT NULL,
+    id_imei_da_ban INT NOT NULL, -- Liên kết máy đã bán cụ thể
+    so_luong INT NOT NULL,
+    loai_vu_viec NVARCHAR(20) NOT NULL, -- FAILED_DELIVERY, RETURN
+    thoi_gian_vu_viec DATETIME NOT NULL DEFAULT GETDATE(),
+    id_ly_do INT NULL,
+    hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
+    da_kiem_tra BIT NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don),
+    FOREIGN KEY (id_imei_da_ban) REFERENCES imei_da_ban(id_imei_da_ban),
+    FOREIGN KEY (id_ly_do) REFERENCES ly_do_xu_ly(id_ly_do)
+);
+
+-- Table nhan_vien
 INSERT INTO nhan_vien (ten_nhan_vien, tai_khoan, mat_khau, email, sdt, dia_chi, trang_thai, chuc_vu, gioi_tinh, ngay_sinh)
 VALUES
     (N'Nguyễn Văn An', 'nv_an', '$2a$10$mQLhyl17N446ZOSUjzzRqOTkQ9q/PAaI9omLyfs82fHeJWdpzkutu', 'an.nv@example.com', '0901234567', N'123 Đường Láng, Hà Nội', N'ENABLE', N'ADMIN', 1, '1990-05-15'),
@@ -1209,63 +1239,6 @@ VALUES
     (15, 5, 3, 3, 18000000.00), -- Hồng Phấn, 512GB
     (15, 9, 3, 2, 18000000.00); -- Đỏ Rực Rỡ, 512GB
 
-
--- Table loai_bao_hanh
-INSERT INTO loai_bao_hanh (ten_loai_bao_hanh, thoi_gian_thang, mo_ta)
-VALUES
-    (N'Bảo hành chính hãng', 12, N'Bảo hành từ nhà sản xuất'),
-    (N'Bảo hành của cửa hàng', 6, N'Bảo hành nội bộ của cửa hàng'),
-    (N'Bảo hành đổi trả', 1, N'Cho phép đổi trả trong vòng 1 tháng'),
-    (N'Bảo hành mở rộng', 24, N'Bảo hành mở rộng từ nhà sản xuất'),
-    (N'Bảo hành VIP', 36, N'Bảo hành đặc biệt cho khách hàng VIP'),
-    (N'Bảo hành 1 đổi 1', 3, N'Đổi trả 1 đổi 1 trong 3 tháng'),
-    (N'Bảo hành tiêu chuẩn', 12, N'Bảo hành cơ bản từ cửa hàng'),
-    (N'Bảo hành quốc tế', 12, N'Bảo hành toàn cầu từ nhà sản xuất'),
-    (N'Bảo hành nhanh', 6, N'Bảo hành sửa chữa nhanh trong 6 tháng'),
-    (N'Bảo hành đặc biệt', 18, N'Bảo hành đặc biệt cho sản phẩm cao cấp'),
-    (N'Bảo hành cơ bản', 9, N'Bảo hành cơ bản từ nhà cung cấp'),
-    (N'Bảo hành mở rộng 2 năm', 24, N'Bảo hành mở rộng thêm 2 năm'),
-    (N'Bảo hành 1 đổi 1 6 tháng', 6, N'Đổi trả 1 đổi 1 trong 6 tháng'),
-    (N'Bảo hành siêu tốc', 3, N'Sửa chữa nhanh trong 3 tháng'),
-    (N'Bảo hành vàng', 36, N'Bảo hành cao cấp cho sản phẩm đặc biệt');
-
--- Table bao_hanh
-INSERT INTO bao_hanh (id_khach_hang, id_san_pham_chi_tiet, ngay_bat_dau, ngay_ket_thuc, id_loai_bao_hanh, trang_thai_bao_hanh)
-VALUES
-    (1, 1, '2025-05-02', '2026-05-02', 1, N'UNDER_WARRANTY'),
-    (2, 2, '2025-04-20', '2026-04-20', 2, N'UNDER_WARRANTY'),
-    (3, 3, '2025-05-01', '2026-05-01', 1, N'UNDER_WARRANTY'),
-    (4, 4, '2025-03-15', '2026-03-15', 1, N'UNDER_WARRANTY'),
-    (5, 5, '2025-05-12', '2026-05-12', 3, N'UNDER_WARRANTY'),
-    (6, 6, '2025-06-01', '2026-06-01', 4, N'UNDER_WARRANTY'),
-    (7, 7, '2025-04-25', '2027-04-25', 5, N'UNDER_WARRANTY'),
-    (8, 8, '2025-05-10', '2026-05-10', 6, N'UNDER_WARRANTY'),
-    (9, 9, '2025-03-20', '2026-03-20', 7, N'UNDER_WARRANTY'),
-    (10, 10, '2025-05-15', '2026-05-15', 8, N'UNDER_WARRANTY'),
-    (11, 11, '2025-06-05', '2026-06-05', 9, N'UNDER_WARRANTY'),
-    (12, 12, '2025-04-30', '2026-04-30', 10, N'UNDER_WARRANTY'),
-    (13, 13, '2025-05-20', '2026-05-20', 11, N'UNDER_WARRANTY'),
-    (14, 14, '2025-03-25', '2026-03-25', 12, N'UNDER_WARRANTY'),
-    (15, 15, '2025-06-10', '2026-06-10', 13, N'UNDER_WARRANTY');
-
--- Table lich_su_bao_hanh
-INSERT INTO lich_su_bao_hanh (id_san_pham_bao_hanh, ngay_tiep_nhan, ngay_hoan_thanh, mo_ta_loi, trang_thai)
-VALUES
-    (1, '2025-05-03', '2025-05-10', N'Lỗi màn hình chớp tắt', N'REPAIRED'),
-    (2, '2025-04-25', '2025-04-28', N'Không sạc được pin', N'REPAIRED'),
-    (3, '2025-05-02', NULL, N'Loa bị rè', N'IN_REPAIR'),
-    (4, '2025-04-01', '2025-04-05', N'Lỗi phần mềm, treo máy', N'REPAIRED'),
-    (5, '2025-05-13', NULL, N'Nứt màn hình do rơi vỡ', N'WARRANTY_VOID'),
-    (6, '2025-06-02', '2025-06-09', N'Lỗi cảm ứng', N'REPAIRED'),
-    (7, '2025-04-26', '2025-04-30', N'Pin tụt nhanh', N'REPAIRED'),
-    (8, '2025-05-11', NULL, N'Camera bị mờ', N'IN_REPAIR'),
-    (9, '2025-03-21', '2025-03-25', N'Lỗi kết nối Wi-Fi', N'REPAIRED'),
-    (10, '2025-05-16', NULL, N'Máy nóng bất thường', N'IN_REPAIR'),
-    (11, '2025-06-06', '2025-06-13', N'Lỗi nút nguồn', N'REPAIRED'),
-    (12, '2025-05-01', '2025-05-05', N'Lỗi loa ngoài', N'REPAIRED'),
-    (13, '2025-05-21', NULL, N'Màn hình bị ám vàng', N'IN_REPAIR'),
-    (14, '2025-03-26', '2025-03-30', N'Lỗi cảm biến ánh sáng', N'REPAIRED'),
-    (15, '2025-06-11', NULL, N'Lỗi sạc không dây', N'IN_REPAIR');
 
 -- Table imei
 INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
