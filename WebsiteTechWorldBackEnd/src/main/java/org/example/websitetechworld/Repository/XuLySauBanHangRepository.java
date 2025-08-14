@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, Integer> {
+    XuLySauBanHang findByIdHoaDon_Id(Integer id);
 }

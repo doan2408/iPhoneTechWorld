@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.ActionAfterCase;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
@@ -26,22 +28,18 @@ public class XuLySauBanHang {
     @JoinColumn(name = "id_hoa_don", nullable = false)
     private HoaDon idHoaDon;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_imei_da_ban", nullable = false)
     private ImeiDaBan idImeiDaBan;
 
-    @NotNull
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong;
 
-    @Size(max = 20)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "loai_vu_viec", nullable = false, length = 20)
-    private String loaiVuViec;
+    private CaseType loaiVuViec;
 
-    @NotNull
     @ColumnDefault("getdate()")
     @Column(name = "thoi_gian_vu_viec", nullable = false)
     private LocalDateTime thoiGianVuViec;
@@ -50,11 +48,10 @@ public class XuLySauBanHang {
     @JoinColumn(name = "id_ly_do")
     private LyDoXuLy idLyDo;
 
-    @Size(max = 20)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "hanh_dong_sau_vu_viec", nullable = false, length = 20)
-    private String hanhDongSauVuViec;
+    private ActionAfterCase hanhDongSauVuViec;
 
     @NotNull
     @ColumnDefault("0")

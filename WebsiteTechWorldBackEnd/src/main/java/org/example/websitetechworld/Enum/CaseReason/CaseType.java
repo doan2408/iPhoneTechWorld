@@ -3,7 +3,8 @@ package org.example.websitetechworld.Enum.CaseReason;
 
 public enum CaseType {
     FAILED_DELIVERY("Giao hàng không thành công"),
-    RETURN("Đã xác nhận");
+    RETURN("Trả hàng"),
+    CANCELLED("Hủy đơn");
 
     private final String displayName;
 

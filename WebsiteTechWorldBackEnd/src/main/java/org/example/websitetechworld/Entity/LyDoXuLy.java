@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.LinkedHashSet;
@@ -26,11 +27,10 @@ public class LyDoXuLy {
     @Column(name = "ten_ly_do", nullable = false)
     private String tenLyDo;
 
-    @Size(max = 20)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "loai_vu_viec", nullable = false, length = 20)
-    private String loaiVuViec;
+    private CaseType loaiVuViec;
 
     @OneToMany(mappedBy = "idLyDo")
     private Set<XuLySauBanHang> xuLySauBanHangs = new LinkedHashSet<>();
