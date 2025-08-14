@@ -1,9 +1,9 @@
 package org.example.websitetechworld.Repository;
 
-import org.example.websitetechworld.Entity.AfterSalesItem;
+import org.example.websitetechworld.Entity.XuLySauBanHang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AfterSalesItemRepository extends JpaRepository<AfterSalesItem, Integer> {
+public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, Integer> {
 }
