@@ -1183,7 +1183,7 @@ const toggleWishlist = async () => {
 }
 
 ::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
-  background-color: #1890ff;
+  background: linear-gradient(45deg, #1d37fd, #76e6dc) !important;
   color: #fff;
   border-color: #1890ff;
 }
@@ -1292,7 +1292,7 @@ const toggleWishlist = async () => {
 }
 
 .buy-btn {
-  background: #d70018;
+  background: linear-gradient(90deg, #ff001e, #fdf512) !important;
   color: white;
 }
 
@@ -1301,7 +1301,7 @@ const toggleWishlist = async () => {
 }
 
 .cart-btn {
-  background: #1890ff;
+  background: linear-gradient(45deg, #1d37fd, #76e6dc) !important;
   color: white;
 }
 
@@ -1845,7 +1845,7 @@ const toggleWishlist = async () => {
 }
 
 .wishlist-btn:hover {
-  transform: scale(1.2);
+  transform: scale(1.05);
 }
 
 .wishlist-btn.active {

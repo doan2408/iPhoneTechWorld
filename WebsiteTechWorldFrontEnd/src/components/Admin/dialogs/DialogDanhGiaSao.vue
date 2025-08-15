@@ -58,7 +58,7 @@
                   </div>
                   <input
                     type="file"
-                    accept="image/jpeg,image/png"
+                    accept="image/jpeg,image/png,image/webp"
                     multiple
                     @change="handleImageUpload($event, product.idSanPhamChiTiet)"
                     class="file-input"
@@ -301,7 +301,7 @@ const handleImageUpload = (event, productId) => {
       toast.warning(`Ảnh ${file.name} vượt quá 5MB!`);
       return true;
     }
-    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       console.warn(`Ảnh không đúng định dạng JPG/PNG: ${file.name}`);
       toast.warning(`Ảnh ${file.name} phải có định dạng JPG hoặc PNG!`);
       return true;
@@ -512,7 +512,7 @@ const submitRating = async () => {
       trangThaiDanhGia: 'APPROVED',
     };
     console.log('Payload gửi đi:', JSON.stringify(payload, null, 2));
-    emit('submit', { payload });
+    await emit('submit', { payload });
   } catch (error) {
     console.error('Lỗi khi gửi đánh giá:', error);
     toast.error('Gửi đánh giá thất bại. Vui lòng thử lại.');

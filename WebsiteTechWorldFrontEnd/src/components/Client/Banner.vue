@@ -114,7 +114,6 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  background: #000;
 }
 
 .slider-container {
@@ -131,21 +130,21 @@ onUnmounted(() => {
   height: 100%;
   opacity: 0;
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #66dbea 0%, #23b8c0 100%);
   background-size: 400% 400%;
   animation: gradientMove 15s ease infinite;
 }
 
 .slide:nth-child(1) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #66eadf 0%, #002aff 100%);
 }
 
 .slide:nth-child(2) {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #6797e0 0%, #0a20e8 100%);
 }
 
 .slide:nth-child(3) {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #1153ef 0%, #00f2fe 100%);
 }
 
 .slide.active {
@@ -340,7 +339,7 @@ onUnmounted(() => {
 }
 
 .banner-btn {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+  background: linear-gradient(45deg, #01afff, #ade6e9);
   color: white;
   border: none;
   padding: 14px 28px;
@@ -373,7 +372,7 @@ onUnmounted(() => {
 
 .banner-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+  box-shadow: 0 8px 25px rgba(107, 151, 255, 0.5);
 }
 
 .banner-btn-secondary {
@@ -426,7 +425,7 @@ onUnmounted(() => {
 }
 
 .banner-badge {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+  background: linear-gradient(45deg, #6bf5ff, #8effd4);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -434,7 +433,7 @@ onUnmounted(() => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 4px 12px rgba(179, 64, 64, 0.3);
   animation: bounce 2s infinite;
 }
 
@@ -461,11 +460,11 @@ onUnmounted(() => {
 
 .banner-img {
   width: 100%;
-  max-width: 320px;
-  height: 350px;
+  max-width: 420px;
+  height: 450px;
   object-fit: contain;
-  border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(10, 10, 10, 0.4);
   transition: all 0.4s ease;
   filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
 }
