@@ -557,6 +557,9 @@
                 </div>
                 <div class="modal-body">
                     <ul class="voucher-list">
+                        <p v-if="discountList.value" style="text-align: center; font-style: italic;">
+                            Khách hàng không có giảm giá nào
+                        </p>
                         <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
                             <div>
                                 <strong>{{ discount.tenGiamGia }}</strong>
@@ -704,7 +707,6 @@ const calculateTotal = () => {
 
 const loadDiscountList = async () => {
     try {
-        console.log('hehe: ', totalProductAmount.value)
         const response = await getAllPhieuGiamGia(search.value, currentInvoiceDetail.value.idKhachHang, totalProductAmount.value)
         discountList.value = response.data
     } catch (err) {
