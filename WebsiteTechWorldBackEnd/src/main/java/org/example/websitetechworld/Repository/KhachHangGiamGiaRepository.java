@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamGia, Integer> {
@@ -17,15 +19,11 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
             @Param("isUser") Boolean isUser
     );
 
-
     void deleteByIdPhieuGiamGiaId(Integer idPhieuGiamGia);
-    boolean existsByIdPhieuGiamGiaAndIsUser(PhieuGiamGia idPhieuGiamGia, Boolean isUser);
-    boolean existsByIdPhieuGiamGiaAndIdKhachHang(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang);
 
+    boolean existsByIdPhieuGiamGiaAndIsUser(PhieuGiamGia idPhieuGiamGia, Boolean isUser);
 
     List<KhachHangGiamGia> findByIdKhachHang_Id(Integer idKhachHangId);
-
-    void deleteByIdPhieuGiamGiaAndIsUser(PhieuGiamGia idPhieuGiamGia, Boolean isUser);
 
     @Query("SELECT CASE " +
             "WHEN COUNT(k) > 0 THEN true " +
@@ -33,17 +31,29 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
             "FROM KhachHangGiamGia k " +
             "WHERE k.idKhachHang.id = :idKhachHang " +
             "AND k.idPhieuGiamGia.id = :idPhieuGiamGia " +
-            "AND k.trangThai = 1 " +
-            "AND MONTH(k.ngayCap) = :thang " +
-            "AND YEAR(k.ngayCap) = :nam")
-    boolean checkSoLanDoiTrong1Thang(
+            "AND (k.isUser = false OR (k.isUser = true AND k.ngayCap > :motNamTruoc))")
+    boolean checkSoLanDoi(
             @Param("idKhachHang") Integer idKhachHang,
             @Param("idPhieuGiamGia") Integer idPhieuGiamGia,
-            @Param("thang") int thang,
-            @Param("nam") int nam
+            @Param("motNamTruoc") LocalDate motNamTruoc
     );
 
-    KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHang(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang);
+    @Query("""
+        SELECT khgg.idPhieuGiamGia 
+        FROM KhachHangGiamGia khgg 
+        WHERE khgg.idKhachHang.id = :idKhachHang
+          AND khgg.isUser = false
+          AND khgg.idPhieuGiamGia.trangThaiPhatHanh = 'ISSUED'
+          AND (khgg.idPhieuGiamGia.ngayBatDau <= CURRENT_TIMESTAMP AND khgg.idPhieuGiamGia.ngayKetThuc >= CURRENT_TIMESTAMP)
+          AND khgg.idPhieuGiamGia.trangThaiPhieuGiamGia = 'ACTIVE'
+          AND khgg.idPhieuGiamGia.giaTriDonHangToiThieu <= :giaTriDonHangToiThieu
+          AND (:timKiem IS NULL OR LOWER(khgg.idPhieuGiamGia.maGiamGia) LIKE LOWER(CONCAT('%', :timKiem, '%')))
+        """)
+    List<PhieuGiamGia> findPhieuGiamGiaCuaKhach(
+            @Param("idKhachHang") Integer idKhachHang,
+            @Param("giaTriDonHangToiThieu") BigDecimal giaTriDonHangToiThieu,
+            @Param("timKiem") String timKiem
+    );
 
     KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang, Boolean isUser);
 }

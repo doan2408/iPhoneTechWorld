@@ -25,7 +25,6 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.C
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
-import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ValidationException;
@@ -50,18 +49,16 @@ public class HoaDonAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final LichSuHoaDonAdminServices lichSuHoaDonAdminServices;
     private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
-    private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
     private final ThanhToanFactory thanhToanFactory;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
 
     private static final int PAGE_SIZE = 4;
 
-    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, PhieuGiamGiaAdminService phieuGiamGiaAdminService, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
+    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.lichSuHoaDonAdminServices = lichSuHoaDonAdminServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
-        this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
@@ -237,7 +234,7 @@ public class HoaDonAdminController {
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "0") BigDecimal giaTriDonHangToiThieu,
             @RequestParam(required = false) Integer idKhachHang) {
-        List<PhieuGiamGiaAdminResponse> phieuGiamGias = phieuGiamGiaAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang, giaTriDonHangToiThieu);
+        List<PhieuGiamGiaAdminResponse> phieuGiamGias = hoaDonAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang, giaTriDonHangToiThieu);
         return ResponseEntity.ok(phieuGiamGias);
     }
 

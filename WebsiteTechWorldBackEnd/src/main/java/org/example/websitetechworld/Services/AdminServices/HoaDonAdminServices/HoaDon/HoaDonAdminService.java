@@ -11,6 +11,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRe
 import org.example.websitetechworld.Dto.Request.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
@@ -18,6 +19,8 @@ import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -40,9 +43,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,8 +62,9 @@ public class HoaDonAdminService {
     private final EntityManager entityManager;
     private final EmailServicces emailServicces;
     private final GiaoHangAdminServices giaoHangAdminServices;
+    private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, KhachHangGiamGiaRepository khachHangGiamGiaRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -76,6 +78,7 @@ public class HoaDonAdminService {
         this.entityManager = entityManager;
         this.emailServicces = emailServicces;
         this.giaoHangAdminServices = giaoHangAdminServices;
+        this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -198,6 +201,14 @@ public class HoaDonAdminService {
         }
         if (hoaDon.getSoTienGiam() != null){
             hoaDon.setSoTienGiam(request.getSoTienGiam());
+        }
+        if (hoaDon.getIdPhieuGiamGia() != null && hoaDon.getIdKhachHang() != null){
+            KhachHangGiamGia khgg = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(
+                    hoaDon.getIdPhieuGiamGia(), hoaDon.getIdKhachHang(), false);
+            if (khgg != null) {
+                khgg.setIsUser(true);
+                khachHangGiamGiaRepository.save(khgg);
+            }
         }
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
@@ -458,6 +469,33 @@ public class HoaDonAdminService {
         hoaDonRepository.save(hoaDon);
     }
 
+    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(
+            String timKiem, Integer idKhachHang, BigDecimal giaTriDonHangToiThieu) {
 
+        if (idKhachHang == null) return Collections.emptyList();
+
+        List<PhieuGiamGia> phieuList = khachHangGiamGiaRepository.findPhieuGiamGiaCuaKhach(
+                idKhachHang, giaTriDonHangToiThieu, timKiem);
+
+        List<PhieuGiamGiaAdminResponse> result = new ArrayList<>();
+        for (PhieuGiamGia pgg : phieuList) {
+            PhieuGiamGiaAdminResponse resp = new PhieuGiamGiaAdminResponse();
+            resp.setId(pgg.getId());
+            resp.setMaGiamGia(pgg.getMaGiamGia());
+            resp.setTenGiamGia(pgg.getTenGiamGia());
+            resp.setSoLuong(pgg.getSoLuong());
+            resp.setGiaTriGiamGia(pgg.getGiaTriGiamGia());
+            resp.setLoaiGiamGia(pgg.getLoaiGiamGia());
+            resp.setNgayBatDau(pgg.getNgayBatDau());
+            resp.setNgayKetThuc(pgg.getNgayKetThuc());
+            resp.setTrangThaiPhatHanh(pgg.getTrangThaiPhatHanh());
+            resp.setTrangThaiPhieuGiamGia(pgg.getTrangThaiPhieuGiamGia());
+            resp.setSoDiemCanDeDoi(pgg.getSoDiemCanDeDoi());
+            resp.setDieuKienApDung(pgg.getDieuKienApDung());
+            resp.setHangToiThieu(String.valueOf(pgg.getHangToiThieu()));
+            result.add(resp);
+        }
+        return result;
+    }
 
 }

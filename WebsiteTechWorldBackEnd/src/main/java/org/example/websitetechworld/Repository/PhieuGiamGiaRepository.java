@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -59,6 +60,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
           AND (:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau)
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)
           AND (:hangToiThieu IS NULL OR p.hangToiThieu = :hangToiThieu)
+          AND (p.trangThaiPhatHanh = 'ISSUED')
     """)
     Page<PhieuGiamGia> getDoiVoucher (
             @Param("search") String search,
@@ -69,4 +71,31 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             Pageable pageable
     );
 
+    @Query("""
+        SELECT COUNT(*)
+        FROM PhieuGiamGia p 
+        WHERE (p.ngayBatDau > :now)
+           OR (p.ngayKetThuc > :now)
+    """)
+    long existsPhieuCanCapNhatTrongNgay(LocalDateTime now);
+
+    @Query("""
+        SELECT COUNT(*)
+        FROM PhieuGiamGia p 
+        WHERE (p.ngayBatDau > :now AND p.ngayBatDau <= :nowPlusOneHour)
+           OR (p.ngayKetThuc > :now AND p.ngayKetThuc <= :nowPlusOneHour)
+    """)
+    long existsPhieuCanCapNhatTrongGio(@Param("now") LocalDateTime now, @Param("nowPlusOneHour") LocalDateTime nowPlusOneHour);
+
+    @Query("""
+        SELECT COUNT(*)
+        FROM PhieuGiamGia p 
+        WHERE (p.ngayBatDau > :now AND p.ngayBatDau <= :nowPlusOneMinute)
+           OR (p.ngayKetThuc > :now AND p.ngayKetThuc <= :nowPlusOneMinute)
+    """)
+    long existsPhieuCanCapNhatTrongPhut(@Param("now") LocalDateTime now, @Param("nowPlusOneMinute") LocalDateTime nowPlusOneMinute);
+
+    List<PhieuGiamGia> findAllByTrangThaiPhieuGiamGiaIn(Collection<TrangThaiPGG> trangThaiPhieuGiamGias);
+
+    boolean existsByMaGiamGia(@Size(max = 50) String maGiamGia);
 }

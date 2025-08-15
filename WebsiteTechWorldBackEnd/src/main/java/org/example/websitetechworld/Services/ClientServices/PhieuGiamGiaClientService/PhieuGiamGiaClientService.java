@@ -36,37 +36,16 @@ public class PhieuGiamGiaClientService {
     }
 
     public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(String timKiem, Integer idKhachHang, BigDecimal giaTriDonHangToiThieu) {
+        if (idKhachHang == null) return null;
 
-        Set<PhieuGiamGia> phieuGiamGiaGop = new HashSet<>();
+        List<PhieuGiamGia> phieuList = khachHangGiamGiaRepository.findPhieuGiamGiaCuaKhach(
+                idKhachHang,
+                giaTriDonHangToiThieu,
+                timKiem
+        );
 
-        List<PhieuGiamGia> phieuCongKhai = phieuGiamGiaRepository
-                .timPhieuGiamGiaCongKhai(
-                        BigDecimal.ZERO,
-                        giaTriDonHangToiThieu,
-                        TrangThaiPhatHanh.ISSUED,
-                        TrangThaiPGG.ACTIVE,
-                        timKiem
-                );
-        phieuGiamGiaGop.addAll(phieuCongKhai);
-
-        if (idKhachHang != null) {
-            List<KhachHangGiamGia> khachHangGiamGias = khachHangGiamGiaRepository.findByIdKhachHang_Id(idKhachHang);
-
-            List<PhieuGiamGia> phieuRiengTu = khachHangGiamGias
-                    .stream()
-                    .filter(khgg -> !khgg.getIsUser())
-                    .map(KhachHangGiamGia::getIdPhieuGiamGia)
-                    .filter(pgg -> pgg.getTrangThaiPhatHanh() == TrangThaiPhatHanh.ISSUED
-                            && pgg.getGiaTriDonHangToiThieu().compareTo(giaTriDonHangToiThieu) <= 0
-                            && pgg.getTrangThaiPhieuGiamGia() == TrangThaiPGG.ACTIVE
-                            && pgg.getMaGiamGia().toLowerCase().contains(timKiem == null ? "" : timKiem.toLowerCase()))
-                    .toList();
-            phieuGiamGiaGop.addAll(phieuRiengTu);
-        }
-
-        return phieuGiamGiaGop
-                .stream()
-                .map(phieuGiamGia -> modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class))
+        return phieuList.stream()
+                .map(phieu -> modelMapper.map(phieu, PhieuGiamGiaAdminResponse.class))
                 .collect(Collectors.toList());
     }
 

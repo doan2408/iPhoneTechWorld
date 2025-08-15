@@ -8,19 +8,13 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
-import org.example.websitetechworld.Entity.ChiTietHoaDon;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
-import org.example.websitetechworld.Repository.ChiTietHoaDonRepository;
-import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
-import org.example.websitetechworld.Repository.HoaDonRepository;
-import org.example.websitetechworld.Repository.KhachHangRepository;
+import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
@@ -44,6 +38,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 public class MyOrderClientServices {
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
+    private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -56,7 +51,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -68,6 +63,7 @@ public class MyOrderClientServices {
         this.danhGiaSanPhamRepository = danhGiaSanPhamRepository;
         this.emailServicces = emailServicces;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
+        this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
     }
 
 
@@ -191,6 +187,13 @@ public class MyOrderClientServices {
         if (requestThanhToanTongHop.getIdPhieuGiamGia() != null){
             PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
             phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
+            if (khachHang != null) {
+                KhachHangGiamGia khgg = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(phieuGiamGia, khachHang, false);
+                if (khgg != null) {
+                    khgg.setIsUser(true);
+                    khachHangGiamGiaRepository.save(khgg);
+                }
+            }
             hoaDon.setIdPhieuGiamGia(phieuGiamGia);
         }
         hoaDon.setIsShipping(true);
