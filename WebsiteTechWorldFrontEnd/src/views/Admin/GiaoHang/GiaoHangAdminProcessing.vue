@@ -126,6 +126,12 @@
                     <CheckCircle class="icon-small" /> ĐÃ NHẬN TIỀN
                 </button>
 
+                <button v-if="order.trangThaiThanhToan === 'PAID' && 'Đã hủy' === order.trangThaiDonHang"
+                    @click="openConfirm('Xác nhận đã hoàn tiền?', () => updateStatusInvoicePaid('REFUNDED'))"
+                    class="action-btn complete-btn">
+                    <CheckCircle class="icon-small" /> ĐÃ HOÀN TIỀN
+                </button>
+
                 <button v-if="canConfirm"
                     @click="openConfirm('Xác nhận đơn hàng?', () => updateOrderStatus('Đã xác nhận'))"
                     class="action-btn confirm-btn">
@@ -465,12 +471,12 @@ const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
 const canPack = computed(() => order.trangThaiDonHang === 'Đã xác nhận');
 const canReady = computed(() => order.trangThaiDonHang === 'Đã đóng gói');
 const canCancel = computed(() =>
-    ['Chờ xử lý', 'Đã xác nhận','Đã đóng gói'].includes(order.trangThaiDonHang)
+    ['Chờ xử lý'].includes(order.trangThaiDonHang)
 );
 const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
 const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao');
 
-//format date
+//format date 
 const formatDate = (dateString) => {
     if (!dateString) {
         return 'N/A';

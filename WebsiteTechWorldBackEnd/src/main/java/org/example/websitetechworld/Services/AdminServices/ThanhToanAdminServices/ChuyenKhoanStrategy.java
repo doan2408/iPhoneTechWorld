@@ -77,6 +77,7 @@ public class ChuyenKhoanStrategy implements ThanhToanStrategy {
         ChiTietThanhToan cttt = new ChiTietThanhToan();
         cttt.setIdHoaDon(hoaDon);
         cttt.setSoTienThanhToan(hoaDon.getThanhTien());
+        cttt.setThoiGianThanhToan(LocalDateTime.now());
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
 
         chiTietThanhToanRepository.save(cttt);

@@ -136,6 +136,7 @@ public class HoaDonChiTiet_ImeiAdminServices {
         imeiDaBanRepository.saveAll(imeiDaBansToUpdate);
         changeStatusImei(imeiList, trangThaiImei);
     }
+
     public Page<ViewImeiAdminResponse> getAvailableImeisByProductId(Integer productId, Pageable pageable) {
         Page<Imei> imeiEntitiesPage = imeiReposiory.findByIdSanPhamChiTiet_IdAndTrangThaiImei(productId, TrangThaiImei.AVAILABLE, pageable);
         List<ViewImeiAdminResponse> imeiDtos = imeiEntitiesPage.getContent().stream()

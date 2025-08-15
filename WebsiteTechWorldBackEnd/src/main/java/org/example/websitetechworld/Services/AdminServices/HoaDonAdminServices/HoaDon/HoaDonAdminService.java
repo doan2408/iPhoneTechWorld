@@ -13,6 +13,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
@@ -63,8 +64,9 @@ public class HoaDonAdminService {
     private final EmailServicces emailServicces;
     private final GiaoHangAdminServices giaoHangAdminServices;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final XuLySauBanHangRepository xuLySauBanHangRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, KhachHangGiamGiaRepository khachHangGiamGiaRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -79,6 +81,7 @@ public class HoaDonAdminService {
         this.emailServicces = emailServicces;
         this.giaoHangAdminServices = giaoHangAdminServices;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.xuLySauBanHangRepository = xuLySauBanHangRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -461,9 +464,22 @@ public class HoaDonAdminService {
         HoaDon hoaDon = optionalHoaDon.get();
         hoaDon.setTrangThaiThanhToan(newStatus);
         List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
+
+        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        }
+        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+        }
+        if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_Id(hoaDon.getId());
+            xuLySauBanHang.setThoiGianVuViec(LocalDateTime.now());
+            xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
+            xuLySauBanHang.setDaKiemTra(true);
+            xuLySauBanHangRepository.save(xuLySauBanHang);
         }
 
         hoaDonRepository.save(hoaDon);
@@ -497,5 +513,7 @@ public class HoaDonAdminService {
         }
         return result;
     }
+
+
 
 }

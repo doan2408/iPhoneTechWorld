@@ -66,6 +66,7 @@ public class TienMatStrategy implements ThanhToanStrategy {
         cttt.setIdHoaDon(hoaDon);
         cttt.setSoTienThanhToan(thanhTien);
         cttt.setIdPhuongThucThanhToan(phuongThucThanhToan);
+        cttt.setThoiGianThanhToan(LocalDateTime.now());
         chiTietThanhToanRepository.save(cttt);
 
         return new ThanhToanAdminResponse("Thanh toán thành công", tienThua,null);
