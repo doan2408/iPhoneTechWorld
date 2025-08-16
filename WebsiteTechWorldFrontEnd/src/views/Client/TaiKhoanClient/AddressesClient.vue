@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, reactive, computed, watch, nextTick } from "vue";
 import {
   addAddress,
   getAdress,
@@ -10,6 +10,8 @@ import { useRoute, useRouter } from "vue-router";
 import { add } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage } from "element-plus";
 import { ArrowLeft, Plus, Edit, Delete } from "@element-plus/icons-vue";
+import provinceData from '@/assets/JsonTinhThanh/province.json'
+import wardData from '@/assets/JsonTinhThanh/ward.json'
 import store from "@/Service/LoginService/Store";
 
 const addresses = ref([]);
@@ -20,6 +22,9 @@ const router = useRouter();
 const user = computed(() => store.getters.user || null);
 console.log(user);
 const errors = reactive({});
+const tinhList = ref(Object.values(provinceData))
+const allXaList = ref(Object.values(wardData).flat())
+
 // Modal states
 const isModalVisible = ref(false);
 const isEditMode = ref(false);
@@ -36,10 +41,26 @@ const formData = reactive({
   emailNguoiNhan: "",
   soNha: "",
   tenDuong: "",
-  xaPhuong: "",
-  tinhThanhPho: "",
+  xaPhuong: null, // Đổi thành null để dùng với select
+  tinhThanhPho: null, // Đổi thành null để dùng với select
   diaChiChinh: false,
 });
+
+// Computed để filter danh sách xã/phường dựa trên tỉnh đã chọn
+const filteredXaList = computed(() => {
+  if (!formData.tinhThanhPho) return []
+  return allXaList.value.filter(
+    xa => xa.parent_code === String(formData.tinhThanhPho)
+  )
+})
+
+// Watch để reset xã/phường khi đổi tỉnh
+watch(
+  () => formData.tinhThanhPho,
+  () => {
+    formData.xaPhuong = null
+  }
+)
 
 // Form validation rules
 const rules = {
@@ -58,12 +79,12 @@ const rules = {
       trigger: "blur",
     },
   ],
-  soNha: [{ required: true, message: "Vui lòng nhập số nhà", trigger: "blur" }],
+  soNha: [{ required: true, message: "Vui lòng nhập thông tin cụ thể", trigger: "blur" }],
   tenDuong: [
-    { required: true, message: "Vui lòng nhập tên đường", trigger: "blur" },
+    { required: true, message: "Vui lòng nhập thôn/làng", trigger: "blur" },
   ],
   xaPhuong: [
-    { required: true, message: "Vui lòng nhập xã/phường", trigger: "blur" },
+    { required: true, message: "Vui lòng chọn xã/phường", trigger: "blur" },
   ],
   emailNguoiNhan: [
     { required: true, message: "Vui lòng nhập email người nhận", trigger: "blur" },
@@ -71,7 +92,7 @@ const rules = {
   tinhThanhPho: [
     {
       required: true,
-      message: "Vui lòng nhập tỉnh/thành phố",
+      message: "Vui lòng chọn tỉnh/thành phố",
       trigger: "blur",
     },
   ],
@@ -99,9 +120,9 @@ const resetForm = () => {
     sdtNguoiNhan: "",
     soNha: "",
     tenDuong: "",
-    xaPhuong: "",
-    quanHuyen: "",
-    tinhThanhPho: "",
+    xaPhuong: null,
+    emailNguoiNhan: "",
+    tinhThanhPho: null,
     diaChiChinh: false,
   });
   formRef.value?.clearValidate();
@@ -123,7 +144,26 @@ const originalPrimaryStatus = ref(false);
 // Open modal for editing address
 const openEditModal = (address) => {
   isEditMode.value = true;
-  Object.assign(formData, { ...address });
+  formData.id = address.id;
+  formData.tenNguoiNhan = address.tenNguoiNhan;
+  formData.sdtNguoiNhan = address.sdtNguoiNhan;
+  formData.emailNguoiNhan = address.emailNguoiNhan;
+  formData.soNha = address.soNha;
+  formData.tenDuong = address.tenDuong;
+  formData.diaChiChinh = address.diaChiChinh;
+  
+  // Tìm code tỉnh dựa trên tên
+  const tinh = tinhList.value.find(t => t.name === address.tinhThanhPho);
+  formData.tinhThanhPho = tinh?.code || '';
+
+  // Sử dụng nextTick để đảm bảo filteredXaList đã được cập nhật
+  nextTick(() => {
+    const xa = allXaList.value.find(
+      x => x.name === address.xaPhuong && x.parent_code === formData.tinhThanhPho
+    );
+    formData.xaPhuong = xa?.code || '';
+  });
+
   originalPrimaryStatus.value = address.diaChiChinh;
   initialFormData.value = JSON.parse(JSON.stringify(formData)); // Deep copy
   isModalVisible.value = true;
@@ -151,19 +191,27 @@ const handleSubmit = async () => {
 
     Object.keys(errors).forEach((key) => delete errors[key]);
 
+    // Tìm tên tỉnh và xã dựa trên code
+    const selectedTinh = tinhList.value.find(t => t.code === formData.tinhThanhPho)
+    const selectedXa = allXaList.value.find(xa => xa.code === formData.xaPhuong)
+
+    if (!selectedTinh || !selectedXa) {
+      ElMessage.warning("Vui lòng chọn tỉnh và xã hợp lệ.");
+      return;
+    }
+
     // Prepare data for API
-    // Update existing address - sử dụng ID của địa chỉ
     const addressData = {
-      id: formData.id, // ID của địa chỉ để update
+      id: formData.id,
       tenNguoiNhan: formData.tenNguoiNhan,
       sdtNguoiNhan: formData.sdtNguoiNhan,
       soNha: formData.soNha,
       tenDuong: formData.tenDuong,
-      xaPhuong: formData.xaPhuong,
+      xaPhuong: selectedXa?.name || '', // Lưu tên thay vì code
       emailNguoiNhan: formData.emailNguoiNhan,
-      tinhThanhPho: formData.tinhThanhPho,
+      tinhThanhPho: selectedTinh?.name || '', // Lưu tên thay vì code
       diaChiChinh: formData.diaChiChinh,
-      idKhachHang: idKhachHang, // ID khách hàng từ params
+      idKhachHang: idKhachHang,
     };
 
     if (isEditMode.value) {
@@ -267,14 +315,6 @@ onMounted(() => {
         <div class="address-content">
           <div class="address-details">
             <el-descriptions :column="1" border>
-              <!-- <el-descriptions-item label="ID:">
-                <span>{{
-                  address.tenNguoiNhan != null
-                    ? address.id
-                    : "Không có thông tin"
-                }}</span>
-              </el-descriptions-item> -->
-
               <el-descriptions-item label="Người nhận:">
                 <span>{{
                   address.tenNguoiNhan != null
@@ -323,7 +363,7 @@ onMounted(() => {
 
               <el-button v-if="selectedAddressId === address.id && !address.diaChiChinh" type="success" size="small"
                 @click.stop="setPrimary(address)" class="set-primary-btn">
-                Đặt làm mặc địnhhh
+                Đặt làm mặc định
               </el-button>
             </div>
           </div>
@@ -368,35 +408,32 @@ onMounted(() => {
           </div>
         </el-form-item>
 
-        <el-form-item label="Số nhà" prop="soNha">
-          <el-input v-model="formData.soNha" placeholder="Nhập số nhà" clearable
-            :class="{ 'is-error': errors.soNha }" />
-          <div v-if="errors.soNha" class="error-message">
-            {{ errors.soNha }}
-          </div>
+        <el-form-item label="Tỉnh/Thành phố" prop="tinhThanhPho">
+          <el-select v-model="formData.tinhThanhPho" placeholder="Chọn tỉnh/thành phố" clearable>
+            <el-option v-for="tinh in tinhList" :key="tinh.code" :label="tinh.name" :value="tinh.code" />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="Tên đường" prop="tenDuong">
-          <el-input v-model="formData.tenDuong" placeholder="Nhập tên đường" clearable
+        <el-form-item label="Xã/Phường" prop="xaPhuong">
+          <el-select v-model="formData.xaPhuong" :disabled="!formData.tinhThanhPho" placeholder="Chọn xã/phường"
+            clearable>
+            <el-option v-for="xa in filteredXaList" :key="xa.code" :label="xa.name" :value="xa.code" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="Thôn/làng" prop="tenDuong">
+          <el-input v-model="formData.tenDuong" placeholder="Nhập tên thôn/làng" clearable
             :class="{ 'is-error': errors.tenDuong }" />
           <div v-if="errors.tenDuong" class="error-message">
             {{ errors.tenDuong }}
           </div>
         </el-form-item>
 
-        <el-form-item label="Xã/Phường" prop="xaPhuong">
-          <el-input v-model="formData.xaPhuong" placeholder="Nhập xã/phường" clearable
-            :class="{ 'is-error': errors.xaPhuong }" />
-          <div v-if="errors.xaPhuong" class="error-message">
-            {{ errors.xaPhuong }}
-          </div>
-        </el-form-item>
-
-        <el-form-item label="Tỉnh/Thành phố" prop="tinhThanhPho">
-          <el-input v-model="formData.tinhThanhPho" placeholder="Nhập tỉnh/thành phố" clearable
-            :class="{ 'is-error': errors.tinhThanhPho }" />
-          <div v-if="errors.tinhThanhPho" class="error-message">
-            {{ errors.tinhThanhPho }}
+        <el-form-item label="Cụ thể" prop="soNha">
+          <el-input v-model="formData.soNha" placeholder="Nhập thông tin cụ thể" clearable
+            :class="{ 'is-error': errors.soNha }" />
+          <div v-if="errors.soNha" class="error-message">
+            {{ errors.soNha }}
           </div>
         </el-form-item>
 
