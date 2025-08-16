@@ -22,10 +22,10 @@ public class AdminDiaChiRequest {
     @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại không hợp lệ. Phải bắt đầu bằng 0 và đủ 10 chữ số.")
     private String sdtNguoiNhan;
 
-    @NotBlank(message = "Số nhà không được để trống.")
+    @NotBlank(message = "Thông tin cụ thể không được để trống.")
     private String soNha;
 
-    @NotBlank(message = "Tên đường không được để trống.")
+    @NotBlank(message = "Tên Thôn/Làng không được để trống.")
     private String tenDuong;
 
     @NotBlank(message = "Xã/Phường không được để trống.")
