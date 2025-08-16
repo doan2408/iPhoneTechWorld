@@ -1561,7 +1561,6 @@ INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, loai_hinh_thuc)
 VALUES
     (N'TIEN_MAT', N'OFFLINE'),
     (N'CHUYEN_KHOAN', N'OFFLINE'),
-    (N'NGAN_HANG', N'ONLINE'),
     (N'COD', N'ONLINE'),
     (N'VNPAY', N'ONLINE');
 
@@ -1620,13 +1619,13 @@ FROM
 
 INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
 VALUES
-    ('Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
-    ('Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
-    ('Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
-    ('Khách đổi ý', 'RETURN'),
-    ('Sản phẩm không đúng mô tả', 'RETURN'),
-    ('Sản phẩm bị lỗi sản xuất', 'RETURN'),
-    ('Khách đổi ý', 'CANCELLED');
+    (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
+    (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
+    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
+    (N'Khách đổi ý', 'RETURN'),
+    (N'Sản phẩm không đúng mô tả', 'RETURN'),
+    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
+    (N'Khách đổi ý', 'CANCELLED');
 
 
 -- 1. nhan_vien
@@ -1749,4 +1748,3 @@ SELECT * FROM hang_thanh_vien
 --42. nha_cung_cap_sp
 SELECT * FROM nha_cung_cap_sp
 
--- note

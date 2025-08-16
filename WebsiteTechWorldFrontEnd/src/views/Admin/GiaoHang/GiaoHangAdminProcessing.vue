@@ -64,10 +64,10 @@
                     <div class="timeline-line"></div>
 
                     <div v-for="(step, index) in orderStepsShipping" :key="step.id" class="timeline-step" :class="{
-                    'active': step.status === 'completed',
-                    'current': step.status === 'current',
-                    'pending': step.status === 'pending'
-                }">
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
                         <div class="step-icon">
                             <component :is="step.icon" class="icon" />
                         </div>
@@ -92,10 +92,10 @@
                     <div class="timeline-line"></div>
 
                     <div v-for="(step, index) in orderStepsFalse" :key="step.id" class="timeline-step-false" :class="{
-                    'active': step.status === 'completed',
-                    'current': step.status === 'current',
-                    'pending': step.status === 'pending'
-                }">
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
                         <div class="step-icon">
                             <component :is="step.icon" class="icon" />
                         </div>
@@ -168,11 +168,34 @@
                     <X class="icon-small" /> HỦY ĐƠN
                 </button>
 
-                <button v-if="canShippingFalse"
+                <!-- <button v-if="canShippingFalse"
                     @click="openConfirm('Xác nhận giao thất bại?', () => updateOrderStatus('Giao thất bại'))"
                     class="action-btn cancel-btn">
                     <X class="icon-small" /> GIAO THẤT BẠI
+                </button> -->
+                <button v-if="canShippingFalse" @click="openPopupShippingFalse()" class="action-btn cancel-btn">
+                    <X class="icon-small" /> GIAO THẤT BẠI
                 </button>
+
+                <div v-if="showFailPopup" class="fail-overlay">
+                    <div class="fail-modal">
+                        <h3 class="fail-title">Chọn lý do giao thất bại</h3>
+
+                        <select v-model="failReason" class="fail-select">
+                            <option disabled value="">-- Chọn lý do --</option>
+                            <option v-for="reason in failReasons" :key="reason.id" :value="reason.idReason">
+                                {{ reason.tenLyDo }}
+                            </option>
+                        </select>
+
+                        <div class="fail-actions">
+                            <button class="fail-btn-cancel" @click="showFailPopup = false">Hủy</button>
+                            <button class="fail-btn-confirm" :disabled="!failReason" @click="confirmFail">
+                                Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <button v-if="canReturn" @click="openConfirm('Xác nhận trả hàng?', () => updateOrderStatus('Trả hàng'))"
                     class="action-btn cancel-btn">
@@ -323,6 +346,8 @@ import {
 } from 'lucide-vue-next'
 import { hoaDonDetail, changeStatusInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import { getAllFalseReasonByCaseReason } from '@/Service/GuestService/FalseReasonServices/FalseReasonServices'
+import { createActionAfterCase } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
@@ -331,7 +356,7 @@ import { useToast } from "vue-toastification";
 const order = reactive({})
 const route = useRoute()
 const statusUpdate = null;
-const statusFlase = ['Trả hàng', 'Giao thất bại','Đã hủy']
+const statusFlase = ['Trả hàng', 'Giao thất bại', 'Đã hủy']
 const toast = useToast()
 
 // ham view giao hang
@@ -382,8 +407,8 @@ const orderSteps = computed(() => [
         icon: FileText,
         // Bước đầu luôn hiện là completed (hoặc current nếu mới tạo)
         status: order.trangThaiDonHang === 'Chờ xử lý' ? 'current' :
-            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại','Đã xác nhận', 
-                'Sẵn sàng giao'
+            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại', 'Đã xác nhận',
+                'Sẵn sàng giao', 'Đã hủy'
             ].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.ngayDatHang,
         description: 'Đơn hàng đang chờ được xác nhận'
@@ -434,7 +459,7 @@ const orderStepsShipping = computed(() => [
         title: 'Giao Hàng Thành Công',
         icon: CheckCircle,
         status: order.trangThaiDonHang === 'Đã giao' ? 'current' :
-            [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+            ['Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.trangThaiDonHang === 'Đã giao' ? order.deliveredAt : null,
         description: order.trangThaiDonHang === 'Đã giao' ? 'Khách hàng đã nhận hàng' : null
     },
@@ -453,7 +478,7 @@ const orderStepsFalse = computed(() => [
         id: 2,
         title: 'Đã trả lại',
         icon: AlertTriangle,
-        status: [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        status: ['Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
         timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
         description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã trả lại' : null
     },
@@ -518,7 +543,7 @@ const getStatusText = (status) => {
 function getStatusKey(text) {
     const statusMap = {
         pending: ['Chờ xử lý', 'Đã xác nhận'],
-        packed: ['Đã đóng gói','Sẵn sàng giao'],
+        packed: ['Đã đóng gói', 'Sẵn sàng giao'],
         shipping: ['Đang giao'],
         delivered: ['Đã giao'],
         failed: ['Giao thất bại'],
@@ -531,11 +556,11 @@ function getStatusKey(text) {
 
     for (const [key, aliases] of Object.entries(statusMap)) {
         if (aliases.some(alias => alias.toLowerCase() === normalized)) {
-            return key; 
+            return key;
         }
     }
 
-        return text;
+    return text;
 }
 
 const getPaymentStatusText = (status) => {
@@ -566,11 +591,39 @@ const getPaymentStatusClass = (status) => {
 
     return statusClassMap[status.toUpperCase()] || 'pending';
 };
+
+const showFailPopup = ref(false)
+const failReason = ref("")
+const failReasons = ref([])
+
+const getAllFalseReason = async () => {
+    try {
+        const res = await getAllFalseReasonByCaseReason('RETURN')
+        failReasons.value = res.data
+    }catch(err){
+        console.error("Lỗi load lý do:", err)
+    }
+}
+
+const openPopupShippingFalse = () => {
+    showFailPopup.value = true
+    failReason.value = ""
+    console.log(showFailPopup.value);
+
+}
+
+const confirmFail = async () => {
+    updateOrderStatus('Giao thất bại')
+    await createActionAfterCase(order.idHoaDon,failReason.value)
+    showFailPopup.value = false
+    failReason.value = ""
+}
+
 const isProcessing = ref(false);
 const updateOrderStatus = async (newStatus) => {
     const id = route.params.id;
     try {
-        if (newStatus === 'Sẵn sàng giao'){
+        if (newStatus === 'Sẵn sàng giao') {
             isProcessing.value = true;
             toast.info("Đang tạo mã vận đơn...", { autoClose: 2000 });
         }
@@ -629,6 +682,7 @@ const editOrder = () => {
 
 onMounted(() => {
     viewOrderDetail()
+    getAllFalseReason();
 })
 
 const showConfirm = ref(false)
@@ -647,6 +701,4 @@ function handleConfirm() {
 }
 </script>
 
-<style scoped src="@/style/GiaoHang/GiaoHangProcessing.css">
-
-</style>
+<style scoped src="@/style/GiaoHang/GiaoHangProcessing.css"></style>

@@ -172,6 +172,7 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
     return api.put(`/admin/hoa-don/update-invoice/${id}`, {
         tenNguoiNhan: shippingInfo.tenNguoiNhan,
         sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
+        emailNguoiNhan: shippingInfo.emailNguoiNhan,
         diaChiGiaoHang: fullAddressForDB,
         phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
         isShipping: isShipping,

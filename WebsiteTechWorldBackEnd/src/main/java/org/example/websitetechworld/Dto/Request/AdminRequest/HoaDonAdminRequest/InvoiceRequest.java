@@ -1,10 +1,9 @@
-package org.example.websitetechworld.Dto.Request;
+package org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +15,7 @@ import java.time.LocalDate;
 public class InvoiceRequest {
     private String tenNguoiNhan;
     private String sdtNguoiNhan;
+    private String emailNguoiNhan;
     private String diaChiGiaoHang;
     private String shippingMethod;
     private BigDecimal phiShip;

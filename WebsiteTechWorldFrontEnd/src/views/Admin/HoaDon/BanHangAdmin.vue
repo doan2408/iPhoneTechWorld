@@ -305,7 +305,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                            currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -346,10 +346,12 @@
                                 </p>
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
+                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật' }}
+                                </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                ' VNĐ' : 'Chưa tính' }}</p>
+                                    ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -363,6 +365,8 @@
                                             placeholder="Tên người nhận" class="input-field" required>
                                         <input type="tel" v-model="shippingInfo.sdtNguoiNhan"
                                             placeholder="Số điện thoại" class="input-field" required>
+                                        <input type="mail" v-model="shippingInfo.emailNguoiNhan"
+                                            placeholder="Email người nhận" class="input-field" required>
                                         <div class="address-form">
                                             <label>Chọn tỉnh:</label>
                                             <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
@@ -670,6 +674,7 @@ const agreedToTerms = ref(false);
 const shippingInfo = ref({
     tenNguoiNhan: '',
     sdtNguoiNhan: '',
+    emailNguoiNhan: '',
     diaChiChiTiet: '',
     phiShip: 0,
     shippingMethod: 'express', // Đảm bảo khớp với 'express' thay vì 'EXPRESS'
@@ -1515,6 +1520,7 @@ watch(isShipping, (newVal) => {
         shippingInfo.value = {
             tenNguoiNhan: '',
             sdtNguoiNhan: '',
+            emailNguoiNhan: '',
             diaChiChiTiet: '',
             phiShip: null,
             shippingMethod: 'express'
@@ -1734,6 +1740,7 @@ const loadHoaDon = async () => {
                 shippingInfo.value = {
                     tenNguoiNhan: hoaDon.tenNguoiNhan || '',
                     sdtNguoiNhan: hoaDon.sdtNguoiNhan || '',
+                    emailNguoiNhan: hoaDon.emailNguoiNhan || '',
                     diaChiChiTiet: hoaDon.diaChiGiaoHang || '',
                     phiShip: hoaDon.phiShip || null,
                     shippingMethod: 'express'
@@ -1912,7 +1919,7 @@ const selectedKhachHang = async (khachHang) => {
         if (selected.khachHangId == undefined || selected.khachHangId == null) {
             toast.success("Bỏ chọn khách hàng thành công")
         } else {
-            toast.success("Chọn khách hàng thành công id: " + khachHang.id)
+            toast.success("Chọn khách hàng thành công ")
         }
     } catch (err) {
         toast.error("Thêm khách hàng vào hóa đơn thất bại")
@@ -1955,23 +1962,14 @@ const confirmShippingInfo = async () => {
 
     const storedId = localStorage.getItem("selectedInvoiceId");
 
-    console.log("Bắt đầu xác nhận thông tin giao hàng:");
-    console.log("  shippingInfo:", shippingInfo.value);
-    console.log("  isShipping:", isShipping.value);
-    console.log("  selectedTinh:", selectedTinh.value);
-    // console.log("  selectedHuyen:", selectedHuyen.value);
-    console.log("  selectedXa:", selectedXa.value);
-    console.log("  invoiceId:", storedId);
-
-
     // Kiểm tra dữ liệu bắt buộc
     if (!selectedTinh.value?.name || !selectedXa.value?.name) {
         toast.warning('Vui lòng chọn đầy đủ Tỉnh, Huyện, Xã.');
         return;
     }
 
-    if (!shippingInfo.value.tenNguoiNhan || !shippingInfo.value.sdtNguoiNhan) {
-        toast.warning('Vui lòng nhập đầy đủ Tên người nhận và Số điện thoại.');
+    if (!shippingInfo.value.tenNguoiNhan || !shippingInfo.value.sdtNguoiNhan || !shippingInfo.value.emailNguoiNhan) {
+        toast.warning('Vui lòng nhập đầy đủ Tên người nhận, Số điện thoại và Email người nhận.');
         return;
     }
 
