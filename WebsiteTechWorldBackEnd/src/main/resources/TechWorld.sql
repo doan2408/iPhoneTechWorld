@@ -1748,3 +1748,5 @@ SELECT * FROM hang_thanh_vien
 
 --42. nha_cung_cap_sp
 SELECT * FROM nha_cung_cap_sp
+
+-- note
