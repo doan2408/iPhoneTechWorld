@@ -235,6 +235,7 @@
                 v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].giaBan"
                 :min="1000"
                 :precision="0"
+                :step="1000000"
                 style="width: 100%"
               ></el-input-number>
             </el-form-item>
@@ -633,9 +634,9 @@ const uploadProgress = reactive({
 const danhSachTrangThaiSanPham = [
   { label: "Đang kinh doanh", value: "ACTIVE" },
   { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
-  { label: "Sắp ra mắt", value: "COMING_SOON" },
-  { label: "Tạm ngừng bán", value: "TEMPORARILY_UNAVAILABLE" },
-  { label: "Hết hàng", value: "OUT_OF_STOCK" },
+  // { label: "Sắp ra mắt", value: "COMING_SOON" },
+  // { label: "Tạm ngừng bán", value: "TEMPORARILY_UNAVAILABLE" },
+  // { label: "Hết hàng", value: "OUT_OF_STOCK" },
 ];
 
 const rules = {
@@ -1296,10 +1297,12 @@ const validateForm = () => {
         index + 1
       }: Giá bán phải lớn hơn hoặc bằng 1000 VND`;
       hasError = true;
-    } else if (!chiTiet.soLuong) {
-      error.value = `Biến thể ${index + 1}: Số lượng phải lớn hơn 0`;
-      hasError = true;
     } 
+    // else if (!chiTiet.soLuong) {
+    //   error.value = `Biến thể ${index + 1}: Số lượng phải lớn hơn 0`;
+    //   hasError = true;
+    // } 
+
     // else if (chiTiet.hinhAnhs.length === 0) {
     //   error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 hình ảnh`;
     //   hasError = true;
@@ -1310,8 +1313,8 @@ const validateForm = () => {
       .map((i) => i.trim())
       .filter((i) => i);
     if (imeis.length === 0) {
-      error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 IMEI`;
-      hasError = true;
+      // error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 IMEI`;
+      // hasError = true;
     } else {
       // Kiểm tra IMEI không hợp lệ
       const invalidImeis = imeis.filter((i) => !validateIMEI(i));
