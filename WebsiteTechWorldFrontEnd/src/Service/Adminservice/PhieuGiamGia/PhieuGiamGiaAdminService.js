@@ -66,7 +66,8 @@ export const getAllSanPham = async (params) => {
 
 export const giftVoucher = async (id, type) => {
   try {
-    await api.post(`${baseURL}/${id}/gift?type=${type}`);
+    const response = await api.post(`${baseURL}/${id}/gift?type=${type}`);
+    return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm khách hàng giảm giá:', error);
     throw error.response?.data || new Error('Lỗi khi thêm khách hàng giảm giá');

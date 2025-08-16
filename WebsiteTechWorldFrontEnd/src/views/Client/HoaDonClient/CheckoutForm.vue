@@ -101,7 +101,7 @@
                 <div class="voucher-display-area">
                     <div v-if="appliedVoucher.code" class="applied-voucher-info">
                         <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ appliedVoucher.code
-                        }}</strong></span>
+                                }}</strong></span>
                         <span class="applied-voucher-discount">- ₫{{ appliedVoucher.discount.toLocaleString() }}</span>
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
@@ -259,10 +259,13 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
+                                <input v-if="discountList?.length" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
                                     class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
+                                <p v-if="!discountList?.length" style="text-align: center; font-style: italic;">
+                                    Khách hàng không có giảm giá nào
+                                </p>
                                 <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
                                     <div>
                                         <strong>{{ discount.tenGiamGia }}</strong>
@@ -275,7 +278,7 @@
                             </ul>
                             <div v-if="modalAppliedVoucher.code" class="applied-voucher-info">
                                 <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ modalAppliedVoucher.code
-                                }}</strong></span>
+                                        }}</strong></span>
                                 <span class="applied-voucher-discount">- ₫{{
                                     modalAppliedVoucher.discount.toLocaleString() }}</span>
                             </div>
@@ -283,7 +286,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button @click="closeVoucherModal" class="apply-button">Đóng</button>
+                        <button v-if="!discountList?.length" @click="closeVoucherModal" class="apply-button">Đóng</button>
                     </div>
                 </div>
             </div>
@@ -306,6 +309,9 @@ import headerState from "@/components/Client/modules/headerState";
 
 import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
 
+import Store from "@/Service/LoginService/Store";
+const user = computed(() => Store.getters.user || null);
+
 const store = useStore();
 const count = ref(0);
 
@@ -317,7 +323,7 @@ const guiLenHeader = () => {
     store.commit("headerState/setCartItemCount", count.value);
 };
 
-const idKhachHang = JSON.parse(localStorage.getItem("selectedInvoiceId")) || [];
+const idKhachHang = user.value?.id;
 
 const toast = useToast()
 const route = useRoute();
@@ -462,6 +468,7 @@ const openVoucherModal = () => {
     modalAppliedVoucher.value = { ...appliedVoucher.value }; // Sync currently applied voucher
     modalVoucherError.value = ''; // Clear errors on open
     isVoucherModalOpen.value = true;
+    loadDiscountList()
 };
 
 const closeVoucherModal = () => {
@@ -471,7 +478,7 @@ const closeVoucherModal = () => {
 const applyDiscount = (discount) => {
     selectedDiscount.value = discount;
 
-        console.log('1', selectedDiscount.value)
+    console.log('1', selectedDiscount.value)
     if (selectedDiscount.value?.loaiGiamGia === 'Phần trăm') {
         giam.value = calculateSubtotal.value * selectedDiscount.value?.giaTriGiamGia / 100;
         if (selectedDiscount.value?.giaTriGiamGiaToiDa < giam.value) {
@@ -479,7 +486,7 @@ const applyDiscount = (discount) => {
         }
     } else if (selectedDiscount.value?.giaTriGiamGia) {
         giam.value = selectedDiscount.value.giaTriGiamGia;
-    } 
+    }
 
     const giamGia = { code: discount.maGiamGia, discount: giam.value }
     calculateTotal.value = calculateTotal.value - giamGia
@@ -599,7 +606,7 @@ const handleBuy = async () => {
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
         })),
-        idPhieuGiamGia: selectedDiscount.value?.id 
+        idPhieuGiamGia: selectedDiscount.value?.id
     };
     if (getShippingCost.value == 0) {
         toast.warning('Chưa chọn phương thức giao hàng')
@@ -623,7 +630,7 @@ const handleBuy = async () => {
 
         if (res.data.message === 'REDIRECT_VNPAY') {
             window.location.href = res.data.paymentUrl;
-            return; 
+            return;
         }
 
         if (res.data.message === 'Đặt hàng thành công') {

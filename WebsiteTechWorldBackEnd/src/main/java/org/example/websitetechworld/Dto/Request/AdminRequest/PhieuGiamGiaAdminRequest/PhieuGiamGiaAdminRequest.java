@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -62,6 +62,9 @@ public class PhieuGiamGiaAdminRequest {
     @PositiveOrZero(message = "Số điểm cần để đổi phải lớn hơn hoặc bằng 0")
     @DecimalMax(value = "99999999.99", message = "Số điểm cần để đổi không được vượt quá 99999999.99")
     private BigDecimal soDiemCanDeDoi;
+
+    @NotNull(message = "Trạng thái không được để trống")
+    private TrangThaiPGG trangThaiPhieuGiamGia;
 
     @NotNull(message = "Trạng thái không được để trống")
     private TrangThaiPhatHanh trangThaiPhatHanh;

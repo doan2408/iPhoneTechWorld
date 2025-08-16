@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import jakarta.validation.constraints.Size;
+import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.NhanVien;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
@@ -80,17 +82,19 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
     @Query("SELECT k FROM KhachHang k WHERE k.hangThanhVien = :hangKhachHang")
     List<KhachHang> findByHangKhachHang(HangKhachHang hangKhachHang);
 
-
     @Query("SELECT k FROM KhachHang k WHERE MONTH(k.ngaySinh) = :month")
     List<KhachHang> findByMonthOfNgaySinh(@Param("month") int month);
 
-
-    List<KhachHang> findByNgaySinhAfter(LocalDate ngaySinhAfter);
+    @Query("""
+        SELECT k
+        FROM KhachHang k
+        WHERE k.hoaDons IS EMPTY
+    """)
+    List<KhachHang> findNewCustomers();
 
     @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien")
     List<KhachHang> findAllWithHangThanhVien();
 
     @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien WHERE kh.id = :id")
     Optional<KhachHang> findByIdWithHangThanhVien(@Param("id") Integer id);
-
 }
