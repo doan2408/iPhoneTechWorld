@@ -8,7 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
-import org.example.websitetechworld.Dto.Request.InvoiceRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
@@ -22,8 +22,6 @@ import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
-import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
-import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -303,12 +301,7 @@ public class HoaDonAdminService {
         invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
         invoice.setNgayDatHang(LocalDateTime.now());
-        // Gán maVanDon
-//        String maVanDon = request.getMaVanDon();
-//        if (maVanDon == null || maVanDon.trim().isEmpty()) {
-//            maVanDon = generateMaVanDon(id);
-//        }
-//        invoice.setMaVanDon(maVanDon);
+        invoice.setEmailNguoiNhan(request.getEmailNguoiNhan() != null ? request.getEmailNguoiNhan() : "");
 
         // Gán shippingMethod
         invoice.setShippingMethod(request.getShippingMethod() != null ?
@@ -339,6 +332,7 @@ public class HoaDonAdminService {
                     invoice.getThanhTien(),
                     invoice.getShippingMethod(),
                     TrangThaiGiaoHang.PENDING,
+                    invoice.getEmailNguoiNhan(),
                     invoice.getNgayDatHang()
             );
         } catch (Exception e) {
@@ -498,6 +492,9 @@ public class HoaDonAdminService {
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
+        }
+        if (TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.REFUNDED.equals(newStatus)){
+            hoaDonChiTiet_ImeiAdminServices.updateImeiHoanTien(danhSachChiTiet, TrangThaiImei.AVAILABLE,TrangThaiImei.RETURNED);
         }
 
         hoaDonRepository.save(hoaDon);

@@ -137,6 +137,32 @@ public class HoaDonChiTiet_ImeiAdminServices {
         changeStatusImei(imeiList, trangThaiImei);
     }
 
+    public void updateImeiHoanTien(List<ChiTietHoaDon> chiTietHoaDons, TrangThaiImei trangThaiImei,TrangThaiImei trangThaiHoanTien){
+        List<Imei> imeiList = new ArrayList<>();
+        List<ImeiDaBan> imeiDaBansToUpdate = new ArrayList<>();
+
+        for (ChiTietHoaDon chiTietHoaDon : chiTietHoaDons) {
+            List<ImeiDaBan> imeiDaBans = imeiDaBanRepository.findByIdHoaDonChiTiet_Id(chiTietHoaDon.getId());
+            if (imeiDaBans.size() < chiTietHoaDon.getSoLuong()) {
+                throw new IllegalArgumentException("Không đủ IMEI cho chi tiết hóa đơn: " + chiTietHoaDon.getId());
+            }
+            for (ImeiDaBan imeiDaBan: imeiDaBans) {
+                if (imeiDaBan.getTrangThai() != TrangThaiImei.RESERVED ) {
+                    throw new IllegalArgumentException("IMEI không ở trạng thái đặt trước: " + imeiDaBan.getSoImei());
+                }
+                Imei imei = imeiReposiory.findBySoImei(imeiDaBan.getSoImei());
+                if (imei == null){
+                    throw new IllegalArgumentException("Imei khong ton tai" +imeiDaBan.getSoImei());
+                }
+                imeiList.add(imei);
+                imeiDaBan.setTrangThai(trangThaiHoanTien);
+                imeiDaBansToUpdate.add(imeiDaBan);
+            }
+        }
+        imeiDaBanRepository.saveAll(imeiDaBansToUpdate);
+        changeStatusImei(imeiList, trangThaiImei);
+    }
+
     public Page<ViewImeiAdminResponse> getAvailableImeisByProductId(Integer productId, Pageable pageable) {
         Page<Imei> imeiEntitiesPage = imeiReposiory.findByIdSanPhamChiTiet_IdAndTrangThaiImei(productId, TrangThaiImei.AVAILABLE, pageable);
         List<ViewImeiAdminResponse> imeiDtos = imeiEntitiesPage.getContent().stream()

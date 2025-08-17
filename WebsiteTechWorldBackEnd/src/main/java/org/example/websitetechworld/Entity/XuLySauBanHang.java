@@ -32,15 +32,11 @@ public class XuLySauBanHang {
     @JoinColumn(name = "id_imei_da_ban", nullable = false)
     private ImeiDaBan idImeiDaBan;
 
-    @Column(name = "so_luong", nullable = false)
-    private Integer soLuong;
-
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "loai_vu_viec", nullable = false, length = 20)
     private CaseType loaiVuViec;
 
-    @ColumnDefault("getdate()")
     @Column(name = "thoi_gian_vu_viec", nullable = false)
     private LocalDateTime thoiGianVuViec;
 
