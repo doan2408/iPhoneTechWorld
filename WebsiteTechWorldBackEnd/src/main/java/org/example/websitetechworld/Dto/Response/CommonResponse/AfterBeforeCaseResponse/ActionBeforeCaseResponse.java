@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Response.CommonResponse;
+package org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
