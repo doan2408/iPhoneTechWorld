@@ -855,7 +855,6 @@ const pageNoHdctByImei = ref(0);
 const pageSizeHdctByImei = ref(10);
 const getHdctByImeiDaBan = async () => {
     const storedId = localStorage.getItem("selectedInvoiceId");
-    console.log(storedId);
     const res = await findHdctByImeiDaBan(pageNoHdctByImei.value, pageSizeHdctByImei.value, storedId);
     listHdctByImeiDaBan.value = res.data.content
     console.log('res', res);
@@ -1840,16 +1839,11 @@ watch(currentInvoiceId, async (newId) => {
         currentInvoiceDetail.value = selected;
     }
 });
-// Watcher để tự động xóa lựa chọn khi chuyển trang
 watch(imeiCurrentPage, async () => {
-    selectedImeis.value = []; // Xóa các lựa chọn khi chuyển trang
-    // Không tự động chọn lại ở đây. Người dùng sẽ tự chọn hoặc nhấn nút "Tự động chọn".
+    selectedImeis.value = []; 
 });
 
-// Watcher cho quantityToSelect để tự động xóa lựa chọn khi số lượng thay đổi
 watch(quantityToSelect, (newValue, oldValue) => {
-    // Chỉ reset khi giá trị thực sự thay đổi và khác với giá trị cũ đã được chọn
-    // Tránh reset khi giá trị được điều chỉnh nội bộ (ví dụ: ép về max)
     if (newValue !== oldValue) {
         selectedImeis.value = [];
     }

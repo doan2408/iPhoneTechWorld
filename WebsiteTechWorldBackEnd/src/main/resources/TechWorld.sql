@@ -123,8 +123,7 @@ CREATE TABLE hoa_don (
                          ngay_thanh_toan DATETIME,
                          trang_thai_thanh_toan NVARCHAR(50),
                          is_delete BIT,
-                         trang_thai_don_hang NVARCHAR(50),
-                         thoi_gian_huy DATETIME
+                         trang_thai_don_hang NVARCHAR(50)
 );
 
 --7
@@ -569,7 +568,8 @@ CREATE TABLE xu_ly_sau_ban_hang (
                                     id_hoa_don INT NOT NULL,
                                     id_imei_da_ban INT NULL, -- Liên kết máy đã bán cụ thể
                                     loai_vu_viec NVARCHAR(20) NOT NULL, -- FAILED_DELIVERY, RETURN
-                                    thoi_gian_vu_viec DATETIME NULL,
+                                    thoi_gian_yeu_cau DATETIME null,
+                                    thoi_gian_xu_ly DATETIME NULL,
                                     id_ly_do INT NULL,
                                     hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
                                     da_kiem_tra BIT NOT NULL DEFAULT 0,

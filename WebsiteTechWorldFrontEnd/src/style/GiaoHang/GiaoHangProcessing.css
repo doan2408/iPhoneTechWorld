@@ -1010,3 +1010,155 @@
 .modal .fail-select option:hover {
     background-color: #f3f4f6;
 }
+
+.return-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.return-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 750px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.3s ease;
+}
+
+.return-title {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+/* List imei */
+.return-imei-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.return-imei-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.return-imei-item:hover {
+    background: #f0f8ff;
+    border-color: #4cafef;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.return-imei-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.imei-main {
+    font-weight: 600;
+    font-size: 14px;
+    color: #222;
+}
+
+.imei-sub {
+    font-size: 13px;
+    color: #666;
+}
+
+/* Table */
+.return-selected {
+    margin-top: 20px;
+}
+
+.return-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.return-table th,
+.return-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.return-table th {
+    background: #f2f2f2;
+    font-weight: bold;
+}
+
+.return-select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Actions */
+.return-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.return-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s;
+}
+
+.return-btn.cancel {
+    background: #ddd;
+    color: #333;
+}
+
+.return-btn.confirm {
+    background: #4CAF50;
+    color: #fff;
+}
+
+.return-btn:hover {
+    transform: translateY(-2px);
+}
+
+.return-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

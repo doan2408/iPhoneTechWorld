@@ -74,3 +74,7 @@ export const deleteHoaDonGuest = (maHd) => {
     return api.delete(`/my-order/hdct/` + maHd);
 };
 
+export const findHdctByImeiDaBan = (idHoaDon) => {
+    return api.get('/my-order' + '/' + idHoaDon + '/hdct-by-imei-da-ban')
+}
+

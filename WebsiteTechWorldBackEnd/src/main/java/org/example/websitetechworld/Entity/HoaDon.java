@@ -137,7 +137,5 @@ public class HoaDon {
     @Column(name = "email_nguoi_nhan", length = 100)
     private String emailNguoiNhan;
 
-    @Column(name = "thoi_gian_huy")
-    private LocalDateTime thoiGianHuy;
 
 }

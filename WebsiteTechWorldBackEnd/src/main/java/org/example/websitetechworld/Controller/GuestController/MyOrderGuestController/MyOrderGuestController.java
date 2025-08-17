@@ -1,10 +1,13 @@
 package org.example.websitetechworld.Controller.GuestController.MyOrderGuestController;
 
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,10 +22,12 @@ public class MyOrderGuestController {
 
     private final MyOrderClientServices myOrderClientServices;
     private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
+    private final ImeiDaBanAdminServices imeiDaBanAdminServices;
 
-    public MyOrderGuestController(MyOrderClientServices myOrderClientServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices) {
+    public MyOrderGuestController(MyOrderClientServices myOrderClientServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
         this.myOrderClientServices = myOrderClientServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
+        this.imeiDaBanAdminServices = imeiDaBanAdminServices;
     }
 
     @PutMapping("/thanh-toan")
@@ -56,4 +61,9 @@ public class MyOrderGuestController {
                     .body("Xóa thất bại: " + e.getMessage());
         }
     }
+    @GetMapping("/{hoaDonId}/hdct-by-imei-da-ban")
+    public ResponseEntity<List<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@PathVariable(value = "hoaDonId") Integer hoaDonId){
+        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(hoaDonId));
+    }
+
 }
