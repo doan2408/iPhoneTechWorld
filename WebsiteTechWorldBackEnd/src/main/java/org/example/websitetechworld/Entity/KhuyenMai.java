@@ -8,8 +8,6 @@ import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -47,7 +45,4 @@ public class KhuyenMai {
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 50)
     private TrangThaiKhuyenMai trangThai;
-
-    @OneToMany(mappedBy = "khuyenMai", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<KhuyenMaiSanPhamChiTiet> danhSachSanPhamCT = new LinkedHashSet<>();
 }

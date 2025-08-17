@@ -17,6 +17,7 @@ public class ClientProductDetailResponse {
     private String tenSanPham;
     private List<String> hinhAnh;
     private BigDecimal giaBan;
+    private BigDecimal giaTruocKhuyenMai;
     private List<ThuocTinh> rom;
     private List<ThuocTinh> mau;
     private Integer soLuong;

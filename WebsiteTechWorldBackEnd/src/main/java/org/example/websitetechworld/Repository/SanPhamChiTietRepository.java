@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Entity.KhuyenMai;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
@@ -102,4 +103,8 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     List<SanPhamChiTiet> findBySanPhamIds(@Param("sanPhamIds") List<Integer> sanPhamIds);
 
     List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
+
+    List<SanPhamChiTiet> findAllByIdKhuyenMai_Id(Integer idKhuyenMaiId);
+
+    Integer id(Integer id);
 }

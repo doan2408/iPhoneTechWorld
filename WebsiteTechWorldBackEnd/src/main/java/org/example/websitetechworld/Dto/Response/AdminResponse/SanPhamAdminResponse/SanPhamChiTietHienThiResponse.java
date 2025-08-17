@@ -30,6 +30,8 @@ public class SanPhamChiTietHienThiResponse {
 
     private BigDecimal giaBan;
 
+    private BigDecimal giaTruocKhuyenMai;
+
     private String url;
 
     public static SanPhamChiTietHienThiResponse converDto(SanPhamChiTiet sanPhamChiTiet){
@@ -47,7 +49,7 @@ public class SanPhamChiTietHienThiResponse {
             response.setRom(sanPhamChiTiet.getIdRom().getDungLuong());
         }
         response.setSoLuong(sanPhamChiTiet.getSoLuong());
-        response.setGiaBan(sanPhamChiTiet.getGiaBan());
+        response.setGiaTruocKhuyenMai(sanPhamChiTiet.getGiaBan());
         Set<HinhAnh> hinhAnhs = sanPhamChiTiet.getHinhAnhs();
         if (hinhAnhs != null && !hinhAnhs.isEmpty()) {
             HinhAnh hinhAnhDauTien = hinhAnhs.iterator().next();

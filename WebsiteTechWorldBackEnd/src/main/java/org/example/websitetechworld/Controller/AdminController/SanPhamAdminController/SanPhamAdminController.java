@@ -82,8 +82,12 @@ public class SanPhamAdminController {
 
     // ham lay ten san pham
     @GetMapping("/ten-san-pham")
-    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham( @RequestParam(value = "tenSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
-        return ResponseEntity.ok(sanPhamAdminService.getProductNames(tenSanPham,pageNo, pageSize));
+    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham(
+            @RequestParam(value = "tenSanPham") String tenSanPham ,
+            @RequestParam(value = "pageNo",defaultValue = "5") int pageNo,
+            @RequestParam(value = "pageSize",defaultValue = "0") int pageSize,
+            @RequestParam(value = "selectedIdKhachHang",defaultValue = "0") int selectedIdKhachHang) {
+        return ResponseEntity.ok(sanPhamAdminService.getProductNames(tenSanPham,pageNo, pageSize, selectedIdKhachHang));
     }
 
     @GetMapping("/category")

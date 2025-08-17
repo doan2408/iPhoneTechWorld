@@ -5,13 +5,16 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRe
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
+import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.SchedulerService;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -19,9 +22,11 @@ import java.util.Map;
 public class PhieuGiamGiaAdminController {
 
     private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
+    private final SchedulerService schedulerService;
 
-    public PhieuGiamGiaAdminController(PhieuGiamGiaAdminService phieuGiamGiaAdminService) {
+    public PhieuGiamGiaAdminController(PhieuGiamGiaAdminService phieuGiamGiaAdminService, SchedulerService schedulerService) {
         this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
+        this.schedulerService = schedulerService;
     }
 
     @GetMapping
@@ -74,5 +79,18 @@ public class PhieuGiamGiaAdminController {
             @RequestParam String type) {
         Map<String, Object> result = phieuGiamGiaAdminService.giftPhieuGiamGia(id, type);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/next-delay")
+    public Map<String, Long> getNextDelay() {
+        LocalDateTime now = LocalDateTime.now();
+        Duration nextDelay = schedulerService.calculateNextDelayPhieu(now);
+        return Map.of("delay", nextDelay.toMillis());
+    }
+
+    @PostMapping("/update-statuses")
+    public Map<String, String> updateStatuses() {
+        schedulerService.runTaskPhieu();
+        return Map.of("status", "success");
     }
 }

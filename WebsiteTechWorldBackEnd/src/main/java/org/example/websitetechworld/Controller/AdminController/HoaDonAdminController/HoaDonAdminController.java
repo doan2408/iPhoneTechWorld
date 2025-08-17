@@ -297,8 +297,9 @@ public class HoaDonAdminController {
     @GetMapping("/{hoaDonId}/hdct-by-imei-da-ban")
     public ResponseEntity<Page<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@RequestParam(defaultValue = "0") int pageNo,
                                                                              @RequestParam(defaultValue = "10") int pageSize,
+                                                                             @RequestParam(defaultValue = "0") int idKhachHang,
                                                                              @PathVariable(value = "hoaDonId") Integer hoaDonId){
-        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId));
+        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId, idKhachHang));
     }
 
     @GetMapping("/export")
@@ -320,6 +321,11 @@ public class HoaDonAdminController {
         return ResponseEntity.ok("Đã cập nhật trạng thái: " + trangThai.getDisplayName());
     }
 
-    
 
+    @PutMapping("/sua-gia/{idHoaDonChiTiet}")
+    public ResponseEntity<?> updateStatus(@PathVariable Integer idHoaDonChiTiet,
+                                          @RequestParam BigDecimal donGia) {
+        hoaDonChiTietAdminServices.updateGiaHoaDonChiTiet(idHoaDonChiTiet, donGia);
+        return ResponseEntity.ok("Đã cập nhật đơn giá: " + idHoaDonChiTiet);
+    }
 }
