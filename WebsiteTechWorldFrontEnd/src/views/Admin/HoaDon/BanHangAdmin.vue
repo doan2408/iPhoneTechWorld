@@ -140,7 +140,13 @@
                             <div class="product-info">
                                 <h4>{{ product.tenSanPham }} {{ product.rom }}</h4>
                                 <div class="product-color">{{ product.mau }}</div>
-                                <div class="product-price">{{ formatCurrency(product.giaBan) }}</div>
+                                <div class="product-price" v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
+                                    <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
+                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                </div>
+                                <div class="product-price" v-else>
+                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
                                     'low-stock-text': product.soLuong > 0 && product.soLuong <= 5,
@@ -592,7 +598,8 @@ import {
     , getTinhThanh, getHuyen, getXa, getLatLon, getDistance, updateSoLuongAndTrangThai
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
-    , findHdctByImeiDaBan, findProductByImei
+    , findHdctByImeiDaBan, findProductByImei,
+    updateGia
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -767,13 +774,15 @@ const danhMucSanPham = async () => {
     }
 }
 
+const selectedIdKhachHang = ref(0)
+
 const loadProducts = async () => {
     // selectedCategory.value = category.tenSanPham;
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
-        response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value);
+        response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
     } else {
-        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value);
+        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
     }
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
@@ -828,6 +837,7 @@ const loadTabHoaDon = async () => {
             const selected = invoices.value.find(i => i.id == finalId);
             if (selected && !selected.chiTietHoaDonAdminResponseList) {
                 const res = await hoaDonDetail(finalId);
+            console.log('test', res.data)
                 if (res.data) {
                     addOrUpdateInvoice(res.data);
                     currentInvoiceDetail.value = res.data;
@@ -851,11 +861,21 @@ const pageSizeHdctByImei = ref(10);
 const getHdctByImeiDaBan = async () => {
     const storedId = localStorage.getItem("selectedInvoiceId");
     console.log(storedId);
-    const res = await findHdctByImeiDaBan(pageNoHdctByImei.value, pageSizeHdctByImei.value, storedId);
+    const res = await findHdctByImeiDaBan(pageNoHdctByImei.value, pageSizeHdctByImei.value, storedId, selectedIdKhachHang.value);
     listHdctByImeiDaBan.value = res.data.content
-    console.log('res', res);
-
+    updateGiaChiTietDonHang()
 }
+
+const updateGiaChiTietDonHang = async () => {
+    for (const hdct of listHdctByImeiDaBan.value) {
+        try {
+            await updateGia(hdct.idHoaDonChiTiet, hdct.giaBan);
+        } catch (err) {
+            console.error("Có lỗi khi cập nhật giá:", err);
+        }
+    }
+}
+
 const addOrUpdateInvoice = (invoice) => {
     const index = invoices.value.findIndex(i => i.id === invoice.id);
     if (index !== -1) {
@@ -1264,7 +1284,8 @@ const addToCartWithImeis = async (product, imeiList) => {
         tenSanPham: product.tenSanPham,
         // moTa: product.moTa,
         soLuong: imeiList.length,
-        imeiIds: imeiList.map(imei => imei.imei)
+        imeiIds: imeiList.map(imei => imei.imei),
+        idKhachHang: selectedIdKhachHang.value
     };
     console.log(data)
     try {
@@ -1825,6 +1846,7 @@ watch(currentInvoiceId, async (newId) => {
             if (res.data) {
                 addOrUpdateInvoice(res.data);
                 currentInvoiceDetail.value = res.data; // Gán lại chi tiết mới
+                selectedIdKhachHang.value = res.data.idKhachHang
             }
         } catch (e) {
             console.error("Lỗi khi load detail khi tab change:", e);
@@ -1910,8 +1932,10 @@ const selectedKhachHang = async (khachHang) => {
             currentInvoiceDetail.value = response.data;
         }
         if (selected.khachHangId == undefined || selected.khachHangId == null) {
+            selectedIdKhachHang.value = 0
             toast.success("Bỏ chọn khách hàng thành công")
         } else {
+            selectedIdKhachHang.value = khachHang.id
             toast.success("Chọn khách hàng thành công id: " + khachHang.id)
         }
     } catch (err) {
@@ -1933,6 +1957,11 @@ const add = async (data) => {
 
 watch(searchKhachHang, () => {
     listKhachHang(0);
+});
+
+watch(selectedIdKhachHang, () => {
+    loadProducts();
+    getHdctByImeiDaBan();
 });
 
 

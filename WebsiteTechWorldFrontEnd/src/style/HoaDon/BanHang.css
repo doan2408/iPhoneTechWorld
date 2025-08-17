@@ -643,15 +643,23 @@
 }
 
 .product-price {
+    display: flex;
+    justify-content: space-around;
+}
+
+.product-price-sale {
     font-size: 15px;
     font-weight: bold;
-    color: #e74c3c;
-    text-align: center;
-    margin: 6px 0;
-    white-space: nowrap;
-    position: relative;
-    z-index: 1;
+    color: #e74c3c; /* đỏ */
+    margin-right: 8px;
 }
+
+.product-price-original {
+    font-size: 14px;
+    color: #888; /* xám */
+    text-decoration: line-through;
+}
+
 
 .product-stock {
     font-size: 12px;

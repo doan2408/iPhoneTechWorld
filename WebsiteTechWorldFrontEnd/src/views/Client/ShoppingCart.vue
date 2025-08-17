@@ -49,7 +49,8 @@
                 <div v-for="(product, productIndex) in filteredCartData" :key="productIndex" class="product-item"
                     :class="{ 'selected': product.selected }">
                     <div class="product-selection">
-                        <el-checkbox v-model="product.selected" @change="handleProductSelect" />
+                        <el-checkbox v-model="product.selected" :disabled="product.soLuongTon <= 0"
+                            @change="handleProductSelect" />
                     </div>
 
                     <div class="product-image">
@@ -63,6 +64,13 @@
                                 </div>
                             </template>
                         </el-image>
+
+                        <div v-if="product.soLuongTon <= 0" class="out-of-stock-badge">
+                            <el-icon>
+                                <Warning />
+                            </el-icon>
+                            <span> Hết hàng</span>
+                        </div>
                     </div>
 
                     <div class="product-info">
@@ -80,21 +88,27 @@
                         <div class="label">Giá</div>
                         <div
                             style="display: flex; height: 90px; flex-direction: column; justify-content: space-around; align-items: flex-end; gap: 4px;">
-                            <div class="current-price">{{ formatPrice(product.gia) }}</div>
+                            <template v-if="product.giaTruocKhuyenMai && product.giaTruocKhuyenMai !== product.gia">
+                                <div class="current-price">{{ formatPrice(product.gia) }}</div>
+                                <div class="old-price">{{ formatPrice(product.giaTruocKhuyenMai) }}</div>
+                            </template>
+                            <template v-else>
+                                <div class="current-price">{{ formatPrice(product.gia) }}</div>
+                            </template>
                         </div>
                     </div>
 
                     <div class="product-quantity">
                         <div class="label">Số lượng</div>
                         <div class="quantity-controls">
-                            <el-button size="small" :disabled="product.soLuong <= 1" @click="decreaseQuantity(product)"
-                                class="quantity-btn">
+                            <el-button size="small" :disabled="product.soLuong <= 1 || product.soLuongTon <= 0"
+                                @click="decreaseQuantity(product)" class="quantity-btn">
                                 <el-icon>
                                     <Minus />
                                 </el-icon>
                             </el-button>
-                            <el-input-number v-model="product.soLuong" :min="1" :max="product.soLuongTon" size="large"
-                                :controls="false" readonly class="quantity-input" @change="updateQuantity(product)" />
+                            <el-input-number v-model="product.soLuong" size="large" :controls="false" readonly
+                                class="quantity-input" @change="updateQuantity(product)" />
                             <el-button size="small" :disabled="product.soLuong >= product.soLuongTon"
                                 @click="increaseQuantity(product)" class="quantity-btn">
                                 <el-icon>
@@ -110,7 +124,7 @@
                     </div>
 
                     <div class="product-actions">
-                        <el-button size="small" @click="removeProduct(product.idSanPhamChiTiet)" class="delete-item">
+                        <el-button size="small" @click="removeProduct(product.idGioHangChiTiet)" class="delete-item">
                             <el-icon>
                                 <Delete />
                             </el-icon>
@@ -159,7 +173,8 @@ import { useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
     ShoppingCart, Search, ShoppingCartFull, Delete, Plus,
-    Picture, Minus, ShoppingBag
+    Picture, Minus, ShoppingBag,
+    Warning
 } from '@element-plus/icons-vue';
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 import { CartService } from '@/Service/ClientService/GioHang/CartService';
@@ -202,6 +217,7 @@ async function fetchCart() {
                 tenSanPham: item.tenSanPham || 'Sản phẩm',
                 phienBan: item.phienBan || 'Mặc định',
                 imageUrl: item.imageUrl || '',
+                giaTruocKhuyenMai: item.giaTruocKhuyenMai || 0,
                 gia: item.gia || 0,
                 soLuong: item.soLuong || 1,
                 soLuongTon: item.soLuongTon || 0,
@@ -247,11 +263,20 @@ async function fetchCart() {
             console.error('Lỗi khi tải giỏ hàng:', error);
         }
         guiLenHeader()
+        if (hetHangList.value.length > 0) {
+            hetHangList.value.forEach(item => {
+                ElMessage.error(`Sản phẩm "${item.tenSanPham}" đã hết hàng`)
+            })
+        }
     } catch (error) {
         console.error('Lỗi khi tải giỏ hàng:', error);
         ElMessage.error('Không thể tải giỏ hàng');
     }
 }
+
+const hetHangList = computed(() =>
+    cartData.value.filter(item => item.soLuongTon <= 0)
+)
 
 const filteredCartData = computed(() => {
     let result = cartData.value;
@@ -283,8 +308,12 @@ const formatPrice = (price) => {
 
 async function updateQuantity(product) {
     try {
-        if (product.soLuong <= 0 || product.soLuong > product.soLuongTon) {
+        if (product.soLuong <= 0) {
             throw new Error(`Số lượng không hợp lệ. Phải từ 1 đến ${product.soLuongTon}.`);
+        }
+        if (product.soLuong > product.soLuongTon) {
+            ElMessage.warning('Sản phẩm còn: ' + product.soLuongTon);
+            product.soLuong = product.soLuongTon
         }
         if (user.value?.id) {
             await cartService.updateQuantity(product.idGioHangChiTiet, product.soLuong);
@@ -295,7 +324,7 @@ async function updateQuantity(product) {
     } catch (error) {
         console.error('Lỗi khi cập nhật số lượng:', error);
         ElMessage.error(error.message || 'Không thể cập nhật số lượng');
-        await fetchCart(); // Tải lại giỏ hàng để đảm bảo dữ liệu nhất quán
+        await fetchCart();
     }
 }
 
@@ -311,7 +340,7 @@ async function increaseQuantity(product) {
     await updateQuantity(product);
 }
 
-async function removeProduct(idSanPhamChiTiet) {
+async function removeProduct(idGioHangChiTiet) {
     try {
         await ElMessageBox.confirm(
             'Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?',
@@ -323,7 +352,7 @@ async function removeProduct(idSanPhamChiTiet) {
             }
         );
         if (user.value?.id) {
-            await cartService.removeItem(idSanPhamChiTiet);
+            await cartService.removeItem(idGioHangChiTiet);
         } else {
             const success = CartService.xoaSanPhamKhoiGio(idSanPhamChiTiet)
         }
@@ -384,8 +413,8 @@ const handleCheckout = () => {
     ElMessage.success(`Đang chuyển đến trang thanh toán với ${selectedItems.value.length} sản phẩm`);
     const selectedProducts = JSON.stringify(selectedItems.value);
 
-    console.log('product',selectedProducts);
-    
+    console.log('product', selectedProducts);
+
     if (route.path.startsWith('/client/')) {
         router.push({
             path: '/client/checkout-form',
@@ -650,6 +679,22 @@ const handleCheckout = () => {
     font-size: 18px;
     font-weight: 700;
     color: #dc2626;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 14px;
+}
+
+.out-of-stock-badge {
+    background-color: #ff4d4f;
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-weight: 600;
+    width: 100px;
 }
 
 .product-quantity {

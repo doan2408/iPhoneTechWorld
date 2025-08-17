@@ -87,14 +87,15 @@ export const postData = async (url,payload) => {
 //   }
 // };
 
-export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize) => {
+export const findSanPhamBanHang = (tenSanPham,pageNo, pageSize, selectedIdKhachHang) => {
   const urlProduct = '/admin/product'
   const url = urlProduct + '/ten-san-pham';
   return api.get(url, {
     params: {
       tenSanPham,
       pageNo,
-      pageSize
+      pageSize,
+      selectedIdKhachHang
     }
   }
   )
@@ -354,12 +355,13 @@ export const loadCategory = (pageNo, pageSize) =>{
   })
 
 }
-export const loadSanPhamChiTiet = (pageNo,pageSize) => {
+export const loadSanPhamChiTiet = (pageNo, pageSize, selectedIdKhachHang) => {
   const urlProduct = '/admin/sanPhamChiTiet'
   return api.get(urlProduct, {
     params: {
       pageNo,
-      pageSize
+      pageSize,
+      selectedIdKhachHang
     }
   })
 }

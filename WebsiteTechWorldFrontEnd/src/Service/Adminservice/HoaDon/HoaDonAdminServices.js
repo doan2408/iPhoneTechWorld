@@ -194,13 +194,18 @@ export const thanhToan = (id, paymentPayload) => {
     return api.put('/admin/hoa-don/' +id + '/thanh-toan',paymentPayload)
 }
 
-export const findHdctByImeiDaBan = (pageNo = 0, pageSize = 5, idHoaDon ) => {
+export const findHdctByImeiDaBan = (pageNo = 0, pageSize = 5, idHoaDon , idKhachHang) => {
     return api.get(url_base + '/' + idHoaDon +'/hdct-by-imei-da-ban', {
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            idKhachHang
         }
     })
+}
+
+export const updateGia = (idHoaDonChiTiet, donGia) => {
+    api.put(url_base + '/sua-gia/' + idHoaDonChiTiet + '?donGia=' + donGia )
 }
 
 export const findProductByImei = (soImei) => {

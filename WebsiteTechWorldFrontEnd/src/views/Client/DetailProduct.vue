@@ -299,7 +299,8 @@ const fetchThongSo = async () => {
 const fetchChiTietBienThe = async () => {
   if (!selectedRom.value || !selectedMau.value) return;
   try {
-    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value);
+    console.log('hehe', user.id)
+    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value, user.id);
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
     await fetchReviews();
@@ -634,7 +635,18 @@ const toggleWishlist = async () => {
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
 
-          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+          <p class="price">
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai !== bienThe.giaBan" class="old-price">
+              {{ formatPrice(bienThe.giaTruocKhuyenMai) }}
+            </span>
+            <span class="current-price">
+              {{ formatPrice(bienThe?.giaBan) }}
+            </span>
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai > bienThe.giaBan"
+              class="discount-badge">
+              -{{ Math.round(((bienThe.giaTruocKhuyenMai - bienThe.giaBan) / bienThe.giaTruocKhuyenMai) * 100) }}%
+            </span>
+          </p>
 
           <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
@@ -1083,11 +1095,32 @@ const toggleWishlist = async () => {
 }
 
 .price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.old-price {
+  font-size: 18px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.current-price {
   font-size: 28px;
   color: #d70018;
   font-weight: 700;
-  margin: 15px 0;
-  display: inline-block;
+}
+
+.discount-badge {
+  background: #ffeee8;
+  color: #d70018;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
 .danhGia {
