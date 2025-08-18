@@ -2,13 +2,19 @@ import api from "@/Service/LoginService/axiosInstance";
 
 const baseURL = "/client/my-order"
 
-export const getMyOrder = async (pageNo,pageSize) => {
-    return  await api.get(baseURL,{
-        params : {
-            pageNo,
-            pageSize
-        }
-    });
+export const getMyOrder = async (params = {}) => {
+    try {
+        console.log('Gọi API getMyOrder với params:', params);
+        
+        const response = await api.get(baseURL, { params });
+        
+        console.log('Response từ API:', response.data);
+        
+        return response;
+    } catch (error) {
+        console.error('Lỗi API getMyOrder:', error);
+        throw error;
+    }
 };  
 
 //bảng đánh giá
