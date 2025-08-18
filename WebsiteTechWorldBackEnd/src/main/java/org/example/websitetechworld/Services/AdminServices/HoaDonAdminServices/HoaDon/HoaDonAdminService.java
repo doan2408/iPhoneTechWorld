@@ -68,8 +68,10 @@ public class HoaDonAdminService {
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     private final XuLySauBanHangRepository xuLySauBanHangRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final GioHangRepository gioHangRepository;
+    private final ViDiemRepository viDiemRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -86,6 +88,8 @@ public class HoaDonAdminService {
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
         this.xuLySauBanHangRepository = xuLySauBanHangRepository;
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
+        this.gioHangRepository = gioHangRepository;
+        this.viDiemRepository = viDiemRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -282,30 +286,37 @@ public class HoaDonAdminService {
 
     public KhachHang addKhachHang (KhachHang khachHang) {
         KhachHang saved = new KhachHang();
+        checkValidate(khachHang);
         saved.setTenKhachHang(khachHang.getTenKhachHang());
         saved.setSdt(khachHang.getSdt());
         saved.setEmail(khachHang.getEmail());
         saved.setTrangThai(TrangThaiKhachHang.ACTIVE);
+
+        saved = khachHangRepository.save(saved);
+        updateKhachHang(saved);
+
+        return saved;
+    }
+
+    public void updateKhachHang (KhachHang khachHang) {
         HangThanhVien hangThanhVien = new HangThanhVien();
         hangThanhVien.setId(1);
-        saved.setHangThanhVien(hangThanhVien);
+        khachHang.setHangThanhVien(hangThanhVien);
+        khachHangRepository.save(khachHang);
 
-        KhachHang khachHangSaved = khachHangRepository.save(saved);
-
-        //tạo giỏ hàng tương ứng với khách hàng mới vừa tạo
         GioHang gioHang = new GioHang();
-        gioHang.setIdKhachHang(khachHangSaved); //oneToOne
+        gioHang.setIdKhachHang(khachHang);
+        gioHangRepository.save(gioHang);
 
-        //tạo ví tương ứng với khách hàng mới vừa tạo
         ViDiem viDiem = new ViDiem();
-        viDiem.setKhachHang(khachHangSaved);
+        viDiem.setKhachHang(khachHang);
         viDiem.setDiemKhaDung(new BigDecimal(0));
+        viDiemRepository.save(viDiem);
+    }
 
-        //set ngược lại one to one
-        khachHangSaved.setGioHang(gioHang);
-        khachHangSaved.setViDiem(viDiem);
-
-        return khachHangRepository.save(khachHangSaved);
+    public void checkValidate (KhachHang khachHang) {
+        if (khachHangRepository.existsByEmail(khachHang.getEmail())) throw new RuntimeException("Email đã tồn tại!");
+        if (khachHangRepository.existsBySdt(khachHang.getSdt())) throw new RuntimeException("Số điện thoại đã tồn tại!");
     }
 
     @Transactional

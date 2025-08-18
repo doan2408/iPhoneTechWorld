@@ -1953,6 +1953,7 @@ const add = async (data) => {
         console.log(response.data)
         selectedKhachHang(response.data)
     } catch (err) {
+        toast.error(err.response.data.message || "Thêm khách hàng thất bại");
         console.error("Thêm khách hàng thất bại:", err);
     }
     showCustomerModal.value = false;
