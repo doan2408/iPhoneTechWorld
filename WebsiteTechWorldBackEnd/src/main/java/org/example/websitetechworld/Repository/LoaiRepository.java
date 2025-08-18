@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LoaiRepository extends JpaRepository<Loai, Integer> {
@@ -24,4 +25,7 @@ public interface LoaiRepository extends JpaRepository<Loai, Integer> {
     from Loai l
     """)
     List<LoaiClientResponse> getLoaiClientResponse();
+
+    Optional<Loai> findByTenLoai(String tenLoai);
+
 }

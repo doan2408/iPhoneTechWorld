@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ManHinhRepository extends JpaRepository<ManHinh, Integer> {
     @Query("SELECT mh FROM ManHinh mh WHERE " +
@@ -37,4 +39,13 @@ public interface ManHinhRepository extends JpaRepository<ManHinh, Integer> {
                             @Param("tanSoQuet") String tanSoQuet,
                             @Param("doSang") String doSang,
                             @Param("chatLieuKinh") String chatLieuKinh);
+
+
+    Boolean existsByTenManHinhAndKichThuocAndLoaiManHinh (String tenManHinh, String kichThuoc, String loaiManHinh);
+
+    Boolean existsByTenManHinhAndKichThuocAndLoaiManHinhAndIdNot (String tenManHinh, String kichThuoc, String loaiManHinh, Integer id);
+
+    Optional<ManHinh> findBykichThuoc(String kichThuoc);
+
+    Optional<ManHinh> findByKichThuocAndTenManHinhAndLoaiManHinh(String kichThuoc, String tenManHinh, String loaiManHinh);
 }

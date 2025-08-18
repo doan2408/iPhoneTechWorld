@@ -59,10 +59,6 @@ public class ModelSanPham {
     @JoinColumn(name = "id_camera_truoc")
     private CameraTruoc idCameraTruoc;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "id_camera_sau")
-//    private CameraSau idCameraSau;
-
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ModelCameraSau> cameraSaus = new ArrayList<>();
 

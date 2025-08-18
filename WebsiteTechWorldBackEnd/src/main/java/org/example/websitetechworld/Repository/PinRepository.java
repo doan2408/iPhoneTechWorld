@@ -7,9 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PinRepository extends JpaRepository<Pin, Integer> {
     boolean existsByPhienBan(String phienBan);
     boolean existsByPhienBanAndIdNot(String phienBan, Integer id);
     Page<Pin> findByPhienBanContainingIgnoreCaseOrCongSuatSacContainingIgnoreCase(@Size(max = 50) String phienBan, @Size(max = 50) String congSuatSac, Pageable pageable);
+    Optional<Pin> findByPhienBan (String phienBan);
 }

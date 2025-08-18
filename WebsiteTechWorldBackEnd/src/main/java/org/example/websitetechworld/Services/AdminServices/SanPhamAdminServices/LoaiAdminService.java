@@ -5,6 +5,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.LoaiAdminResponse;
 import org.example.websitetechworld.Entity.Loai;
 import org.example.websitetechworld.Repository.LoaiRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -54,7 +55,7 @@ public class LoaiAdminService {
     @Transactional
     public LoaiAdminResponse createLoai(LoaiAdminRequest loaiAdminRequest) {
         if (loaiRepository.existsByTenLoai(loaiAdminRequest.getTenLoai())) {
-            throw new IllegalArgumentException("Tên loại đã tồn tại");
+            throw new BusinessException("Tên loại đã tồn tại");
         }
         Loai loai = modelMapper.map(loaiAdminRequest, Loai.class);
         Loai saved = loaiRepository.save(loai);
@@ -66,7 +67,7 @@ public class LoaiAdminService {
         Loai loai = loaiRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại ID: " + id));
         if (loaiRepository.existsByTenLoaiAndIdNot(loaiAdminRequest.getTenLoai(), id)) {
-            throw new IllegalArgumentException("Tên loại đã tồn tại");
+            throw new BusinessException("Tên loại đã tồn tại");
         }
         modelMapper.map(loaiAdminRequest, loai);
         Loai saved = loaiRepository.save(loai);

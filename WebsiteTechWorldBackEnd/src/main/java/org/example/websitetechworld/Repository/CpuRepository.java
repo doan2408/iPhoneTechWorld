@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CpuRepository extends JpaRepository<Cpu, Integer> {
 
@@ -27,4 +29,10 @@ public interface CpuRepository extends JpaRepository<Cpu, Integer> {
                 @Param("chipXuLy") String chipXuLy
         );
 
-    }
+        Boolean existsByChipXuLy (String chipXuLy);
+
+        Boolean existsByChipXuLyAndIdNot (String chipXuLy, Integer id);
+
+        Optional<Cpu> findByChipXuLy (String chipXuLy);
+
+}

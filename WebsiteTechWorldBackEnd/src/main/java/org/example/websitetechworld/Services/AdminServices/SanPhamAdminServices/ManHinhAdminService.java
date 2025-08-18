@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.ManHinh;
 import org.example.websitetechworld.Entity.MauSac;
 import org.example.websitetechworld.Repository.ManHinhRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
@@ -61,77 +62,75 @@ public class ManHinhAdminService {
 
     @Transactional
     public ManHinhAdminResponse createManHinh(ManHinhAdminRequest manHinhAdminRequest) {
-        List<Map<String, String>> errors = new ArrayList<>();
-
-        Integer count = manHinhRepository.countCheckTrung(
+        String ten = manHinhAdminRequest.getTenManHinh().trim();
+        if (!ten.matches("^[a-zA-Z0-9 ]+$")) { // chỉ cho phép chữ, số và khoảng trắng
+            throw new BusinessException("Tên màn hình chỉ được chứa chữ, số không chứa ký tự đặc biệt.");
+        }
+        if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinh(
                 manHinhAdminRequest.getTenManHinh(),
                 manHinhAdminRequest.getKichThuoc(),
-                manHinhAdminRequest.getLoaiManHinh(),
-                manHinhAdminRequest.getDoPhanGiai(),
-                manHinhAdminRequest.getTanSoQuet(),
-                manHinhAdminRequest.getDoSang(),
-                manHinhAdminRequest.getChatLieuKinh()
-        );
-        if (count > 0) {
-            errors.add(Map.of("field", "errorsThuocTinh", "message", "Màn hình có những thuộc tính này đã tồn tại!"));
+                manHinhAdminRequest.getLoaiManHinh()
+        )) {
+            throw new BusinessException(
+                    String.format(
+                            "Màn hình '%s' với kích thước %s và loại %s đã tồn tại.",
+                            manHinhAdminRequest.getTenManHinh(),
+                            manHinhAdminRequest.getKichThuoc(),
+                            manHinhAdminRequest.getLoaiManHinh()
+                    )
+            );
         }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException(errors);
-        }
-
         ManHinh manHinh = manHinhRepository.save(modelMapper.map(manHinhAdminRequest, ManHinh.class));
         return convert(manHinh);
     }
 
     @Transactional
-    public ManHinhAdminResponse createManHinhQuick (ManHinhQuickCreateAdminRequest request) {
-        ManHinh manHinh = manHinhRepository.save(modelMapper.map(request, ManHinh.class));
+    public ManHinhAdminResponse createManHinhQuick (ManHinhQuickCreateAdminRequest manHinhAdminRequest) {
+        String ten = manHinhAdminRequest.getTenManHinh().trim();
+        if (!ten.matches("^[a-zA-Z0-9 ]+$")) {
+            throw new BusinessException("Tên màn hình chỉ được chứa chữ, số không chứa ký tự đặc biệt.");
+        }
+        if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinh(
+                manHinhAdminRequest.getTenManHinh(),
+                manHinhAdminRequest.getKichThuoc(),
+                manHinhAdminRequest.getLoaiManHinh()
+        )) {
+            throw new BusinessException(
+                    String.format(
+                            "Màn hình '%s' với kích thước %s và loại %s đã tồn tại.",
+                            manHinhAdminRequest.getTenManHinh(),
+                            manHinhAdminRequest.getKichThuoc(),
+                            manHinhAdminRequest.getLoaiManHinh()
+                    )
+            );
+        }
+        ManHinh manHinh = manHinhRepository.save(modelMapper.map(manHinhAdminRequest, ManHinh.class));
         return convert(manHinh);
     }
 
     @Transactional
-    public ManHinhAdminResponse updateManHinh(Integer id, ManHinhAdminRequest req) {
+    public ManHinhAdminResponse updateManHinh(Integer id, ManHinhAdminRequest manHinhAdminRequest) {
         ManHinh manHinhOld = manHinhRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy màn hình ID: " + id));
 
-        List<Map<String, String>> errors = new ArrayList<>();
-
-        // Kiểm tra xem có sự thay đổi không
-        boolean unchanged =
-                Objects.equals(req.getTenManHinh(), manHinhOld.getTenManHinh()) &&
-                        Objects.equals(req.getKichThuoc(), manHinhOld.getKichThuoc()) &&
-                        Objects.equals(req.getLoaiManHinh(), manHinhOld.getLoaiManHinh()) &&
-                        Objects.equals(req.getDoPhanGiai(), manHinhOld.getDoPhanGiai()) &&
-                        Objects.equals(req.getTanSoQuet(), manHinhOld.getTanSoQuet()) &&
-                        Objects.equals(req.getDoSang(), manHinhOld.getDoSang()) &&
-                        Objects.equals(req.getChatLieuKinh(), manHinhOld.getChatLieuKinh());
-        //không có sự thay đổi -> trả về dữ liệu cũ
-        if (unchanged) {
-            return convert(manHinhOld);
-        }
-        else {
-            Integer count = manHinhRepository.countCheckTrung(
-                    req.getTenManHinh(),
-                    req.getKichThuoc(),
-                    req.getLoaiManHinh(),
-                    req.getDoPhanGiai(),
-                    req.getTanSoQuet(),
-                    req.getDoSang(),
-                    req.getChatLieuKinh()
+        if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinhAndIdNot(
+                manHinhAdminRequest.getTenManHinh(),
+                manHinhAdminRequest.getKichThuoc(),
+                manHinhAdminRequest.getLoaiManHinh(),
+                manHinhAdminRequest.getId()
+        )) {
+            throw new BusinessException(
+                    String.format(
+                            "Màn hình '%s' với kích thước %s và loại %s đã tồn tại.",
+                            manHinhAdminRequest.getTenManHinh(),
+                            manHinhAdminRequest.getKichThuoc(),
+                            manHinhAdminRequest.getLoaiManHinh()
+                    )
             );
-            if (count > 0) {
-                errors.add(Map.of("field", "errorsThuocTinh", "message", "Màn hình có những thuộc tính này đã tồn tại!"));
-            }
-
-            if (!errors.isEmpty()) {
-                throw new ValidationException(errors);
-            }
-
-            modelMapper.map(req, manHinhOld);
+        }
+            modelMapper.map(manHinhAdminRequest, manHinhOld);
             manHinhRepository.save(manHinhOld);
             return convert(manHinhOld);
-        }
     }
 
     @Transactional

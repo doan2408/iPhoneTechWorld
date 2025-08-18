@@ -1,9 +1,8 @@
 <template>
     <div class="container mt-4">
-
         <el-row :gutter="20" class="mb-4 justify-content-center">
             <el-col :span="6">
-                <el-input v-model="searchQuery" placeholder="Tìm kiếm" clearable />
+                <el-input v-model="searchQuery" placeholder="Tìm kiếm loại" clearable @input="handleSearchDebounced" />
             </el-col>
             <el-col :span="3">
                 <el-button type="primary" @click="handleSearch" class="w-100">Tìm kiếm</el-button>
@@ -21,19 +20,16 @@
 
         <h2>Danh sách loại</h2>
         <div class="table-responsive mb-4" style="margin-top: 20px;">
-            <el-table :data="tableLoai" border style="width: 100%">
+            <el-table :data="tableLoai" border style="width: 100%" v-loading="loading">
                 <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
-                <!-- <el-table-column prop="id" label="ID" /> -->
                 <el-table-column prop="tenLoai" label="Tên loại" />
                 <el-table-column label="Thao tác" width="180">
                     <template #default="{ row }">
                         <div class="action-buttons-horizontal">
-                            
-                            <el-button size="small" type="primary" :icon="Edit" circle />
-
+                            <el-button size="small" type="primary" :icon="Edit" circle @click="handleEdit(row)" />
                             <el-button size="small" type="danger" :icon="Delete" circle @click="handleDelete(row.id)" />
-                            <!-- 
-                            <router-link :to="`/admin/products/detail/${row.id}`">
+                            <!-- Khôi phục nếu cần -->
+                            <!-- <router-link :to="`/admin/categories/detail/${row.id}`">
                                 <el-button size="small" type="info" :icon="View" circle />
                             </router-link> -->
                         </div>
@@ -47,16 +43,17 @@
                 <el-pagination background layout="prev, pager, next" :page-size="pageSize" :current-page="currentPage"
                     :total="totalItems" :pager-count="7" prev-text="< Trước" next-text="Sau >"
                     @current-change="handlePageChange" />
+                <!-- <span>Hiển thị {{ fromRecord }} - {{ toRecord }} / {{ totalItems }} loại</span> -->
             </div>
         </div>
 
         <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa Loại' : 'Thêm mới Loại'" width="900px"
-            :close-on-click-modal="false" :destroy-on-close="true">
+            :close-on-click-modal="false" :destroy-on-close="true" @close="handleClose">
             <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
-                size="medium" class="hdh-form">
+                size="default" class="hdh-form">
                 <el-row :gutter="20">
                     <el-col>
-                        <el-form-item label="Loại" prop="loai">
+                        <el-form-item label="Tên loại" prop="tenLoai">
                             <el-input v-model="formData.tenLoai" placeholder="Nhập tên loại (Ví dụ: Thường, Pro)"
                                 autocomplete="on" style="width: 100%" />
                         </el-form-item>
@@ -65,47 +62,178 @@
 
                 <el-row justify="end" style="margin-top: 30px;">
                     <el-button @click="handleClose" style="margin-right: 10px;">Hủy</el-button>
-                    <el-button type="primary" @click="submitForm">{{ isEditMode ? 'Cập nhật' : 'Lưu' }}</el-button>
+                    <el-button type="primary" @click="submitForm" :loading="formLoading">
+                        {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
+                    </el-button>
                 </el-row>
             </el-form>
         </el-dialog>
     </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, watch, computed, reactive } from 'vue';
-import { getAllLoaiPage } from '@/Service/Adminservice/Products/ProductAdminService';
-import { Edit, Delete, View } from '@element-plus/icons-vue'
+import { getAllLoaiPage, postLoai, putLoai, deleteLoai } from '@/Service/Adminservice/Products/ProductAdminService'; // Thêm deleteLoai
+import { Edit, Delete, View } from '@element-plus/icons-vue';
+import { useToast } from 'vue-toastification';
+import { ElMessageBox } from 'element-plus';
+import { debounce } from 'lodash'; // Thêm lodash để debounce
+
+const toast = useToast();
 
 const tableLoai = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
-const pageSize = 5; // Số bản ghi trên 1 trang
+const pageSize = 5;
 const searchQuery = ref('');
 const dialogVisible = ref(false);
+const isEditMode = ref(false); // Thêm isEditMode
+const loading = ref(false); // Thêm trạng thái loading cho bảng
+const formLoading = ref(false); // Thêm trạng thái loading cho form
+const formRef = ref(null); // Thêm tham chiếu đến form
+
 const rules = {
-    loai: [
-        { required: true, message: 'Vui lòng nhập loại', trigger: 'blur' },
-    ]
-}
+    tenLoai: [
+        { required: true, message: 'Vui lòng nhập tên loại', trigger: 'blur' },
+        { max: 50, message: 'Tên loại không được vượt quá 50 ký tự', trigger: 'blur' },
+        { pattern: /^[a-zA-Z0-9\sÀ-ỹ]*$/, message: 'Tên loại không được chứa ký tự đặc biệt', trigger: 'blur' },
+    ],
+};
 
 const formData = reactive({
     id: null,
-    tenLoai: ''
+    tenLoai: '',
 });
 
 const loadData = async () => {
     try {
+        loading.value = true;
         const response = await getAllLoaiPage(currentPage.value - 1, pageSize, searchQuery.value.trim());
-        // currentPage trong UI thường bắt đầu từ 1, backend bắt đầu từ 0 nên -1
-        tableLoai.value = response.content;
-        totalPages.value = response.totalPages;
-        totalItems.value = response.totalElements;
+        tableLoai.value = response.content || [];
+        totalPages.value = response.totalPages || 1;
+        totalItems.value = response.totalElements || 0;
     } catch (error) {
         console.error('Không thể load dữ liệu:', error);
+        toast.error('Không thể tải dữ liệu. Vui lòng thử lại!');
+    } finally {
+        loading.value = false;
     }
+};
+
+const submitForm = async () => {
+    if (!formRef.value) return;
+    formRef.value.validate(async (valid) => {
+        if (!valid) return;
+        try {
+            formLoading.value = true;
+            if (isEditMode.value) {
+                await putLoai(formData.id, formData);
+                toast.success('Cập nhật loại thành công!');
+            } else {
+                await postLoai(formData);
+                toast.success('Thêm mới loại thành công!');
+            }
+            resetForm();
+            dialogVisible.value = false;
+            loadData();
+        } catch (err) {
+            console.error('Lỗi xử lý form:', err);
+            if (err.response?.data) {
+                const { message, errors } = err.response.data;
+                if (Array.isArray(message)) {
+                    message.forEach((error) => toast.error(error));
+                } else if (typeof message === 'object' && message) {
+                    Object.values(message).forEach((msg) => toast.error(msg));
+                } else if (typeof errors === 'object' && errors) {
+                    Object.values(errors).forEach((msg) => toast.error(msg));
+                } else {
+                    toast.error(message || errors || 'Lỗi không xác định!');
+                }
+            } else {
+                toast.error('Lỗi kết nối server. Vui lòng thử lại sau!');
+            }
+        } finally {
+            formLoading.value = false;
+        }
+    });
+};
+
+const handleEdit = (row) => {
+    isEditMode.value = true;
+    formData.id = row.id;
+    formData.tenLoai = row.tenLoai;
+    dialogVisible.value = true;
+};
+
+const handleDelete = (id) => {
+    ElMessageBox.confirm('Bạn có chắc chắn muốn xóa loại này?', 'Cảnh báo', {
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+    })
+        .then(async () => {
+            try {
+                await deleteLoai(id); // Giả định API deleteLoai đã được định nghĩa
+                toast.success('Xóa loại thành công!');
+                loadData();
+            } catch (error) {
+                console.error('Lỗi khi xóa:', error);
+                toast.error('Lỗi khi xóa loại. Vui lòng thử lại!');
+            }
+        })
+        .catch(() => {
+            toast.info('Đã hủy thao tác xóa');
+        });
+};
+
+const handleSearch = () => {
+    currentPage.value = 1;
+    loadData();
+};
+
+const handleSearchDebounced = debounce(() => {
+    handleSearch();
+}, 500);
+
+const handleRefresh = () => {
+    searchQuery.value = '';
+    currentPage.value = 1;
+    loadData();
+};
+
+const handleCreate = () => {
+    resetForm();
+    isEditMode.value = false;
+    dialogVisible.value = true;
+};
+
+const handleClose = () => {
+    dialogVisible.value = false;
+}
+
+// const handleClose = () => {
+//     if (formData.tenLoai) {
+//         ElMessageBox.confirm('Bạn có muốn hủy và đóng form? Dữ liệu sẽ không được lưu.', 'Cảnh báo', {
+//             confirmButtonText: 'Xác nhận',
+//             cancelButtonText: 'Hủy',
+//             type: 'warning',
+//         })
+//             .then(() => {
+//                 dialogVisible.value = false;
+//                 resetForm();
+//             })
+//             .catch(() => {});
+//     } else {
+//         dialogVisible.value = false;
+//         resetForm();
+//     }
+// };
+
+const resetForm = () => {
+    formData.id = null;
+    formData.tenLoai = '';
+    if (formRef.value) formRef.value.resetFields();
 };
 
 const fromRecord = computed(() => {
@@ -116,53 +244,35 @@ const toRecord = computed(() => {
     return Math.min(currentPage.value * pageSize, totalItems.value);
 });
 
-const resetForm = () => {
-    formData.id = null;
-    formData.tenLoai = '';
-};
-
-
-const handleSearch = () => {
-    currentPage.value = 1; // Về trang 1 khi tìm kiếm
-    // loadData() đã được gọi tự động bởi watch
-};
-
-const handleRefresh = () => {
-    searchQuery.value = '';
-    currentPage.value = 1;
-    // loadData() sẽ gọi theo watch
-};
-
-const handleCreate = () => {
-    resetForm();
-    dialogVisible.value = true;
-};
-
-const handleClose = () => {
-    dialogVisible.value = false;
-};
-
 const indexMethod = (index) => {
     return (currentPage.value - 1) * pageSize + index + 1;
-}
+};
 
 const handlePageChange = (newPage) => {
     currentPage.value = newPage;
+    loadData();
 };
-// Tự động load khi component mounted
+
 onMounted(() => {
     loadData();
 });
 
-// Watch để khi thay đổi trang hoặc tìm kiếm thì load lại dữ liệu
 watch([currentPage, searchQuery], () => {
     loadData();
 });
-
 </script>
 
 
 <style scoped>
+/* Giữ style hiện tại, thêm style cho loading */
+:deep(.el-table .el-loading-mask) {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+}
+
+:deep(.el-table .el-loading-spinner) {
+    margin-top: -20px;
+}
 ::v-deep(.el-pagination button) {
     font-size: 16px;
     padding: 8px 16px;
