@@ -117,7 +117,8 @@ public class XuLySauBanHangServices {
 
     public void changeStatus(ChangeStatusRequest request) {
         XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(request.getSoImei());
-        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.HOLD);
+        xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
+        xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
         xuLySauBanHang.setDaKiemTra(true);
         xuLySauBanHangRepository.save(xuLySauBanHang);
     }

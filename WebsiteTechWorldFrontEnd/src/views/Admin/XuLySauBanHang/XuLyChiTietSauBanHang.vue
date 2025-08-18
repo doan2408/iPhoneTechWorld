@@ -127,32 +127,31 @@
                                     </td>
                                     <td class="action-col">
                                         <div class="row-actions">
-                                            <button class="action-btn retry" 
-                                            @click="openConfirm('Bạn có chắc chắn muốn dữ lại?', () => processImei(imei.soImei,'hold'))" title="Dữ lại">
+                                            <!-- <button class="action-btn retry"
+                                                @click="openConfirm('Bạn có chắc chắn muốn dữ lại?', () => processImei(imei.soImei,'hold'))"
+                                                title="Dữ lại">
                                                 ♻️
-                                            </button>
-
-                                            <button v-if="canCancel"
-                                                @click="openConfirm('Bạn có chắc chắn?', () => updateOrderStatus('Đã hủy'))"
-                                                class="action-btn cancel-btn">
-                                                <X class="icon-small" /> HỦY ĐƠN
-                                            </button>
+                                            </button> -->
 
                                             <button class="action-btn cancel"
-                                                @click="processImei(imei.soImei, 'cancel')" title="Hủy bỏ">
+                                                @click="openConfirm('Bạn có chắc chắn muốn hủy yêu cầu này?', () => processImei(imei.soImei, 'cancel'))"
+                                                title="Hủy bỏ">
                                                 ❌
                                             </button>
+
                                             <button class="action-btn return"
-                                                @click="processImei(imei.soImei, 'return-to-stock')" title="Trả kho">
+                                                @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"
+                                                title="Trả kho">
                                                 📦
                                             </button>
+
                                             <button class="action-btn refund"
                                                 @click="processImei(imei.soImei, 'refund')" title="Hoàn tiền">
                                                 💰
                                             </button>
                                             <button class="action-btn exchange"
                                                 @click="processImei(imei.soImei, 'exchange')" title="Trao đổi">
-                                                soImei
+                                                ♻️
                                             </button>
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
                                                 @confirm="handleConfirm" @cancel="showConfirm = false" />
@@ -456,8 +455,7 @@ const processImei = async (imeiCode, action) => {
     const status = action.toUpperCase()    
     const res = await changeStatusPending(imeiCode,status)
     orderSanPham()
-    orderInformation()
-
+    orderInformations()
 }
 
 function formatDate(date) {

@@ -123,8 +123,7 @@ CREATE TABLE hoa_don (
                          ngay_thanh_toan DATETIME,
                          trang_thai_thanh_toan NVARCHAR(50),
                          is_delete BIT,
-                         trang_thai_don_hang NVARCHAR(50),
-                         thoi_gian_huy DATETIME
+                         trang_thai_don_hang NVARCHAR(50)
 );
 
 --7
@@ -479,7 +478,7 @@ CREATE TABLE chi_tiet_hoa_don (
                                   don_gia DECIMAL(10,2)
 );
 
---39
+--49
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
@@ -567,10 +566,10 @@ CREATE TABLE ly_do_xu_ly (
 CREATE TABLE xu_ly_sau_ban_hang (
                                     id_xu_ly_sau_ban_hang INT IDENTITY(1,1) PRIMARY KEY,
                                     id_hoa_don INT NOT NULL,
-                                    id_imei_da_ban INT NOT NULL, -- Liên kết máy đã bán cụ thể
-                                    so_luong INT NOT NULL,
+                                    id_imei_da_ban INT NULL, -- Liên kết máy đã bán cụ thể
                                     loai_vu_viec NVARCHAR(20) NOT NULL, -- FAILED_DELIVERY, RETURN
-                                    thoi_gian_vu_viec DATETIME NOT NULL DEFAULT GETDATE(),
+                                    thoi_gian_yeu_cau DATETIME null,
+                                    thoi_gian_xu_ly DATETIME NULL,
                                     id_ly_do INT NULL,
                                     hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
                                     da_kiem_tra BIT NOT NULL DEFAULT 0,
@@ -1562,7 +1561,6 @@ INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, loai_hinh_thuc)
 VALUES
     (N'TIEN_MAT', N'OFFLINE'),
     (N'CHUYEN_KHOAN', N'OFFLINE'),
-    (N'NGAN_HANG', N'ONLINE'),
     (N'COD', N'ONLINE'),
     (N'VNPAY', N'ONLINE');
 
@@ -1619,8 +1617,17 @@ SELECT
 FROM
     IMEI_Generator i;
 
+INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
+VALUES
+    (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
+    (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
+    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
+    (N'Khách đổi ý', 'RETURN'),
+    (N'Sản phẩm không đúng mô tả', 'RETURN'),
+    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
+    (N'Khách đổi ý', 'CANCELLED');
 
-	-- 20 ảnh đầu tiên -> id = 1..20
+-- 20 ảnh đầu tiên -> id = 1..20
 UPDATE hinh_anh 
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562841/iemqzr3nxhwi0vdvywcd.webp',
     image_public_id = 'iemqzr3nxhwi0vdvywcd'
