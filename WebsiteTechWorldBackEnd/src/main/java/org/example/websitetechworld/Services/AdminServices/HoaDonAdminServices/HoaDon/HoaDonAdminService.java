@@ -280,13 +280,32 @@ public class HoaDonAdminService {
         return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getSdt(), kh.getTenKhachHang()));
     }
 
-    public KhachHang addKhachHang  (KhachHang khachHang) {
+    public KhachHang addKhachHang (KhachHang khachHang) {
         KhachHang saved = new KhachHang();
         saved.setTenKhachHang(khachHang.getTenKhachHang());
         saved.setSdt(khachHang.getSdt());
         saved.setEmail(khachHang.getEmail());
         saved.setTrangThai(TrangThaiKhachHang.ACTIVE);
-        return khachHangRepository.save(saved);
+        HangThanhVien hangThanhVien = new HangThanhVien();
+        hangThanhVien.setId(1);
+        saved.setHangThanhVien(hangThanhVien);
+
+        KhachHang khachHangSaved = khachHangRepository.save(saved);
+
+        //tạo giỏ hàng tương ứng với khách hàng mới vừa tạo
+        GioHang gioHang = new GioHang();
+        gioHang.setIdKhachHang(khachHangSaved); //oneToOne
+
+        //tạo ví tương ứng với khách hàng mới vừa tạo
+        ViDiem viDiem = new ViDiem();
+        viDiem.setKhachHang(khachHangSaved);
+        viDiem.setDiemKhaDung(new BigDecimal(0));
+
+        //set ngược lại one to one
+        khachHangSaved.setGioHang(gioHang);
+        khachHangSaved.setViDiem(viDiem);
+
+        return khachHangRepository.save(khachHangSaved);
     }
 
     @Transactional
