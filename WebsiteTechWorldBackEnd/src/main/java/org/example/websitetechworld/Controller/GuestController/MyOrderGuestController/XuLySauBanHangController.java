@@ -2,7 +2,8 @@ package org.example.websitetechworld.Controller.GuestController.MyOrderGuestCont
 
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
-import org.example.websitetechworld.Dto.Response.CommonResponse.ActionBeforeCaseResponse;
+import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
+import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
 import org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangService.XuLySauBanHangServices;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,12 @@ public class XuLySauBanHangController {
     @GetMapping
     public ResponseEntity<?> getAllLyDoXuLy(@RequestParam(defaultValue = "0") Integer pageNo, @RequestParam(defaultValue = "5") Integer pageSIze){
         Page<ActionBeforeCaseResponse> banHangList = xuLySauBanHangServices.getAllLyDoXuLy(pageNo,pageSIze);
+        return ResponseEntity.ok(banHangList);
+    }
+
+    @GetMapping("/detail/{idHoaDon}")
+    public ResponseEntity<?> findByIdHoaDon(@PathVariable Integer idHoaDon){
+        List<XuLyChiTietResponse> banHangList = xuLySauBanHangServices.findByIdHoaDon(idHoaDon);
         return ResponseEntity.ok(banHangList);
     }
 }

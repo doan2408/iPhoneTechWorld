@@ -2,7 +2,8 @@ package org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangServi
 
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
-import org.example.websitetechworld.Dto.Response.CommonResponse.ActionBeforeCaseResponse;
+import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
+import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
@@ -109,5 +110,8 @@ public class XuLySauBanHangServices {
         return xuLySauBanHangRepository.getAllLyDoXuLy(pageable);
     }
 
+    public List<XuLyChiTietResponse> findByIdHoaDon(Integer idHoaDon){
+        return xuLySauBanHangRepository.getAllCtXuLy(idHoaDon);
+    }
 
 }
