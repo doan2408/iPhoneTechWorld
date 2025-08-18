@@ -33,7 +33,7 @@ const fetchData = async (url) => {
 
 
 export const postData = async (url,payload) => {
-  try {
+  // try {
     const res = await api.post(`${baseURL}${url}`, payload, {
       headers: {
         'Content-Type': 'application/json'
@@ -41,10 +41,10 @@ export const postData = async (url,payload) => {
     });
     console.log('📩 [postModelSanPham] Response:', res);
     return res.data;
-  } catch (err) {
-    console.error('❌ [postModelSanPham] Error:', err);
-    throw err;
-  }
+  // } catch (err) {
+  //   console.error('❌ [postModelSanPham] Error:', err);
+  //   throw err;
+  // }
 };
 
 
@@ -130,13 +130,13 @@ const postDataSpct = async (url, data) => {
 
 
 const putData = async (url, data) => {
-  try {
+  // try {
     const response = await api.put(`${baseURL}${url}`, data);
     return response.data; // hoặc response.data.content nếu backend trả về theo kiểu đó
-  } catch (error) {
-    console.error(`Lỗi gửi dữ liệu tới ${baseURL}${url}:`, error);
-    throw error.response?.data || `Lỗi gửi dữ liệu tới ${baseURL}${url}`;
-  }
+  // } catch (error) {
+  //   console.error(`Lỗi gửi dữ liệu tới ${baseURL}${url}:`, error);
+  //   throw error.response?.data || `Lỗi gửi dữ liệu tới ${baseURL}${url}`;
+  // }
 };
 
 
@@ -354,6 +354,7 @@ export const loadCategory = (pageNo, pageSize) =>{
   })
 
 }
+
 export const loadSanPhamChiTiet = (pageNo,pageSize) => {
   const urlProduct = '/admin/sanPhamChiTiet'
   return api.get(urlProduct, {
@@ -363,4 +364,33 @@ export const loadSanPhamChiTiet = (pageNo,pageSize) => {
     }
   })
 }
+
+export const importExcelFileUpload = async (formData) => {
+  try {
+    const response = await api.post("/admin/modelSanPham/import-excel/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const downloadModelSanPhamTemplate = async () => {
+  try {
+    const response = await api.get('/admin/modelSanPham/download-template', {
+      responseType: 'blob', 
+    });
+    return response; 
+  } catch (error) {
+    console.error('Lỗi khi tải template:', error);
+    throw error; 
+  }
+};
+
+
+
 

@@ -6,9 +6,23 @@
     @close="handleClose"
     destroy-on-close
   >
+
+  
+    <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
+      <el-form-item label="Tên màn hình" prop="tenManHinh">
+        <el-input v-model="NewManHinh.tenManHinh" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+
     <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Tên kích thước màn hình" prop="kichThuoc">
         <el-input v-model="NewManHinh.kichThuoc" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+
+    <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
+      <el-form-item label="Tên loại màn hình" prop="loaiManHinh">
+        <el-input v-model="NewManHinh.loaiManHinh" autocomplete="off" />
       </el-form-item>
     </el-form>
 
@@ -23,18 +37,24 @@
 import { postManHinhList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const emit = defineEmits(['saved']);
 
 const NewManHinh = reactive({
   kichThuoc: '',
+  loaiManHinh: '',
+  tenManHinh: '',
 });
 
 const dialogVisible = ref(false);
 const formRef = ref(null);
 
 const rules = {
-  kichThuoc: [{ required: true, message: 'Vui lòng nhập tên kích thước màn hình', trigger: 'blur' }],
+  tenManHinh: [{ required: true, message: 'Vui lòng nhập tên màn hình', trigger: 'blur' }],
+  kichThuoc: [{ required: true, message: 'Vui lòng nhập kích thước màn hình', trigger: 'blur' }],
+  loaiManHinh: [{ required: true, message: 'Vui lòng nhập loại màn hình', trigger: 'blur' }],
 };
 
 function open() {
@@ -46,8 +66,12 @@ defineExpose({ open });
 function handleClose() {
   formRef.value?.resetFields();
   NewManHinh.kichThuoc = '';
+  NewManHinh.loaiManHinh = '';
+  NewManHinh.tenManHinh = '';
   dialogVisible.value = false;
 }
+
+
 
 async function submitMH() {
   formRef.value?.validate(async (valid) => {
@@ -55,16 +79,44 @@ async function submitMH() {
       try {
         const savedManHinh = await postManHinhList({
           kichThuoc: NewManHinh.kichThuoc,
+          loaiManHinh: NewManHinh.loaiManHinh,
+          tenManHinh: NewManHinh.tenManHinh,
         });
+
         emit('saved', savedManHinh);
         dialogVisible.value = false;
         handleClose();
-        ElMessage.success('Thêm kích thước màn hình thành công!'); // Thêm thông báo thành công
+        toast.success('Thêm màn hình thành công!');
       } catch (error) {
-        console.error('Lỗi khi lưu kích thước màn hình:', error);
-        ElMessage.error('Có lỗi xảy ra khi thêm kích thước màn hình!');
+        console.error('Lỗi khi lưu màn hình:', error);
+
+        if (error.response && error.response.data) {
+          const { message, error: serverError, errors: fieldErrors } = error.response.data;
+
+          if (fieldErrors) {
+            const msgs = Object.values(fieldErrors).flat().join('\n');
+            toast.error(msgs);
+          } else if (message && typeof message === 'object') {
+            const msgs = Object.values(message).join('\n');
+            toast.error(msgs);
+          } else if (message) {
+            toast.error(message);
+          } else if (serverError) {
+            toast.error(typeof serverError === 'string' ? serverError : JSON.stringify(serverError));
+          } else {
+            toast.error('Dữ liệu không hợp lệ, vui lòng kiểm tra lại!');
+          }
+        } else if (error.response) {
+          const status = error.response.status;
+          if (status === 401) toast.error('Bạn không có quyền thực hiện hành động này!');
+          else if (status === 403) toast.error('Bạn không có quyền truy cập tài nguyên này!');
+          else toast.error('Đã xảy ra lỗi, vui lòng thử lại!');
+        } else {
+          toast.error('Không thể kết nối đến server!');
+        }
       }
     }
   });
 }
+
 </script>
