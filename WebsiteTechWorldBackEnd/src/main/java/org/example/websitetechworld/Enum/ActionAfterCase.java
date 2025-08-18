@@ -3,6 +3,7 @@ package org.example.websitetechworld.Enum;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
 
 public enum ActionAfterCase {
+    PENDING("Chờ xử lý"),
     RETRY("Giao lại"),
     CANCEL("Hủy bỏ"),
     HOLD("Giữ"),

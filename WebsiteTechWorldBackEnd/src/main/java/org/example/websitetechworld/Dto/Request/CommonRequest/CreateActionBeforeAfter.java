@@ -1,4 +1,4 @@
-package org.example.websitetechworld.Dto.Request.CommonRequt;
+package org.example.websitetechworld.Dto.Request.CommonRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

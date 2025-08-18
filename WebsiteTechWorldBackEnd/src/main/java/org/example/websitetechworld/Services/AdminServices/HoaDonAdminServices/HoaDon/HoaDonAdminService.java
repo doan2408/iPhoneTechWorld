@@ -488,7 +488,7 @@ public class HoaDonAdminService {
         }
         if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
             XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_Id(hoaDon.getId());
-            xuLySauBanHang.setThoiGianVuViec(LocalDateTime.now());
+            xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);

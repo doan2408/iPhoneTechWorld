@@ -115,4 +115,8 @@ public class ImeiDaBanAdminServices {
     private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
         return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
     }
+
+    public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer idHoaDon) {
+        return imeiDaBanRepository.imeiTrongHdct(idHoaDon);
+    }
 }

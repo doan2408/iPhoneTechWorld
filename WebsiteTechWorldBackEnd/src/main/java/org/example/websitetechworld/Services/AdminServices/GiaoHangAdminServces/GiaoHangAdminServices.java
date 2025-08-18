@@ -40,6 +40,7 @@ public class GiaoHangAdminServices {
     private final GioHangClientService gioHangClientService;
     private final XuLySauBanHangServices xuLySauBanHangServices;
 
+
     public GiaoHangAdminServices(HoaDonRepository hoaDonRepository, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTiet_SanPhamAdminServices, GioHangClientService gioHangClientService, XuLySauBanHangServices xuLySauBanHangServices) {
         this.hoaDonRepository = hoaDonRepository;
         this.hoaDonChiTiet_ImeiAdminServices = hoaDonChiTiet_ImeiAdminServices;
@@ -62,8 +63,7 @@ public class GiaoHangAdminServices {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
         }
-        if (TrangThaiGiaoHang.CANCELLED.equals(newStatus) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())){
-            hoaDon.setThoiGianHuy(LocalDateTime.now());
+        if (TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan()) || TrangThaiGiaoHang.CANCELLED.equals(newStatus)){
             xuLySauBanHangServices.taoDonHoanTienHuyHang(hoaDon);
         }
 

@@ -11,3 +11,32 @@ export const createActionAfterCase = (idHoaDon, idFailReason) => {
     };
     return api.post(url, requestBody)
 }
+
+export const createActionAfterCaseReturn = (data) => {
+    const url = baseURL + '/tra-hang';
+    return api.post(url, data)
+}
+
+export const getAllLyDoXuLy = (pageNo, pageSize) => {
+    const url = baseURL ;
+    return api.get(url,{
+        params: {
+            pageNo,
+            pageSize
+        }
+    })
+}
+
+export const getAllCtXuLy = (idHoaDon) => {
+    const url = baseURL + '/detail/' + idHoaDon;
+    return api.get(url)
+}
+
+export const changeStatusPending = (soImei,status) => {
+    const url = baseURL + '/change-status'
+    const request = {
+        soImei: soImei,
+        status: status
+    };
+    return api.post(url,request)
+}

@@ -4,6 +4,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
@@ -39,6 +40,7 @@ public class MyOrderClientServices {
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final ImeiDaBanRepository imeiDaBanRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -51,7 +53,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -64,6 +66,7 @@ public class MyOrderClientServices {
         this.emailServicces = emailServicces;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.imeiDaBanRepository = imeiDaBanRepository;
     }
 
 
@@ -284,8 +287,4 @@ public class MyOrderClientServices {
     public void deleteHoaDonById(Integer id){
         hoaDonRepository.deleteById(id);
     }
-
-
-
-
 }

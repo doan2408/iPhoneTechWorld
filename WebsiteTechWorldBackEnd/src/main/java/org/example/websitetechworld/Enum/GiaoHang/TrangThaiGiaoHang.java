@@ -8,7 +8,7 @@ public enum TrangThaiGiaoHang {
     SHIPPING("Đang giao"),
     DELIVERED("Đã giao"),
     FAILED("Giao thất bại"),
-    RETURNED("Đã trả lại"),
+    RETURNS("Trả hàng"),
     CANCELLED("Đã hủy");
 
     private final String displayName;

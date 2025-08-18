@@ -9,6 +9,7 @@ import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.cglib.core.Local;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,9 +38,6 @@ public class XuLySauBanHang {
     @Column(name = "loai_vu_viec", nullable = false, length = 20)
     private CaseType loaiVuViec;
 
-    @Column(name = "thoi_gian_vu_viec", nullable = false)
-    private LocalDateTime thoiGianVuViec;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ly_do")
     private LyDoXuLy idLyDo;
@@ -53,5 +51,11 @@ public class XuLySauBanHang {
     @ColumnDefault("0")
     @Column(name = "da_kiem_tra", nullable = false)
     private Boolean daKiemTra = false;
+
+    @Column(name = "thoi_gian_xu_ly")
+    private LocalDateTime thoiGianXuLy;
+
+    @Column(name = "thoi_gian_yeu_cau")
+    private LocalDateTime thoiGianYeuCau;
 
 }
