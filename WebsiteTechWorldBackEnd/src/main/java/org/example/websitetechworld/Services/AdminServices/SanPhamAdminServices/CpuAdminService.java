@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CpuAdminResponse;
 import org.example.websitetechworld.Entity.Cpu;
 import org.example.websitetechworld.Repository.CpuRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
@@ -60,38 +61,29 @@ public class CpuAdminService {
 
 
     @Transactional
-    public CpuAdminResponse createCpu(CpuAdminRequest req) {
-        List<Map<String, String>> errors = new ArrayList<>();
+    public CpuAdminResponse createCpu(CpuAdminRequest cpuAdminRequest) {
 
-        Integer count = cpuRepository.countCheckTrung(
-              req.getChipXuLy()
-        );
-        if(count > 0) {
-            errors.add(Map.of("field", "cpu", "message", "Chip xử lý đã tồn tại"));
+        validateCpu(cpuAdminRequest);
+
+        if (cpuRepository.existsByChipXuLy(cpuAdminRequest.getChipXuLy())) {
+            throw new BusinessException("Chíp xử lý đã tồn tại");
         }
 
-        if(!errors.isEmpty()) {
-            throw new ValidationException(errors);
-        }
-
-        Cpu cpu = cpuRepository.save(modelMapper.map(req, Cpu.class));
+        Cpu cpu = cpuRepository.save(modelMapper.map(cpuAdminRequest, Cpu.class));
 
         return convert(cpu);
     }
 
     @Transactional
     public CpuAdminResponse createCpuQuick (CpuQuickCreateAdminRequest request) {
-        List<Map<String, String>> errors = new ArrayList<>();
 
-        Integer count = cpuRepository.countCheckTrung(
-                request.getChipXuLy()
-        );
-        if(count > 0) {
-            errors.add(Map.of("field", "cpu", "message", "Chip xử lý đã tồn tại"));
+        String chip = request.getChipXuLy().trim().replaceAll("\\s+", " ");
+        if (!chip.matches("^[a-zA-Z0-9 ]+$")) { // chỉ còn space đơn
+            throw new BusinessException("Chíp xử lý chỉ được chứa chữ, số, không chứa ký tự đặc biệt");
         }
 
-        if(!errors.isEmpty()) {
-            throw new ValidationException(errors);
+        if (cpuRepository.existsByChipXuLy(request.getChipXuLy())) {
+            throw new BusinessException("Chíp xử lý đã tồn tại");
         }
 
         Cpu cpu = cpuRepository.save(modelMapper.map(request, Cpu.class));
@@ -99,34 +91,20 @@ public class CpuAdminService {
         return convert(cpu);
     }
 
+
+    // đang sửa ở đây
     @Transactional
     public CpuAdminResponse updateCpu(Integer id, CpuAdminRequest cpuAdminRequest) {
         Cpu cpuOld = cpuRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Cpu ID: " + id));
-        List<Map<String, String>> errors = new ArrayList<>();
-        boolean unchanged =
-                Objects.equals(cpuAdminRequest.getHangSanXuat(),cpuOld.getHangSanXuat()) &&
-                        Objects.equals(cpuAdminRequest.getSoNhan(), cpuOld.getSoNhan()) &&
-                        Objects.equals(cpuAdminRequest.getChipXuLy(), cpuOld.getChipXuLy()) &&
-                        Objects.equals(cpuAdminRequest.getXungNhip(), cpuOld.getXungNhip()) &&
-                        Objects.equals(cpuAdminRequest.getCongNgheSanXuat(), cpuOld.getCongNgheSanXuat()) &&
-                        Objects.equals(cpuAdminRequest.getBoNhoDem(), cpuOld.getBoNhoDem()) &&
-                        Objects.equals(cpuAdminRequest.getTieuThuDienNang(), cpuOld.getTieuThuDienNang());
-        //không có thay đổi -> trả về dữ liệu cũ
-        if(unchanged) {
-            return convert(cpuOld);
-        }
-        else {
-            Integer count = cpuRepository.countCheckTrung(
-                    cpuAdminRequest.getChipXuLy()
-            );
-            if(count > 0) {
-                errors.add(Map.of("field", "cpu", "message", "Chip xử lý đã tồn tại"));
-            }
-        }
 
-        if(!errors.isEmpty()) {
-            throw new ValidationException(errors);
+        validateCpu(cpuAdminRequest);
+
+        if (cpuRepository.existsByChipXuLyAndIdNot(
+                cpuAdminRequest.getChipXuLy(),
+                id
+        )) {
+            throw new BusinessException("Chíp xử lý đã tồn tại");
         }
         modelMapper.map(cpuAdminRequest, cpuOld);
         cpuRepository.save(cpuOld);
@@ -148,6 +126,14 @@ public class CpuAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Cpu ID: " + id));
 
         return convert(cpu);
+    }
+
+
+    public void validateCpu(CpuAdminRequest cpuAdminRequest) {
+        String chip = cpuAdminRequest.getChipXuLy().trim().replaceAll("\\s+", " ");
+        if (!chip.matches("^[a-zA-Z0-9 ]+$")) { // chỉ còn space đơn
+            throw new BusinessException("Chíp xử lý chỉ được chứa chữ, số, không chứa ký tự đặc biệt");
+        }
     }
 
 

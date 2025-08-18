@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface HeDieuHanhRepository extends JpaRepository<HeDieuHanh, Integer> {
     @Query("SELECT hdh FROM HeDieuHanh hdh WHERE " +
@@ -21,4 +23,12 @@ public interface HeDieuHanhRepository extends JpaRepository<HeDieuHanh, Integer>
             h.phienBan = :phienBan
 """)
     Integer countCheckTrung(@Param("phienBan") String phienBan);
+
+
+    Boolean existsByPhienBan(String phienBan);
+
+    Boolean existsByPhienBanAndIdNot(String phienBan, Integer id);
+
+    Optional<HeDieuHanh> findByPhienBan(String phienBan);
+
 }

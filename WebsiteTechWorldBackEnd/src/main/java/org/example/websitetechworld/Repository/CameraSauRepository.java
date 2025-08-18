@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CameraSauRepository extends JpaRepository<CameraSau, Integer> {
@@ -52,5 +53,9 @@ public interface CameraSauRepository extends JpaRepository<CameraSau, Integer> {
     """,nativeQuery = true)
     List<CameraSauResponse> findCameraSauByIdSanPham(@Param("idSanPham") Integer idSanPham);
 
+
+    Optional<CameraSau> findByLoaiCamera (String loaiCamera);
+
+    Optional<CameraSau> findByLoaiCameraAndDoPhanGiaiAndKhauDo (String loaiCamera, String doPhanGiai, String khauDo);
 
 }

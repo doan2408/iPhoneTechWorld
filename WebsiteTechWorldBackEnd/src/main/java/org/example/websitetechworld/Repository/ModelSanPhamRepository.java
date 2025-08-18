@@ -98,4 +98,6 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
             @Param("idLoai") Integer idLoai
     );
 
+    boolean existsByTenModel(String tenModel);
+
 }
