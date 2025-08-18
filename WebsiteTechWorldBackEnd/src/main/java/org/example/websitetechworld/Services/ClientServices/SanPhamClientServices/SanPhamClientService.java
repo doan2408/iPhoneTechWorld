@@ -2,10 +2,9 @@ package org.example.websitetechworld.Services.ClientServices.SanPhamClientServic
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
-import org.example.websitetechworld.Entity.CameraSau;
-import org.example.websitetechworld.Entity.SanPham;
-import org.example.websitetechworld.Entity.SanPhamChiTiet;
-import org.example.websitetechworld.Entity.XuatXu;
+import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class SanPhamClientService {
     private final ModelMapper modelMapper;
     private final LoaiRepository loaiRepository;
     private final CameraSauRepository cameraSauRepository;
+    private final HoaDonRepository hoaDonRepository;
 
     //hien thi san pham len trang chủ
     public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, Integer idLoai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
@@ -98,7 +100,7 @@ public class SanPhamClientService {
     }
 
     //khi chon mau + rom
-    public ClientProductDetailResponse getChiTietBienThe(Integer idSanPham, Integer idMau, Integer idRom) {
+    public ClientProductDetailResponse getChiTietBienThe(Integer idSanPham, Integer idMau, Integer idRom, Integer selectedIdKhachHang) {
 
         Optional<SanPhamChiTiet> chiTietOtp = sanPhamRepo.getSpctByMauAndRom(idSanPham, idMau, idRom);
         if (chiTietOtp.isEmpty()) {
@@ -113,7 +115,7 @@ public class SanPhamClientService {
         response.setTenSanPham(sp.getTenSanPham());
         List<String> hinhAnh = sanPhamRepo.getListAnhByMau(idSanPham, idMau);
         response.setHinhAnh(hinhAnh);
-        response.setGiaBan(spct.getGiaBan());
+        response.setGiaTruocKhuyenMai(spct.getGiaBan());
 
         List<ClientProductDetailResponse.ThuocTinh> listRom = sp.getSanPhamChiTiets().stream()
                 .map(SanPhamChiTiet::getIdRom)
@@ -133,6 +135,7 @@ public class SanPhamClientService {
         response.setTongSoLuong(sp.getSanPhamChiTiets().stream()
                 .mapToInt(SanPhamChiTiet::getSoLuong).sum()
         );
+        response.setGiaBan(tinhGiaKhuyenMai(spct, selectedIdKhachHang));
 
         return response;
     }
@@ -145,4 +148,45 @@ public class SanPhamClientService {
         return loaiRepository.getLoaiClientResponse();
     }
 
+    private BigDecimal tinhGiaKhuyenMai(SanPhamChiTiet spct, Integer selectedIdKhachHang) {
+        try {
+            if (spct == null || spct.getGiaBan() == null) {
+                return BigDecimal.ZERO;
+            }
+            BigDecimal giaGoc = spct.getGiaBan();
+            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            if (khuyenMai == null) {
+                return giaGoc;
+            }
+            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
+                return giaGoc;
+            }
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
+                return giaGoc;
+            }
+
+            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
+                return giaGoc;
+            }
+
+            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
+            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
+            boolean khongHopLe =
+                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
+                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
+            if (khongHopLe) {
+                return giaGoc;
+            }
+
+            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
+            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal giaKhuyenMai = giaGoc.subtract(giaGoc.multiply(tyLeGiam));
+
+            return giaKhuyenMai.max(BigDecimal.ZERO);
+        } catch (Exception e) {
+            return spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
+        }
+    }
 }

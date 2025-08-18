@@ -72,4 +72,63 @@ export const getDonHangHuy = async (params) => {
     throw error.response?.data || 'Lỗi lấy thống kê tổng quan';
   }
 };
+// Xuất Excel tổng quan Dashboard
+export const exportDashboardExcel = async (startDate, endDate) => {
+  try {
+    const response = await api.get(`${baseURL}/dashboard/export-excel`, {
+      params: { startDate, endDate },
+      responseType: 'blob' 
+    });
+
+    // Tạo URL từ Blob để tải xuống
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'dashboard-tong-quan.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Có lỗi khi xuất Excel tổng quan:', error);
+    throw error.response?.data || 'Lỗi xuất Excel tổng quan';
+  }
+};
+//xuất doanh thu 
+export const exportDoanhThuTheoThangExcel = async () => {
+  try {
+    const response = await api.get(`${baseURL}/doanh-thu-theo-thang/export-excel`, {
+      responseType: 'blob' // Quan trọng để tải file Excel
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'doanh-thu-theo-thang.xlsx');
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error('Có lỗi khi export doanh thu theo tháng:', error);
+    throw error.response?.data || 'Lỗi export doanh thu theo tháng';
+  }
+}
+// Xuất danh sách khách hàng trung thành
+export const exportKhachHangTrungThanhExcel = async () => {
+  try {
+    const response = await api.get(`${baseURL}/khach-hang-trung-thanh/export-excel`, {
+      responseType: 'blob' // Quan trọng để tải file Excel
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'khach-hang-trung-thanh.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Có lỗi khi export khách hàng trung thành:', error);
+    throw error.response?.data || 'Lỗi export khách hàng trung thành';
+  }
+};
+
 

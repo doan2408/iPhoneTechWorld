@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
@@ -53,11 +54,11 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("emailNguoiNhan") String emailNguoiNhan,
                        @Param("ngayDatHang") LocalDateTime ngayDatHang);
 
-    public Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
+    Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
 
 
     @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
-    public List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
+    List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
 
 
     @Query(value = """
@@ -74,4 +75,13 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     List<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull();
 
     List<HoaDon> findByMaHoaDon(String maHoaDon);
+
+    @Query(value = """
+    SELECT COUNT(*) 
+    FROM hoa_don 
+    WHERE 
+        (trang_thai_thanh_toan = 'PAID' OR trang_thai_thanh_toan = 'COMPLETED')
+        AND id_khach_hang = :idKhachHang
+    """, nativeQuery = true)
+    int countHoaDonByIdKhachHang(@Param("idKhachHang") Integer idKhachHang);
 }

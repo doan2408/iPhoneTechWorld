@@ -52,108 +52,21 @@ public class CpuAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCpu(@RequestBody @Valid CpuAdminRequest cpuAdminRequest, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<Map<String, String>> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        try {
-            CpuAdminResponse response = cpuAdminService.createCpu(cpuAdminRequest);
-
-            return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
-
-
+    public ResponseEntity<CpuAdminResponse> createCpu(@Valid @RequestBody CpuAdminRequest cpuAdminRequest) {
+        CpuAdminResponse response = cpuAdminService.createCpu(cpuAdminRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/quick-cpu")
-    public ResponseEntity<?> createCpuQuick(@RequestBody @Valid CpuQuickCreateAdminRequest cpuAdminRequest, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<Map<String, String>> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        try {
+    public ResponseEntity<CpuAdminResponse> createCpuQuick(@RequestBody @Valid CpuQuickCreateAdminRequest cpuAdminRequest) {
             CpuAdminResponse response = cpuAdminService.createCpuQuick(cpuAdminRequest);
-
             return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
-
-
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCpu(@PathVariable Integer id, @RequestBody @Valid CpuAdminRequest cpuAdminRequest, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<Map<String, String>> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        try {
-            CpuAdminResponse response = cpuAdminService.updateCpu(id, cpuAdminRequest);
-
-            return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
-
-
+    public ResponseEntity<?> updateCpu( @PathVariable Integer id, @Valid @RequestBody CpuAdminRequest cpuAdminRequest) {
+         CpuAdminResponse response = cpuAdminService.updateCpu(id, cpuAdminRequest);
+         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.XuatXuAdminResponse;
 import org.example.websitetechworld.Entity.XuatXu;
 import org.example.websitetechworld.Repository.XuatXuRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -57,7 +58,7 @@ public class XuatXuAdminService {
     @Transactional
     public XuatXuAdminResponse createXuatXu(@Valid XuatXuAdminRequest xuatXuAdminRequest) {
         if (xuatXuRepo.existsByMaXuatXu(xuatXuAdminRequest.getMaXuatXu())) {
-            throw new IllegalArgumentException("Mã xuất xứ đã tồn tại");
+            throw new BusinessException("Mã xuất xứ đã tồn tại");
         }
         XuatXu xuatXu = modelMapper.map(xuatXuAdminRequest, XuatXu.class);
         XuatXu saved = xuatXuRepo.save(xuatXu);
@@ -66,6 +67,9 @@ public class XuatXuAdminService {
 
     @Transactional
     public XuatXuAdminResponse createQuickXuatXu(XuatXuQuickCreateAdminRequest req) {
+        if (xuatXuRepo.existsByMaXuatXu(req.getMaXuatXu())) {
+            throw new BusinessException("Mã xuất xứ đã tồn tại");
+        }
         XuatXu xuatXu = modelMapper.map(req, XuatXu.class);
         xuatXuRepo.save(xuatXu);
 

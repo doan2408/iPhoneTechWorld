@@ -102,6 +102,9 @@ import { deletePin, getAllPinPage, postPin, putPin } from '@/Service/Adminservic
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 
 const dataPin = ref([]);
 const currentPage = ref(1);
@@ -112,6 +115,7 @@ const pageSize = 5;
 const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
+
 
 // const rules = {
 //     phienBan: [
@@ -176,17 +180,44 @@ const submitForm = async () => {
         errors.thoiGianSuDung = error.message.thoiGianSuDung || ''
         errors.soLanSacToiDa = error.message.soLanSacToiDa || ''
 
-        const errorMessages = [];
-        if (errors.phienBan) errorMessages.push(errors.phienBan);
-        if (errors.congSuatSac) errorMessages.push(errors.congSuatSac);
-        if (errors.thoiGianSuDung) errorMessages.push(errors.thoiGianSuDung);
-        if (errors.soLanSacToiDa) errorMessages.push(errors.soLanSacToiDa);
+         if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
 
-        if (errorMessages.length > 0) {
-            ElMessage.error('Đã xảy ra lỗi không xác định');
+            if (status === 400) {
+                const msg = data.message;
+
+                if (typeof msg === 'string') {
+                    // Backend trả về message chung
+                    toast.error(msg);
+                } else if (typeof msg === 'object') {
+                    Object.keys(errors).forEach(key => {
+                        errors[key] = msg[key] || '';
+                    });
+
+                    const fieldErrors = Object.values(errors).filter(m => m);
+                    if (fieldErrors.length > 0) {
+                        toast.error(fieldErrors.join('\n'));
+                    } else {
+                        toast.error('Dữ liệu không hợp lệ!');
+                    }
+                } else {
+                    toast.error('Dữ liệu không hợp lệ!');
+                }
+            } else if (status === 409) {
+                toast.error(data.message || 'Dữ liệu đã tồn tại');
+            } else if (status >= 500) {
+                toast.error('Server lỗi, vui lòng thử lại sau');
+            } else {
+                toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+            }
+
+        } else if (error.request) {
+            toast.error('Không nhận được phản hồi từ server');
         } else {
-            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+            toast.error('Lỗi gửi request: ' + error.message);
         }
+
     }
 }
 

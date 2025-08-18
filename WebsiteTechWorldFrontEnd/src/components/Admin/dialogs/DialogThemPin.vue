@@ -23,6 +23,9 @@
 import { postPinList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 
 const emit = defineEmits(['saved']);
 
@@ -61,8 +64,32 @@ async function submitPin() {
         handleClose();
         ElMessage.success('Thêm phiên bản pin thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error('Lỗi khi lưu phiên bản pin:', error);
-        ElMessage.error('Có lỗi xảy ra khi thêm phiên bản pin!');
+        console.error('Lỗi khi lưu màn hình:', error);
+
+        if (error.response && error.response.data) {
+          const { message, error: serverError, errors: fieldErrors } = error.response.data;
+
+          if (fieldErrors) {
+            const msgs = Object.values(fieldErrors).flat().join('\n');
+            toast.error(msgs);
+          } else if (message && typeof message === 'object') {
+            const msgs = Object.values(message).join('\n');
+            toast.error(msgs);
+          } else if (message) {
+            toast.error(message);
+          } else if (serverError) {
+            toast.error(typeof serverError === 'string' ? serverError : JSON.stringify(serverError));
+          } else {
+            toast.error('Dữ liệu không hợp lệ, vui lòng kiểm tra lại!');
+          }
+        } else if (error.response) {
+          const status = error.response.status;
+          if (status === 401) toast.error('Bạn không có quyền thực hiện hành động này!');
+          else if (status === 403) toast.error('Bạn không có quyền truy cập tài nguyên này!');
+          else toast.error('Đã xảy ra lỗi, vui lòng thử lại!');
+        } else {
+          toast.error('Không thể kết nối đến server!');
+        }
       }
     }
   });

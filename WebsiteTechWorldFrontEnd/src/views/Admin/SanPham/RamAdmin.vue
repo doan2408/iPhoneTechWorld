@@ -58,14 +58,14 @@
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Dung lượng" prop="dungLuong" :error="errors.dungLuong">
+                        <el-form-item label="Dung lượng" prop="dungLuong" >
                             <el-input v-model="formData.dungLuong" placeholder="Nhập dung lượng (ví dụ: 128GB)"
                                 autocomplete="on" />
                         </el-form-item>
                     </el-col>
 
                     <el-col :span="12">
-                        <el-form-item label="Loại" prop="loai" :error="errors.loai">
+                        <el-form-item label="Loại" prop="loai" >
                             <el-input v-model="formData.loai" placeholder="Nhập loại bộ nhớ (ví dụ: NVMe)" />
                         </el-form-item>
                     </el-col>
@@ -73,13 +73,13 @@
 
                 <el-row :gutter="20">
                     <el-col :span="12">
-                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat" :error="errors.nhaSanXuat">
+                        <el-form-item label="Nhà sản xuất" prop="nhaSanXuat" >
                             <el-input v-model="formData.nhaSanXuat"
                                 placeholder="Nhập tên nhà sản xuất (ví dụ: Apple)" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="Năm ra mắt" prop="namRaMat" :error="errors.namRaMat">
+                        <el-form-item label="Năm ra mắt" prop="namRaMat" >
                             <el-date-picker v-model="formData.namRaMat" type="date" value-format="YYYY-MM-DD"
                                 placeholder="Chọn ngày ra mắt" style="width: 100%;" />
                         </el-form-item>
@@ -88,7 +88,7 @@
 
                 <el-row :gutter="20">
                     <el-col>
-                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi" :error="errors.tocDoDocGhi">
+                        <el-form-item label="Tốc độ đọc ghi" prop="tocDoDocGhi" >
                             <el-input v-model="formData.tocDoDocGhi" placeholder="Ví dụ: 12MP" />
                         </el-form-item>
                     </el-col>
@@ -110,6 +110,8 @@ import { ref, onMounted, watch, computed, reactive } from 'vue';
 import { deleteRam, getAllRamPage, postRam, putRam } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const tableRam = ref([]);
 const totalPages = ref(1);
@@ -189,39 +191,73 @@ const submitForm = async () => {
     if (!formRef.value) return;
 
     try {
+        // Validate frontend trước
         await formRef.value.validate();
 
         if (isEditMode.value) {
             await putRam(formData.id, formData);
-            ElMessage.success('Cập nhật ram thành công!');
+            toast.success('Cập nhật RAM thành công!');
         } else {
             await postRam(formData);
-            ElMessage.success('Thêm mới ram thành công!');
+            toast.success('Thêm mới RAM thành công!');
         }
+
+        // Reset form & đóng dialog
         resetForm();
         dialogVisible.value = false;
         loadData();
+
     } catch (error) {
-        errors.dungLuong = error.message.dungLuong || ''
-        errors.loai = error.message.loai || ''
-        errors.tocDoDocGhi = error.message.tocDoDocGhi || ''
-        errors.nhaSanXuat = error.message.nhaSanXuat || ''
-        errors.namRaMat = error.message.namRaMat || ''
+        // Reset lỗi cũ
+        errors.dungLuong = '';
+        errors.loai = '';
+        errors.tocDoDocGhi = '';
+        errors.nhaSanXuat = '';
+        errors.namRaMat = '';
 
-        const errorMessages = [];
-        if (errors.dungLuong) errorMessages.push(errors.dungLuong);
-        if (errors.loai) errorMessages.push(errors.loai);
-        if (errors.tocDoDocGhi) errorMessages.push(errors.tocDoDocGhi);
-        if (errors.nhaSanXuat) errorMessages.push(errors.nhaSanXuat);
-        if (errors.namRaMat) errorMessages.push(errors.namRaMat);
+        if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
 
-        if (errorMessages.length > 0) {
-            ElMessage.error('Đã xảy ra lỗi không xác định');
+            if (status === 400) {
+                const msg = data.message;
+
+                if (typeof msg === 'string') {
+                    // Backend trả về message chung
+                    toast.error(msg);
+                } else if (typeof msg === 'object') {
+                    Object.keys(errors).forEach(key => {
+                        errors[key] = msg[key] || '';
+                    });
+
+                    const fieldErrors = Object.values(errors).filter(m => m);
+                    if (fieldErrors.length > 0) {
+                        toast.error(fieldErrors.join('\n'));
+                    } else {
+                        toast.error('Dữ liệu không hợp lệ!');
+                    }
+                } else {
+                    toast.error('Dữ liệu không hợp lệ!');
+                }
+            } else if (status === 409) {
+                toast.error(data.message || 'Dữ liệu đã tồn tại');
+            } else if (status >= 500) {
+                toast.error('Server lỗi, vui lòng thử lại sau');
+            } else {
+                toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+            }
+
+        } else if (error.request) {
+            toast.error('Không nhận được phản hồi từ server');
         } else {
-            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+            toast.error('Lỗi gửi request: ' + error.message);
         }
+
+        console.error('Lỗi submitForm:', error);
     }
-}
+};
+
+
 
 const handleDelete = async (id) => {
     try {

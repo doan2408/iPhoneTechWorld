@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Controller.AdminController.ThongKeAdminController;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.ThongKeAdminResponse.DashboardAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.ThongKeAdminResponse.ThongKeDonhangAdminResponse;
 import org.example.websitetechworld.Services.AdminServices.ThongkeAdminService.ThongKeAdminService;
@@ -13,13 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping ("/admin/thong-ke")
+@RequestMapping("/admin/thong-ke")
 
 public class ThongKeAdminController {
 
@@ -61,83 +63,116 @@ public class ThongKeAdminController {
 
 
     @GetMapping("/san-pham-ban-chay")
-    public List<Map<String, Object>> sanPhamBanChay () {
+    public List<Map<String, Object>> sanPhamBanChay() {
 
         return thongKeAdminService.getSanPhamBanChay();
     }
 
     @GetMapping("/don-hang-moi-nhat")
-    public List<Map<String, Object>> donHangMoiNhat () {
+    public List<Map<String, Object>> donHangMoiNhat() {
 
         return thongKeAdminService.getDonHangMoiNhat();
     }
 
 
     @GetMapping("/doanh-thu-theo-ngay")
-    public List<Map<String, Object>> doanhThuTheoNgay () {
+    public List<Map<String, Object>> doanhThuTheoNgay() {
 
         return thongKeAdminService.doanhThuTheoNgay();
     }
 
     @GetMapping("/doanh-thu-theo-thang")
-    public List<Map<String, Object>> doanhThuTheoThang () {
+    public List<Map<String, Object>> doanhThuTheoThang() {
 
         return thongKeAdminService.doanhThuTheoThang();
     }
+
     @GetMapping("/don-huy-theo-thang")
-    public List<Map<String, Object>> donHuyTheoThang () {
+    public List<Map<String, Object>> donHuyTheoThang() {
 
         return thongKeAdminService.donHuyTheoThang();
     }
 
     @GetMapping("/doanh-thu-theo-khach-hang")
-    public List<Map<String, Object>> thongKeTheoKhachHang () {
+    public List<Map<String, Object>> thongKeTheoKhachHang() {
 
         return thongKeAdminService.doanhThuTheoKhachHang();
     }
 
 
     @GetMapping("/top-khach-hang-mua-nhieu")
-    public List<Map<String, Object>> topKhachHangMuaNhieu () {
+    public List<Map<String, Object>> topKhachHangMuaNhieu() {
 
         return thongKeAdminService.topKhachHangMuaNhieu();
     }
 
     @GetMapping("/khach-hang-trung-thanh")
-    public List<Map<String, Object>> khachHangTrungThanh () {
+    public List<Map<String, Object>> khachHangTrungThanh() {
 
         return thongKeAdminService.khachHangTrungThanh();
     }
 
     @GetMapping("/khach-hang-hang-cao")
-    public List<Map<String, Object>> khachHangHangCao () {
+    public List<Map<String, Object>> khachHangHangCao() {
 
         return thongKeAdminService.khachHangHangCao();
     }
 
 
     @GetMapping("/san-pham-ton-kho")
-    public List<Map<String, Object>> sanPhamTonKhoNhieu () {
+    public List<Map<String, Object>> sanPhamTonKhoNhieu() {
 
         return thongKeAdminService.sanPhamTonKhoNhieu();
     }
 
     @GetMapping("/san-pham-sap-het-hang")
-    public List<Map<String, Object>> sanPhamSapHetHang () {
+    public List<Map<String, Object>> sanPhamSapHetHang() {
 
         return thongKeAdminService.sanPhamSapHetHang();
     }
 
     @GetMapping("/don-hang")
-    public ThongKeDonhangAdminResponse thongKeDonHang () {
+    public ThongKeDonhangAdminResponse thongKeDonHang() {
 
         return thongKeAdminService.thongKeDonhangAdminResponse();
     }
+
     @GetMapping("/top-san-pham-ban-chay")
     public List<Map<String, Object>> getSanPhamBanChayTheoNgay(
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam("endDate")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         return thongKeAdminService.getSanPhamBanChayTheoNgay(startDate, endDate);
     }
+    @GetMapping("/dashboard/export-excel")
+    public void exportDashboardExcel(HttpServletResponse response,
+                                     @RequestParam String startDate,
+                                     @RequestParam String endDate) {
+        try {
+            thongKeAdminService.exportDashboardExcel(response, startDate, endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    //xuất doanh thu
+    @GetMapping("/doanh-thu-theo-thang/export-excel")
+    public void exportDoanhThuTheoThangExcel(
+
+            HttpServletResponse response) {
+        try {
+            thongKeAdminService.exportDoanhThuTheoThangExcel(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    //Xuất khách hàng TT
+    @GetMapping("/khach-hang-trung-thanh/export-excel")
+    public void exportKhachHangTrungThanh(HttpServletResponse response) {
+        try {
+            thongKeAdminService.exportKhachHangTrungThanhExcel(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

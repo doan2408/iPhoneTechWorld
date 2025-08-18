@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.PinAdminResponse;
 import org.example.websitetechworld.Entity.Pin;
 import org.example.websitetechworld.Repository.PinRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -55,7 +56,7 @@ public class PinAdminService {
     @Transactional
     public PinAdminResponse createPin(PinAdminRequest pinAdminRequest) {
         if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
-            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+            throw new BusinessException("Phiên bản đã tồn tại");
         }
         Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
         Pin saved = pinRepository.save(pin);
@@ -65,7 +66,7 @@ public class PinAdminService {
     @Transactional
     public PinAdminResponse createPinQuick(PinQuicKCreateAdminRequest pinAdminRequest) {
         if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
-            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+            throw new BusinessException("Phiên bản đã tồn tại");
         }
         Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
         Pin saved = pinRepository.save(pin);
@@ -77,7 +78,7 @@ public class PinAdminService {
         Pin pin = pinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Pin ID: " + id));
         if (pinRepository.existsByPhienBanAndIdNot(pinAdminRequest.getPhienBan(), id)) {
-            throw new IllegalArgumentException("Phiên bản đã tồn tại");
+            throw new BusinessException("Phiên bản đã tồn tại");
         }
         modelMapper.map(pinAdminRequest, pin);
         Pin saved = pinRepository.save(pin);

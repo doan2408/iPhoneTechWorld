@@ -148,7 +148,7 @@
                   <el-option
                     v-for="ram in rams"
                     :key="ram.idRam"
-                    :label="ram.dungLuongRam"
+                    :label="`${ram.dungLuongRam} - ${ram.loaiRam}`"
                     :value="ram.idRam"
                   />
                 </el-select>
@@ -219,7 +219,7 @@
                   <el-option
                     v-for="mh in manHinhs"
                     :key="mh.idManHinh"
-                    :label="mh.kichThuoc"
+                    :label="` ${mh.tenManHinh} - ${mh.kichThuoc} - ${mh.loaiManHinh} `"
                     :value="mh.idManHinh"
                   />
                 </el-select>
@@ -687,7 +687,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="RAM" width="120">
+        <el-table-column label="RAM" width="140">
           <template #default="{ row }">
             <el-tag type="warning" effect="light">
               {{ ramLabel(row.idRam) }}
@@ -727,7 +727,6 @@
         >
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-tooltip content="Xem chi tiết" placement="top">
                 <el-button
                   size="small"
                   type="info"
@@ -739,9 +738,7 @@
                     <View />
                   </el-icon>
                 </el-button>
-              </el-tooltip>
 
-              <el-tooltip content="Chỉnh sửa" placement="top">
                 <el-button
                   size="small"
                   type="primary"
@@ -753,9 +750,7 @@
                     <Edit />
                   </el-icon>
                 </el-button>
-              </el-tooltip>
 
-              <el-tooltip content="Xóa" placement="top">
                 <el-button
                   size="small"
                   type="danger"
@@ -767,7 +762,6 @@
                     <Delete />
                   </el-icon>
                 </el-button>
-              </el-tooltip>
             </div>
           </template>
         </el-table-column>
@@ -1268,24 +1262,33 @@ export default {
     const indexMethod = (index) =>
       (currentPage.value - 1) * pageSize + index + 1;
 
-    const ramLabel = (idRam) =>
-      rams.value.find((r) => r.idRam === idRam)?.dungLuongRam || "Không rõ";
+    const ramLabel = (idRam) => {
+      const ram = rams.value.find(r => r.idRam === idRam);
+      if (!ram) return "Không rõ";
+      return `${ram.dungLuongRam} - ${ram.loaiRam || "Không rõ"}`;
+    };
+
     const cpuLabel = (idCpu) =>
       cpus.value.find((c) => c.idCpu === idCpu)?.chipXuLy || "Không rõ";
-    const manHinhLabel = (idManHinh) =>
-      manHinhs.value.find((m) => m.idManHinh === idManHinh)?.kichThuoc ||
-      "Không rõ";
+
+    const manHinhLabel = (idManHinh) => {
+      const manHinh = manHinhs.value.find((m) => m.idManHinh === idManHinh);
+      return manHinh ? `${manHinh.kichThuoc} - ${manHinh.loaiManHinh} - ${manHinh.tenManHinh}` : "Không rõ";
+    };
+
     const heDieuHanhLabel = (idHeDieuHanh) =>
-      heDieuHanhs.value.find((h) => h.idHeDieuHanh === idHeDieuHanh)
-        ?.phienBan || "Không rõ";
+      heDieuHanhs.value.find((h) => h.idHeDieuHanh === idHeDieuHanh)?.phienBan || "Không rõ";
+
     const pinLabel = (idPin) =>
       pins.value.find((p) => p.idPin === idPin)?.phienBan || "Không rõ";
+
     const cameraTruocLabel = (idCamera) => {
       const camera = cameraTruocs.value.find((c) => c.idCamera === idCamera);
       return camera
         ? `${camera.doPhanGiai} - ${camera.khauDo || "Không rõ"}`
         : "Không rõ";
     };
+
     const cameraSauLabel = (idCameraSau) => {
       if (!idCameraSau || !Array.isArray(idCameraSau)) return "Không rõ";
       return idCameraSau
@@ -1297,8 +1300,10 @@ export default {
         })
         .join(", ");
     };
+
     const loaiLabel = (idLoai) =>
       loais.value.find((l) => l.idLoai === idLoai)?.tenLoai || "Không rõ";
+
     const xuatXuLabel = (idXuatXu) =>
       xuatXus.value.find((x) => x.idXuatXu === idXuatXu)?.maXuatXu ||
       "Không rõ";
@@ -1380,6 +1385,7 @@ export default {
       rams.value.push({
         idRam: savedDungLuong.id,
         dungLuongRam: savedDungLuong.dungLuong,
+        loaiRam: savedDungLuong.loai,
       });
       modelForm.value.idRam = savedDungLuong.id;
     };
@@ -1393,6 +1399,8 @@ export default {
       manHinhs.value.push({
         idManHinh: savedManHinh.id,
         kichThuoc: savedManHinh.kichThuoc,
+        tenManHinh: savedManHinh.tenManHinh,
+        loaiManHinh: savedManHinh.loaiManHinh,
       });
       modelForm.value.idManHinh = savedManHinh.id;
     };
@@ -1468,8 +1476,11 @@ export default {
             ? results[0].value.map((ram) => ({
                 idRam: ram.id,
                 dungLuongRam: ram.dungLuong || "",
+                loaiRam: ram.loai || "",
               }))
             : [];
+
+         console.log("rams.value:", rams.value);   
         cpus.value =
           results[1].status === "fulfilled" && Array.isArray(results[1].value)
             ? results[1].value.map((cpu) => ({
@@ -1477,13 +1488,17 @@ export default {
                 chipXuLy: cpu.chipXuLy || "",
               }))
             : [];
+
         manHinhs.value =
           results[2].status === "fulfilled" && Array.isArray(results[2].value)
             ? results[2].value.map((mh) => ({
                 idManHinh: mh.id,
                 kichThuoc: mh.kichThuoc || "",
+                loaiManHinh: mh.loaiManHinh || "",
+                tenManHinh: mh.tenManHinh || "",
               }))
             : [];
+
         heDieuHanhs.value =
           results[3].status === "fulfilled" && Array.isArray(results[3].value)
             ? results[3].value.map((hdh) => ({
@@ -1491,6 +1506,7 @@ export default {
                 phienBan: hdh.phienBan || "",
               }))
             : [];
+
         pins.value =
           results[4].status === "fulfilled" && Array.isArray(results[4].value)
             ? results[4].value.map((pin) => ({
@@ -1498,6 +1514,7 @@ export default {
                 phienBan: pin.phienBan || "",
               }))
             : [];
+
         cameraTruocs.value =
           results[5].status === "fulfilled" && Array.isArray(results[5].value)
             ? results[5].value.map((cam) => ({
@@ -1506,6 +1523,7 @@ export default {
                 khauDo: cam.khauDo || "",
               }))
             : [];
+
         cameraSaus.value =
           results[6].status === "fulfilled" && Array.isArray(results[6].value)
             ? results[6].value.map((cam) => ({
@@ -1515,6 +1533,8 @@ export default {
                 loaiCamera: cam.loaiCamera || "",
               }))
             : [];
+
+            console.log("cameraSaus.value:", cameraSaus.value);
         xuatXus.value =
           results[7].status === "fulfilled" && Array.isArray(results[7].value)
             ? results[7].value.map((xx) => ({
@@ -1522,6 +1542,7 @@ export default {
                 maXuatXu: xx.maXuatXu || "",
               }))
             : [];
+
         loais.value =
           results[8].status === "fulfilled" && Array.isArray(results[8].value)
             ? results[8].value.map((loai) => ({
@@ -1664,6 +1685,8 @@ export default {
                 .filter((id) => id != null)
             : [],
         };
+
+        console.log('Dữ liệu model:', viewModelData.value); // Log dữ liệu model
         dialogVisible.value = true;
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết model:", error);
@@ -1677,49 +1700,70 @@ export default {
       }
     };
 
-    const editModel = async (model) => {
-      try {
-        const response = await finByIdModelSanPham(model.idModelSanPham);
-        if (!response) {
-          toast.error("Không tìm thấy dữ liệu model!");
-          return;
-        }
-        const validStatuses = ["ACTIVE", "DISCONTINUED", "UPCOMING"];
-        const trangThai = validStatuses.includes(response.trangThaiSanPhamModel)
-          ? response.trangThaiSanPhamModel
-          : "ACTIVE";
-        if (!validStatuses.includes(response.trangThaiSanPhamModel)) {
-          console.warn(
-            `Invalid trangThaiSanPhamModel in editModel: ${response.trangThaiSanPhamModel}`
-          );
-        }
-        formMode.value = "edit";
-        modelForm.value = {
-          ...response,
-          idModelSanPham: response.idModelSanPham,
-          tenModel: response.tenModel || "",
-          idRam: response.idRam,
-          idCpu: response.idCpu,
-          idManHinh: response.idManHinh,
-          idHeDieuHanh: response.idHeDieuHanh,
-          idPin: response.idPin,
-          idCameraTruoc: response.idCameraTruoc,
-          idCameraSau: Array.isArray(response.cameraSaus)
-            ? response.cameraSaus
-                .map((cam) => cam?.id)
-                .filter((id) => id != null)
-            : [],
-          idXuatXu: response.idXuatXu,
-          idLoai: response.idLoai,
-          trangThaiSanPhamModel: trangThai,
-          namRaMat: response.namRaMat,
-        };
-        document.getElementById("form").scrollIntoView();
-      } catch (error) {
-        console.error("Lỗi khi lấy chi tiết model để chỉnh sửa:", error);
-        toast.error("Không thể lấy dữ liệu model để chỉnh sửa!");
-      }
+const editModel = async (model) => {
+  try {
+    console.log('Gọi API finByIdModelSanPham với id:', model.idModelSanPham); // Log ID model
+    const response = await finByIdModelSanPham(model.idModelSanPham);
+    
+    console.log('Response từ API:', response); // Log toàn bộ response
+
+    if (!response) {
+      console.log('Response rỗng hoặc không hợp lệ'); // Log khi response không hợp lệ
+      toast.error("Không tìm thấy dữ liệu model!");
+      return;
+    }
+
+    const validStatuses = ["ACTIVE", "DISCONTINUED", "UPCOMING"];
+    const trangThai = validStatuses.includes(response.trangThaiSanPhamModel)
+      ? response.trangThaiSanPhamModel
+      : "ACTIVE";
+
+    if (!validStatuses.includes(response.trangThaiSanPhamModel)) {
+      console.warn(
+        `Invalid trangThaiSanPhamModel in editModel: ${response.trangThaiSanPhamModel}`
+      );
+    }
+
+    const idCameraSau = Array.isArray(response.cameraSaus)
+      ? response.cameraSaus
+          .map((cam) => cam?.id)
+          .filter((id) => id != null)
+      : [];
+    
+    console.log('Dữ liệu cameraSaus:', response.cameraSaus); // Log dữ liệu cameraSaus
+    console.log('idCameraSau sau khi xử lý:', idCameraSau); // Log idCameraSau
+
+    formMode.value = "edit";
+    modelForm.value = {
+      ...response,
+      idModelSanPham: response.idModelSanPham,
+      tenModel: response.tenModel || "",
+      idRam: response.idRam,
+      idCpu: response.idCpu,
+      idManHinh: response.idManHinh,
+      idHeDieuHanh: response.idHeDieuHanh,
+      idPin: response.idPin,
+      idCameraTruoc: response.idCameraTruoc,
+      idCameraSau,
+      idXuatXu: response.idXuatXu,
+      idLoai: response.idLoai,
+      trangThaiSanPhamModel: trangThai,
+      namRaMat: response.namRaMat,
     };
+
+    console.log('modelForm.value:', modelForm.value); // Log dữ liệu modelForm
+
+    document.getElementById("form").scrollIntoView();
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết model để chỉnh sửa:", error);
+    console.log('Chi tiết lỗi:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    }); // Log chi tiết lỗi
+    toast.error("Không thể lấy dữ liệu model để chỉnh sửa!");
+  }
+};
 
     const switchToEditMode = () => {
       formMode.value = "edit";
@@ -2028,7 +2072,7 @@ export default {
 .filter-card:hover,
 .table-card:hover {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
 }
 
 .card-header {

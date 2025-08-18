@@ -45,10 +45,10 @@ export const detailSanPham = async (id) => {
   }
 };
 
-export const getChiTietBienThe = async (idSp, idMau, idRom) => {
+export const getChiTietBienThe = async (idSp, idMau, idRom, selectedIdKhachHang) => {
   try {
     const response = await api.get(
-      `${baseURL}/${idSp}/mau/${idMau}/rom/${idRom}`
+      `${baseURL}/${selectedIdKhachHang}/${idSp}/mau/${idMau}/rom/${idRom}`
     );
     return response.data;
   } catch (error) {

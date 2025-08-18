@@ -1627,6 +1627,53 @@ VALUES
     (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
     (N'Khách đổi ý', 'CANCELLED');
 
+-- 20 ảnh đầu tiên -> id = 1..20
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562841/iemqzr3nxhwi0vdvywcd.webp',
+    image_public_id = 'iemqzr3nxhwi0vdvywcd'
+WHERE id_hinh_anh BETWEEN 1 AND 20;
+
+-- 20 ảnh tiếp theo -> id = 21..40
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562744/xq9bxvzytcm8dwbkqnpk.webp',
+    image_public_id = 'xq9bxvzytcm8dwbkqnpk'
+WHERE id_hinh_anh BETWEEN 21 AND 40;
+
+-- 20 ảnh tiếp theo -> id = 41..60
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562704/imsnuvtjwjpfkqhszkxn.webp',
+    image_public_id = 'imsnuvtjwjpfkqhszkxn'
+WHERE id_hinh_anh BETWEEN 41 AND 60;
+
+-- 20 ảnh tiếp theo -> id = 61..80
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562653/yesdc6rszdhxgbhxhbnh.webp',
+    image_public_id = 'yesdc6rszdhxgbhxhbnh'
+WHERE id_hinh_anh BETWEEN 61 AND 80;
+
+-- 20 ảnh tiếp theo -> id = 81..100
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562629/ddoxprv7d6cvfltwqgxw.webp',
+    image_public_id = 'ddoxprv7d6cvfltwqgxw'
+WHERE id_hinh_anh BETWEEN 81 AND 100;
+
+-- 20 ảnh tiếp theo -> id = 101..120
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802104/ievxl7iehsy3d5cbhkdw.webp',
+    image_public_id = 'ievxl7iehsy3d5cbhkdw'
+WHERE id_hinh_anh BETWEEN 101 AND 120;
+
+-- 19 ảnh tiếp theo -> id = 121..139
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802102/c0166slcdkfkxszvwujn.webp',
+    image_public_id = 'c0166slcdkfkxszvwujn'
+WHERE id_hinh_anh BETWEEN 121 AND 139;
+
+-- 19 ảnh cuối -> id = 140..158
+UPDATE hinh_anh 
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753800593/bqvwkuqlwuc2slzrkzug.webp',
+    image_public_id = 'bqvwkuqlwuc2slzrkzug'
+WHERE id_hinh_anh BETWEEN 140 AND 158;
 
 -- 1. nhan_vien
 SELECT * FROM nhan_vien;
@@ -1747,4 +1794,3 @@ SELECT * FROM hang_thanh_vien
 
 --42. nha_cung_cap_sp
 SELECT * FROM nha_cung_cap_sp
-

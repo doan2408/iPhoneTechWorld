@@ -68,4 +68,7 @@ public class SanPhamChiTiet {
     @OneToMany(mappedBy = "idSanPhamChiTiet", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private List<DanhGiaSanPham> danhGiaSanPhams = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_khuyen_mai")
+    private KhuyenMai idKhuyenMai;
 }

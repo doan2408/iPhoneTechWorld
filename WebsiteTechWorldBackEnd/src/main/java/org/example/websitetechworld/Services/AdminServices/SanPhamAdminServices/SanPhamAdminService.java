@@ -9,6 +9,8 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.BusinessException;
@@ -24,6 +26,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +46,8 @@ public class SanPhamAdminService {
     private final ModelMapper modelMapper;
     private final SanPhamChiTietAdminService sanPhamChiTietAdminService;
     private final NhaCungCapSpRepository nhaCungCapSpRepository;
+    private final HoaDonRepository hoaDonRepository;
+    private final KhachHangRepository khachHangRepository;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -1019,11 +1025,15 @@ public class SanPhamAdminService {
         sanPhamRepo.save(sanPham);
     }
 
-    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size, Integer selectedIdKhachHang) {
         Pageable pageable = PageRequest.of(page, size);
         Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(tenSanPham, TrangThaiSanPham.ACTIVE, pageable);
 
-        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+        return chiTietPage.map(spct -> {
+            SanPhamBanHangAdminResponse response = SanPhamBanHangAdminResponse.converDto(spct);
+            response.setGiaBan(tinhGiaKhuyenMai(spct, selectedIdKhachHang));
+            return response;
+        });
     }
 
     public Page<SanPhamBanHangAdminResponse> getProductMas(String maSanPham, int page, int size) {
@@ -1097,7 +1107,52 @@ public class SanPhamAdminService {
         }
     }
 
+    private BigDecimal tinhGiaKhuyenMai(SanPhamChiTiet spct, Integer selectedIdKhachHang) {
+        try {
+            if (spct == null || spct.getGiaBan() == null) {
+                return BigDecimal.ZERO;
+            }
+            BigDecimal giaGoc = spct.getGiaBan();
+            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            if (khuyenMai == null) {
+                return giaGoc;
+            }
+            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
+                return giaGoc;
+            }
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
+                return giaGoc;
+            }
 
+            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
+            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
+            if (doiTuong == DoiTuongApDung.ALL) {
+                return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+            }
+            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
+                return giaGoc;
+            }
+            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
+            boolean khongHopLe =
+                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
+                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
+            if (khongHopLe) {
+                return giaGoc;
+            }
+
+            return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+        } catch (Exception e) {
+            return spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
+        return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
+    }
 }
 
 

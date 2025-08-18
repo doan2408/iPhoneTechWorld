@@ -31,4 +31,6 @@ public class SanPhamChiTietResponse {
 
     private Set<HinhAnhAdminResponse> hinhAnhs;
     private Integer idSanPham;
+    private Integer idKhuyenMai;
+    private String maKhuyenMai;
 }

@@ -21,4 +21,5 @@ public class ChiTietHoaDonAdminRequest {
 
     private List<String> imeiIds;
 
+    private Integer idKhachHang;
 }

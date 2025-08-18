@@ -7,6 +7,9 @@
 
 
   <button @click="() => { console.log('Đã click lọc'); fetchDashboardData() }">Lọc</button>
+  <button @click="handleExportDashboard">Xuất Excel</button>
+  <button @click="handleExportDoanhThu">Xuất Excel Doanh Thu</button>
+  <button @click="handleExportKhachHang">Xuất Excel KHTT</button>
 
 </div>
 
@@ -77,31 +80,34 @@
   </div>
   <!-- Khách hàng trung thành  -->
   <div class="khach-hang-wrapper">
-    <h2>Top 5 Khách Hàng Trung Thành</h2>
+  <h2>Top 5 Khách Hàng Trung Thành</h2>
 
-    <table class="khach-hang-table">
-      <thead>
-        <tr>
-          <th>STT</th>
-          <th>Mã KH</th>
-          <th>Tên KH</th>
-          <th>Số lần mua</th>
-          <th>Doanh Thu</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(kh, index) in khachHangList" :key="kh.ma_khach_hang">
-          <td>{{ index + 1 }}</td>
-          <td>{{ kh.ma_khach_hang }}</td>
-          <td>{{ kh.ten_khach_hang }}</td>
-          <td>{{ kh.so_lan_mua }}</td>
-          <td>{{ kh.tong_doanh_thu }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Bảng dữ liệu -->
+  <table class="khach-hang-table" v-if="khachHangList && khachHangList.length > 0">
+    <thead>
+      <tr>
+        <th>STT</th>
+        <th>Mã KH</th>
+        <th>Tên KH</th>
+        <th>Số lần mua</th>
+        <th>Doanh Thu</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(kh, index) in khachHangList" :key="kh.ma_khach_hang">
+        <td>{{ index + 1 }}</td>
+        <td>{{ kh.ma_khach_hang }}</td>
+        <td>{{ kh.ten_khach_hang }}</td>
+        <td>{{ kh.so_lan_mua }}</td>
+        <td>{{ formatCurrency(kh.tong_doanh_thu) }}</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <p v-if="khachHangList && khachHangList.length === 0">Không có dữ liệu.</p>
-  </div>
+  <!-- Thông báo khi không có dữ liệu -->
+  <p v-else-if="!loading">Không có dữ liệu.</p>
+</div>
+
   <!-- sản phẩm sắp hết -->
   <div class="khach-hang-wrapper">
     <h2>Sản phẩm Sắp Hết Hàng</h2>
@@ -158,6 +164,12 @@ import { getSanPhamBanChay } from '@/Service/Adminservice/ThongKe/ThongKeAdminSe
 import { getKhachHangTrungThanh } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
 import { getSanPhamSapHetHang } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
 import { getDonHangHuy } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { exportDashboardExcel } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { exportDoanhThuTheoThangExcel } from '@/Service/Adminservice/ThongKe/ThongKeAdminService';
+import { exportKhachHangTrungThanhExcel } from '@/Service/Adminservice/ThongKe/ThongKeAdminService'
+
+
+
 
 import Chart from 'chart.js/auto'
 
@@ -175,10 +187,14 @@ const fetchDashboardData = async () => {
 }
 onMounted(fetchDashboardData)
 
+//fomat tiền 
 const formatCurrency = (value) => {
-  if (!value) return '0 VNĐ'
-  return Number(value).toLocaleString('vi-VN') + ' VNĐ'
-}
+  if (!value) return "0 VNĐ";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
+};
 //biểu đồ 
 const labels = ref([])
 const revenues = ref([])
@@ -380,6 +396,29 @@ const fetchCancelData = async () => {
 }
 
 onMounted(fetchCancelData)
+const handleExportDashboard = async () => {
+  try {
+    await exportDashboardExcel(startDate.value, endDate.value)
+  } catch (e) {
+    console.error("Export Excel Dashboard error:", e)
+  }
+}
+//Xuất doanh thu 
+const handleExportDoanhThu = async () => {
+  try {
+    await exportDoanhThuTheoThangExcel()
+  } catch (e) {
+    console.error("Export Doanh thu theo tháng error:", e)
+  }
+}
+///
+const handleExportKhachHang = async () => {
+  try {
+    await exportKhachHangTrungThanhExcel()
+  } catch (e) {
+    console.error("Export Khách hàng trung thành error:", e)
+  }
+}
 </script>
 
 
