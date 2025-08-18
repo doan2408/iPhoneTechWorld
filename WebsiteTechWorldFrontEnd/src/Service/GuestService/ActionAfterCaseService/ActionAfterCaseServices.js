@@ -26,3 +26,8 @@ export const getAllLyDoXuLy = (pageNo, pageSize) => {
         }
     })
 }
+
+export const getAllCtXuLy = (idHoaDon) => {
+    const url = baseURL + '/detail/' + idHoaDon;
+    return api.get(url)
+}

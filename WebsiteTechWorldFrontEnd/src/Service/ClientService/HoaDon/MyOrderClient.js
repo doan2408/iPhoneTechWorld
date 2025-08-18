@@ -1,6 +1,7 @@
 import api from "@/Service/LoginService/axiosInstance";
 
 const baseURL = "/client/my-order"
+const baseUrlGuest = '/my-order'
 
 export const getMyOrder = async (pageNo,pageSize) => {
     return  await api.get(baseURL,{
@@ -76,5 +77,10 @@ export const deleteHoaDonGuest = (maHd) => {
 
 export const findHdctByImeiDaBan = (idHoaDon) => {
     return api.get('/my-order' + '/' + idHoaDon + '/hdct-by-imei-da-ban')
+}
+
+export const hoaDonDetailGuest = (id) => {
+    const url = baseUrlGuest + '/' + id;
+    return api.get(url)
 }
 
