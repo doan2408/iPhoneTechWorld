@@ -48,7 +48,7 @@ public class ImeiDaBanAdminServices {
         return imeiDaBanRepository.imeiTrongHdct(idHoaDon,pageable);
     }
 
-    public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer idHoaDon) {
-        return imeiDaBanRepository.imeiTrongHdct(idHoaDon);
+    public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer ctHoaDonId) {
+        return imeiDaBanRepository.imeiTrongHdct(ctHoaDonId);
     }
 }

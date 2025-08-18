@@ -21,5 +21,5 @@ public class ActionBeforeCaseResponse {
     private TrangThaiGiaoHang trangThaiDonHang;
     private LocalDateTime thoiGianYeuCau;
     private BigDecimal giaBan;
-
+    private Integer idHoaDon;
 }

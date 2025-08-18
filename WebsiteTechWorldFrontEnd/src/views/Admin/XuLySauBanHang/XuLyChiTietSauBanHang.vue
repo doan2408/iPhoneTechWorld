@@ -80,11 +80,6 @@
                                 :disabled="selectedImeis.length === 0" title="Hoàn tiền">
                                 💰 Hoàn tiền
                             </button>
-
-                            <button class="toolbar-btn exchange" @click="processBulk('exchange')"
-                                :disabled="selectedImeis.length === 0" title="Trao đổi">
-                                🔄 Trao đổi
-                            </button>
                         </div>
                     </div>
 
@@ -146,12 +141,9 @@
                                             </button>
 
                                             <button class="action-btn refund"
-                                                @click="processImei(imei.soImei, 'refund')" title="Hoàn tiền">
+                                                @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
+                                                title="Hoàn tiền">
                                                 💰
-                                            </button>
-                                            <button class="action-btn exchange"
-                                                @click="processImei(imei.soImei, 'exchange')" title="Trao đổi">
-                                                ♻️
                                             </button>
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
                                                 @confirm="handleConfirm" @cancel="showConfirm = false" />
@@ -160,6 +152,10 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="mt-4">
+                            <strong>Số tiền cần trả:</strong>
+                            {{ formatPrice(orderProduct[0]?.soTienHoan) }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,46 +218,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Processing Actions -->
-            <div class="actions-section">
-                <h2>Xử lý chi tiết</h2>
-                <div class="action-form">
-                    <div class="form-group">
-                        <label for="action-type">Loại hành động:</label>
-                        <select id="action-type" v-model="selectedAction">
-                            <option value="">Chọn hành động</option>
-                            <option value="retry">RETRY - Giao lại</option>
-                            <option value="cancel">CANCEL - Hủy bỏ</option>
-                            <option value="return-to-stock">RETURN_TO_STOCK - Trả lại kho</option>
-                            <option value="refund">REFUND - Hoàn tiền</option>
-                            <option value="exchange">EXCHANGE - Trao đổi</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" v-if="selectedAction === 'retry'">
-                        <label for="delivery-date">Ngày giao lại:</label>
-                        <input type="date" id="delivery-date" v-model="deliveryDate">
-                    </div>
-
-                    <div class="form-group" v-if="selectedAction === 'refund'">
-                        <label for="refund-amount">Số tiền hoàn:</label>
-                        <input type="number" id="refund-amount" v-model="refundAmount" :max="order.amount">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="processing-note">Ghi chú xử lý:</label>
-                        <textarea id="processing-note" v-model="processingNote" rows="4"
-                            placeholder="Nhập ghi chú về việc xử lý..."></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn-secondary" @click="saveDraft">Lưu nháp</button>
-                        <button class="btn-primary" @click="processOrder" :disabled="!selectedAction">Xử lý đơn
-                            hàng</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </template>
@@ -272,6 +228,7 @@ import { getAllCtXuLy, changeStatusPending } from '@/Service/GuestService/Action
 import { useRoute } from 'vue-router'
 import { hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import router from '@/router'
 
 const route = useRoute()
 const idHoaDon = route.params.idHoaDon
@@ -387,7 +344,7 @@ const viewWarrantyCenter = () => {
 }
 
 const goBack = () => {
-    console.log('[v0] Navigating back to main page')
+    router.push(`/admin/handle`)
 }
 
 const saveDraft = () => {

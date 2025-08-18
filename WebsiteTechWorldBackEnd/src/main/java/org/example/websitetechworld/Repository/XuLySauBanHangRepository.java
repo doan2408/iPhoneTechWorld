@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
+import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +25,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
              , hd.trangThaiDonHang
              , MAX(xlbh.thoiGianYeuCau)
              , SUM(cthd.donGia)
+             , hd.id
         )
                 FROM
                      XuLySauBanHang xlbh
@@ -49,19 +51,21 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             xlbh.hanhDongSauVuViec,
             cthd.tenSanPham,
             spct.idRom.dungLuong,
-            spct.idMau.tenMau
-            
+            spct.idMau.tenMau,
+            CAST(0 AS bigdecimal)
         )
             FROM XuLySauBanHang xlbh
-                JOIN xlbh.idHoaDon hd
-                JOIN xlbh.idImeiDaBan imdb
-                JOIN xlbh.idLyDo ld
-                JOIN hd.chiTietHoaDons cthd
-                JOIN cthd.idSanPhamChiTiet spct 
+                LEFT JOIN xlbh.idHoaDon hd
+                LEFT JOIN xlbh.idImeiDaBan imdb
+                LEFT JOIN xlbh.idLyDo ld
+                LEFT JOIN hd.chiTietHoaDons cthd
+                LEFT JOIN cthd.idSanPhamChiTiet spct
             WHERE xlbh.idHoaDon.id = :idHoaDon
     """)
     List<XuLyChiTietResponse> getAllCtXuLy(Integer idHoaDon);
 
     XuLySauBanHang findXuLySauBanHangByIdImeiDaBan_SoImei(String soImei);
+
+    List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_IdAndHanhDongSauVuViec(Integer idHoaDon, ActionAfterCase action);
 
 }

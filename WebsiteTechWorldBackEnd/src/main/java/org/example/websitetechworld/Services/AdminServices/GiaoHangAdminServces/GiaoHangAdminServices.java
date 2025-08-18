@@ -63,7 +63,7 @@ public class GiaoHangAdminServices {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
         }
-        if (TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan()) || TrangThaiGiaoHang.CANCELLED.equals(newStatus)){
+        if (TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan()) && TrangThaiGiaoHang.CANCELLED.equals(newStatus)){
             xuLySauBanHangServices.taoDonHoanTienHuyHang(hoaDon);
         }
 

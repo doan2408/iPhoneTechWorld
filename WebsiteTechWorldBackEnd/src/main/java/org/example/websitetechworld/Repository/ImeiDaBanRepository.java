@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.ImeiDaBan;
+import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,12 +59,14 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
         LEFT JOIN SanPhamChiTiet  spct ON spct.id = cthd.idSanPhamChiTiet.id
         LEFT JOIN MauSac ms ON ms.id = spct.idMau.id
         LEFT JOIN Rom rom ON rom.id = spct.idRom.id
-        WHERE cthd.idHoaDon.id = :hoaDonId
+        WHERE cthd.id = :ctHoaDonId
         ORDER BY imbd.id DESC 
     """)
-    List<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer hoaDonId);
+    List<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer ctHoaDonId);
 
-    boolean existsBySoImei(String soImei);
+    boolean existsBySoImeiAndTrangThai(String soImei, TrangThaiImei trangThaiImei);
 
     ImeiDaBan findByIdHoaDonChiTiet_IdAndSoImei(Integer idHoaDonChiTiet_Id, String soImei);
+
+    ImeiDaBan findBySoImei(String soImei);
 }

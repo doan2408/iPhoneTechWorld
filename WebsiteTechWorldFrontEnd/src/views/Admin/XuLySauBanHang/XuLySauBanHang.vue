@@ -94,7 +94,7 @@
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
-                                        <button class="action-btn primary">Xử lý</button>
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử lý</button>
                                         <button class="action-btn secondary">Chi tiết</button>
                                     </div>
                                 </td>
@@ -184,6 +184,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import router from '@/router'
 
 // Reactive data
 const activeTab = ref('all')
@@ -210,6 +211,10 @@ const pageSize = ref(5);
 const getAllLyDoXuLyView = async () => {
     const res = await getAllLyDoXuLy(pageNo.value, pageSize.value);
     orders.value = res.data.content
+}
+
+const xuLyClick = (id) => {
+    router.push(`/admin/handle-detail/`+id)
 }
 
 const failedOrders = computed(() =>

@@ -109,9 +109,6 @@
                                 {{ step.description }}
                             </div>
                         </div>
-
-                        <!-- Arrow for completed/current steps -->
-                        <!-- <div v-if="step.status !== 'pending'" class="step-arrow"></div> -->
                     </div>
                 </div>
             </div>
@@ -167,7 +164,7 @@
                     class="action-btn cancel-btn">
                     <X class="icon-small" /> HỦY ĐƠN
                 </button>
-                
+
                 <button v-if="canShippingFalse" @click="openPopupShippingFalse()" class="action-btn cancel-btn">
                     <X class="icon-small" /> GIAO THẤT BẠI
                 </button>
@@ -697,6 +694,7 @@ const openPopupReturn = async () => {
         imeis.value.push(...resImeis.data.map(i => ({ ...i, reasonId: "" })))
     }
 
+    console.log(imeis.value)
     await getAllReturnReason()
 }
 const confirmReturn = async () => {

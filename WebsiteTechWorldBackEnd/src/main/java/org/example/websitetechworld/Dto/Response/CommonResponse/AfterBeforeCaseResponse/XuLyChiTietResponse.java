@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 
+import java.math.BigDecimal;
+
 
 @Getter
 @Setter
@@ -21,4 +23,5 @@ public class XuLyChiTietResponse {
     private String tenSanPham;
     private String dungLuong;
     private String mau;
+    private BigDecimal soTienHoan;
 }
