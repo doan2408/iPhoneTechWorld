@@ -167,12 +167,7 @@
                     class="action-btn cancel-btn">
                     <X class="icon-small" /> HỦY ĐƠN
                 </button>
-
-                <!-- <button v-if="canShippingFalse"
-                    @click="openConfirm('Xác nhận giao thất bại?', () => updateOrderStatus('Giao thất bại'))"
-                    class="action-btn cancel-btn">
-                    <X class="icon-small" /> GIAO THẤT BẠI
-                </button> -->
+                
                 <button v-if="canShippingFalse" @click="openPopupShippingFalse()" class="action-btn cancel-btn">
                     <X class="icon-small" /> GIAO THẤT BẠI
                 </button>
@@ -711,9 +706,9 @@ const confirmReturn = async () => {
             imeis: imeis.value
                 .filter(i => i.selected)
                 .map(i => ({
-                    idHoaDonChiTiet: i.idHoaDonChiTiet, // cần cho backend
-                    soImei: i.soImei,                   // đúng field backend
-                    idFailReason: i.reasonId            // lấy từ select
+                    idHoaDonChiTiet: i.idHoaDonChiTiet, 
+                    soImei: i.soImei,                   
+                    idFailReason: i.reasonId            
                 }))
         }
 

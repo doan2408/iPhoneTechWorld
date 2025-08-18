@@ -8,7 +8,8 @@
                 </button>
                 <div class="header-info">
                     <h1>Xử lý đơn hàng #{{ orderInformation.maHoaDon }}</h1>
-                    <span class="order-status" :class="orderInformation.trangThaiDonHang">{{ getStatusText(orderInformation.trangThaiDonHang) }}</span>
+                    <span class="order-status" :class="orderInformation.trangThaiDonHang">{{
+                        getStatusText(orderInformation.trangThaiDonHang) }}</span>
                 </div>
             </div>
         </div>
@@ -117,7 +118,8 @@
                                             class="row-checkbox">
                                     </td>
                                     <td class="imei-code">{{ imei.soImei }}</td>
-                                    <td class="product-name">{{ imei.tenSanPham +' '+ imei.mau +' '+ imei.dungLuong }}</td>
+                                    <td class="product-name">{{ imei.tenSanPham +' '+ imei.mau +' '+ imei.dungLuong }}
+                                    </td>
                                     <td>
                                         <span class="imei-status" :class="imei.trangThaiDon">
                                             {{ getImeiStatusText(imei.trangThaiDon) }}
@@ -125,26 +127,35 @@
                                     </td>
                                     <td class="action-col">
                                         <div class="row-actions">
-                                            <button class="action-btn retry" @click="processImei(imei.soImei, 'retry')"
-                                                title="Giao lại">
-                                                🚚
+                                            <button class="action-btn retry" 
+                                            @click="openConfirm('Bạn có chắc chắn muốn dữ lại?', () => processImei(imei.soImei,'hold'))" title="Dữ lại">
+                                                ♻️
                                             </button>
-                                            <button class="action-btn cancel" @click="processImei(imei.soImei, 'cancel')"
-                                                title="Hủy bỏ">
+
+                                            <button v-if="canCancel"
+                                                @click="openConfirm('Bạn có chắc chắn?', () => updateOrderStatus('Đã hủy'))"
+                                                class="action-btn cancel-btn">
+                                                <X class="icon-small" /> HỦY ĐƠN
+                                            </button>
+
+                                            <button class="action-btn cancel"
+                                                @click="processImei(imei.soImei, 'cancel')" title="Hủy bỏ">
                                                 ❌
                                             </button>
                                             <button class="action-btn return"
                                                 @click="processImei(imei.soImei, 'return-to-stock')" title="Trả kho">
                                                 📦
                                             </button>
-                                            <button class="action-btn refund" @click="processImei(imei.soImei, 'refund')"
-                                                title="Hoàn tiền">
+                                            <button class="action-btn refund"
+                                                @click="processImei(imei.soImei, 'refund')" title="Hoàn tiền">
                                                 💰
                                             </button>
                                             <button class="action-btn exchange"
                                                 @click="processImei(imei.soImei, 'exchange')" title="Trao đổi">
                                                 soImei
                                             </button>
+                                            <ConfirmModal v-if="showConfirm" :message="confirmMessage"
+                                                @confirm="handleConfirm" @cancel="showConfirm = false" />
                                         </div>
                                     </td>
                                 </tr>
@@ -258,9 +269,10 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { getAllCtXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { getAllCtXuLy, changeStatusPending } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import { useRoute } from 'vue-router'
 import { hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
 
 const route = useRoute()
 const idHoaDon = route.params.idHoaDon
@@ -353,11 +365,6 @@ const openZalo = () => {
     window.open(`https://zalo.me/${order.zalo}`)
 }
 
-const retryDelivery = () => {
-    selectedAction.value = 'retry'
-    deliveryDate.value = new Date(Date.now() + 86400000).toISOString().split('T')[0]
-}
-
 const cancelOrder = () => {
     selectedAction.value = 'cancel'
 }
@@ -418,12 +425,7 @@ const getActionText = (action) => {
     return actionMap[action] || action
 }
 
-const processImei = (imeiCode, action) => {
-    console.log(`[v0] Processing IMEI ${imeiCode} with action: ${action}`)
-    alert(`Xử lý IMEI ${imeiCode} với hành động: ${getActionText(action)}`)
-}
-
-const processBulk = (action) => {
+const processBulk = async (action) => {
     if (selectedImeis.value.length === 0) {
         alert('Vui lòng chọn ít nhất một IMEI!')
         return
@@ -432,8 +434,30 @@ const processBulk = (action) => {
     console.log(`[v0] Processing ${selectedImeis.value.length} IMEIs with action: ${action}`)
     alert(`Xử lý ${selectedImeis.value.length} IMEI với hành động: ${getActionText(action)}`)
 
-    // Clear selection after processing
+    switch (action) {
+        case 'retry':
+            retryDelivery()
+            break
+        default:
+            alert(`Hành động ${action} chưa được hỗ trợ!`)
+    }
+
     selectedImeis.value = []
+}
+
+
+const retryDelivery = () => {
+    selectedAction.value = 'retry'
+    deliveryDate.value = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+}
+
+const processImei = async (imeiCode, action) => {
+    console.log(`[v0] Processing IMEI ${imeiCode} with action: ${action}`)
+    const status = action.toUpperCase()    
+    const res = await changeStatusPending(imeiCode,status)
+    orderSanPham()
+    orderInformation()
+
 }
 
 function formatDate(date) {
@@ -443,6 +467,21 @@ function formatDate(date) {
         month: "2-digit",
         day: "2-digit",
     }).format(new Date(date));
+}
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
 }
 
 onMounted( async () => {

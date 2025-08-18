@@ -31,3 +31,12 @@ export const getAllCtXuLy = (idHoaDon) => {
     const url = baseURL + '/detail/' + idHoaDon;
     return api.get(url)
 }
+
+export const changeStatusPending = (soImei,status) => {
+    const url = baseURL + '/change-status'
+    const request = {
+        soImei: soImei,
+        status: status
+    };
+    return api.post(url,request)
+}

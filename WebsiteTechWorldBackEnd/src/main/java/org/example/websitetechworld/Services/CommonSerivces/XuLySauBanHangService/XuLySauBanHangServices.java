@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangService;
 
+import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
@@ -40,7 +41,7 @@ public class XuLySauBanHangServices {
         xuLySauBanHang.setThoiGianYeuCau(LocalDateTime.now());
         LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findByLoaiVuViec(CaseType.CANCELLED);
         xuLySauBanHang.setIdLyDo(lyDoXuLy);
-        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.HOLD);
+        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.PENDING);
         xuLySauBanHang.setDaKiemTra(false);
         xuLySauBanHangRepository.save(xuLySauBanHang);
     }
@@ -64,7 +65,7 @@ public class XuLySauBanHangServices {
                             xuLy.setLoaiVuViec(lyDoXuLy.getLoaiVuViec());
                             xuLy.setThoiGianYeuCau(LocalDateTime.now());
                             xuLy.setIdLyDo(lyDoXuLy);
-                            xuLy.setHanhDongSauVuViec(ActionAfterCase.HOLD);
+                            xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                             xuLy.setDaKiemTra(false);
                             return xuLy;
                         })
@@ -94,7 +95,7 @@ public class XuLySauBanHangServices {
                     xuLy.setLoaiVuViec(lyDoXuLy.getLoaiVuViec());
                     xuLy.setThoiGianYeuCau(LocalDateTime.now());
                     xuLy.setIdLyDo(lyDoXuLy);
-                    xuLy.setHanhDongSauVuViec(ActionAfterCase.HOLD);
+                    xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                     xuLy.setDaKiemTra(false);
                     return xuLy;
                 })
@@ -114,4 +115,10 @@ public class XuLySauBanHangServices {
         return xuLySauBanHangRepository.getAllCtXuLy(idHoaDon);
     }
 
+    public void changeStatus(ChangeStatusRequest request) {
+        XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(request.getSoImei());
+        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.HOLD);
+        xuLySauBanHang.setDaKiemTra(true);
+        xuLySauBanHangRepository.save(xuLySauBanHang);
+    }
 }

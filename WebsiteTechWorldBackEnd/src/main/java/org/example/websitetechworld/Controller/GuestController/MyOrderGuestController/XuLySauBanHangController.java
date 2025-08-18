@@ -1,5 +1,7 @@
 package org.example.websitetechworld.Controller.GuestController.MyOrderGuestController;
 
+import org.apache.commons.collections4.Get;
+import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
@@ -43,5 +45,11 @@ public class XuLySauBanHangController {
     public ResponseEntity<?> findByIdHoaDon(@PathVariable Integer idHoaDon){
         List<XuLyChiTietResponse> banHangList = xuLySauBanHangServices.findByIdHoaDon(idHoaDon);
         return ResponseEntity.ok(banHangList);
+    }
+
+    @PostMapping("/change-status")
+    public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request){
+        xuLySauBanHangServices.changeStatus(request);
+        return ResponseEntity.ok("Cập nhật trạng thái thành công");
     }
 }

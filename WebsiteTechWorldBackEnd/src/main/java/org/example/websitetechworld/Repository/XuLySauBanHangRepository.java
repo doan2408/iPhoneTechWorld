@@ -62,4 +62,6 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
     """)
     List<XuLyChiTietResponse> getAllCtXuLy(Integer idHoaDon);
 
+    XuLySauBanHang findXuLySauBanHangByIdImeiDaBan_SoImei(String soImei);
+
 }
