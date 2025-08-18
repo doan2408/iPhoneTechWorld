@@ -1937,7 +1937,8 @@ const selectedKhachHang = async (khachHang) => {
             toast.success("Bỏ chọn khách hàng thành công")
         } else {
             selectedIdKhachHang.value = khachHang.id
-            toast.success("Chọn khách hàng thành công id: " + khachHang.id)
+            // toast.success("Chọn khách hàng thành công id: " + khachHang.id)
+            toast.success("Chọn khách hàng thành công");
         }
     } catch (err) {
         toast.error("Thêm khách hàng vào hóa đơn thất bại")
@@ -1949,6 +1950,7 @@ const selectedKhachHang = async (khachHang) => {
 const add = async (data) => {
     try {
         const response = await addKhachHang(data);
+        console.log(response.data)
         selectedKhachHang(response.data)
     } catch (err) {
         console.error("Thêm khách hàng thất bại:", err);
