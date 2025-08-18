@@ -18,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -35,12 +37,19 @@ public class MyOrderController {
 
     @GetMapping()
     public Page<MyOrderClientResponse> myOrder(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
-                                               @RequestParam(defaultValue = "10",value = "pageSize") int pageSize) {
+                                               @RequestParam(defaultValue = "10",value = "pageSize") int pageSize,
+                                               @RequestParam(value = "keyword", required = false) String keyword,
+                                               @RequestParam(value = "minPrice", required = false)BigDecimal minPrice,
+                                               @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+                                               @RequestParam(value = "startDate", required = false) LocalDateTime startDate,
+                                               @RequestParam(value = "endDate", required = false) LocalDateTime endDate,
+                                               @RequestParam(value = "trangThaiGiaoHang", required = false) String trangThaiGiaoHang
+                                               ) {
         Page<MyOrderClientResponse> myOrderClientResponses = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails){
             Integer userLoginId = customUserDetails.getId();
-            myOrderClientResponses = myOrderClientServices.getOrderByUserLogin(userLoginId,pageNo,pageSize);
+            myOrderClientResponses = myOrderClientServices.getOrderByUserLogin(userLoginId, pageNo, pageSize, keyword, minPrice, maxPrice, startDate, endDate, trangThaiGiaoHang);
         }
         return myOrderClientResponses;
         }

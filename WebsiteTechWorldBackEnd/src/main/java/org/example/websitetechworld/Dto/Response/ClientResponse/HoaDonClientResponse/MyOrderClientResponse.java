@@ -8,6 +8,7 @@ import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,5 +21,6 @@ public class MyOrderClientResponse {
     private String trangThaiGiaoHang;
     private String trangThaiThanhToan;
     private BigDecimal thanhTien;
+    private LocalDateTime ngayDatHang;
     private List<MyOrderProductClientResponse> myOrderClientResponseList;
 }

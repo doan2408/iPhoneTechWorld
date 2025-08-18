@@ -70,14 +70,194 @@ public class MyOrderClientServices {
     }
 
 
-    public Page<MyOrderClientResponse> getOrderByUserLogin(Integer userLoginId, Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId,pageable);
-        List<MyOrderClientResponse> content = lstHoaDon
-                .stream()
-                .map(hoaDon -> myOrderClientMapper.toMyOrderClientResponse(hoaDon))
-                .toList();
-        return new PageImpl<>(content,pageable,lstHoaDon.getTotalElements());
+    public Page<MyOrderClientResponse> getOrderByUserLogin(
+            Integer userLoginId,
+            Integer pageNo,
+            Integer pageSize,
+            String keyword,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            String trangThaiGiaoHang
+    ) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
+            Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
+
+            // Null check cho lstHoaDon
+            if (lstHoaDon == null || lstHoaDon.getContent() == null) {
+                System.out.println("No orders found for user: " + userLoginId);
+                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            }
+
+            List<HoaDon> filtered = new ArrayList<>(lstHoaDon.getContent());
+
+            // 🔍 Lọc theo trạng thái giao hàng (từ tab hoặc combobox)
+            if (trangThaiGiaoHang != null && !trangThaiGiaoHang.trim().isEmpty()) {
+                String statusKeyword = trangThaiGiaoHang.toLowerCase().trim();
+
+                System.out.println("🔍 Filtering by status: " + statusKeyword);
+
+                // Logic filtering theo business rules
+                if ("hoàn thành".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Hoàn thành" -> DELIVERED (online) hoặc COMPLETED (offline)
+                    List<HoaDon> online = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "DELIVERED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                    List<HoaDon> offline = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() == null &&
+                                    h.getTrangThaiThanhToan() != null &&
+                                    "COMPLETED".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                    filtered = new ArrayList<>();
+                    filtered.addAll(online);
+                    filtered.addAll(offline);
+
+                } else if ("đã hủy".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Đã hủy" -> CANCELLED (cả online và offline)
+                    List<HoaDon> online = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "CANCELLED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                    List<HoaDon> offline = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() == null &&
+                                    h.getTrangThaiThanhToan() != null &&
+                                    "CANCELLED".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                    filtered = new ArrayList<>();
+                    filtered.addAll(online);
+                    filtered.addAll(offline);
+
+                }
+                else if ("chờ xử lý".equalsIgnoreCase(statusKeyword)) {
+                    // Lấy tất cả đơn có PENDING ở giao hàng hoặc thanh toán
+                    filtered = filtered.stream()
+                            .filter(h -> ("PENDING".equalsIgnoreCase(
+                                    h.getTrangThaiDonHang() != null ? h.getTrangThaiDonHang().name() : null))
+                                    || ("PENDING".equalsIgnoreCase(
+                                    h.getTrangThaiThanhToan() != null ? h.getTrangThaiThanhToan().name() : null)))
+                            .toList();
+                }
+                else if ("chờ thanh toán".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Chờ thanh toán" -> PENDING (thanh toán)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiThanhToan() != null &&
+                                    "PENDING".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                } else if ("vận chuyển".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Vận chuyển" -> CONFIRM, PACKED, SHIPPING (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    ("CONFIRM".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "PACKED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "SHIPPING".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
+                            .toList();
+
+                } else if ("chờ giao hàng".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Chờ giao hàng" -> READYFORPICKUP (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "READYFORPICKUP".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                } else if ("trả hàng/hoàn tiền".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Trả hàng/Hoàn tiền" -> RETURNED, FAILED (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    ("RETURNED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "FAILED".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
+                            .toList();
+                } else {
+                    // Fallback: tìm theo contains trong displayName với null checks
+                    filtered = filtered.stream()
+                            .filter(h -> {
+                                // Ưu tiên trạng thái đơn hàng online
+                                if (h.getTrangThaiDonHang() != null &&
+                                        h.getTrangThaiDonHang().getDisplayName() != null) {
+                                    String onlineStatus = h.getTrangThaiDonHang().getDisplayName().toLowerCase();
+                                    return onlineStatus.contains(statusKeyword) || onlineStatus.equalsIgnoreCase(statusKeyword);
+                                }
+                                // Nếu không có trạng thái đơn hàng, kiểm tra trạng thái thanh toán (offline)
+                                else if (h.getTrangThaiThanhToan() != null &&
+                                        h.getTrangThaiThanhToan().getDisplayName() != null) {
+                                    String offlineStatus = h.getTrangThaiThanhToan().getDisplayName().toLowerCase();
+                                    return offlineStatus.contains(statusKeyword) || offlineStatus.equalsIgnoreCase(statusKeyword);
+                                }
+                                return false;
+                            })
+                            .toList();
+                }
+
+                System.out.println("📊 After status filtering: " + filtered.size() + " orders");
+            }
+
+            // 🔍 Lọc theo các tiêu chí khác với null checks
+            filtered = filtered.stream()
+                    .filter(h -> minPrice == null ||
+                            (h.getThanhTien() != null && h.getThanhTien().compareTo(minPrice) >= 0))
+                    .filter(h -> maxPrice == null ||
+                            (h.getThanhTien() != null && h.getThanhTien().compareTo(maxPrice) <= 0))
+                    .filter(h -> startDate == null ||
+                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isBefore(startDate)))
+                    .filter(h -> endDate == null ||
+                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isAfter(endDate)))
+                    .filter(h -> {
+                        if (keyword == null || keyword.isEmpty()) return true;
+
+                        String keywordLower = keyword.toLowerCase();
+
+                        // Tìm theo mã vận đơn nếu keyword bắt đầu bằng "vd"
+                        if (keywordLower.startsWith("vd")) {
+                            return h.getMaVanDon() != null &&
+                                    !h.getMaVanDon().trim().isEmpty() &&
+                                    h.getMaVanDon().toLowerCase().contains(keywordLower);
+                        }
+                        // Ngược lại tìm theo tên sản phẩm
+                        else {
+                            return h.getChiTietHoaDons() != null &&
+                                    h.getChiTietHoaDons().stream()
+                                            .anyMatch(ct -> ct != null &&
+                                                    ct.getTenSanPham() != null &&
+                                                    !ct.getTenSanPham().trim().isEmpty() &&
+                                                    ct.getTenSanPham().toLowerCase().contains(keywordLower));
+                        }
+                    })
+                    .toList();
+
+            System.out.println("📊 Final filtered orders: " + filtered.size());
+
+            // Map sang response DTO với null checks
+            List<MyOrderClientResponse> content = filtered.stream()
+                    .filter(Objects::nonNull) // Filter out null orders
+                    .map(order -> {
+                        try {
+                            return myOrderClientMapper.toMyOrderClientResponse(order);
+                        } catch (Exception e) {
+
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull) // Filter out failed mappings
+                    .toList();
+
+            // Trả về Page với tổng số phần tử là số đơn hàng sau filtering
+            return new PageImpl<>(content, pageable, (long) content.size());
+
+        } catch (Exception e) {
+            System.err.println("❌ Error in getOrderByUserLogin: " + e.getMessage());
+            e.printStackTrace();
+
+            // Return empty page in case of error
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
     }
 
 

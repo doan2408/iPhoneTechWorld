@@ -78,9 +78,9 @@ const rules = {
       trigger: "blur",
     },
   ],
-  soNha: [{ required: true, message: "Vui lòng nhập số nhà", trigger: "blur" }],
+  soNha: [{ required: true, message: "Vui lòng nhập thông tin cụ thể", trigger: "blur" }],
   tenDuong: [
-    { required: true, message: "Vui lòng nhập tên đường", trigger: "blur" },
+    { required: true, message: "Vui lòng nhập thôn/làng", trigger: "blur" },
   ],
   xaPhuong: [
     { required: true, message: "Vui lòng nhập xã/phường", trigger: "blur" },
@@ -423,16 +423,16 @@ onMounted(() => {
         </el-form-item>
 
 
-        <el-form-item label="Tên đường" prop="tenDuong">
-          <el-input v-model="formData.tenDuong" placeholder="Nhập tên đường" clearable
+        <el-form-item label="Thôn/làng" prop="tenDuong">
+          <el-input v-model="formData.tenDuong" placeholder="Nhập tên thôn/làng" clearable
             :class="{ 'is-error': errors.tenDuong }" />
           <div v-if="errors.tenDuong" class="error-message">
             {{ errors.tenDuong }}
           </div>
         </el-form-item>
 
-        <el-form-item label="Số nhà" prop="soNha">
-          <el-input v-model="formData.soNha" placeholder="Nhập số nhà" clearable
+        <el-form-item label="Cụ thể" prop="soNha">
+          <el-input v-model="formData.soNha" placeholder="Nhập thông tin cụ thể" clearable
             :class="{ 'is-error': errors.soNha }" />
           <div v-if="errors.soNha" class="error-message">
             {{ errors.soNha }}

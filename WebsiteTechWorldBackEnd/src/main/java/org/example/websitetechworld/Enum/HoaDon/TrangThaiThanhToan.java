@@ -1,7 +1,7 @@
 package org.example.websitetechworld.Enum.HoaDon;
 
 public enum TrangThaiThanhToan {
-    PENDING("Chờ xử lý"),
+    PENDING("Chờ thanh toán"),
     CONFIRMED("Đã xác nhận"),
     PAID("Đã thanh toán"),
     CANCELLED("Đã hủy"),

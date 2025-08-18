@@ -242,7 +242,7 @@ const goToLogin = () => {
 </template>
 
 <style scoped>
-/* === HEADER STYLES - Improved Version === */
+/* === HEADER STYLES - Stable & Smooth Version === */
 .client-header {
   background: linear-gradient(135deg, #1a2954 0%, #2274c7 50%, #1a405e 100%);
   box-shadow: 0 4px 20px rgba(34, 116, 199, 0.3);
@@ -256,31 +256,6 @@ const goToLogin = () => {
   z-index: 1000;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-}
-
-/* Hiệu ứng tia lấp lánh theo chuột - Improved */
-.client-header::before {
-  content: "";
-  position: absolute;
-  top: var(--mouse-y, 50%);
-  left: var(--mouse-x, 50%);
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle,
-      rgba(135, 206, 235, 0.2) 0%,
-      rgba(34, 116, 199, 0.1) 30%,
-      transparent 70%);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-}
-
-.client-header:hover::before {
-  opacity: 1;
 }
 
 /* Logo Styling */
@@ -298,11 +273,10 @@ const goToLogin = () => {
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  transition: text-shadow 0.3s ease;
 }
 
 .client-header .logo a:hover {
-  transform: translateY(-1px);
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
@@ -322,9 +296,12 @@ nav ul {
 
 nav ul li {
   position: relative;
-  margin-right: 0; /* Remove margin, use gap instead */
+  /* Đảm bảo không có margin/padding gây lệch */
+  margin: 0;
+  padding: 0;
 }
 
+/* FIXED: Đồng nhất tất cả các nút */
 nav ul li a {
   color: rgba(255, 255, 255, 0.95);
   text-decoration: none;
@@ -332,105 +309,79 @@ nav ul li a {
   font-weight: 600;
   padding: 10px 16px;
   border-radius: 25px;
-  transition: all 0.3s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: rgba(135, 206, 235, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(135, 206, 235, 0.3);
   position: relative;
-  overflow: hidden;
+  /* FIXED: Transition mượt mà, không có transform */
+  transition: all 0.25s ease-out;
+  /* FIXED: Đảm bảo không bị shift */
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
-nav ul li a::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(135, 206, 235, 0.3), 
-    transparent
-  );
-  transition: left 0.6s ease;
-  z-index: -1;
-}
-
-nav ul li a:hover::before {
-  left: 100%;
-}
-
+/* FIXED: Hover effect đơn giản, không dùng transform */
 nav ul li a:hover {
-  background: rgba(135, 206, 235, 0.25);
+  background: rgba(135, 206, 235, 0.3);
+  border-color: rgba(135, 206, 235, 0.6);
   color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(34, 116, 199, 0.3);
-  border-color: rgba(135, 206, 235, 0.5);
+  box-shadow: 0 4px 12px rgba(34, 116, 199, 0.4);
   text-decoration: none;
 }
 
+/* FIXED: Icon styling nhất quán */
 nav ul li a i {
-  font-size: 16px;
+  font-size: 14px;
   opacity: 0.9;
-  margin-right: 0; /* Remove inline margin */
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
 }
 
-/* Cart Link Special Styling - FIXED BADGE POSITION */
+nav ul li a:hover i {
+  opacity: 1;
+}
+
+/* Cart Link Special Styling */
 .cart-link {
-  position: relative;
   background: rgba(135, 206, 235, 0.2) !important;
   border: 2px solid rgba(135, 206, 235, 0.4) !important;
-  overflow: visible !important;
+  position: relative;
 }
 
 .cart-link:hover {
-  background: rgba(135, 206, 235, 0.3) !important;
-  border-color: rgba(135, 206, 235, 0.6) !important;
+  background: rgba(135, 206, 235, 0.35) !important;
+  border-color: rgba(135, 206, 235, 0.7) !important;
 }
 
-.cart-link i {
-  margin-right: 6px; /* Proper spacing instead of inline style */
-}
-
-/* FIXED: Badge positioning */
+/* FIXED: Badge positioning - Đơn giản và ổn định */
 .badge {
   position: absolute;
-  top: -8px;
-  right: -8px; /* Changed from right: 60px to proper position */
+  top: -6px;
+  right: -6px;
   background: linear-gradient(135deg, #dc3545, #c82333);
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 6px;
-  border-radius: 50%;
+  padding: 2px 6px;
+  border-radius: 10px;
   min-width: 16px;
   height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.5), 0 0 0 2px white;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
   z-index: 10;
-  animation: pulse-badge 2s infinite;
+  /* FIXED: Không có animation gây nháy */
+  pointer-events: none;
 }
 
-@keyframes pulse-badge {
-  0%, 100% { 
-    transform: scale(1); 
-    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.5), 0 0 0 2px white; 
-  }
-  50% { 
-    transform: scale(1.05); 
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.7), 0 0 0 2px white; 
-  }
-}
-
-/* User Dropdown - KEEP ORIGINAL FUNCTIONALITY */
+/* User Dropdown */
 .user-dropdown {
   position: relative;
-  margin-right: 0;
   z-index: 5;
 }
 
@@ -439,34 +390,35 @@ nav ul li a i {
   border: 2px solid rgba(135, 206, 235, 0.4) !important;
   font-weight: 700 !important;
   cursor: pointer;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-dropdown > a:hover {
-  background: rgba(135, 206, 235, 0.3) !important;
-  border-color: rgba(135, 206, 235, 0.6) !important;
+  background: rgba(135, 206, 235, 0.35) !important;
+  border-color: rgba(135, 206, 235, 0.7) !important;
 }
 
-/* Dropdown Menu - KEEP ORIGINAL STRUCTURE */
+/* Dropdown Menu - FIXED: Thêm lại display logic */
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
-  background-color: white;
-  border: none;
+  background: white;
   min-width: 200px;
   border-radius: 12px;
   box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.15),
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
-  display: block;
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.1);
   z-index: 9999;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  margin-top: 8px;
+  /* FIXED: Đảm bảo dropdown được hiển thị khi có class/state */
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Arrow for dropdown */
 .dropdown-menu::before {
   content: '';
   position: absolute;
@@ -475,27 +427,21 @@ nav ul li a i {
   width: 12px;
   height: 12px;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-bottom: none;
-  border-right: none;
   transform: rotate(45deg);
-  z-index: 1;
+  box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-menu a {
-  display: block;
-  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
   color: #2c3e50;
   text-decoration: none;
   font-weight: 500;
   font-size: 14px;
-  border-left: 3px solid transparent;
-  transition: all 0.25s ease;
-  background: white;
-  display: flex !important;
-  align-items: center;
-  gap: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
 }
 
 .dropdown-menu a:last-child {
@@ -505,15 +451,12 @@ nav ul li a i {
 }
 
 .dropdown-menu a:hover {
-  background: linear-gradient(90deg, rgba(34, 116, 199, 0.08), rgba(135, 206, 235, 0.05));
-  border-left-color: #2274c7;
+  background: rgba(34, 116, 199, 0.08);
   color: #2274c7;
-  transform: translateX(2px);
 }
 
 .dropdown-menu a:last-child:hover {
-  background: linear-gradient(90deg, rgba(220, 53, 69, 0.08), rgba(200, 35, 51, 0.05));
-  border-left-color: #dc3545;
+  background: rgba(220, 53, 69, 0.08);
   color: #dc3545;
 }
 
@@ -522,13 +465,11 @@ nav ul li a i {
   text-align: center;
   opacity: 0.7;
   font-size: 14px;
-  transition: all 0.3s ease;
-  margin-right: 0;
+  flex-shrink: 0;
 }
 
 .dropdown-menu a:hover i {
   opacity: 1;
-  transform: scale(1.1);
 }
 
 /* Loading State */
@@ -541,9 +482,15 @@ nav ul li a i {
 .loading-state i {
   color: rgba(255, 255, 255, 0.8);
   font-size: 16px;
+  animation: spin 1s linear infinite;
 }
 
-/* KEEP ORIGINAL Animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Animation cho dropdown - FIXED */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.3s ease;
@@ -555,11 +502,7 @@ nav ul li a i {
   transform: translateY(-10px);
 }
 
-.fade-slide-enter-to {
-  opacity: 1;
-  transform: translateY(0);
-}
-
+.fade-slide-enter-to,
 .fade-slide-leave-from {
   opacity: 1;
   transform: translateY(0);
@@ -579,11 +522,11 @@ nav ul li a i {
   }
 
   nav ul {
-    gap: 8px;
+    gap: 10px;
   }
 
   nav ul li a {
-    padding: 8px 12px;
+    padding: 8px 14px;
     font-size: 13px;
   }
 
@@ -605,7 +548,7 @@ nav ul li a i {
 
   nav ul {
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
   }
 
   nav ul li a {
@@ -614,7 +557,7 @@ nav ul li a i {
   }
 
   nav ul li a i {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .dropdown-menu {
@@ -627,12 +570,12 @@ nav ul li a i {
   }
 
   .badge {
-    font-size: 10px;
-    padding: 2px 5px;
+    font-size: 9px;
+    padding: 2px 4px;
     min-width: 14px;
     height: 14px;
-    top: -6px;
-    right: -6px;
+    top: -5px;
+    right: -5px;
   }
 }
 
@@ -676,21 +619,13 @@ nav ul li a i {
     font-size: 11px;
   }
 
-  nav ul li a i {
-    font-size: 12px;
-  }
-
-  /* Hide cart text on mobile */
-  .cart-link {
-    font-size: 0;
-  }
-
-  .cart-link i {
-    font-size: 16px;
+  /* Ẩn text trên mobile, chỉ hiển thị icon */
+  .cart-link span:not(.badge) {
+    display: none;
   }
 
   .badge {
-    font-size: 9px;
+    font-size: 8px;
     padding: 2px 4px;
     min-width: 12px;
     height: 12px;
@@ -699,33 +634,26 @@ nav ul li a i {
   }
 
   .user-dropdown > a {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    max-width: 100px;
   }
 }
 
-/* Focus states for accessibility */
+/* Focus states cho accessibility */
 nav ul li a:focus {
-  outline: 2px solid rgba(135, 206, 235, 0.6);
+  outline: 2px solid rgba(135, 206, 235, 0.8);
   outline-offset: 2px;
 }
 
 .dropdown-menu a:focus {
-  outline: 2px solid rgba(34, 116, 199, 0.5);
+  outline: 2px solid rgba(34, 116, 199, 0.6);
   outline-offset: -2px;
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .client-header::before,
-  nav ul li a::before,
-  .fade-slide-enter-active,
-  .fade-slide-leave-active,
-  .badge {
-    animation: none;
-    transition: none;
+  * {
+    animation-duration: 0.01s !important;
+    transition-duration: 0.01s !important;
   }
 }
 </style>

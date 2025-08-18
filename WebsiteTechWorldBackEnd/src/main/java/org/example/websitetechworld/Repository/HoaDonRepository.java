@@ -54,11 +54,11 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("emailNguoiNhan") String emailNguoiNhan,
                        @Param("ngayDatHang") LocalDateTime ngayDatHang);
 
-    public Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
+    Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
 
 
     @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
-    public List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
+    List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
 
 
     @Query(value = """
