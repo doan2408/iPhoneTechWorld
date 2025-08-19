@@ -196,7 +196,7 @@
 
             <!-- Warranty Tracking -->
             <div class="warranty-section">
-                <h2>Theo dõi bảo hành</h2>
+                <h2>Theo dõi bảo hành ( Mẫu )</h2>
                 <div class="warranty-grid">
                     <div class="warranty-item">
                         <label>Thời gian bảo hành còn lại:</label>
