@@ -587,7 +587,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, markRaw, watch, watchEffect, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, markRaw, watch, watchEffect, nextTick, onUnmounted } from 'vue'
 import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
@@ -617,6 +617,7 @@ import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
 import html2pdf from 'html2pdf.js';
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
+import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -1871,6 +1872,22 @@ watch(quantityToSelect, (newValue, oldValue) => {
     }
 });
 
+let statusUpdateInterval = null;
+
+const getNextUpdateDelay = async () => {
+    try {
+        const response = await nextDelay()
+        const delay = Math.max(1000, response.delay || 60_000);
+        console.log('1', delay)
+        return delay;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Không thể lấy thời gian cập nhật:', error);
+            toast.error('Không thể lấy thời gian cập nhật');
+        }
+        return 60_000;
+    }
+};
 // Initialize
 onMounted(async () => {
     await danhMucSanPham();
@@ -1882,6 +1899,19 @@ onMounted(async () => {
     await loadDiscountList();
     fetchPaymentMethods();
     await getHdctByImeiDaBan();
+    const initialDelay = await getNextUpdateDelay();
+    statusUpdateInterval = setInterval(() => {
+        loadProducts({});
+        loadTabHoaDon();
+        getHdctByImeiDaBan()
+    }, initialDelay);
+});
+
+onUnmounted(() => {
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+        statusUpdateInterval = null;
+    }
 });
 
 //Khach hang

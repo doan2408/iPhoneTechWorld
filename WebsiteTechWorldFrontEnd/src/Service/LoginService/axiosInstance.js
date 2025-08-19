@@ -7,7 +7,6 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken"); // luôn lấy lại mỗi lần request
-    console.log("🔐 Token đính kèm trong interceptor:", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

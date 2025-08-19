@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -191,15 +191,43 @@ if (!store.hasModule('headerState')) {
 const route = useRoute();
 const selectedId = route.query.selected;
 import router from '@/router';
+import { nextDelayClient } from '../../Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 
 const search = ref('');
 const selectAll = ref(false);
 const cartData = ref([]);
 const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 
+const getNextUpdateDelay = async () => {
+    try {
+        const response = await nextDelayClient()
+        const delay = Math.max(1000, response.delay || 60_000);
+        return delay;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Không thể lấy thời gian cập nhật:', error);
+            toast.error('Không thể lấy thời gian cập nhật');
+        }
+        return 60_000;
+    }
+};
+
+let statusUpdateInterval = null;
+
 onMounted(async () => {
     await fetchCart();
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    const initialDelay = await getNextUpdateDelay();
+    statusUpdateInterval = setInterval(() => {
+        fetchCart()
+    }, initialDelay);
+});
+
+onUnmounted(() => {
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+        statusUpdateInterval = null;
+    }
 });
 
 const guiLenHeader = () => {
