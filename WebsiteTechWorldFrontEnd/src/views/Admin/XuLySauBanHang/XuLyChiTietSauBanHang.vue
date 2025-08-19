@@ -178,19 +178,6 @@
                         <label>Ghi chú khách hàng:</label>
                         <span>{{ orderInformation.customerNote }}</span>
                     </div>
-                    <div class="contact-item">
-                        <label>Lịch sử liên hệ:</label>
-                        <div class="contact-history">
-                            <div class="history-item">
-                                <span class="history-date">15/01/2024 - 14:30</span>
-                                <span class="history-content">Đã gọi điện, khách không nghe máy</span>
-                            </div>
-                            <div class="history-item">
-                                <span class="history-date">14/01/2024 - 09:15</span>
-                                <span class="history-content">Gửi SMS thông báo giao hàng</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
