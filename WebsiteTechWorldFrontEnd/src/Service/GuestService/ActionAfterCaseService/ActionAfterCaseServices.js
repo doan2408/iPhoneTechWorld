@@ -17,12 +17,15 @@ export const createActionAfterCaseReturn = (data) => {
     return api.post(url, data)
 }
 
-export const getAllLyDoXuLy = (pageNo, pageSize) => {
+export const getAllLyDoXuLy = (pageNo, pageSize, search, status, sortDir) => {
     const url = baseURL ;
     return api.get(url,{
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            search,
+            status,
+            sortDir
         }
     })
 }

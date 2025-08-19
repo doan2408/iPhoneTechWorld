@@ -47,9 +47,8 @@
                     <button class="search-btn">🔍</button>
                 </div>
                 <select v-model="sortBy" class="sort-select">
-                    <option value="date">Sắp xếp theo ngày</option>
-                    <option value="priority">Sắp xếp theo độ ưu tiên</option>
-                    <option value="amount">Sắp xếp theo giá trị</option>
+                    <option value="asc">Sắp xếp theo ngày giảm dần</option>
+                    <option value="desc">Sắp xếp theo ngày tăng dần</option>
                 </select>
             </div>
         </section>
@@ -82,19 +81,21 @@
                                 <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.tenKhachHang }}</strong>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
                                         <span class="phone">{{ order.sdt }}</span>
                                     </div>
                                 </td>
                                 <td class="status-cell">
-                                    <span :class="['order-status', order.trangThaiDonHang]">{{ getStatusText(order.trangThaiDonHang)
-                                        }}</span>
+                                    <span :class="['order-status', order.trangThaiDonHang]">{{
+                                        getStatusText(order.trangThaiDonHang)
+                                    }}</span>
                                 </td>
                                 <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
-                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử lý</button>
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
                                         <button class="action-btn secondary">Chi tiết</button>
                                     </div>
                                 </td>
@@ -103,32 +104,32 @@
                     </table>
                 </div>
 
-                <div v-if="activeTab === 'failed'" class="table-container">
+                <div v-if="activeTab === 'failed_delivery'" class="table-container">
                     <table class="orders-table">
                         <thead>
                             <tr>
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
                                 <th>Lý do thất bại</th>
-                                <th>Lần thử</th>
+                                <th>Thời gian yêu cầu</th>
                                 <th>Giá trị</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="order in failedOrders" :key="order.id" class="order-row failed">
-                                <td class="order-id-cell">#{{ order.id }}</td>
+                            <tr v-for="order in orders" :key="order.idXuLyBanHang" class="order-row failed">
+                                <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.customerName }}</strong>
-                                        <span class="address">{{ order.address }}</span>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
+                                        <span class="address">{{ order.sdt }}</span>
                                     </div>
                                 </td>
                                 <td class="failure-cell">
-                                    <span class="failure-reason">{{ order.failureReason }}</span>
+                                    <span class="failure-reason">{{ order.trangThaiDonHang }}</span>
                                 </td>
-                                <td class="retry-cell">{{ order.retryCount }}/3</td>
-                                <td class="amount-cell">{{ formatCurrency(order.amount) }}</td>
+                                <td class="retry-cell">{{ order.thoiGianYeuCau }}</td>
+                                <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
                                         <button class="action-btn warning">Giao lại</button>
@@ -140,7 +141,7 @@
                     </table>
                 </div>
 
-                <div v-if="activeTab === 'returns'" class="table-container">
+                <div v-if="activeTab === 'return'" class="table-container">
                     <table class="orders-table">
                         <thead>
                             <tr>
@@ -153,19 +154,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="order in returnOrders" :key="order.id" class="order-row return">
-                                <td class="order-id-cell">#{{ order.id }}</td>
+                            <tr v-for="order in orders" :key="order.idXuLyBanHang" class="order-row return">
+                                <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.customerName }}</strong>
-                                        <span class="return-type">{{ order.returnType }}</span>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
+                                        <span class="return-type">{{ order.trangThaiDonHang }}</span>
                                     </div>
                                 </td>
                                 <td class="return-cell">
                                     <span class="return-reason">{{ order.returnReason }}</span>
                                 </td>
-                                <td class="date-cell">{{ formatDate(order.returnDate) }}</td>
-                                <td class="amount-cell">{{ formatCurrency(order.amount) }}</td>
+                                <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
+                                <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
                                         <button class="action-btn success">Chấp nhận</button>
@@ -177,19 +178,26 @@
                     </table>
                 </div>
             </div>
+            <br>
+            <div class="pagination-controls">
+                <button @click="prevPage" :disabled="pageNo === 0"> &lt; </button>
+                <span>Trang {{ pageNo + 1 }} / {{ totalPages }}</span>
+                <button @click="nextPage" :disabled="pageNo + 1 >= totalPages"> &gt; </button>
+            </div>
+            <br>
         </section>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import router from '@/router'
 
 // Reactive data
 const activeTab = ref('all')
 const searchQuery = ref('')
-const sortBy = ref('date')
+const sortBy = ref('desc')
 
 // Mock data
 const stats = ref({
@@ -201,20 +209,53 @@ const stats = ref({
 
 const tabs = ref([
     { id: 'all', label: 'Tất cả' },
-    { id: 'failed', label: 'Giao hàng thất bại'},
-    { id: 'returns', label: 'Yêu cầu trả hàng'}
+    { id: 'failed_delivery', label: 'Giao hàng thất bại' },
+    { id: 'return', label: 'Yêu cầu trả hàng' }
 ])
 
-const orders = ref();
+const currentTabData = computed(() => {
+    return tabs.value.find(tab => tab.id === activeTab.value);
+});
+
+
+const orders = ref([]);
 const pageNo = ref(0);
 const pageSize = ref(5);
+const totalPages = ref(1)
 const getAllLyDoXuLyView = async () => {
-    const res = await getAllLyDoXuLy(pageNo.value, pageSize.value);
+    const status = activeTab.value === 'all' ? null : activeTab.value.toUpperCase();
+    const res = await getAllLyDoXuLy(pageNo.value, pageSize.value, searchQuery.value, status, sortBy.value);
+    totalPages.value = res.data.totalPages
     orders.value = res.data.content
 }
 
+const nextPage = async () => {
+    if (pageNo.value + 1 < totalPages.value) {
+        pageNo.value++
+        await getAllLyDoXuLyView()
+    }
+
+}
+
+const prevPage = async () => {
+    if (pageNo.value > 0) {
+        pageNo.value--
+        await getAllLyDoXuLyView()
+    }
+
+}
+
+watch(
+    [pageNo, pageSize, searchQuery, activeTab, sortBy],
+    () => {
+        getAllLyDoXuLyView();
+        console.log('order value:', orders.value, 'status', activeTab.value);
+    },
+    { immediate: true }
+);
+
 const xuLyClick = (id) => {
-    router.push(`/admin/handle-detail/`+id)
+    router.push(`/admin/handle-detail/` + id)
 }
 
 const failedOrders = computed(() =>
@@ -236,7 +277,7 @@ const getStatusText = (status) => {
 }
 
 function formatDate(date) {
-    if (!date) return ""; 
+    if (!date) return "";
     return new Intl.DateTimeFormat("vi-VN", {
         year: "numeric",
         month: "2-digit",
@@ -727,5 +768,108 @@ onMounted(() => {
     .action-btn {
         flex: 1;
     }
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* Pagination - ĐƠN GIẢN */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px 0;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+}
+
+.page-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .pagination {
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .page-btn {
+        padding: 6px 10px;
+    }
+
+    .page-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .page-info {
+        font-size: 13px;
+        min-width: 50px;
+    }
+}
+
+.pagination-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.pagination-controls span {
+    font-weight: 500;
+    color: #666;
+    font-size: 1em;
 }
 </style>
