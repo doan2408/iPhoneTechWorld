@@ -25,7 +25,7 @@
                     </div>
                     <div class="info-item">
                         <label>Khách hàng:</label>
-                        <span>{{ orderInformation.tenKhachHang }}</span>
+                        <span>{{ orderInformation.tenKhachHang || 'Khách vãng lai' }}</span>
                     </div>
                     <div class="info-item">
                         <label>Số điện thoại:</label>

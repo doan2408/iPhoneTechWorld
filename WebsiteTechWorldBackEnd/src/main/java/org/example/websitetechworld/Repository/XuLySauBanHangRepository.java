@@ -54,7 +54,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             xlbh.id,
             xlbh.idHoaDon.id,
             hd.maHoaDon,
-            hd.idKhachHang.tenKhachHang,
+            kh.tenKhachHang,
             imdb.soImei,
             xlbh.hanhDongSauVuViec,
             cthd.tenSanPham,
@@ -66,6 +66,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
                 LEFT JOIN xlbh.idHoaDon hd
                 LEFT JOIN xlbh.idImeiDaBan imdb
                 LEFT JOIN xlbh.idLyDo ld
+                LEFT JOIN hd.idKhachHang kh
                 LEFT JOIN hd.chiTietHoaDons cthd
                 LEFT JOIN cthd.idSanPhamChiTiet spct
             WHERE xlbh.idHoaDon.id = :idHoaDon

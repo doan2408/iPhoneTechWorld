@@ -132,13 +132,14 @@ public class XuLySauBanHangServices {
 
     public List<XuLyChiTietResponse> findByIdHoaDon(Integer idHoaDon){
         List<XuLyChiTietResponse> lstResponse = xuLySauBanHangRepository.getAllCtXuLy(idHoaDon);
+        log.info("data return:{}", lstResponse);
         BigDecimal soTienHoan = tinhTienCanTra(lstResponse);
 
         if (!lstResponse.isEmpty()) {
             XuLyChiTietResponse firstItem = lstResponse.get(0);
             firstItem.setSoTienHoan(soTienHoan);
         }
-
+        log.info("tien can tra:{}", soTienHoan);
         return lstResponse;
     }
 
