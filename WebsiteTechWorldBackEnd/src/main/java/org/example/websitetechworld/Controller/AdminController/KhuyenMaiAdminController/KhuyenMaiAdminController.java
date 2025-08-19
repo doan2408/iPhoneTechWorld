@@ -87,14 +87,8 @@ public class KhuyenMaiAdminController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/san-pham-chi-tiet/{sanPhamChiTietId}/promotions")
-    public ResponseEntity<KhuyenMaiAdminResponse> getExistingPromotions(@PathVariable Integer sanPhamChiTietId) {
+    public ResponseEntity<List<KhuyenMaiAdminResponse>> getExistingPromotions(@PathVariable Integer sanPhamChiTietId) {
         return ResponseEntity.ok(khuyenMaiAdminService.getExistingPromotions(sanPhamChiTietId));
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/remove-product")
-    public ResponseEntity<SanPhamChiTietResponse> removeProductFromPromotions(@Valid @RequestBody RemoveProductRequest request) {
-        return ResponseEntity.ok(khuyenMaiAdminService.removeProductFromPromotions(request.getSanPhamChiTietId(), request.getKhuyenMaiId()));
     }
 
     @GetMapping("/next-delay")

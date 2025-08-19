@@ -381,7 +381,6 @@ CREATE TABLE khuyen_mai (
                             trang_thai NVARCHAR(50) -- ENUM('DANG_HOAT_DONG', 'HET_HAN')
 );
 
-
 --31
 CREATE TABLE san_pham_chi_tiet (
                                    id_san_pham_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
@@ -396,11 +395,17 @@ CREATE TABLE san_pham_chi_tiet (
                                    id_mau INT REFERENCES mau_sac(id_mau_sac),
                                    id_rom INT REFERENCES rom(id_rom),
                                    so_luong INT,
-                                   gia_ban DECIMAL(10,2),
-                                   id_khuyen_mai INT REFERENCES khuyen_mai(id)
+                                   gia_ban DECIMAL(10,2)
 );
 
 --32
+CREATE TABLE khuyen_mai_san_pham_chi_tiet (
+                                              id INT IDENTITY(1,1) PRIMARY KEY,
+                                              id_khuyen_mai INT REFERENCES khuyen_mai(id),
+                                              id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
+);
+
+--33
 CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -408,7 +413,7 @@ CREATE TABLE imei (
                       trang_thai_imei NVARCHAR(50),
 );
 
---33
+--34
 CREATE TABLE loai_bao_hanh (
                                id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
                                ten_loai_bao_hanh NVARCHAR(100),
@@ -416,7 +421,7 @@ CREATE TABLE loai_bao_hanh (
                                mo_ta NVARCHAR(255)
 );
 
---34
+--35
 CREATE TABLE bao_hanh (
                           id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
                           id_khach_hang INT,
@@ -427,7 +432,7 @@ CREATE TABLE bao_hanh (
                           trang_thai_bao_hanh NVARCHAR(50)
 );
 
---35
+--36
 CREATE TABLE lich_su_bao_hanh (
                                   id INT IDENTITY(1,1) PRIMARY KEY,
                                   id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
@@ -438,7 +443,7 @@ CREATE TABLE lich_su_bao_hanh (
 );
 
 
---36
+--37
 CREATE TABLE hinh_anh (
                           id_hinh_anh INT IDENTITY(1,1) PRIMARY KEY,
                           id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -446,7 +451,7 @@ CREATE TABLE hinh_anh (
                           image_public_id VARCHAR(100)
 );
 
---37
+--38
 CREATE TABLE gio_hang_chi_tiet (
                                    id_gio_hang_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
                                    id_gio_hang INT,
@@ -458,7 +463,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
 
---38
+--39
 CREATE TABLE chi_tiet_hoa_don (
                                   id_chi_tiet_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
                                   id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
@@ -478,7 +483,7 @@ CREATE TABLE chi_tiet_hoa_don (
                                   don_gia DECIMAL(10,2)
 );
 
---49
+--40
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
@@ -486,14 +491,14 @@ CREATE TABLE imei_da_ban (
                              trang_thai NVARCHAR(50)
 );
 
---40
+--41
 CREATE TABLE phuong_thuc_thanh_toan (
                                         id_phuong_thuc_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                         ten_phuong_thuc NVARCHAR(50),
                                         loai_hinh_thuc NVARCHAR(50)
 );
 
---41
+--42
 CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
@@ -502,7 +507,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      thoi_gian_thanh_toan DATETIME
 );
 
---42
+--43
 CREATE TABLE danh_gia_san_pham (
                                    id_danh_gia INT IDENTITY(1,1) PRIMARY KEY,
                                    id_khach_hang INT NOT NULL,
@@ -517,7 +522,7 @@ CREATE TABLE danh_gia_san_pham (
                                    FOREIGN KEY (id_chi_tiet_hoa_don) REFERENCES chi_tiet_hoa_don(id_chi_tiet_hoa_don)
 );
 
---43
+--44
 CREATE TABLE media_danh_gia (
                                 id_media INT IDENTITY(1,1) PRIMARY KEY,
                                 id_danh_gia INT NOT NULL,
@@ -532,7 +537,7 @@ CREATE TABLE media_danh_gia (
                                 FOREIGN KEY (id_danh_gia) REFERENCES danh_gia_san_pham(id_danh_gia) ON DELETE CASCADE
 );
 
---44
+--45
 CREATE TABLE phan_hoi_danh_gia (
                                    id_phan_hoi INT IDENTITY(1,1) PRIMARY KEY,
                                    id_danh_gia INT NOT NULL,
@@ -543,7 +548,7 @@ CREATE TABLE phan_hoi_danh_gia (
                                    FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id_nhan_vien)
 );
 
---45
+--46
 CREATE TABLE wishlist (
                           id BIGINT PRIMARY KEY IDENTITY,
                           khac_hang_id INT NOT NULL,
@@ -555,14 +560,14 @@ CREATE TABLE wishlist (
                           CONSTRAINT uc_user_product_detail UNIQUE (khac_hang_id, chi_tiet_san_pham_id)
 );
 
---46 Bảng lý do xử lý
+--47 Bảng lý do xử lý
 CREATE TABLE ly_do_xu_ly (
                              id_ly_do INT IDENTITY(1,1) PRIMARY KEY,
                              ten_ly_do NVARCHAR(255) NOT NULL,
                              loai_vu_viec NVARCHAR(20) NOT NULL -- FAILED_DELIVERY, RETURN
 );
 
---47 Bảng xử lý sau bán hàng
+--48 Bảng xử lý sau bán hàng
 CREATE TABLE xu_ly_sau_ban_hang (
                                     id_xu_ly_sau_ban_hang INT IDENTITY(1,1) PRIMARY KEY,
                                     id_hoa_don INT NOT NULL,
@@ -1628,49 +1633,49 @@ VALUES
     (N'Khách đổi ý', 'CANCELLED');
 
 -- 20 ảnh đầu tiên -> id = 1..20
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562841/iemqzr3nxhwi0vdvywcd.webp',
     image_public_id = 'iemqzr3nxhwi0vdvywcd'
 WHERE id_hinh_anh BETWEEN 1 AND 20;
 
 -- 20 ảnh tiếp theo -> id = 21..40
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562744/xq9bxvzytcm8dwbkqnpk.webp',
     image_public_id = 'xq9bxvzytcm8dwbkqnpk'
 WHERE id_hinh_anh BETWEEN 21 AND 40;
 
 -- 20 ảnh tiếp theo -> id = 41..60
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562704/imsnuvtjwjpfkqhszkxn.webp',
     image_public_id = 'imsnuvtjwjpfkqhszkxn'
 WHERE id_hinh_anh BETWEEN 41 AND 60;
 
 -- 20 ảnh tiếp theo -> id = 61..80
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562653/yesdc6rszdhxgbhxhbnh.webp',
     image_public_id = 'yesdc6rszdhxgbhxhbnh'
 WHERE id_hinh_anh BETWEEN 61 AND 80;
 
 -- 20 ảnh tiếp theo -> id = 81..100
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562629/ddoxprv7d6cvfltwqgxw.webp',
     image_public_id = 'ddoxprv7d6cvfltwqgxw'
 WHERE id_hinh_anh BETWEEN 81 AND 100;
 
 -- 20 ảnh tiếp theo -> id = 101..120
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802104/ievxl7iehsy3d5cbhkdw.webp',
     image_public_id = 'ievxl7iehsy3d5cbhkdw'
 WHERE id_hinh_anh BETWEEN 101 AND 120;
 
 -- 19 ảnh tiếp theo -> id = 121..139
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802102/c0166slcdkfkxszvwujn.webp',
     image_public_id = 'c0166slcdkfkxszvwujn'
 WHERE id_hinh_anh BETWEEN 121 AND 139;
 
 -- 19 ảnh cuối -> id = 140..158
-UPDATE hinh_anh 
+UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753800593/bqvwkuqlwuc2slzrkzug.webp',
     image_public_id = 'bqvwkuqlwuc2slzrkzug'
 WHERE id_hinh_anh BETWEEN 140 AND 158;

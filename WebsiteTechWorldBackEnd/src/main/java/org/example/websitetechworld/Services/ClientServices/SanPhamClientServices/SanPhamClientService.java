@@ -6,6 +6,7 @@ import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.KhuyenMaiAdminService.KhuyenMaiAdminService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,7 @@ public class SanPhamClientService {
     private final LoaiRepository loaiRepository;
     private final CameraSauRepository cameraSauRepository;
     private final HoaDonRepository hoaDonRepository;
+    private final KhuyenMaiAdminService khuyenMaiAdminService;
 
     //hien thi san pham len trang chủ
     public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, Integer idLoai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
@@ -135,7 +137,7 @@ public class SanPhamClientService {
         response.setTongSoLuong(sp.getSanPhamChiTiets().stream()
                 .mapToInt(SanPhamChiTiet::getSoLuong).sum()
         );
-        response.setGiaBan(tinhGiaKhuyenMai(spct, selectedIdKhachHang));
+        response.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(spct, selectedIdKhachHang));
 
         return response;
     }
@@ -146,47 +148,5 @@ public class SanPhamClientService {
 
     public List<LoaiClientResponse> getLoaiClientResponses() {
         return loaiRepository.getLoaiClientResponse();
-    }
-
-    private BigDecimal tinhGiaKhuyenMai(SanPhamChiTiet spct, Integer selectedIdKhachHang) {
-        try {
-            if (spct == null || spct.getGiaBan() == null) {
-                return BigDecimal.ZERO;
-            }
-            BigDecimal giaGoc = spct.getGiaBan();
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
-            if (khuyenMai == null) {
-                return giaGoc;
-            }
-            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
-                return giaGoc;
-            }
-            LocalDateTime now = LocalDateTime.now();
-            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
-                return giaGoc;
-            }
-
-            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
-                return giaGoc;
-            }
-
-            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
-            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
-            boolean khongHopLe =
-                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
-                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
-            if (khongHopLe) {
-                return giaGoc;
-            }
-
-            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
-            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            BigDecimal giaKhuyenMai = giaGoc.subtract(giaGoc.multiply(tyLeGiam));
-
-            return giaKhuyenMai.max(BigDecimal.ZERO);
-        } catch (Exception e) {
-            return spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
-        }
     }
 }
