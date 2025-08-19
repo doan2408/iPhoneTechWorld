@@ -133,14 +133,36 @@ public class XuLySauBanHangServices {
     public List<XuLyChiTietResponse> findByIdHoaDon(Integer idHoaDon){
         List<XuLyChiTietResponse> lstResponse = xuLySauBanHangRepository.getAllCtXuLy(idHoaDon);
         log.info("data return:{}", lstResponse);
-        BigDecimal soTienHoan = tinhTienCanTra(lstResponse);
+
+        BigDecimal soTienHoan = BigDecimal.ZERO;
 
         if (!lstResponse.isEmpty()) {
             XuLyChiTietResponse firstItem = lstResponse.get(0);
+            if (firstItem.getTrangThaiDon().equals(ActionAfterCase.RETURN_TO_STOCK)){
+                if (CaseType.RETURN.equals(firstItem.getLoaiVuViec())){
+                    soTienHoan = tinhTienCanTra(lstResponse);
+                } else if (CaseType.FAILED_DELIVERY.equals(firstItem.getLoaiVuViec())) {
+                    soTienHoan = tinhTienCanTraGiaoThatBai(lstResponse);
+                }
+            }
             firstItem.setSoTienHoan(soTienHoan);
         }
         log.info("tien can tra:{}", soTienHoan);
         return lstResponse;
+    }
+
+    public BigDecimal tinhTienCanTraGiaoThatBai(List<XuLyChiTietResponse> lstResponse) {
+        if (lstResponse == null || lstResponse.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách xử lý chi tiết trống");
+        }
+        Integer idHoaDon = lstResponse.get(0).getIdHoaDon();
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hoa don ko ton tai"));
+        BigDecimal thanhTien = Optional.ofNullable(hoaDon.getThanhTien()).orElse(BigDecimal.ZERO);
+        BigDecimal phiShip = Optional.ofNullable(hoaDon.getPhiShip()).orElse(BigDecimal.ZERO);
+
+        BigDecimal soTienCanTra = thanhTien.subtract(phiShip.multiply(BigDecimal.TWO));
+        return soTienCanTra;
     }
 
     public BigDecimal tinhTienCanTra(List<XuLyChiTietResponse> lstResponse) {
@@ -196,19 +218,20 @@ public class XuLySauBanHangServices {
 
 
     public void changeStatus(ChangeStatusRequest request) {
-        XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(request.getSoImei());
-        if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
-            ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImei(request.getSoImei());
-            imeiDaBan.setTrangThai(TrangThaiImei.RETURNED);
-            imeiDaBanRepository.save(imeiDaBan);
-            Imei imei = imeiReposiory.findBySoImei(request.getSoImei());
-            imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-            sanPhamChiTietRepository.tangSoLuongTon(imei.getIdSanPhamChiTiet().getId(),1);
-
+        for (String s : request.getSoImeis()){
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(s);
+            if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
+                ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImei(s);
+                imeiDaBan.setTrangThai(TrangThaiImei.RETURNED);
+                imeiDaBanRepository.save(imeiDaBan);
+                Imei imei = imeiReposiory.findBySoImei(s);
+                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                sanPhamChiTietRepository.tangSoLuongTon(imei.getIdSanPhamChiTiet().getId(),1);
+            }
+            xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
+            xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
+            xuLySauBanHang.setDaKiemTra(true);
+            xuLySauBanHangRepository.save(xuLySauBanHang);
         }
-        xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
-        xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
-        xuLySauBanHang.setDaKiemTra(true);
-        xuLySauBanHangRepository.save(xuLySauBanHang);
     }
 }

@@ -60,7 +60,10 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             cthd.tenSanPham,
             spct.idRom.dungLuong,
             spct.idMau.tenMau,
-            CAST(0 AS bigdecimal)
+            ld.tenLyDo,
+            xlbh.loaiVuViec,
+            cthd.donGia,
+            CAST(0 AS bigdecimal)   
         )
             FROM XuLySauBanHang xlbh
                 LEFT JOIN xlbh.idHoaDon hd

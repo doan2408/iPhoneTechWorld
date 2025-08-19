@@ -66,19 +66,9 @@
                                 🚚 Giao lại
                             </button>
 
-                            <button class="toolbar-btn cancel" @click="processBulk('cancel')"
-                                :disabled="selectedImeis.length === 0" title="Hủy bỏ">
-                                ❌ Hủy bỏ
-                            </button>
-
-                            <button class="toolbar-btn return" @click="processBulk('return-to-stock')"
+                            <button class="toolbar-btn return" @click="processBulk('return_to_stock')"
                                 :disabled="selectedImeis.length === 0" title="Trả kho">
                                 📦 Trả kho
-                            </button>
-
-                            <button class="toolbar-btn refund" @click="processBulk('refund')"
-                                :disabled="selectedImeis.length === 0" title="Hoàn tiền">
-                                💰 Hoàn tiền
                             </button>
                         </div>
                     </div>
@@ -103,6 +93,7 @@
                                     <th>IMEI</th>
                                     <th>Sản phẩm</th>
                                     <th>Trạng thái</th>
+                                    <th>Giá bán</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -120,6 +111,9 @@
                                             {{ getImeiStatusText(imei.trangThaiDon) }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <span> {{ formatPrice(imei.donGia) }}</span>
+                                    </td>
                                     <td class="action-col">
                                         <div class="row-actions">
                                             <!-- <button class="action-btn retry"
@@ -128,7 +122,7 @@
                                                 ♻️
                                             </button> -->
 
-                                            <button class="action-btn cancel"
+                                            <button v-if="imei.loaiVuViec === 'RETURN'" class="action-btn cancel"
                                                 @click="openConfirm('Bạn có chắc chắn muốn hủy yêu cầu này?', () => processImei(imei.soImei, 'cancel'))"
                                                 title="Hủy bỏ">
                                                 ❌
@@ -142,7 +136,7 @@
 
                                             <button class="action-btn refund"
                                                 @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
-                                                title="Hoàn tiền">
+                                                title="Hoàn tiền" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK'">
                                                 💰
                                             </button>
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
@@ -152,7 +146,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="mt-4">
+                        <div class="mt-4" style="color: red;">
                             <strong>Số tiền cần trả:</strong>
                             {{ formatPrice(orderProduct[0]?.soTienHoan) }}
                         </div>
@@ -381,23 +375,32 @@ const processBulk = async (action) => {
         case 'retry':
             retryDelivery()
             break
+        case 'return_to_stock':
+            returnToStockDelivery(selectedImeis.value,action)
+            break
         default:
             alert(`Hành động ${action} chưa được hỗ trợ!`)
     }
 
     selectedImeis.value = []
 }
-
+const returnToStockDelivery = async (selectedImeis, action) => {
+    const status = action.toUpperCase() 
+    const res = await changeStatusPending(selectedImeis, status)
+    orderSanPham()
+    orderInformations()
+}
 
 const retryDelivery = () => {
-    selectedAction.value = 'retry'
-    deliveryDate.value = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    
 }
 
 const processImei = async (imeiCode, action) => {
-    console.log(`[v0] Processing IMEI ${imeiCode} with action: ${action}`)
-    const status = action.toUpperCase()    
-    const res = await changeStatusPending(imeiCode,status)
+    const status = action.toUpperCase() 
+
+    const imeiList = [imeiCode];  
+
+    const res = await changeStatusPending(imeiList,status)
     orderSanPham()
     orderInformations()
 }

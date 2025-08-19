@@ -96,7 +96,6 @@
                                     <div class="order-actions">
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
-                                        <button class="action-btn secondary">Chi tiết</button>
                                     </div>
                                 </td>
                             </tr>
