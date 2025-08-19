@@ -373,7 +373,7 @@ const processBulk = async (action) => {
         alert('Vui lòng chọn ít nhất một IMEI!')
         return
     }
-
+    console.log(selectedImeis.value);
     console.log(`[v0] Processing ${selectedImeis.value.length} IMEIs with action: ${action}`)
     alert(`Xử lý ${selectedImeis.value.length} IMEI với hành động: ${getActionText(action)}`)
 

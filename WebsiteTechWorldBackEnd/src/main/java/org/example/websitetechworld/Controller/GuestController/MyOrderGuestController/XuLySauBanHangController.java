@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnReques
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangService.XuLySauBanHangServices;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,13 @@ public class XuLySauBanHangController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllLyDoXuLy(@RequestParam(defaultValue = "0") Integer pageNo, @RequestParam(defaultValue = "5") Integer pageSIze){
-        Page<ActionBeforeCaseResponse> banHangList = xuLySauBanHangServices.getAllLyDoXuLy(pageNo,pageSIze);
+    public ResponseEntity<?> getAllLyDoXuLy(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) CaseType status,
+            @RequestParam(defaultValue = "asc") String sortDir){
+        Page<ActionBeforeCaseResponse> banHangList = xuLySauBanHangServices.getAllLyDoXuLy(pageNo,pageSize,search,status,sortDir);
         return ResponseEntity.ok(banHangList);
     }
 

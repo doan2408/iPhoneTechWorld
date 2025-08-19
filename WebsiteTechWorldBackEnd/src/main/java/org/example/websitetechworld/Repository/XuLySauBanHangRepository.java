@@ -4,10 +4,12 @@ import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseR
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
 import org.example.websitetechworld.Enum.ActionAfterCase;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,7 +20,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
 
     @Query(value = """
         SELECT new org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse(
-            xlbh.id
+            MAX(xlbh.id)
              , hd.maHoaDon
              , kh.tenKhachHang
              , kh.sdt
@@ -31,13 +33,19 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
                      XuLySauBanHang xlbh
                 JOIN xlbh.idLyDo ldxl
                  JOIN xlbh.idHoaDon hd
-                 JOIN hd.idKhachHang kh
+                LEFT JOIN hd.idKhachHang kh
                  JOIN hd.chiTietHoaDons cthd
                 WHERE ldxl.loaiVuViec <> 'CANCELLED'
-                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang, xlbh.id
-                ORDER BY MAX(xlbh.thoiGianYeuCau)  ASC
+                    AND (:search IS NULL OR hd.maHoaDon LIKE %:search% OR kh.tenKhachHang LIKE %:search%)
+                    AND (:status IS NULL OR ldxl.loaiVuViec = :status)
+                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang
+                ORDER BY
+                    CASE WHEN :sortDir = 'ASC' THEN MAX(xlbh.thoiGianYeuCau) END ASC,
+                    CASE WHEN :sortDir = 'DESC' THEN MAX(xlbh.thoiGianYeuCau) END DESC
     """)
-    Page<ActionBeforeCaseResponse> getAllLyDoXuLy(Pageable pageable);
+    Page<ActionBeforeCaseResponse> getAllLyDoXuLy(@Param("search") String search,
+                                                  @Param("status") CaseType status,
+                                                  Pageable pageable, @Param("sortDir") String sortDir);
 
     List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_Id(Integer idHoaDon);
 

@@ -11,9 +11,12 @@ import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,6 +36,7 @@ public class XuLySauBanHangServices {
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ImeiReposiory imeiReposiory;
+    private static final Logger log = LoggerFactory.getLogger(XuLySauBanHangServices.class);
 
     public XuLySauBanHangServices(XuLySauBanHangRepository xuLySauBanHangRepository, LyDoXuLyRepository lyDoXuLyRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, ImeiDaBanRepository imeiDaBanRepository, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiReposiory imeiReposiory) {
         this.xuLySauBanHangRepository = xuLySauBanHangRepository;
@@ -117,9 +121,13 @@ public class XuLySauBanHangServices {
         }
     }
 
-    public Page<ActionBeforeCaseResponse> getAllLyDoXuLy(Integer pageNo, Integer pageSize){
+    public Page<ActionBeforeCaseResponse> getAllLyDoXuLy(Integer pageNo, Integer pageSize, String search, CaseType status, String sortDir){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return xuLySauBanHangRepository.getAllLyDoXuLy(pageable);
+        log.info(">>> getAllLyDoXuLy called with search={}, status={}, sortDir={}, pageNo={}, pageSize={}",
+                search, status, sortDir, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ActionBeforeCaseResponse> responses =  xuLySauBanHangRepository.getAllLyDoXuLy(search, status, pageable,sortDir);
+        log.info("Total:{}", responses.getTotalElements());
+        return responses;
     }
 
     public List<XuLyChiTietResponse> findByIdHoaDon(Integer idHoaDon){
