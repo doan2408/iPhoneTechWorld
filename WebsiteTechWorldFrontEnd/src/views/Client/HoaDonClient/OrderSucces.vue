@@ -15,7 +15,7 @@
                 <button  class="button primary-button" @click="viewMyOrder">
                     Xem đơn hàng của bạn
                 </button>
-                <a href="/" class="button secondary-button">
+                <a href="/client/home" class="button secondary-button">
                     Tiếp tục mua sắm
                 </a>
             </div>
@@ -28,21 +28,36 @@ import router from '@/router';
 import { CheckCircleIcon } from 'lucide-vue-next';
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { deleteHoaDon } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { deleteHoaDon, hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { cartService } from'@/Service/ClientService/GioHang/GioHangClientService'
 
 const route = useRoute();
 const viewMyOrder = () => {
     router.push({ name: 'myorder' });
 }
 
-onMounted(() => {
+onMounted( async () => {
     const responseCode = route.query.vnp_ResponseCode;
     const orderId = route.query.vnp_TxnRef;
+    
+    const orderIdNumber = parseInt(orderId.replace(/^HD/, ''), 10);
 
+    if(orderId && orderId.trim() !== ''){
+        const response = await hoaDonDetail(orderIdNumber);
+        if (responseCode === '24' && orderId) {
+            deleteHoaDon(orderId)
+            router.push({ name: 'shoppingCardClient' });
+        } else {
+            const chiTietList = response.data.chiTietHoaDonAdminResponseList;
 
-    if (responseCode === '24' && orderId) {
-        deleteHoaDon(orderId)
-        router.push({ name: 'shoppingCardClient' });
+            if (Array.isArray(chiTietList)) {
+                chiTietList.forEach(item => {
+                    if (item.idSanPhamChiTiet) {
+                        cartService.removeItem(item.idSanPhamChiTiet);
+                    }
+                });
+            }
+        }
     }
 });
 </script>

@@ -56,9 +56,18 @@ const formatDiem = (diem) => {
   return new Intl.NumberFormat("vi-VN").format(diem);
 };
 
-const formatDate = (dateStr) => {
+const formatDateTime = (dateStr) => {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("vi-VN");
+  const date = new Date(dateStr);
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
 // checking rank before redeeming
@@ -115,12 +124,17 @@ const fetchDiem = async () => {
 };
 
 // Đổi điểm voucher
-const doiDiemVouCher = async (idPhieuGiamGia) => {
+const doiDiemVouCher = async (phieuGiamGia) => {
   const confirmed = await confirmAction("Xác nhận đổi điểm?");
   if (!confirmed) return;
 
+  if (new Date(phieuGiamGia.ngayKetThuc) <= new Date()) {
+    ElMessage.warning("Phiếu giảm giá đã hết hạn!");
+    return; 
+  }
+
   try {
-    await doiDiem(idPhieuGiamGia);
+    await doiDiem(phieuGiamGia.id);
     ElMessage.success("Đổi điểm thành công!");
     fetchVoucher();
     fetchDiem();
@@ -173,11 +187,10 @@ onMounted(() => {
         Điểm khả dụng: <strong>{{ formatDiem(viDiem.diemKhaDung) }}</strong>
       </div>
       <div class="hang-thanh-vien">
-        <router-link to="/client/khoangHang" class="hang"
-        >Hạng: <strong> {{ hangThanhVien }}</strong>
-      </router-link>
+        <router-link to="/client/khoangHang" class="hang">Hạng: <strong> {{ hangThanhVien }}</strong>
+        </router-link>
       </div>
-      
+
       <div class="diem-sap-het-han" v-if="viDiem.diemSapHetHan">
         Có:
         <strong>{{ formatDiem(viDiem.diemSapHetHan || 0) }}</strong>
@@ -186,24 +199,17 @@ onMounted(() => {
 
       <el-tooltip content="Lịch sử điểm" placement="top">
         <router-link to="/client/lichSuDiem" class="history-icon">
-          <el-icon><Clock /></el-icon>
+          <el-icon>
+            <Clock />
+          </el-icon>
         </router-link>
       </el-tooltip>
     </div>
 
     <el-tabs v-model="currentTab" class="tabs">
-      <el-tab-pane
-        v-for="hang in hangList"
-        :key="hang"
-        :label="hang"
-        :name="hang"
-      >
-        <el-table
-          :data="vouchers"
-          style="width: 100%"
-          :empty-text="`Chưa có voucher cho mục ${hang}`"
-        >
-          <el-table-column prop="tenKhuyenMai" label="Tên voucher" />
+      <el-tab-pane v-for="hang in hangList" :key="hang" :label="hang" :name="hang">
+        <el-table :data="vouchers" style="width: 100%" :empty-text="`Chưa có voucher cho mục ${hang}`">
+          <el-table-column prop="tenGiamGia" label="Tên voucher" />
           <el-table-column label="Điểm cần đổi">
             <template #default="scope">
               {{ formatDiem(scope.row.soDiemCanDeDoi) }}
@@ -212,7 +218,7 @@ onMounted(() => {
 
           <el-table-column label="Giá trị giảm">
             <template #default="scope">
-              {{ formatCurrency(scope.row.giaTriKhuyenMai) }}
+              {{ formatCurrency(scope.row.giaTriGiamGia) }}
             </template>
           </el-table-column>
 
@@ -222,29 +228,23 @@ onMounted(() => {
             </template>
           </el-table-column>
 
-          <el-table-column label="Ngày bắt đầu">
+          <el-table-column label="Thời gian bắt đầu">
             <template #default="scope">
-              {{ formatDate(scope.row.ngayBatDau) }}
+              {{ formatDateTime(scope.row.ngayBatDau) }}
             </template>
           </el-table-column>
 
-          <el-table-column label="Ngày kết thúc">
+          <el-table-column label="Thời gian kết thúc">
             <template #default="scope">
-              {{ formatDate(scope.row.ngayKetThuc) }}
+              {{ formatDateTime(scope.row.ngayKetThuc) }}
             </template>
           </el-table-column>
 
           <el-table-column label="Thao tác">
             <template #default="scope">
-              <el-button
-                type="primary"
-                size="small"
-                :disabled="
-                  scope.row.soDiemCanDeDoi > viDiem.diemKhaDung ||
-                  !canRedeemVoucher(currentTab, hangThanhVien)
-                "
-                @click="doiDiemVouCher(scope.row.id)"
-              >
+              <el-button type="primary" size="small" :disabled="scope.row.soDiemCanDeDoi > viDiem.diemKhaDung ||
+                !canRedeemVoucher(currentTab, hangThanhVien)
+                " @click="doiDiemVouCher(scope.row)">
                 Đổi điểm
               </el-button>
             </template>
@@ -252,13 +252,8 @@ onMounted(() => {
         </el-table>
 
         <div class="pagination">
-          <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="total"
-            :page-size="pageSize"
-            @current-change="onPageChange"
-          />
+          <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize"
+            @current-change="onPageChange" />
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -356,7 +351,7 @@ onMounted(() => {
 }
 
 .hang {
-   text-decoration: none;
+  text-decoration: none;
 }
 
 .history-icon {
@@ -518,53 +513,53 @@ onMounted(() => {
   .voucher-page {
     padding: 16px;
   }
-  
+
   .header {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto;
     text-align: center;
     gap: 12px;
   }
-  
+
   .header h2 {
     grid-column: 1;
     grid-row: 1;
     font-size: 24px;
   }
-  
+
   .diem-sap-het-han {
     grid-column: 1;
     grid-row: 2;
   }
-  
+
   .diem-kha-dung {
     grid-column: 1;
     grid-row: 3;
     font-size: 14px;
     padding: 10px 16px;
   }
-  
+
   .hang-thanh-vien {
     grid-column: 1;
     grid-row: 4;
     font-size: 14px;
     padding: 10px 16px;
   }
-  
+
   .history-icon {
     grid-column: 1;
     grid-row: 5;
     justify-self: center;
   }
-  
+
   .tabs .el-tabs__content {
     padding: 16px;
   }
-  
+
   .el-table {
     font-size: 14px;
   }
-  
+
   .el-table td {
     padding: 12px 8px;
   }
@@ -575,6 +570,7 @@ onMounted(() => {
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: calc(200px + 100%) 0;
   }

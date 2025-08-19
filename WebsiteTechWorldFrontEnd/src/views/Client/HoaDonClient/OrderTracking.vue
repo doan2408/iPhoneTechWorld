@@ -3,22 +3,31 @@
         <!-- Order Header -->
         <div class="order-header">
             <div class="order-info">
-                <h1>Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-if="order.maVanDon">Đơn hàng #{{ order.maVanDon }} </h1>
+                <h1 v-else>Hóa đơn #{{ order.maHoaDon }} </h1>
                 <p class="order-date">
                     <Clock class="icon-small" />
                     Ngày đặt: {{ formatDate(order.ngayDatHang) }}
                 </p>
             </div>
-            <div class="order-summary">
-                <div class="total-info">
-                    <span class="total-label">Tổng tiền</span>
-                    <span class="total-amount">{{ formatCurrency(order.thanhTien) }}</span>
-                </div>
+            <div class="info-item">
+                <strong>Trạng thái đơn hàng</strong>
+                <br>
                 <span :class="'status status-' + getStatusKey(order.trangThaiDonHang)">
                     {{ getStatusText(order.trangThaiDonHang) }}
                 </span>
             </div>
+            <div class="order-summary">
+                <div class="total-info">
+                    <span class="total-label"><strong>Tổng tiền</strong></span>
+                    <span class="total-amount">{{ formatCurrency(order.thanhTien) }}</span>
+                </div>
+                <span :class="'payment-status ' + getPaymentStatusClass(order.trangThaiThanhToan)">
+                    {{ getPaymentStatusText(order.trangThaiThanhToan) }}
+                </span>
+            </div>
         </div>
+
 
         <!-- Timeline Section -->
         <div class="timeline-section">
@@ -49,6 +58,83 @@
                 </div>
             </div>
         </div>
+        <div class="timeline-section-row">
+            <div class="timeline-section timeline-shipping">
+                <div class="timeline-wrapper">
+                    <div class="timeline-line"></div>
+
+                    <div v-for="(step, index) in orderStepsShipping" :key="step.id" class="timeline-step" :class="{
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
+                        <div class="step-icon">
+                            <component :is="step.icon" class="icon" />
+                        </div>
+
+                        <div class="step-content">
+                            <div class="step-title">{{ step.title }}</div>
+                            <div v-if="step.timestamp" class="step-time">
+                                {{ formatDate(step.timestamp) }}
+                            </div>
+                            <div v-if="step.description" class="step-description">
+                                {{ step.description }}
+                            </div>
+                        </div>
+
+                        <!-- Arrow for completed/current steps -->
+                        <div v-if="step.status !== 'pending'" class="step-arrow-shipping"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-section timeline-false">
+                <div class="timeline-wrapper">
+                    <div class="timeline-line"></div>
+
+                    <div v-for="(step, index) in orderStepsFalse" :key="step.id" class="timeline-step-false" :class="{
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
+                        <div class="step-icon">
+                            <component :is="step.icon" class="icon" />
+                        </div>
+
+                        <div class="step-content">
+                            <div class="step-title">{{ step.title }}</div>
+                            <div v-if="step.timestamp" class="step-time">
+                                {{ formatDate(step.timestamp) }}
+                            </div>
+                            <div v-if="step.description" class="step-description">
+                                {{ step.description }}
+                            </div>
+                        </div>
+
+                        <!-- Arrow for completed/current steps -->
+                        <!-- <div v-if="step.status !== 'pending'" class="step-arrow"></div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions-section">
+            <div class="right-actions">
+                <button @click="printInvoice" class="action-btn print-btn">
+                    <Printer class="icon-small" /> IN HÓA ĐƠN
+                </button>
+
+                <button @click="printDeliveryNote" class="action-btn delivery-btn">
+                    <FileText class="icon-small" /> IN PHIẾU GIAO HÀNG
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+            @cancel="showConfirm = false" />
+
+        <br><br>
 
         <!-- Delivery Details Section -->
         <div class="delivery-details">
@@ -65,20 +151,22 @@
                                 <User class="avatar-icon" />
                             </div>
                             <div class="customer-details">
-                                <h4>{{ order.tenNguoiNhan }}</h4>
-                                <span class="customer-type">{{ order.maKhachHang }} *Hạng</span>
+                                <h4>{{ order.tenNguoiMua || 'Khách vãng lai' }} ( Người mua )</h4>
+                                <div :class="['customer-type', getCustomerTypeClass(order.hangKhachHang)]">
+                                    <span>{{ getCustomerTypeText(order.hangKhachHang) }}</span>
+                                </div>
                             </div>
                         </div>
+                        <br>
                         <div class="contact-info">
+                            <h5>Thông tin người nhận</h5>
                             <div class="contact-item">
-                                <Phone class="icon-small" />
-                                <span>{{ order.sdtNguoiNhan }}</span>
-                                <button @click="callCustomer" class="contact-btn">Gọi</button>
+                                <User class="icon-small" />
+                                <span>{{ order.tenNguoiNhan }}</span>
                             </div>
                             <div class="contact-item">
                                 <Mail class="icon-small" />
-                                <span>{{ order.sdtNguoiNhan }} *Email</span>
-                                <button @click="emailCustomer" class="contact-btn">Email</button>
+                                <span>{{ order.emailNguoiNhan }}</span>
                             </div>
                         </div>
                     </div>
@@ -92,12 +180,6 @@
                     </div>
                     <div class="card-content">
                         <div class="delivery-info">
-                            <div class="info-item">
-                                <label>Trạng thái</label>
-                                <span :class="'payment-status ' + getPaymentStatusClass(order.trangThaiThanhToan)">
-                                    {{ getPaymentStatusText(order.trangThaiThanhToan) }}
-                                </span>
-                            </div>
                             <div class="info-item">
                                 <label>Địa chỉ giao hàng</label>
                                 <p>{{ order.diaChiGiaoHang }}</p>
@@ -118,7 +200,7 @@
                                     </div>
                                     <button @click="callDriver" class="contact-btn">Gọi</button>
                                 </div>
-                                <p v-else class="no-driver">Chưa phân công</p>
+                                <p v-else class="no-driver">Nhân viên cửa hàng</p>
                             </div>
                             <div class="info-item">
                                 <label>Ghi chú</label>
@@ -158,42 +240,15 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="actions-section">
-            <div class="left-actions">
-            </div>
 
-            <div class="right-actions">
-                <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" />
-                    IN HÓA ĐƠN
-                </button>
-
-                <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" />
-                    IN PHIẾU GIAO HÀNG
-                </button>
-            </div>
-        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
-    Clock,
-    User,
-    Phone,
-    Mail,
-    MapPin,
-    Package,
-    CreditCard,
-    CheckCircle,
-    X,
-    Truck,
-    Printer,
-    FileText,
-    Edit
+    Clock, User, Phone, Mail, MapPin, Package, CreditCard, ScrollText, Check, XCircle, AlertTriangle,
+    CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw
 } from 'lucide-vue-next'
 import { hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
@@ -219,6 +274,34 @@ const viewOrderDetail = async () => {
 }
 
 // ham cap nha tien do giao dien giao hang
+const getCustomerTypeClass = (type) => {
+    switch (type) {
+        case 'SILVER': return 'silver';
+        case 'GOLD': return 'gold';
+        case 'DIAMOND': return 'diamond';
+        default: return 'member';
+    }
+}
+
+const getCustomerTypeText = (type) => {
+    switch (type) {
+        case 'SILVER': return 'Bạc';
+        case 'GOLD': return 'Vàng';
+        case 'DIAMOND': return 'Kim cương';
+        case 'MEMBER': return 'Thành viên';
+        default: return 'Không có hạng';
+    }
+}
+const getCustomerTypeIcon = (type) => {
+    switch (type) {
+        case 'SILVER': return 'fas fa-medal';
+        case 'GOLD': return 'fas fa-trophy';
+        case 'DIAMOND': return 'fas fa-gem';
+        default: return 'fas fa-user';
+    }
+}
+
+// ham cap nha tien do giao dien giao hang
 const orderSteps = computed(() => [
     {
         id: 1,
@@ -226,52 +309,99 @@ const orderSteps = computed(() => [
         icon: FileText,
         // Bước đầu luôn hiện là completed (hoặc current nếu mới tạo)
         status: order.trangThaiDonHang === 'Chờ xử lý' ? 'current' :
-            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại','Đã xác nhận', 
+                'Sẵn sàng giao'
+            ].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.ngayDatHang,
-        description: 'Khách hàng đặt hàng qua ứng dụng'
+        description: 'Đơn hàng đang chờ được xác nhận'
     },
     {
         id: 2,
+        title: 'Đơn hàng đã được xác nhận',
+        icon: CheckSquare,
+        status: order.trangThaiDonHang === 'Đã xác nhận' ? 'current' :
+            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại',
+                'Sẵn sàng giao'
+            ].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+        timestamp: null,
+        description: 'Đơn hàng đang chờ được đóng gói'
+    },
+    {
+        id: 3,
         title: 'Đã Đóng Gói',
         icon: Package,
         status: order.trangThaiDonHang === 'Đã đóng gói' ? 'current' :
-            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại', 'Sẵn sàng giao'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.packedAt : null,
         description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã được đóng gói' : null
     },
     {
-        id: 3,
-        title: 'Đang Giao Hàng',
+        id: 4,
+        title: 'Sẵn sàng giao',
+        icon: Check,
+        status: order.trangThaiDonHang === 'Sẵn sàng giao' ? 'current' :
+            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+        timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.packedAt : null,
+        description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng sắp dược giao' : null
+    },
+])
+
+const orderStepsShipping = computed(() => [
+    {
+        id: 1,
+        title: 'Đang Giao',
         icon: Truck,
         status: order.trangThaiDonHang === 'Đang giao' ? 'current' :
             ['Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.shippingAt : null,
-        description: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? `${order.driver?.name} đang giao hàng` : null
+        description: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? `Đơn hàng đang được giao` : null
     },
     {
-        id: 4,
+        id: 2,
         title: 'Giao Hàng Thành Công',
         icon: CheckCircle,
         status: order.trangThaiDonHang === 'Đã giao' ? 'current' :
-            ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+            [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.trangThaiDonHang === 'Đã giao' ? order.deliveredAt : null,
         description: order.trangThaiDonHang === 'Đã giao' ? 'Khách hàng đã nhận hàng' : null
     },
+])
+
+const orderStepsFalse = computed(() => [
     {
-        id: 5,
-        title: 'Giao Thất Bại / Trả Lại',
-        icon: CheckCircle,
+        id: 1,
+        title: 'Giao Thất Bại',
+        icon: XCircle,
         status: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
         timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
-        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng bị trả lại hoặc giao thất bại' : null
+        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng giao thất bại' : null
+    },
+    {
+        id: 2,
+        title: 'Đã trả lại',
+        icon: AlertTriangle,
+        status: [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
+        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã trả lại' : null
+    },
+    {
+        id: 3,
+        title: 'Đã hủy',
+        icon: RefreshCcw,
+        status: ['Đã hủy'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
+        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã bị hủy' : null
     }
 ])
 // bien trang thai
 const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
-
+const canPack = computed(() => order.trangThaiDonHang === 'Đã xác nhận');
+const canReady = computed(() => order.trangThaiDonHang === 'Đã đóng gói');
 const canCancel = computed(() =>
-    ['Chờ xử lý', 'Đã xác nhận'].includes(order.trangThaiDonHang)
+    ['Chờ xử lý', 'Đã xác nhận','Đã đóng gói'].includes(order.trangThaiDonHang)
 );
+const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
+const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao');
 
 //format date
 const formatDate = (dateString) => {
@@ -314,12 +444,12 @@ const getStatusText = (status) => {
 // chuyển chuỗi thân thiện qua enum
 function getStatusKey(text) {
     const statusMap = {
-        pending: ['Chờ xử lý', 'Chờ xác nhận', 'Đang chờ'],
-        packed: ['Đã đóng gói', 'Đóng gói xong'],
-        shipping: ['Đang giao', 'Đang vận chuyển'],
-        delivered: ['Đã giao', 'Giao thành công'],
-        failed: ['Giao thất bại', 'Giao không thành công'],
-        returned: ['Đã trả lại', 'Trả hàng'],
+        pending: ['Chờ xử lý', 'Đã xác nhận'],
+        packed: ['Đã đóng gói','Sẵn sàng giao'],
+        shipping: ['Đang giao'],
+        delivered: ['Đã giao'],
+        failed: ['Giao thất bại'],
+        returned: ['Đã trả lại', 'Đã hủy'],
     }
     if (typeof text !== 'string') {
         return text;
@@ -328,11 +458,11 @@ function getStatusKey(text) {
 
     for (const [key, aliases] of Object.entries(statusMap)) {
         if (aliases.some(alias => alias.toLowerCase() === normalized)) {
-            return key;
+            return key; 
         }
     }
 
-    return text;
+        return text;
 }
 
 const getPaymentStatusText = (status) => {
@@ -342,7 +472,7 @@ const getPaymentStatusText = (status) => {
         PENDING: 'Chưa thanh toán',
         CONFIRMED: 'Chưa thanh toán',
         PAID: 'Đã thanh toán',
-        COMPLETED: 'Đã thanh toán',
+        COMPLETED: 'Hoàn tất',
         CANCELLED: 'Hủy',
         REFUNDED: 'Hoàn tiền',
     };
@@ -356,7 +486,7 @@ const getPaymentStatusClass = (status) => {
         PENDING: 'pending',
         CONFIRMED: 'pending',
         PAID: 'paid',
-        COMPLETED: 'paid',
+        COMPLETED: 'completed',
         CANCELLED: 'cancelled',
         REFUNDED: 'refunded'
     };

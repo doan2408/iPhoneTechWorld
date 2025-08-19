@@ -885,4 +885,280 @@
     /* Để icon không bị dính vào lề */
 }
 
+.custom-popconfirm {
+    max-width: 400px !important;
+    /* tăng chiều rộng */
+    font-size: 16px !important;
+    /* chữ to hơn */
+    padding: 16px !important;
+    /* thêm khoảng trống */
+}
 
+.custom-popconfirm .el-popconfirm__main {
+    white-space: normal;
+    /* cho phép xuống dòng nếu dài */
+}
+.fail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.fail-modal {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    animation: fail-fadeIn 0.3s ease-in-out;
+}
+
+.fail-title {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.fail-select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.fail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.fail-btn-cancel {
+    background: #f1f1f1;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.fail-btn-cancel:hover {
+    background: #ddd;
+}
+
+.fail-btn-confirm {
+    background: #e53935;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.fail-btn-confirm:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@keyframes fail-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.modal .fail-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    /* màu xám nhạt */
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #374151;
+    /* text xám đậm */
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.modal .fail-select:focus {
+    border-color: #3b82f6;
+    /* xanh focus */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.modal .fail-select option {
+    padding: 10px;
+    font-size: 14px;
+}
+
+/* Nếu muốn style option hover (không phải trình duyệt nào cũng hỗ trợ) */
+.modal .fail-select option:hover {
+    background-color: #f3f4f6;
+}
+
+.return-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.return-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 750px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.3s ease;
+}
+
+.return-title {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+/* List imei */
+.return-imei-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.return-imei-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.return-imei-item:hover {
+    background: #f0f8ff;
+    border-color: #4cafef;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.return-imei-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.imei-main {
+    font-weight: 600;
+    font-size: 14px;
+    color: #222;
+}
+
+.imei-sub {
+    font-size: 13px;
+    color: #666;
+}
+
+/* Table */
+.return-selected {
+    margin-top: 20px;
+}
+
+.return-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.return-table th,
+.return-table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.return-table th {
+    background: #f2f2f2;
+    font-weight: bold;
+}
+
+.return-select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Actions */
+.return-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.return-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s;
+}
+
+.return-btn.cancel {
+    background: #ddd;
+    color: #333;
+}
+
+.return-btn.confirm {
+    background: #4CAF50;
+    color: #fff;
+}
+
+.return-btn:hover {
+    transform: translateY(-2px);
+}
+
+.return-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

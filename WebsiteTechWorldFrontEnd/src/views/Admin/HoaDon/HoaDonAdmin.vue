@@ -870,6 +870,10 @@ const deleteHoaDon = async (hoaDon) => {
   });
 
   try {
+    if (hoaDon.tongTien > 0) {
+      Swal.fire("Thông báo!", "Hóa đơn này đã có sản phẩm, không thể xóa.", "info");
+      return;
+    }
     if (confirmDelete.isConfirmed) {
       await hoaDonSoftDelete(hoaDon.idHoaDon);
       Swal.fire("Thành công!", "Hóa đơn đã được xóa mềm.", "success");

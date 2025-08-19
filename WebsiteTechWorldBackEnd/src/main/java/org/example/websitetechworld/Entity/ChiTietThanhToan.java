@@ -7,6 +7,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,5 +31,8 @@ public class ChiTietThanhToan {
 
     @Column(name = "so_tien_thanh_toan", precision = 18, scale = 2)
     private BigDecimal soTienThanhToan;
+
+    @Column(name = "thoi_gian_thanh_toan")
+    private LocalDateTime thoiGianThanhToan;
 
 }

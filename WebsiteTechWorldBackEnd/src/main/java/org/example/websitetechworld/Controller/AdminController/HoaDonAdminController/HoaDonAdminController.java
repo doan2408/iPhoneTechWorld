@@ -1,31 +1,24 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
-import org.example.websitetechworld.Dto.Request.AdminRequest.GiaoHangAdminRequest.CapNhatTrangThaiDTO;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.CapNhatTrangThaiThanhToan;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
-import org.example.websitetechworld.Dto.Request.InvoiceRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
-import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.LichSuHoaDon.LichSuHoaDonAdminServices;
-import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ValidationException;
@@ -39,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -50,18 +42,16 @@ public class HoaDonAdminController {
     private final HoaDonAdminService hoaDonAdminService;
     private final LichSuHoaDonAdminServices lichSuHoaDonAdminServices;
     private final HoaDonChiTietAdminServices hoaDonChiTietAdminServices;
-    private final PhieuGiamGiaAdminService phieuGiamGiaAdminService;
     private final ThanhToanFactory thanhToanFactory;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
 
     private static final int PAGE_SIZE = 4;
 
-    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, PhieuGiamGiaAdminService phieuGiamGiaAdminService, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
+    public HoaDonAdminController(HoaDonAdminService hoaDonAdminService, LichSuHoaDonAdminServices lichSuHoaDonAdminServices, HoaDonChiTietAdminServices hoaDonChiTietAdminServices, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, ImeiDaBanAdminServices imeiDaBanAdminServices) {
         this.hoaDonAdminService = hoaDonAdminService;
         this.lichSuHoaDonAdminServices = lichSuHoaDonAdminServices;
         this.hoaDonChiTietAdminServices = hoaDonChiTietAdminServices;
-        this.phieuGiamGiaAdminService = phieuGiamGiaAdminService;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
@@ -237,7 +227,7 @@ public class HoaDonAdminController {
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "0") BigDecimal giaTriDonHangToiThieu,
             @RequestParam(required = false) Integer idKhachHang) {
-        List<PhieuGiamGiaAdminResponse> phieuGiamGias = phieuGiamGiaAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang, giaTriDonHangToiThieu);
+        List<PhieuGiamGiaAdminResponse> phieuGiamGias = hoaDonAdminService.layDanhSachPhieuGiamGiaCuaKhach(search, idKhachHang, giaTriDonHangToiThieu);
         return ResponseEntity.ok(phieuGiamGias);
     }
 

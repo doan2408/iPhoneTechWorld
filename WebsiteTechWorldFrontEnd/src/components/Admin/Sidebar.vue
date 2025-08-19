@@ -156,9 +156,7 @@ function toggleUuDaiMenu() {
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <!-- <li>
-              <router-link to="/admin/shipping">Quản lý giao hàng</router-link>
-            </li> -->
+            <li><router-link to="/admin/handle">Quản lý yêu cầu</router-link></li>
           </ul>
 
           <li @click="toggleUuDaiMenu" class="menu-toggle">

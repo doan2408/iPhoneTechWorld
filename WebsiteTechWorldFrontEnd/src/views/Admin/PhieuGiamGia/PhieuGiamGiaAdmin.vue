@@ -181,7 +181,7 @@
               <h3 class="section-title">Thông tin cơ bản</h3>
               <div class="form-row">
                 <el-form-item label="Mã giảm giá" class="form-item">
-                  <el-input v-model="formData.maGiamGia" placeholder="Mã tự động"
+                  <el-input v-model="formData.maGiamGia" placeholder="Mã tự động" :readonly="!!formData.id"
                     :class="{ 'error': errors.maGiamGia }" />
                   <span v-if="errors.maGiamGia" class="error-text">{{ errors.maGiamGia }}</span>
                 </el-form-item>
@@ -195,7 +195,8 @@
 
               <div class="form-row">
                 <el-form-item label="Loại giảm giá" class="form-item">
-                  <el-select v-model="formData.loaiGiamGia" placeholder="Chọn loại">
+                  <el-select v-model="formData.loaiGiamGia" placeholder="Chọn loại"
+                    :class="{ 'readonly-select': phieuActive }">
                     <el-option value="Phần trăm" label="Phần trăm (%)" />
                     <el-option value="Cố định" label="Số tiền cố định" />
                   </el-select>
@@ -203,21 +204,22 @@
 
                 <el-form-item label="Giá trị giảm giá *" class="form-item">
                   <el-input-number v-model="formData.giaTriGiamGia" :min="0"
-                    :max="formData.loaiGiamGia === 'Phần trăm' ? 100 : undefined" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.giaTriGiamGia }" />
+                    :max="formData.loaiGiamGia === 'Phần trăm' ? 60 : 99999999"
+                    :step="formData.loaiGiamGia === 'Phần trăm' ? 1 : 5000" placeholder="0" class="full-width"
+                    :readonly="phieuActive" :class="{ 'error': errors.giaTriGiamGia }" />
                   <span v-if="errors.giaTriGiamGia" class="error-text">{{ errors.giaTriGiamGia }}</span>
                 </el-form-item>
 
                 <el-form-item label="Giá trị đơn hàng tối thiểu" class="form-item">
-                  <el-input-number v-model="formData.giaTriDonHangToiThieu" :min="0" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.giaTriDonHangToiThieu }" />
+                  <el-input-number v-model="formData.giaTriDonHangToiThieu" :min="0" :step="10000" placeholder="0"
+                    class="full-width" :readonly="phieuActive" :class="{ 'error': errors.giaTriDonHangToiThieu }" />
                   <span v-if="errors.giaTriDonHangToiThieu" class="error-text">{{ errors.giaTriDonHangToiThieu }}</span>
                 </el-form-item>
 
                 <el-form-item v-if="formData.loaiGiamGia === 'Phần trăm'" label="Giá trị giảm giá tối đa"
                   class="form-item">
-                  <el-input-number v-model="formData.giaTriGiamGiaToiDa" :min="0" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.giaTriGiamGiaToiDa }" />
+                  <el-input-number v-model="formData.giaTriGiamGiaToiDa" :min="0" :step="5000" placeholder="0"
+                    class="full-width" :readonly="phieuActive" :class="{ 'error': errors.giaTriGiamGiaToiDa }" />
                   <span v-if="errors.giaTriGiamGiaToiDa" class="error-text">{{ errors.giaTriGiamGiaToiDa }}</span>
                 </el-form-item>
               </div>
@@ -228,13 +230,14 @@
               <h3 class="section-title">Thời gian hiệu lực</h3>
               <div class="form-row">
                 <el-form-item label="Thời gian bắt đầu *" class="form-item">
-                  <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian giờ bắt đầu"
-                    value-format="YYYY-MM-DD HH:mm:ss" class="full-width" :class="{ 'error': errors.ngayBatDau }" />
+                  <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian bắt đầu"
+                    :readonly="phieuActive" value-format="YYYY-MM-DD HH:mm:ss" class="full-width"
+                    :class="{ 'error': errors.ngayBatDau }" />
                   <span v-if="errors.ngayBatDau" class="error-text">{{ errors.ngayBatDau }}</span>
                 </el-form-item>
 
                 <el-form-item label="Thời gian kết thúc *" class="form-item">
-                  <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian giờ kết thúc"
+                  <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian kết thúc"
                     value-format="YYYY-MM-DD HH:mm:ss" class="full-width" :class="{ 'error': errors.ngayKetThuc }" />
                   <span v-if="errors.ngayKetThuc" class="error-text">{{ errors.ngayKetThuc }}</span>
                 </el-form-item>
@@ -253,7 +256,7 @@
 
                 <el-form-item label="Số điểm cần đổi" class="form-item">
                   <el-input-number v-model="formData.soDiemCanDeDoi" :min="0" placeholder="0" class="full-width"
-                    :class="{ 'error': errors.soDiemCanDeDoi }" />
+                    :readonly="phieuActive" :class="{ 'error': errors.soDiemCanDeDoi }" />
                   <span v-if="errors.soDiemCanDeDoi" class="error-text">{{ errors.soDiemCanDeDoi }}</span>
                 </el-form-item>
               </div>
@@ -270,9 +273,9 @@
                 </el-form-item>
               </div>
 
-              <el-form-item label="Điều kiện áp dụng *" class="form-item full-width">
+              <el-form-item label="Mô tả điều kiện áp dụng *" class="form-item full-width">
                 <el-input v-model="formData.dieuKienApDung" type="textarea" :rows="3"
-                  placeholder="Nhập điều kiện áp dụng giảm giá..." :class="{ 'error': errors.dieuKienApDung }" />
+                  placeholder="Nhập mô tả điều kiện áp dụng giảm giá..." :class="{ 'error': errors.dieuKienApDung }" />
                 <span v-if="errors.dieuKienApDung" class="error-text">{{ errors.dieuKienApDung }}</span>
               </el-form-item>
 
@@ -400,12 +403,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive, computed } from "vue";
+import { ref, onMounted, watch, reactive, computed, onUnmounted, readonly } from "vue";
 import { getAll, detail, add, update, deletePhieuGiamGia, giftVoucher } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Plus, Edit, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
 import store from "@/Service/LoginService/Store";
 import { Gift } from "lucide-vue-next";
+import { useToast } from "vue-toastification";
+import Swal from "sweetalert2";
+
+const toast = useToast()
 
 // Reactive data
 const isLoading = ref(false);
@@ -419,6 +426,8 @@ const trangThaiFilter = ref(null);
 const ngayBatDauFilter = ref(null);
 const ngayKetThucFilter = ref(null);
 const phieuGiamGiaDialogVisible = ref(false);
+
+const phieuActive = ref(false);
 
 const detailDialogVisible = ref(false);
 const detailData = reactive({
@@ -486,6 +495,7 @@ const resetForm = () => {
   formData.dieuKienApDung = "";
   formData.trangThaiPhieuGiamGia = "ACTIVE";
   formData.trangThaiPhatHanh = "NOT_ISSUED";
+  phieuActive.value = false
 };
 
 const resetDetailData = () => {
@@ -539,14 +549,21 @@ const validateForm = () => {
   if (formData.giaTriGiamGia <= 0) {
     errors.giaTriGiamGia = "Giá trị giảm giá phải lớn hơn 0";
     isValid = false;
-  } else if (formData.loaiGiamGia === "Phần trăm" && formData.giaTriGiamGia > 100) {
-    errors.giaTriGiamGia = "Giá trị giảm giá không được vượt quá 100%";
+  } else if (formData.loaiGiamGia === "Phần trăm" && formData.giaTriGiamGia > 60) {
+    errors.giaTriGiamGia = "Giá trị giảm giá không được vượt quá 60%";
     isValid = false;
   }
 
   if (!formData.ngayBatDau) {
     errors.ngayBatDau = "Ngày bắt đầu là bắt buộc";
     isValid = false;
+  } else {
+    const now = new Date();
+    const startDate = new Date(formData.ngayBatDau);
+    if (startDate < now && !formData.id) {
+      errors.ngayBatDau = "Ngày bắt đầu không được nằm trong quá khứ";
+      isValid = false;
+    }
   }
 
   if (!formData.ngayKetThuc) {
@@ -561,7 +578,7 @@ const validateForm = () => {
     }
   }
 
-  if (formData.giaTriGiamGiaToiDa <= 10000.00) {
+  if (formData.giaTriGiamGiaToiDa < 10000.00 && formData.loaiGiamGia === "Phần trăm") {
     errors.giaTriGiamGiaToiDa = "Giá trị giảm giá tối đa không được ít hơn 10000.00";
     isValid = false;
   }
@@ -590,13 +607,16 @@ const loadPhieuGiamGia = async (page) => {
       ngayBatDau: ngayBatDauFilter.value || null,
       ngayKetThuc: ngayKetThucFilter.value || null,
     });
-    phieuGiamGias.value = response.content;
+    phieuGiamGias.value = response.content.map(item => ({
+      ...item,
+      trangThaiPhieuGiamGia: calculateStatus(item.ngayBatDau, item.ngayKetThuc)
+    }));
     totalPages.value = response.totalPages;
     total.value = response.totalElements;
     currentPage.value = page;
   } catch (err) {
     console.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
-    ElMessage.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
+    toast.error(err.message || "Lỗi lấy danh sách phiếu giảm giá");
   } finally {
     isLoading.value = false;
   }
@@ -609,8 +629,22 @@ const openDialog = () => {
 };
 
 const savePhieuGiamGia = async () => {
+  const confirmSave = await Swal.fire({
+    title: formData.id ? "Xác nhận cập nhật" : "Xác nhận tạo mới",
+    text: formData.id ? "Bạn có chắc muốn cập nhật phiếu giảm giá này?" : "Bạn có chắc muốn tạo phiếu giảm giá này?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: formData.id ? "Cập nhật" : "Tạo mới",
+    cancelButtonText: "Hủy",
+  });
+
+  if (!confirmSave.isConfirmed) {
+    toast.info(formData.id ? "Đã hủy cập nhật" : "Đã hủy tạo mới");
+    return;
+  }
+
   if (!validateForm()) {
-    ElMessage.error("Vui lòng kiểm tra các lỗi trong form");
+    toast.error("Vui lòng kiểm tra các lỗi trong form");
     return;
   }
 
@@ -620,44 +654,73 @@ const savePhieuGiamGia = async () => {
       ...formData,
       giaTriGiamGia: formData.giaTriGiamGia.toString(),
       giaTriDonHangToiThieu: formData.giaTriDonHangToiThieu.toString(),
-      giaTriGiamGiaToiDa: formData.giaTriGiamGiaToiDa.toString(),
+      giaTriGiamGiaToiDa: formData.loaiGiamGia === 'Phần trăm' ? formData.giaTriGiamGiaToiDa.toString() : formData.giaTriGiamGia.toString(),
       soDiemCanDeDoi: formData.soDiemCanDeDoi.toString(),
-
       ngayBatDau: formatToSQLDateTime(formData.ngayBatDau),
       ngayKetThuc: formatToSQLDateTime(formData.ngayKetThuc),
+      trangThaiPhieuGiamGia: calculateStatus(formData.ngayBatDau, formData.ngayKetThuc),
     };
 
     if (formData.id) {
       await update(formData.id, payload);
-      ElMessage.success("Cập nhật giảm giá thành công!");
+      toast.success("Cập nhật giảm giá thành công!");
     } else {
       await add(payload);
-      ElMessage.success("Tạo giảm giá thành công!");
+      toast.success("Tạo giảm giá thành công!");
     }
 
     phieuGiamGiaDialogVisible.value = false;
-    loadPhieuGiamGia(currentPage.value);
+    await loadPhieuGiamGia(currentPage.value);
   } catch (error) {
-    console.error(error);
-    ElMessage.error(error.message || "Đã xảy ra lỗi không xác định");
+    console.error("Error saving phieu giam gia:", error);
+    toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi lưu phiếu giảm giá");
   } finally {
     isLoading.value = false;
   }
 };
 
 const giftPhieuGiamGia = async (type) => {
+  const confirmGift = await Swal.fire({
+    title: `Xác nhận tặng phiếu giảm giá`,
+    text: `Bạn có chắc muốn tặng phiếu giảm giá này mừng ${type === 'BIRTHDAY' ? 'sinh nhật khách hàng' : 'khách hàng mới'}?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Tặng",
+    cancelButtonText: "Hủy",
+  });
+
+  if (!confirmGift.isConfirmed) {
+    toast.info("Đã hủy tặng phiếu giảm giá");
+    return;
+  }
+
   try {
     isLoading.value = true;
-
     if (!detailData.id) {
-      ElMessage.error("Vui lòng tạo hoặc chọn phiếu giảm giá trước khi tặng");
+      toast.error("Vui lòng tạo hoặc chọn phiếu giảm giá trước khi tặng");
       return;
     }
-    await giftVoucher(detailData.id, type);
-    ElMessage.success(`Đã tặng phiếu giảm giá cho ${type === 'BIRTHDAY' ? 'sinh nhật' : 'khách hàng mới'} thành công!`);
+    if (detailData.trangThaiPhieuGiamGia === 'EXPIRED') {
+      toast.error("Phiếu giảm giá đã hết hạn");
+      return;
+    }
+    if (detailData.trangThaiPhatHanh !== 'ISSUED') {
+      toast.error("Phiếu giảm giá chưa được phát hành");
+      return;
+    }
+    if (!['BIRTHDAY', 'NEW_CUSTOMER'].includes(type.toUpperCase())) {
+      toast.error("Loại tặng phiếu không hợp lệ");
+      return;
+    }
+    const response = await giftVoucher(detailData.id, type);
+    if (response.code === 1) {
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
+    }
   } catch (error) {
-    console.error(error);
-    ElMessage.error(error.message || "Đã xảy ra lỗi khi tặng phiếu");
+    console.error("Error gifting phieu giam gia:", error);
+    toast.error(error.message || "Đã xảy ra lỗi khi tặng phiếu giảm giá");
   } finally {
     isLoading.value = false;
   }
@@ -665,23 +728,31 @@ const giftPhieuGiamGia = async (type) => {
 
 const handleDeletePhieuGiamGia = async (id) => {
   try {
-    await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa giảm giá này?", 'Xác nhận', {
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy',
-      type: 'warning'
+    const confirmDelete = await Swal.fire({
+      title: "Xác nhận xóa giảm giá",
+      text: "Bạn có chắc muốn xóa phiếu giảm giá này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
-
+    if (!confirmDelete.isConfirmed) {
+      toast.info("Đã hủy xóa");
+      return;
+    }
     isLoading.value = true;
-    await deletePhieuGiamGia(id);
-    ElMessage.success("Xóa giảm giá thành công!");
+    const response = await deletePhieuGiamGia(id);
+    if (response.code === 1) {
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
+    }
     loadPhieuGiamGia(currentPage.value);
   } catch (error) {
-    if (error === 'cancel') {
-      ElMessage.info('Đã hủy xóa');
-    } else {
-      console.error(error.message || "Lỗi khi xóa giảm giá");
-      ElMessage.error(error.message || "Lỗi khi xóa giảm giá");
-    }
+    console.error("Error deleting phieu giam gia:", error);
+    toast.error(
+      error.response?.data?.message || "Đã xảy ra lỗi khi xóa giảm giá"
+    );
   } finally {
     isLoading.value = false;
   }
@@ -691,10 +762,11 @@ const viewUpdate = async (id) => {
   try {
     const response = await detail(id);
     Object.assign(formData, response);
+    checkPhieuActive(formData.ngayBatDau)
     phieuGiamGiaDialogVisible.value = true;
   } catch (error) {
     console.error(error.message || "Lỗi khi tải chi tiết giảm giá");
-    ElMessage.error(error.message || "Lỗi khi tải chi tiết giảm giá");
+    toast.error(error.message || "Lỗi khi tải chi tiết giảm giá");
   }
   resetErrors();
 };
@@ -706,10 +778,9 @@ const viewDetail = async (id) => {
     detailDialogVisible.value = true;
   } catch (error) {
     console.error(error.message || "Lỗi khi tải chi tiết giảm giá");
-    ElMessage.error(error.message || "Lỗi khi tải chi tiết giảm giá");
+    toast.error(error.message || "Lỗi khi tải chi tiết giảm giá");
   }
 };
-
 
 const clear = () => {
   currentPage.value = 0;
@@ -720,12 +791,42 @@ const clear = () => {
   loadPhieuGiamGia(0);
 };
 
+import dayjs from 'dayjs';
+const checkPhieuActive = (ngayBatDau) => {
+  const now = dayjs();
+  const startDate = dayjs(ngayBatDau);
+
+  phieuActive.value = startDate.isBefore(now) || startDate.isSame(now, 'day');
+};
+
 const handleSizeChange = (newSize) => {
   pageSize.value = newSize;
   loadPhieuGiamGia(0);
 };
 
-// Utility functions
+let statusUpdateInterval = null;
+
+const calculateStatus = (ngayBatDau, ngayKetThuc) => {
+  const now = new Date();
+  const startDate = new Date(ngayBatDau);
+  const endDate = new Date(ngayKetThuc);
+
+  if (now < startDate) {
+    return 'NOT_STARTED';
+  } else if (now >= startDate && now <= endDate) {
+    return 'ACTIVE';
+  } else {
+    return 'EXPIRED';
+  }
+};
+
+const updateStatuses = () => {
+  phieuGiamGias.value = phieuGiamGias.value.map(item => ({
+    ...item,
+    trangThaiPhieuGiamGia: calculateStatus(item.ngayBatDau, item.ngayKetThuc)
+  }));
+};
+
 const trangThaiLabels = {
   NOT_STARTED: "Chưa bắt đầu",
   ACTIVE: "Đang hoạt động",
@@ -776,7 +877,7 @@ const formatDateTime = (dateStr) => {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
-function formatToSQLDateTime(date) {
+const formatToSQLDateTime = (date) => {
   if (!date) return null;
   const d = new Date(date);
 
@@ -813,6 +914,13 @@ watch([search, trangThaiFilter, ngayBatDauFilter, ngayKetThucFilter], () => {
 // Lifecycle
 onMounted(() => {
   loadPhieuGiamGia(currentPage.value);
+  statusUpdateInterval = setInterval(updateStatuses, 1000);
+});
+
+onUnmounted(() => {
+  if (statusUpdateInterval) {
+    clearInterval(statusUpdateInterval);
+  }
 });
 </script>
 
@@ -1125,6 +1233,14 @@ onMounted(() => {
   color: white;
 }
 
+:deep(.el-overlay) {
+  z-index: 1000 !important;
+}
+
+:deep(.el-overlay .el-dialog) {
+  z-index: 1000 !important;
+}
+
 /* Dialog Styles */
 .promotion-dialog :deep(.el-dialog) {
   border-radius: 16px;
@@ -1195,6 +1311,17 @@ onMounted(() => {
   font-weight: 500;
   color: #374151;
   margin-bottom: 8px;
+}
+
+.readonly-select :deep(.el-select__wrapper) {
+  pointer-events: none;
+  /* Ngăn tương tác */
+  background: #f5f7fa;
+  cursor: not-allowed;
+}
+
+.readonly-select :deep(.el-select__suffix) {
+  pointer-events: none;
 }
 
 .form-item :deep(.el-input__wrapper),

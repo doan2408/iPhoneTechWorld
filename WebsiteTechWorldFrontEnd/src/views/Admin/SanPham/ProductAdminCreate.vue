@@ -137,6 +137,30 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <!-- <el-row :gutter="20">
+        <el-col :span="12" v-if="sanPham.trangThaiSanPham">
+          <el-form-item
+            label="Ngày ra mắt"
+            prop="ngayRaMat"
+            :error="errors.ngayRaMat"
+          >
+            <el-date-picker
+              v-model="sanPham.ngayRaMat"
+              type="datetime"
+              value-format="YYYY-MM-DDTHH:mm:ss"
+              format="DD/MM/YYYY HH:mm:ss"
+              placeholder="Chọn ngày giờ ra mắt"
+              size="large"
+              style="width: 100%"
+              :disabled-date="disabledDate"
+              :disabled-hours="disabledHours"
+              :disabled-minutes="disabledMinutes"
+              :disabled-seconds="disabledSeconds"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row> -->
     </el-card>
 
     <!-- Chọn thuộc tính để tạo biến thể -->
@@ -636,6 +660,7 @@ export default {
       selectedMaus: "",
       selectedRoms: "",
       giaBanChung: "",
+      ngayRaMat: "",
     });
 
     const errorsChiTiet = reactive([]);
@@ -669,7 +694,7 @@ export default {
 
     const danhSachTrangThaiSanPham = [
       { label: "Đang kinh doanh", value: "ACTIVE" },
-      { label: "Sắp ra mắt", value: "COMING_SOON" },
+      { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
     ];
 
     // Hàm hiển thị thông báo tùy chỉnh
@@ -751,186 +776,186 @@ export default {
     };
 
     const generateVariants = async () => {
-  loading.generate = true;
-  let hasError = false;
-  const errorMessages = [];
-  console.log("Starting generateVariants", {
-    sanPham,
-    selectedMaus: selectedMaus.value,
-    selectedRoms: selectedRoms.value,
-    hinhAnhTheoMau,
-  });
+      loading.generate = true;
+      let hasError = false;
+      const errorMessages = [];
+      console.log("Starting generateVariants", {
+        sanPham,
+        selectedMaus: selectedMaus.value,
+        selectedRoms: selectedRoms.value,
+        hinhAnhTheoMau,
+      });
 
-  // TẠM THỜI COMMENT TẤT CẢ VALIDATION ĐỂ TEST
-  // if (!validateForm()) {
-  //   Object.keys(errors).forEach((key) => {
-  //     if (errors[key]) {
-  //       errorMessages.push(errors[key]);
-  //     }
-  //   });
-  //   hasError = true;
-  // }
+      // TẠM THỜI COMMENT TẤT CẢ VALIDATION ĐỂ TEST
+      // if (!validateForm()) {
+      //   Object.keys(errors).forEach((key) => {
+      //     if (errors[key]) {
+      //       errorMessages.push(errors[key]);
+      //     }
+      //   });
+      //   hasError = true;
+      // }
 
-  if (!selectedMaus.value.length) {
-    errors.selectedMaus = "Vui lòng chọn ít nhất một màu sắc";
-    errorMessages.push("Chọn ít nhất một màu sắc");
-    hasError = true;
-  }
-  if (!selectedRoms.value.length) {
-    errors.selectedRoms = "Vui lòng chọn ít nhất một ROM";
-    errorMessages.push("Chọn ít nhất một ROM");
-    hasError = true;
-  }
-
-  // selectedMaus.value.forEach((mau) => {
-  //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-  //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
-  //     errorMessages.push(`Màu ${getMauSacLabels(mau)}: Phải có ít nhất 1 hình ảnh`);
-  //     hasError = true;
-  //   }
-  // });
-
-  if (hasError) {
-    loading.generate = false;
-    await nextTick();
-    showNotification(errorMessages.join("; "), "error", 5000);
-    scrollToError();
-    return;
-  }
-
-  Object.keys(hinhAnhTheoMau).forEach((key) => {
-    if (!selectedMaus.value.includes(Number(key))) {
-      delete hinhAnhTheoMau[key];
-    }
-  });
-  Object.keys(errorsMauHinhAnh).forEach((key) => {
-    if (!selectedMaus.value.includes(Number(key))) {
-      delete errorsMauHinhAnh[key];
-    }
-  });
-
-  const existingCombinations = new Set();
-  const newVariants = [];
-  errorsChiTiet.length = 0;
-
-  selectedMaus.value.forEach((mau) => {
-    selectedRoms.value.forEach((rom) => {
-      const combination = `${mau}-${rom}`;
-      if (!existingCombinations.has(combination)) {
-        existingCombinations.add(combination);
-        const existingVariant = sanPham.sanPhamChiTiets.find(
-          (v) => v.idMau === mau && v.idRom === rom
-        );
-        newVariants.push({
-          id: existingVariant?.id || null,
-          idMau: mau,
-          idRom: rom,
-          soLuong: existingVariant?.soLuong || 0,
-          giaBan: giaBanChung.value || existingVariant?.giaBan || null,
-          imeisInput: existingVariant?.imeisInput || "",
-          isFileUploaded: existingVariant?.isFileUploaded || false,
-          imeis: existingVariant?.imeis || [],
-          hinhAnhs: hinhAnhTheoMau[mau] || [],
-        });
-        errorsChiTiet.push({
-          giaBan: "",
-          soLuong: "",
-          imeisInput: "",
-        });
+      if (!selectedMaus.value.length) {
+        errors.selectedMaus = "Vui lòng chọn ít nhất một màu sắc";
+        errorMessages.push("Chọn ít nhất một màu sắc");
+        hasError = true;
       }
-    });
-  });
+      if (!selectedRoms.value.length) {
+        errors.selectedRoms = "Vui lòng chọn ít nhất một ROM";
+        errorMessages.push("Chọn ít nhất một ROM");
+        hasError = true;
+      }
 
-  const duplicateCombinations = [];
-  for (const variant of newVariants) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const res = await api.get(
-        "/admin/sanPhamChiTiet/check-duplicate-variant",
-        {
-          params: {
-            idSp: sanPham.idModelSanPham,
-            idMau: variant.idMau,
-            idRom: variant.idRom,
-            idLoai: sanPham.idModelSanPham,
-          },
-          signal: controller.signal,
+      // selectedMaus.value.forEach((mau) => {
+      //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
+      //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
+      //     errorMessages.push(`Màu ${getMauSacLabels(mau)}: Phải có ít nhất 1 hình ảnh`);
+      //     hasError = true;
+      //   }
+      // });
+
+      if (hasError) {
+        loading.generate = false;
+        await nextTick();
+        showNotification(errorMessages.join("; "), "error", 5000);
+        scrollToError();
+        return;
+      }
+
+      Object.keys(hinhAnhTheoMau).forEach((key) => {
+        if (!selectedMaus.value.includes(Number(key))) {
+          delete hinhAnhTheoMau[key];
         }
-      );
-      clearTimeout(timeoutId);
-      if (res.data.exists) {
-        duplicateCombinations.push(
-          `${getMauSacLabels(variant.idMau)} - ${getRomLabels(
-            variant.idRom
-          )}`
-        );
+      });
+      Object.keys(errorsMauHinhAnh).forEach((key) => {
+        if (!selectedMaus.value.includes(Number(key))) {
+          delete errorsMauHinhAnh[key];
+        }
+      });
+
+      const existingCombinations = new Set();
+      const newVariants = [];
+      errorsChiTiet.length = 0;
+
+      selectedMaus.value.forEach((mau) => {
+        selectedRoms.value.forEach((rom) => {
+          const combination = `${mau}-${rom}`;
+          if (!existingCombinations.has(combination)) {
+            existingCombinations.add(combination);
+            const existingVariant = sanPham.sanPhamChiTiets.find(
+              (v) => v.idMau === mau && v.idRom === rom
+            );
+            newVariants.push({
+              id: existingVariant?.id || null,
+              idMau: mau,
+              idRom: rom,
+              soLuong: existingVariant?.soLuong || 0,
+              giaBan: giaBanChung.value || existingVariant?.giaBan || null,
+              imeisInput: existingVariant?.imeisInput || "",
+              isFileUploaded: existingVariant?.isFileUploaded || false,
+              imeis: existingVariant?.imeis || [],
+              hinhAnhs: hinhAnhTheoMau[mau] || [],
+            });
+            errorsChiTiet.push({
+              giaBan: "",
+              soLuong: "",
+              imeisInput: "",
+            });
+          }
+        });
+      });
+
+      const duplicateCombinations = [];
+      for (const variant of newVariants) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const res = await api.get(
+            "/admin/sanPhamChiTiet/check-duplicate-variant",
+            {
+              params: {
+                idSp: sanPham.idModelSanPham,
+                idMau: variant.idMau,
+                idRom: variant.idRom,
+                idLoai: sanPham.idModelSanPham,
+              },
+              signal: controller.signal,
+            }
+          );
+          clearTimeout(timeoutId);
+          if (res.data.exists) {
+            duplicateCombinations.push(
+              `${getMauSacLabels(variant.idMau)} - ${getRomLabels(
+                variant.idRom
+              )}`
+            );
+          }
+        } catch (err) {
+          console.error("Lỗi kiểm tra biến thể từ backend:", err);
+          if (err.name === "AbortError") {
+            showNotification(
+              "Yêu cầu kiểm tra biến thể quá thời gian, vui lòng thử lại.",
+              "error",
+              3000
+            );
+          } else {
+            showNotification(
+              "Lỗi kiểm tra trùng biến thể từ hệ thống: " + err.message,
+              "error",
+              3000
+            );
+          }
+          loading.generate = false;
+          return;
+        }
       }
-    } catch (err) {
-      console.error("Lỗi kiểm tra biến thể từ backend:", err);
-      if (err.name === "AbortError") {
+
+      if (duplicateCombinations.length > 0) {
         showNotification(
-          "Yêu cầu kiểm tra biến thể quá thời gian, vui lòng thử lại.",
+          `Không thể tạo các biến thể đã tồn tại: ${duplicateCombinations.join(
+            ", "
+          )}`,
           "error",
-          3000
+          2000
         );
-      } else {
-        showNotification(
-          "Lỗi kiểm tra trùng biến thể từ hệ thống: " + err.message,
-          "error",
-          3000
-        );
+        loading.generate = false;
+        return;
       }
+
+      sanPham.sanPhamChiTiets = newVariants;
+
+      // Sync formatted values cho các biến thể mới tạo
+      sanPham.sanPhamChiTiets.forEach((variant, index) => {
+        if (variant.giaBan) {
+          variantPriceFormatted[index] = variant.giaBan.toLocaleString("vi-VN");
+        } else {
+          variantPriceFormatted[index] = "";
+        }
+      });
+
+      // BỎ PHẦN VALIDATION GIÁ BÁN VÀ IMEI CHO TỪNG BIẾN THỂ
+      // Chỉ cập nhật số lượng mà không validate
+      sanPham.sanPhamChiTiets.forEach((_, index) => {
+        capNhatSoLuong(index, true);
+        // Bỏ phần validation IMEI ở đây
+      });
+
+      selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
+      setTimeout(() => {
+        const table = document.querySelector(".variant-table");
+        if (table) {
+          table.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+
       loading.generate = false;
-      return;
-    }
-  }
-
-  if (duplicateCombinations.length > 0) {
-    showNotification(
-      `Không thể tạo các biến thể đã tồn tại: ${duplicateCombinations.join(
-        ", "
-      )}`,
-      "error",
-      1000
-    );
-    loading.generate = false;
-    return;
-  }
-
-  sanPham.sanPhamChiTiets = newVariants;
-
-  // Sync formatted values cho các biến thể mới tạo
-  sanPham.sanPhamChiTiets.forEach((variant, index) => {
-    if (variant.giaBan) {
-      variantPriceFormatted[index] = variant.giaBan.toLocaleString("vi-VN");
-    } else {
-      variantPriceFormatted[index] = "";
-    }
-  });
-
-  // BỎ PHẦN VALIDATION GIÁ BÁN VÀ IMEI CHO TỪNG BIẾN THỂ
-  // Chỉ cập nhật số lượng mà không validate
-  sanPham.sanPhamChiTiets.forEach((_, index) => {
-    capNhatSoLuong(index, true);
-    // Bỏ phần validation IMEI ở đây
-  });
-
-  selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
-  setTimeout(() => {
-    const table = document.querySelector(".variant-table");
-    if (table) {
-      table.scrollIntoView({ behavior: "smooth" });
-    }
-  }, 100);
-
-  loading.generate = false;
-  showNotification(
-    `Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`,
-    "success",
-    3000
-  );
-};
+      showNotification(
+        `Đã tạo ${sanPham.sanPhamChiTiets.length} biến thể sản phẩm`,
+        "success",
+        3000
+      );
+    };
 
     const variantPriceFormatted = reactive({});
 
@@ -1494,6 +1519,69 @@ export default {
       }, 100);
     };
 
+    // function clearFieldError(fieldName) {
+    //   if (errors[fieldName]) {
+    //     delete errors[fieldName];
+    //   }
+    // }
+
+    // const disabledDate = (date) => {
+    //   if (sanPham.trangThaiSanPham === "COMING_SOON") {
+    //     const today = new Date();
+    //     today.setHours(0, 0, 0, 0);
+    //     return date < today; // Mờ ngày trước hôm nay
+    //   }
+    //   return false;
+    // };
+
+    // const disabledHours = () => {
+    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
+    //   const now = new Date();
+    //   const selected = new Date(sanPham.ngayRaMat || now);
+
+    //   if (
+    //     selected.getFullYear() === now.getFullYear() &&
+    //     selected.getMonth() === now.getMonth() &&
+    //     selected.getDate() === now.getDate()
+    //   ) {
+    //     return Array.from({ length: now.getHours() }, (_, i) => i);
+    //   }
+    //   return [];
+    // };
+
+    // const disabledMinutes = (hour) => {
+    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
+    //   const now = new Date();
+    //   const selected = new Date(sanPham.ngayRaMat || now);
+
+    //   if (
+    //     selected.getFullYear() === now.getFullYear() &&
+    //     selected.getMonth() === now.getMonth() &&
+    //     selected.getDate() === now.getDate() &&
+    //     hour === now.getHours()
+    //   ) {
+    //     return Array.from({ length: now.getMinutes() }, (_, i) => i);
+    //   }
+    //   return [];
+    // };
+
+    // const disabledSeconds = (hour, minute) => {
+    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
+    //   const now = new Date();
+    //   const selected = new Date(sanPham.ngayRaMat || now);
+
+    //   if (
+    //     selected.getFullYear() === now.getFullYear() &&
+    //     selected.getMonth() === now.getMonth() &&
+    //     selected.getDate() === now.getDate() &&
+    //     hour === now.getHours() &&
+    //     minute === now.getMinutes()
+    //   ) {
+    //     return Array.from({ length: now.getSeconds() }, (_, i) => i);
+    //   }
+    //   return [];
+    // };
+
     const validateForm = () => {
       let hasError = false;
       if (!sanPham.idModelSanPham || !sanPham.tenSanPham) {
@@ -1519,6 +1607,10 @@ export default {
         errors.idModelSanPham = "Vui lòng chọn model sản phẩm";
         hasError = true;
       }
+      // if (!sanPham.ngayRaMat) {
+      //   errors.ngayRaMat = "Vui lòng chọn ngày ra mắt";
+      //   hasError = true;
+      // }
       // selectedMaus.value.forEach((mau) => {
       //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
       //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
@@ -1622,6 +1714,7 @@ export default {
           thuongHieu: sanPham.thuongHieu,
           idNhaCungCaps: [sanPham.idNhaCungCap],
           trangThaiSanPham: sanPham.trangThaiSanPham,
+          ngayRaMat: sanPham.ngayRaMat,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {
             const imeis = chiTiet.isFileUploaded
@@ -1780,6 +1873,11 @@ export default {
       router,
       notification, // Trả về thông báo để sử dụng trong template
       showNotification, // Hàm để gọi thông báo
+      // clearFieldError,
+      // disabledDate,
+      // disabledHours,
+      // disabledMinutes,
+      // disabledSeconds,
     };
   },
 };

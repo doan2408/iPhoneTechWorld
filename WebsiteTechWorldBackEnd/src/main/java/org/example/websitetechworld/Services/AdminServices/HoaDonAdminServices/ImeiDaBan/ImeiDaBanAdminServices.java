@@ -47,4 +47,8 @@ public class ImeiDaBanAdminServices {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return imeiDaBanRepository.imeiTrongHdct(idHoaDon,pageable);
     }
+
+    public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer ctHoaDonId) {
+        return imeiDaBanRepository.imeiTrongHdct(ctHoaDonId);
+    }
 }

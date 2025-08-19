@@ -247,10 +247,13 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
+                                <input v-if="discountList" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
                                     class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
+                                <p v-if="!discountList" style="text-align: center; font-style: italic;">
+                                    Khách hàng không có giảm giá nào
+                                </p>
                                 <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
                                     <div>
                                         <strong>{{ discount.tenGiamGia }}</strong>

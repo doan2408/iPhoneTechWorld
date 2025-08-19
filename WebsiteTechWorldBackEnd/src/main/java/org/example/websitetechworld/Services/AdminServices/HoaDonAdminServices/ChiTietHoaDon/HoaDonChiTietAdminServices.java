@@ -62,7 +62,7 @@ public class HoaDonChiTietAdminServices {
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
         List<String> imeiIdsFromRequest = request.getImeiIds();
         for (String soImei : imeiIdsFromRequest) {
-            boolean imeiDaBanTonTai = imeiDaBanRepository.existsBySoImei(soImei);
+            boolean imeiDaBanTonTai = imeiDaBanRepository.existsBySoImeiAndTrangThai(soImei,TrangThaiImei.RESERVED);
             if (imeiDaBanTonTai) {
                 throw new IllegalArgumentException("IMEI " + soImei + " đã được thêm vào hóa đơn khác.");
             }

@@ -20,7 +20,7 @@ public class ThanhToanFactory {
     @Autowired
     public ThanhToanFactory(List<ThanhToanStrategy> strategyList) {
         for (ThanhToanStrategy strategy : strategyList) {
-            if (strategy instanceof TienMatStrategy) {
+                if (strategy instanceof TienMatStrategy) {
                 strategies.put(TenHinhThuc.TIEN_MAT.name(), strategy);
             } else if (strategy instanceof ChuyenKhoanStrategy) {
                 strategies.put(TenHinhThuc.CHUYEN_KHOAN.name(), strategy);
