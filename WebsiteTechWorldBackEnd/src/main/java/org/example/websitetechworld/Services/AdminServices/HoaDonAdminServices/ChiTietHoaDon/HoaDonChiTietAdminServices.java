@@ -218,7 +218,15 @@ public class HoaDonChiTietAdminServices {
                 return BigDecimal.ZERO;
             }
             BigDecimal giaGoc = spct.getGiaBan();
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
             if (khuyenMai == null) {
                 return giaGoc;
             }
