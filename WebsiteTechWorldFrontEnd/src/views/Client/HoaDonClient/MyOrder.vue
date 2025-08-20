@@ -629,6 +629,7 @@ const allMyOrder = async () => {
     allOrderValue.value = ordersWithCheck;
     totalElements.value = res.data.totalElements || 0;
     totalPages.value = res.data.totalPages || 0;
+    console.log(totalElements.value)
 
     console.log("✅ Kết quả cuối cùng:", ordersWithCheck);
   } catch (error) {

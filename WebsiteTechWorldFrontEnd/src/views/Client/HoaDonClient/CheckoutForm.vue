@@ -65,11 +65,13 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <div class="radio-content">
-                            <input type="radio" name="shipping-method" value="ghtk" v-model="selectedShippingMethod"
+                            <input type="radio" name="shipping-method" value="standard" v-model="selectedShippingMethod"
                                 class="radio-field" />
                             <span>Vận chuyển tiêu chuẩn</span>
                         </div>
-                        <span class="shipping-cost">₫25.000</span>
+                        <span class="shipping-cost">
+                            đ{{ formatCurrency(phiShipTieuChuan) }}
+                        </span>
                     </label>
                     <label class="radio-option">
                         <div class="radio-content">
@@ -511,6 +513,8 @@ const handleApplyVoucherInModal = () => {
 };
 
 // --- Other Checkout Data ---
+const phiShipTieuChuan = ref(0);
+const phishipDisplay = ref(0);
 const selectedShippingMethod = ref('standard')
 const pointsToApply = ref('')
 const hasInsurance = ref(false)
@@ -530,8 +534,8 @@ onMounted(() => {
 });
 
 watch(product, (newVal) => {
-    console.log("👀 product thay đổi:", newVal);
-    console.log("💵 Subtotal mới:", calculateSubtotal.value);
+    console.log("product thay đổi:", newVal);
+    console.log("Subtotal mới:", calculateSubtotal.value);
     loadDiscountList()
 });
 
@@ -546,8 +550,8 @@ const insurance = ref({
 
 const getShippingCost = computed(() => {
     switch (selectedShippingMethod.value) {
-        case 'ghtk':
-            return 25000;
+        case 'standard':
+            return phiShipTieuChuan.value;
         case 'express':
             return phishipDisplay.value;
         default:
@@ -686,8 +690,6 @@ const getIconUrl = (code) => {
 onMounted(async () => {
     fetchPaymentMethods();
 })
-
-const phishipDisplay = ref(0);
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
@@ -708,12 +710,6 @@ const updatePhiShip = async () => {
         console.log("Tọa độ cửa hàng (from):", from);
         console.log("Tọa độ người nhận (to):", to);
 
-        if (!from || !to) {
-            phishipDisplay.value = 30000; // Phí mặc định
-            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Áp dụng phí mặc định: 30,000 VNĐ.");
-            return;
-        }
-
         const distance = await getDistanceInKm(from, to);
         console.log("Khoảng cách tính được:", distance);
 
@@ -725,12 +721,14 @@ const updatePhiShip = async () => {
         // }
 
         phishipDisplay.value = calcPhiShip(distance);
+        phiShipTieuChuan.value = calcPhiShipTieuChuan(distance)
         console.log(
             `Khoảng cách: ${distance} km, Phí ship: ${phishipDisplay.value.toLocaleString('vi-VN')} VNĐ`
         );
     } catch (err) {
         console.error("Lỗi khi tính phí ship:", err);
-        phishipDisplay.value = 30000; // Phí mặc định
+        phishipDisplay.value = 50000; 
+        phiShipTieuChuan.value = 30000;
         console.log("Áp dụng phí mặc định do lỗi: 30,000 VNĐ");
     }
 };
@@ -801,14 +799,27 @@ const getDistanceInKm = async (from, to) => {
     }
 };
 const calcPhiShip = (km) => {
-    const baseFee = 15000;
-    const additionalFeePerKm = 2000;
+    return 50000
+};
 
-    if (km <= 2) return baseFee;
 
-    const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
+const calcPhiShipTieuChuan = (km) => {
 
-    return calculatedFee;
+    if (km <= 30) return 30000;
+
+    if (km >= 30 || km <= 50) return 40000;
+
+    if (km >= 50 || km <= 100) {
+        return 1500 * km;
+    }
+
+    if (km >= 100 || km <= 500) {
+        return 1200 * km;
+    }
+
+    if (km => 1000) {
+        return 1000 * km;
+    }
 };
 </script>
 
