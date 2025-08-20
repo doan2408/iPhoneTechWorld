@@ -21,7 +21,7 @@
             <div class="stats-grid">
                 <div class="stat-card urgent">
                     <div class="stat-number">{{ stats.total }}</div>
-                    <div class="stat-label">Tổng đơn cần xử lý</div>
+                    <div class="stat-label">Tổng đơn cần phê duyệt</div>
                 </div>
                 <div class="stat-card warning">
                     <div class="stat-number">{{ stats.failed }}</div>
@@ -190,7 +190,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { countDonHangByStatus, getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import router from '@/router'
 
 // Reactive data
@@ -200,11 +200,22 @@ const sortBy = ref('desc')
 
 // Mock data
 const stats = ref({
-    total: 24,
-    failed: 8,
-    returns: 12,
-    resolved: 15
+    total: 0,
+    failed: 0,
+    returns: 0,
+    resolved: 0
 })
+
+const getStats = async () => {
+    
+    try {
+    const res = await countDonHangByStatus();
+    console.log("Kết quả:", res.data);
+    stats.value = res.data
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu:", error);
+  }
+}
 
 const tabs = ref([
     { id: 'all', label: 'Tất cả' },
@@ -293,6 +304,7 @@ const formatCurrency = (amount) => {
 
 onMounted(() => {
     getAllLyDoXuLyView()
+    getStats()
 })
 </script>
 

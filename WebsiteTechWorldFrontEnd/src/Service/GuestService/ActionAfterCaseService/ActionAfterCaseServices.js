@@ -43,3 +43,8 @@ export const changeStatusPending = (soImeis,status) => {
     };
     return api.post(url,request)
 }
+
+export const countDonHangByStatus = () => {
+    const url = baseURL + '/stats';
+    return api.get(url)
+}
