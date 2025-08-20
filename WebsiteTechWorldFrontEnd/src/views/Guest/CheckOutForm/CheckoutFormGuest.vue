@@ -18,7 +18,7 @@
                         {{ shippingAddress.email || '' }}
                     </p>
                     <p v-if="shippingAddress.address" class="address-detail-display">
-                        <span style="color: blue;">Địa chỉ nhận hàng:</span>{{ shippingAddress.address }}
+                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }}
                     </p>
                     <p v-else class="address-detail-display text-gray-400">
                         Chưa có địa chỉ nhận hàng
