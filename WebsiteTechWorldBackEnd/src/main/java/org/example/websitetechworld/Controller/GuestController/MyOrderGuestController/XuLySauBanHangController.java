@@ -1,13 +1,20 @@
 package org.example.websitetechworld.Controller.GuestController.MyOrderGuestController;
 
 import org.apache.commons.collections4.Get;
+import org.example.websitetechworld.Dto.Request.AdminRequest.GiaoHangAdminRequest.CapNhatTrangThaiDTO;
+import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.AccepAndInAccepAction;
 import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
+import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangService.XuLySauBanHangServices;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +26,15 @@ import java.util.List;
 @RequestMapping("/action-after-case")
 public class XuLySauBanHangController {
     private final XuLySauBanHangServices xuLySauBanHangServices;
+    private final HoaDonAdminService hoaDonAdminService;
+    private final GiaoHangAdminServices giaoHangAdminServices;
+    private final LichSuDiemService lichSuDiemService;
 
-    public XuLySauBanHangController(XuLySauBanHangServices xuLySauBanHangServices) {
+    public XuLySauBanHangController(XuLySauBanHangServices xuLySauBanHangServices, HoaDonAdminService hoaDonAdminService, GiaoHangAdminServices giaoHangAdminServices, LichSuDiemService lichSuDiemService) {
         this.xuLySauBanHangServices = xuLySauBanHangServices;
+        this.hoaDonAdminService = hoaDonAdminService;
+        this.giaoHangAdminServices = giaoHangAdminServices;
+        this.lichSuDiemService = lichSuDiemService;
     }
 
     @PostMapping("")
@@ -56,6 +69,20 @@ public class XuLySauBanHangController {
     @PostMapping("/change-status")
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request){
         xuLySauBanHangServices.changeStatus(request);
+        return ResponseEntity.ok("Cập nhật trạng thái thành công");
+    }
+    @PutMapping("/{idHoaDon}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Integer idHoaDon,
+                                          @RequestBody CapNhatTrangThaiDTO request) {
+        TrangThaiGiaoHang trangThai = TrangThaiGiaoHang.fromDisplayName(request.getTrangThaiDonHang());
+        if (trangThai.equals(TrangThaiGiaoHang.RETURNS)){
+            giaoHangAdminServices.updateStatus(idHoaDon, trangThai);
+        }
+        return ResponseEntity.ok("Đã cập nhật trạng thái: " + trangThai.getDisplayName());
+    }
+    @PutMapping("/update-status")
+    public ResponseEntity<?> changeStatus(@RequestBody AccepAndInAccepAction action) {
+        xuLySauBanHangServices.changeStatus(action);
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
     }
 }

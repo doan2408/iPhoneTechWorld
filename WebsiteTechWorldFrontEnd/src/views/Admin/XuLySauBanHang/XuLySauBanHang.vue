@@ -70,9 +70,10 @@
                             <tr>
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
-                                <th>Trạng thái</th>
+                                <th>Loại yêu cầu</th>
                                 <th>Ngày yêu cầu xử lý</th>
                                 <th>Giá trị</th>
+                                <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -90,13 +91,36 @@
                                         getStatusText(order.trangThaiDonHang)
                                         }}</span>
                                 </td>
+
                                 <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
+                                <td class="status-cell">
+                                    <span :class="['order-status', order.hanhDongSauVuViec]">{{
+                                        getStatusText(order.hanhDongSauVuViec)
+                                        }}</span>
+                                </td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
                                     </div>
+                                    <div class="order-actions" v-if="order.hanhDongSauVuViec === 'PENDING'">
+                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn success"
+                                            @click="openConfirm('Bạn có chắc chắn chấp nhận yêu cầu này?', () => updateStatus(order.idHoaDon, 'HOLD'))"
+                                            title="Chấp nhận">
+                                            Chấp nhận
+                                        </button>
+                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn danger"
+                                            @click="openConfirm('Bạn có chắc chắn từ chối yêu cầu này?', () => updateStatus(order.idHoaDon, 'CANCEL'))"
+                                            title="Từ chối">
+                                            Từ chối
+                                        </button>
+                                    </div>
+                                    <button v-if="order.hanhDongSauVuViec === 'HOLD'" class="action-btn success"
+                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(order.idHoaDon, 'RECEIVED'))"
+                                        title="Đã nhận hàng">
+                                        Đã nhận hàng
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -167,10 +191,27 @@
                                 <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
                                     </div>
+                                    <div class="order-actions" v-if="order.hanhDongSauVuViec === 'PENDING'">
+                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn success"
+                                            @click="openConfirm('Bạn có chắc chắn chấp nhận yêu cầu này?', () => updateStatus(order.idHoaDon, 'HOLD'))"
+                                            title="Chấp nhận">
+                                            Chấp nhận
+                                        </button>
+                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn danger"
+                                            @click="openConfirm('Bạn có chắc chắn từ chối yêu cầu này?', () => updateStatus(order.idHoaDon, 'CANCEL'))"
+                                            title="Từ chối">
+                                            Từ chối
+                                        </button>
+                                    </div>
+                                    <button v-if="order.hanhDongSauVuViec === 'HOLD'" class="action-btn success"
+                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(order.idHoaDon, 'RECEIVED'))"
+                                        title="Đã nhận hàng">
+                                        Đã nhận hàng
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -184,20 +225,26 @@
                 <button @click="nextPage" :disabled="pageNo + 1 >= totalPages"> &gt; </button>
             </div>
             <br>
+            <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+                @cancel="showConfirm = false" />
         </section>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { getAllLyDoXuLy, updateStatusPending } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import router from '@/router'
+import { useToast } from 'vue-toastification'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
 
 // Reactive data
 const activeTab = ref('all')
 const searchQuery = ref('')
 const sortBy = ref('desc')
 
+const statusNotXuLy = ['PENDING', 'HOLD','CANCEL']
+const toast = useToast()
 // Mock data
 const stats = ref({
     total: 24,
@@ -228,6 +275,18 @@ const getAllLyDoXuLyView = async () => {
     orders.value = res.data.content
 }
 
+const updateStatus = async (idHoaDon,status) => {
+    await updateStatusPending(idHoaDon,status)
+    if (status === 'HOLD') {
+        toast.success("Bạn đã chấp nhận yêu cầu!")
+    } else if (status === 'CANCEL') {
+        toast.success("Bạn đã từ chối yêu cầu!")
+    } else if (status === 'RECEIVED') {
+        toast.success("Đã nhận được hàng")
+    }
+    getAllLyDoXuLyView()
+}
+
 const nextPage = async () => {
     if (pageNo.value + 1 < totalPages.value) {
         pageNo.value++
@@ -244,6 +303,21 @@ const prevPage = async () => {
 
 }
 
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
+}
+
 watch(
     [pageNo, pageSize, searchQuery, activeTab, sortBy],
     () => {
@@ -255,6 +329,7 @@ watch(
 
 const xuLyClick = (id) => {
     router.push(`/admin/handle-detail/` + id)
+    toast.success("Chuyển thành công qua trang xử lý")
 }
 
 const failedOrders = computed(() =>

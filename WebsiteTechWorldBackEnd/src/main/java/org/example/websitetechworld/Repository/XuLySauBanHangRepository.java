@@ -16,7 +16,9 @@ import java.util.List;
 
 @Repository
 public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, Integer> {
-    XuLySauBanHang findByIdHoaDon_Id(Integer id);
+    XuLySauBanHang findByIdHoaDon_IdAndLoaiVuViec(Integer id,CaseType caseType);
+
+    List<XuLySauBanHang> findByIdHoaDon_Id(Integer id);
 
     @Query(value = """
         SELECT new org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse(
@@ -28,6 +30,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
              , MAX(xlbh.thoiGianYeuCau)
              , SUM(cthd.donGia)
              , hd.id
+             , xlbh.hanhDongSauVuViec
         )
                 FROM
                      XuLySauBanHang xlbh
@@ -38,7 +41,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
                 WHERE ldxl.loaiVuViec <> 'CANCELLED'
                     AND (:search IS NULL OR hd.maHoaDon LIKE %:search% OR kh.tenKhachHang LIKE %:search%)
                     AND (:status IS NULL OR ldxl.loaiVuViec = :status)
-                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang
+                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang, xlbh.hanhDongSauVuViec
                 ORDER BY
                     CASE WHEN :sortDir = 'ASC' THEN MAX(xlbh.thoiGianYeuCau) END ASC,
                     CASE WHEN :sortDir = 'DESC' THEN MAX(xlbh.thoiGianYeuCau) END DESC

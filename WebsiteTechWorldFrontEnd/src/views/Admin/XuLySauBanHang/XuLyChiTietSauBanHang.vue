@@ -116,17 +116,6 @@
                                     </td>
                                     <td class="action-col">
                                         <div class="row-actions">
-                                            <!-- <button class="action-btn retry"
-                                                @click="openConfirm('Bạn có chắc chắn muốn dữ lại?', () => processImei(imei.soImei,'hold'))"
-                                                title="Dữ lại">
-                                                ♻️
-                                            </button> -->
-
-                                            <button v-if="imei.loaiVuViec === 'RETURN'" class="action-btn cancel"
-                                                @click="openConfirm('Bạn có chắc chắn muốn hủy yêu cầu này?', () => processImei(imei.soImei, 'cancel'))"
-                                                title="Hủy bỏ">
-                                                ❌
-                                            </button>
 
                                             <button class="action-btn return"
                                                 @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"

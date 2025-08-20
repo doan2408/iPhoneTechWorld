@@ -43,3 +43,17 @@ export const changeStatusPending = (soImeis,status) => {
     };
     return api.post(url,request)
 }
+
+export const uploadAnhAndVid = (formData) => {
+    const url = '/api/upload/upload-imei'
+    return api.post(url, formData)
+}
+
+export const updateStatusPending = (idHoaDon, hanhDong) => {
+    const url = baseURL + '/update-status'
+    const request = {
+        idHoaDon: idHoaDon,
+        hanhDong: hanhDong
+    };
+    return api.put(url, request)
+}

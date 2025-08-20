@@ -414,36 +414,6 @@ CREATE TABLE imei (
 );
 
 --34
-CREATE TABLE loai_bao_hanh (
-                               id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
-                               ten_loai_bao_hanh NVARCHAR(100),
-                               thoi_gian_thang INT,
-                               mo_ta NVARCHAR(255)
-);
-
---35
-CREATE TABLE bao_hanh (
-                          id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
-                          id_khach_hang INT,
-                          id_imei INT REFERENCES imei(id_imei),
-                          ngay_bat_dau DATE,
-                          ngay_ket_thuc DATE,
-                          id_loai_bao_hanh INT REFERENCES loai_bao_hanh(id_loai_bao_hanh),
-                          trang_thai_bao_hanh NVARCHAR(50)
-);
-
---36
-CREATE TABLE lich_su_bao_hanh (
-                                  id INT IDENTITY(1,1) PRIMARY KEY,
-                                  id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
-                                  ngay_tiep_nhan DATE,
-                                  ngay_hoan_thanh DATE,
-                                  mo_ta_loi NVARCHAR(255),
-                                  trang_thai NVARCHAR(50)
-);
-
-
---37
 CREATE TABLE hinh_anh (
                           id_hinh_anh INT IDENTITY(1,1) PRIMARY KEY,
                           id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -451,7 +421,7 @@ CREATE TABLE hinh_anh (
                           image_public_id VARCHAR(100)
 );
 
---38
+--35
 CREATE TABLE gio_hang_chi_tiet (
                                    id_gio_hang_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
                                    id_gio_hang INT,
@@ -463,7 +433,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
 
---39
+--36
 CREATE TABLE chi_tiet_hoa_don (
                                   id_chi_tiet_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
                                   id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
@@ -483,12 +453,42 @@ CREATE TABLE chi_tiet_hoa_don (
                                   don_gia DECIMAL(10,2)
 );
 
---40
+--37
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
                              so_imei VARCHAR(70),
                              trang_thai NVARCHAR(50)
+);
+
+--38
+CREATE TABLE loai_bao_hanh (
+                               id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
+                               ten_loai_bao_hanh NVARCHAR(100),
+                               thoi_gian_thang INT,
+                               mo_ta NVARCHAR(255)
+);
+
+--39
+CREATE TABLE bao_hanh (
+                          id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
+                          id_khach_hang INT,
+                          id_imei_da_ban INT REFERENCES imei_da_ban(id_imei_da_ban),
+                          ngay_bat_dau DATE,
+                          ngay_ket_thuc DATE,
+                          id_loai_bao_hanh INT REFERENCES loai_bao_hanh(id_loai_bao_hanh),
+                          id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
+                          trang_thai_bao_hanh NVARCHAR(50)
+);
+
+--40
+CREATE TABLE lich_su_bao_hanh (
+                                  id INT IDENTITY(1,1) PRIMARY KEY,
+                                  id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
+                                  ngay_tiep_nhan DATE,
+                                  ngay_hoan_thanh DATE,
+                                  mo_ta_loi NVARCHAR(255),
+                                  trang_thai NVARCHAR(50)
 );
 
 --41
@@ -578,6 +578,8 @@ CREATE TABLE xu_ly_sau_ban_hang (
                                     id_ly_do INT NULL,
                                     hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
                                     da_kiem_tra BIT NOT NULL DEFAULT 0,
+                                    url_hinh NVARCHAR(500) NULL,
+                                    url_video NVARCHAR(500) NULL,
                                     FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don),
                                     FOREIGN KEY (id_imei_da_ban) REFERENCES imei_da_ban(id_imei_da_ban),
                                     FOREIGN KEY (id_ly_do) REFERENCES ly_do_xu_ly(id_ly_do)
