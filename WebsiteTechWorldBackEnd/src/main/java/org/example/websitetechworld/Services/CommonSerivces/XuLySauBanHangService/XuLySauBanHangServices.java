@@ -9,7 +9,6 @@ import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseR
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
-import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -239,15 +237,15 @@ public class XuLySauBanHangServices {
 
     public StatsTrangThaiHoaDon getStatsTrangThaiHoaDon() {
         StatsTrangThaiHoaDon statsTrangThaiHoaDon = new StatsTrangThaiHoaDon();
-        statsTrangThaiHoaDon.setTotal(countStatus(ActionAfterCase.PENDING));
+        statsTrangThaiHoaDon.setTotal(countStatus());
         statsTrangThaiHoaDon.setFailed(countStatus(CaseType.FAILED_DELIVERY));
         statsTrangThaiHoaDon.setReturns(countStatus(CaseType.RETURN));
-        statsTrangThaiHoaDon.setResolved(countStatus(ActionAfterCase.REFUND));
+        statsTrangThaiHoaDon.setResolved(xuLySauBanHangRepository.countByThoiGianXuLy(LocalDateTime.now()));
         return statsTrangThaiHoaDon;
     }
 
-    private int countStatus (ActionAfterCase actionAfterCase) {
-        return xuLySauBanHangRepository.countByHanhDongSauVuViec(actionAfterCase);
+    private int countStatus () {
+        return xuLySauBanHangRepository.countByHanhDongSauVuViec(ActionAfterCase.PENDING);
     }
 
     private int countStatus (CaseType caseType) {
