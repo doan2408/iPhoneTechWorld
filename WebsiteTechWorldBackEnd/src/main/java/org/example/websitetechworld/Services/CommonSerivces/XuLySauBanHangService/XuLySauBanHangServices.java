@@ -3,11 +3,13 @@ package org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangServi
 import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.StatsTrangThaiHoaDon;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
+import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
@@ -233,5 +235,22 @@ public class XuLySauBanHangServices {
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
         }
+    }
+
+    public StatsTrangThaiHoaDon getStatsTrangThaiHoaDon() {
+        StatsTrangThaiHoaDon statsTrangThaiHoaDon = new StatsTrangThaiHoaDon();
+        statsTrangThaiHoaDon.setTotal(countStatus(ActionAfterCase.PENDING));
+        statsTrangThaiHoaDon.setFailed(countStatus(CaseType.FAILED_DELIVERY));
+        statsTrangThaiHoaDon.setReturns(countStatus(CaseType.RETURN));
+        statsTrangThaiHoaDon.setResolved(countStatus(ActionAfterCase.REFUND));
+        return statsTrangThaiHoaDon;
+    }
+
+    private int countStatus (ActionAfterCase actionAfterCase) {
+        return xuLySauBanHangRepository.countByHanhDongSauVuViec(actionAfterCase);
+    }
+
+    private int countStatus (CaseType caseType) {
+        return xuLySauBanHangRepository.countByLoaiVuViec(caseType);
     }
 }

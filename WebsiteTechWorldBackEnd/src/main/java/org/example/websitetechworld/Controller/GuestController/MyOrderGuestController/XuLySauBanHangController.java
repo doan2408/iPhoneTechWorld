@@ -4,6 +4,7 @@ import org.apache.commons.collections4.Get;
 import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.StatsTrangThaiHoaDon;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.XuLySauBanHang;
@@ -57,5 +58,11 @@ public class XuLySauBanHangController {
     public ResponseEntity<?> changeStatus(@RequestBody ChangeStatusRequest request){
         xuLySauBanHangServices.changeStatus(request);
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<?> countDonHangByStatus (){
+        StatsTrangThaiHoaDon banHangList = xuLySauBanHangServices.getStatsTrangThaiHoaDon();
+        return ResponseEntity.ok(banHangList);
     }
 }

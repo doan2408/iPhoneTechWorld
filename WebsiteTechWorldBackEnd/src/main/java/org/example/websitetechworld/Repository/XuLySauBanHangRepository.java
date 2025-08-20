@@ -80,4 +80,13 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
 
     List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_IdAndHanhDongSauVuViec(Integer idHoaDon, ActionAfterCase action);
 
+    @Query (value = """
+        SELECT COUNT(*) 
+        FROM xu_ly_sau_ban_hang 
+        WHERE hanh_dong_sau_vu_viec = :hanhDongSauVuViec
+            AND (:hanhDongSauVuViec != 'REFUND' OR CAST(thoi_gian_xu_ly AS date) = CAST(GETDATE() AS date))
+    """, nativeQuery = true)
+    int countByHanhDongSauVuViec(ActionAfterCase hanhDongSauVuViec);
+
+    int countByLoaiVuViec(CaseType loaiVuViec);
 }
