@@ -7,11 +7,18 @@
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
                 <div class="current-address-display">
-                    <p class="address-name-display">{{ shippingAddress.name || '' }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.phone || ''}}</p>
-                    <p class="address-phone-display">{{ shippingAddress.email || '' }}</p>
+                    <p class="address-name-display"><span style="color: blue;">Họ tên:</span>
+                        {{ shippingAddress.name || '' }}</p>
+                    <p class="address-phone-display">
+                        <span style="color: blue;">Số điện thoại:</span>
+                        {{ shippingAddress.phone || ''}}
+                    </p>
+                    <p class="address-phone-display">
+                        <span style="color: blue;">Email:</span>
+                        {{ shippingAddress.email || '' }}
+                    </p>
                     <p v-if="shippingAddress.address" class="address-detail-display">
-                        {{ shippingAddress.address }}
+                        <span style="color: blue;">Địa chỉ nhận hàng:</span>{{ shippingAddress.address }}
                     </p>
                     <p v-else class="address-detail-display text-gray-400">
                         Chưa có địa chỉ nhận hàng
@@ -181,19 +188,19 @@
                                     <label for="modal-name" class="label">Họ và tên</label>
                                     <input id="modal-name" v-model="modalNewAddress.name" type="text"
                                         placeholder="Nhập họ và tên" class="input-field" />
-                                        <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
+                                    <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Số điện thoại</label>
                                     <input id="modal-phone" v-model="modalNewAddress.phone" type="tel"
                                         placeholder="Nhập số điện thoại" class="input-field" />
-                                        <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
+                                    <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Email</label>
                                     <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
                                         placeholder="Nhập email người nhận" class="input-field" />
-                                        <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
+                                    <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
                                 </div>
                                 <label>Chọn tỉnh:</label>
                                 <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
@@ -216,7 +223,7 @@
                                     <label for="modal-address" class="label">Địa chỉ</label>
                                     <input id="modal-address" v-model="addressDetail" type="text"
                                         placeholder="Nhập địa chỉ chi tiết" class="input-field" />
-                                        <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
+                                    <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
                                 </div>
                             </div>
                         </div>
@@ -247,8 +254,8 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-if="discountList" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
-                                    class="input-field flex-grow" />
+                                <input v-if="discountList" v-model="modalVoucherCode" type="text"
+                                    placeholder="Nhập mã giảm giá" class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
                                 <p v-if="!discountList" style="text-align: center; font-style: italic;">
