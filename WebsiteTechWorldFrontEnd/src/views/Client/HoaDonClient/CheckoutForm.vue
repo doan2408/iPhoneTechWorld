@@ -7,10 +7,15 @@
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
                 <div class="current-address-display">
-                    <p class="address-name-display">{{ shippingAddress.tenNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.sdtNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.emailNguoiNhan }}</p>
-                    <p class="address-detail-display">{{ shippingAddress.soNha + ', ' + shippingAddress.tenDuong + ', '
+                    <p class="address-name-display"><span style="color: blue;">Họ tên:</span> {{
+                        shippingAddress.tenNguoiNhan }}</p>
+                    <p class="address-phone-display"><span style="color: blue;">Số điện thoại:</span> {{
+                        shippingAddress.sdtNguoiNhan }}</p>
+                    <p class="address-phone-display"><span style="color: blue;">Email:</span> {{
+                        shippingAddress.emailNguoiNhan }}</p>
+                    <p class="address-detail-display"><span style="color: blue;">Địa chỉ nhận hàng:</span> {{
+                        shippingAddress.soNha + ', ' +
+                        shippingAddress.tenDuong + ', '
                         + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho }}</p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
                 </div>
@@ -259,8 +264,8 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-if="discountList?.length" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
-                                    class="input-field flex-grow" />
+                                <input v-if="discountList?.length" v-model="modalVoucherCode" type="text"
+                                    placeholder="Nhập mã giảm giá" class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
                                 <p v-if="!discountList?.length" style="text-align: center; font-style: italic;">
@@ -286,7 +291,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button v-if="!discountList?.length" @click="closeVoucherModal" class="apply-button">Đóng</button>
+                        <button v-if="!discountList?.length" @click="closeVoucherModal"
+                            class="apply-button">Đóng</button>
                     </div>
                 </div>
             </div>

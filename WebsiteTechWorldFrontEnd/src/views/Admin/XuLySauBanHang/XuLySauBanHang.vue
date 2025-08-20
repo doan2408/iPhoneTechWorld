@@ -88,7 +88,7 @@
                                 <td class="status-cell">
                                     <span :class="['order-status', order.trangThaiDonHang]">{{
                                         getStatusText(order.trangThaiDonHang)
-                                    }}</span>
+                                        }}</span>
                                 </td>
                                 <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
@@ -131,8 +131,8 @@
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
-                                        <button class="action-btn warning">Giao lại</button>
-                                        <button class="action-btn danger">Hủy đơn</button>
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
                                     </div>
                                 </td>
                             </tr>
@@ -168,8 +168,8 @@
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions">
-                                        <button class="action-btn success">Chấp nhận</button>
-                                        <button class="action-btn danger">Từ chối</button>
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
                                     </div>
                                 </td>
                             </tr>
