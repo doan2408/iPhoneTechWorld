@@ -617,6 +617,8 @@ import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
 import html2pdf from 'html2pdf.js';
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
+import tienMatPng from '@/assets/HinhAnh/tienmat.png'
+import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 
 // Search queries
 const productSearchQuery = ref('')
@@ -2072,9 +2074,9 @@ const fetchPaymentMethods = async () => {
 const getIconUrl = (code) => {
     switch (code) {
         case 'TIEN_MAT':
-            return '/icons/cod.png';
-        case 'NGAN_HANG':
-            return '/icons/bank.png';
+            return tienMatPng;
+        case 'CHUYEN_KHOAN':
+            return chuyenKhoanPng;
         default:
             return '/icons/default.png';
     }

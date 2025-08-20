@@ -6,18 +6,22 @@
             <!-- Địa chỉ nhận hàng -->
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
-                <div class="current-address-display">
+                <div class="current-address-display" v-if="hasShippingInfo">
                     <p class="address-name-display"><span style="color: blue;">Họ tên:</span> {{
-                        shippingAddress.tenNguoiNhan }}</p>
+                        shippingAddress.tenNguoiNhan || 'Chưa có' }}</p>
                     <p class="address-phone-display"><span style="color: blue;">Số điện thoại:</span> {{
-                        shippingAddress.sdtNguoiNhan }}</p>
+                        shippingAddress.sdtNguoiNhan || 'Chưa có' }}</p>
                     <p class="address-phone-display"><span style="color: blue;">Email:</span> {{
-                        shippingAddress.emailNguoiNhan }}</p>
+                        shippingAddress.emailNguoiNhan || 'Chưa có' }}</p>
                     <p class="address-detail-display"><span style="color: blue;">Địa chỉ nhận hàng:</span> {{
                         shippingAddress.soNha + ', ' +
                         shippingAddress.tenDuong + ', '
-                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho }}</p>
+                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho || 'Chưa có' }}</p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
+                </div>
+                <div v-else class="no-address">
+                    <p style="color: red;">Chưa cập nhật thông tin giao hàng</p>
+                    <button @click="openAddressModal" class="change-button">Thêm địa chỉ</button>
                 </div>
             </div>
 
@@ -53,26 +57,6 @@
 
 
                 <div class="separator"></div>
-
-                <div class="insurance-item">
-                    <input type="checkbox" id="fashion-insurance" v-model="hasInsurance" class="checkbox-field" />
-                    <div class="insurance-details">
-                        <label for="fashion-insurance" class="insurance-label">
-                            {{ insurance.name }} <span class="new-tag">Mới</span>
-                        </label>
-                        <p class="insurance-description">
-                            {{ insurance.description }}
-                            <a href="#" class="learn-more-link">Tìm hiểu thêm</a>
-                        </p>
-                    </div>
-                    <div class="insurance-pricing">
-                        <div class="insurance-price">₫{{ insurance.gia }}</div>
-                        <div class="insurance-quantity">x{{ insurance.quantity }}</div>
-                        <div class="insurance-total">
-                            ₫{{ (insurance.gia * insurance.quantity) }}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Phương thức vận chuyển -->
@@ -111,16 +95,6 @@
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
                     <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
-            <!-- Áp dụng điểm -->
-            <div class="section">
-                <h2 class="section-title">Áp dụng điểm</h2>
-                <div class="points-input-group">
-                    <input v-model="pointsToApply" type="number" placeholder="Nhập số điểm muốn áp dụng"
-                        class="input-field flex-grow" />
-                    <button class="apply-button">Áp dụng</button>
                 </div>
             </div>
 
@@ -309,7 +283,8 @@ import { useToast } from "vue-toastification";
 import router from '@/router';
 import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
-
+import codIcon from '@/assets/HinhAnh/images.jpg'
+import vnPayIcon from '@/assets/HinhAnh/vnpay.png'
 import { useStore } from "vuex";
 import headerState from "@/components/Client/modules/headerState";
 
@@ -422,6 +397,18 @@ const validateNewAddress = () => {
 
     return Object.keys(errors.value).length === 0;
 };
+
+const hasShippingInfo = computed(() => {
+    const addr = shippingAddress.value;
+    return addr
+        && addr.tenNguoiNhan
+        && addr.sdtNguoiNhan
+        && addr.emailNguoiNhan
+        && addr.soNha
+        && addr.tenDuong
+        && addr.xaPhuong
+        && addr.tinhThanhPho;
+});
 
 const confirmAddressSelection = () => {
     if (modalSelectedAddressId.value === 'new') {
@@ -688,12 +675,12 @@ const fetchPaymentMethods = async () => {
 };
 const getIconUrl = (code) => {
     switch (code) {
-        case 'TIEN_MAT':
-            return '/icons/cod.png'; // Đảm bảo file cod.png có trong public/icons
-        case 'NGAN_HANG':
-            return '/icons/bank.png'; // Đảm bảo file bank.png có trong public/icons
+        case 'COD':
+            return codIcon; 
+        case 'VNPAY':
+            return vnPayIcon; 
         default:
-            return '/icons/default.png'; // Icon mặc định
+            return '/icons/default.png'; 
     }
 };
 onMounted(async () => {

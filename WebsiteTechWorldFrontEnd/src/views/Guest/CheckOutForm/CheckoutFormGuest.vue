@@ -8,19 +8,19 @@
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
                 <div class="current-address-display">
                     <p class="address-name-display"><span style="color: blue;">Họ tên:</span>
-                        {{ shippingAddress.name || '' }}</p>
+                        {{ shippingAddress.name || 'Chưa có' }}</p>
                     <p class="address-phone-display">
                         <span style="color: blue;">Số điện thoại:</span>
-                        {{ shippingAddress.phone || ''}}
+                        {{ shippingAddress.phone || 'Chưa có'}}
                     </p>
                     <p class="address-phone-display">
                         <span style="color: blue;">Email:</span>
-                        {{ shippingAddress.email || '' }}
+                        {{ shippingAddress.email || 'Chưa có' }}
                     </p>
                     <p v-if="shippingAddress.address" class="address-detail-display">
-                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }}
+                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }} 
                     </p>
-                    <p v-else class="address-detail-display text-gray-400">
+                    <p v-else class="address-detail-display text-gray-400" style="color: red;">
                         Chưa có địa chỉ nhận hàng
                     </p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
@@ -59,26 +59,6 @@
 
 
                 <div class="separator"></div>
-
-                <div class="insurance-item">
-                    <input type="checkbox" id="fashion-insurance" v-model="hasInsurance" class="checkbox-field" />
-                    <div class="insurance-details">
-                        <label for="fashion-insurance" class="insurance-label">
-                            {{ insurance.name }} <span class="new-tag">Mới</span>
-                        </label>
-                        <p class="insurance-description">
-                            {{ insurance.description }}
-                            <a href="#" class="learn-more-link">Tìm hiểu thêm</a>
-                        </p>
-                    </div>
-                    <div class="insurance-pricing">
-                        <div class="insurance-price">₫{{ insurance.gia }}</div>
-                        <div class="insurance-quantity">x{{ insurance.quantity }}</div>
-                        <div class="insurance-total">
-                            ₫{{ (insurance.gia * insurance.quantity) }}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Phương thức vận chuyển -->
@@ -117,16 +97,6 @@
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
                     <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
-            <!-- Áp dụng điểm -->
-            <div class="section">
-                <h2 class="section-title">Áp dụng điểm</h2>
-                <div class="points-input-group">
-                    <input v-model="pointsToApply" type="number" placeholder="Nhập số điểm muốn áp dụng"
-                        class="input-field flex-grow" />
-                    <button class="apply-button">Áp dụng</button>
                 </div>
             </div>
 
@@ -300,7 +270,8 @@ import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderCl
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
 import { add } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
-
+import codIcon from '@/assets/HinhAnh/images.jpg'
+import vnPayIcon from '@/assets/HinhAnh/vnpay.png'
 import { CartService } from "@/Service/ClientService/GioHang/CartService";
 import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
 
@@ -682,12 +653,12 @@ const fetchPaymentMethods = async () => {
 };
 const getIconUrl = (code) => {
     switch (code) {
-        case 'TIEN_MAT':
-            return '/icons/cod.png'; // Đảm bảo file cod.png có trong public/icons
-        case 'NGAN_HANG':
-            return '/icons/bank.png'; // Đảm bảo file bank.png có trong public/icons
+        case 'COD':
+            return codIcon;
+        case 'VNPAY':
+            return vnPayIcon;
         default:
-            return '/icons/default.png'; // Icon mặc định
+            return '/icons/default.png';
     }
 };
 onMounted(async () => {
