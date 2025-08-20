@@ -1368,6 +1368,7 @@ const handleRemoveSingleImei = async (item) => {
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
         loadTabHoaDon();
+        loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
