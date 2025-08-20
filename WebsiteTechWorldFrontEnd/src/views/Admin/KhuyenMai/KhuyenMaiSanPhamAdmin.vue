@@ -95,7 +95,7 @@
                 <el-table-column label="Mức độ ưu tiên" width="140" align="center">
                     <template #default="scope">
                         <div class="value-cell">
-                            <span class="priority-level">{{ scope.row.mucDoUuTien }}</span>
+                            <span class="priority-level">{{ converMucDoUuTien(scope.row.mucDoUuTien) }}</span>
                         </div>
                     </template>
                 </el-table-column>
@@ -173,8 +173,11 @@
                                         class="full-width" />
                                 </el-form-item>
                                 <el-form-item label="Mức độ ưu tiên" prop="mucDoUuTien" class="form-item">
-                                    <el-input-number v-model="form.mucDoUuTien" :min="1" :max="100" placeholder="0"
-                                        class="full-width" />
+                                        <el-select v-model="form.mucDoUuTien" placeholder="Chọn đối tượng áp dụng">
+                                        <el-option label="Cao" value="3" />
+                                        <el-option label="Trung bình" value="2" />
+                                        <el-option label="Thấp" value="1" />
+                                    </el-select>
                                 </el-form-item>
                             </div>
                             <div class="form-row">
@@ -316,7 +319,8 @@
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Phần trăm giảm">{{ selectedKhuyenMai?.phanTramGiam
                         }}%</el-descriptions-item>
-                    <el-descriptions-item label="Mức độ ưu tiên">{{ selectedKhuyenMai?.mucDoUuTien
+                    <el-descriptions-item label="Mức độ ưu tiên">{{ 
+                        converMucDoUuTien(selectedKhuyenMai?.mucDoUuTien)
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Thời gian bắt đầu">{{ formatDateTime(selectedKhuyenMai?.ngayBatDau)
                         }}</el-descriptions-item>
@@ -417,7 +421,7 @@ const form = ref({
     tenKhuyenMai: '',
     moTa: '',
     phanTramGiam: 0,
-    mucDoUuTien: 1,
+    mucDoUuTien: '1',
     ngayBatDau: '',
     ngayKetThuc: '',
     trangThai: '',
@@ -665,7 +669,7 @@ const openCreateDialog = () => {
         tenKhuyenMai: '',
         moTa: '',
         phanTramGiam: 0,
-        mucDoUuTien: 1,
+        mucDoUuTien: '1',
         ngayBatDau: '',
         ngayKetThuc: '',
         trangThai: '',
@@ -693,6 +697,7 @@ const openEditDialog = async (item) => {
     form.value = {
         ...item,
         doiTuongApDung: item.doiTuongApDung || 'ALL',
+        mucDoUuTien: item.mucDoUuTien || '1',
         idSanPhamChiTietList: item.idSanPhamChiTietList || [],
         mucDoUuTien: item.mucDoUuTien || 1
     };
@@ -878,6 +883,15 @@ const convertDoiTuongApDung = (doiTuongApDung) => {
         OLD_CUSTOMER: 'Khách hàng cũ',
     };
     return doiTuongLabels[doiTuongApDung] || 'Không xác định';
+};
+
+const converMucDoUuTien = (mucDoUuTien) => {
+    const uuTienLabels = {
+        1: 'Thấp',
+        2: 'Trung bình',
+        3: 'Cao',
+    };
+    return uuTienLabels[mucDoUuTien] || 'Thấp';
 };
 
 const getStatusType = (status) => {
