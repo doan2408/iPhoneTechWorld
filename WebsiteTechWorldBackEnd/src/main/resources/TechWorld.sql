@@ -378,6 +378,8 @@ CREATE TABLE khuyen_mai (
                             ngay_bat_dau DATETIME,
                             ngay_ket_thuc DATETIME,
                             doi_tuong_ap_dung NVARCHAR(50),
+                            muc_do_uu_tien INT,
+                            ngay_tao DATETIME,
                             trang_thai NVARCHAR(50) -- ENUM('DANG_HOAT_DONG', 'HET_HAN')
 );
 

@@ -4,6 +4,7 @@ import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.A
 import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.StatsTrangThaiHoaDon;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.*;
@@ -114,8 +115,6 @@ public class XuLySauBanHangServices {
                     xuLy.setIdLyDo(lyDoXuLy);
                     xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                     xuLy.setDaKiemTra(false);
-                    xuLy.setUrlHinh(imeiReq.getUrlHinh());
-                    xuLy.setUrlVideo(imeiReq.getUrlVideo());
                     return xuLy;
                 })
                 .collect(Collectors.toList());
@@ -234,18 +233,37 @@ public class XuLySauBanHangServices {
             }
             xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
             xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
+            xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
         }
     }
     public void changeStatus(AccepAndInAccepAction action) {
         List<XuLySauBanHang> xuLySauBanHangList = xuLySauBanHangRepository.findByIdHoaDon_Id(action.getIdHoaDon());
         List<XuLySauBanHang> listUpdate = new ArrayList<>();
-        for (XuLySauBanHang x : xuLySauBanHangList){
+        for (XuLySauBanHang x : xuLySauBanHangList) {
             x.setDaKiemTra(true);
             x.setHanhDongSauVuViec(action.getHanhDong());
             listUpdate.add(x);
         }
         xuLySauBanHangRepository.saveAll(listUpdate);
 
+    }
+
+    public StatsTrangThaiHoaDon getStatsTrangThaiHoaDon() {
+        StatsTrangThaiHoaDon statsTrangThaiHoaDon = new StatsTrangThaiHoaDon();
+        statsTrangThaiHoaDon.setTotal(countStatus());
+        statsTrangThaiHoaDon.setFailed(countStatus(CaseType.FAILED_DELIVERY));
+        statsTrangThaiHoaDon.setReturns(countStatus(CaseType.RETURN));
+        statsTrangThaiHoaDon.setResolved(xuLySauBanHangRepository.countByThoiGianXuLy(LocalDateTime.now()));
+        return statsTrangThaiHoaDon;
+    }
+
+
+    private int countStatus() {
+        return xuLySauBanHangRepository.countByHanhDongSauVuViec(ActionAfterCase.PENDING);
+    }
+
+    private int countStatus(CaseType caseType) {
+        return xuLySauBanHangRepository.countByLoaiVuViec(caseType);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -83,4 +84,9 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
 
     List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_IdAndHanhDongSauVuViec(Integer idHoaDon, ActionAfterCase action);
 
+    int countByHanhDongSauVuViec(ActionAfterCase hanhDongSauVuViec);
+
+    int countByLoaiVuViec(CaseType loaiVuViec);
+
+    int countByThoiGianXuLy(LocalDateTime thoiGianXuLy);
 }
