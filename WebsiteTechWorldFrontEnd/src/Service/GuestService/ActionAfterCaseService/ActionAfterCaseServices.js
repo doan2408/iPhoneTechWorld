@@ -57,3 +57,8 @@ export const updateStatusPending = (idHoaDon, hanhDong) => {
     };
     return api.put(url, request)
 }
+
+export const countDonHangByStatus = () => {
+    const url = baseURL + '/stats';
+    return api.get(url)
+}
