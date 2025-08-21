@@ -260,7 +260,7 @@ public class XuLySauBanHangServices {
         }
     }
     public void changeStatus(AccepAndInAccepAction action) {
-        List<XuLySauBanHang> xuLySauBanHangList = xuLySauBanHangRepository.findByIdHoaDon_Id(action.getIdHoaDon());
+        List<XuLySauBanHang> xuLySauBanHangList = xuLySauBanHangRepository.findByIdHoaDon_IdAndAndIdImeiDaBan_SoImei(action.getIdHoaDon(),action.getSoImei());
         List<XuLySauBanHang> listUpdate = new ArrayList<>();
         for (XuLySauBanHang x : xuLySauBanHangList) {
             x.setDaKiemTra(true);

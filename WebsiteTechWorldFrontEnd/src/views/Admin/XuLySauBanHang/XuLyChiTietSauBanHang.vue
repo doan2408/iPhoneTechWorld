@@ -106,7 +106,7 @@
                                             class="row-checkbox">
                                     </td>
                                     <td class="imei-code">{{ imei.soImei }}</td>
-                                    <td class="product-name">{{ imei.tenSanPham +' '+ imei.mau +' '+ imei.dungLuong }}
+                                    <td class="product-name">{{ imei.tenSanPham +'-'+ imei.mau +'-'+ imei.dungLuong }}
                                     </td>
                                     <td>
                                         <span class="imei-status" :class="imei.trangThaiDon">

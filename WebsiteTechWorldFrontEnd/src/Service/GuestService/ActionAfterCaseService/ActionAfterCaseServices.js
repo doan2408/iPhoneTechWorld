@@ -50,10 +50,11 @@ export const uploadAnhAndVid = (formData) => {
     return api.post(url, formData)
 }
 
-export const updateStatusPending = (idHoaDon, hanhDong) => {
+export const updateStatusPending = (idHoaDon,soImei, hanhDong) => {
     const url = baseURL + '/update-status'
     const request = {
         idHoaDon: idHoaDon,
+        soImei: soImei,
         hanhDong: hanhDong
     };
     return api.put(url, request)

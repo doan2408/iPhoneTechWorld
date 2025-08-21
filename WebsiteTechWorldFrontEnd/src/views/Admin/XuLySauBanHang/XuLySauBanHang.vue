@@ -104,23 +104,12 @@
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
                                     </div>
-                                    <div class="order-actions" v-if="order.hanhDongSauVuViec === 'PENDING'">
-                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn success"
-                                            @click="openConfirm('Bạn có chắc chắn chấp nhận yêu cầu này?', () => updateStatus(order.idHoaDon, 'HOLD'))"
-                                            title="Chấp nhận">
-                                            Chấp nhận
-                                        </button>
-                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn danger"
-                                            @click="openConfirm('Bạn có chắc chắn từ chối yêu cầu này?', () => updateStatus(order.idHoaDon, 'CANCEL'))"
-                                            title="Từ chối">
-                                            Từ chối
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
                                         </button>
                                     </div>
-                                    <button v-if="order.hanhDongSauVuViec === 'HOLD'" class="action-btn success"
-                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(order.idHoaDon, 'RECEIVED'))"
-                                        title="Đã nhận hàng">
-                                        Đã nhận hàng
-                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -195,20 +184,76 @@
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
                                     </div>
-                                    <div class="order-actions" v-if="order.hanhDongSauVuViec === 'PENDING'">
-                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn success"
-                                            @click="openConfirm('Bạn có chắc chắn chấp nhận yêu cầu này?', () => updateStatus(order.idHoaDon, 'HOLD'))"
-                                            title="Chấp nhận">
-                                            Chấp nhận
-                                        </button>
-                                        <button v-if="order.hanhDongSauVuViec === 'PENDING'" class="action-btn danger"
-                                            @click="openConfirm('Bạn có chắc chắn từ chối yêu cầu này?', () => updateStatus(order.idHoaDon, 'CANCEL'))"
-                                            title="Từ chối">
-                                            Từ chối
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
                                         </button>
                                     </div>
-                                    <button v-if="order.hanhDongSauVuViec === 'HOLD'" class="action-btn success"
-                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(order.idHoaDon, 'RECEIVED'))"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Modal chi tiết -->
+            <div v-if="showDetailModal" class="tw-modal-overlay">
+                <div class="tw-modal-content">
+                    <button class="tw-modal-close" @click="closeDetail">✕</button>
+
+                    <h2>Chi tiết yêu cầu xử lý</h2>
+                    <table class="tw-product-table">
+                        <thead>
+                            <tr>
+                                <th>IMEI</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Hình ảnh</th>
+                                <th>Video</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in orderProduct" :key="item.idImei">
+                                <td>{{ item.soImei }}</td>
+                                <td>{{ item.tenSanPham + '-' + item.mau + '-' + item.dungLuong }}</td>
+                                <td>
+                                    <img v-if="item.urlHinh" :src="item.urlHinh"
+                                        style="max-width: 80px; cursor: zoom-in;"
+                                        @click="previewImage = item.urlHinh" />
+                                </td>
+                                <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
+                                    <div class="tw-modal-content"
+                                        style="max-width: 80%; max-height: 80%; padding: 0; background: transparent; box-shadow: none;">
+                                        <img :src="previewImage"
+                                            style="max-width: 100%; max-height: 100%; border-radius: 8px;" />
+                                    </div>
+                                </div>
+                                <video v-if="item.urlVideo" ref="videoThumb" controls
+                                    style="max-width: 120px; cursor: pointer;" @click="openVideo">
+                                    <source :src="item.urlVideo" type="video/mp4" />
+                                </video>
+
+                                <!-- Modal xem video to -->
+                                <div v-if="showVideo" class="modal" @click="closeVideo">
+                                    <video controls autoplay style="max-width: 80%; max-height: 80%;">
+                                        <source :src="item.urlVideo" type="video/mp4" />
+                                    </video>
+                                </div>
+                                <td class="order-actions" v-if="item.trangThaiDon === 'PENDING'">
+                                    <button class="tw-btn tw-btn-success"
+                                        @click="openConfirm('Bạn có chắc chắn muốn chấp nhận yêu cầu?', () => updateStatus(item.idHoaDon, item.soImei, 'HOLD'))"
+                                        title="Chấp nhận">
+                                        Chấp nhận
+                                    </button>
+                                    <button class="tw-btn tw-btn-danger"
+                                        @click="openConfirm('Bạn có chắc chắn muốn từ chối yêu cầu?', () => updateStatus(item.idHoaDon, item.soImei, 'CANCEL'))"
+                                        title="Từ chối">
+                                        Từ chối
+                                    </button>
+                                </td>
+                                <td>
+                                    <button v-if="item.trangThaiDon === 'HOLD'" class="tw-btn tw-btn-success"
+                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(item.idHoaDon,item.soImei, 'RECEIVED'))"
                                         title="Đã nhận hàng">
                                         Đã nhận hàng
                                     </button>
@@ -216,6 +261,10 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <div class="tw-modal-actions">
+                        <button class="tw-btn" @click="closeDetail">Đóng</button>
+                    </div>
                 </div>
             </div>
             <br>
@@ -233,15 +282,42 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { countDonHangByStatus, getAllLyDoXuLy, updateStatusPending } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { countDonHangByStatus, getAllCtXuLy, getAllLyDoXuLy, updateStatusPending } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import router from '@/router'
 import { useToast } from 'vue-toastification'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import { findHdctByImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 
 // Reactive data
 const activeTab = ref('all')
 const searchQuery = ref('')
 const sortBy = ref('desc')
+const previewImage = ref(null)
+const showVideo = ref(false);
+const showDetailModal = ref(false)
+const orderProduct = ref([])
+function openDetail(idHoaDon) {
+    showDetailModal.value = true
+    loadXuLy(idHoaDon)
+}
+
+async function loadXuLy(idHoaDon) {
+    const res = await getAllCtXuLy(idHoaDon);
+    orderProduct.value = res.data
+}
+
+
+function closeDetail() {
+    showDetailModal.value = false
+}
+
+function openVideo() {
+    showVideo.value = true;
+}
+
+function closeVideo() {
+    showVideo.value = false;
+}
 
 const statusNotXuLy = ['PENDING', 'HOLD','CANCEL']
 const toast = useToast()
@@ -252,6 +328,8 @@ const stats = ref({
     returns: 0,
     resolved: 0
 })
+
+
 
 const getStats = async () => {
     
@@ -286,8 +364,8 @@ const getAllLyDoXuLyView = async () => {
     orders.value = res.data.content
 }
 
-const updateStatus = async (idHoaDon,status) => {
-    await updateStatusPending(idHoaDon,status)
+const updateStatus = async (idHoaDon,imei,status) => {
+    await updateStatusPending(idHoaDon,imei,status)
     if (status === 'HOLD') {
         toast.success("Bạn đã chấp nhận yêu cầu!")
     } else if (status === 'CANCEL') {
@@ -296,6 +374,7 @@ const updateStatus = async (idHoaDon,status) => {
         toast.success("Đã nhận được hàng")
     }
     getAllLyDoXuLyView()
+    loadXuLy(idHoaDon)
 }
 
 const nextPage = async () => {
@@ -957,5 +1036,119 @@ onMounted(() => {
     font-weight: 500;
     color: #666;
     font-size: 1em;
+}
+/* overlay nền mờ */
+.tw-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    /* nền mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* nội dung modal */
+.tw-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    animation: tw-fadeIn 0.3s ease;
+    position: relative;
+}
+
+/* animation mở modal */
+@keyframes tw-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* table trong modal */
+.tw-product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.tw-product-table th,
+.tw-product-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.tw-product-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+/* action button */
+.tw-modal-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.tw-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 14px;
+}
+
+.tw-btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.tw-btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.tw-btn-info {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* nút X để đóng modal */
+.tw-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+}
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 </style>

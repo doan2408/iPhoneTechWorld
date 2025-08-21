@@ -18,9 +18,9 @@ import java.util.Optional;
 
 @Repository
 public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, Integer> {
-    XuLySauBanHang findByIdHoaDon_IdAndLoaiVuViec(Integer id,CaseType caseType);
+    XuLySauBanHang findByIdHoaDon_IdAndLoaiVuViec(Integer id, CaseType caseType);
 
-    List<XuLySauBanHang> findByIdHoaDon_Id(Integer id);
+    List<XuLySauBanHang> findByIdHoaDon_IdAndAndIdImeiDaBan_SoImei(Integer id,String soImei);
 
     @Query(value = """
         SELECT new org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse(
@@ -32,7 +32,10 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
              , MAX(xlbh.thoiGianYeuCau)
              , SUM(cthd.donGia)
              , hd.id
-             , xlbh.hanhDongSauVuViec
+             , (    SELECT x.hanhDongSauVuViec
+                        FROM XuLySauBanHang x
+                    WHERE x.idHoaDon = hd
+                    ORDER BY x.thoiGianYeuCau DESC LIMIT 1)
         )
                 FROM
                      XuLySauBanHang xlbh
@@ -43,7 +46,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
                 WHERE ldxl.loaiVuViec <> 'CANCELLED'
                     AND (:search IS NULL OR hd.maHoaDon LIKE %:search% OR kh.tenKhachHang LIKE %:search%)
                     AND (:status IS NULL OR ldxl.loaiVuViec = :status)
-                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang, xlbh.hanhDongSauVuViec
+                GROUP BY hd.id, hd.maHoaDon, kh.tenKhachHang, kh.sdt, hd.trangThaiDonHang
                 ORDER BY
                     CASE WHEN :sortDir = 'ASC' THEN MAX(xlbh.thoiGianYeuCau) END ASC,
                     CASE WHEN :sortDir = 'DESC' THEN MAX(xlbh.thoiGianYeuCau) END DESC
@@ -68,7 +71,9 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             ld.tenLyDo,
             xlbh.loaiVuViec,
             cthd.donGia,
-            CAST(0 AS bigdecimal)
+            CAST(0 AS bigdecimal),
+            xlbh.urlHinh,
+            xlbh.urlVideo
         )
             FROM XuLySauBanHang xlbh
                 LEFT JOIN xlbh.idImeiDaBan imdb
@@ -89,7 +94,9 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             spct.idMau.tenMau,
             ld.tenLyDo,
             xlbh.loaiVuViec,
-            cthd.donGia
+            cthd.donGia,
+            xlbh.urlHinh,
+            xlbh.urlVideo
     """)
     List<XuLyChiTietResponse> getAllCtXuLy(Integer idHoaDon);
 
@@ -102,8 +109,9 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
     int countByLoaiVuViec(CaseType loaiVuViec);
 
     int countByThoiGianXuLy(LocalDateTime thoiGianXuLy);
-
+    
     XuLySauBanHang findByIdImeiDaBan_IdAndIdHoaDon_IdAndHanhDongSauVuViec(
-        Integer idImei, Integer idHoaDon, ActionAfterCase hanhDongSauVuViec
+            Integer idImei, Integer idHoaDon, ActionAfterCase hanhDongSauVuViec
     );
+
 }
