@@ -12,6 +12,9 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.H
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,7 +40,7 @@ public class MyOrderController {
 
     @GetMapping()
     public Page<MyOrderClientResponse> myOrder(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
-                                               @RequestParam(defaultValue = "10",value = "pageSize") int pageSize,
+                                               @RequestParam(defaultValue = "5",value = "pageSize") int pageSize,
                                                @RequestParam(value = "keyword", required = false) String keyword,
                                                @RequestParam(value = "minPrice", required = false)BigDecimal minPrice,
                                                @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
@@ -49,6 +52,7 @@ public class MyOrderController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails){
             Integer userLoginId = customUserDetails.getId();
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "id"));
             myOrderClientResponses = myOrderClientServices.getOrderByUserLogin(userLoginId, pageNo, pageSize, keyword, minPrice, maxPrice, startDate, endDate, trangThaiGiaoHang);
         }
         return myOrderClientResponses;

@@ -28,12 +28,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClientAdminService {
     private final KhachHangRepository khachHangRepository;
-    private final DiaChiRepository diaChiRepository;
     private final NhanVienRepository nhanVienRepository;
     private final PasswordEncoder passwordEncoder;
-
-    ModelMapper modelMapper = new ModelMapper();
-
 
     //convertToResponse
     private AdminClientResponse convert(KhachHang khachHang) {
@@ -94,6 +90,11 @@ public class ClientAdminService {
      return khachHang;
     }
 
+
+    // using for dropdown
+    public List<AdminClientResponse> clientList() {
+        return khachHangRepository.findAll().stream().map(this::convert).collect(Collectors.toList());
+    }
 
     //hien thi
     public Page<AdminClientResponse> getAllClient(int page, int size) {

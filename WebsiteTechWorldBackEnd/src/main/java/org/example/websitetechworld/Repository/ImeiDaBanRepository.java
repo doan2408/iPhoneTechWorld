@@ -70,5 +70,9 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
 
     ImeiDaBan findByIdHoaDonChiTiet_IdAndSoImei(Integer idHoaDonChiTiet_Id, String soImei);
 
+    @Query(value = "select i from ImeiDaBan i " +
+            "where i.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang " +
+            "order by i.id desc")
+    List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
     ImeiDaBan findBySoImei(String soImei);
 }

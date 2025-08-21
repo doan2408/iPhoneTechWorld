@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.example.websitetechworld.Entity.LichSuBaoHanh;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiLichSuBaoHanh;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 @Getter
@@ -16,14 +17,14 @@ import java.time.LocalDate;
 public class LichSuBaoHanhAdminResponse {
     private Integer idLichSuBaoHanh;
 
-    private Integer idSanPhamBaoHanh;
+    private Integer idBaoHanh;
     private String tenLoaiBaoHanh;
     private Integer thoiGianThang;
 
 
-    private LocalDate ngayTiepNhan;
+    private Date ngayTiepNhan;
 
-    private LocalDate ngayHoanThanh;
+    private Date ngayHoanThanh;
 
     private String moTaLoi;
 
@@ -32,10 +33,10 @@ public class LichSuBaoHanhAdminResponse {
     public static LichSuBaoHanhAdminResponse convertDto(LichSuBaoHanh lichSuBaoHanh) {
         LichSuBaoHanhAdminResponse lichSuBaoHanhAdminResponse = new LichSuBaoHanhAdminResponse();
         lichSuBaoHanhAdminResponse.setIdLichSuBaoHanh(lichSuBaoHanh.getId());
-        if (lichSuBaoHanh.getIdSanPhamBaoHanh() != null) {
-            lichSuBaoHanhAdminResponse.setIdSanPhamBaoHanh(lichSuBaoHanh.getIdSanPhamBaoHanh().getId());
-            lichSuBaoHanhAdminResponse.setTenLoaiBaoHanh(lichSuBaoHanh.getIdSanPhamBaoHanh().getIdLoaiBaoHanh().getTenLoaiBaoHanh());
-            lichSuBaoHanhAdminResponse.setThoiGianThang(lichSuBaoHanh.getIdSanPhamBaoHanh().getIdLoaiBaoHanh().getThoiGianThang());
+        if (lichSuBaoHanh.getIdBaoHanh() != null) {
+            lichSuBaoHanhAdminResponse.setIdBaoHanh(lichSuBaoHanh.getIdBaoHanh().getId());
+            lichSuBaoHanhAdminResponse.setTenLoaiBaoHanh(lichSuBaoHanh.getIdBaoHanh().getIdLoaiBaoHanh().getTenLoaiBaoHanh());
+            lichSuBaoHanhAdminResponse.setThoiGianThang(lichSuBaoHanh.getIdBaoHanh().getIdLoaiBaoHanh().getThoiGianThang());
         }
         lichSuBaoHanhAdminResponse.setNgayTiepNhan(lichSuBaoHanh.getNgayTiepNhan());
         lichSuBaoHanhAdminResponse.setNgayHoanThanh(lichSuBaoHanh.getNgayHoanThanh());

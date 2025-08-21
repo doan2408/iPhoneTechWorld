@@ -32,6 +32,10 @@ public class LoaiBaoHanh {
     @Column(name = "mo_ta")
     private String moTa;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_model_san_pham")
+    private ModelSanPham idModelSanPham;
+
     @OneToMany(mappedBy = "idLoaiBaoHanh",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
 

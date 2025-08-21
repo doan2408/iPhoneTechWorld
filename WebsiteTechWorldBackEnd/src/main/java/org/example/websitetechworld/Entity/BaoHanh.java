@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
 import org.hibernate.annotations.Nationalized;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -23,27 +24,30 @@ public class BaoHanh {
     @JoinColumn(name = "id_khach_hang")
     private KhachHang idKhachHang;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_san_pham_chi_tiet")
-    private SanPhamChiTiet idSanPhamChiTiet;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id_san_pham_chi_tiet")
+//    private SanPhamChiTiet idSanPhamChiTiet;
 
     @Column(name = "ngay_bat_dau")
-    private LocalDate ngayBatDau;
+    private Date ngayBatDau;
 
     @Column(name = "ngay_ket_thuc")
-    private LocalDate ngayKetThuc;
+    private Date ngayKetThuc;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_imei_da_ban")
+    private ImeiDaBan idImeiDaBan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_loai_bao_hanh")
     private LoaiBaoHanh idLoaiBaoHanh;
-
 
     @Enumerated(EnumType.STRING)
     @Nationalized
     @Column(name = "trang_thai_bao_hanh", length = 50)
     private TrangThaiBaoHanh trangThaiBaoHanh;
 
-    @OneToMany(mappedBy = "idSanPhamBaoHanh",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "idBaoHanh",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<LichSuBaoHanh> lichSuBaoHanhs = new LinkedHashSet<>();
 
 }

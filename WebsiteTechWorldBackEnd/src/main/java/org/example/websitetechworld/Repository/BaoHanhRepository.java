@@ -9,11 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface BaoHanhRepository extends JpaRepository<BaoHanh,Integer> {
 
     @Query("SELECT bh FROM BaoHanh bh WHERE " +
-            "(:search IS NULL OR bh.idKhachHang.maKhachHang LIKE %:search% OR bh.idKhachHang.tenKhachHang LIKE %:search%" +
+            "(:search IS NULL OR bh.idKhachHang.maKhachHang LIKE %:search% OR bh.idKhachHang.tenKhachHang LIKE %:search% " +
+            "or bh.idKhachHang.sdt like %:search%" +
             "  OR bh.idKhachHang.sdt LIKE %:search%  OR bh.idLoaiBaoHanh.tenLoaiBaoHanh LIKE %:search%) AND " +
             "(:trangThai IS NULL OR bh.trangThaiBaoHanh = :trangThai) AND " +
             "(:ngayBatDau IS NULL OR bh.ngayBatDau >= :ngayBatDau) AND " +
@@ -24,4 +26,17 @@ public interface BaoHanhRepository extends JpaRepository<BaoHanh,Integer> {
             @Param("ngayBatDau") LocalDate ngayBatDau,
             @Param("ngayKetThuc") LocalDate ngayKetThuc,
             Pageable pageable);
+
+    @Query(value = "select case when count(bh) > 0 then true else false end " +
+            "from BaoHanh bh " +
+            "where bh.idKhachHang.id = :idKhachHang " +
+            "and bh.idImeiDaBan.id = :idImeiDaBan " +
+            "and bh.idLoaiBaoHanh.id = :idLoaiBaoHanh")
+    boolean existsByBaoHanh(@Param("idKhachHang") Integer idKhachHang,
+                            @Param("idImeiDaBan") Integer idImeiDaBan,
+                            @Param("idLoaiBaoHanh") Integer idLoaiBaoHanh);
+
+    @Query(value = "select bh from BaoHanh bh " +
+            "where bh.trangThaiBaoHanh = :trangThaiBaoHanh")
+    List<BaoHanh> baoHanhByStatus(TrangThaiBaoHanh trangThaiBaoHanh);
 }
