@@ -119,13 +119,13 @@
 
                                             <button class="action-btn return"
                                                 @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"
-                                                title="Trả kho">
+                                                title="Trả kho" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK'" >
                                                 📦
                                             </button>
 
-                                            <button class="action-btn refund"
+                                            <button class=" action-btn refund"
                                                 @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
-                                                title="Hoàn tiền" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK'">
+                                                title="Hoàn tiền" :disabled="!imei.trangThaiDon === 'RETURN_TO_STOCK'">
                                                 💰
                                             </button>
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"

@@ -85,7 +85,10 @@ public class UploadController {
             String url = (String) uploadResult.get("secure_url");
             mediaTamService.addMedia(idImei, url, type);
 
-            return ResponseEntity.ok("Upload thành công");
+            return ResponseEntity.ok(Map.of(
+                    "url", url,
+                    "message", "Upload thành công"
+            ));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Lỗi upload: " + e.getMessage());

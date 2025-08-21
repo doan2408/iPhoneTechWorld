@@ -197,8 +197,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
 
             <div class="right-actions">
@@ -501,7 +499,7 @@ const canCancel = computed(() =>
     ['Chờ xử lý'].includes(order.trangThaiDonHang)
 );
 const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
-const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao');
+const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao' || order.trangThaiDonHang === 'Trả hàng');
 
 //format date 
 const formatDate = (dateString) => {
@@ -660,7 +658,7 @@ const handleUpload = async (event, imei, type) => {
 
     try {
         const res = await uploadAnhAndVid(formData)
-        const url = res.data.url || res.data // tùy backend trả về
+        const url = res.data.url
 
         if (type === "image") imei.urlHinh = url
         else imei.urlVideo = url

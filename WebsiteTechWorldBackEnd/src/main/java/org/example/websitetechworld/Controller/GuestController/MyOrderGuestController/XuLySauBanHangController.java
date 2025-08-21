@@ -72,7 +72,6 @@ public class XuLySauBanHangController {
         xuLySauBanHangServices.changeStatus(request);
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
     }
-<<<<<<< HEAD
     @PutMapping("/{idHoaDon}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Integer idHoaDon,
                                           @RequestBody CapNhatTrangThaiDTO request) {
@@ -86,12 +85,10 @@ public class XuLySauBanHangController {
     public ResponseEntity<?> changeStatus(@RequestBody AccepAndInAccepAction action) {
         xuLySauBanHangServices.changeStatus(action);
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
-=======
-
+    }
     @GetMapping("/stats")
     public ResponseEntity<?> countDonHangByStatus (){
         StatsTrangThaiHoaDon banHangList = xuLySauBanHangServices.getStatsTrangThaiHoaDon();
         return ResponseEntity.ok(banHangList);
->>>>>>> 3a26b626bec82254e936681f7340e79c4b819b80
     }
 }

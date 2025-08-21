@@ -54,13 +54,15 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
             rom.dungLuong,
             ms.tenMau
         )
-        FROM ImeiDaBan imbd 
+        FROM ImeiDaBan imbd
         LEFT JOIN ChiTietHoaDon  cthd ON cthd.id = imbd.idHoaDonChiTiet.id
+        LEFT JOIN HoaDon hd ON hd.id = cthd.idHoaDon.id
         LEFT JOIN SanPhamChiTiet  spct ON spct.id = cthd.idSanPhamChiTiet.id
         LEFT JOIN MauSac ms ON ms.id = spct.idMau.id
         LEFT JOIN Rom rom ON rom.id = spct.idRom.id
-        WHERE cthd.id = :ctHoaDonId
-        ORDER BY imbd.id DESC 
+        LEFT JOIN XuLySauBanHang xlbh ON xlbh.idImeiDaBan.id = imbd.id
+        WHERE cthd.id = :ctHoaDonId AND xlbh.idHoaDon.id IS NULL
+        ORDER BY imbd.id DESC
     """)
     List<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer ctHoaDonId);
 
