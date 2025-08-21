@@ -67,8 +67,8 @@ public class MyOrderController {
     }
 
     @GetMapping("/mvd/{maVanDon}")
-    public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon) {
-        return myOrderClientServices.findIdHoaDonByMVD(maVanDon);
+    public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon, @RequestParam String sdt) {
+        return myOrderClientServices.findIdHoaDonByMVDAndSdt(sdt, maVanDon);
     }
 
     @GetMapping("/{idHoaDon}")
