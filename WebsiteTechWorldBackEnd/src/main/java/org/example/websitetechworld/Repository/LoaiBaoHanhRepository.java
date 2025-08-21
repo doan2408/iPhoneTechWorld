@@ -11,4 +11,12 @@ public interface LoaiBaoHanhRepository extends JpaRepository<LoaiBaoHanh,Integer
 
     @Query("SELECT lbh FROM LoaiBaoHanh lbh WHERE :search IS NULL OR lbh.tenLoaiBaoHanh LIKE %:search% ")
     Page<LoaiBaoHanh> findAll(@Param("search") String search, Pageable pageable);
+
+    boolean existsByTenLoaiBaoHanh(String tenLoaiBaoHanh);
+
+    @Query("select case when count(l) > 0 then true else false end " +
+            "from LoaiBaoHanh l " +
+            "where l.tenLoaiBaoHanh = :tenLoai " +
+            "and l.idModelSanPham.idModelSanPham = :idModel")
+    boolean existsByTenLoaiBaoHanhAndIdModel(@Param("tenLoai") String tenLoaiBaoHanh, @Param("idModel") Integer idModel);
 }

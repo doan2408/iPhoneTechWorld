@@ -56,6 +56,8 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
 
+    List<HoaDon> findByIdKhachHang_Id(Integer userLoginId);
+
 
     @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
     List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);

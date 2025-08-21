@@ -66,4 +66,9 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
     boolean existsBySoImei(String soImei);
 
     ImeiDaBan findByIdHoaDonChiTiet_IdAndSoImei(Integer idHoaDonChiTiet_Id, String soImei);
+
+    @Query(value = "select i from ImeiDaBan i " +
+            "where i.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang " +
+            "order by i.id desc")
+    List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
 }

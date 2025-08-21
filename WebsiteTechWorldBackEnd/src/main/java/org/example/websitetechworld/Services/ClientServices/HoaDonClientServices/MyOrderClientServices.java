@@ -2,9 +2,7 @@ package org.example.websitetechworld.Services.ClientServices.HoaDonClientService
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
-import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
@@ -37,10 +35,8 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class MyOrderClientServices {
-    private final ImeiDaBanAdminServices imeiDaBanAdminServices;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
-    private final ImeiDaBanRepository imeiDaBanRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -60,13 +56,11 @@ public class MyOrderClientServices {
         hoaDonChiTiet_sanPhamAdminServices = hoaDonChiTietSanPhamAdminServices;
         this.khachHangRepository = khachHangRepository;
         this.chiTietHoaDonClientServices = chiTietHoaDonClientServices;
-        this.imeiDaBanAdminServices = imeiDaBanAdminServices;
         this.gioHangClientService = gioHangClientService;
         this.danhGiaSanPhamRepository = danhGiaSanPhamRepository;
         this.emailServicces = emailServicces;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
-        this.imeiDaBanRepository = imeiDaBanRepository;
     }
 
 
@@ -82,26 +76,19 @@ public class MyOrderClientServices {
             String trangThaiGiaoHang
     ) {
         try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize);
-            Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
+            // Lấy toàn bộ đơn hàng của user
+            List<HoaDon> allHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId);
 
-            // Null check cho lstHoaDon
-            if (lstHoaDon == null || lstHoaDon.getContent() == null) {
-                System.out.println("No orders found for user: " + userLoginId);
-                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            if (allHoaDon == null || allHoaDon.isEmpty()) {
+                return new PageImpl<>(new ArrayList<>(), PageRequest.of(pageNo, pageSize), 0);
             }
 
-            List<HoaDon> filtered = new ArrayList<>(lstHoaDon.getContent());
-
-            // 🔍 Lọc theo trạng thái giao hàng (từ tab hoặc combobox)
+            // Filter theo trạng thái giao hàng
+            List<HoaDon> filtered = new ArrayList<>(allHoaDon);
             if (trangThaiGiaoHang != null && !trangThaiGiaoHang.trim().isEmpty()) {
                 String statusKeyword = trangThaiGiaoHang.toLowerCase().trim();
 
-                System.out.println("🔍 Filtering by status: " + statusKeyword);
-
-                // Logic filtering theo business rules
                 if ("hoàn thành".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Hoàn thành" -> DELIVERED (online) hoặc COMPLETED (offline)
                     List<HoaDon> online = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     "DELIVERED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
@@ -118,7 +105,6 @@ public class MyOrderClientServices {
                     filtered.addAll(offline);
 
                 } else if ("đã hủy".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Đã hủy" -> CANCELLED (cả online và offline)
                     List<HoaDon> online = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     "CANCELLED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
@@ -134,93 +120,68 @@ public class MyOrderClientServices {
                     filtered.addAll(online);
                     filtered.addAll(offline);
 
-                }
-                else if ("chờ xử lý".equalsIgnoreCase(statusKeyword)) {
-                    // Lấy tất cả đơn có PENDING ở giao hàng hoặc thanh toán
+                } else if ("chờ xử lý".equalsIgnoreCase(statusKeyword)) {
                     filtered = filtered.stream()
                             .filter(h -> ("PENDING".equalsIgnoreCase(
                                     h.getTrangThaiDonHang() != null ? h.getTrangThaiDonHang().name() : null))
                                     || ("PENDING".equalsIgnoreCase(
                                     h.getTrangThaiThanhToan() != null ? h.getTrangThaiThanhToan().name() : null)))
                             .toList();
-                }
-                else if ("chờ thanh toán".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Chờ thanh toán" -> PENDING (thanh toán)
+                } else if ("chờ thanh toán".equalsIgnoreCase(statusKeyword)) {
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiThanhToan() != null &&
                                     "PENDING".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
                             .toList();
-
                 } else if ("vận chuyển".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Vận chuyển" -> CONFIRM, PACKED, SHIPPING (giao hàng)
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     ("CONFIRM".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
                                             "PACKED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
                                             "SHIPPING".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
                             .toList();
-
                 } else if ("chờ giao hàng".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Chờ giao hàng" -> READYFORPICKUP (giao hàng)
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     "READYFORPICKUP".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
                             .toList();
-
                 } else if ("trả hàng/hoàn tiền".equalsIgnoreCase(statusKeyword)) {
-                    // Tab "Trả hàng/Hoàn tiền" -> RETURNED, FAILED (giao hàng)
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     ("RETURNED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
                                             "FAILED".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
                             .toList();
                 } else {
-                    // Fallback: tìm theo contains trong displayName với null checks
+                    // Fallback: tìm theo displayName
                     filtered = filtered.stream()
                             .filter(h -> {
-                                // Ưu tiên trạng thái đơn hàng online
                                 if (h.getTrangThaiDonHang() != null &&
                                         h.getTrangThaiDonHang().getDisplayName() != null) {
                                     String onlineStatus = h.getTrangThaiDonHang().getDisplayName().toLowerCase();
-                                    return onlineStatus.contains(statusKeyword) || onlineStatus.equalsIgnoreCase(statusKeyword);
-                                }
-                                // Nếu không có trạng thái đơn hàng, kiểm tra trạng thái thanh toán (offline)
-                                else if (h.getTrangThaiThanhToan() != null &&
+                                    return onlineStatus.contains(statusKeyword);
+                                } else if (h.getTrangThaiThanhToan() != null &&
                                         h.getTrangThaiThanhToan().getDisplayName() != null) {
                                     String offlineStatus = h.getTrangThaiThanhToan().getDisplayName().toLowerCase();
-                                    return offlineStatus.contains(statusKeyword) || offlineStatus.equalsIgnoreCase(statusKeyword);
+                                    return offlineStatus.contains(statusKeyword);
                                 }
                                 return false;
                             })
                             .toList();
                 }
-
-                System.out.println("📊 After status filtering: " + filtered.size() + " orders");
             }
 
-            // 🔍 Lọc theo các tiêu chí khác với null checks
             filtered = filtered.stream()
-                    .filter(h -> minPrice == null ||
-                            (h.getThanhTien() != null && h.getThanhTien().compareTo(minPrice) >= 0))
-                    .filter(h -> maxPrice == null ||
-                            (h.getThanhTien() != null && h.getThanhTien().compareTo(maxPrice) <= 0))
-                    .filter(h -> startDate == null ||
-                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isBefore(startDate)))
-                    .filter(h -> endDate == null ||
-                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isAfter(endDate)))
+                    .filter(h -> minPrice == null || (h.getThanhTien() != null && h.getThanhTien().compareTo(minPrice) >= 0))
+                    .filter(h -> maxPrice == null || (h.getThanhTien() != null && h.getThanhTien().compareTo(maxPrice) <= 0))
+                    .filter(h -> startDate == null || (h.getNgayDatHang() != null && !h.getNgayDatHang().isBefore(startDate)))
+                    .filter(h -> endDate == null || (h.getNgayDatHang() != null && !h.getNgayDatHang().isAfter(endDate)))
                     .filter(h -> {
                         if (keyword == null || keyword.isEmpty()) return true;
-
                         String keywordLower = keyword.toLowerCase();
-
-                        // Tìm theo mã vận đơn nếu keyword bắt đầu bằng "vd"
                         if (keywordLower.startsWith("vd")) {
                             return h.getMaVanDon() != null &&
                                     !h.getMaVanDon().trim().isEmpty() &&
                                     h.getMaVanDon().toLowerCase().contains(keywordLower);
-                        }
-                        // Ngược lại tìm theo tên sản phẩm
-                        else {
+                        } else {
                             return h.getChiTietHoaDons() != null &&
                                     h.getChiTietHoaDons().stream()
                                             .anyMatch(ct -> ct != null &&
@@ -230,35 +191,27 @@ public class MyOrderClientServices {
                         }
                     })
                     .toList();
+            filtered = filtered.stream()
+                    .sorted(Comparator.comparing(HoaDon::getId).reversed()).toList();
 
-            System.out.println("📊 Final filtered orders: " + filtered.size());
+            // Phân trang thủ công
+            int start = pageNo * pageSize;
+            int end = Math.min(start + pageSize, filtered.size());
+            List<HoaDon> pageContent = start <= end ? filtered.subList(start, end) : new ArrayList<>();
 
-            // Map sang response DTO với null checks
-            List<MyOrderClientResponse> content = filtered.stream()
-                    .filter(Objects::nonNull) // Filter out null orders
-                    .map(order -> {
-                        try {
-                            return myOrderClientMapper.toMyOrderClientResponse(order);
-                        } catch (Exception e) {
-
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull) // Filter out failed mappings
+            // Map sang DTO
+            List<MyOrderClientResponse> content = pageContent.stream()
+                    .map(order -> myOrderClientMapper.toMyOrderClientResponse(order))
                     .toList();
 
-            // Trả về Page với tổng số phần tử là số đơn hàng sau filtering
-            return new PageImpl<>(content, pageable, (long) content.size());
+            // Trả về Page với totalElements đúng
+            return new PageImpl<>(content, PageRequest.of(pageNo, pageSize), filtered.size());
 
         } catch (Exception e) {
-            System.err.println("❌ Error in getOrderByUserLogin: " + e.getMessage());
-            e.printStackTrace();
-
-            // Return empty page in case of error
-            Pageable pageable = PageRequest.of(pageNo, pageSize);
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            return new PageImpl<>(new ArrayList<>(), PageRequest.of(pageNo, pageSize), 0);
         }
     }
+
 
 
     public Page<MyReviewClientResponse> getReview(Integer userLoginId, Integer pageNo, Integer pageSize) {

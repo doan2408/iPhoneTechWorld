@@ -88,6 +88,18 @@ export const getAdressesClient = async (id) => {
 };
 
 
+// using for dropdown
+export const clientList = async () => {
+  try {
+    const response = await api.get(`${baseURL}/list`);
+    return response.data;
+  }
+  catch (err) {
+    throw err.response?.data || "Error getting client list";
+  }
+}
+
+
 // export const getAdressListOfClient = async (clientId) => {
 //   try {
 //     const response = await api.get(`/admin/address/${clientId}`);

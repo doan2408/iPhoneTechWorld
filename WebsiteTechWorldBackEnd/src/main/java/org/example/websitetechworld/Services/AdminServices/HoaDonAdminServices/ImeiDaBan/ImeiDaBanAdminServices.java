@@ -119,4 +119,17 @@ public class ImeiDaBanAdminServices {
     public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer idHoaDon) {
         return imeiDaBanRepository.imeiTrongHdct(idHoaDon);
     }
+
+    // list imei đã bán cho 1 khách
+    public List<ImeiDaBangAdminResponse> imeiDaBanListByKhachHang(Integer idKhachHang) {
+        List<ImeiDaBan> imeiDaBanList = imeiDaBanRepository.imeiDaBanListByKhachHang(idKhachHang);
+        return imeiDaBanList.stream()
+                .map(imeiDaBan -> {
+                    ImeiDaBangAdminResponse imeiDaBanAdminResponse = new ImeiDaBangAdminResponse();
+                    imeiDaBanAdminResponse.setId(imeiDaBan.getId());
+                    imeiDaBanAdminResponse.setSoImei(imeiDaBan.getSoImei());
+                    imeiDaBanAdminResponse.setTrangThaiImei(imeiDaBan.getTrangThai().name());
+                    return imeiDaBanAdminResponse;
+                }).toList();
+    }
 }
