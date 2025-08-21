@@ -67,16 +67,28 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
             ld.tenLyDo,
             xlbh.loaiVuViec,
             cthd.donGia,
-            CAST(0 AS bigdecimal)   
+            CAST(0 AS bigdecimal)
         )
             FROM XuLySauBanHang xlbh
-                LEFT JOIN xlbh.idHoaDon hd
                 LEFT JOIN xlbh.idImeiDaBan imdb
+                LEFT JOIN imdb.idHoaDonChiTiet cthd
                 LEFT JOIN xlbh.idLyDo ld
+                LEFT JOIN cthd.idHoaDon hd
                 LEFT JOIN hd.idKhachHang kh
-                LEFT JOIN hd.chiTietHoaDons cthd
                 LEFT JOIN cthd.idSanPhamChiTiet spct
             WHERE xlbh.idHoaDon.id = :idHoaDon
+            GROUP BY 
+            imdb.soImei, xlbh.id,
+            xlbh.idHoaDon.id,
+            hd.maHoaDon,
+            kh.tenKhachHang,
+            xlbh.hanhDongSauVuViec,
+            cthd.tenSanPham,
+            spct.idRom.dungLuong,
+            spct.idMau.tenMau,
+            ld.tenLyDo,
+            xlbh.loaiVuViec,
+            cthd.donGia
     """)
     List<XuLyChiTietResponse> getAllCtXuLy(Integer idHoaDon);
 

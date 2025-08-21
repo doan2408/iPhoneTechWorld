@@ -113,6 +113,8 @@ public class XuLySauBanHangServices {
                     xuLy.setLoaiVuViec(lyDoXuLy.getLoaiVuViec());
                     xuLy.setThoiGianYeuCau(LocalDateTime.now());
                     xuLy.setIdLyDo(lyDoXuLy);
+                    xuLy.setUrlHinh(imeiReq.getUrlHinh());
+                    xuLy.setUrlVideo(imeiReq.getUrlVideo());
                     xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                     xuLy.setDaKiemTra(false);
                     return xuLy;
@@ -233,7 +235,7 @@ public class XuLySauBanHangServices {
             }
             xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
             xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
-            xuLySauBanHang.setDaKiemTra(true);
+//            xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
         }
     }
