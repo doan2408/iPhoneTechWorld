@@ -8,23 +8,30 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
-import org.example.websitetechworld.Dto.Request.InvoiceRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.ActionAfterCase;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.GiaoHangAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
+import org.example.websitetechworld.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -36,12 +43,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,8 +65,14 @@ public class HoaDonAdminService {
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final EntityManager entityManager;
     private final EmailServicces emailServicces;
+    private final GiaoHangAdminServices giaoHangAdminServices;
+    private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final XuLySauBanHangRepository xuLySauBanHangRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final GioHangRepository gioHangRepository;
+    private final ViDiemRepository viDiemRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -73,6 +85,12 @@ public class HoaDonAdminService {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
         this.entityManager = entityManager;
         this.emailServicces = emailServicces;
+        this.giaoHangAdminServices = giaoHangAdminServices;
+        this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.xuLySauBanHangRepository = xuLySauBanHangRepository;
+        this.sanPhamChiTietRepository = sanPhamChiTietRepository;
+        this.gioHangRepository = gioHangRepository;
+        this.viDiemRepository = viDiemRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -92,7 +110,19 @@ public class HoaDonAdminService {
     }
 
     public HoaDonAdminResponse findById(Integer id){
-        return hoaDonRepository.findById(id).map(HoaDonAdminResponse::convertDto).orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
+        return hoaDonRepository.findById(id)
+                .map(hoaDon -> {
+                    HoaDonAdminResponse hoaDonAdminResponse = HoaDonAdminResponse.convertDto(hoaDon);
+                    hoaDonAdminResponse.setChiTietHoaDonAdminResponseList(
+                            hoaDonAdminResponse.getChiTietHoaDonAdminResponseList()
+                                    .stream().map(response -> {
+                                        response.setDonGia(tinhGiaKhuyenMai(response.getIdSanPhamChiTiet(), hoaDonAdminResponse.getIdKhachHang()));
+                                        return response;
+                                    }).collect(Collectors.toList())
+                    );
+                    return hoaDonAdminResponse;
+                })
+                .orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
     }
     public HoaDon findByIdHoaDon(Integer id){
         return hoaDonRepository.findById(id).orElseThrow();
@@ -196,12 +226,20 @@ public class HoaDonAdminService {
         if (hoaDon.getSoTienGiam() != null){
             hoaDon.setSoTienGiam(request.getSoTienGiam());
         }
+        if (hoaDon.getIdPhieuGiamGia() != null && hoaDon.getIdKhachHang() != null){
+            KhachHangGiamGia khgg = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(
+                    hoaDon.getIdPhieuGiamGia(), hoaDon.getIdKhachHang(), false);
+            if (khgg != null) {
+                khgg.setIsUser(true);
+                khachHangGiamGiaRepository.save(khgg);
+            }
+        }
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
 
-        if (response.getMessage().equals("Thanh toán thành công")) {
-            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.SOLD);
+        if (response.getMessage().equals("Thanh toán thành công") && Boolean.TRUE.equals(hoaDon.getIsShipping())) {
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.RESERVED);
             updateTongTien(hoaDon.getId());
         }
 
@@ -210,12 +248,24 @@ public class HoaDonAdminService {
 
     public void hoaDonSoftDelete (Integer id){
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+
+        boolean hasDetails = chiTietHoaDonRepository.existsByIdHoaDon(hoaDon);
+        if (hasDetails) {
+            throw new IllegalStateException("Hóa đơn này đã có sản phẩm, không thể xóa.");
+        }
+
         hoaDon.setIsDelete(true);
         hoaDonRepository.save(hoaDon);
     }
 
     public void hoaDonHardDelete (Integer id){
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow();
+
+        boolean hasDetails = chiTietHoaDonRepository.existsByIdHoaDon(hoaDon);
+        if (hasDetails) {
+            throw new IllegalStateException("Hóa đơn này đã có sản phẩm, không thể xóa.");
+        }
+
         hoaDonRepository.delete(hoaDon);
     }
 
@@ -235,13 +285,39 @@ public class HoaDonAdminService {
         return khachHangPage.map(kh -> new KhachHangGiamGiaResponse(kh.getId(),kh.getMaKhachHang(), kh.getSdt(), kh.getTenKhachHang()));
     }
 
-    public KhachHang addKhachHang  (KhachHang khachHang) {
+    public KhachHang addKhachHang (KhachHang khachHang) {
         KhachHang saved = new KhachHang();
+        checkValidate(khachHang);
         saved.setTenKhachHang(khachHang.getTenKhachHang());
         saved.setSdt(khachHang.getSdt());
         saved.setEmail(khachHang.getEmail());
         saved.setTrangThai(TrangThaiKhachHang.ACTIVE);
-        return khachHangRepository.save(saved);
+
+        saved = khachHangRepository.save(saved);
+        updateKhachHang(saved);
+
+        return saved;
+    }
+
+    public void updateKhachHang (KhachHang khachHang) {
+        HangThanhVien hangThanhVien = new HangThanhVien();
+        hangThanhVien.setId(1);
+        khachHang.setHangThanhVien(hangThanhVien);
+        khachHangRepository.save(khachHang);
+
+        GioHang gioHang = new GioHang();
+        gioHang.setIdKhachHang(khachHang);
+        gioHangRepository.save(gioHang);
+
+        ViDiem viDiem = new ViDiem();
+        viDiem.setKhachHang(khachHang);
+        viDiem.setDiemKhaDung(new BigDecimal(0));
+        viDiemRepository.save(viDiem);
+    }
+
+    public void checkValidate (KhachHang khachHang) {
+        if (khachHangRepository.existsByEmail(khachHang.getEmail())) throw new RuntimeException("Email đã tồn tại!");
+        if (khachHangRepository.existsBySdt(khachHang.getSdt())) throw new RuntimeException("Số điện thoại đã tồn tại!");
     }
 
     @Transactional
@@ -256,12 +332,7 @@ public class HoaDonAdminService {
         invoice.setPhiShip(request.getPhiShip() != null ? request.getPhiShip() : BigDecimal.ZERO);
         invoice.setIsShipping(request.getIsShipping() != null ? request.getIsShipping() : false);
         invoice.setNgayDatHang(LocalDateTime.now());
-        // Gán maVanDon
-//        String maVanDon = request.getMaVanDon();
-//        if (maVanDon == null || maVanDon.trim().isEmpty()) {
-//            maVanDon = generateMaVanDon(id);
-//        }
-//        invoice.setMaVanDon(maVanDon);
+        invoice.setEmailNguoiNhan(request.getEmailNguoiNhan() != null ? request.getEmailNguoiNhan() : "");
 
         // Gán shippingMethod
         invoice.setShippingMethod(request.getShippingMethod() != null ?
@@ -292,6 +363,7 @@ public class HoaDonAdminService {
                     invoice.getThanhTien(),
                     invoice.getShippingMethod(),
                     TrangThaiGiaoHang.PENDING,
+                    invoice.getEmailNguoiNhan(),
                     invoice.getNgayDatHang()
             );
         } catch (Exception e) {
@@ -434,11 +506,118 @@ public class HoaDonAdminService {
         }
         HoaDon hoaDon = optionalHoaDon.get();
         hoaDon.setTrangThaiThanhToan(newStatus);
-        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+        List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
+
+        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        }
+        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
+        if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
+            hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+        }
+        if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_IdAndLoaiVuViec(hoaDon.getId(), CaseType.CANCELLED);
+            xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
+            xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
+            xuLySauBanHang.setDaKiemTra(true);
+            xuLySauBanHangRepository.save(xuLySauBanHang);
+        }
+        if (TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.REFUNDED.equals(newStatus)){
+            hoaDonChiTiet_ImeiAdminServices.updateImeiHoanTien(danhSachChiTiet, TrangThaiImei.AVAILABLE,TrangThaiImei.RETURNED);
+        }
 
         hoaDonRepository.save(hoaDon);
     }
 
+    public List<PhieuGiamGiaAdminResponse> layDanhSachPhieuGiamGiaCuaKhach(
+            String timKiem, Integer idKhachHang, BigDecimal giaTriDonHangToiThieu) {
 
+        if (idKhachHang == null) return Collections.emptyList();
 
+        List<PhieuGiamGia> phieuList = khachHangGiamGiaRepository.findPhieuGiamGiaCuaKhach(
+                idKhachHang, giaTriDonHangToiThieu, timKiem);
+
+        List<PhieuGiamGiaAdminResponse> result = new ArrayList<>();
+        for (PhieuGiamGia pgg : phieuList) {
+            PhieuGiamGiaAdminResponse resp = new PhieuGiamGiaAdminResponse();
+            resp.setId(pgg.getId());
+            resp.setMaGiamGia(pgg.getMaGiamGia());
+            resp.setTenGiamGia(pgg.getTenGiamGia());
+            resp.setSoLuong(pgg.getSoLuong());
+            resp.setGiaTriGiamGia(pgg.getGiaTriGiamGia());
+            resp.setLoaiGiamGia(pgg.getLoaiGiamGia());
+            resp.setNgayBatDau(pgg.getNgayBatDau());
+            resp.setNgayKetThuc(pgg.getNgayKetThuc());
+            resp.setTrangThaiPhatHanh(pgg.getTrangThaiPhatHanh());
+            resp.setTrangThaiPhieuGiamGia(pgg.getTrangThaiPhieuGiamGia());
+            resp.setSoDiemCanDeDoi(pgg.getSoDiemCanDeDoi());
+            resp.setDieuKienApDung(pgg.getDieuKienApDung());
+            resp.setHangToiThieu(String.valueOf(pgg.getHangToiThieu()));
+            result.add(resp);
+        }
+        return result;
+    }
+
+    private BigDecimal tinhGiaKhuyenMai(Integer idSpct, Integer selectedIdKhachHang) {
+        try {
+            if (idSpct == null) {
+                return BigDecimal.ZERO;
+            }
+            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(idSpct)
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm chi tiết với ID: " + idSpct));
+
+            BigDecimal giaGoc = spct.getGiaBan();
+            if (giaGoc == null) {
+                return BigDecimal.ZERO;
+            }
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
+            if (khuyenMai == null) {
+                return giaGoc;
+            }
+            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
+                return giaGoc;
+            }
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
+                return giaGoc;
+            }
+
+            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
+            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
+            if (doiTuong == DoiTuongApDung.ALL) {
+                return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+            }
+            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
+                return giaGoc;
+            }
+            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
+            boolean khongHopLe =
+                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
+                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
+            if (khongHopLe) {
+                return giaGoc;
+            }
+
+            return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
+        return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
+    }
 }

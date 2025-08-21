@@ -2,11 +2,11 @@ package org.example.websitetechworld.Services.ClientServices.SanPhamClientServic
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.SanPhamClientResponse.*;
-import org.example.websitetechworld.Entity.CameraSau;
-import org.example.websitetechworld.Entity.SanPham;
-import org.example.websitetechworld.Entity.SanPhamChiTiet;
-import org.example.websitetechworld.Entity.XuatXu;
+import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.KhuyenMaiAdminService.KhuyenMaiAdminService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,8 @@ public class SanPhamClientService {
     private final ModelMapper modelMapper;
     private final LoaiRepository loaiRepository;
     private final CameraSauRepository cameraSauRepository;
+    private final HoaDonRepository hoaDonRepository;
+    private final KhuyenMaiAdminService khuyenMaiAdminService;
 
     //hien thi san pham len trang chủ
     public Page<ClientProductResponse> getAllSanPhamHome(int page, int size, String tenSanPham, Integer idLoai, BigDecimal giaMin, BigDecimal giaMax, String sort) {
@@ -98,7 +102,7 @@ public class SanPhamClientService {
     }
 
     //khi chon mau + rom
-    public ClientProductDetailResponse getChiTietBienThe(Integer idSanPham, Integer idMau, Integer idRom) {
+    public ClientProductDetailResponse getChiTietBienThe(Integer idSanPham, Integer idMau, Integer idRom, Integer selectedIdKhachHang) {
 
         Optional<SanPhamChiTiet> chiTietOtp = sanPhamRepo.getSpctByMauAndRom(idSanPham, idMau, idRom);
         if (chiTietOtp.isEmpty()) {
@@ -113,7 +117,7 @@ public class SanPhamClientService {
         response.setTenSanPham(sp.getTenSanPham());
         List<String> hinhAnh = sanPhamRepo.getListAnhByMau(idSanPham, idMau);
         response.setHinhAnh(hinhAnh);
-        response.setGiaBan(spct.getGiaBan());
+        response.setGiaTruocKhuyenMai(spct.getGiaBan());
 
         List<ClientProductDetailResponse.ThuocTinh> listRom = sp.getSanPhamChiTiets().stream()
                 .map(SanPhamChiTiet::getIdRom)
@@ -133,6 +137,7 @@ public class SanPhamClientService {
         response.setTongSoLuong(sp.getSanPhamChiTiets().stream()
                 .mapToInt(SanPhamChiTiet::getSoLuong).sum()
         );
+        response.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(spct, selectedIdKhachHang));
 
         return response;
     }
@@ -144,5 +149,4 @@ public class SanPhamClientService {
     public List<LoaiClientResponse> getLoaiClientResponses() {
         return loaiRepository.getLoaiClientResponse();
     }
-
 }

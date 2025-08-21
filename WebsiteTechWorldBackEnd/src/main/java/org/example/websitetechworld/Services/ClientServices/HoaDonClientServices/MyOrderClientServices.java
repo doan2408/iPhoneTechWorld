@@ -4,23 +4,18 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.GetAllHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
-import org.example.websitetechworld.Entity.ChiTietHoaDon;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
-import org.example.websitetechworld.Repository.ChiTietHoaDonRepository;
-import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
-import org.example.websitetechworld.Repository.HoaDonRepository;
-import org.example.websitetechworld.Repository.KhachHangRepository;
+import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
@@ -44,6 +39,8 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 public class MyOrderClientServices {
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
+    private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final ImeiDaBanRepository imeiDaBanRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -56,7 +53,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -68,17 +65,199 @@ public class MyOrderClientServices {
         this.danhGiaSanPhamRepository = danhGiaSanPhamRepository;
         this.emailServicces = emailServicces;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
+        this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.imeiDaBanRepository = imeiDaBanRepository;
     }
 
 
-    public Page<MyOrderClientResponse> getOrderByUserLogin(Integer userLoginId, Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId,pageable);
-        List<MyOrderClientResponse> content = lstHoaDon
-                .stream()
-                .map(hoaDon -> myOrderClientMapper.toMyOrderClientResponse(hoaDon))
-                .toList();
-        return new PageImpl<>(content,pageable,lstHoaDon.getTotalElements());
+    public Page<MyOrderClientResponse> getOrderByUserLogin(
+            Integer userLoginId,
+            Integer pageNo,
+            Integer pageSize,
+            String keyword,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            String trangThaiGiaoHang
+    ) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
+            Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
+
+            // Null check cho lstHoaDon
+            if (lstHoaDon == null || lstHoaDon.getContent() == null) {
+                System.out.println("No orders found for user: " + userLoginId);
+                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            }
+
+            List<HoaDon> filtered = new ArrayList<>(lstHoaDon.getContent());
+
+            // 🔍 Lọc theo trạng thái giao hàng (từ tab hoặc combobox)
+            if (trangThaiGiaoHang != null && !trangThaiGiaoHang.trim().isEmpty()) {
+                String statusKeyword = trangThaiGiaoHang.toLowerCase().trim();
+
+                System.out.println("🔍 Filtering by status: " + statusKeyword);
+
+                // Logic filtering theo business rules
+                if ("hoàn thành".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Hoàn thành" -> DELIVERED (online) hoặc COMPLETED (offline)
+                    List<HoaDon> online = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "DELIVERED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                    List<HoaDon> offline = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() == null &&
+                                    h.getTrangThaiThanhToan() != null &&
+                                    "COMPLETED".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                    filtered = new ArrayList<>();
+                    filtered.addAll(online);
+                    filtered.addAll(offline);
+
+                } else if ("đã hủy".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Đã hủy" -> CANCELLED (cả online và offline)
+                    List<HoaDon> online = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "CANCELLED".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                    List<HoaDon> offline = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() == null &&
+                                    h.getTrangThaiThanhToan() != null &&
+                                    "CANCELLED".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                    filtered = new ArrayList<>();
+                    filtered.addAll(online);
+                    filtered.addAll(offline);
+
+                }
+                else if ("chờ xử lý".equalsIgnoreCase(statusKeyword)) {
+                    // Lấy tất cả đơn có PENDING ở giao hàng hoặc thanh toán
+                    filtered = filtered.stream()
+                            .filter(h -> ("PENDING".equalsIgnoreCase(
+                                    h.getTrangThaiDonHang() != null ? h.getTrangThaiDonHang().name() : null))
+                                    || ("PENDING".equalsIgnoreCase(
+                                    h.getTrangThaiThanhToan() != null ? h.getTrangThaiThanhToan().name() : null)))
+                            .toList();
+                }
+                else if ("chờ thanh toán".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Chờ thanh toán" -> PENDING (thanh toán)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiThanhToan() != null &&
+                                    "PENDING".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
+                            .toList();
+
+                } else if ("vận chuyển".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Vận chuyển" -> CONFIRM, PACKED, SHIPPING (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    ("CONFIRM".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "PACKED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "SHIPPING".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
+                            .toList();
+
+                } else if ("chờ giao hàng".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Chờ giao hàng" -> READYFORPICKUP (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    "READYFORPICKUP".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                            .toList();
+
+                } else if ("trả hàng/hoàn tiền".equalsIgnoreCase(statusKeyword)) {
+                    // Tab "Trả hàng/Hoàn tiền" -> RETURNED, FAILED (giao hàng)
+                    filtered = filtered.stream()
+                            .filter(h -> h.getTrangThaiDonHang() != null &&
+                                    ("RETURNED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                            "FAILED".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
+                            .toList();
+                } else {
+                    // Fallback: tìm theo contains trong displayName với null checks
+                    filtered = filtered.stream()
+                            .filter(h -> {
+                                // Ưu tiên trạng thái đơn hàng online
+                                if (h.getTrangThaiDonHang() != null &&
+                                        h.getTrangThaiDonHang().getDisplayName() != null) {
+                                    String onlineStatus = h.getTrangThaiDonHang().getDisplayName().toLowerCase();
+                                    return onlineStatus.contains(statusKeyword) || onlineStatus.equalsIgnoreCase(statusKeyword);
+                                }
+                                // Nếu không có trạng thái đơn hàng, kiểm tra trạng thái thanh toán (offline)
+                                else if (h.getTrangThaiThanhToan() != null &&
+                                        h.getTrangThaiThanhToan().getDisplayName() != null) {
+                                    String offlineStatus = h.getTrangThaiThanhToan().getDisplayName().toLowerCase();
+                                    return offlineStatus.contains(statusKeyword) || offlineStatus.equalsIgnoreCase(statusKeyword);
+                                }
+                                return false;
+                            })
+                            .toList();
+                }
+
+                System.out.println("📊 After status filtering: " + filtered.size() + " orders");
+            }
+
+            // 🔍 Lọc theo các tiêu chí khác với null checks
+            filtered = filtered.stream()
+                    .filter(h -> minPrice == null ||
+                            (h.getThanhTien() != null && h.getThanhTien().compareTo(minPrice) >= 0))
+                    .filter(h -> maxPrice == null ||
+                            (h.getThanhTien() != null && h.getThanhTien().compareTo(maxPrice) <= 0))
+                    .filter(h -> startDate == null ||
+                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isBefore(startDate)))
+                    .filter(h -> endDate == null ||
+                            (h.getNgayDatHang() != null && !h.getNgayDatHang().isAfter(endDate)))
+                    .filter(h -> {
+                        if (keyword == null || keyword.isEmpty()) return true;
+
+                        String keywordLower = keyword.toLowerCase();
+
+                        // Tìm theo mã vận đơn nếu keyword bắt đầu bằng "vd"
+                        if (keywordLower.startsWith("vd")) {
+                            return h.getMaVanDon() != null &&
+                                    !h.getMaVanDon().trim().isEmpty() &&
+                                    h.getMaVanDon().toLowerCase().contains(keywordLower);
+                        }
+                        // Ngược lại tìm theo tên sản phẩm
+                        else {
+                            return h.getChiTietHoaDons() != null &&
+                                    h.getChiTietHoaDons().stream()
+                                            .anyMatch(ct -> ct != null &&
+                                                    ct.getTenSanPham() != null &&
+                                                    !ct.getTenSanPham().trim().isEmpty() &&
+                                                    ct.getTenSanPham().toLowerCase().contains(keywordLower));
+                        }
+                    })
+                    .toList();
+
+            System.out.println("📊 Final filtered orders: " + filtered.size());
+
+            // Map sang response DTO với null checks
+            List<MyOrderClientResponse> content = filtered.stream()
+                    .filter(Objects::nonNull) // Filter out null orders
+                    .map(order -> {
+                        try {
+                            return myOrderClientMapper.toMyOrderClientResponse(order);
+                        } catch (Exception e) {
+
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull) // Filter out failed mappings
+                    .toList();
+
+            // Trả về Page với tổng số phần tử là số đơn hàng sau filtering
+            return new PageImpl<>(content, pageable, (long) content.size());
+
+        } catch (Exception e) {
+            System.err.println("❌ Error in getOrderByUserLogin: " + e.getMessage());
+            e.printStackTrace();
+
+            // Return empty page in case of error
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
     }
 
 
@@ -124,8 +303,6 @@ public class MyOrderClientServices {
 
         HoaDon hoaDon = new HoaDon();
         hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
-//        String maVanDon = generateMaVanDon(hoaDon.getId());
-//        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
@@ -137,21 +314,20 @@ public class MyOrderClientServices {
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
-        hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
 
-        if ("Đặt hàng thành công".equals(response.getMessage())) {
-            if (TenHinhThuc.NGAN_HANG.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
-            }else {
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
-            }
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+            hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
+        }else {
             for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
                 gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
             }
-            sendMailFromInvoice(hoaDon);
-
         }
+
+        sendMailFromInvoice(hoaDon);
+
+
         return response;
     }
 
@@ -173,19 +349,10 @@ public class MyOrderClientServices {
 
         List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
 
-        hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
-
-        if ("Đặt hàng thành công".equals(response.getMessage())) {
-            if (TenHinhThuc.NGAN_HANG.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
-            }else {
-                hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
-            }
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+            hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
+            hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
-            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
-                gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
-            }
-            sendMailFromInvoice(hoaDon);
         }
         return response;
     }
@@ -198,6 +365,13 @@ public class MyOrderClientServices {
         if (requestThanhToanTongHop.getIdPhieuGiamGia() != null){
             PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
             phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
+            if (khachHang != null) {
+                KhachHangGiamGia khgg = khachHangGiamGiaRepository.findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(phieuGiamGia, khachHang, false);
+                if (khgg != null) {
+                    khgg.setIsUser(true);
+                    khachHangGiamGiaRepository.save(khgg);
+                }
+            }
             hoaDon.setIdPhieuGiamGia(phieuGiamGia);
         }
         hoaDon.setIsShipping(true);
@@ -293,8 +467,4 @@ public class MyOrderClientServices {
     public void deleteHoaDonById(Integer id){
         hoaDonRepository.deleteById(id);
     }
-
-
-
-
 }

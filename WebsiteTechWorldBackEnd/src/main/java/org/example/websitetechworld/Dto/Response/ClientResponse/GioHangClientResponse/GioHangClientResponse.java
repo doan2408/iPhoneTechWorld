@@ -21,6 +21,7 @@ public class GioHangClientResponse {
         private String phienBan;
         private String imageUrl;
         private BigDecimal gia;
+        private BigDecimal giaTruocKhuyenMai;
         private Integer soLuong;
         private Integer soLuongTon;
         private LocalDateTime ngayThem;

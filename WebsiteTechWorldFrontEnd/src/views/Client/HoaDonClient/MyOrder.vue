@@ -5,13 +5,23 @@
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">Bộ Lọc Đơn Hàng</h2>
+          <span v-if="isFiltered" class="filter-badge">Đang lọc</span>
         </div>
         <div class="card-content space-y-6">
           <div class="space-y-2">
             <label for="status-filter" class="label">Trạng thái</label>
-            <select id="status-filter" v-model="filterStatus" class="select-input">
+            <select
+              id="status-filter"
+              v-model="filterStatus"
+              @change="handleStatusFilterChange"
+              class="select-input"
+            >
               <option value="all">Tất cả</option>
-              <option v-for="status in orderStatuses" :key="status" :value="status">
+              <option
+                v-for="status in orderStatuses"
+                :key="status"
+                :value="status"
+              >
                 {{ status }}
               </option>
             </select>
@@ -19,9 +29,29 @@
           <div class="space-y-2">
             <label class="label">Khoảng giá</label>
             <div class="flex-group">
-              <input type="number" placeholder="Min" v-model="filterMinPrice" class="text-input flex-1" />
+              <input
+                type="text"
+                placeholder="Min"
+                v-model="displayMinPrice"
+                class="text-input flex-1"
+              />
               <span class="separator">-</span>
-              <input type="number" placeholder="Max" v-model="filterMaxPrice" class="text-input flex-1" />
+              <input
+                type="text"
+                placeholder="Max"
+                v-model="displayMaxPrice"
+                class="text-input flex-1"
+              />
+            </div>
+            <div
+              v-if="
+                filterMinPrice &&
+                filterMaxPrice &&
+                filterMinPrice > filterMaxPrice
+              "
+              class="validation-error"
+            >
+              ⚠️ Giá tối thiểu không thể lớn hơn giá tối đa
             </div>
           </div>
           <div class="space-y-2">
@@ -29,22 +59,63 @@
             <div class="space-y-2">
               <div>
                 <label for="start-date" class="sr-only">Ngày bắt đầu</label>
-                <input id="start-date" type="date" v-model="filterStartDate" class="text-input" />
+                <input
+                  id="start-date"
+                  type="date"
+                  v-model="filterStartDate"
+                  class="text-input"
+                />
               </div>
               <div>
                 <label for="end-date" class="sr-only">Ngày kết thúc</label>
-                <input id="end-date" type="date" v-model="filterEndDate" class="text-input" />
+                <input
+                  id="end-date"
+                  type="date"
+                  v-model="filterEndDate"
+                  class="text-input"
+                />
               </div>
+            </div>
+            <div
+              v-if="
+                filterStartDate &&
+                filterEndDate &&
+                filterStartDate > filterEndDate
+              "
+              class="validation-error"
+            >
+              ⚠️ Ngày bắt đầu không thể sau ngày kết thúc
             </div>
           </div>
         </div>
         <div class="card-footer flex-col space-y-2">
-          <button @click="handleApplyFilters" class="button primary-button w-full">
+          <button
+            @click="handleApplyFilters"
+            class="button primary-button w-full"
+          >
             Áp dụng bộ lọc
           </button>
-          <button @click="handleResetFilters" class="button outline-button w-full">
+          <button
+            @click="handleResetFilters"
+            class="button outline-button w-full"
+          >
             Đặt lại bộ lọc
           </button>
+          <div v-if="isFiltered" class="filter-info">
+            <small>{{ formatCurrency(filterStatusText) }}</small>
+            <div class="current-filter-status mt-1">
+              <small
+                ><strong
+                  >Đang lọc:
+                  {{
+                    currentFilterStatus === "all"
+                      ? "Tất cả đơn hàng"
+                      : currentFilterStatus
+                  }}</strong
+                ></small
+              >
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -55,8 +126,12 @@
         <div class="header-right">
           <div class="search-container">
             <SearchIcon class="search-icon" />
-            <input type="search" placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm"
-              class="search-input" v-model="searchTerm" />
+            <input
+              type="search"
+              placeholder="tìm theo tên sản phẩm, mã vận"
+              class="search-input"
+              v-model="searchTerm"
+            />
           </div>
         </div>
       </header>
@@ -64,30 +139,49 @@
       <main class="main-content">
         <div class="tabs-container">
           <div class="tabs-list">
-            <button :class="['tab-trigger', { active: activeTab === 'all' }]" @click="setActiveTab('all')">
+            <button
+              :class="['tab-trigger', { active: isTabActive('all') }]"
+              @click="setActiveTab('all')"
+            >
               Tất cả
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Chờ thanh toán' }]"
-              @click="setActiveTab('Chờ thanh toán')">
-              Chờ thanh toán
+            <button
+              :class="['tab-trigger', { active: isTabActive('Chờ xử lý') }]"
+              @click="setActiveTab('Chờ xử lý')"
+            >
+              Chờ xử lý
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Vận chuyển' }]"
-              @click="setActiveTab('Vận chuyển')">
+            <button
+              :class="['tab-trigger', { active: isTabActive('Vận chuyển') }]"
+              @click="setActiveTab('Vận chuyển')"
+            >
               Vận chuyển
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Chờ giao hàng' }]"
-              @click="setActiveTab('Chờ giao hàng')">
+            <button
+              :class="['tab-trigger', { active: isTabActive('Chờ giao hàng') }]"
+              @click="setActiveTab('Chờ giao hàng')"
+            >
               Chờ giao hàng
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Hoàn thành' }]"
-              @click="setActiveTab('Hoàn thành')">
+            <button
+              :class="['tab-trigger', { active: isTabActive('Hoàn thành') }]"
+              @click="setActiveTab('Hoàn thành')"
+            >
               Hoàn thành
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Đã hủy' }]" @click="setActiveTab('Đã hủy')">
+            <button
+              :class="['tab-trigger', { active: isTabActive('Đã hủy') }]"
+              @click="setActiveTab('Đã hủy')"
+            >
               Đã hủy
             </button>
-            <button :class="['tab-trigger', { active: activeTab === 'Trả hàng/Hoàn tiền' }]"
-              @click="setActiveTab('Trả hàng/Hoàn tiền')">
+            <button
+              :class="[
+                'tab-trigger',
+                { active: isTabActive('Trả hàng/Hoàn tiền') },
+              ]"
+              @click="setActiveTab('Trả hàng/Hoàn tiền')"
+            >
               Trả hàng/Hoàn tiền
             </button>
           </div>
@@ -97,10 +191,14 @@
           <div v-if="allOrderValue.length === 0" class="empty-state">
             Không tìm thấy đơn hàng nào phù hợp.
           </div>
-          <div v-for="order in allOrderValue" :key="order.idHoaDon" class="order-card">
-            <div class="order-mvd" style="margin: 10px 3px;">
-                <b>Mã vận đơn: {{ order.maVanDon }}</b>
-              </div>
+          <div
+            v-for="order in allOrderValue"
+            :key="order.idHoaDon"
+            class="order-card"
+          >
+            <div class="order-mvd" style="margin: 10px 3px">
+              <b>Mã vận đơn: {{ order.maVanDon }}</b>
+            </div>
             <div class="order-status-bar">
               <div class="order-status">
                 🧾 Trạng thái đơn: <span>{{ order.trangThaiGiaoHang }}</span>
@@ -110,30 +208,61 @@
               </div>
             </div>
             <div class="order-products">
-              <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
-                class="product-item">
-                <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
+              <div
+                v-for="product in order.myOrderClientResponseList"
+                :key="product.idSanPhamChiTiet"
+                class="product-item"
+              >
+                <img
+                  :src="product.urlImage"
+                  :alt="product.tenSanPham"
+                  class="product-image"
+                />
                 <div class="product-details">
                   <div class="product-name">{{ product.tenSanPham }}</div>
-                  <div class="product-variant">Phân loại hàng: {{ product.colorName + product.dungLuongRom }}</div>
-                  <div class="product-quantity">x{{ product.soLuong }}</div>
+                  <div class="product-variant">
+                    Phân loại hàng:
+                    {{ product.colorName + " " + product.dungLuongRom }}
+                  </div>
+                  <div class="product-quantity">
+                    Số lượng: x{{ product.soLuong }}
+                  </div>
                 </div>
                 <div class="product-prices">
-                  <span class="discounted-price">₫{{ product.giaSanPham }}</span>
+                  <span class="discounted-price"
+                    >{{ formatCurrency(product.giaSanPham) }}₫</span
+                  >
                 </div>
               </div>
             </div>
 
             <div class="order-footer">
               <div class="order-total">
-                Thành tiền: <span class="total-amount">{{ order.thanhTien }} VNĐ</span>
+                Thành tiền:
+                <span class="total-amount"
+                  >{{ formatCurrency(order.thanhTien) }} VNĐ</span
+                >
               </div>
               <div class="order-actions">
                 <button class="action-button buy-again-button">Mua Lại</button>
-                <button class="action-button contact-seller-button" @click="contactSeller">Liên Hệ Người Bán</button>
-                <button v-if="order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia"
+                <button
+                  class="action-button contact-seller-button"
+                  @click="contactSeller"
+                >
+                  Liên Hệ Người Bán
+                </button>
+                <button
+                  v-if="
+                    order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia
+                  "
                   class="action-button rate-button"
-                  @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
+                  @click="
+                    openRateDialog(
+                      order.idHoaDon,
+                      order.myOrderClientResponseList
+                    )
+                  "
+                >
                   Đánh giá
                 </button>
               </div>
@@ -142,15 +271,29 @@
         </div>
 
         <div v-if="totalElements > pageSizeMyOrder" class="pagination-controls">
-          <button class="pagination-button" :disabled="currentPage === 0" @click="prevPage()">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 0"
+            @click="prevPage()"
+          >
             Trước
           </button>
           <span v-for="page in totalPages" :key="page">
-            <button :class="['pagination-button', { active: currentPage === page - 1 }]" @click="changePage(page - 1)">
+            <button
+              :class="[
+                'pagination-button',
+                { active: currentPage === page - 1 },
+              ]"
+              @click="changePage(page - 1)"
+            >
               {{ page }}
             </button>
           </span>
-          <button class="pagination-button" :disabled="currentPage === totalPages - 1" @click="nextPage()">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages - 1"
+            @click="nextPage()"
+          >
             Sau
           </button>
         </div>
@@ -162,151 +305,427 @@
           <h2 class="card-title">Thống Kê Đơn Hàng</h2>
         </div>
         <div class="card-content space-y-4">
-          <p>Tổng đơn: <strong>{{ totalOrders }}</strong></p>
-          <p>Đã giao: <strong>{{ deliveredOrders }}</strong></p>
-          <p>Chờ xử lý: <strong>{{ pendingOrders }}</strong></p>
-          <p>Tổng doanh thu: <strong>₫{{ totalRevenue }}</strong></p>
+          <p>
+            Tổng đơn: <strong>{{ totalOrders }}</strong>
+          </p>
+          <p>
+            Đã giao: <strong>{{ deliveredOrders }}</strong>
+          </p>
+          <p>
+            Đơn mua trực tiếp: <strong>{{ totalOrders - deliveredOrders }}</strong>
+          </p>
+          <p>
+            Chờ xử lý: <strong>{{ pendingOrders }}</strong>
+          </p>
+          <p>
+            Tổng tiền mua: <strong>₫{{ formatCurrency(totalRevenue) }}</strong>
+          </p>
         </div>
       </div>
     </section>
     <!-- Thêm dialog đánh giá -->
-    <RateOrderDialog :is-open="isRateDialogOpen" :order-id="selectedOrderId" :order-products="selectedOrderProducts"
-      :id-san-pham-chi-tiet-list="idSanPhamChiTietList" @close="closeRateDialog" @submit="submitRating" />
+    <RateOrderDialog
+      :is-open="isRateDialogOpen"
+      :order-id="selectedOrderId"
+      :order-products="selectedOrderProducts"
+      :id-san-pham-chi-tiet-list="idSanPhamChiTietList"
+      @close="closeRateDialog"
+      @submit="submitRating"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue';
-import { SearchIcon } from 'lucide-vue-next';
-import { getHoaDonAndIdChiTietHoaDon, getMyOrder } from '@/Service/ClientService/HoaDon/MyOrderClient';
-import RateOrderDialog from '@/components/Admin/dialogs/DialogDanhGiaSao.vue';
-import { DanhGiaSanPhamClientService } from '@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService';
-import { MediaDanhGiaClientService } from '@/Service/ClientService/MediaDanhGiaClientService/MediaDanhGiaClientService';
+import { ref, watch, onMounted, computed } from "vue";
+import { SearchIcon } from "lucide-vue-next";
+import {
+  getHoaDonAndIdChiTietHoaDon,
+  getMyOrder,
+} from "@/Service/ClientService/HoaDon/MyOrderClient";
+import RateOrderDialog from "@/components/Admin/dialogs/DialogDanhGiaSao.vue";
+import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import { MediaDanhGiaClientService } from "@/Service/ClientService/MediaDanhGiaClientService/MediaDanhGiaClientService";
+import { useToast } from "vue-toastification";
 
-// State
+// Toast instance
+const toast = useToast();
+
+// ========== STATE VARIABLES ==========
 const allOrderValue = ref([]);
 const pageNoMyOrder = ref(0);
 const pageSizeMyOrder = ref(5);
 const totalElements = ref(0);
 const totalPages = ref(0);
 const currentPage = ref(0);
-const searchTerm = ref('');
-const activeTab = ref('all');
+const searchTerm = ref("");
 const isUserMenuOpen = ref(false);
 const activeOrderActions = ref(null);
-const isRateDialogOpen = ref(false);
-const selectedOrderId = ref(null);
-const selectedOrderProducts = ref([]);
-const idSanPhamChiTietList = ref([]);
-const user = ref(JSON.parse(localStorage.getItem('user')) || null);
-import { useToast } from 'vue-toastification';
-const toast = useToast();
+const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 
-// Bộ lọc
-const filterStatus = ref('all');
+// ========== FILTERING STATE ==========
+const activeTab = ref("all");
+const filterStatus = ref("all");
 const filterMinPrice = ref(null);
 const filterMaxPrice = ref(null);
 const filterStartDate = ref(null);
 const filterEndDate = ref(null);
 const orderStatuses = ref([
-  'Chờ thanh toán',
-  'Vận chuyển',
-  'Chờ giao hàng',
-  'Hoàn thành',
-  'Đã hủy',
-  'Trả hàng/Hoàn tiền',
+  "Chờ xử lý",
+  "Chờ thanh toán",
+  "Vận chuyển",
+  "Chờ giao hàng",
+  "Hoàn thành",
+  "Đã hủy",
+  "Trả hàng/Hoàn tiền",
 ]);
 
-// Thống kê
+// ========== RATING DIALOG STATE ==========
+const isRateDialogOpen = ref(false);
+const selectedOrderId = ref(null);
+const selectedOrderProducts = ref([]);
+const idSanPhamChiTietList = ref([]);
+
+// ========== COMPUTED PROPERTIES ==========
+
+// Computed để đồng bộ tab và combobox
+const currentFilterStatus = computed(() => {
+  // Ưu tiên tab nếu không phải 'all'
+  if (activeTab.value !== "all") {
+    return activeTab.value;
+  }
+  // Nếu không thì dùng filter status
+  return filterStatus.value;
+});
+
+// Hàm format tiền
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return "";
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+// Computed với getter/setter để hiển thị format nhưng vẫn lưu giá trị số
+const displayMinPrice = computed({
+  get() {
+    return filterMinPrice.value !== null
+      ? formatCurrency(filterMinPrice.value)
+      : "";
+  },
+  set(val) {
+    // Loại bỏ tất cả ký tự không phải số
+    const numeric = val.replace(/\D/g, "");
+    filterMinPrice.value = numeric ? parseInt(numeric) : null;
+  },
+});
+
+const displayMaxPrice = computed({
+  get() {
+    return filterMaxPrice.value !== null
+      ? formatCurrency(filterMaxPrice.value)
+      : "";
+  },
+  set(val) {
+    const numeric = val.replace(/\D/g, "");
+    filterMaxPrice.value = numeric ? parseInt(numeric) : null;
+  },
+});
+
+// Thống kê đơn hàng theo logic business mới
 const totalOrders = computed(() => allOrderValue.value.length);
-const deliveredOrders = computed(() =>
-  allOrderValue.value.filter(order => order.trangThaiGiaoHang === 'Hoàn thành').length
+
+const deliveredOrders = computed(
+  () =>
+    allOrderValue.value.filter(
+      (order) =>
+        // Đơn online: DELIVERED
+        (order.trangThaiDonHang &&
+          order.trangThaiDonHang.includes("Đã giao")) ||
+        // Đơn offline: COMPLETED
+        (order.trangThaiThanhToan &&
+          order.trangThaiThanhToan.includes("Hoàn tất"))
+    ).length
 );
-const pendingOrders = computed(() =>
-  allOrderValue.value.filter(order => order.trangThaiGiaoHang === 'Chờ thanh toán').length
+
+const pendingOrders = computed(
+  () =>
+    allOrderValue.value.filter(
+      (order) =>
+        // Đơn chờ thanh toán: PENDING
+        (order.trangThaiThanhToan &&
+          order.trangThaiThanhToan.includes("Chờ xử lý")) ||
+        // Đơn đang vận chuyển: CONFIRM, PACKED, SHIPPING
+        (order.trangThaiDonHang &&
+          (order.trangThaiDonHang.includes("Đã xác nhận") ||
+            order.trangThaiDonHang.includes("Đã đóng gói") ||
+            order.trangThaiDonHang.includes("Đang giao"))) ||
+        // Đơn chờ giao hàng: READYFORPICKUP
+        (order.trangThaiDonHang &&
+          order.trangThaiDonHang.includes("Sẵn sàng giao"))
+    ).length
+);
+
+const cancelledOrders = computed(
+  () =>
+    allOrderValue.value.filter(
+      (order) =>
+        // Đơn online hủy: CANCELLED
+        (order.trangThaiDonHang && order.trangThaiDonHang.includes("Đã hủy")) ||
+        // Đơn offline hủy: CANCELLED
+        (order.trangThaiThanhToan &&
+          order.trangThaiThanhToan.includes("Đã hủy"))
+    ).length
+);
+
+const returnedOrders = computed(
+  () =>
+    allOrderValue.value.filter(
+      (order) =>
+        // Đơn trả hàng: RETURNED, FAILED
+        order.trangThaiDonHang &&
+        (order.trangThaiDonHang.includes("Đã trả lại") ||
+          order.trangThaiDonHang.includes("Giao thất bại"))
+    ).length
 );
 const totalRevenue = computed(() =>
   allOrderValue.value.reduce((sum, order) => sum + order.thanhTien, 0)
 );
 
-onMounted(() => {
-  window.Tawk_API = window.Tawk_API || {};
-  window.Tawk_LoadStart = new Date();
-  const s1 = document.createElement('script');
-  const s0 = document.getElementsByTagName('script')[0];
-  s1.async = true;
-  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
-  s1.charset = 'UTF-8';
-  s1.setAttribute('crossorigin', '*');
-  s0.parentNode.insertBefore(s1, s0);
+// Computed cho trạng thái filter
+const isFiltered = computed(() => {
+  return (
+    filterMinPrice.value ||
+    filterMaxPrice.value ||
+    filterStartDate.value ||
+    filterEndDate.value ||
+    (searchTerm.value && searchTerm.value.trim().length > 0) ||
+    currentFilterStatus.value !== "all"
+  );
 });
 
+// Computed cho filter status text
+const filterStatusText = computed(() => {
+  const filters = [];
 
-const contactSeller = () => {
-  if (window.Tawk_API?.toggle) {
-    window.Tawk_API.toggle();
-  } else {
-    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
-    setTimeout(() => {
-      if (!window.Tawk_API?.toggle) {
-        toast.error('Không thể mở chat. Vui lòng thử lại sau.');
-      }
-    }, 5000);
+  const effectiveStatus = currentFilterStatus.value;
+  if (effectiveStatus !== "all") {
+    filters.push(`Trạng thái: ${effectiveStatus}`);
   }
+
+  if (filterMinPrice.value || filterMaxPrice.value) {
+    filters.push(
+      `Giá: ${filterMinPrice.value || "0"} - ${filterMaxPrice.value || "∞"}`
+    );
+  }
+
+  if (filterStartDate.value || filterEndDate.value) {
+    filters.push(
+      `Từ ${filterStartDate.value || "..."} đến ${filterEndDate.value || "..."}`
+    );
+  }
+
+  if (searchTerm.value && searchTerm.value.trim()) {
+    filters.push(`Tìm: "${searchTerm.value.trim()}"`);
+  }
+
+  return filters.length > 0 ? filters.join(" | ") : "Không có bộ lọc";
+});
+
+// Computed để kiểm tra tab active
+const isTabActive = (tabName) => {
+  return activeTab.value === tabName;
 };
 
-
-// const allMyOrde = async () => {
-//   try {
-//     const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value);
-//     allOrderValue.value = res.data.content || [];
-//     totalElements.value = res.data.totalElements || 0;
-//     totalPages.value = res.data.totalPages || 0;
-//     console.log('Dữ liệu đơn hàng:', res);
-//   } catch (error) {
-//     console.error('Lỗi khi lấy đơn hàng:', error);
-//     alert('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
-//   }
-// };
-
-const allMyOrde = async () => {
+// ========== MAIN API FUNCTION ==========
+const allMyOrder = async () => {
   try {
     if (!user.value?.id) {
-      toast.error('Vui lòng đăng nhập để xem đơn hàng!');
+      toast.error("Vui lòng đăng nhập để xem đơn hàng!");
       return;
     }
 
-    const res = await getMyOrder(currentPage.value, pageSizeMyOrder.value, user.value.id);
-    console.log("📦 Dữ liệu thô từ getMyOrder:", res);
+    // Chuẩn bị parameters cho API
+    const params = {
+      pageNo: currentPage.value,
+      pageSize: pageSizeMyOrder.value,
+    };
 
-    const orders = res.data.content || []; // ✅ Sửa ở đây!
-    console.log("✅ Danh sách đơn hàng:", orders);
+    // Thêm keyword parameter
+    if (searchTerm.value && searchTerm.value.trim()) {
+      params.keyword = searchTerm.value.trim();
+    }
 
+    // Thêm filter parameters
+    if (filterMinPrice.value !== null && filterMinPrice.value !== "") {
+      params.minPrice = filterMinPrice.value;
+    }
+    if (filterMaxPrice.value !== null && filterMaxPrice.value !== "") {
+      params.maxPrice = filterMaxPrice.value;
+    }
+    if (filterStartDate.value) {
+      params.startDate = filterStartDate.value + "T00:00:00";
+    }
+    if (filterEndDate.value) {
+      params.endDate = filterEndDate.value + "T23:59:59";
+    }
+
+    // ✨ QUAN TRỌNG: Xử lý trạng thái từ tab hoặc combobox
+    const effectiveStatus = currentFilterStatus.value;
+    if (effectiveStatus && effectiveStatus !== "all") {
+      // Map frontend status sang backend parameter theo logic business
+      const statusMapping = {
+        // Tab "Chờ thanh toán" -> Trạng thái thanh toán PENDING
+        "Chờ xử lý": "Chờ xử lý",
+
+        // Tab "Vận chuyển" -> Các trạng thái giao hàng: CONFIRM, PACKED, READYFORPICKUP, SHIPPING
+        "Vận chuyển": "Vận chuyển",
+
+        // Tab "Chờ giao hàng" -> Trạng thái giao hàng READYFORPICKUP
+        "Chờ giao hàng": "Chờ giao hàng",
+
+        // Tab "Hoàn thành" -> Trạng thái giao hàng DELIVERED hoặc thanh toán COMPLETED
+        "Hoàn thành": "Hoàn thành",
+
+        // Tab "Đã hủy" -> Trạng thái giao hàng CANCELLED hoặc thanh toán CANCELLED
+        "Đã hủy": "Đã hủy",
+
+        // Tab "Trả hàng/Hoàn tiền" -> Trạng thái giao hàng RETURNED hoặc FAILED
+        "Trả hàng/Hoàn tiền": "Trả hàng/Hoàn tiền",
+      };
+
+      params.trangThaiGiaoHang =
+        statusMapping[effectiveStatus] || effectiveStatus;
+
+      console.log(
+        `🔄 Frontend status "${effectiveStatus}" -> Backend param "${params.trangThaiGiaoHang}"`
+      );
+    }
+
+    console.log("Gọi API với parameters:", params);
+
+    const res = await getMyOrder(params);
+    console.log("Response từ backend:", res);
+
+    const orders = res.data.content || [];
+
+    // Kiểm tra đánh giá
     const ordersWithCheck = await Promise.all(
       orders.map(async (order) => {
         try {
-          const response = await DanhGiaSanPhamClientService.checkDanhGia(order.idHoaDon, user.value.id);
-          console.log("✅ Kết quả check:", response);
+          const response = await DanhGiaSanPhamClientService.checkDanhGia(
+            order.idHoaDon,
+            user.value.id
+          );
           return { ...order, daDanhGia: response.daDanhGia };
         } catch (err) {
-          console.error(`❌ Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`, err);
+          console.error(
+            `Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`,
+            err
+          );
           return { ...order, daDanhGia: false };
         }
       })
     );
 
+    // Cập nhật state
     allOrderValue.value = ordersWithCheck;
     totalElements.value = res.data.totalElements || 0;
     totalPages.value = res.data.totalPages || 0;
+    console.log(totalElements.value)
 
-    console.log("🎯 Dữ liệu đơn hàng sau check đánh giá:", ordersWithCheck);
+    console.log("✅ Kết quả cuối cùng:", ordersWithCheck);
   } catch (error) {
-    console.error('❌ Lỗi khi lấy đơn hàng:', error);
-    toast.error('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+    console.error("❌ Lỗi khi lấy đơn hàng:", error);
+    toast.error("Không thể tải danh sách đơn hàng. Vui lòng thử lại.");
   }
 };
 
+// ========== TAB AND FILTER FUNCTIONS ==========
 
+// Hàm xử lý khi click tab - đồng bộ với combobox
+const setActiveTab = async (tab) => {
+  console.log("🏷️ Chọn tab:", tab);
+
+  activeTab.value = tab;
+
+  // Đồng bộ combobox với tab được chọn
+  if (tab === "all") {
+    filterStatus.value = "all";
+  } else {
+    filterStatus.value = tab;
+  }
+
+  currentPage.value = 0;
+  activeOrderActions.value = null;
+
+  await allMyOrder();
+};
+
+// Hàm xử lý khi thay đổi combobox - đồng bộ với tab
+const handleStatusFilterChange = async () => {
+  console.log("🔽 Chọn combobox:", filterStatus.value);
+
+  // Đồng bộ tab với combobox được chọn
+  if (filterStatus.value === "all") {
+    activeTab.value = "all";
+  } else {
+    activeTab.value = filterStatus.value;
+  }
+
+  currentPage.value = 0;
+
+  await allMyOrder();
+};
+
+// Hàm apply filters
+const handleApplyFilters = async () => {
+  console.log("🔍 Áp dụng bộ lọc:", {
+    status: filterStatus.value,
+    minPrice: filterMinPrice.value,
+    maxPrice: filterMaxPrice.value,
+    startDate: filterStartDate.value,
+    endDate: filterEndDate.value,
+    keyword: searchTerm.value,
+  });
+
+  // Validation
+  if (filterMinPrice.value && filterMaxPrice.value) {
+    if (parseFloat(filterMinPrice.value) > parseFloat(filterMaxPrice.value)) {
+      toast.warning("⚠️ Giá tối thiểu không thể lớn hơn giá tối đa!");
+      return;
+    }
+  }
+
+  if (filterStartDate.value && filterEndDate.value) {
+    if (new Date(filterStartDate.value) > new Date(filterEndDate.value)) {
+      toast.warning("⚠️ Ngày bắt đầu không thể sau ngày kết thúc!");
+      return;
+    }
+  }
+
+  // Reset về trang đầu và gọi API
+  currentPage.value = 0;
+  await allMyOrder();
+  console.log("✅ Đã áp dụng bộ lọc!");
+};
+
+// Hàm reset filters
+const handleResetFilters = async () => {
+  console.log("🔄 Đặt lại tất cả bộ lọc");
+
+  // Reset tất cả filters
+  activeTab.value = "all";
+  filterStatus.value = "all";
+  filterMinPrice.value = null;
+  filterMaxPrice.value = null;
+  filterStartDate.value = null;
+  filterEndDate.value = null;
+  searchTerm.value = "";
+  currentPage.value = 0;
+
+  await allMyOrder();
+  toast.success("Đã đặt lại tất cả bộ lọc!");
+};
+
+// ========== PAGINATION FUNCTIONS ==========
 const changePage = (page) => {
   currentPage.value = page;
 };
@@ -318,116 +737,84 @@ const prevPage = () => {
 };
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value - 1) currentPage.value++;
+  if (currentPage.value < totalPages.value - 1) {
+    currentPage.value++;
+  }
 };
 
-watch(currentPage, () => {
-  allMyOrde();
-});
-
-const handleApplyFilters = () => {
-  console.log('Áp dụng bộ lọc:', {
-    status: filterStatus.value,
-    minPrice: filterMinPrice.value,
-    maxPrice: filterMaxPrice.value,
-    startDate: filterStartDate.value,
-    endDate: filterEndDate.value,
-  });
-  allMyOrde();
-};
-
-const handleResetFilters = () => {
-  filterStatus.value = 'all';
-  filterMinPrice.value = null;
-  filterMaxPrice.value = null;
-  filterStartDate.value = null;
-  filterEndDate.value = null;
-  allMyOrde();
-};
-
-const setActiveTab = (tab) => {
-  activeTab.value = tab;
-  currentPage.value = 1;
-  activeOrderActions.value = null;
-};
-
+// ========== UI FUNCTIONS ==========
 const toggleUserMenu = () => {
   isUserMenuOpen.value = !isUserMenuOpen.value;
   activeOrderActions.value = null;
 };
 
 const toggleOrderActions = (orderId) => {
-  activeOrderActions.value = activeOrderActions.value === orderId ? null : orderId;
+  activeOrderActions.value =
+    activeOrderActions.value === orderId ? null : orderId;
   isUserMenuOpen.value = false;
 };
 
-window.addEventListener('click', (event) => {
-  if (!event.target.closest('.dropdown-menu')) {
-    isUserMenuOpen.value = false;
-    activeOrderActions.value = null;
-  }
-});
-
-// Dialog đánh giá
+// ========== RATING DIALOG FUNCTIONS ==========
 const openRateDialog = async (orderId, products) => {
   if (!user.value?.id) {
-    console.error('Không thể mở dialog vì thiếu thông tin user:', user.value);
-    alert('Vui lòng đăng nhập để đánh giá!');
+    console.error("Không thể mở dialog vì thiếu thông tin user:", user.value);
+    toast.error("Vui lòng đăng nhập để đánh giá!");
     return;
   }
 
-  console.log('Mở dialog đánh giá cho đơn hàng:', {
+  console.log("Mở dialog đánh giá cho đơn hàng:", {
     orderId,
-    products: Array.from(products), // Log dữ liệu gốc của products
+    products: Array.from(products),
   });
 
-  selectedOrderId.value = orderId; // Chuyển thành chuỗi để tránh lỗi prop
-  selectedOrderProducts.value = Array.from(products); // Chuyển Proxy thành mảng
+  selectedOrderId.value = orderId;
+  selectedOrderProducts.value = Array.from(products);
 
   try {
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(orderId);
-    console.log('API getHoaDonAndIdChiTietHoaDon response:', chiTietList.data);
+    console.log("API getHoaDonAndIdChiTietHoaDon response:", chiTietList.data);
 
-    // Kiểm tra tính hợp lệ của chiTietList
     if (!chiTietList.data || !Array.isArray(chiTietList.data)) {
-      console.error('Dữ liệu chiTietList không hợp lệ:', chiTietList.data);
-      alert('Không thể lấy chi tiết hóa đơn. Dữ liệu không hợp lệ!');
+      console.error("Dữ liệu chiTietList không hợp lệ:", chiTietList.data);
+      toast.error("Không thể lấy chi tiết hóa đơn. Dữ liệu không hợp lệ!");
       return;
     }
 
-    // Tạo idSanPhamChiTietList
-    idSanPhamChiTietList.value = chiTietList.data.map(item => {
-      const product = products.find(p => p.idSanPhamChiTiet === item.idSanPhamChiTiet);
+    idSanPhamChiTietList.value = chiTietList.data.map((item) => {
+      const product = products.find(
+        (p) => p.idSanPhamChiTiet === item.idSanPhamChiTiet
+      );
       return {
         idSanPhamChiTiet: item.idSanPhamChiTiet,
         idChiTietHoaDon: item.idChiTietHoaDon,
-        tenSanPham: product?.tenSanPham || 'Unknown',
+        tenSanPham: product?.tenSanPham || "Unknown",
       };
     });
 
-    // Bổ sung idChiTietHoaDon vào selectedOrderProducts
-    selectedOrderProducts.value = selectedOrderProducts.value.map(product => {
-      const chiTiet = chiTietList.data.find(item => item.idSanPhamChiTiet === product.idSanPhamChiTiet);
+    selectedOrderProducts.value = selectedOrderProducts.value.map((product) => {
+      const chiTiet = chiTietList.data.find(
+        (item) => item.idSanPhamChiTiet === product.idSanPhamChiTiet
+      );
       return {
         ...product,
         idChiTietHoaDon: chiTiet?.idChiTietHoaDon || null,
       };
     });
 
-    // Kiểm tra tính hợp lệ của selectedOrderProducts
-    const invalidProducts = selectedOrderProducts.value.filter(p => !p.idSanPhamChiTiet || !p.idChiTietHoaDon);
+    const invalidProducts = selectedOrderProducts.value.filter(
+      (p) => !p.idSanPhamChiTiet || !p.idChiTietHoaDon
+    );
     if (invalidProducts.length > 0) {
-      console.error('Dữ liệu selectedOrderProducts không hợp lệ:', {
+      console.error("Dữ liệu selectedOrderProducts không hợp lệ:", {
         invalidProducts,
         fullOrderProducts: selectedOrderProducts.value,
         chiTietList: chiTietList.data,
       });
-      alert('Dữ liệu sản phẩm không hợp lệ! Vui lòng kiểm tra lại.');
+      toast.error("Dữ liệu sản phẩm không hợp lệ! Vui lòng kiểm tra lại.");
       return;
     }
 
-    // Log dữ liệu trước khi mở dialog
-    console.log('Dữ liệu truyền vào DialogDanhGiaSao:', {
+    console.log("Dữ liệu truyền vào DialogDanhGiaSao:", {
       isOpen: isRateDialogOpen.value,
       orderId: selectedOrderId.value,
       idKhachHang: user.value?.id,
@@ -437,14 +824,13 @@ const openRateDialog = async (orderId, products) => {
 
     isRateDialogOpen.value = true;
   } catch (error) {
-    console.error('Lỗi khi lấy chi tiết hóa đơn:', {
+    console.error("Lỗi khi lấy chi tiết hóa đơn:", {
       error: error.message,
       stack: error.stack,
     });
-    alert('Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.');
+    toast.error("Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.");
   }
 };
-
 
 const closeRateDialog = () => {
   isRateDialogOpen.value = false;
@@ -456,7 +842,7 @@ const closeRateDialog = () => {
 const submitRating = async (ratingData) => {
   try {
     if (!user.value?.id) {
-      toast.warning('⚠️ Vui lòng đăng nhập để đánh giá!');
+      toast.warning("⚠️ Vui lòng đăng nhập để đánh giá!");
       return;
     }
 
@@ -468,40 +854,57 @@ const submitRating = async (ratingData) => {
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(data.idHoaDon);
     const chiTietArray = chiTietList.data;
 
-    if (!chiTietArray || !Array.isArray(chiTietArray) || chiTietArray.length === 0) {
-      console.error('Không có chi tiết hóa đơn!');
-      toast.error('❌ Không tìm thấy chi tiết hóa đơn.');
+    if (
+      !chiTietArray ||
+      !Array.isArray(chiTietArray) ||
+      chiTietArray.length === 0
+    ) {
+      console.error("Không có chi tiết hóa đơn!");
+      toast.error("❌ Không tìm thấy chi tiết hóa đơn.");
       return;
     }
 
-    // Sử dụng data.ratings thay vì data.soSao
     if (chiTietArray.length !== data.ratings.length) {
-      console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
-      toast.error('❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn.');
+      console.error(
+        "Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!"
+      );
+      toast.error(
+        "❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn."
+      );
       return;
     }
 
     const isValid = data.ratings.every((rating) => {
-      return chiTietArray.some((chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet);
+      return chiTietArray.some(
+        (chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet
+      );
     });
 
-    console.log('🔍 Dữ liệu chi tiết hóa đơn:', chiTietArray);
+    console.log("🔍 Dữ liệu chi tiết hóa đơn:", chiTietArray);
 
     if (!isValid) {
-      console.error('Dữ liệu không khớp: Có sản phẩm đánh giá không thuộc hóa đơn!');
-      toast.error('❌ Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này.');
+      console.error(
+        "Dữ liệu không khớp: Có sản phẩm đánh giá không thuộc hóa đơn!"
+      );
+      toast.error(
+        "❌ Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này."
+      );
       return;
     }
 
     if (data.ratings.length > chiTietArray.length) {
-      console.error('Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!');
-      toast.error('❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.');
+      console.error(
+        "Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!"
+      );
+      toast.error("❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.");
       return;
     }
 
     const danhGiaPromises = data.ratings.map(async (rating, index) => {
       if (!chiTietArray[index]?.idChiTietHoaDon) {
-        throw new Error(`Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`);
+        throw new Error(
+          `Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`
+        );
       }
 
       const danhGiaRequest = {
@@ -514,78 +917,158 @@ const submitRating = async (ratingData) => {
         trangThaiDanhGia: data.trangThaiDanhGia,
       };
 
-      console.log('📤 Gửi yêu cầu đánh giá:', danhGiaRequest);
+      console.log("📤 Gửi yêu cầu đánh giá:", danhGiaRequest);
       return await DanhGiaSanPhamClientService.taoMoiDanhGia(danhGiaRequest);
     });
 
     const danhGiaResponses = await Promise.all(danhGiaPromises);
-    console.log('✅ Phản hồi đánh giá:', danhGiaResponses);
+    console.log("✅ Phản hồi đánh giá:", danhGiaResponses);
 
-    // Upload media
     const mediaPromises = [];
     const idDanhGia = danhGiaResponses[0]?.idDanhGia;
     if (!idDanhGia) {
-      console.error('Không có idDanhGia trong phản hồi:', danhGiaResponses);
-      toast.error('❌ Không nhận được id đánh giá từ máy chủ.');
+      console.error("Không có idDanhGia trong phản hồi:", danhGiaResponses);
+      toast.error("❌ Không nhận được id đánh giá từ máy chủ.");
       return;
     }
 
     for (const rating of data.ratings) {
       for (const file of rating.imageFiles) {
-        console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+        console.log(
+          "📂 Image file chuẩn bị upload:",
+          file.name,
+          "👉 idDanhGia:",
+          idDanhGia
+        );
+        mediaPromises.push(
+          MediaDanhGiaClientService.uploadMedia(file, idDanhGia)
+        );
       }
       for (const file of rating.videoFiles) {
-        console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
+        console.log(
+          "📹 Video file chuẩn bị upload:",
+          file.name,
+          "👉 idDanhGia:",
+          idDanhGia
+        );
+        mediaPromises.push(
+          MediaDanhGiaClientService.uploadMedia(file, idDanhGia)
+        );
       }
     }
 
     await Promise.all(mediaPromises);
 
-    toast.success('🎉 Gửi đánh giá thành công!');
-    await allMyOrde();
+    toast.success("🎉 Gửi đánh giá thành công!");
+    await allMyOrder();
     closeRateDialog();
   } catch (error) {
-    console.error('❌ Lỗi khi gửi đánh giá:', error);
+    console.error("❌ Lỗi khi gửi đánh giá:", error);
 
     if (
       error.response &&
       error.response.status === 500 &&
-      error.response.data.message === 'Sản phẩm này đã được đánh giá rồi'
+      error.response.data.message === "Sản phẩm này đã được đánh giá rồi"
     ) {
-      toast.error('⚠️ Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá.');
+      toast.error(
+        "⚠️ Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá."
+      );
     } else {
-      toast.error('❌ Gửi đánh giá thất bại. Vui lòng thử lại.');
+      toast.error("❌ Gửi đánh giá thất bại. Vui lòng thử lại.");
     }
   }
 };
 
-
-onMounted(async () => {
-  await allMyOrde();
-});
-
-const getOrderStatusClass = (status) => {
-  switch (status) {
-    case 'Hoàn thành':
-      return 'status-completed';
-    case 'Đang vận chuyển':
-      return 'status-shipping';
-    case 'Chờ thanh toán':
-      return 'status-pending-payment';
-    case 'Vận chuyển':
-      return 'status-in-transit';
-    case 'Chờ giao hàng':
-      return 'status-awaiting-delivery';
-    case 'Đã hủy':
-      return 'status-cancelled';
-    case 'Trả hàng/Hoàn tiền':
-      return 'status-return-refund';
-    default:
-      return '';
+// ========== CHAT SUPPORT FUNCTION ==========
+const contactSeller = () => {
+  if (window.Tawk_API?.toggle) {
+    window.Tawk_API.toggle();
+  } else {
+    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
+    setTimeout(() => {
+      if (!window.Tawk_API?.toggle) {
+        toast.error("Không thể mở chat. Vui lòng thử lại sau.");
+      }
+    }, 5000);
   }
 };
+
+// ========== UTILITY FUNCTIONS ==========
+const getOrderStatusClass = (status) => {
+  switch (status) {
+    case "Hoàn thành":
+      return "status-completed";
+    case "Đang vận chuyển":
+      return "status-shipping";
+    case "Chờ thanh toán":
+      return "status-pending-payment";
+    case "Vận chuyển":
+      return "status-in-transit";
+    case "Chờ giao hàng":
+      return "status-awaiting-delivery";
+    case "Đã hủy":
+      return "status-cancelled";
+    case "Trả hàng/Hoàn tiền":
+      return "status-return-refund";
+    default:
+      return "";
+  }
+};
+
+// ========== WATCHERS ==========
+
+// Debounce search
+let searchTimeout = null;
+watch(searchTerm, (newValue) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+
+  searchTimeout = setTimeout(async () => {
+    if (newValue.trim().length >= 2 || newValue.trim().length === 0) {
+      currentPage.value = 0;
+      await allMyOrder();
+    }
+  }, 500);
+});
+
+// Watch pagination
+watch(currentPage, async () => {
+  await allMyOrder();
+});
+
+// Watch để đảm bảo đồng bộ khi có thay đổi từ bên ngoài
+watch(filterStatus, (newValue, oldValue) => {
+  // Tránh infinite loop
+  if (newValue !== oldValue && newValue !== currentFilterStatus.value) {
+    handleStatusFilterChange();
+  }
+});
+
+// ========== LIFECYCLE HOOKS ==========
+onMounted(async () => {
+  // Initialize Tawk chat
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+  const s1 = document.createElement("script");
+  const s0 = document.getElementsByTagName("script")[0];
+  s1.async = true;
+  s1.src = "https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5";
+  s1.charset = "UTF-8";
+  s1.setAttribute("crossorigin", "*");
+  s0.parentNode.insertBefore(s1, s0);
+
+  // Load orders
+  await allMyOrder();
+});
+
+// Event listener for dropdown menus
+window.addEventListener("click", (event) => {
+  if (!event.target.closest(".dropdown-menu")) {
+    isUserMenuOpen.value = false;
+    activeOrderActions.value = null;
+  }
+});
 </script>
 
 <style scoped src="@/style/HoaDon/MyOrder.css">

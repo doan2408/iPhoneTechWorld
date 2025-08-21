@@ -14,11 +14,11 @@ public class KhuyenMaiSanPhamChiTiet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_san_pham_chi_tiet")
-    private SanPhamChiTiet sanPhamChiTiet;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khuyen_mai")
-    private KhuyenMai khuyenMai;
+    private KhuyenMai idKhuyenMai;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_san_pham_chi_tiet")
+    private SanPhamChiTiet idSanPhamChiTiet;
 }

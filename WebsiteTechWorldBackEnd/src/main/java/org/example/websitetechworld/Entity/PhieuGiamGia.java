@@ -7,11 +7,9 @@ import lombok.Setter;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -84,8 +82,4 @@ public class PhieuGiamGia {
 
     @OneToMany(mappedBy = "idPhieuGiamGia",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
-
-//    @OneToMany(mappedBy = "idPhieuGiamGia",cascade = CascadeType.ALL,orphanRemoval = true)
-//    private Set<KhachHangGiamGia> khachHangGiamGias = new LinkedHashSet<>();
-
 }

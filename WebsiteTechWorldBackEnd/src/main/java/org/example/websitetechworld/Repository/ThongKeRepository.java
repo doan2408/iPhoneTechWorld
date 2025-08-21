@@ -17,7 +17,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
 
     // Tổng doanh thu theo khoảng thời gian và trạng thái
     @Query(value = """
-    SELECT SUM(thanh_tien) 
+    SELECT SUM(tong_tien) 
     FROM hoa_don 
     WHERE ngay_thanh_toan BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
@@ -135,7 +135,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     )
     SELECT 
         FORMAT(dau_thang, 'yyyy-MM') AS thang,
-        ISNULL(SUM(hd.thanh_tien), 0) AS tong_doanh_thu
+        ISNULL(SUM(hd.tong_tien), 0) AS tong_doanh_thu
     FROM Thang
     LEFT JOIN hoa_don hd 
         ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
@@ -162,7 +162,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     LEFT JOIN hoa_don hd 
         ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
        AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
-       AND hd.trang_thai_don_hang = 'RETURNED'
+       AND hd.trang_thai_don_hang = 'RETURNS'
     GROUP BY FORMAT(dau_thang, 'yyyy-MM')
     ORDER BY thang
     OPTION (MAXRECURSION 100)

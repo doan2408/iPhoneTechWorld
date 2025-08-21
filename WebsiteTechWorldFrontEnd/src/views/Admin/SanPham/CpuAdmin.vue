@@ -3,13 +3,8 @@
     <el-row :gutter="20" class="mb-4" align="middle">
       <!-- Thanh tìm kiếm căn trái -->
       <el-col :span="8">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="Tìm kiếm theo tên, loại màn hình, tần số quét..."
-          clearable
-          prefix-icon="Search"
-          @clear="clearSearch"
-        />
+        <el-input v-model="searchKeyword" placeholder="Tìm kiếm theo tên, loại màn hình, tần số quét..." clearable
+          prefix-icon="Search" @clear="clearSearch" />
       </el-col>
 
       <!-- Các nút căn phải -->
@@ -24,9 +19,9 @@
       <el-table :data="tableCpu" border style="width: 100%">
         <el-table-column type="index" :index="indexMethod" label="STT" width="80" />
         <!-- <el-table-column prop="id" label="ID" /> -->
+        <el-table-column prop="chipXuLy" label="Chip xử lý" />
         <el-table-column prop="hangSanXuat" label="Hãng sản xuất" />
         <el-table-column prop="soNhan" label="Số nhân" />
-        <el-table-column prop="chipXuLy" label="Chip xử lý" />
         <el-table-column prop="xungNhip" label="Xung nhịp" />
         <el-table-column prop="congNgheSanXuat" label="Công nghệ sản xuất" />
         <el-table-column prop="boNhoDem" label="Bộ nhớ đệm" />
@@ -58,6 +53,14 @@
       :close-on-click-modal="false" :destroy-on-close="true" width="800px">
       <el-form :model="formData" ref="formRef" :rules="rules" label-width="150px">
         <el-row :gutter="20">
+          <!-- Chip xử lý -->
+
+          <el-col :span="12">
+            <el-form-item label="Chip xử lý" prop="chipXuLy">
+              <el-input v-model="formData.chipXuLy" placeholder="Nhập tên chip xử lý (ví dụ: Apple A17 Pro)" />
+            </el-form-item>
+          </el-col>
+
           <!-- Hãng sản xuất -->
           <el-col :span="12">
             <el-form-item label="Hãng sản xuất" prop="hangSanXuat">
@@ -69,13 +72,6 @@
           <el-col :span="12">
             <el-form-item label="Số nhân" prop="soNhan">
               <el-input v-model="formData.soNhan" placeholder="Nhập số lượng nhân (ví dụ: 8)" />
-            </el-form-item>
-          </el-col>
-
-          <!-- Chip xử lý -->
-          <el-col :span="12">
-            <el-form-item label="Chip xử lý" prop="chipXuLy">
-              <el-input v-model="formData.chipXuLy" placeholder="Nhập tên chip xử lý (ví dụ: Apple A17 Pro)" />
             </el-form-item>
           </el-col>
 
@@ -133,9 +129,13 @@ import { deleteCpu, getAllCpuPage, postCpu, putCpu } from '@/Service/Adminservic
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 // Router
 const router = useRouter()
+
 
 // Reactive data
 const dialogVisible = ref(false)
@@ -144,7 +144,7 @@ const formRef = ref(null)
 
 const formData = reactive({
   id: null,
-  hangSanXuat: '',
+  hangSanXuat: "Apple",
   soNhan: '',
   chipXuLy: '',
   xungNhip: '',
@@ -171,36 +171,36 @@ const icons = {
 
 const rules = {
   hangSanXuat: [
-    { required: true, message: 'Vui lòng nhập hãng sản xuất', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập hãng sản xuất', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   soNhan: [
-    { required: true, message: 'Vui lòng nhập số nhân', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập số nhân', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   chipXuLy: [
-    { required: true, message: 'Vui lòng nhập tên chip xử lý', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập tên chip xử lý', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   xungNhip: [
-    { required: true, message: 'Vui lòng nhập xung nhịp', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập xung nhịp', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   congNgheSanXuat: [
-    { required: true, message: 'Vui lòng nhập công nghệ sản xuất', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập công nghệ sản xuất', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   boNhoDem: [
-    { required: true, message: 'Vui lòng nhập bộ nhớ đệm', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập bộ nhớ đệm', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   tieuThuDienNang: [
-    { required: true, message: 'Vui lòng nhập tiêu thụ điện năng', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng nhập tiêu thụ điện năng', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
   namRaMat: [
-    { required: true, message: 'Vui lòng chọn năng ra mắt', trigger: 'blur' }, 
-    { max: 50, message: "không được phép quá 50 kí tự"}
+    { required: true, message: 'Vui lòng chọn năng ra mắt', trigger: 'blur' },
+    { max: 50, message: "không được phép quá 50 kí tự" }
   ],
 }
 
@@ -228,7 +228,7 @@ const loadData = async () => {
 const resetForm = () => {
   Object.assign(formData, {
     id: null,
-    hangSanXuat: '',
+    hangSanXuat: "Apple",
     soNhan: '',
     chipXuLy: '',
     xungNhip: '',
@@ -262,29 +262,64 @@ const handleClose = () => {
 
 const submitForm = async () => {
   try {
-    await formRef.value.validate()
+
+    // Chuẩn bị dữ liệu gửi đi
+    const submitData = {
+      ...formData,
+    };
+    console.log("Submitting data:", submitData);
 
     if (isEditMode.value) {
-      await putCpu(formData.id, formData)
-      ElMessage.success('Cập nhật thành công!')
+      await putCpu(formData.id, submitData);
+      toast.success("Cập nhật thành công!");
     } else {
-      await postCpu(formData)
-      ElMessage.success('Thêm cpu thành công!')
-      console.log('Dữ liệu data', formData)
+      await postCpu(submitData);
+      toast.success("Thêm CPU thành công!");
     }
 
-    resetForm()
-    dialogVisible.value = false
-    loadData()
+    resetForm();
+    dialogVisible.value = false;
+    loadData();
   } catch (err) {
-    console.error("Lỗi xử lý form:", err);
-    if(Array.isArray(err)) {
-      err.forEach(({field, message}) => {
-        ElMessage.error(errors[field] = message)
-      })
+    console.error("❌ Lỗi xử lý form:", err);
+    console.log("err.response:", err.response);
+    console.log("err.response.data:", err.response?.data);
+
+    // Xử lý lỗi validate frontend
+    if (err && err.fields) {
+      Object.values(err.fields).forEach(fieldErrors => {
+        fieldErrors.forEach(error => toast.error(error.message));
+      });
+      return;
     }
+
+    // Xử lý lỗi từ API
+    if (err.response && err.response.data) {
+      const { message, errors } = err.response.data;
+      if (Array.isArray(message)) {
+        message.forEach(error => toast.error(error.message));
+      } else if (typeof message === 'object' && message !== null) {
+        Object.values(message).forEach(msg => toast.error(msg));
+      } else if (typeof errors === 'object' && errors !== null) {
+        Object.values(errors).forEach(msg => toast.error(msg));
+      } else {
+        toast.error(message || errors || "Lỗi không xác định!");
+      }
+      return;
+    }
+
+    // Xử lý lỗi mạng
+    if (!err.response) {
+      toast.error("Lỗi kết nối server. Vui lòng thử lại sau!");
+      return;
+    }
+
+    // Xử lý lỗi chung
+    const action = isEditMode.value ? "cập nhật" : "thêm";
+    const errorMessage = err?.message || String(err) || "Lỗi không xác định!";
+    toast.error(`Lỗi khi ${action} CPU: ${errorMessage}`);
   }
-}
+};
 
 const openDetail = (row) => {
   isEditMode.value = true;

@@ -82,6 +82,8 @@ import { ref, onMounted, watch, computed, reactive } from 'vue';
 import { deleteXuatXu, getAllXuatXuPage, postXuatXu, putXuatXu } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const tableData = ref([]);
 const currentPage = ref(1);
@@ -143,10 +145,10 @@ const submitForm = async () => {
 
     if (isEditMode.value) {
       await putXuatXu(formData.id, formData);
-      ElMessage.success('Cập nhật xuất xứ thành công!');
+      toast.success('Cập nhật xuất xứ thành công!');
     } else {
       await postXuatXu(formData);
-      ElMessage.success('Thêm mới xuất xứ thành công!');
+      toast.success('Thêm mới xuất xứ thành công!');
     }
     resetForm();
     dialogVisible.value = false;
@@ -156,14 +158,42 @@ const submitForm = async () => {
     errors.maXuatXu = error.message.maXuatXu || ''
     errors.tenQuocGia = error.message.tenQuocGia || ''
 
-    const errorMessages = [];
-    if (errors.maXuatXu) errorMessages.push(errors.maXuatXu);
-    if (errors.tenQuocGia) errorMessages.push(errors.tenQuocGia);
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data;
 
-    if (errorMessages.length > 0) {
-      ElMessage.error('Đã xảy ra lỗi không xác định');
+      if (status === 400) {
+        const msg = data.message;
+
+        if (typeof msg === 'string') {
+          // Backend trả về message chung
+          toast.error(msg);
+        } else if (typeof msg === 'object') {
+          Object.keys(errors).forEach(key => {
+            errors[key] = msg[key] || '';
+          });
+
+          const fieldErrors = Object.values(errors).filter(m => m);
+          if (fieldErrors.length > 0) {
+            toast.error(fieldErrors.join('\n'));
+          } else {
+            toast.error('Dữ liệu không hợp lệ!');
+          }
+        } else {
+          toast.error('Dữ liệu không hợp lệ!');
+        }
+      } else if (status === 409) {
+        toast.error(data.message || 'Dữ liệu đã tồn tại');
+      } else if (status >= 500) {
+        toast.error('Server lỗi, vui lòng thử lại sau');
+      } else {
+        toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+      }
+
+    } else if (error.request) {
+      toast.error('Không nhận được phản hồi từ server');
     } else {
-      ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+      toast.error('Lỗi gửi request: ' + error.message);
     }
   }
 }
@@ -180,11 +210,11 @@ const handleDelete = async (id) => {
       }
     );
     await deleteXuatXu(id);
-    ElMessage.success('Xoá thành công!');
+    toast.success('Xoá thành công!');
     loadData(); // tải lại danh sách sau khi xoá
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+      toast.error('Xoá thất bại! Vui lòng thử lại.');
     }
   }
 }

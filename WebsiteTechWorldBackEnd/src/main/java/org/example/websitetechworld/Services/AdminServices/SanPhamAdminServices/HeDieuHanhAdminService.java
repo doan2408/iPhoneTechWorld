@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.HeDieuHanh;
 import org.example.websitetechworld.Entity.ManHinh;
 import org.example.websitetechworld.Repository.HeDieuHanhRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
@@ -61,24 +62,19 @@ public class HeDieuHanhAdminService {
 
     @Transactional
     public HeDieuHanhAdminResponse createHeDieuHanh(HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
-        List<Map<String, String>> errors = new ArrayList<>();
+        if (heDieuHanhRepository.existsByPhienBan(heDieuHanhAdminRequest.getPhienBan())) {
+            throw new BusinessException("Phiên bản đã tồn tại");
+        }
 
-
-            Integer count = heDieuHanhRepository.countCheckTrung(
-                    heDieuHanhAdminRequest.getPhienBan());
-            if (count > 0) {
-                errors.add(Map.of("field", "phienBan", "message", "Phiên bản này đã tồn tại"));
-            }
-
-            if (!errors.isEmpty()) {
-                throw new ValidationException(errors);
-            }
             HeDieuHanh heDieuHanh = heDieuHanhRepository.save(modelMapper.map(heDieuHanhAdminRequest, HeDieuHanh.class));
             return convert(heDieuHanh);
     }
 
     @Transactional
     public HeDieuHanhAdminResponse createHDHQuick (HDHQuickCreateAdminRequest request) {
+        if (heDieuHanhRepository.existsByPhienBan(request.getPhienBan())) {
+            throw new BusinessException("Phiên bản đã tồn tại");
+        }
         HeDieuHanh dieuHanh = heDieuHanhRepository.save(modelMapper.map(request, HeDieuHanh.class));
         return convert(dieuHanh);
     }
@@ -88,30 +84,13 @@ public class HeDieuHanhAdminService {
     public HeDieuHanhAdminResponse updateHeDieuHanh(Integer id, HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
         HeDieuHanh dieuHanhOld = heDieuHanhRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hệ điều hành ID: " + id));
-
-        List<Map<String, String>> errors = new ArrayList<>();
-        boolean unchanged =
-                Objects.equals(heDieuHanhAdminRequest.getPhienBan(), dieuHanhOld.getPhienBan()) &&
-                        Objects.equals(heDieuHanhAdminRequest.getGiaoDienNguoiDung(), dieuHanhOld.getGiaoDienNguoiDung()) &&
-                        Objects.equals(heDieuHanhAdminRequest.getNhaPhatTrien(), dieuHanhOld.getNhaPhatTrien());
-        //không có sự thay đổi -> trả về dữ liệu cũ
-        if(unchanged) {
-            return convert(dieuHanhOld);
+        if (heDieuHanhRepository.existsByPhienBanAndIdNot(heDieuHanhAdminRequest.getPhienBan(), id)) {
+            throw new BusinessException("Phiên bản đã tồn tại");
         }
-        else {
-            Integer count = heDieuHanhRepository.countCheckTrung(
-                    heDieuHanhAdminRequest.getPhienBan());
-            if (count > 0) {
-                errors.add(Map.of("field", "phienBan", "message", "Phiên bản này đã tồn tại"));
-            }
-
-            if (!errors.isEmpty()) {
-                throw new ValidationException(errors);
-            }
             modelMapper.map(heDieuHanhAdminRequest, dieuHanhOld);
             heDieuHanhRepository.save(dieuHanhOld);
             return convert(dieuHanhOld);
-        }
+
     }
 
     @Transactional

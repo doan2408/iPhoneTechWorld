@@ -1,14 +1,21 @@
 import api from "@/Service/LoginService/axiosInstance";
 
 const baseURL = "/client/my-order"
+const baseUrlGuest = '/my-order'
 
-export const getMyOrder = async (pageNo,pageSize) => {
-    return  await api.get(baseURL,{
-        params : {
-            pageNo,
-            pageSize
-        }
-    });
+export const getMyOrder = async (params = {}) => {
+    try {
+        console.log('Gọi API getMyOrder với params:', params);
+        
+        const response = await api.get(baseURL, { params });
+        
+        console.log('Response từ API:', response.data);
+        
+        return response;
+    } catch (error) {
+        console.error('Lỗi API getMyOrder:', error);
+        throw error;
+    }
 };  
 
 //bảng đánh giá
@@ -73,4 +80,13 @@ export const deleteHoaDon = (maHd) => {
 export const deleteHoaDonGuest = (maHd) => {
     return api.delete(`/my-order/hdct/` + maHd);
 };
+
+export const findHdctByImeiDaBan = (ctHoaDonId) => {
+    return api.get('/my-order' + '/' + ctHoaDonId + '/hdct-by-imei-da-ban')
+}
+
+export const hoaDonDetailGuest = (id) => {
+    const url = baseUrlGuest + '/' + id;
+    return api.get(url)
+}
 

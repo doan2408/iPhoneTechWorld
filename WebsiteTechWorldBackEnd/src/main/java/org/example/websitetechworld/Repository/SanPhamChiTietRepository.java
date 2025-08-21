@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Entity.KhuyenMai;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
@@ -58,10 +59,9 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     FROM san_pham_chi_tiet c
     JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
     JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
-    JOIN nha_cung_cap_sp ncc_sp ON ncc_sp.id_san_pham = sp.id_san_pham
     WHERE 
       c.id_san_pham = :idSp
-      AND m.id_loai = :idLoai
+      AND m.id_model_san_pham = :idLoai
       AND c.id_mau = :idMau
       AND c.id_rom = :idRom
 """, nativeQuery = true)
@@ -103,4 +103,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     List<SanPhamChiTiet> findBySanPhamIds(@Param("sanPhamIds") List<Integer> sanPhamIds);
 
     List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
+
+    Integer id(Integer id);
 }

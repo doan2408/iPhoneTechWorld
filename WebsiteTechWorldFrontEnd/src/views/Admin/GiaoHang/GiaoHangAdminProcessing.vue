@@ -64,10 +64,10 @@
                     <div class="timeline-line"></div>
 
                     <div v-for="(step, index) in orderStepsShipping" :key="step.id" class="timeline-step" :class="{
-                    'active': step.status === 'completed',
-                    'current': step.status === 'current',
-                    'pending': step.status === 'pending'
-                }">
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
                         <div class="step-icon">
                             <component :is="step.icon" class="icon" />
                         </div>
@@ -92,10 +92,10 @@
                     <div class="timeline-line"></div>
 
                     <div v-for="(step, index) in orderStepsFalse" :key="step.id" class="timeline-step-false" :class="{
-                    'active': step.status === 'completed',
-                    'current': step.status === 'current',
-                    'pending': step.status === 'pending'
-                }">
+                        'active': step.status === 'completed',
+                        'current': step.status === 'current',
+                        'pending': step.status === 'pending'
+                    }">
                         <div class="step-icon">
                             <component :is="step.icon" class="icon" />
                         </div>
@@ -109,9 +109,6 @@
                                 {{ step.description }}
                             </div>
                         </div>
-
-                        <!-- Arrow for completed/current steps -->
-                        <!-- <div v-if="step.status !== 'pending'" class="step-arrow"></div> -->
                     </div>
                 </div>
             </div>
@@ -120,73 +117,159 @@
         <!-- Action Buttons -->
         <div class="actions-section">
             <div class="left-actions">
-                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)" @click="updateStatusInvoicePaid('PAID')"
+                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)"
+                    @click="openConfirm('Xác nhận đã nhận tiền?', () => updateStatusInvoicePaid('PAID'))"
                     class="action-btn complete-btn">
-                    <CheckCircle class="icon-small" />
-                    ĐÃ NHẬN TIỀN
-                </button>
-                <button v-if="canConfirm" @click="updateOrderStatus('Đã xác nhận')" class="action-btn confirm-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN DƠN HÀNG
+                    <CheckCircle class="icon-small" /> ĐÃ NHẬN TIỀN
                 </button>
 
-                <button v-if="canPack" @click="updateOrderStatus('Đã đóng gói')" class="action-btn pack-btn">
-                    <CheckCircle class="icon-small" />
-                    XÁC NHẬN ĐÓNG GÓI
+                <button v-if="order.trangThaiThanhToan === 'PAID' && 'Đã hủy' === order.trangThaiDonHang"
+                    @click="openConfirm('Xác nhận đã hoàn tiền?', () => updateStatusInvoicePaid('REFUNDED'))"
+                    class="action-btn complete-btn">
+                    <CheckCircle class="icon-small" /> ĐÃ HOÀN TIỀN
                 </button>
 
-                <button v-if="canReady" @click="updateOrderStatus('Sẵn sàng giao')" class="action-btn ready-btn">
-                    <CheckCircle class="icon-small" />
-                    SẴN SÀNG GIAO
+                <button v-if="canConfirm"
+                    @click="openConfirm('Xác nhận đơn hàng?', () => updateOrderStatus('Đã xác nhận'))"
+                    class="action-btn confirm-btn">
+                    <CheckCircle class="icon-small" /> XÁC NHẬN ĐƠN HÀNG
                 </button>
 
-                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'" @click="updateOrderStatus('Đang giao')"
+                <button v-if="canPack"
+                    @click="openConfirm('Xác nhận đóng gói?', () => updateOrderStatus('Đã đóng gói'))"
+                    class="action-btn pack-btn">
+                    <CheckCircle class="icon-small" /> XÁC NHẬN ĐÓNG GÓI
+                </button>
+
+                <button v-if="canReady"
+                    @click="openConfirm('Xác nhận sẵn sàng giao?', () => updateOrderStatus('Sẵn sàng giao'))"
+                    class="action-btn ready-btn" :disabled="isProcessing">
+                    <CheckCircle class="icon-small" /> SẴN SÀNG GIAO
+                </button>
+
+                <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'"
+                    @click="openConfirm('Bắt đầu giao hàng?', () => updateOrderStatus('Đang giao'))"
                     class="action-btn ship-btn">
-                    <Truck class="icon-small" />
-                    BẮT ĐẦU GIAO HÀNG
+                    <Truck class="icon-small" /> BẮT ĐẦU GIAO HÀNG
                 </button>
 
-                <button v-if="order.trangThaiDonHang === 'Đang giao'" @click="updateOrderStatus('Đã giao')"
+                <button v-if="order.trangThaiDonHang === 'Đang giao'"
+                    @click="openConfirm('Xác nhận hoàn thành?', () => updateOrderStatus('Đã giao'))"
                     class="action-btn complete-btn">
-                    <CheckCircle class="icon-small" />
-                    HOÀN THÀNH
+                    <CheckCircle class="icon-small" /> HOÀN THÀNH
                 </button>
 
-                <button v-if="canCancel" @click="updateOrderStatus('Đã hủy')" class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    HỦY ĐƠN
-                </button>
-
-                <button v-if="canShippingFalse" @click="updateOrderStatus('Giao thất bại')"
+                <button v-if="canCancel"
+                    @click="openConfirm('Bạn có chắc muốn hủy đơn?', () => updateOrderStatus('Đã hủy'))"
                     class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    GIAO THẤT BẠI
+                    <X class="icon-small" /> HỦY ĐƠN
                 </button>
 
-                <button v-if="canReturn" @click="updateOrderStatus('Trả hàng')" class="action-btn cancel-btn">
-                    <X class="icon-small" />
-                    TRẢ HÀNG
+                <button v-if="canShippingFalse" @click="openPopupShippingFalse()" class="action-btn cancel-btn">
+                    <X class="icon-small" /> GIAO THẤT BẠI
                 </button>
+
+                <div v-if="showFailPopup" class="fail-overlay">
+                    <div class="fail-modal">
+                        <h3 class="fail-title">Chọn lý do giao thất bại</h3>
+
+                        <select v-model="failReason" class="fail-select">
+                            <option disabled value="">-- Chọn lý do --</option>
+                            <option v-for="reason in failReasons" :key="reason.id" :value="reason.idReason">
+                                {{ reason.tenLyDo }}
+                            </option>
+                        </select>
+
+                        <div class="fail-actions">
+                            <button class="fail-btn-cancel" @click="showFailPopup = false">Hủy</button>
+                            <button class="fail-btn-confirm" :disabled="!failReason" @click="confirmFail">
+                                Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button v-if="canReturn" @click="openPopupReturn()" class="action-btn cancel-btn">
+                    <X class="icon-small" /> TRẢ HÀNG
+                </button>
+
+                <div v-if="showReturnPopup" class="return-overlay">
+                    <div class="return-modal">
+                        <h3 class="return-title">Chọn sản phẩm/IMEI muốn trả</h3>
+
+                        <div class="return-imei-list">
+                            <label v-for="imei in imeis" :key="imei.idImei" class="return-imei-item">
+                                <input type="checkbox" v-model="imei.selected" />
+                                <div class="return-imei-info">
+                                    <span class="imei-main">{{ imei.soImei }}</span>
+                                    <span class="imei-sub">
+                                        {{ imei.tenSanPham }} - {{ imei.dungLuongRom }} - {{ imei.tenMau }}
+                                        ({{ imei.giaBan.toLocaleString() }}đ)
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div v-if="imeis.some(i => i.selected)" class="return-selected">
+                            <h4>Danh sách trả hàng</h4>
+                            <table class="return-table">
+                                <thead>
+                                    <tr>
+                                        <th>IMEI</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Lý do trả</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="imei in imeis.filter(i => i.selected)" :key="imei.idImei">
+                                        <td>{{ imei.soImei }}</td>
+                                        <td>{{ imei.tenSanPham }} - {{ imei.dungLuongRom }} - {{ imei.tenMau }}</td>
+                                        <td>
+                                            <select v-model="imei.reasonId" class="return-select">
+                                                <option disabled value="">-- Chọn lý do --</option>
+                                                <option v-for="reason in returnReasons" :key="reason.idReason"
+                                                    :value="reason.idReason">
+                                                    {{ reason.tenLyDo }}
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="return-actions">
+                            <button class="return-btn cancel" @click="showReturnPopup = false">Hủy</button>
+                            <button class="return-btn confirm"
+                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId)"
+                                @click="confirmReturn">
+                                Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
-
 
             <div class="right-actions">
                 <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" />
-                    IN HÓA ĐƠN
+                    <Printer class="icon-small" /> IN HÓA ĐƠN
                 </button>
 
                 <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" />
-                    IN PHIẾU GIAO HÀNG
+                    <FileText class="icon-small" /> IN PHIẾU GIAO HÀNG
                 </button>
 
                 <button @click="editOrder" class="action-btn edit-btn">
-                    <Edit class="icon-small" />
-                    CHỈNH SỬA
+                    <Edit class="icon-small" /> CHỈNH SỬA
                 </button>
             </div>
         </div>
+
+        <!-- Confirm Modal -->
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+            @cancel="showConfirm = false" />
 
         <br><br>
 
@@ -312,14 +395,19 @@ import {
 } from 'lucide-vue-next'
 import { hoaDonDetail, changeStatusInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
+import { getAllFalseReasonByCaseReason } from '@/Service/GuestService/FalseReasonServices/FalseReasonServices'
+import { createActionAfterCase, createActionAfterCaseReturn } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { findHdctByImeiDaBan } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import { useToast } from "vue-toastification";
 
 const order = reactive({})
 const route = useRoute()
 const statusUpdate = null;
-const statusFlase = ['Trả hàng', 'Giao thất bại','Đã hủy']
-
+const statusFlase = ['Trả hàng', 'Giao thất bại', 'Đã hủy']
+const toast = useToast()
 
 // ham view giao hang
 const viewOrderDetail = async () => {
@@ -369,8 +457,8 @@ const orderSteps = computed(() => [
         icon: FileText,
         // Bước đầu luôn hiện là completed (hoặc current nếu mới tạo)
         status: order.trangThaiDonHang === 'Chờ xử lý' ? 'current' :
-            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại','Đã xác nhận', 
-                'Sẵn sàng giao'
+            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng', 'Đã xác nhận',
+                'Sẵn sàng giao', 'Đã hủy'
             ].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.ngayDatHang,
         description: 'Đơn hàng đang chờ được xác nhận'
@@ -380,7 +468,7 @@ const orderSteps = computed(() => [
         title: 'Đơn hàng đã được xác nhận',
         icon: CheckSquare,
         status: order.trangThaiDonHang === 'Đã xác nhận' ? 'current' :
-            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại',
+            ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng',
                 'Sẵn sàng giao'
             ].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: null,
@@ -391,18 +479,18 @@ const orderSteps = computed(() => [
         title: 'Đã Đóng Gói',
         icon: Package,
         status: order.trangThaiDonHang === 'Đã đóng gói' ? 'current' :
-            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại', 'Sẵn sàng giao'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
-        timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.packedAt : null,
-        description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã được đóng gói' : null
+            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng', 'Sẵn sàng giao'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+        timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.packedAt : null,
+        description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã được đóng gói' : null
     },
     {
         id: 4,
         title: 'Sẵn sàng giao',
         icon: Check,
         status: order.trangThaiDonHang === 'Sẵn sàng giao' ? 'current' :
-            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
-        timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.packedAt : null,
-        description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng sắp dược giao' : null
+            ['Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+        timestamp: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.packedAt : null,
+        description: ['Đã đóng gói', 'Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng sắp dược giao' : null
     },
 ])
 
@@ -412,16 +500,16 @@ const orderStepsShipping = computed(() => [
         title: 'Đang Giao',
         icon: Truck,
         status: order.trangThaiDonHang === 'Đang giao' ? 'current' :
-            ['Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
-        timestamp: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.shippingAt : null,
-        description: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? `Đơn hàng đang được giao` : null
+            ['Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+        timestamp: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.shippingAt : null,
+        description: ['Đang giao', 'Đã giao', 'Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? `Đơn hàng đang được giao` : null
     },
     {
         id: 2,
         title: 'Giao Hàng Thành Công',
         icon: CheckCircle,
         status: order.trangThaiDonHang === 'Đã giao' ? 'current' :
-            [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
+            ['Trả hàng'].includes(order.trangThaiDonHang) ? 'completed' : 'pending',
         timestamp: order.trangThaiDonHang === 'Đã giao' ? order.deliveredAt : null,
         description: order.trangThaiDonHang === 'Đã giao' ? 'Khách hàng đã nhận hàng' : null
     },
@@ -432,25 +520,25 @@ const orderStepsFalse = computed(() => [
         id: 1,
         title: 'Giao Thất Bại',
         icon: XCircle,
-        status: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
-        timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
-        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng giao thất bại' : null
+        status: ['Giao thất bại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        timestamp: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.failedAt : null,
+        description: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng giao thất bại' : null
     },
     {
         id: 2,
-        title: 'Đã trả lại',
+        title: 'Trả hàng',
         icon: AlertTriangle,
-        status: [ 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
-        timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
-        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã trả lại' : null
+        status: ['Trả hàng'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        timestamp: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.failedAt : null,
+        description: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng Trả hàng' : null
     },
     {
         id: 3,
         title: 'Đã hủy',
         icon: RefreshCcw,
         status: ['Đã hủy'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
-        timestamp: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? order.failedAt : null,
-        description: ['Giao thất bại', 'Đã trả lại'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã bị hủy' : null
+        timestamp: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.failedAt : null,
+        description: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng đã bị hủy' : null
     }
 ])
 // bien trang thai
@@ -458,12 +546,12 @@ const canConfirm = computed(() => order.trangThaiDonHang === 'Chờ xử lý');
 const canPack = computed(() => order.trangThaiDonHang === 'Đã xác nhận');
 const canReady = computed(() => order.trangThaiDonHang === 'Đã đóng gói');
 const canCancel = computed(() =>
-    ['Chờ xử lý', 'Đã xác nhận','Đã đóng gói'].includes(order.trangThaiDonHang)
+    ['Chờ xử lý'].includes(order.trangThaiDonHang)
 );
 const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
 const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao');
 
-//format date
+//format date 
 const formatDate = (dateString) => {
     if (!dateString) {
         return 'N/A';
@@ -505,11 +593,11 @@ const getStatusText = (status) => {
 function getStatusKey(text) {
     const statusMap = {
         pending: ['Chờ xử lý', 'Đã xác nhận'],
-        packed: ['Đã đóng gói','Sẵn sàng giao'],
+        packed: ['Đã đóng gói', 'Sẵn sàng giao'],
         shipping: ['Đang giao'],
         delivered: ['Đã giao'],
         failed: ['Giao thất bại'],
-        returned: ['Đã trả lại', 'Đã hủy'],
+        returned: ['Trả hàng', 'Đã hủy'],
     }
     if (typeof text !== 'string') {
         return text;
@@ -518,11 +606,11 @@ function getStatusKey(text) {
 
     for (const [key, aliases] of Object.entries(statusMap)) {
         if (aliases.some(alias => alias.toLowerCase() === normalized)) {
-            return key; 
+            return key;
         }
     }
 
-        return text;
+    return text;
 }
 
 const getPaymentStatusText = (status) => {
@@ -554,22 +642,110 @@ const getPaymentStatusClass = (status) => {
     return statusClassMap[status.toUpperCase()] || 'pending';
 };
 
-const updateOrderStatus = async (newStatus) => {
-    const id = route.params.id
+const showFailPopup = ref(false)
+const failReason = ref("")
+const failReasons = ref([])
+
+const getAllFalseReason = async () => {
     try {
-        console.log(id)
-        console.log(newStatus)
-        const response = await changeStatusOrder(id, newStatus)
-        // Cập nhật trạng thái sau khi API thành công
-        order.trangThaiDonHang = newStatus
-        console.log(response.data)
-        console.log(`Order status updated to: ${newStatus}`)
-        await viewOrderDetail();
-        
-    } catch (error) {
-        console.error('Failed to update order status:', error.response?.data || error.message)
+        const res = await getAllFalseReasonByCaseReason('FAILED_DELIVERY')
+        failReasons.value = res.data
+    }catch(err){
+        console.error("Lỗi load lý do:", err)
     }
 }
+
+const openPopupShippingFalse = () => {
+    showFailPopup.value = true
+    failReason.value = ""
+
+    getAllFalseReason()
+
+    console.log(showFailPopup.value);
+
+}
+
+const confirmFail = async () => {
+    updateOrderStatus('Giao thất bại')
+    await createActionAfterCase(order.idHoaDon,failReason.value)
+    showFailPopup.value = false
+    failReason.value = ""
+}
+
+const showReturnPopup = ref(false)
+const imeis = ref([])
+const returnReason = ref("")
+const returnReasons = ref([])
+
+const getAllReturnReason = async () => {
+    try {
+        const res = await getAllFalseReasonByCaseReason('RETURN')
+        returnReasons.value = res.data
+    } catch (err) {
+        console.error("Lỗi load lý do:", err)
+    }
+}
+const openPopupReturn = async () => {
+    showReturnPopup.value = true
+    imeis.value = []
+
+    for (const cthd of order.chiTietHoaDonAdminResponseList) {
+        const resImeis = await findHdctByImeiDaBan(cthd.idHoaDonChiTiet)
+        imeis.value.push(...resImeis.data.map(i => ({ ...i, reasonId: "" })))
+    }
+
+    console.log(imeis.value)
+    await getAllReturnReason()
+}
+const confirmReturn = async () => {
+    try {
+        const payload = {
+            idHoaDon: order.idHoaDon,
+            imeis: imeis.value
+                .filter(i => i.selected)
+                .map(i => ({
+                    idHoaDonChiTiet: i.idHoaDonChiTiet, 
+                    soImei: i.soImei,                   
+                    idFailReason: i.reasonId            
+                }))
+        }
+
+        await createActionAfterCaseReturn(payload)
+
+        updateOrderStatus('Trả hàng')
+
+        // Reset popup
+        showReturnPopup.value = false
+        imeis.value.forEach(i => {
+            i.selected = false
+            i.reasonId = ""
+        })
+    } catch (error) {
+        console.error("Lỗi khi trả hàng:", error)
+    }
+}
+
+
+const isProcessing = ref(false);
+const updateOrderStatus = async (newStatus) => {
+    const id = route.params.id;
+    try {
+        if (newStatus === 'Sẵn sàng giao') {
+            isProcessing.value = true;
+            toast.info("Đang tạo mã vận đơn...", { autoClose: 2000 });
+        }
+        const response = await changeStatusOrder(id, newStatus);
+        order.trangThaiDonHang = newStatus;
+        console.log(response.data);
+        console.log(`Order status updated to: ${newStatus}`);
+        await viewOrderDetail();
+    } catch (error) {
+        console.error('Failed to update order status:', error.response?.data || error.message);
+    } finally {
+        isProcessing.value = false;
+    }
+};
+
 
 const updateStatusInvoicePaid = async (newStatus) => {
     const id = route.params.id
@@ -614,8 +790,21 @@ const editOrder = () => {
 onMounted(() => {
     viewOrderDetail()
 })
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
+}
 </script>
 
-<style scoped src="@/style/GiaoHang/GiaoHangProcessing.css">
-
-</style>
+<style scoped src="@/style/GiaoHang/GiaoHangProcessing.css"></style>

@@ -7,9 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface XuatXuRepository extends JpaRepository<XuatXu, Integer> {
     boolean existsByMaXuatXu(String maXuatXu);
     boolean existsByMaXuatXuAndIdNot(String maXuatXu, Integer id);
     Page<XuatXu> findByMaXuatXuContainingIgnoreCaseOrTenQuocGiaContainingIgnoreCase(String maXuatXu, String tenQuocGia, Pageable pageable);
+    Optional<XuatXu> findByMaXuatXu(String tenXuatXu);
 }

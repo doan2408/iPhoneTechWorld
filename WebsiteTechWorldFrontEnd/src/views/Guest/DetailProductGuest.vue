@@ -1,5 +1,16 @@
+<script type="text/javascript">
+var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+(function () {
+  var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  s0.parentNode.insertBefore(s1, s0);
+})();
+</script>
 <script setup>
-import { ref, onMounted, watch, nextTick } from "vue";
+import { ref, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   detailSanPham,
@@ -10,7 +21,23 @@ import {
 import { ShoppingCart } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { CartService } from "@/Service/ClientService/GioHang/CartService";
+import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
+import { PhanHoiDanhGiaClientService } from "@/Service/ClientService/PhanHoiDanhGia/PhanHoiDanhGiaClientService";
 
+const loadTawkTo = () => {
+  if (window.Tawk_API) return;
+  const s1 = document.createElement("script");
+  s1.async = true;
+  s1.src = 'https://embed.tawk.to/68836581db7610192eeaacd6/1j10k90i5';
+  s1.charset = 'UTF-8';
+  s1.setAttribute('crossorigin', '*');
+  const s0 = document.getElementsByTagName("script")[0];
+  s0.parentNode.insertBefore(s1, s0);
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
+};
+
+// const user = JSON.parse(localStorage.getItem("user"));
 const route = useRoute();
 const idSanPham = route.params.id;
 const router = useRouter();
@@ -23,6 +50,21 @@ const selectedImage = ref("");
 const bienThe = ref(null);
 const thongSo = ref(null);
 const quantity = ref(1);
+
+
+// const rating = ref(0);
+// const comment = ref("");
+// const uploadedImages = ref([]);
+// const reviews = ref([]);
+// const averageRating = ref(0);
+// const starDistribution = reactive({});
+// const currentPage = ref(1);
+// const pageSize = ref(10);
+// const totalReviews = ref(0);
+// const selectedStarFilter = ref(0);
+// const hasMediaFilter = ref(false);
+// const isLoading = ref(false);
+// const phanHoiByDanhGia = ref({});
 
 // Variables pour la modal (nouvelles)
 const activeTab = ref("thong-tin-hang-hoa");
@@ -58,16 +100,16 @@ const scrollTabIntoView = (tabId) => {
     );
     if (activeTabElement) {
       const container = specTabsContainer.value;
-      
+
       // Tính toán vị trí để tab luôn ở góc trái với padding 20px
       const targetScrollLeft = activeTabElement.offsetLeft - 20;
-      
+
       // Scroll container để đưa tab về góc trái
       container.scrollTo({
         left: Math.max(0, targetScrollLeft), // Đảm bảo không scroll âm
         behavior: "smooth"
       });
-      
+
       // Debug log
       console.log('Tab scrolled to left:', tabId, targetScrollLeft);
     }
@@ -85,9 +127,9 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
       const containerWidth = container.clientWidth;
       const tabLeft = activeTabElement.offsetLeft;
       const tabWidth = activeTabElement.offsetWidth;
-      
+
       let targetScrollLeft;
-      
+
       switch (position) {
         case 'left':
           // Tab ở góc trái với padding 20px
@@ -104,13 +146,13 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
         default:
           targetScrollLeft = tabLeft - 20;
       }
-      
+
       // Scroll container
       container.scrollTo({
         left: Math.max(0, targetScrollLeft),
         behavior: "smooth"
       });
-      
+
       console.log(`Tab "${tabId}" scrolled to ${position}:`, targetScrollLeft);
     }
   }
@@ -126,21 +168,21 @@ const scrollToSection = (sectionId) => {
       const targetSection = specModalContent.value.querySelector(
         `[data-section="${sectionId}"]`
       );
-      
+
       if (targetSection) {
         const modalContent = specModalContent.value;
         const headerHeight = 81; // Modal header
         const tabsHeight = 49; // Tabs height
-        
+
         // Tính toán vị trí chính xác của section
         const sectionTop = targetSection.offsetTop;
         const scrollPosition = sectionTop - headerHeight - tabsHeight - 10;
-        
+
         // Debug log để kiểm tra
         console.log('Section ID:', sectionId);
         console.log('Section top:', sectionTop);
         console.log('Scroll to:', scrollPosition);
-        
+
         modalContent.scrollTo({
           top: Math.max(0, scrollPosition), // Đảm bảo không scroll âm
           behavior: "smooth",
@@ -227,7 +269,8 @@ const fetchChiTietBienThe = async () => {
     const res = await getChiTietBienThe(
       idSanPham,
       selectedMau.value,
-      selectedRom.value
+      selectedRom.value,
+      0
     );
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
@@ -257,7 +300,7 @@ const addToCart = async (buy) => {
       ElMessage.error("Sản phẩm đã hết hàng hoặc không hợp lệ!");
       return;
     }
-    
+
     console.log(bienThe.value)
     const idSanPhamChiTiet = bienThe.value.idSpct;
     const soLuongMoi = quantity.value;
@@ -266,18 +309,16 @@ const addToCart = async (buy) => {
     // const idSanPhamChiTiet = bienThe.value.idSpct;
     // const soLuongMoi = quantity.value;
     const tenSanPham = sanPham.value?.tenSanPham || "Sản phẩm không xác định";
-    const phienBan = `${
-      sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
-    } - ${
-      sanPham.value?.rom?.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
-    }`;
+    const phienBan = `${sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
+      } - ${sanPham.value?.rom?.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
+      }`;
     const imageUrl = bienThe.value?.hinhAnh?.[0] || "/default-image.png";
     const gia = bienThe.value?.giaBan ?? 0;
     const soLuongTon = bienThe.value.soLuong;
 
     const isValid = validateCartItem(idSanPhamChiTiet, soLuongMoi, soLuongTon);
     console.log("");
-    
+
     const success = CartService.themVaoGio(
       idSanPhamChiTiet,
       soLuongMoi,
@@ -322,6 +363,110 @@ const validateCartItem = (idSanPhamChiTiet, soLuongMoi, soLuongTon) => {
   return soLuongHienTai + soLuongMoi <= soLuongTon;
 };
 
+// const reviewsSection = ref(null)
+
+// const scrollToReviews = async () => {
+//   await nextTick()
+//   reviewsSection.value?.scrollIntoView({ behavior: 'smooth' })
+// }
+
+// const fetchPhanHoi = async (idDanhGia) => {
+//   try {
+//     const phanHoi = await PhanHoiDanhGiaClientService.layPhanHoiTheoDanhGia(idDanhGia);
+//     phanHoiByDanhGia.value[idDanhGia] = phanHoi;
+//   } catch (error) {
+//     console.error(`Lỗi khi lấy phản hồi cho đánh giá ${idDanhGia}:`, error);
+//     ElMessage.error("Không thể tải phản hồi!");
+//   }
+// };
+
+// const fetchReviews = async () => {
+//   try {
+//     isLoading.value = true;
+//     const response = await DanhGiaSanPhamClientService.layDanhGiaTheoSanPham(
+//       bienThe.value.idSpct,
+//       currentPage.value - 1,
+//       pageSize.value,
+//       selectedStarFilter.value === 0 ? null : selectedStarFilter.value,
+//       hasMediaFilter.value ? true : null,
+//       user?.id
+//     );
+
+//     console.log("Đánh giá111:", response);
+
+//     reviews.value = currentPage.value === 1 ? (response.content || response) : [...reviews.value, ...(response.content || response)];
+//     totalReviews.value = response.totalElements || response.length;
+
+//     for (const review of reviews.value) {
+//       await fetchPhanHoi(review.idDanhGia);
+//     }
+//   } catch (error) {
+//     console.error("Lỗi khi lấy đánh giá:", error);
+//     ElMessage.error("Không thể tải đánh giá!");
+//   } finally {
+//     isLoading.value = false;
+//   }
+// };
+
+// const fetchAverageRating = async () => {
+//   try {
+//     const avg = await DanhGiaSanPhamClientService.tinhDiemTrungBinhSanPhamSpct(bienThe.value.idSpct);
+//     averageRating.value = avg || 0;
+//   } catch (error) {
+//     console.error("Lỗi khi lấy điểm trung bình:", error);
+//   }
+// };
+
+// const fetchStarDistribution = async () => {
+//   if (!bienThe.value?.idSpct) return;
+//   try {
+//     const distribution = await DanhGiaSanPhamClientService.thongKeSoSaoSanPham(bienThe.value.idSpct);
+//     // ép về reactive object để Vue track thay đổi
+//     Object.keys(starDistribution).forEach(k => delete starDistribution[k]); // xóa cũ
+//     Object.entries(distribution).forEach(([star, count]) => {
+//       starDistribution[star] = count;
+//     });
+
+//     totalReviews.value = Object.values(distribution).reduce((a, b) => a + b, 0);
+//     const totalScore = Object.entries(distribution).reduce((sum, [star, count]) => sum + star * count, 0);
+//     averageRating.value = totalReviews.value ? totalScore / totalReviews.value : 0;
+//   } catch (error) {
+//     console.error("❌ Lỗi khi lấy thống kê sao:", error);
+//   }
+// };
+
+// const filterReviewsByStar = async (star) => {
+//   selectedStarFilter.value = star;
+//   currentPage.value = 1;
+//   await fetchReviews();
+// };
+
+// const filterReviewsByMedia = async () => {
+//   currentPage.value = 1;
+//   await fetchReviews();
+// };
+
+// const loadMoreReviews = async () => {
+//   currentPage.value++;
+//   await fetchReviews();
+// };
+
+// const setupInfiniteScroll = () => {
+//   const observer = new IntersectionObserver(
+//     (entries) => {
+//       if (entries[0].isIntersecting && reviews.value.length < totalReviews.value && !isLoading.value) {
+//         loadMoreReviews();
+//       }
+//     },
+//     { threshold: 0.1 }
+//   );
+
+//   nextTick(() => {
+//     const loadMoreElement = document.querySelector('.reviews-list');
+//     if (loadMoreElement) observer.observe(loadMoreElement);
+//   });
+// };
+
 watch([selectedMau], () => {
   fetchChiTietBienThe();
   fetchListAnhByMau();
@@ -338,10 +483,10 @@ watch(showSpecModal, (newVal) => {
       if (specModalContent.value) {
         // Reset scroll position về đầu
         specModalContent.value.scrollTop = 0;
-        
+
         // Add scroll listener
         specModalContent.value.addEventListener("scroll", handleScroll, { passive: true });
-        
+
         // Set default active tab
         activeTab.value = "thong-tin-hang-hoa";
         scrollTabIntoView("thong-tin-hang-hoa");
@@ -366,11 +511,8 @@ onMounted(() => {
     <div class="product-container">
       <!-- Cột trái: Hình ảnh (55%) -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
         <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
@@ -412,7 +554,7 @@ onMounted(() => {
       <div class="product-right">
         <div class="product-info">
           <h1>{{ sanPham?.tenSanPham }} - {{ sanPham?.maXuatXu }}</h1>
-          <router-link class="danhGia" to="#">Đánh giá</router-link> |
+          <a href="#" class="danhGia" @click.prevent="scrollToReviews">Đánh giá</a> |
           <button @click="openSpecModal" class="thong-so-btn">
             Xem thông số
           </button>
@@ -446,7 +588,18 @@ onMounted(() => {
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
 
-          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+          <p class="price">
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai !== bienThe.giaBan" class="old-price">
+              {{ formatPrice(bienThe.giaTruocKhuyenMai) }}
+            </span>
+            <span class="current-price">
+              {{ formatPrice(bienThe?.giaBan) }}
+            </span>
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai > bienThe.giaBan"
+              class="discount-badge">
+              -{{ Math.round(((bienThe.giaTruocKhuyenMai - bienThe.giaBan) / bienThe.giaTruocKhuyenMai) * 100) }}%
+            </span>
+          </p>
 
           <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
@@ -462,11 +615,7 @@ onMounted(() => {
 
           <div class="banner-tichDiem">
             <router-link to="/client/doiDiem">
-              <img
-                src="/src/components/images/bannerTichDiem.jpg"
-                alt="Banner tích điểm"
-                class="tich-diem-img"
-              />
+              <img src="/src/components/images/bannerTichDiem.jpg" alt="Banner tích điểm" class="tich-diem-img" />
             </router-link>
           </div>
 
@@ -477,21 +626,13 @@ onMounted(() => {
 
           <!-- Hành động -->
           <div class="button-group">
-            <el-button
-              type="primary"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="buy-btn"
-              @click="addToCart(true)"
-            >
+            <el-button type="primary" :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="buy-btn"
+              @click="addToCart(true)">
               Mua ngay
             </el-button>
-            <el-button
-              type="success"
-              :icon="ShoppingCart"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="cart-btn"
-              @click="addToCart(false)"
-            >
+            <el-button type="success" :icon="ShoppingCart"
+              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="cart-btn"
+              @click="addToCart(false)">
               Thêm vào giỏ hàng
             </el-button>
           </div>
@@ -500,11 +641,7 @@ onMounted(() => {
     </div>
 
     <!-- Specifications Modal -->
-    <div
-      v-if="showSpecModal"
-      class="spec-modal-overlay"
-      @click="closeSpecModal"
-    >
+    <div v-if="showSpecModal" class="spec-modal-overlay" @click="closeSpecModal">
       <div class="spec-modal" @click.stop>
         <div class="spec-modal-header">
           <h2>Thông số sản phẩm</h2>
@@ -515,60 +652,32 @@ onMounted(() => {
         <div class="spec-modal-content" v-if="thongSo" ref="specModalContent">
           <div class="spec-tabs-wrapper">
             <div class="spec-tabs" ref="specTabsContainer">
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
-                @click="scrollToSection('thong-tin-hang-hoa')"
-                data-tab="thong-tin-hang-hoa"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
+                @click="scrollToSection('thong-tin-hang-hoa')" data-tab="thong-tin-hang-hoa">
                 Thông tin hàng hóa
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
-                @click="scrollToSection('thiet-ke-trong-luong')"
-                data-tab="thiet-ke-trong-luong"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
+                @click="scrollToSection('thiet-ke-trong-luong')" data-tab="thiet-ke-trong-luong">
                 Thiết kế & Trọng lượng
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'bo-xu-ly' }"
-                @click="scrollToSection('bo-xu-ly')"
-                data-tab="bo-xu-ly"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'bo-xu-ly' }" @click="scrollToSection('bo-xu-ly')"
+                data-tab="bo-xu-ly">
                 Bộ xử lý
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'ram' }"
-                @click="scrollToSection('ram')"
-                data-tab="ram"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'ram' }" @click="scrollToSection('ram')"
+                data-tab="ram">
                 Lưu trữ
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'man-hinh' }"
-                @click="scrollToSection('man-hinh')"
-                data-tab="man-hinh"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'man-hinh' }" @click="scrollToSection('man-hinh')"
+                data-tab="man-hinh">
                 Màn hình
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'camera' }"
-                @click="scrollToSection('camera')"
-                data-tab="camera"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'camera' }" @click="scrollToSection('camera')"
+                data-tab="camera">
                 Camera
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'pin-sac' }"
-                @click="scrollToSection('pin-sac')"
-                data-tab="pin-sac"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'pin-sac' }" @click="scrollToSection('pin-sac')"
+                data-tab="pin-sac">
                 Pin & Sạc
               </div>
             </div>
@@ -677,6 +786,87 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <!-- <div class="product-reviews" ref="reviewsSection">
+      <h2>Đánh giá sản phẩm</h2>
+      <div class="rating-summary">
+        <h3>Điểm trung bình: {{ averageRating.toFixed(1) }} / 5</h3>
+        <el-rate v-model="averageRating" disabled allow-half />
+        <div class="star-distribution">
+          <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="star-bar">
+            <span>{{ star }} sao:</span>
+            <div class="progress-bar">
+              <div class="progress" :style="{
+                width: totalReviews === 0
+                  ? '100%'
+                  : ((starDistribution[star] || 0) / totalReviews * 100) + '%'
+              }"></div>
+            </div>
+            <span>{{ starDistribution[star] || 0 }} đánh giá</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="review-filters">
+        <el-button v-for="star in [0, 5, 4, 3, 2, 1]" :key="star" @click="filterReviewsByStar(star)"
+          :type="selectedStarFilter === star ? 'primary' : 'default'">
+          {{ star === 0 ? 'Tất cả' : `${star} sao` }}
+        </el-button>
+        <el-button @click="hasMediaFilter = !hasMediaFilter; filterReviewsByMedia()"
+          :type="hasMediaFilter ? 'primary' : 'default'">
+          Có hình ảnh/video
+        </el-button>
+      </div>
+
+      <div class="reviews-list">
+        <div class="review-item" v-for="review in reviews" :key="review.idDanhGia">
+          <div class="review-header">
+            <span class="review-user">{{ review.anonymous ? 'Người mua' : review.tenKhachHang }}</span>
+            <span v-if="review.trangThaiDanhGia === 'PENDING' && review.idKhachHang === user.id" class="pending-label">
+              Chờ duyệt
+            </span>
+            <span class="purchased-label" v-if="review.idChiTietHoaDon">Đã mua hàng</span>
+            <el-rate v-model="review.soSao" disabled />
+            <span class="review-date">{{ new Date(review.ngayDanhGia).toLocaleDateString("vi-VN") }}</span>
+          </div>
+          <p class="review-comment">{{ review.noiDung }}</p>
+          <div class="review-media" v-if="review.mediaUrls?.length">
+            <div class="review-images"
+              v-if="review.mediaUrls?.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i)).length">
+              <img v-for="(img, index) in review.mediaUrls.filter(url => url.match(/\.(png|jpg|jpeg|gif)$/i))"
+                :key="index" :src="img" alt="Hình ảnh đánh giá" class="review-image"
+                @error="console.log('Lỗi tải ảnh:', img)" />
+            </div>
+            <video v-for="(video, index) in review.mediaUrls.filter(url => url.match(/\.(mp4|mov|avi|webm)$/i))"
+              :key="'video-' + index" :src="video" controls class="review-video"
+              @error="console.log('Lỗi tải video:', video)"></video>
+          </div>
+          <div class="review-responses">
+            <el-button v-if="!phanHoiByDanhGia[review.idDanhGia]" @click="fetchPhanHoi(review.idDanhGia)" size="small">
+              Tải phản hồi
+            </el-button>
+            <div v-else-if="phanHoiByDanhGia[review.idDanhGia]?.length">
+              <h4>Phản hồi từ cửa hàng:</h4>
+              <div v-for="phanHoi in phanHoiByDanhGia[review.idDanhGia]" :key="phanHoi.idPhanHoi" class="response-item">
+                <p class="response-content">{{ phanHoi.noiDungPhanHoi }}</p>
+                <span class="response-date">{{ new Date(phanHoi.ngayPhanHoi).toLocaleDateString("vi-VN") }}</span>
+              </div>
+            </div>
+            <div v-else class="no-response">
+              Chưa có phản hồi từ cửa hàng.
+            </div>
+          </div>
+        </div>
+        <div v-if="isLoading" class="loading">Đang tải thêm...</div>
+      </div>
+
+      <div class="load-more" v-if="reviews.length < totalReviews && !isLoading">
+        <el-button type="primary" @click="loadMoreReviews">Xem thêm</el-button>
+      </div>
+
+      <el-pagination v-if="totalReviews > pageSize" :current-page="currentPage" :page-size="pageSize"
+        :total="totalReviews" layout="prev, pager, next" @current-change="handlePageChange" />
+    </div> -->
   </section>
 </template>
 
@@ -866,11 +1056,32 @@ onMounted(() => {
 }
 
 .price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.old-price {
+  font-size: 18px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.current-price {
   font-size: 28px;
   color: #d70018;
   font-weight: 700;
-  margin: 15px 0;
-  display: inline-block;
+}
+
+.discount-badge {
+  background: #ffeee8;
+  color: #d70018;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
 .danhGia {
@@ -963,7 +1174,7 @@ onMounted(() => {
 }
 
 ::v-deep(.el-radio-button.is-active .el-radio-button__inner) {
-  background-color: #1890ff;
+  background: linear-gradient(45deg, #1d37fd, #76e6dc) !important;
   color: #fff;
   border-color: #1890ff;
 }
@@ -1074,7 +1285,7 @@ onMounted(() => {
 }
 
 .buy-btn {
-  background: #d70018;
+  background: linear-gradient(90deg, #ff001e, #fdf512) !important;
   color: white;
 }
 
@@ -1083,7 +1294,7 @@ onMounted(() => {
 }
 
 .cart-btn {
-  background: #1890ff;
+  background: linear-gradient(45deg, #1d37fd, #76e6dc) !important;
   color: white;
 }
 
@@ -1275,6 +1486,7 @@ onMounted(() => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1284,6 +1496,7 @@ onMounted(() => {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -1435,6 +1648,383 @@ onMounted(() => {
 
   .tich-diem-img {
     max-height: 60px;
+  }
+}
+
+.product-reviews {
+  background: #ffffff;
+  padding: 30px;
+  /* border-radius: 12px; */
+  border: 1px solid #e9ecef;
+  margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-reviews h2 {
+  margin-bottom: 25px;
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: 700;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.rating-summary {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.rating-summary h3 {
+  font-size: 20px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.star-distribution {
+  margin-top: 20px;
+}
+
+.star-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #34495e;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #1890ff, #40c4ff);
+  transition: width 0.5s ease-in-out;
+}
+
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+  padding: 10px;
+  background: #f1f3f5;
+  border-radius: 8px;
+}
+
+.review-filters .el-button {
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.review-filters .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-list {
+  margin-bottom: 20px;
+}
+
+.review-item {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.review-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.review-user {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.purchased-label {
+  background: linear-gradient(90deg, #e7f3ff, #d0e6ff);
+  color: #1890ff;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.review-date {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin-left: auto;
+}
+
+.review-comment {
+  color: #34495e;
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+.review-media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.review-images {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.review-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.review-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.review-video {
+  width: 300px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-responses {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9fbfc;
+  border-radius: 8px;
+  border-left: 4px solid #1890ff;
+  transition: all 0.3s ease;
+}
+
+.review-responses h4 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-responses h4::before {
+  content: '\f3e5';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.response-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.response-content {
+  color: #34495e;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.response-date {
+  font-size: 12px;
+  color: #95a5a6;
+  display: block;
+}
+
+.no-response {
+  color: #7f8c8d;
+  font-size: 14px;
+  font-style: italic;
+  padding: 10px;
+  background: #f1f3f5;
+  border-radius: 6px;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.load-more .el-button {
+  border-radius: 20px;
+  padding: 12px 35px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.load-more .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .spec-modal {
+    width: 100vw;
+  }
+
+  .spec-tabs {
+    padding: 0 10px;
+  }
+
+  .tab-item {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .spec-details {
+    padding: 15px;
+  }
+
+  .spec-row {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .spec-label {
+    flex: none;
+  }
+
+  .spec-value {
+    text-align: left;
+  }
+
+  .product-reviews {
+    padding: 20px;
+  }
+
+  .review-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .review-video {
+    width: 100%;
+  }
+
+  .star-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress-bar {
+    width: 100%;
+  }
+}
+
+.wishlist-btn {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  color: #555;
+}
+
+.wishlist-btn.active {
+  color: red;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.05);
+}
+
+.wishlist-btn.active {
+  color: red;
+}
+
+@media (max-width: 480px) {
+  .product-container {
+    padding: 10px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-specs {
+    padding: 12px;
+  }
+
+  .options {
+    padding: 8px 0;
+  }
+
+  .option-list {
+    gap: 6px;
+  }
+
+  ::v-deep(.option-list .el-radio-button__inner) {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 60px;
+  }
+
+  .review-item {
+    padding: 15px;
+  }
+
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .review-date {
+    margin-left: 0;
   }
 }
 </style>

@@ -45,8 +45,11 @@ public class SanPhamChiTietAdminController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllSanPhamChiTiet(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,@RequestParam(defaultValue = "5",value = "pageSize") int pageSize){
-        return ResponseEntity.ok(sanPhamChiTietAdminService.getAllSanPhamChiTiet(pageNo,pageSize));
+    public ResponseEntity<?> getAllSanPhamChiTiet(
+            @RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
+            @RequestParam(defaultValue = "5",value = "pageSize") int pageSize,
+            @RequestParam(defaultValue = "0", value = "selectedIdKhachHang") int selectedIdKhachHang){
+        return ResponseEntity.ok(sanPhamChiTietAdminService.getAllSanPhamChiTiet(pageNo, pageSize, selectedIdKhachHang));
     }
 
     @GetMapping("/check-duplicate-variant")

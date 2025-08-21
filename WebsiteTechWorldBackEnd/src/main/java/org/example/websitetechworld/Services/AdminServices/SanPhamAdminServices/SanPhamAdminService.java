@@ -9,8 +9,11 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.KhuyenMaiAdminService.KhuyenMaiAdminService;
 import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.NotFoundException;
 
@@ -24,6 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +47,9 @@ public class SanPhamAdminService {
     private final ModelMapper modelMapper;
     private final SanPhamChiTietAdminService sanPhamChiTietAdminService;
     private final NhaCungCapSpRepository nhaCungCapSpRepository;
+    private final HoaDonRepository hoaDonRepository;
+    private final KhachHangRepository khachHangRepository;
+    private final KhuyenMaiAdminService khuyenMaiAdminService;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -1019,11 +1027,15 @@ public class SanPhamAdminService {
         sanPhamRepo.save(sanPham);
     }
 
-    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size) {
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size, Integer selectedIdKhachHang) {
         Pageable pageable = PageRequest.of(page, size);
         Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(tenSanPham, TrangThaiSanPham.ACTIVE, pageable);
 
-        return chiTietPage.map(SanPhamBanHangAdminResponse::converDto);
+        return chiTietPage.map(spct -> {
+            SanPhamBanHangAdminResponse response = SanPhamBanHangAdminResponse.converDto(spct);
+            response.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(spct, selectedIdKhachHang));
+            return response;
+        });
     }
 
     public Page<SanPhamBanHangAdminResponse> getProductMas(String maSanPham, int page, int size) {
@@ -1096,8 +1108,6 @@ public class SanPhamAdminService {
             }
         }
     }
-
-
 }
 
 

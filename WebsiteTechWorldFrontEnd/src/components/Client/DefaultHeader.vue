@@ -71,7 +71,7 @@ const goToLogin = () => {
     </div>
     <nav>
       <ul>
-        <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li>
+        <!-- <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li> -->
         <li><router-link to="/orders"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
         <li>
           <router-link to="/shopping-cart" class="cart-link">
@@ -102,89 +102,418 @@ const goToLogin = () => {
 </template>
 
 <style scoped>
+/* === HEADER STYLES - Stable & Smooth Version === */
 .client-header {
   background: linear-gradient(135deg, #1a2954 0%, #2274c7 50%, #1a405e 100%);
+  box-shadow: 0 4px 20px rgba(34, 116, 199, 0.3);
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  overflow: hidden;
-  --mouse-x: 0px;
-  --mouse-y: 0px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Hiệu ứng tia lấp lánh theo chuột */
-.client-header::before {
-  content: '';
-  position: absolute;
-  top: var(--mouse-y);
-  left: var(--mouse-x);
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle,
-      rgba(255, 255, 255, 0.3) 0%,
-      rgba(135, 206, 235, 0.4) 30%,
-      transparent 70%);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-}
-
-.client-header:hover::before {
-  opacity: 1;
+/* Logo Styling */
+.client-header .logo {
+  display: flex;
+  align-items: center;
+  z-index: 2;
 }
 
 .client-header .logo a {
   color: white;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 800;
   text-decoration: none;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: text-shadow 0.3s ease;
+}
+
+.client-header .logo a:hover {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Navigation Styling */
+nav {
+  z-index: 2;
 }
 
 nav ul {
   list-style-type: none;
   padding: 0;
+  margin: 0;
   display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 nav ul li {
-  margin-right: 20px;
+  position: relative;
+  /* Đảm bảo không có margin/padding gây lệch */
+  margin: 0;
+  padding: 0;
 }
 
+/* FIXED: Đồng nhất tất cả các nút */
 nav ul li a {
-  color: white;
+  color: rgba(255, 255, 255, 0.95);
   text-decoration: none;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(135, 206, 235, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(135, 206, 235, 0.3);
+  position: relative;
+  /* FIXED: Transition mượt mà, không có transform */
+  transition: all 0.25s ease-out;
+  /* FIXED: Đảm bảo không bị shift */
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
+/* FIXED: Hover effect đơn giản, không dùng transform */
 nav ul li a:hover {
+  background: rgba(135, 206, 235, 0.3);
+  border-color: rgba(135, 206, 235, 0.6);
+  color: white;
+  box-shadow: 0 4px 12px rgba(34, 116, 199, 0.4);
   text-decoration: none;
 }
 
-/* Style cho link bị disabled */
+/* FIXED: Icon styling nhất quán */
+nav ul li a i {
+  font-size: 14px;
+  opacity: 0.9;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+nav ul li a:hover i {
+  opacity: 1;
+}
+
+/* Cart Link Special Styling */
+.cart-link {
+  background: rgba(135, 206, 235, 0.2) !important;
+  border: 2px solid rgba(135, 206, 235, 0.4) !important;
+  position: relative;
+}
+
+.cart-link:hover {
+  background: rgba(135, 206, 235, 0.35) !important;
+  border-color: rgba(135, 206, 235, 0.7) !important;
+}
+
+/* FIXED: Badge positioning - Đơn giản và ổn định */
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+  z-index: 10;
+  /* FIXED: Không có animation gây nháy */
+  pointer-events: none;
+}
+
+/* User Dropdown */
+.user-dropdown {
+  position: relative;
+  z-index: 5;
+}
+
+.user-dropdown > a {
+  background: rgba(135, 206, 235, 0.2) !important;
+  border: 2px solid rgba(135, 206, 235, 0.4) !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown > a:hover {
+  background: rgba(135, 206, 235, 0.35) !important;
+  border-color: rgba(135, 206, 235, 0.7) !important;
+}
+
+/* Dropdown Menu - FIXED: Thêm lại display logic */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  min-width: 200px;
+  border-radius: 12px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  overflow: hidden;
+  /* FIXED: Đảm bảo dropdown được hiển thị khi có class/state */
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg);
+  box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #dc3545;
+}
+
+.dropdown-menu a:hover {
+  background: rgba(34, 116, 199, 0.08);
+  color: #2274c7;
+}
+
+.dropdown-menu a:last-child:hover {
+  background: rgba(220, 53, 69, 0.08);
+  color: #dc3545;
+}
+
+.dropdown-menu a i {
+  width: 16px;
+  text-align: center;
+  opacity: 0.7;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dropdown-menu a:hover i {
+  opacity: 1;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.loading-state i {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Animation cho dropdown - FIXED */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Disabled Link */
 .disabled-link {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.cart-link {
-  position: relative;
-  display: inline-block;
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .client-header {
+    padding: 10px 20px;
+  }
+
+  nav ul {
+    gap: 10px;
+  }
+
+  nav ul li a {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .client-header .logo a {
+    font-size: 24px;
+  }
 }
 
-.badge {
-  position: absolute;
-  top: -6px;
-  right: 60px;
-  background-color: red;
-  color: white;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 50%;
-  z-index: 1;
+@media (max-width: 768px) {
+  .client-header {
+    padding: 8px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .client-header .logo a {
+    font-size: 20px;
+  }
+
+  nav ul {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  nav ul li a {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  nav ul li a i {
+    font-size: 12px;
+  }
+
+  .dropdown-menu {
+    min-width: 180px;
+    right: -10px;
+  }
+
+  .dropdown-menu::before {
+    right: 30px;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 2px 4px;
+    min-width: 14px;
+    height: 14px;
+    top: -5px;
+    right: -5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .client-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px;
+  }
+
+  .client-header .logo {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  nav ul {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  nav ul li a {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .dropdown-menu {
+    right: 50%;
+    transform: translateX(50%);
+    min-width: 180px;
+  }
+
+  .dropdown-menu::before {
+    right: 50%;
+    transform: translateX(50%) rotate(45deg);
+  }
+}
+
+@media (max-width: 480px) {
+  nav ul li a {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  /* Ẩn text trên mobile, chỉ hiển thị icon */
+  .cart-link span:not(.badge) {
+    display: none;
+  }
+
+  .badge {
+    font-size: 8px;
+    padding: 2px 4px;
+    min-width: 12px;
+    height: 12px;
+    top: -4px;
+    right: -4px;
+  }
+
+  .user-dropdown > a {
+    max-width: 100px;
+  }
+}
+
+/* Focus states cho accessibility */
+nav ul li a:focus {
+  outline: 2px solid rgba(135, 206, 235, 0.8);
+  outline-offset: 2px;
+}
+
+.dropdown-menu a:focus {
+  outline: 2px solid rgba(34, 116, 199, 0.6);
+  outline-offset: -2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01s !important;
+    transition-duration: 0.01s !important;
+  }
 }
 </style>

@@ -27,7 +27,7 @@ public class KhuyenMaiAdminRequest {
 
     @NotNull(message = "Phần trăm giảm giá không được để trống")
     @Min(value = 1, message = "Phần trăm giảm phải lớn hơn 0%")
-    @Max(value = 100, message = "Phần trăm giảm không được vượt quá 100%")
+    @Max(value = 60, message = "Phần trăm giảm không được vượt quá 60%")
     private Integer phanTramGiam;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
@@ -38,6 +38,11 @@ public class KhuyenMaiAdminRequest {
 
     @NotNull(message = "Đối tượng áp dụng không được để trống")
     private DoiTuongApDung doiTuongApDung;
+
+    @NotNull(message = "Mức độ ưu tiên không được để trống")
+    @Min(value = 1, message = "Mức độ ưu tiên phải lớn hơn 0")
+    @Max(value = 100, message = "Mức độ ưu tiên không được vượt quá 100")
+    private Integer mucDoUuTien;
 
     private String trangThai;
 

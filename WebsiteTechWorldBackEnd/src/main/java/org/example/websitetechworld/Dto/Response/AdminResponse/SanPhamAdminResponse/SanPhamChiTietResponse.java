@@ -6,6 +6,7 @@ import org.example.websitetechworld.Entity.SanPham;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -31,4 +32,5 @@ public class SanPhamChiTietResponse {
 
     private Set<HinhAnhAdminResponse> hinhAnhs;
     private Integer idSanPham;
+    private List<Integer> idKhuyenMais;
 }

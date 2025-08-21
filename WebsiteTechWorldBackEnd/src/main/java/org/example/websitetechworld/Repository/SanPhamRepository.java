@@ -269,7 +269,26 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """,nativeQuery = true)
     Integer findIdSpct(@Param("idSanPham") Integer idSanPham, @Param("idRom") Integer idRom, @Param("idMauSac") Integer idMauSac);
 
-    List<SanPham> findByMaSanPhamContainingIgnoreCaseOrTenSanPhamContainingIgnoreCase(String maSanPham, String tenSanPham);
+    List<SanPham> findByMaSanPhamContainingIgnoreCaseOrTenSanPhamContainingIgnoreCase(
+            @Param("maSanPham") String maSanPham,
+            @Param("tenSanPham") String tenSanPham);
 
-    SanPham findBySanPhamChiTiets(Set<SanPhamChiTiet> sanPhamChiTiets);
+    @Query("""
+    SELECT s
+    FROM SanPham s 
+    JOIN s.sanPhamChiTiets spct
+    GROUP BY s
+    HAVING SUM(spct.soLuong) < :threshold
+""")
+    List<SanPham> findByTongSoLuongLessThan (@Param("threshold") int threshold);
+
+    @Query("""
+    SELECT s
+    FROM SanPham s
+    JOIN s.sanPhamChiTiets spct
+    GROUP BY s
+    HAVING SUM(spct.soLuong) > :threshold
+""")
+    List<SanPham> findByTongSoLuongGreaterThan (@Param("threshold") int threshold);
+
 }

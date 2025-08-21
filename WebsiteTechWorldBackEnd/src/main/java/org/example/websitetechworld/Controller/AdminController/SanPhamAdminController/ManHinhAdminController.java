@@ -52,35 +52,9 @@ public class ManHinhAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createManHinh(@RequestBody @Valid ManHinhAdminRequest manHinhAdminRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<Map<String, String>> fieldErrors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(fieldErrors);
-        }
-        try {
+    public ResponseEntity<?> createManHinh(@RequestBody @Valid ManHinhAdminRequest manHinhAdminRequest) {
             ManHinhAdminResponse response = manHinhAdminService.createManHinh(manHinhAdminRequest);
             return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
-
     }
 
     @PostMapping("/quick-manHinh")
@@ -90,34 +64,9 @@ public class ManHinhAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateManHinh(@PathVariable Integer id, @RequestBody @Valid ManHinhAdminRequest manHinhAdminRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<Map<String, String>> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
-        try {
+    public ResponseEntity<?> updateManHinh(@PathVariable Integer id, @RequestBody @Valid ManHinhAdminRequest manHinhAdminRequest) {
             ManHinhAdminResponse response = manHinhAdminService.updateManHinh(id, manHinhAdminRequest);
             return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
     }
 
     @DeleteMapping("/{id}")

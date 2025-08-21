@@ -5,15 +5,27 @@ import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.ModelSanPhamAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ModelSanPhamAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.ModelSanPhamHienThiAdminResponse;
+import org.example.websitetechworld.Entity.ModelSanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ModelSanPhamService;
+import org.example.websitetechworld.exception.BusinessException;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,4 +87,30 @@ public class ModelSanPhamAdminController {
         Page<ModelSanPhamAdminResponse> result = modelSanPhamService.searchModelSanPham(page, size, search, idLoai, idRam, idXuatXu);
         return ResponseEntity.ok(result);
     }
+
+
+    @PostMapping("/import-excel/upload")
+    public ResponseEntity<List<ModelSanPhamAdminResponse>> importExcelUpload(@RequestParam("file") MultipartFile file) throws IOException {
+        List<ModelSanPhamAdminResponse> responses = modelSanPhamService.importExcelFileUpload(file);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/download-template")
+    public ResponseEntity<byte[]> downloadTemplate() {
+        try {
+            // Đọc file template có sẵn trong resources
+            ClassPathResource resource = new ClassPathResource("templates/ModelSanPhamTemplate.xlsx");
+
+            byte[] data = Files.readAllBytes(resource.getFile().toPath());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ModelSanPhamTemplate.xlsx");
+
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

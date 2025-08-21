@@ -29,8 +29,7 @@ public class VoucherClientController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
-        phieuGiamGiaAdminService.capNhatTrangThaiPhieuGiamGia();
+            @RequestParam(defaultValue = "desc") String direction) {
         Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminService.getVoucherRedeeming(
                 search, trangThai, ngayBatDau, ngayKetThuc, hangToiThieu, page, size, sortBy, direction);
         return ResponseEntity.ok(result);

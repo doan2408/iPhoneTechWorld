@@ -12,6 +12,7 @@ import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -135,5 +136,6 @@ public class HoaDon {
     @Nationalized
     @Column(name = "email_nguoi_nhan", length = 100)
     private String emailNguoiNhan;
+
 
 }

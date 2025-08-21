@@ -16,7 +16,7 @@ export const getAll = async (params) => {
 
 export const detail = async (id) => {
   try {
-    const response = await api.get( baseURL +`/${id}`);
+    const response = await api.get(baseURL +`/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi lấy chi tiết phiếu giảm giá với ID ${id}:`, error);
@@ -36,7 +36,7 @@ export const add = async (data) => {
 
 export const update = async (id, data) => {
   try {
-    const response = await api.put( baseURL + `/${id}`, data);
+    const response = await api.put(baseURL + `/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật phiếu giảm giá với ID ${id}:`, error);
@@ -46,7 +46,7 @@ export const update = async (id, data) => {
 
 export const deletePhieuGiamGia = async (id) => {
   try {
-    const response = await api.delete( baseURL + `/${id}`);
+    const response = await api.delete(baseURL + `/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi xóa phiếu giảm giá với ID ${id}:`, error);
@@ -66,9 +66,20 @@ export const getAllSanPham = async (params) => {
 
 export const giftVoucher = async (id, type) => {
   try {
-    await api.post(`${baseURL}/${id}/gift?type=${type}`);
+    const response = await api.post(`${baseURL}/${id}/gift?type=${type}`);
+    return response.data;
   } catch (error) {
     console.error('Lỗi khi thêm khách hàng giảm giá:', error);
     throw error.response?.data || new Error('Lỗi khi thêm khách hàng giảm giá');
+  }
+};
+
+export const nextDelay = async (id, type) => {
+  try {
+    const response = await api.get(baseURL +'/next-delay');
+    return response;
+  } catch (error) {
+    console.error('Lỗi khi lấy thời gian update:', error);
+    throw error.response?.data || new Error('Lỗi khi lấy thời gian update');
   }
 };

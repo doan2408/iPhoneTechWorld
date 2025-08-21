@@ -68,4 +68,6 @@ public class SanPhamChiTiet {
     @OneToMany(mappedBy = "idSanPhamChiTiet", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private List<DanhGiaSanPham> danhGiaSanPhams = new ArrayList<>();
 
+    @OneToMany(mappedBy = "idSanPhamChiTiet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KhuyenMaiSanPhamChiTiet> danhSachKhuyenMai;
 }

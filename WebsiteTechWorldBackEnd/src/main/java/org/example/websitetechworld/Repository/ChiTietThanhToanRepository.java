@@ -9,4 +9,6 @@ import java.util.List;
 public interface ChiTietThanhToanRepository extends JpaRepository<ChiTietThanhToan, Integer> {
     List<ChiTietThanhToan> findByIdHoaDon_Id(Integer idHoaDon, Pageable pageable);
 
+    List<ChiTietThanhToan> findByIdHoaDon_Id(Integer idHoaDon);
+
 }

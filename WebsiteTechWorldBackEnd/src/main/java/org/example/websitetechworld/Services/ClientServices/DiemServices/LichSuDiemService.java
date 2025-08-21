@@ -35,6 +35,7 @@ public class LichSuDiemService {
     private final HoaDonRepository hoaDonRepository;
     private final HangServices hangServices;
     private final ViDiemServices viDiemServices;
+    private final KhachHangRepository khachHangRepository;
 
     private LichSuDiemResponse convertToResponse(LichSuDiem entity) {
         return new LichSuDiemResponse(
@@ -82,26 +83,35 @@ public class LichSuDiemService {
         PhieuGiamGia phieu = phieuGiamGiaRepository.findById(idPhieuGiamGia)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu giảm giá"));
 
+        if (idKhachHang != null) {
+            KhachHang khachHang = khachHangRepository.findById(idKhachHang)
+                    .orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
+            HangKhachHang hangThanhVien = khachHang.getHangThanhVien().getTenHang();
+            HangKhachHang hangToiThieu = phieu.getHangToiThieu();
+            if (hangThanhVien.ordinal() < hangToiThieu.ordinal()) {
+                errors.add(Map.of("field", "hang", "message", "Không đủ hạng để đổi phiếu giảm giá!"));
+            }
+        }
+
+        if (phieu.getSoLuong() == null || phieu.getSoLuong() <= 0) {
+            errors.add(Map.of("field", "soLuongPhieu", "message", "Phiếu giảm giá đã hết lượt đổi!"));
+        }
+
         BigDecimal diemCanDoi = phieu.getSoDiemCanDeDoi();
 
         // Kiểm tra điểm khả dụng trong ví
         if (viDiem.getDiemKhaDung().compareTo(diemCanDoi) < 0) {
-            errors.add(Map.of("field", "point", "message", "Không đủ điểm để đổi Voucher"));
+            errors.add(Map.of("field", "point", "message", "Không đủ điểm để đổi phiếu giảm giá"));
         }
 
         if(!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
 
-        // ngay doi hien tai
-        LocalDate ngayHienTai = LocalDate.now();
-        YearMonth thangNamHienTai = YearMonth.from(ngayHienTai);
-
-        boolean daDoiTrongThang = khachHangGiamGiaRepository
-                .checkSoLanDoiTrong1Thang(idKhachHang, idPhieuGiamGia, thangNamHienTai.getMonthValue(), thangNamHienTai.getYear());
-
-        if(daDoiTrongThang) {
-            errors.add(Map.of("field", "voucher", "message", "Bạn đã đổi voucher này trong tháng rồi !"));
+        LocalDate motNamTruoc = LocalDate.now().minusYears(1);
+        boolean daDoi = khachHangGiamGiaRepository.checkSoLanDoi(idKhachHang, idPhieuGiamGia, motNamTruoc);
+        if (daDoi) {
+            errors.add(Map.of("field", "voucher", "message", "Bạn đã đổi phiếu giảm giá này rồi !"));
         }
 
         if(!errors.isEmpty()) {
@@ -141,7 +151,7 @@ public class LichSuDiemService {
         }
 
         if (diemConLai.compareTo(BigDecimal.ZERO) > 0) {
-            errors.add(Map.of("field", "diemConLai", "message", "Không đủ điểm để đổi Voucher"));
+            errors.add(Map.of("field", "diemConLai", "message", "Không đủ điểm để đổi phiếu giảm giá"));
         }
 
         if(!errors.isEmpty()) {
@@ -159,6 +169,7 @@ public class LichSuDiemService {
         lichSuTru.setLoaiDiem(LoaiDiem.TRU);
         lichSuTru.setGhiChu("Đổi điểm lấy voucher " + phieu.getTenGiamGia());
         lichSuTru.setThoiGian(OffsetDateTime.now(ZoneOffset.UTC));
+        lichSuTru.setHanSuDung(OffsetDateTime.now(ZoneOffset.UTC).plusYears(1));
         lichSuDiemRepository.save(lichSuTru);
 
 
@@ -169,6 +180,9 @@ public class LichSuDiemService {
         khachHangGiamGia.setIsUser(false);
         khachHangGiamGia.setNgayCap(LocalDate.now());
         khachHangGiamGia.setTrangThai(1);
+
+        phieu.setSoLuong(phieu.getSoLuong() - 1);
+        phieuGiamGiaRepository.save(phieu);
 
         khachHangGiamGiaRepository.save(khachHangGiamGia);
         hangServices.updateHang(idKhachHang);
