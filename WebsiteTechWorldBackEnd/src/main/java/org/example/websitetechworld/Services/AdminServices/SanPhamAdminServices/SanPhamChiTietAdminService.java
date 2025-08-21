@@ -9,6 +9,7 @@ import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.KhuyenMaiAdminService.KhuyenMaiAdminService;
 import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -22,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +34,7 @@ public class SanPhamChiTietAdminService {
     private final MauSacRepository mauSacRepo;
     private final RomRepository romRepo;
     private final HoaDonRepository hoaDonRepository;
+    private final KhuyenMaiAdminService khuyenMaiAdminService;
 
 
     private void mapRequestToEntity(SanPhamChiTietAdminRepuest req, SanPhamChiTiet entity) {
@@ -143,7 +142,7 @@ public class SanPhamChiTietAdminService {
                 .findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable)
                 .map(spct -> {
                     SanPhamChiTietHienThiResponse response = SanPhamChiTietHienThiResponse.converDto(spct);
-                    response.setGiaBan(tinhGiaKhuyenMai(spct, selectedIdKhachHang));
+                    response.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(spct, selectedIdKhachHang));
                     return response;
                 });
     }
@@ -179,52 +178,5 @@ public class SanPhamChiTietAdminService {
                 throw new BusinessException("Biến thể màu + ROM này đã tồn tại trong cùng loại sản phẩm.");
             }
         }
-    }
-
-    private BigDecimal tinhGiaKhuyenMai(SanPhamChiTiet spct, Integer selectedIdKhachHang) {
-        try {
-            if (spct == null || spct.getGiaBan() == null) {
-                return BigDecimal.ZERO;
-            }
-            BigDecimal giaGoc = spct.getGiaBan();
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
-            if (khuyenMai == null) {
-                return giaGoc;
-            }
-            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
-                return giaGoc;
-            }
-            LocalDateTime now = LocalDateTime.now();
-            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
-                return giaGoc;
-            }
-
-            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
-            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
-            if (doiTuong == DoiTuongApDung.ALL) {
-                return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
-            }
-            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
-                return giaGoc;
-            }
-            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
-            boolean khongHopLe =
-                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
-                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
-            if (khongHopLe) {
-                return giaGoc;
-            }
-
-            return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
-        } catch (Exception e) {
-            return spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
-        }
-    }
-
-    private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
-        return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
     }
 }

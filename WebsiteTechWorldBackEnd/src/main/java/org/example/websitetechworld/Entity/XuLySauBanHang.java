@@ -58,4 +58,14 @@ public class XuLySauBanHang {
     @Column(name = "thoi_gian_yeu_cau")
     private LocalDateTime thoiGianYeuCau;
 
+    @Size(max = 500)
+    @Nationalized
+    @Column(name = "url_hinh", length = 500)
+    private String urlHinh;
+
+    @Size(max = 500)
+    @Nationalized
+    @Column(name = "url_video", length = 500)
+    private String urlVideo;
+
 }

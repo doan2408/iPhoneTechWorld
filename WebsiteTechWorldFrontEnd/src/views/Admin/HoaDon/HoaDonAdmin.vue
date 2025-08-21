@@ -119,14 +119,6 @@
             </svg>
             Xuất Excel
           </button>
-          <button class="btn btn-outline">
-            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-              </path>
-            </svg>
-            In
-          </button>
         </div>
       </div>
     </div>
@@ -169,9 +161,6 @@
         <table class="modern-table">
           <thead class="table-header-row">
             <tr>
-              <th class="table-th checkbox-column">
-                <input type="checkbox" class="header-checkbox" />
-              </th>
               <th class="table-th">STT</th>
               <th class="table-th">Mã hóa đơn</th>
               <th class="table-th">Người mua</th>
@@ -185,9 +174,6 @@
           </thead>
           <tbody class="table-body">
             <tr v-for="(hoaDon, index) in hoaDons" :key="hoaDon.id" class="table-row">
-              <td class="table-td checkbox-column">
-                <input type="checkbox" class="row-checkbox" />
-              </td>
               <td class="table-td">
                 <div class="invoice-stt">
                   {{ pageNo * pageSize + index + 1 }}

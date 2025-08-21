@@ -15,4 +15,7 @@ public interface ChiTietHoaDonRepository extends JpaRepository<ChiTietHoaDon,Int
     ChiTietHoaDon findByIdHoaDon_IdAndIdSanPhamChiTiet_Id(Integer idHoaDon, Integer idSanPhamChiTiet);
 
     boolean existsByIdHoaDon(HoaDon idHoaDon);
+
+    @Query("SELECT hdct FROM ChiTietHoaDon hdct JOIN hdct.imeiDaBans i WHERE i.soImei = :soImei")
+    ChiTietHoaDon findByImei(@Param("soImei") String soImei);
 }

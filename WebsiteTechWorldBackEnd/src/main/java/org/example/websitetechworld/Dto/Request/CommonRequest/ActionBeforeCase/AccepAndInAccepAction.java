@@ -6,13 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChangeStatusRequest {
-    private List<String> soImeis;
-    private ActionAfterCase status;
+public class AccepAndInAccepAction {
+    private Integer idHoaDon;
+    private ActionAfterCase hanhDong;
 }

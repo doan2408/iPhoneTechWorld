@@ -67,7 +67,7 @@ public class HoaDonChiTietAdminServices {
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại"));
         List<String> imeiIdsFromRequest = request.getImeiIds();
         for (String soImei : imeiIdsFromRequest) {
-            boolean imeiDaBanTonTai = imeiDaBanRepository.existsBySoImei(soImei);
+            boolean imeiDaBanTonTai = imeiDaBanRepository.existsBySoImeiAndTrangThai(soImei,TrangThaiImei.RESERVED);
             if (imeiDaBanTonTai) {
                 throw new IllegalArgumentException("IMEI " + soImei + " đã được thêm vào hóa đơn khác.");
             }
@@ -218,7 +218,15 @@ public class HoaDonChiTietAdminServices {
                 return BigDecimal.ZERO;
             }
             BigDecimal giaGoc = spct.getGiaBan();
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
             if (khuyenMai == null) {
                 return giaGoc;
             }

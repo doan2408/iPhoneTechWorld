@@ -17,12 +17,15 @@ export const createActionAfterCaseReturn = (data) => {
     return api.post(url, data)
 }
 
-export const getAllLyDoXuLy = (pageNo, pageSize) => {
+export const getAllLyDoXuLy = (pageNo, pageSize, search, status, sortDir) => {
     const url = baseURL ;
     return api.get(url,{
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            search,
+            status,
+            sortDir
         }
     })
 }
@@ -32,11 +35,30 @@ export const getAllCtXuLy = (idHoaDon) => {
     return api.get(url)
 }
 
-export const changeStatusPending = (soImei,status) => {
+export const changeStatusPending = (soImeis,status) => {
     const url = baseURL + '/change-status'
     const request = {
-        soImei: soImei,
+        soImeis: soImeis,
         status: status
     };
     return api.post(url,request)
+}
+
+export const uploadAnhAndVid = (formData) => {
+    const url = '/api/upload/upload-imei'
+    return api.post(url, formData)
+}
+
+export const updateStatusPending = (idHoaDon, hanhDong) => {
+    const url = baseURL + '/update-status'
+    const request = {
+        idHoaDon: idHoaDon,
+        hanhDong: hanhDong
+    };
+    return api.put(url, request)
+}
+
+export const countDonHangByStatus = () => {
+    const url = baseURL + '/stats';
+    return api.get(url)
 }

@@ -587,7 +587,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, markRaw, watch, watchEffect, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, markRaw, watch, watchEffect, nextTick, onUnmounted } from 'vue'
 import {
     Search, X, Plus, Lock, Undo, RotateCcw, Printer, Menu,
     User, Users, List, Filter, Eye, Edit, ChevronLeft, ChevronRight,
@@ -617,6 +617,9 @@ import InvoicePrint from '@/views/Printf/InvoicePrint.vue';
 import html2pdf from 'html2pdf.js';
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
+import tienMatPng from '@/assets/HinhAnh/tienmat.png'
+import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
+import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -1159,7 +1162,32 @@ const openImeiModal = async (product) => {
 const fetchImeis = async (productId, page, size) => {
     try {
         const response = await fetchImeisJs(productId, page, size)
-        availableImeis.value = response.data.content;
+
+        let imeis = response.data.content;
+
+        // Sắp xếp danh sách để các IMEI đã chọn xuất hiện đầu tiên
+        imeis = imeis.sort((a, b) => {
+            const isASelected = selectedImeis.value.some(selected => selected.id === a.id);
+            const isBSelected = selectedImeis.value.some(selected => selected.id === b.id);
+            if (isASelected && !isBSelected) return -1;
+            if (!isASelected && isBSelected) return 1;
+            return 0;
+        });
+
+        // imeis = imeis.sort((a, b) => {
+        //     const isASelected = selectedImeis.value.some(selected => selected.id === a.id);
+        //     const isBSelected = selectedImeis.value.some(selected => selected.id === b.id);
+            
+        //     // Nếu a được chọn và b không được chọn, a lên đầu
+        //     if (isASelected && !isBSelected) return -1;
+        //     // Nếu b được chọn và a không được chọn, b lên đầu
+        //     if (!isASelected && isBSelected) return 1;
+        //     // Nếu cả hai đều được chọn hoặc không được chọn, giữ nguyên thứ tự
+        //     return 0;
+        // });
+
+        availableImeis.value = imeis;
+
         imeiTotalItems.value = response.data.totalElements;
         imeiTotalPages.value = response.data.totalPages;
     } catch (error) {
@@ -1200,7 +1228,7 @@ const showWarningOnce = (message) => {
 // Hàm xử lý khi input số lượng thay đổi
 const handleQuantityInputChange = () => {
     if (quantityToSelect.value === null || isNaN(quantityToSelect.value)) {
-        selectedImeis.value = [];
+        quantityToSelect.value = 0;
         return;
     }
     quantityToSelect.value = parseInt(quantityToSelect.value);
@@ -1213,7 +1241,10 @@ const handleQuantityInputChange = () => {
         showWarningOnce(`Số lượng phải lớn hơn 0.`);
     }
 
-    selectedImeis.value = [];
+    if (selectedImeis.value.length > quantityToSelect.value) {
+        selectedImeis.value = selectedImeis.value.slice(0, quantityToSelect.value);
+        showWarningOnce(`Đã điều chỉnh danh sách IMEI để phù hợp với số lượng ${quantityToSelect.value}.`);
+    }
 };
 
 // chọn bỏ chọn imei bằng check box
@@ -1237,14 +1268,28 @@ const isImeiSelected = (imei) => {
 
 // tự động chọn imei
 const autoSelectImeis = () => {
-    selectedImeis.value = []; // Xóa các lựa chọn cũ
+    const existingSelected = selectedImeis.value.filter(selected =>
+        availableImeis.value.some(available => available.id === selected.id)
+    );
 
+    const remainingToSelect = quantityToSelect.value - existingSelected.length;
+
+    if (remainingToSelect <= 0) {
+        selectedImeis.value = existingSelected.slice(0, quantityToSelect.value);
+        return;
+    }
+
+    const newSelections = availableImeis.value
+        .filter(imei => !existingSelected.some(selected => selected.id === imei.id))
+        .slice(0, remainingToSelect);
+
+    selectedImeis.value = [...existingSelected, ...newSelections];
 
     // Lặp qua danh sách IMEI có sẵn trên trang hiện tại và chọn đủ số lượng
-    const countToSelectOnCurrentPage = Math.min(quantityToSelect.value, availableImeis.value.length);
-    for (let i = 0; i < countToSelectOnCurrentPage; i++) {
-        selectedImeis.value.push(availableImeis.value[i]);
-    }
+    // const countToSelectOnCurrentPage = Math.min(quantityToSelect.value, availableImeis.value.length);
+    // for (let i = 0; i < countToSelectOnCurrentPage; i++) {
+    //     selectedImeis.value.push(availableImeis.value[i]);
+    // }
 
     // Ghi chú: Logic này chỉ tự động chọn trên trang hiện tại.
     // Nếu số lượng cần chọn lớn hơn số IMEI trên trang, bạn cần xử lý phức tạp hơn
@@ -1365,6 +1410,7 @@ const handleRemoveSingleImei = async (item) => {
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
         loadTabHoaDon();
+        loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
@@ -1861,9 +1907,6 @@ watch(currentInvoiceId, async (newId) => {
         currentInvoiceDetail.value = selected;
     }
 });
-watch(imeiCurrentPage, async () => {
-    selectedImeis.value = []; 
-});
 
 watch(quantityToSelect, (newValue, oldValue) => {
     if (newValue !== oldValue) {
@@ -1871,6 +1914,22 @@ watch(quantityToSelect, (newValue, oldValue) => {
     }
 });
 
+let statusUpdateInterval = null;
+
+const getNextUpdateDelay = async () => {
+    try {
+        const response = await nextDelay()
+        const delay = Math.max(1000, response.delay || 60_000);
+        console.log('1', delay)
+        return delay;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Không thể lấy thời gian cập nhật:', error);
+            toast.error('Không thể lấy thời gian cập nhật');
+        }
+        return 60_000;
+    }
+};
 // Initialize
 onMounted(async () => {
     await danhMucSanPham();
@@ -1882,6 +1941,19 @@ onMounted(async () => {
     await loadDiscountList();
     fetchPaymentMethods();
     await getHdctByImeiDaBan();
+    const initialDelay = await getNextUpdateDelay();
+    statusUpdateInterval = setInterval(() => {
+        loadProducts({});
+        loadTabHoaDon();
+        getHdctByImeiDaBan()
+    }, initialDelay);
+});
+
+onUnmounted(() => {
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+        statusUpdateInterval = null;
+    }
 });
 
 //Khach hang
@@ -2072,9 +2144,9 @@ const fetchPaymentMethods = async () => {
 const getIconUrl = (code) => {
     switch (code) {
         case 'TIEN_MAT':
-            return '/icons/cod.png';
-        case 'NGAN_HANG':
-            return '/icons/bank.png';
+            return tienMatPng;
+        case 'CHUYEN_KHOAN':
+            return chuyenKhoanPng;
         default:
             return '/icons/default.png';
     }

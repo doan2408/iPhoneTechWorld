@@ -599,10 +599,10 @@ const allMyOrder = async () => {
       );
     }
 
-    console.log("📤 Gọi API với parameters:", params);
+    console.log("Gọi API với parameters:", params);
 
     const res = await getMyOrder(params);
-    console.log("📦 Response từ backend:", res);
+    console.log("Response từ backend:", res);
 
     const orders = res.data.content || [];
 
@@ -617,7 +617,7 @@ const allMyOrder = async () => {
           return { ...order, daDanhGia: response.daDanhGia };
         } catch (err) {
           console.error(
-            `❌ Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`,
+            `Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`,
             err
           );
           return { ...order, daDanhGia: false };
@@ -629,6 +629,7 @@ const allMyOrder = async () => {
     allOrderValue.value = ordersWithCheck;
     totalElements.value = res.data.totalElements || 0;
     totalPages.value = res.data.totalPages || 0;
+    console.log(totalElements.value)
 
     console.log("✅ Kết quả cuối cùng:", ordersWithCheck);
   } catch (error) {

@@ -14,6 +14,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdmin
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.ActionAfterCase;
+import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
@@ -517,7 +518,7 @@ public class HoaDonAdminService {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
         }
         if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
-            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_Id(hoaDon.getId());
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_IdAndLoaiVuViec(hoaDon.getId(), CaseType.CANCELLED);
             xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
@@ -571,7 +572,15 @@ public class HoaDonAdminService {
             if (giaGoc == null) {
                 return BigDecimal.ZERO;
             }
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
             if (khuyenMai == null) {
                 return giaGoc;
             }
