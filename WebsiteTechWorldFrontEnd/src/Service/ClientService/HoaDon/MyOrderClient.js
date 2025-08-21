@@ -29,8 +29,8 @@ export const getMyReview = async (pageNo,pageSize) => {
 };  
 
 
-export const findIdHoaDonByMVD = async (maVanDon) => {
-    return await api.get(baseURL +'/mvd/'+ maVanDon);
+export const findIdHoaDonByMVDAndSdt = async (maVanDon, sdt) => {
+    return await api.get(baseURL +'/mvd/'+ maVanDon + '?sdt=' + sdt);
 };  
 
 export const hoaDonDetail = (id) => {
