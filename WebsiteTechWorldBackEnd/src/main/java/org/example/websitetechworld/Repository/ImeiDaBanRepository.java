@@ -61,7 +61,7 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
         LEFT JOIN MauSac ms ON ms.id = spct.idMau.id
         LEFT JOIN Rom rom ON rom.id = spct.idRom.id
         LEFT JOIN XuLySauBanHang xlbh ON xlbh.idImeiDaBan.id = imbd.id
-        WHERE cthd.id = :ctHoaDonId AND xlbh.idHoaDon.id IS NULL
+        WHERE cthd.id = :ctHoaDonId AND ( xlbh.idHoaDon.id IS NULL OR xlbh.hanhDongSauVuViec = 'CANCEL')
         ORDER BY imbd.id DESC
     """)
     List<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer ctHoaDonId);

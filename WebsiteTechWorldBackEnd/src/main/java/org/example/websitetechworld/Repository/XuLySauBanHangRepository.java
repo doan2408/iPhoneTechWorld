@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, Integer> {
@@ -77,7 +78,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
                 LEFT JOIN hd.idKhachHang kh
                 LEFT JOIN cthd.idSanPhamChiTiet spct
             WHERE xlbh.idHoaDon.id = :idHoaDon
-            GROUP BY 
+            GROUP BY
             imdb.soImei, xlbh.id,
             xlbh.idHoaDon.id,
             hd.maHoaDon,
@@ -101,4 +102,8 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
     int countByLoaiVuViec(CaseType loaiVuViec);
 
     int countByThoiGianXuLy(LocalDateTime thoiGianXuLy);
+
+    XuLySauBanHang findByIdImeiDaBan_IdAndIdHoaDon_IdAndHanhDongSauVuViec(
+        Integer idImei, Integer idHoaDon, ActionAfterCase hanhDongSauVuViec
+    );
 }

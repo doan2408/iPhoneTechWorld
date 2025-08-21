@@ -290,7 +290,9 @@ const updateStatus = async (idHoaDon,status) => {
     await updateStatusPending(idHoaDon,status)
     if (status === 'HOLD') {
         toast.success("Bạn đã chấp nhận yêu cầu!")
-    }else if (status === 'RECEIVED') {
+    } else if (status === 'CANCEL') {
+        toast.success("Bạn đã từ chối yêu cầu!")
+    } else if (status === 'RECEIVED') {
         toast.success("Đã nhận được hàng")
     }
     getAllLyDoXuLyView()

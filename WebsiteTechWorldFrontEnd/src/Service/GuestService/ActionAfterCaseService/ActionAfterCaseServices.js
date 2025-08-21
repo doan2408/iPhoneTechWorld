@@ -1,4 +1,5 @@
 import api from "@/Service/LoginService/axiosInstance";
+import { id } from "element-plus/es/locales.mjs";
 import { ref } from "vue";
 
 const baseURL = "/action-after-case";
@@ -61,4 +62,9 @@ export const updateStatusPending = (idHoaDon, hanhDong) => {
 export const countDonHangByStatus = () => {
     const url = baseURL + '/stats';
     return api.get(url)
+}
+
+export const tuChoiDonHang = (idHoaDon) => {
+    const url = baseURL+'/'+idHoaDon;
+    return api.post(url)
 }
