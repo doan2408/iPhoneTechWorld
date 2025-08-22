@@ -172,23 +172,48 @@
                             <button @click="closeImeiModal" class="close-button">&times;</button>
                         </div>
 
-                        <div class="modal-body">
-                            <div class="imei-list">
-                                <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
-                                    <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
-                                        v-model="selectedImeis" />
-                                    <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
-                                </div>
+                        <div class="imei-search">
+                            <div class="search-box">
+                                <Search class="search-icon" />
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input" @input="searchImeis" />
                             </div>
                         </div>
 
-                        <div class="pagination-controls">
-                            <button @click="goToImeiPage(imeiCurrentPage - 1)"
-                                :disabled="imeiCurrentPage === 0">Trước</button>
-                            <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
-                            <button @click="goToImeiPage(imeiCurrentPage + 1)"
-                                :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
+                        <div class="modal-body">
+                            <div class="imei-container">
+                            <!-- Danh sách IMEI có sẵn (bên trái) -->
+                            <div class="imei-list-container">
+                                <h3>Danh sách IMEI</h3>
+                                <div class="imei-list">
+                                    <div v-for="imei in filteredImeis" :key="imei.id" class="imei-item">
+                                        <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
+                                            v-model="selectedImeis" />
+                                        <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                    </div>
+                                </div>
+                                <div class="pagination-controls">
+                                    <button @click="goToImeiPage(imeiCurrentPage - 1)" :disabled="imeiCurrentPage === 0">Trước</button>
+                                    <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
+                                    <button @click="goToImeiPage(imeiCurrentPage + 1)" :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
+                                </div>
+                            </div>
+
+                            <!-- Danh sách IMEI đã chọn (bên phải) -->
+                            <div class="selected-imeis-container" style="max-width: 200px;">
+                                <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
+                                <div class="selected-imeis">
+                                    <ul>
+                                        <li v-for="imei in selectedImeis" :key="imei.id">
+                                            {{ imei.imei }}
+                                            <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
+                        </div>
+
+                        
 
                         <div class="modal-footer">
                             <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{
@@ -933,6 +958,7 @@ const selectInvoice = async (id) => {
                 addOrUpdateInvoice(res.data);
             }
             loadHoaDon()
+            getHdctByImeiDaBan()
         } catch (error) {
             console.error("Lỗi khi load chi tiết hóa đơn:", error);
         }
@@ -1198,6 +1224,42 @@ const fetchImeis = async (productId, page, size) => {
     }
 };
 
+// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
+const imeiSearchQuery = ref('');
+
+// Computed property để lọc danh sách IMEI dựa trên tìm kiếm
+const filteredImeis = computed(() => {
+    if (!imeiSearchQuery.value.trim()) {
+        return availableImeis.value;
+    }
+    return availableImeis.value.filter(imei =>
+        imei.imei.toLowerCase().includes(imeiSearchQuery.value.toLowerCase())
+    );
+});
+
+// Hàm tìm kiếm IMEI (được gọi khi input thay đổi)
+const searchImeis = async () => {
+    // Nếu có chuỗi tìm kiếm, lọc trực tiếp trên danh sách hiện tại
+    if (imeiSearchQuery.value.trim()) {
+        // Lọc trên client-side, không gọi lại API
+        return;
+    }
+    // Nếu không có chuỗi tìm kiếm, tải lại danh sách IMEI đầy đủ
+    await fetchImeis(selectedProductForImei.value.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
+};
+
+// Hàm xóa một IMEI khỏi danh sách đã chọn
+const removeImei = (imei) => {
+    selectedImeis.value = selectedImeis.value.filter(item => item.id !== imei.id);
+};
+
+// Cập nhật watch để reset tìm kiếm khi mở modal mới
+watch(isImeiModalOpen, (newVal) => {
+    if (newVal) {
+        imeiSearchQuery.value = ''; // Reset chuỗi tìm kiếm khi mở modal
+    }
+});
+
 // xử lý phân trang imei
 const goToImeiPage = async (page) => {
     console.log('page: ', page);
@@ -1269,7 +1331,7 @@ const isImeiSelected = (imei) => {
 // tự động chọn imei
 const autoSelectImeis = () => {
     const existingSelected = selectedImeis.value.filter(selected =>
-        availableImeis.value.some(available => available.id === selected.id)
+        filteredImeis.value.some(available => available.id === selected.id)
     );
 
     const remainingToSelect = quantityToSelect.value - existingSelected.length;
@@ -1279,7 +1341,7 @@ const autoSelectImeis = () => {
         return;
     }
 
-    const newSelections = availableImeis.value
+    const newSelections = filteredImeis.value
         .filter(imei => !existingSelected.some(selected => selected.id === imei.id))
         .slice(0, remainingToSelect);
 
