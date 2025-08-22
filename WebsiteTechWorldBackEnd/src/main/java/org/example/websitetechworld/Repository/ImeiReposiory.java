@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Repository;
 
+import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -69,4 +70,6 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     Integer soLuongImei(@Param("trangThaiImei") TrangThaiImei trangThaiImei, @Param("idSpct") Integer idSpct);
 
     int countByIdSanPhamChiTietIdAndTrangThaiImeiNot(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei);
+
+    Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImeiAndSoImeiContainingIgnoreCase(Integer idSanPhamChiTietId, TrangThaiImei trangThaiImei, @Size(max = 70) String soImei, Pageable pageable);
 }
