@@ -23,8 +23,8 @@ public class SignUpController {
     private final ClientService clientService;
 
     //dang ki tai khoan (Client)
-    @PostMapping("/register")
-    public ResponseEntity<?> addClient(@RequestBody @Valid ClientRequest khachHang, BindingResult bindingResult) {
+    @PostMapping("/register/verify")
+    public ResponseEntity<?> registerVerify(@RequestBody @Valid ClientRequest khachHang, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<Map<String, String>> errors = bindingResult.getFieldErrors()
                     .stream()
@@ -34,7 +34,7 @@ public class SignUpController {
             return ResponseEntity.badRequest().body(errors);
         }
         try {
-            return ResponseEntity.ok(clientService.addClient(khachHang));
+            return ResponseEntity.ok(clientService.verifyRegister(khachHang));
         }
         catch (ValidationException e) {
             // Bắt riêng FieldException trả lỗi với field cụ thể
@@ -52,4 +52,75 @@ public class SignUpController {
             );
         }
     }
+
+    // Xác nhận mã và hoàn tất đăng ký
+    @PostMapping("/register/complete")
+    public ResponseEntity<?> completeRegistration(@RequestBody Map<String, String> requestData) {
+        String email = requestData.get("email");
+        String verificationCode = requestData.get("verificationCode");
+
+        // Validate input
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    List.of(Map.of("field", "email", "message", "Email không được để trống"))
+            );
+        }
+
+        if (verificationCode == null || verificationCode.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    List.of(Map.of("field", "verificationCode", "message", "Mã xác nhận không được để trống"))
+            );
+        }
+
+        try {
+            Map<String, Object> result = clientService.completeRegistration(email, verificationCode);
+            return ResponseEntity.ok(result);
+        }
+        catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    List.of(Map.of("field", "other", "message", e.getMessage()))
+            );
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
+            );
+        }
+    }
+
+    // API để gửi lại mã xác nhận
+    @PostMapping("/register/resend-code")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody Map<String, String> requestData) {
+        String email = requestData.get("email");
+
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    List.of(Map.of("field", "email", "message", "Email không được để trống"))
+            );
+        }
+
+        try {
+            boolean sent = clientService.sendRegistrationVerificationEmail(email);
+            if (sent) {
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "Mã xác nhận đã được gửi lại đến email của bạn"
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        List.of(Map.of("field", "email", "message", "Không thể gửi lại mã xác nhận"))
+                );
+            }
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
+            );
+        }
+    }
+
+
 }
