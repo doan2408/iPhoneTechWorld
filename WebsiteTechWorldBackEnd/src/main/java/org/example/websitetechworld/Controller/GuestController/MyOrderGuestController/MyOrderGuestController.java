@@ -65,9 +65,9 @@ public class MyOrderGuestController {
                     .body("Xóa thất bại: " + e.getMessage());
         }
     }
-    @GetMapping("/{hoaDonId}/hdct-by-imei-da-ban")
-    public ResponseEntity<List<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@PathVariable(value = "hoaDonId") Integer hoaDonId){
-        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(hoaDonId));
+    @GetMapping("/{ctHoaDonId}/hdct-by-imei-da-ban")
+    public ResponseEntity<List<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@PathVariable(value = "ctHoaDonId") Integer ctHoaDonId){
+        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(ctHoaDonId));
     }
 
     @GetMapping("/{idHoaDon}")

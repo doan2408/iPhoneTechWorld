@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -142,7 +143,15 @@ public class GioHangClientService {
             if (giaGoc == null) {
                 return BigDecimal.ZERO;
             }
-            KhuyenMai khuyenMai = spct.getIdKhuyenMai();
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
             if (khuyenMai == null) {
                 return giaGoc;
             }

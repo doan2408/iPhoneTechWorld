@@ -6,14 +6,13 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.KhuyenMaiAdminRes
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
 import org.example.websitetechworld.Entity.KhuyenMai;
+import org.example.websitetechworld.Entity.KhuyenMaiSanPhamChiTiet;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Events.KhuyenMaiUpdatedEvent;
-import org.example.websitetechworld.Events.PhieuGiamGiaUpdatedEvent;
-import org.example.websitetechworld.Repository.KhuyenMaiRepository;
-import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
-import org.example.websitetechworld.Repository.SanPhamRepository;
+import org.example.websitetechworld.Repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -22,10 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +37,8 @@ public class KhuyenMaiAdminService {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final KhuyenMaiSanPhamChiTietRepo khuyenMaiSanPhamChiTietRepo;
+    private final HoaDonRepository hoaDonRepository;
 
     public Page<KhuyenMaiAdminResponse> getAllKhuyenMai(String search, TrangThaiKhuyenMai trangThai,
                                                         LocalDate ngayBatDau, LocalDate ngayKetThuc,
@@ -58,15 +60,16 @@ public class KhuyenMaiAdminService {
     @Transactional
     public KhuyenMaiAdminResponse createKhuyenMai(KhuyenMaiAdminRequest request) {
         validateRequest(request);
-        validateSanPhamChiTiet(request.getIdSanPhamChiTietList(), null);
-
         if (request.getMaKhuyenMai() == null || request.getMaKhuyenMai().trim().isEmpty()) {
             request.setMaKhuyenMai(taoMaGiamGiaNgauNhien());
         }
-
         KhuyenMai khuyenMai = modelMapper.map(request, KhuyenMai.class);
+        khuyenMai.setMucDoUuTien(request.getMucDoUuTien() != null ? request.getMucDoUuTien() : 1);
+        LocalDateTime now = LocalDateTime.now();
+        khuyenMai.setNgayTao(now);
+        khuyenMai.setTrangThai(xacDinhTrangThaiKhuyenMai(khuyenMai, now));
         khuyenMai = khuyenMaiRepository.save(khuyenMai);
-        updateSanPhamChiTiet(khuyenMai, request.getIdSanPhamChiTietList());
+        updateKhuyenMaiSanPhamChiTiet(khuyenMai, request.getIdSanPhamChiTietList());
         eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
 
         return mapToKhuyenMaiResponse(khuyenMai);
@@ -77,20 +80,13 @@ public class KhuyenMaiAdminService {
         KhuyenMai khuyenMai = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Khuyến mại không tồn tại: " + id));
         validateRequest(request);
-        validateSanPhamChiTiet(request.getIdSanPhamChiTietList(), id);
 
         modelMapper.map(request, khuyenMai);
+        khuyenMai.setMucDoUuTien(request.getMucDoUuTien() != null ? request.getMucDoUuTien() : 1);
         khuyenMai = khuyenMaiRepository.save(khuyenMai);
-
-        List<SanPhamChiTiet> currentSpcts = sanPhamChiTietRepository.findAllByIdKhuyenMai_Id(id);
-        currentSpcts.stream()
-                .filter(spct -> !request.getIdSanPhamChiTietList().contains(spct.getId()))
-                .forEach(spct -> {
-                    spct.setIdKhuyenMai(null);
-                    sanPhamChiTietRepository.save(spct);
-                });
-        updateSanPhamChiTiet(khuyenMai, request.getIdSanPhamChiTietList());
+        updateKhuyenMaiSanPhamChiTiet(khuyenMai, request.getIdSanPhamChiTietList());
         eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
+
         return mapToKhuyenMaiResponse(khuyenMai);
     }
 
@@ -98,13 +94,10 @@ public class KhuyenMaiAdminService {
     public void deleteKhuyenMai(Integer id) {
         KhuyenMai khuyenMai = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Khuyến mại không tồn tại: " + id));
-        sanPhamChiTietRepository.findAllByIdKhuyenMai_Id(id)
-                .forEach(spct -> {
-                    spct.setIdKhuyenMai(null);
-                    sanPhamChiTietRepository.save(spct);
-                });
-        eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
+        List<KhuyenMaiSanPhamChiTiet> danhSachCanXoa = khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(id);
+        khuyenMaiSanPhamChiTietRepo.deleteAll(danhSachCanXoa);
         khuyenMaiRepository.delete(khuyenMai);
+        eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
     }
 
     public List<SanPhamAdminResponse> layDanhSachSanPham(String timKiem, String filter) {
@@ -127,28 +120,28 @@ public class KhuyenMaiAdminService {
     }
 
     public List<SanPhamChiTietResponse> getSanPhamChiTietByIdKhuyenMai(Integer id) {
-        return sanPhamChiTietRepository.findAllByIdKhuyenMai_Id(id)
-                .stream()
+        List<KhuyenMaiSanPhamChiTiet> danhSachSpct = khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(id);
+
+        return danhSachSpct.stream()
+                .map(KhuyenMaiSanPhamChiTiet::getIdSanPhamChiTiet)
                 .map(this::mapToSanPhamChiTietResponse)
                 .collect(Collectors.toList());
     }
 
-    public KhuyenMaiAdminResponse getExistingPromotions(Integer sanPhamChiTietId) {
+    public List<KhuyenMaiAdminResponse> getExistingPromotions(Integer sanPhamChiTietId) {
         SanPhamChiTiet spct = sanPhamChiTietRepository.findById(sanPhamChiTietId)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại: " + sanPhamChiTietId));
-        return spct.getIdKhuyenMai() != null ? mapToKhuyenMaiResponse(spct.getIdKhuyenMai()) : null;
-    }
 
-    @Transactional
-    public SanPhamChiTietResponse removeProductFromPromotions(Integer sanPhamChiTietId, Integer khuyenMaiId) {
-        SanPhamChiTiet spct = sanPhamChiTietRepository.findById(sanPhamChiTietId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại: " + sanPhamChiTietId));
-        if (spct.getIdKhuyenMai() != null
-                && khuyenMaiId != null
-                && khuyenMaiId.equals(spct.getIdKhuyenMai().getId())) {
-            spct.setIdKhuyenMai(null);
+        List<KhuyenMaiSanPhamChiTiet> danhSachKhuyenMai = khuyenMaiSanPhamChiTietRepo.findByIdSanPhamChiTiet_Id(spct.getId());
+
+        if (danhSachKhuyenMai == null || danhSachKhuyenMai.isEmpty()) {
+            return Collections.emptyList();
         }
-        return mapToSanPhamChiTietResponse(sanPhamChiTietRepository.save(spct));
+
+        return danhSachKhuyenMai.stream()
+                .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                .map(this::mapToKhuyenMaiResponse)
+                .collect(Collectors.toList());
     }
 
     private void validateRequest(KhuyenMaiAdminRequest request) {
@@ -157,30 +150,30 @@ public class KhuyenMaiAdminService {
         }
     }
 
-    private void validateSanPhamChiTiet(List<Integer> spctIds, Integer khuyenMaiId) {
-        spctIds.forEach(spctId -> {
-            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(spctId)
-                    .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại: " + spctId));
-            if (spct.getIdKhuyenMai() != null && (!spct.getIdKhuyenMai().getId().equals(khuyenMaiId))) {
-                throw new IllegalStateException("Sản phẩm chi tiết ID " + spctId + " đã được áp dụng trong khuyến mãi: " + spct.getIdKhuyenMai().getTenKhuyenMai());
-            }
-        });
-    }
+    private void updateKhuyenMaiSanPhamChiTiet(KhuyenMai khuyenMai, List<Integer> spctIds) {
 
-    private void updateSanPhamChiTiet(KhuyenMai khuyenMai, List<Integer> spctIds) {
-        spctIds.forEach(spctId -> {
-            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(spctId)
-                    .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại: " + spctId));
-            spct.setIdKhuyenMai(khuyenMai);
-            sanPhamChiTietRepository.save(spct);
-        });
+        List<KhuyenMaiSanPhamChiTiet> sanPhamChiTietsCu = khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(khuyenMai.getId());
+        sanPhamChiTietsCu.stream()
+                .filter(kmSpct -> !spctIds.contains(kmSpct.getIdSanPhamChiTiet().getId()))
+                .forEach(khuyenMaiSanPhamChiTietRepo::delete);
+
+        spctIds.stream()
+                .filter(idSpct -> sanPhamChiTietsCu.stream()
+                        .noneMatch(old -> old.getIdSanPhamChiTiet().getId().equals(idSpct)))
+                .forEach(idSpct -> {
+                    SanPhamChiTiet spct = sanPhamChiTietRepository.findById(idSpct)
+                            .orElseThrow(() -> new IllegalArgumentException("Sản phẩm chi tiết không tồn tại: " + idSpct));
+                    KhuyenMaiSanPhamChiTiet kmSpct = new KhuyenMaiSanPhamChiTiet();
+                    kmSpct.setIdKhuyenMai(khuyenMai);
+                    kmSpct.setIdSanPhamChiTiet(spct);
+                    khuyenMaiSanPhamChiTietRepo.save(kmSpct);
+                });
     }
 
     private KhuyenMaiAdminResponse mapToKhuyenMaiResponse(KhuyenMai khuyenMai) {
         KhuyenMaiAdminResponse response = modelMapper.map(khuyenMai, KhuyenMaiAdminResponse.class);
-        response.setIdSanPhamChiTietList(sanPhamChiTietRepository.findAllByIdKhuyenMai_Id(khuyenMai.getId())
-                .stream()
-                .map(SanPhamChiTiet::getId)
+        response.setIdSanPhamChiTietList(khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(khuyenMai.getId())
+                .stream().map(kmSpct -> kmSpct.getIdSanPhamChiTiet().getId())
                 .collect(Collectors.toList()));
         return response;
     }
@@ -206,8 +199,13 @@ public class KhuyenMaiAdminService {
         response.setDungLuongRom(spct.getIdRom() != null ? spct.getIdRom().getDungLuong() : null);
         response.setGiaBan(spct.getGiaBan());
         response.setIdSanPham(spct.getIdSanPham() != null ? spct.getIdSanPham().getId() : null);
-        response.setIdKhuyenMai(spct.getIdKhuyenMai() != null ? spct.getIdKhuyenMai().getId() : null);
-        response.setMaKhuyenMai(spct.getIdKhuyenMai() != null ? spct.getIdKhuyenMai().getMaKhuyenMai() : null);
+        response.setIdKhuyenMais(
+                spct.getDanhSachKhuyenMai() == null ?
+                        Collections.emptyList() :
+                        spct.getDanhSachKhuyenMai().stream()
+                                .map(kmSpct -> kmSpct.getIdKhuyenMai().getId())
+                                .toList()
+        );
         return response;
     }
 
@@ -221,21 +219,81 @@ public class KhuyenMaiAdminService {
 
     @Transactional
     public void capNhatTrangThaiKhuyenMai (LocalDateTime hienTai) {
-        List<KhuyenMai> danhSachKhuenMai = khuyenMaiRepository.findAllByTrangThaiIn(List.of(TrangThaiKhuyenMai.NOT_STARTED, TrangThaiKhuyenMai.ACTIVE));
-        for (KhuyenMai khuyenMai : danhSachKhuenMai) {
-            TrangThaiKhuyenMai trangThaiMoi = xacDinhTrangThaiKhuyenMai(khuyenMai, hienTai);
-            if (khuyenMai.getTrangThai() != trangThaiMoi) {
-                khuyenMai.setTrangThai(trangThaiMoi);
-                if (khuyenMai.getTrangThai() == TrangThaiKhuyenMai.EXPIRED) {
-                    sanPhamChiTietRepository.findAllByIdKhuyenMai_Id(khuyenMai.getId())
-                            .forEach(spct -> {
-                                spct.setIdKhuyenMai(null);
-                                sanPhamChiTietRepository.save(spct);
-                            });
-                }
-                khuyenMaiRepository.save(khuyenMai);
-            }
+        List<KhuyenMai> danhSachKhuyenMai = khuyenMaiRepository.findAllByTrangThaiIn(List.of(TrangThaiKhuyenMai.NOT_STARTED, TrangThaiKhuyenMai.ACTIVE));
+        List<KhuyenMai> khuyenMaiCanCapNhat = danhSachKhuyenMai.stream()
+                .filter(km -> {
+                    TrangThaiKhuyenMai trangThaiMoi = xacDinhTrangThaiKhuyenMai(km, hienTai);
+                    if (km.getTrangThai() != trangThaiMoi) {
+                        km.setTrangThai(trangThaiMoi);
+                        return true;
+                    }
+                    return false;
+                })
+                .toList();
+        if (!khuyenMaiCanCapNhat.isEmpty()) {
+            khuyenMaiRepository.saveAll(khuyenMaiCanCapNhat);
         }
+    }
+
+    public BigDecimal tinhGiaSauKhuyenMai (SanPhamChiTiet spct, Integer selectedIdKhachHang) {
+        try {
+            if (spct == null || spct.getGiaBan() == null) {
+                return BigDecimal.ZERO;
+            }
+            BigDecimal giaGoc = spct.getGiaBan();
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .toList();
+
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> {
+                        TrangThaiKhuyenMai trangThai = xacDinhTrangThaiKhuyenMai(km, hienTai);
+                        return trangThai == TrangThaiKhuyenMai.ACTIVE;
+                    })
+                    .max(Comparator
+                            .comparingInt((KhuyenMai km) -> km.getMucDoUuTien() != null ? km.getMucDoUuTien() : 1)
+                            .thenComparing(KhuyenMai::getNgayTao))
+                    .orElse(null);
+            if (khuyenMai == null) {
+                return giaGoc;
+            }
+            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
+                return giaGoc;
+            }
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
+                return giaGoc;
+            }
+
+            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
+            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
+            if (doiTuong == DoiTuongApDung.ALL) {
+                return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+            }
+            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
+                return giaGoc;
+            }
+            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
+            boolean khongHopLe =
+                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
+                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
+            if (khongHopLe) {
+                return giaGoc;
+            }
+
+            return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+        } catch (Exception e) {
+            return spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
+        return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
     }
 
     private TrangThaiKhuyenMai xacDinhTrangThaiKhuyenMai (KhuyenMai khuyenMai, LocalDateTime hienTai) {

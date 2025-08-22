@@ -8,6 +8,7 @@ import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,7 +43,16 @@ public class KhuyenMai {
     @Column(name = "doi_tuong_ap_dung", length = 50)
     private DoiTuongApDung doiTuongApDung;
 
+    @Column(name = "muc_do_uu_tien")
+    private Integer mucDoUuTien;
+
+    @Column(name = "ngay_tao")
+    private LocalDateTime ngayTao;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 50)
     private TrangThaiKhuyenMai trangThai;
+
+    @OneToMany(mappedBy = "idKhuyenMai", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KhuyenMaiSanPhamChiTiet> danhSachSanPham;
 }

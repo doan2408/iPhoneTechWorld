@@ -25,7 +25,7 @@
                     </div>
                     <div class="info-item">
                         <label>Khách hàng:</label>
-                        <span>{{ orderInformation.tenKhachHang }}</span>
+                        <span>{{ orderInformation.tenKhachHang || 'Khách vãng lai' }}</span>
                     </div>
                     <div class="info-item">
                         <label>Số điện thoại:</label>
@@ -66,24 +66,9 @@
                                 🚚 Giao lại
                             </button>
 
-                            <button class="toolbar-btn cancel" @click="processBulk('cancel')"
-                                :disabled="selectedImeis.length === 0" title="Hủy bỏ">
-                                ❌ Hủy bỏ
-                            </button>
-
-                            <button class="toolbar-btn return" @click="processBulk('return-to-stock')"
+                            <button class="toolbar-btn return" @click="processBulk('return_to_stock')"
                                 :disabled="selectedImeis.length === 0" title="Trả kho">
                                 📦 Trả kho
-                            </button>
-
-                            <button class="toolbar-btn refund" @click="processBulk('refund')"
-                                :disabled="selectedImeis.length === 0" title="Hoàn tiền">
-                                💰 Hoàn tiền
-                            </button>
-
-                            <button class="toolbar-btn exchange" @click="processBulk('exchange')"
-                                :disabled="selectedImeis.length === 0" title="Trao đổi">
-                                🔄 Trao đổi
                             </button>
                         </div>
                     </div>
@@ -108,6 +93,7 @@
                                     <th>IMEI</th>
                                     <th>Sản phẩm</th>
                                     <th>Trạng thái</th>
+                                    <th>Giá bán</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -125,33 +111,22 @@
                                             {{ getImeiStatusText(imei.trangThaiDon) }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <span> {{ formatPrice(imei.donGia) }}</span>
+                                    </td>
                                     <td class="action-col">
                                         <div class="row-actions">
-                                            <!-- <button class="action-btn retry"
-                                                @click="openConfirm('Bạn có chắc chắn muốn dữ lại?', () => processImei(imei.soImei,'hold'))"
-                                                title="Dữ lại">
-                                                ♻️
-                                            </button> -->
-
-                                            <button class="action-btn cancel"
-                                                @click="openConfirm('Bạn có chắc chắn muốn hủy yêu cầu này?', () => processImei(imei.soImei, 'cancel'))"
-                                                title="Hủy bỏ">
-                                                ❌
-                                            </button>
 
                                             <button class="action-btn return"
                                                 @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"
-                                                title="Trả kho">
+                                                title="Trả kho" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK'" >
                                                 📦
                                             </button>
 
-                                            <button class="action-btn refund"
-                                                @click="processImei(imei.soImei, 'refund')" title="Hoàn tiền">
+                                            <button class=" action-btn refund"
+                                                @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
+                                                title="Hoàn tiền" :disabled="!imei.trangThaiDon === 'RETURN_TO_STOCK'">
                                                 💰
-                                            </button>
-                                            <button class="action-btn exchange"
-                                                @click="processImei(imei.soImei, 'exchange')" title="Trao đổi">
-                                                ♻️
                                             </button>
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
                                                 @confirm="handleConfirm" @cancel="showConfirm = false" />
@@ -160,6 +135,10 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="mt-4" style="color: red;">
+                            <strong>Số tiền cần trả:</strong>
+                            {{ formatPrice(orderProduct[0]?.soTienHoan) }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,25 +161,12 @@
                         <label>Ghi chú khách hàng:</label>
                         <span>{{ orderInformation.customerNote }}</span>
                     </div>
-                    <div class="contact-item">
-                        <label>Lịch sử liên hệ:</label>
-                        <div class="contact-history">
-                            <div class="history-item">
-                                <span class="history-date">15/01/2024 - 14:30</span>
-                                <span class="history-content">Đã gọi điện, khách không nghe máy</span>
-                            </div>
-                            <div class="history-item">
-                                <span class="history-date">14/01/2024 - 09:15</span>
-                                <span class="history-content">Gửi SMS thông báo giao hàng</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <!-- Warranty Tracking -->
             <div class="warranty-section">
-                <h2>Theo dõi bảo hành</h2>
+                <h2>Theo dõi bảo hành ( Mẫu )</h2>
                 <div class="warranty-grid">
                     <div class="warranty-item">
                         <label>Thời gian bảo hành còn lại:</label>
@@ -222,46 +188,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Processing Actions -->
-            <div class="actions-section">
-                <h2>Xử lý chi tiết</h2>
-                <div class="action-form">
-                    <div class="form-group">
-                        <label for="action-type">Loại hành động:</label>
-                        <select id="action-type" v-model="selectedAction">
-                            <option value="">Chọn hành động</option>
-                            <option value="retry">RETRY - Giao lại</option>
-                            <option value="cancel">CANCEL - Hủy bỏ</option>
-                            <option value="return-to-stock">RETURN_TO_STOCK - Trả lại kho</option>
-                            <option value="refund">REFUND - Hoàn tiền</option>
-                            <option value="exchange">EXCHANGE - Trao đổi</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" v-if="selectedAction === 'retry'">
-                        <label for="delivery-date">Ngày giao lại:</label>
-                        <input type="date" id="delivery-date" v-model="deliveryDate">
-                    </div>
-
-                    <div class="form-group" v-if="selectedAction === 'refund'">
-                        <label for="refund-amount">Số tiền hoàn:</label>
-                        <input type="number" id="refund-amount" v-model="refundAmount" :max="order.amount">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="processing-note">Ghi chú xử lý:</label>
-                        <textarea id="processing-note" v-model="processingNote" rows="4"
-                            placeholder="Nhập ghi chú về việc xử lý..."></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn-secondary" @click="saveDraft">Lưu nháp</button>
-                        <button class="btn-primary" @click="processOrder" :disabled="!selectedAction">Xử lý đơn
-                            hàng</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </template>
@@ -272,6 +198,7 @@ import { getAllCtXuLy, changeStatusPending } from '@/Service/GuestService/Action
 import { useRoute } from 'vue-router'
 import { hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import router from '@/router'
 
 const route = useRoute()
 const idHoaDon = route.params.idHoaDon
@@ -387,7 +314,7 @@ const viewWarrantyCenter = () => {
 }
 
 const goBack = () => {
-    console.log('[v0] Navigating back to main page')
+    router.push(`/admin/handle`)
 }
 
 const saveDraft = () => {
@@ -429,7 +356,7 @@ const processBulk = async (action) => {
         alert('Vui lòng chọn ít nhất một IMEI!')
         return
     }
-
+    console.log(selectedImeis.value);
     console.log(`[v0] Processing ${selectedImeis.value.length} IMEIs with action: ${action}`)
     alert(`Xử lý ${selectedImeis.value.length} IMEI với hành động: ${getActionText(action)}`)
 
@@ -437,23 +364,32 @@ const processBulk = async (action) => {
         case 'retry':
             retryDelivery()
             break
+        case 'return_to_stock':
+            returnToStockDelivery(selectedImeis.value,action)
+            break
         default:
             alert(`Hành động ${action} chưa được hỗ trợ!`)
     }
 
     selectedImeis.value = []
 }
-
+const returnToStockDelivery = async (selectedImeis, action) => {
+    const status = action.toUpperCase() 
+    const res = await changeStatusPending(selectedImeis, status)
+    orderSanPham()
+    orderInformations()
+}
 
 const retryDelivery = () => {
-    selectedAction.value = 'retry'
-    deliveryDate.value = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    
 }
 
 const processImei = async (imeiCode, action) => {
-    console.log(`[v0] Processing IMEI ${imeiCode} with action: ${action}`)
-    const status = action.toUpperCase()    
-    const res = await changeStatusPending(imeiCode,status)
+    const status = action.toUpperCase() 
+
+    const imeiList = [imeiCode];  
+
+    const res = await changeStatusPending(imeiList,status)
     orderSanPham()
     orderInformations()
 }

@@ -34,8 +34,9 @@
                         <el-select v-model="trangThai" placeholder="Chọn trạng thái" clearable class="filter-select"
                             @change="fetchKhuyenMai">
                             <el-option label="Tất cả" value="" />
+                            <el-option label="Chưa bắt đầu" value="NOT_STARTED" />
                             <el-option label="Đang hoạt động" value="ACTIVE" />
-                            <el-option label="Hết hạn" value="IN_ACTIVE" />
+                            <el-option label="Đã hết hạn" value="EXPIRED" />
                         </el-select>
                     </div>
                     <div class="filter-item">
@@ -88,6 +89,13 @@
                     <template #default="scope">
                         <div class="value-cell">
                             <span class="discount-percent">{{ scope.row.phanTramGiam }}%</span>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="Mức độ ưu tiên" width="140" align="center">
+                    <template #default="scope">
+                        <div class="value-cell">
+                            <span class="priority-level">{{ converMucDoUuTien(scope.row.mucDoUuTien) }}</span>
                         </div>
                     </template>
                 </el-table-column>
@@ -164,6 +172,15 @@
                                     <el-input-number v-model="form.phanTramGiam" :min="1" :max="100" placeholder="0"
                                         class="full-width" />
                                 </el-form-item>
+                                <el-form-item label="Mức độ ưu tiên" prop="mucDoUuTien" class="form-item">
+                                        <el-select v-model="form.mucDoUuTien" placeholder="Chọn đối tượng áp dụng">
+                                        <el-option label="Cao" value="3" />
+                                        <el-option label="Trung bình" value="2" />
+                                        <el-option label="Thấp" value="1" />
+                                    </el-select>
+                                </el-form-item>
+                            </div>
+                            <div class="form-row">
                                 <el-form-item label="Đối tượng áp dụng" prop="doiTuongApDung" class="form-item">
                                     <el-select v-model="form.doiTuongApDung" placeholder="Chọn đối tượng áp dụng">
                                         <el-option label="Tất cả" value="ALL" />
@@ -182,13 +199,13 @@
                             <div class="form-row">
                                 <el-form-item label="Thời gian bắt đầu" prop="ngayBatDau" class="form-item">
                                     <el-date-picker v-model="form.ngayBatDau" type="datetime"
-                                        placeholder="Chọn thời gian bắt đầu" value-format="YYYY-MM-DD HH:mm:ss"
-                                        class="full-width" />
+                                        placeholder="Chọn thời gian bắt đầu" value-format="YYYY-MM-DD HH:mm"
+                                        class="full-width" @change="handleNgayBatDauChange"/>
                                 </el-form-item>
                                 <el-form-item label="Thời gian kết thúc" prop="ngayKetThuc" class="form-item">
                                     <el-date-picker v-model="form.ngayKetThuc" type="datetime"
-                                        placeholder="Chọn thời gian kết thúc" value-format="YYYY-MM-DD HH:mm:ss"
-                                        class="full-width" />
+                                        placeholder="Chọn thời gian kết thúc" value-format="YYYY-MM-DD HH:mm"
+                                        class="full-width"/>
                                 </el-form-item>
                             </div>
                         </div>
@@ -213,7 +230,7 @@
                                 <el-button type="default" size="small" @click="resetProductFilters">Tất cả sản
                                     phẩm</el-button>
                             </div>
-                            <el-form-item label="Danh sách sản phẩm" prop="idSanPhamChiTietList"
+                            <el-form-item label="Danh sách sản phẩm" prop="idSanPhamList"
                                 class="form-item full-width" style="margin-top: 10px;">
                                 <el-table :data="displaySanPhams" class="product-table" border ref="productTable"
                                     v-loading="sanPhamLoading" :row-key="row => row.id">
@@ -242,7 +259,7 @@
                             </el-form-item>
 
                             <el-form-item label="Sản phẩm chi tiết" class="form-item full-width"
-                                v-if="selectedSanPhamIds.length">
+                                v-if="selectedSanPhamIds.length" prop="idSanPhamChiTietList">
                                 <el-table :data="paginatedSanPhamChiTiets" class="product-detail-table" border
                                     ref="sanPhamChiTietTable" v-loading="sanPhamChiTietLoading"
                                     :row-key="row => row.id">
@@ -267,82 +284,7 @@
                                             {{ formatCurrency(scope.row.giaBan) }}
                                         </template>
                                     </el-table-column>
-                                    <el-table-column label="Khuyến mãi hiện tại" width="180">
-                                        <template #default="{ row }">
-                                            <el-tag v-if="row.idKhuyenMai" type="warning">
-                                                {{ row.maKhuyenMai }}
-                                            </el-tag>
-                                            <span v-else>Chưa áp dụng</span>
-                                        </template>
-                                    </el-table-column>
                                 </el-table>
-
-                                <!-- Dialog hiển thị khuyến mãi hiện tại khi có xung đột -->
-                                <el-dialog v-model="promotionConflictDialog" title="Xung đột khuyến mãi" width="800px"
-                                    style="margin-top: 30px;" :close-on-click-modal="false"
-                                    class="promotion-conflict-dialog">
-                                    <div class="conflict-dialog-content">
-                                        <p class="conflict-message">Các sản phẩm chi tiết sau đã được áp dụng trong các
-                                            khuyến
-                                            mãi khác:</p>
-                                        <!-- Thêm trường tìm kiếm -->
-                                        <el-input v-model="conflictSearch"
-                                            placeholder="Tìm kiếm theo mã SPCT hoặc tên khuyến mãi..." clearable
-                                            class="conflict-search-input" @input="resetConflictPagination">
-                                            <template #prefix>
-                                                <el-icon class="search-icon">
-                                                    <Search />
-                                                </el-icon>
-                                            </template>
-                                        </el-input>
-                                        <el-table :data="paginatedConflictedSanPhamChiTiets" border
-                                            class="conflict-table">
-                                            <!-- Cột checkbox -->
-                                            <el-table-column width="80">
-                                                <template #header>
-                                                    <el-checkbox
-                                                        :model-value="paginatedConflictedSanPhamChiTiets.length > 0 && paginatedConflictedSanPhamChiTiets.every(spct => spct.selected)"
-                                                        @change="toggleAllConflictSelection">
-                                                    </el-checkbox>
-                                                </template>
-                                                <template #default="{ row }">
-                                                    <el-checkbox v-model="row.selected" />
-                                                </template>
-                                            </el-table-column>
-                                            <el-table-column prop="maSanPhamChiTiet" label="Mã SPCT" width="150" />
-                                            <el-table-column label="Khuyến mãi hiện tại" min-width="200">
-                                                <template #default="{ row }">
-                                                    <el-tag type="warning" class="promotion-tag">
-                                                        {{ row.maKhuyenMai || 'Không xác định'
-                                                        }}
-                                                    </el-tag>
-                                                </template>
-                                            </el-table-column>
-                                        </el-table>
-                                        <!-- Thêm phân trang -->
-                                        <div class="pagination-wrapper">
-                                            <el-pagination background layout="total, sizes, prev, pager, next, jumper"
-                                                :current-page="conflictPagination.page"
-                                                :page-size="conflictPagination.size" :page-sizes="[5, 10, 20, 50]"
-                                                :total="filteredConflictedSanPhamChiTiets.length"
-                                                @current-change="updateConflictPage" @size-change="updateConflictSize"
-                                                class="custom-pagination" />
-                                        </div>
-                                        <p class="conflict-prompt">Bạn có muốn xóa các sản phẩm được chọn khỏi khuyến
-                                            mãi hiện
-                                            tại để áp dụng khuyến mãi mới?</p>
-                                    </div>
-                                    <template #footer>
-                                        <div class="dialog-footer">
-                                            <el-button @click="cancelPromotionSelection" size="large"
-                                                class="cancel-btn">Hủy</el-button>
-                                            <el-button type="primary" @click="applyAllPromotionSelection" size="large"
-                                                class="confirm-btn"
-                                                :disabled="!paginatedConflictedSanPhamChiTiets.some(spct => spct.selected)">Xác
-                                                nhận</el-button>
-                                        </div>
-                                    </template>
-                                </el-dialog>
                                 <div class="pagination-wrapper">
                                     <el-pagination background layout="total, sizes, prev, pager, next, jumper"
                                         :current-page="sanPhamChiTietPagination.page"
@@ -377,12 +319,15 @@
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Phần trăm giảm">{{ selectedKhuyenMai?.phanTramGiam
                         }}%</el-descriptions-item>
-                    <el-descriptions-item label="Đối tượng áp dụng">{{
-                        convertDoiTuongApDung(selectedKhuyenMai?.doiTuongApDung)
+                    <el-descriptions-item label="Mức độ ưu tiên">{{ 
+                        converMucDoUuTien(selectedKhuyenMai?.mucDoUuTien)
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Thời gian bắt đầu">{{ formatDateTime(selectedKhuyenMai?.ngayBatDau)
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Thời gian kết thúc">{{ formatDateTime(selectedKhuyenMai?.ngayKetThuc)
+                        }}</el-descriptions-item>
+                    <el-descriptions-item label="Đối tượng áp dụng">{{
+                        convertDoiTuongApDung(selectedKhuyenMai?.doiTuongApDung)
                         }}</el-descriptions-item>
                     <el-descriptions-item label="Trạng thái">{{ convertTrangThai(selectedKhuyenMai?.trangThai)
                         }}</el-descriptions-item>
@@ -426,7 +371,7 @@
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Edit, Delete, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
-import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai, removeProductFromPromotions, getKhuyenMai, nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
+import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai, getKhuyenMai, nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import store from '@/Service/LoginService/Store';
 
 const search = ref('');
@@ -476,14 +421,13 @@ const form = ref({
     tenKhuyenMai: '',
     moTa: '',
     phanTramGiam: 0,
+    mucDoUuTien: '1',
     ngayBatDau: '',
     ngayKetThuc: '',
     trangThai: '',
     doiTuongApDung: 'ALL',
     idSanPhamChiTietList: [],
 });
-
-const conflictedSanPhamChiTiets = ref([]);
 
 const formRef = ref(null);
 const rules = {
@@ -495,10 +439,27 @@ const rules = {
         { min: 3, message: 'Tên khuyến mãi phải có ít nhất 3 ký tự', trigger: 'blur' },
     ],
     phanTramGiam: [
-        { type: 'number', min: 1, max: 100, message: 'Phần trăm giảm phải từ 1-60', trigger: 'blur' },
+        { type: 'number', min: 1, max: 60, message: 'Phần trăm giảm phải từ 1-60', trigger: 'blur' },
+    ],
+    mucDoUuTien: [
+        { type: 'number', min: 1, max: 100, message: 'Mức độ ưu tiên phải từ 1-100', trigger: 'blur' },
     ],
     ngayBatDau: [
         { required: true, message: 'Thời gian bắt đầu là bắt buộc', trigger: 'change' },
+        {
+            validator: (rule, value, callback) => {
+                if (isEdit.value) {
+                    callback();
+                    return;
+                }
+                if (value && form.value.ngayBatDau && new Date(value) <= new Date()) {
+                    callback(new Error('Thời gian bắt đầu phải sau thời gian hiện tại'));
+                } else {
+                    callback();
+                }
+            },
+            trigger: 'change',
+        },
     ],
     ngayKetThuc: [
         { required: true, message: 'Thời gian kết thúc là bắt buộc', trigger: 'change' },
@@ -512,9 +473,6 @@ const rules = {
             },
             trigger: 'change',
         },
-    ],
-    idSanPhamList: [
-        { required: true, message: 'Vui lòng chọn ít nhất một sản phẩm', trigger: 'change', type: 'array', min: 1 },
     ],
     idSanPhamChiTietList: [
         { required: true, message: 'Vui lòng chọn ít nhất một sản phẩm chi tiết', trigger: 'change', type: 'array', min: 1 },
@@ -612,11 +570,8 @@ const fetchSanPhams = async () => {
     }
 };
 
-// Thêm biến để quản lý dialog xung đột khuyến mãi
-const promotionConflictDialog = ref(false);
 const selectedProductDetail = ref(null);
 
-const conflictSearch = ref('');
 const conflictPagination = ref({
     page: 1,
     size: 5,
@@ -629,156 +584,23 @@ const filteredConflictedSanPhamChiTiets = computed(() => {
     if (!searchTerm) return conflictedSanPhamChiTiets.value;
     return conflictedSanPhamChiTiets.value.filter(spct =>
         spct.maSanPhamChiTiet.toLowerCase().includes(searchTerm) ||
-        spct.isKhuyenMai.tenKhuyenMai.toLowerCase().includes(searchTerm)
+        spct.khuyenMais.some(km =>
+            km.maKhuyenMai.toLowerCase().includes(searchTerm) ||
+            km.tenKhuyenMai.toLowerCase().includes(searchTerm)
+        )
     );
 });
 
-// Computed property để hiển thị danh sách phân trang
-const paginatedConflictedSanPhamChiTiets = computed(() => {
-    const start = (conflictPagination.value.page - 1) * conflictPagination.value.size;
-    const end = start + conflictPagination.value.size;
-    return filteredConflictedSanPhamChiTiets.value.slice(start, end);
-});
-
-// Thêm hàm để chọn/bỏ chọn tất cả trong dialog xung đột
-const toggleAllConflictSelection = (val) => {
-    conflictedSanPhamChiTiets.value = conflictedSanPhamChiTiets.value.map(spct => ({
-        ...spct,
-        selected: val
-    }));
-};
-
-// Thêm hàm để reset trang khi tìm kiếm
-const resetConflictPagination = () => {
-    conflictPagination.value.page = 1;
-};
-
-// Thêm hàm để cập nhật trang
-const updateConflictPage = (page) => {
-    conflictPagination.value.page = page;
-};
-
-// Thêm hàm để cập nhật kích thước trang
-const updateConflictSize = (size) => {
-    conflictPagination.value.size = size;
-    conflictPagination.value.page = 1;
-};
-
 const toggleAllSpctSelection = async (val) => {
-    try {
-        if (!sanPhamChiTiets.value.length) {
-            ElMessage.warning('Không có sản phẩm chi tiết để xử lý');
-            return;
+    const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
+    const end = Math.min(start + sanPhamChiTietPagination.value.size, sanPhamChiTiets.value.length);
+    sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
+        if (index >= start && index < end) {
+            return { ...spct, selected: val };
         }
-
-        const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
-        const end = Math.min(start + sanPhamChiTietPagination.value.size, sanPhamChiTiets.value.length);
-
-        conflictedSanPhamChiTiets.value = [];
-
-        if (val) {
-            const currentPageSpcts = sanPhamChiTiets.value.slice(start, end);
-            for (const spct of currentPageSpcts) {
-                if (spct.idKhuyenMai && (!isEdit.value || spct.idKhuyenMai !== form.value.id)) {
-                    spct.selected = true;
-                    conflictedSanPhamChiTiets.value.push(spct);
-                }
-            }
-            if (conflictedSanPhamChiTiets.value.length > 0) {
-                conflictSearch.value = '';
-                conflictPagination.value.page = 1;
-                promotionConflictDialog.value = true;
-                return;
-            }
-            sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
-                if (index >= start && index < end) {
-                    return { ...spct, selected: true };
-                }
-                return spct;
-            });
-        } else {
-            sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
-                if (index >= start && index < end) {
-                    return { ...spct, selected: false };
-                }
-                return spct;
-            });
-        }
-        updateSanPhamChiTietSelection();
-    } catch (error) {
-        console.error('Lỗi trong toggleAllSpctSelection:', error);
-        ElMessage.error({
-            message: error.response?.data?.message || 'Lỗi khi xử lý lựa chọn sản phẩm chi tiết',
-            type: 'error',
-        });
-    }
-};
-
-// Hàm kiểm tra khuyến mãi hiện tại của sản phẩm chi tiết
-const checkExistingPromotions = async (row) => {
-    if (row.selected) {
-        try {
-            // Giả sử có API để kiểm tra khuyến mãi hiện tại của sản phẩm chi tiết
-            const response = await getKhuyenMai(row.id);
-            if (response) {
-                row.idKhuyenMai = response.id;
-                row.selected = true;
-                conflictedSanPhamChiTiets.value = [row];
-                conflictSearch.value = '';
-                conflictPagination.value.page = 1;
-                promotionConflictDialog.value = true;
-            } else {
-                row.isKhuyenMai = 0;
-                updateSanPhamChiTietSelection();
-            }
-        } catch (error) {
-            console.error(error)
-            ElMessage.error('Lỗi khi kiểm tra khuyến mãi hiện tại');
-        }
-    } else {
-        row.isKhuyenMai = 0;
-        updateSanPhamChiTietSelection();
-    }
-};
-
-
-// Hàm hủy chọn khuyến mãi
-const cancelPromotionSelection = () => {
-    conflictedSanPhamChiTiets.value.forEach(spct => {
-        spct.selected = false;
-        spct.isKhuyenMai = [];
+        return spct;
     });
-    conflictedSanPhamChiTiets.value = [];
-    conflictSearch.value = '';
-    conflictPagination.value.page = 1;
-    promotionConflictDialog.value = false;
     updateSanPhamChiTietSelection();
-};
-
-// Hàm áp dụng lựa chọn khuyến mãi
-const applyAllPromotionSelection = async () => {
-    try {
-        const selectedSpcts = conflictedSanPhamChiTiets.value.filter(spct => spct.selected);
-        if (selectedSpcts.length === 0) {
-            ElMessage.warning('Vui lòng chọn ít nhất một sản phẩm để thay đổi khuyến mãi');
-            return;
-        }
-        for (const spct of selectedSpcts) {
-            if (spct.idKhuyenMai) {
-                await removeProductFromPromotions(spct.id, spct.idKhuyenMai);
-            }
-            spct.idKhuyenMai = 0;
-        }
-        ElMessage.success('Đã xóa các sản phẩm được chọn khỏi khuyến mãi hiện tại');
-        conflictedSanPhamChiTiets.value = [];
-        conflictSearch.value = '';
-        conflictPagination.value.page = 1;
-        promotionConflictDialog.value = false;
-        updateSanPhamChiTietSelection();
-    } catch (error) {
-        console.error('Lỗi cập nhật khuyến mãi:', error);
-        ElMessage.error(error?.response?.data?.message || 'Lỗi khi cập nhật khuyến mãi');
-    }
 };
 
 const updateSanPhamChiTietSelection = () => {
@@ -847,6 +669,7 @@ const openCreateDialog = () => {
         tenKhuyenMai: '',
         moTa: '',
         phanTramGiam: 0,
+        mucDoUuTien: '1',
         ngayBatDau: '',
         ngayKetThuc: '',
         trangThai: '',
@@ -864,15 +687,19 @@ const openCreateDialog = () => {
         fetchSanPhams();
         if (productTable.value) productTable.value.clearSelection();
         if (sanPhamChiTietTable.value) sanPhamChiTietTable.value.clearSelection();
+        if (formRef.value) formRef.value.clearValidate();
     });
 };
 
 const openEditDialog = async (item) => {
     isEdit.value = true;
+    if (formRef.value) formRef.value.clearValidate();
     form.value = {
         ...item,
         doiTuongApDung: item.doiTuongApDung || 'ALL',
-        idSanPhamChiTietList: item.idSanPhamChiTietList || []
+        mucDoUuTien: item.mucDoUuTien || '1',
+        idSanPhamChiTietList: item.idSanPhamChiTietList || [],
+        mucDoUuTien: item.mucDoUuTien || 1
     };
     selectedSanPhamChiTietIds.value = form.value.idSanPhamChiTietList;
     selectedSanPhamIds.value = [];
@@ -905,17 +732,9 @@ const saveKhuyenMai = async () => {
                 loading.value = true;
                 const payload = {
                     ...form.value,
-                    trangThai: 'ACTIVE',
                     ngayBatDau: formatToSQLDateTime(form.value.ngayBatDau),
                     ngayKetThuc: formatToSQLDateTime(form.value.ngayKetThuc),
                 };
-                // Kiểm tra và xóa khuyến mãi hiện tại cho các SanPhamChiTiet được chọn
-                for (const spctId of form.value.idSanPhamChiTietList) {
-                    const isKhuyenMai = await getKhuyenMai(spctId);
-                    if (isKhuyenMai > 0 && (!isEdit.value || isKhuyenMai.id !== form.value.id)) {
-                        await removeProductFromPromotions(spctId, isKhuyenMai.id);
-                    }
-                }
                 if (isEdit.value) {
                     await updateKhuyenMai(form.value.id, payload);
                     ElMessage.success('Cập nhật khuyến mãi thành công');
@@ -926,7 +745,7 @@ const saveKhuyenMai = async () => {
                 dialog.value = false;
                 fetchKhuyenMai();
             } catch (error) {
-                ElMessage.error(error || 'Lỗi khi lưu khuyến mãi');
+                ElMessage.error(error?.response?.data?.message || 'Lỗi khi lưu khuyến mãi');
             } finally {
                 loading.value = false;
             }
@@ -958,6 +777,21 @@ const xoaKhuyenMai = async (item) => {
         loading.value = false;
     }
 };
+import dayjs from "dayjs";
+const handleNgayBatDauChange = (value) => {
+    if (!value) return;
+
+    let start = new Date(value);
+    let end;
+
+    start = new Date(start.getTime() + 60 * 1000);
+    form.value.ngayBatDau = dayjs(start).format("YYYY-MM-DD HH:mm");
+
+    if (!isEdit.value) {
+        end = new Date(start.getTime() + 2 * 24 * 60 * 60 * 1000);
+        form.value.ngayKetThuc = dayjs(end).format("YYYY-MM-DD HH:mm");
+    }
+}
 
 const toggleAllSpSelection = (val) => {
     sanPhams.value = sanPhams.value.map((sp, index) => {
@@ -968,55 +802,6 @@ const toggleAllSpSelection = (val) => {
         }
         return sp;
     });
-};
-
-const toggleAllXungDotSpctSelection = async (val) => {
-    if (val) {
-        // Khi chọn tất cả, kiểm tra xung đột khuyến mãi
-        const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
-        const end = start + sanPhamChiTietPagination.value.size;
-        const currentPageSpcts = sanPhamChiTiets.value.slice(start, end);
-
-        try {
-            conflictedSanPhamChiTiets.value = [];
-            for (const spct of currentPageSpcts) {
-                const isKhuyenMai = await getKhuyenMai(spct.id);
-                if (isKhuyenMai > 0 && (!isEdit.value || isKhuyenMai.id !== form.value.id)) {
-                    spct.isKhuyenMai = isKhuyenMai;
-                    conflictedSanPhamChiTiets.value.push(spct);
-                }
-            }
-
-            if (conflictedSanPhamChiTiets.value.length > 0) {
-                // Nếu có xung đột, hiển thị dialog
-                promotionConflictDialog.value = true;
-            } else {
-                // Nếu không có xung đột, cập nhật trạng thái chọn
-                sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
-                    if (index >= start && index < end) {
-                        return { ...spct, selected: true, isKhuyenMai };
-                    }
-                    return spct;
-                });
-                updateSanPhamChiTietSelection();
-            }
-        } catch (error) {
-            console.error('Lỗi khi kiểm tra xung đột khuyến mãi:', error);
-            ElMessage.error(error?.response?.data?.message || 'Lỗi khi kiểm tra khuyến mãi hiện tại');
-        }
-    } else {
-        // Khi bỏ chọn tất cả, xóa trạng thái chọn và danh sách xung đột
-        const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
-        const end = start + sanPhamChiTietPagination.value.size;
-        sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
-            if (index >= start && index < end) {
-                return { ...spct, selected: false, isKhuyenMai };
-            }
-            return spct;
-        });
-        conflictedSanPhamChiTiets.value = [];
-        updateSanPhamChiTietSelection();
-    }
 };
 
 const clearFilters = () => {
@@ -1100,6 +885,15 @@ const convertDoiTuongApDung = (doiTuongApDung) => {
     return doiTuongLabels[doiTuongApDung] || 'Không xác định';
 };
 
+const converMucDoUuTien = (mucDoUuTien) => {
+    const uuTienLabels = {
+        1: 'Thấp',
+        2: 'Trung bình',
+        3: 'Cao',
+    };
+    return uuTienLabels[mucDoUuTien] || 'Thấp';
+};
+
 const getStatusType = (status) => {
     const statusTypes = {
         NOT_STARTED: 'info',
@@ -1110,24 +904,24 @@ const getStatusType = (status) => {
 };
 
 const calculateStatus = (ngayBatDau, ngayKetThuc) => {
-  const now = new Date();
-  const startDate = new Date(ngayBatDau);
-  const endDate = new Date(ngayKetThuc);
+    const now = new Date();
+    const startDate = new Date(ngayBatDau);
+    const endDate = new Date(ngayKetThuc);
 
-  if (now < startDate) {
-    return 'NOT_STARTED';
-  } else if (now >= startDate && now <= endDate) {
-    return 'ACTIVE';
-  } else {
-    return 'EXPIRED';
-  }
+    if (now < startDate) {
+        return 'NOT_STARTED';
+    } else if (now >= startDate && now <= endDate) {
+        return 'ACTIVE';
+    } else {
+        return 'EXPIRED';
+    }
 };
 
 const updateStatuses = () => {
-  khuyenMais.value = khuyenMais.value.map(item => ({
-    ...item,
-    trangThai: calculateStatus(item.ngayBatDau, item.ngayKetThuc)
-  }));
+    khuyenMais.value = khuyenMais.value.map(item => ({
+        ...item,
+        trangThai: calculateStatus(item.ngayBatDau, item.ngayKetThuc)
+    }));
 };
 
 const getRowClassName = ({ rowIndex }) => {
@@ -1151,17 +945,17 @@ function formatToSQLDateTime(date) {
 }
 
 const getNextUpdateDelay = async () => {
-  try {
-    const response = await nextDelay()
-    const delay = Math.max(1000, response.data.delay || 60_000);
-    return delay;
-  } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.error('Không thể lấy thời gian cập nhật:', error);
-      toast.error('Không thể lấy thời gian cập nhật');
+    try {
+        const response = await nextDelay()
+        const delay = Math.max(1000, response.delay || 60_000);
+        return delay;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Không thể lấy thời gian cập nhật:', error);
+            toast.error('Không thể lấy thời gian cập nhật');
+        }
+        return 60_000;
     }
-    return 60_000; 
-  }
 };
 
 watch(
@@ -1196,7 +990,6 @@ onMounted(() => {
     fetchKhuyenMai();
     fetchSanPhams();
     const initialDelay = getNextUpdateDelay();
-  console.log('1', initialDelay)
     statusUpdateInterval = setInterval(updateStatuses, initialDelay);
 });
 
@@ -1685,113 +1478,6 @@ onUnmounted(() => {
     font-weight: 500;
 }
 
-.promotion-conflict-dialog :deep(.el-dialog) {
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    background: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.promotion-conflict-dialog :deep(.el-dialog__header) {
-    padding: 24px 24px 0;
-    border-bottom: none;
-}
-
-.promotion-conflict-dialog :deep(.el-dialog__title) {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a202c;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.conflict-dialog-content {
-    padding: 0 24px;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-.conflict-message,
-.conflict-prompt {
-    font-size: 16px;
-    color: #374151;
-    margin: 0 0 16px 0;
-    line-height: 1.5;
-}
-
-.conflict-message {
-    font-weight: 500;
-}
-
-.conflict-prompt {
-    margin-top: 24px;
-    font-style: italic;
-}
-
-.conflict-search-input {
-    margin-bottom: 16px;
-}
-
-.conflict-search-input :deep(.el-input__wrapper) {
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-}
-
-.conflict-search-input :deep(.el-input__wrapper:hover) {
-    border-color: #cbd5e1;
-}
-
-.conflict-search-input :deep(.el-input__wrapper.is-focus) {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.conflict-table {
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fafbfc;
-}
-
-.conflict-table :deep(.el-table__header) {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
-
-.conflict-table :deep(.el-table__header th) {
-    background: transparent;
-    color: #374151;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 16px 12px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.conflict-table :deep(.el-table__body tr) {
-    transition: all 0.3s ease;
-}
-
-.conflict-table :deep(.el-table__body tr:hover) {
-    background: #f1f5f9;
-}
-
-.conflict-table :deep(.el-table__body td) {
-    padding: 12px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #1f2937;
-    font-size: 14px;
-}
-
-.conflict-table :deep(.promotion-tag) {
-    font-weight: 500;
-    border-radius: 8px;
-    padding: 4px 12px;
-    background: #fef3c7;
-    color: #92400e;
-    border: none;
-}
-
 .dialog-footer {
     padding: 24px;
     display: flex;
@@ -1869,31 +1555,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-    .promotion-conflict-dialog :deep(.el-dialog) {
-        width: 90%;
-        margin: 10px auto;
-    }
-
-    .conflict-dialog-content {
-        max-height: 50vh;
-        padding: 0 16px;
-    }
-
-    .promotion-conflict-dialog :deep(.el-dialog__title) {
-        font-size: 20px;
-    }
-
-    .conflict-message,
-    .conflict-prompt {
-        font-size: 14px;
-    }
-
-    .conflict-table :deep(.el-table__header th),
-    .conflict-table :deep(.el-table__body td) {
-        padding: 10px 8px;
-        font-size: 12px;
-    }
-
     .dialog-footer {
         flex-direction: column;
         gap: 8px;
@@ -1903,23 +1564,6 @@ onUnmounted(() => {
     .cancel-btn,
     .confirm-btn {
         width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .promotion-conflict-dialog :deep(.el-dialog__title) {
-        font-size: 18px;
-    }
-
-    .conflict-table :deep(.el-table__header th),
-    .conflict-table :deep(.el-table__body td) {
-        padding: 8px 4px;
-        font-size: 11px;
-    }
-
-    .conflict-table :deep(.promotion-tag) {
-        padding: 2px 8px;
-        font-size: 12px;
     }
 }
 

@@ -104,7 +104,5 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
 
-    List<SanPhamChiTiet> findAllByIdKhuyenMai_Id(Integer idKhuyenMaiId);
-
     Integer id(Integer id);
 }

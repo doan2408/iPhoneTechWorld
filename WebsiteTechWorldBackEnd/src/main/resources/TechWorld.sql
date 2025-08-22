@@ -378,6 +378,8 @@ CREATE TABLE khuyen_mai (
                             ngay_bat_dau DATETIME,
                             ngay_ket_thuc DATETIME,
                             doi_tuong_ap_dung NVARCHAR(50),
+                            muc_do_uu_tien INT,
+                            ngay_tao DATETIME,
                             trang_thai NVARCHAR(50) -- ENUM('DANG_HOAT_DONG', 'HET_HAN')
 );
 
@@ -466,7 +468,7 @@ CREATE TABLE loai_bao_hanh (
                                id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
                                ten_loai_bao_hanh NVARCHAR(100),
                                thoi_gian_thang INT,
-							   id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
+							                 id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
                                mo_ta NVARCHAR(255)
 );
 
@@ -578,6 +580,8 @@ CREATE TABLE xu_ly_sau_ban_hang (
                                     id_ly_do INT NULL,
                                     hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
                                     da_kiem_tra BIT NOT NULL DEFAULT 0,
+                                    url_hinh NVARCHAR(500) NULL,
+                                    url_video NVARCHAR(500) NULL,
                                     FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don),
                                     FOREIGN KEY (id_imei_da_ban) REFERENCES imei_da_ban(id_imei_da_ban),
                                     FOREIGN KEY (id_ly_do) REFERENCES ly_do_xu_ly(id_ly_do)
