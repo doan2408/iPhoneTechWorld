@@ -635,7 +635,7 @@ const loadDropdownData = async () => {
     // Load loại bảo hành
     const loaiBaoHanhResponse = await loaiBaoHanhList();
     loaiBaoHanhs.value =
-      loaiBaoHanhResponse.content || loaiBaoHanhResponse || [];
+    loaiBaoHanhResponse.content || loaiBaoHanhResponse || [];
   } catch (error) {
     console.error("Load dropdown error:", error);
     ElMessage.error("Lỗi khi tải dữ liệu dropdown");

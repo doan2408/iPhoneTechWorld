@@ -3,10 +3,10 @@ import api from "./axiosInstance"
 
 const API_URL = '/api/auth' 
 
-// Đăng ký
-const register = async (userData) => {
+// gửi mã xác nhận đăng ký
+const registerVerify = async (userData) => {
   try {
-    const response = await api.post(API_URL + `/register`,
+    const response = await api.post(API_URL + `/register/verify`,
        userData );
     const { message, roles } = response.data;
     return { message, roles };
@@ -20,6 +20,44 @@ const register = async (userData) => {
     } else {
       // Lỗi xảy ra khi thiết lập yêu cầu
       throw 'Có lỗi xảy ra khi gửi yêu cầu đăng ký';
+    }
+  }
+};
+
+// Hoàn tất đăng ký với mã xác nhận
+const completeRegistration = async (email, verificationCode) => {
+  try {
+    const response = await api.post(API_URL + `/register/complete`, {
+      email,
+      verificationCode
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw error.response.data || 'Lỗi hoàn tất đăng ký';
+    } else if (error.request) {
+      throw 'Lỗi kết nối mạng';
+    } else {
+      throw 'Có lỗi xảy ra khi hoàn tất đăng ký';
+    }
+  }
+};
+
+// Gửi lại mã xác nhận
+const resendVerificationCode = async (email) => {
+  try {
+    const response = await api.post(API_URL + `/register/resend-code`, {
+      email
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw error.response.data || 'Lỗi gửi lại mã xác nhận';
+    } else if (error.request) {
+      throw 'Lỗi kết nối mạng';
+    } else {
+      throw 'Có lỗi xảy ra khi gửi lại mã xác nhận';
     }
   }
 };
@@ -51,7 +89,9 @@ export const getCurrentUser = async () => {
 }
 
 export default {
-  register,
+  registerVerify,
+  completeRegistration,
+  resendVerificationCode,
   logout,
   getCurrentUser
 }
