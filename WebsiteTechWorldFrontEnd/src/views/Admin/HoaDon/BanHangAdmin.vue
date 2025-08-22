@@ -174,7 +174,7 @@
 
                         <div class="imei-search">
                             <div class="search-box">
-                                <Search class="search-icon" />
+                                <!-- <Search class="search-icon" /> -->
                                 <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input" @input="searchImeis" />
                             </div>
                         </div>
@@ -538,7 +538,7 @@
             <div class="modal-header" style="margin-bottom: 0;">
                 <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2>
                 <div class="search-box">
-                    <Search class="search-icon" />
+                    <!-- <Search class="search-icon" /> -->
                     <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
                 </div>
             </div>
