@@ -420,7 +420,7 @@ const returnToStockDelivery = async (selectedImeis, action) => {
             return
         }
     }
-    const res = await changeStatusPending(selectedImeis, status)
+    const res = await changeStatusPending(selectedImeis,idHoaDon, status)
     orderSanPham()
     orderInformations()
     if (status === 'RETURN_TO_STOCK') {
@@ -440,7 +440,7 @@ const processImei = async (imeiCode, action) => {
 
     const imeiList = [imeiCode];  
 
-    const res = await changeStatusPending(imeiList,status)
+    const res = await changeStatusPending(imeiList,idHoaDon,status)
     orderSanPham()
     orderInformations()
 }

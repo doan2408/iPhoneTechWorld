@@ -36,10 +36,11 @@ export const getAllCtXuLy = (idHoaDon) => {
     return api.get(url)
 }
 
-export const changeStatusPending = (soImeis,status) => {
+export const changeStatusPending = (soImeis,idHoaDon,status) => {
     const url = baseURL + '/change-status'
     const request = {
         soImeis: soImeis,
+        idHoaDon:idHoaDon,
         status: status
     };
     return api.post(url,request)

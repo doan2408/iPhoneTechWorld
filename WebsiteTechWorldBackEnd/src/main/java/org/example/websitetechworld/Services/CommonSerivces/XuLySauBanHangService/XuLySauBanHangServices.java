@@ -244,9 +244,11 @@ public class XuLySauBanHangServices {
 
     public void changeStatus(ChangeStatusRequest request) {
         for (String s : request.getSoImeis()){
-            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(s);
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImeiAndIdHoaDon_Id(s,request.getIdHoaDon());
             if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
-                ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImei(s);
+                ImeiDaBan imeiDaBan = imeiDaBanRepository.findById(xuLySauBanHang.getIdImeiDaBan().getId()).orElseThrow(
+                        () -> new IllegalArgumentException("Imei da ban ko ton tai")
+                );
                 imeiDaBan.setTrangThai(TrangThaiImei.RETURNED);
                 imeiDaBanRepository.save(imeiDaBan);
                 Imei imei = imeiReposiory.findBySoImei(s);

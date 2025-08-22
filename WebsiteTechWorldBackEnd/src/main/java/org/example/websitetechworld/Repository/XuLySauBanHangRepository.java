@@ -100,7 +100,7 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
     """)
     List<XuLyChiTietResponse> getAllCtXuLy(Integer idHoaDon);
 
-    XuLySauBanHang findXuLySauBanHangByIdImeiDaBan_SoImei(String soImei);
+    XuLySauBanHang findXuLySauBanHangByIdImeiDaBan_SoImeiAndIdHoaDon_Id(String soImei, Integer idHoaDon);
 
     List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_IdAndHanhDongSauVuViec(Integer idHoaDon, ActionAfterCase action);
 

@@ -143,9 +143,15 @@
                                 <td class="retry-cell">{{ order.thoiGianYeuCau }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
                                         <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
                                             lý</button>
+                                    </div>
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -220,7 +226,9 @@
                                     <img v-if="item.urlHinh" :src="item.urlHinh"
                                         style="max-width: 80px; cursor: zoom-in;"
                                         @click="previewImage = item.urlHinh" />
+                                    <span style="color: gray; font-size: 14px;">Không có hình ảnh</span>
                                 </td>
+
                                 <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
                                     <div class="tw-modal-content"
                                         style="max-width: 80%; max-height: 80%; padding: 0; background: transparent; box-shadow: none;">
@@ -228,10 +236,14 @@
                                             style="max-width: 100%; max-height: 100%; border-radius: 8px;" />
                                     </div>
                                 </div>
-                                <video v-if="item.urlVideo" ref="videoThumb" controls
-                                    style="max-width: 120px; cursor: pointer;" @click="openVideo">
-                                    <source :src="item.urlVideo" type="video/mp4" />
-                                </video>
+                                <td>
+                                    <video v-if="item.urlVideo" ref="videoThumb" controls
+                                        style="max-width: 120px; cursor: pointer;" @click="openVideo">
+                                        <source :src="item.urlVideo" type="video/mp4" />
+                                    </video>
+                                    <span style="color: gray; font-size: 14px;">Không có video</span>
+                                </td>
+
 
                                 <!-- Modal xem video to -->
                                 <div v-if="showVideo" class="modal" @click="closeVideo">
