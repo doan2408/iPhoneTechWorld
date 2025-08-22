@@ -67,9 +67,9 @@
                                 title="Trả kho" :disabled="selectedImeis.length === 0">
                                 📦Trả kho
                             </button>
-
-                            <button class="toolbar-btn refund" @click="processBulk('refund')"
-                                :disabled="selectedImeis.length === 0" title="Trả kho">
+                            <button class="toolbar-btn refund"
+                                @click="openConfirm('Bạn có chắc chắn muốn hoàn tiền cho toàn bộ sản phẩm trong đơn?', () => processBulk('refund'))"
+                                title="Hoàn tiền" :disabled="selectedImeis.length === 0">
                                 💰 Hoàn tiền
                             </button>
                         </div>
@@ -96,6 +96,7 @@
                                     <th>Sản phẩm</th>
                                     <th>Trạng thái</th>
                                     <th>Giá bán</th>
+                                    <th>Lý do trả hàng</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -116,12 +117,16 @@
                                     <td>
                                         <span> {{ formatPrice(imei.donGia) }}</span>
                                     </td>
+                                    <td>
+                                        <span> {{ imei.tenLyDo }}</span>
+                                    </td>
                                     <td class="action-col">
                                         <div class="row-actions">
 
                                             <button class="action-btn return"
                                                 @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"
-                                                title="Trả kho" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK' || imei.trangThaiDon === 'REFUND'">
+                                                title="Trả kho"
+                                                :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK' || imei.trangThaiDon === 'REFUND'">
                                                 📦
                                             </button>
 
@@ -161,7 +166,7 @@
                     </div>
                     <div class="contact-item">
                         <label>Ghi chú khách hàng:</label>
-                        <span>{{ orderInformation.customerNote }}</span>
+                        <span>{{ orderInformation.customerNote || 'Không có ghi chú' }}</span>
                     </div>
                 </div>
             </div>
@@ -411,7 +416,7 @@ const returnToStockDelivery = async (selectedImeis, action) => {
 
         const isAllReturned = orderProduct.value.every(item => item.trangThaiDon === 'RETURN_TO_STOCK')
         if (!isAllReturned) {
-            toast.error('Chỉ được hoàn tiền khi tất cả sản phẩm đã RETURN_TO_STOCK.')
+            toast.error('Chỉ được hoàn tiền khi tất cả sản phẩm đã được trả về kho.')
             return
         }
     }
