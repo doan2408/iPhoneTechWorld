@@ -175,7 +175,7 @@
                         <div class="imei-search">
                             <div class="search-box">
                                 <Search class="search-icon" />
-                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input" @input="searchImeis" />
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input"/>
                             </div>
                         </div>
 
@@ -185,7 +185,7 @@
                             <div class="imei-list-container">
                                 <h3>Danh sách IMEI</h3>
                                 <div class="imei-list">
-                                    <div v-for="imei in filteredImeis" :key="imei.id" class="imei-item">
+                                    <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
                                         <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
                                             v-model="selectedImeis" />
                                         <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
@@ -1161,6 +1161,8 @@ const imeiTotalItems = ref(0); // Tổng số IMEI có sẵn
 const imeiTotalPages = ref(0); // Tổng số trang IMEI
 const quantityToSelect = ref(1); // lưu số lượng 
 
+// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
+const imeiSearchQuery = ref('');
 
 // mở modal imei
 const openImeiModal = async (product) => {
@@ -1187,7 +1189,7 @@ const openImeiModal = async (product) => {
 // --- Hàm để lấy danh sách IMEI từ backend ---
 const fetchImeis = async (productId, page, size) => {
     try {
-        const response = await fetchImeisJs(productId, page, size)
+        const response = await fetchImeisJs(productId, page, size, imeiSearchQuery.value.trim())
 
         let imeis = response.data.content;
 
@@ -1224,30 +1226,6 @@ const fetchImeis = async (productId, page, size) => {
     }
 };
 
-// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
-const imeiSearchQuery = ref('');
-
-// Computed property để lọc danh sách IMEI dựa trên tìm kiếm
-const filteredImeis = computed(() => {
-    if (!imeiSearchQuery.value.trim()) {
-        return availableImeis.value;
-    }
-    return availableImeis.value.filter(imei =>
-        imei.imei.toLowerCase().includes(imeiSearchQuery.value.toLowerCase())
-    );
-});
-
-// Hàm tìm kiếm IMEI (được gọi khi input thay đổi)
-const searchImeis = async () => {
-    // Nếu có chuỗi tìm kiếm, lọc trực tiếp trên danh sách hiện tại
-    if (imeiSearchQuery.value.trim()) {
-        // Lọc trên client-side, không gọi lại API
-        return;
-    }
-    // Nếu không có chuỗi tìm kiếm, tải lại danh sách IMEI đầy đủ
-    await fetchImeis(selectedProductForImei.value.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
-};
-
 // Hàm xóa một IMEI khỏi danh sách đã chọn
 const removeImei = (imei) => {
     selectedImeis.value = selectedImeis.value.filter(item => item.id !== imei.id);
@@ -1258,6 +1236,10 @@ watch(isImeiModalOpen, (newVal) => {
     if (newVal) {
         imeiSearchQuery.value = ''; // Reset chuỗi tìm kiếm khi mở modal
     }
+});
+
+watch(imeiSearchQuery, (newValue, oldValue) => {
+  goToImeiPage(0);
 });
 
 // xử lý phân trang imei
@@ -1331,7 +1313,7 @@ const isImeiSelected = (imei) => {
 // tự động chọn imei
 const autoSelectImeis = () => {
     const existingSelected = selectedImeis.value.filter(selected =>
-        filteredImeis.value.some(available => available.id === selected.id)
+        availableImeis.value.some(available => available.id === selected.id)
     );
 
     const remainingToSelect = quantityToSelect.value - existingSelected.length;
@@ -1341,7 +1323,7 @@ const autoSelectImeis = () => {
         return;
     }
 
-    const newSelections = filteredImeis.value
+    const newSelections = availableImeis.value
         .filter(imei => !existingSelected.some(selected => selected.id === imei.id))
         .slice(0, remainingToSelect);
 
