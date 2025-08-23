@@ -39,5 +39,4 @@ public interface BaoHanhRepository extends JpaRepository<BaoHanh,Integer> {
     @Query(value = "select bh from BaoHanh bh " +
             "where bh.trangThaiBaoHanh = :trangThaiBaoHanh")
     List<BaoHanh> baoHanhByStatus(TrangThaiBaoHanh trangThaiBaoHanh);
-
 }

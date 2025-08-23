@@ -85,6 +85,4 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
       AND bh.trangThaiBaoHanh = 'UNDER_WARRANTY'
 """)
     ImeiDaBan findBySoImeiWithValidWarranty(String soImei);
-
-
 }

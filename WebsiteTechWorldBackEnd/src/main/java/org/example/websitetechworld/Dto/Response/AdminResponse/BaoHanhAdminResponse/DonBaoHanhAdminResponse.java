@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.BaoHanh.TrangThaiLichSuBaoHanh;
+
+import java.util.Date;
 
 @Getter
 @Setter
@@ -17,6 +20,6 @@ public class DonBaoHanhAdminResponse {
     private String rom;
     private String loaiBaoHanh;
     private String tenKhachHang;
-    private String ngayTiepNhan;
-    private String trangThai;
+    private Date ngayTiepNhan;
+    private TrangThaiLichSuBaoHanh trangThai;
 }

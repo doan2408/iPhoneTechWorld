@@ -1,4 +1,5 @@
 import api from "@/Service/LoginService/axiosInstance";
+import { id } from "element-plus/es/locales.mjs";
 
 
 const baseURL = '/admin/bao-hanh';
@@ -62,4 +63,17 @@ export const checkedWarranty = (soImei) => {
 
 export const createRequestWarranty = (request) => {
   return api.post("/admin/bao-hanh/create-request-warranty" ,request)
+}
+
+export const findDonBaoHanh = (pageNo, pageSize) => {
+  return api.get("/admin/bao-hanh/find-don-bao-hang",{
+    params:{
+      pageNo,
+      pageSize
+    }
+  });
+}
+
+export const hoanThanhDon = (idLsbh) => {
+  return api.put("/admin/bao-hanh/hoan-thanh-don/" + idLsbh);
 }

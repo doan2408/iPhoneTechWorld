@@ -99,4 +99,17 @@ public class BaoHanhAdminController {
         baoHanhAdminServices.createRequestWarranty(request);
         return ResponseEntity.ok("Tao yeu cau bao hanh thanh cong");
     }
+
+    @GetMapping("/find-don-bao-hang")
+    public ResponseEntity<?> findDonBaoHanh(
+            @RequestParam Integer pageNo,
+            @RequestParam Integer pageSize
+    ){
+        return ResponseEntity.ok(baoHanhAdminServices.findDonBaoHanh(pageNo,pageSize));
+    }
+
+    @PutMapping("/hoan-thanh-don/{idLsbh}")
+    public void hoanThanhDon(@PathVariable Integer idLsbh){
+         baoHanhAdminServices.hoanThanhXuLy(idLsbh);
+    }
 }

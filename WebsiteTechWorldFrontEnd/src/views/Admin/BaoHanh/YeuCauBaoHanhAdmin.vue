@@ -59,8 +59,8 @@
                                         </span>
                                     </div>
 
-                                    <button v-if="warranty.trangThaiBaoHanh === 'UNDER_WARRANTY'" @click="selectWarrantyType(warranty)"
-                                        class="select-warranty-btn">
+                                    <button v-if="warranty.trangThaiBaoHanh === 'UNDER_WARRANTY'"
+                                        @click="selectWarrantyType(warranty)" class="select-warranty-btn">
                                         Chọn
                                     </button>
                                 </div>
@@ -100,6 +100,7 @@
         <!-- Tab Quản Lý Đơn Bảo Hành -->
         <div v-if="activeTab === 'manage'" class="tab-content">
             <h2>Danh Sách Đơn Bảo Hành</h2>
+            <br>
             <div class="table-container">
                 <table class="warranty-table">
                     <thead>
@@ -115,20 +116,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="warranty in warrantyOrders" :key="warranty.id" class="table-row">
-                            <td>{{ warranty.id }}</td>
-                            <td>{{ warranty.imei }}</td>
-                            <td>{{ warranty.productName }}</td>
-                            <td>{{ warranty.warrantyType }}</td>
-                            <td>{{ warranty.customerName }}</td>
-                            <td>{{ warranty.createdDate }}</td>
+                        <tr v-for="warranty in warrantyOrders" :key="warranty.idLsbh" class="table-row">
+                            <td>{{ warranty.idLsbh }}</td>
+                            <td>{{ warranty.soImei }}</td>
+                            <td>{{ warranty.tenSanPham + '-' + warranty.mau + '-' + warranty.rom }}</td>
+                            <td>{{ warranty.loaiBaoHanh }}</td>
+                            <td>{{ warranty.tenKhachHang }}</td>
+                            <td>{{ warranty.ngayTiepNhan }}</td>
                             <td>
                                 <span :class="['status-badge', warranty.status]">
-                                    {{ warranty.status === 'pending' ? 'Đang xử lý' : 'Hoàn thành' }}
+                                    {{ warranty.trangThai === 'IN_REPAIR' ? 'Đang sửa chữa' : 'Đã sửa chữa' }}
                                 </span>
                             </td>
                             <td>
-                                <button v-if="warranty.status === 'pending'" @click="completeWarranty(warranty.id)"
+                                <button v-if="warranty.trangThai === 'IN_REPAIR'" @click="completeWarranty(warranty.idLsbh)"
                                     class="complete-btn">
                                     Hoàn Thành
                                 </button>
@@ -137,6 +138,13 @@
                         </tr>
                     </tbody>
                 </table>
+                <br>
+                <div class="pagination-controls" style="margin-top: 0;">
+                    <button @click="previousPage()" :disabled="pageNo === 0">Trước</button>
+                    <span>Trang {{ pageNo + 1 }} / {{ totalPages }}</span>
+                    <button @click="nextPageKH()" :disabled="pageNo >= totalPages - 1">Sau</button>
+                </div>
+                <br>
             </div>
         </div>
 
@@ -169,7 +177,6 @@
             </div>
         </div>
 
-        <!-- Modal Chi Tiết -->
         <div v-if="showDetailModal" class="modal-overlay" @click="closeModal">
             <div class="modal-content" @click.stop>
                 <div class="modal-header">
@@ -213,7 +220,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { checkedWarranty, createRequestWarranty } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
+import { checkedWarranty, createRequestWarranty, findDonBaoHanh, hoanThanhDon } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
 import { tr } from 'element-plus/es/locales.mjs'
 
 const activeTab = ref('lookup')
@@ -232,65 +239,9 @@ const selectedOrder = ref(null)
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref('success')
-
-// Dữ liệu mẫu sản phẩm
-// const sampleProducts = {
-//     '123456789012345': {
-//         imei: '123456789012345',
-//         name: 'iPhone 14 Pro Max',
-//         model: 'A2896',
-//         purchaseDate: '2023-01-15',
-//         warranties: [
-//             {
-//                 type: 'Bảo hành chính hãng',
-//                 duration: '12 tháng',
-//                 expireDate: '2024-01-15',
-//                 isValid: true
-//             },
-//             {
-//                 type: 'Bảo hành mở rộng',
-//                 duration: '24 tháng',
-//                 expireDate: '2025-01-15',
-//                 isValid: true
-//             }
-//         ]
-//     },
-//     '987654321098765': {
-//         imei: '987654321098765',
-//         name: 'Samsung Galaxy S23 Ultra',
-//         model: 'SM-S918B',
-//         purchaseDate: '2022-06-10',
-//         warranties: [
-//             {
-//                 type: 'Bảo hành chính hãng',
-//                 duration: '12 tháng',
-//                 expireDate: '2023-06-10',
-//                 isValid: false
-//             },
-//             {
-//                 type: 'Bảo hành quốc tế',
-//                 duration: '18 tháng',
-//                 expireDate: '2023-12-10',
-//                 isValid: false
-//             }
-//         ]
-//     },
-//     '111111111111111': {
-//         imei: '111111111111111',
-//         name: 'Xiaomi 13 Pro',
-//         model: '2210132C',
-//         purchaseDate: '2023-08-20',
-//         warranties: [
-//             {
-//                 type: 'Bảo hành chính hãng',
-//                 duration: '18 tháng',
-//                 expireDate: '2025-02-20',
-//                 isValid: true
-//             }
-//         ]
-//     }
-// }
-
+const pageNo = ref(0)
+const pageSize = ref(5)
+const totalPages = ref(0)
 
 // Hàm tiện ích Toast
 function showToastMsg(message, type = 'success') {
@@ -358,13 +309,12 @@ function cancelWarranty() {
     warrantyForm.description = ''
 }
 
-function completeWarranty(orderId) {
-    const order = warrantyOrders.value.find(o => o.id === orderId)
-    if (order) {
-        order.status = 'completed'
-        order.completedDate = new Date().toLocaleDateString('vi-VN')
-        saveWarrantyOrders()
-        showToastMsg('Đã hoàn thành đơn bảo hành!', 'success')
+async function completeWarranty(orderId) {
+    try {
+        await hoanThanhDon(orderId);
+        loadWarrantyOrders(pageNo.value)
+    } catch (error) {
+        console.error(error)
     }
 }
 
@@ -391,13 +341,28 @@ function searchHistory() {
     }
 }
 
-function loadWarrantyOrders() {
-    const 
+async function loadWarrantyOrders(pageNoPage) {
+    pageNo.value = pageNoPage
+    const res = await findDonBaoHanh(pageNo.value,pageSize.value);
+    warrantyOrders.value = res.data.content
+    totalPages.value = res.data.totalPages
 }
+
+const nextPageKH = () => {
+    if (pageNo.value < totalPages.value - 1) {
+        loadWarrantyOrders(pageNo.value + 1);
+    }
+};
+
+const previousPage = () => {
+    if (pageNo.value > 0) {
+        loadWarrantyOrders(pageNo.value - 1);
+    }
+};
 
 // Lifecycle
 onMounted(() => {
-    loadWarrantyOrders()
+    loadWarrantyOrders(pageNo.value)
 })
 </script>
 
@@ -411,7 +376,7 @@ onMounted(() => {
 
 .warranty-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5c90e2 0%, #b7c49c 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 20px;
 }
@@ -1044,5 +1009,115 @@ onMounted(() => {
     .modal-body {
         padding: 20px;
     }
+}
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* Pagination - ĐƠN GIẢN */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px 0;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+}
+
+.page-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .pagination {
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .page-btn {
+        padding: 6px 10px;
+    }
+
+    .page-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .page-info {
+        font-size: 13px;
+        min-width: 50px;
+    }
+}
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    /* Thêm padding ngang để căn chỉnh với imei-list */
+    padding: 0 10px;
+}
+
+.pagination-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.pagination-controls span {
+    font-weight: 500;
+    color: #666;
+    font-size: 1em;
 }
 </style>

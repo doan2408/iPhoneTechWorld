@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.AdminServices.BaoHanhAdminServices
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.BaoHanhRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.YeuCauBaoHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.DonBaoHanhAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.YeuCauBaoHanhAdminResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
@@ -69,7 +70,7 @@ public class BaoHanhAdminServices {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(ngayBatDau);
-        cal.add(Calendar.MONTH, thoiGianThang); // startDate + thoi gian thang
+        cal.add(Calendar.MONTH, thoiGianThang);
 
         Date ngayKetThuc = new Date(cal.getTimeInMillis());
         baoHanh.setNgayKetThuc(ngayKetThuc);
@@ -145,5 +146,21 @@ public class BaoHanhAdminServices {
 
         lichSuBaoHanhRepository.save(lichSuBaoHanh);
 
+    }
+
+    public Page<DonBaoHanhAdminResponse> findDonBaoHanh(Integer pageNo, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Page<LichSuBaoHanh> resLst = lichSuBaoHanhRepository.findDonBaoHanh(pageable);
+        return resLst.map(BaoHanhAdminMappper::toDonBaoHanhAdminResponse);
+    }
+
+    public void hoanThanhXuLy(Integer idCtbh){
+        LichSuBaoHanh lichSuBaoHanh =  lichSuBaoHanhRepository.findById(idCtbh).orElseThrow(
+                () -> new IllegalArgumentException("LichSuBaoHanh Not Found")
+        );
+        lichSuBaoHanh.setNgayHoanThanh(Date.valueOf(LocalDate.now()));
+        lichSuBaoHanh.setTrangThai(TrangThaiLichSuBaoHanh.REPAIRED);
+
+        lichSuBaoHanhRepository.save(lichSuBaoHanh);
     }
 }
