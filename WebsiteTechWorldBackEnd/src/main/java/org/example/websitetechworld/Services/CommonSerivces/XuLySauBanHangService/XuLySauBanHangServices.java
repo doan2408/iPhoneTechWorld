@@ -254,16 +254,16 @@ public class XuLySauBanHangServices {
         statsTrangThaiHoaDon.setTotal(countStatus());
         statsTrangThaiHoaDon.setFailed(countStatus(CaseType.FAILED_DELIVERY));
         statsTrangThaiHoaDon.setReturns(countStatus(CaseType.RETURN));
-        statsTrangThaiHoaDon.setResolved(xuLySauBanHangRepository.countByThoiGianXuLy(LocalDateTime.now()));
+        statsTrangThaiHoaDon.setResolved(xuLySauBanHangRepository.countByThoiGianXuLy());
         return statsTrangThaiHoaDon;
     }
 
 
     private int countStatus() {
-        return xuLySauBanHangRepository.countByHanhDongSauVuViec(ActionAfterCase.PENDING);
+        return xuLySauBanHangRepository.countByHanhDongSauVuViec(String.valueOf(ActionAfterCase.PENDING));
     }
 
     private int countStatus(CaseType caseType) {
-        return xuLySauBanHangRepository.countByLoaiVuViec(caseType);
+        return xuLySauBanHangRepository.countByLoaiVuViec(String.valueOf(caseType));
     }
 }

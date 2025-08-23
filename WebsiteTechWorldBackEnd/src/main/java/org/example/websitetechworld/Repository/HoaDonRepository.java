@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(Pageable pageable);
@@ -84,4 +85,17 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
         AND id_khach_hang = :idKhachHang
     """, nativeQuery = true)
     int countHoaDonByIdKhachHang(@Param("idKhachHang") Integer idKhachHang);
+
+    @Query("SELECT h FROM HoaDon h " +
+            "WHERE (h.isDelete = false OR h.isDelete IS NULL) " +
+            "AND h.trangThaiThanhToan = :trangThaiThanhToan " +
+            "AND ( :search IS NULL " +
+            "   OR h.maHoaDon LIKE %:search% " +
+            "   OR h.idKhachHang.sdt LIKE %:search% " +
+            "   OR h.idKhachHang.tenKhachHang LIKE %:search% )")
+    Page<HoaDon> findAllLichSuBanHang(
+            @Param("trangThaiThanhToan") TrangThaiThanhToan trangThaiThanhToan,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }

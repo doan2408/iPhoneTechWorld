@@ -63,6 +63,13 @@ public class HoaDonAdminController {
         return hoaDonAdminService.getPageHoaDon(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name());
     }
 
+    @GetMapping("/lich-su")
+    public Page<HoaDonAdminResponse> getLichSuBanHang (@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize,
+                                                  @RequestParam(defaultValue = "", value = "search") String search) {
+        return hoaDonAdminService.getPageLichSuBanHang(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name(), search);
+    }
+
     @GetMapping("/{idHoaDon}")
     public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
         return hoaDonAdminService.findById(idHoaDon);

@@ -104,6 +104,15 @@ public class HoaDonAdminService {
                 .findByIsDeleteFalseOrIsDeleteIsNull(pageable)
                 .map(GetAllHoaDonAdminResponse::convertDto);
     }
+
+    public Page<HoaDonAdminResponse> getPageLichSuBanHang (Integer pageNo, Integer pageSize, String sortBy, String direction, String search) {
+        Sort.Direction dir = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, sortBy));
+        return hoaDonRepository
+                .findAllLichSuBanHang(TrangThaiThanhToan.COMPLETED, search, pageable)
+                .map(HoaDonAdminResponse::convertDto);
+    }
+
     public List<HoaDonAdminResponse> exportExcel(){
         List<HoaDon> hoaDonList = hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull();
         return hoaDonList.stream().map(HoaDonAdminResponse::convertDto).toList();
