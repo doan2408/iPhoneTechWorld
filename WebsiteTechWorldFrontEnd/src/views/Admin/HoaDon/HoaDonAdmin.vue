@@ -787,13 +787,11 @@ const loadData = async () => {
   isLoading.value = true;
 
   try {
-    // const response = await axios.get('/admin/hoa-don');
     const response = await hoaDonGetAll(pageNo.value, pageSize.value);
 
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
 
-    //Nếu response.data là object chứa content - trong backend trả về page là trả về object json
     if (Array.isArray(response.data.content)) {
       hoaDons.value = response.data.content;
       totalPage.value = response.data.totalPages || 0;

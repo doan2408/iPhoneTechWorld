@@ -161,9 +161,9 @@
             <div v-if="historyData.length > 0" class="history-results">
                 <h3>Lịch Sử Bảo Hành - IMEI: {{ historyImei }}</h3>
                 <div class="history-list">
-                    <div v-for="item in historyData" :key="item.idLsbh" class="history-item">
+                    <div v-for="(item, index) in historyData" :key="item.idLsbh" class="history-item">
                         <div class="history-header">
-                            <span class="order-id">Lần #{{ item.idLsbh }}</span>
+                            <span class="order-id">Lần #{{ index + 1 }}</span>
                             <span :class="['status-badge', item.status]">
                                 {{ item.status === 'IN_REPAIR' ? 'Đang sửa chữa' : 'Đã sửa chữa' }}
                             </span>
@@ -171,7 +171,7 @@
                         <div class="history-details">
                             <p><strong>Loại bảo hành:</strong> {{ item.loaiBaoHanh }}</p>
                             <p><strong>Mô tả:</strong> {{ item.moTa }}</p>
-                            <p><strong>Ngày tạo:</strong> {{ item.ngayYeuCau }}</p>
+                            <p><strong>Ngày yêu cầu:</strong> {{ item.ngayYeuCau }}</p>
                             <p v-if="item.ngayHoanThanh"><strong>Ngày hoàn thành:</strong> {{ item.ngayHoanThanh }}</p>
                         </div>
                     </div>
