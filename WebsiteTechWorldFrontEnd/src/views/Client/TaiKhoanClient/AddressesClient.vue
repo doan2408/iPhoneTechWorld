@@ -409,14 +409,14 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item label="Tỉnh/Thành phố" prop="tinhThanhPho">
-          <el-select v-model="formData.tinhThanhPho" placeholder="Chọn tỉnh/thành phố" clearable>
+          <el-select v-model="formData.tinhThanhPho" placeholder="Chọn tỉnh/thành phố" clearable filterable>
             <el-option v-for="tinh in tinhList" :key="tinh.code" :label="tinh.name" :value="tinh.code" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="Xã/Phường" prop="xaPhuong">
           <el-select v-model="formData.xaPhuong" :disabled="!formData.tinhThanhPho" placeholder="Chọn xã/phường"
-            clearable>
+            clearable filterable>
             <el-option v-for="xa in filteredXaList" :key="xa.code" :label="xa.name" :value="xa.code" />
           </el-select>
         </el-form-item>

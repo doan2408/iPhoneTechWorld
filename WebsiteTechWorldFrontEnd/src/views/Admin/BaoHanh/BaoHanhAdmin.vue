@@ -199,7 +199,6 @@
         </el-table-column>
 
         <el-table-column
-          v-if="isAdmin"
           label="Thao tác"
           width="200"
           align="center"
@@ -219,6 +218,7 @@
               </el-tooltip>
               <el-tooltip content="Chỉnh sửa" placement="top">
                 <el-button
+                  v-if="isAdmin"
                   size="small"
                   type="primary"
                   :icon="Edit"

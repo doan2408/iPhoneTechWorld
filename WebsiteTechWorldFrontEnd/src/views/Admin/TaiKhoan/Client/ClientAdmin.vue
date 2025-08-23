@@ -262,6 +262,8 @@ const handleAddClient = async () => {
         if (!payload.matKhau) {
           delete payload.matKhau; // Không gửi matKhau nếu rỗng
         }
+        delete payload.hangKhachHang;
+        
         await updateClient(editingClientId.value, payload);
         ElMessage.success("Cập nhật khách hàng thành công");
       } else {
