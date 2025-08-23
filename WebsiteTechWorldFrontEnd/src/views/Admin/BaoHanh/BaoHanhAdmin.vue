@@ -227,7 +227,7 @@
                   class="action-btn edit-btn"
                 />
               </el-tooltip>
-              <el-tooltip content="Xóa" placement="top">
+              <!-- <el-tooltip content="Xóa" placement="top">
                 <el-button
                   size="small"
                   type="danger"
@@ -236,7 +236,7 @@
                   @click="xoaBaoHanh(scope.row)"
                   class="action-btn delete-btn"
                 />
-              </el-tooltip>
+              </el-tooltip> -->
             </div>
           </template>
         </el-table-column>
