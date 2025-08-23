@@ -78,7 +78,7 @@
 
                 <!-- Quick actions : hành động  -->
                 <div class="quick-actions">
-                    <button class="quick-btn">
+                    <button class="quick-btn" @click="openSalesHistoryModal()">
                         <History class="btn-icon" />
                         Lịch sử bán hàng
                     </button>
@@ -174,8 +174,8 @@
 
                         <div class="imei-search">
                             <div class="search-box">
-                                <!-- <Search class="search-icon" /> -->
-                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input" @input="searchImeis" />
+                                <Search class="search-icon" />
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input"/>
                             </div>
                         </div>
 
@@ -185,7 +185,7 @@
                             <div class="imei-list-container">
                                 <h3>Danh sách IMEI</h3>
                                 <div class="imei-list">
-                                    <div v-for="imei in filteredImeis" :key="imei.id" class="imei-item">
+                                    <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
                                         <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
                                             v-model="selectedImeis" />
                                         <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
@@ -609,6 +609,55 @@
             </div>
         </div>
     </transition>
+
+    <div v-if="showSalesHistoryModal" class="modal-overlay" @click="closeSalesHistoryModal">
+        <div class="modal-content" @click.stop style="height: 600px;">
+            <div class="modal-header">
+                <h3>Lịch sử bán hàng</h3>
+                <button @click="closeSalesHistoryModal" class="close-modal-btn">
+                    <X class="close-icon" />
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <Search class="search-icon" />
+                    <input v-model="salesHistorySearchQuery" type="text" placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input" @input="searchSalesHistory" />
+                </div>
+                <div class="sales-history-list">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã hóa đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(history, index) in salesHistory" :key="history.id">
+                                <td>{{ salesHistoryPage * 5 + index + 1 }}</td>
+                                <td>{{ history.maHoaDon || 'N/A' }}</td>
+                                <td>{{ history.tenKhachHang || 'Khách lẻ' }}</td>
+                                <td>{{ formatCurrency(history.thanhTien || 0) }}</td>
+                                <td>{{ formatDate(history.ngayTao) }}</td>
+                                <td>{{ formatTrangThaiThanhToan(history.trangThaiThanhToan) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-controls">
+                    <button @click="previousSalesHistoryPage" :disabled="salesHistoryPage === 0">Trước</button>
+                    <span>Trang {{ salesHistoryPage + 1 }} / {{ totalSalesHistoryPages }}</span>
+                    <button @click="nextSalesHistoryPage" :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeSalesHistoryModal" class="cancel-btn">Đóng</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -628,7 +677,8 @@ import {
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
     , findHdctByImeiDaBan, findProductByImei,
-    updateGia
+    updateGia,
+    getAllLichSuBanHang
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -1161,6 +1211,8 @@ const imeiTotalItems = ref(0); // Tổng số IMEI có sẵn
 const imeiTotalPages = ref(0); // Tổng số trang IMEI
 const quantityToSelect = ref(1); // lưu số lượng 
 
+// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
+const imeiSearchQuery = ref('');
 
 // mở modal imei
 const openImeiModal = async (product) => {
@@ -1187,7 +1239,7 @@ const openImeiModal = async (product) => {
 // --- Hàm để lấy danh sách IMEI từ backend ---
 const fetchImeis = async (productId, page, size) => {
     try {
-        const response = await fetchImeisJs(productId, page, size)
+        const response = await fetchImeisJs(productId, page, size, imeiSearchQuery.value.trim())
 
         let imeis = response.data.content;
 
@@ -1224,30 +1276,6 @@ const fetchImeis = async (productId, page, size) => {
     }
 };
 
-// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
-const imeiSearchQuery = ref('');
-
-// Computed property để lọc danh sách IMEI dựa trên tìm kiếm
-const filteredImeis = computed(() => {
-    if (!imeiSearchQuery.value.trim()) {
-        return availableImeis.value;
-    }
-    return availableImeis.value.filter(imei =>
-        imei.imei.toLowerCase().includes(imeiSearchQuery.value.toLowerCase())
-    );
-});
-
-// Hàm tìm kiếm IMEI (được gọi khi input thay đổi)
-const searchImeis = async () => {
-    // Nếu có chuỗi tìm kiếm, lọc trực tiếp trên danh sách hiện tại
-    if (imeiSearchQuery.value.trim()) {
-        // Lọc trên client-side, không gọi lại API
-        return;
-    }
-    // Nếu không có chuỗi tìm kiếm, tải lại danh sách IMEI đầy đủ
-    await fetchImeis(selectedProductForImei.value.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
-};
-
 // Hàm xóa một IMEI khỏi danh sách đã chọn
 const removeImei = (imei) => {
     selectedImeis.value = selectedImeis.value.filter(item => item.id !== imei.id);
@@ -1258,6 +1286,10 @@ watch(isImeiModalOpen, (newVal) => {
     if (newVal) {
         imeiSearchQuery.value = ''; // Reset chuỗi tìm kiếm khi mở modal
     }
+});
+
+watch(imeiSearchQuery, (newValue, oldValue) => {
+  goToImeiPage(0);
 });
 
 // xử lý phân trang imei
@@ -1331,7 +1363,7 @@ const isImeiSelected = (imei) => {
 // tự động chọn imei
 const autoSelectImeis = () => {
     const existingSelected = selectedImeis.value.filter(selected =>
-        filteredImeis.value.some(available => available.id === selected.id)
+        availableImeis.value.some(available => available.id === selected.id)
     );
 
     const remainingToSelect = quantityToSelect.value - existingSelected.length;
@@ -1341,7 +1373,7 @@ const autoSelectImeis = () => {
         return;
     }
 
-    const newSelections = filteredImeis.value
+    const newSelections = availableImeis.value
         .filter(imei => !existingSelected.some(selected => selected.id === imei.id))
         .slice(0, remainingToSelect);
 
@@ -2295,6 +2327,18 @@ const handleClose = () => {
     showInvoice.value = false;
 };
 
+const formatTrangThaiThanhToan = (trangThai) => {
+    const mapping = {
+        PENDING: 'Chờ thanh toán',
+        CONFIRMED: 'Đã xác nhận',
+        PAID: 'Đã thanh toán',
+        CANCELLED: 'Đã hủy',
+        REFUNDED: 'Đã hoàn tiền',
+        COMPLETED: 'Hoàn tất',
+    };
+    return mapping[trangThai] || 'Không rõ';
+};
+
 const formatTrangThai = (trangThai) => {
     const mapping = {
         AVAILABLE: 'Có sẵn',
@@ -2384,6 +2428,71 @@ const applyDiscount = (discount) => {
 const clearDiscount = () => {
     selectedDiscount.value = null;
 };
+
+// Biến cho modal lịch sử bán hàng
+const showSalesHistoryModal = ref(false);
+const salesHistory = ref([]);
+const salesHistoryPage = ref(0);
+const salesHistoryPageSize = ref(5);
+const totalSalesHistoryPages = ref(1);
+const salesHistorySearchQuery = ref('');
+
+const openSalesHistoryModal = async () => {
+    showSalesHistoryModal.value = true;
+    await loadSalesHistory();
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+    salesHistorySearchQuery.value = '';
+    salesHistoryPage.value = 0;
+};
+
+const loadSalesHistory = async () => {
+    try {
+        const response = await getAllLichSuBanHang(salesHistoryPage.value, salesHistoryPageSize.value, salesHistorySearchQuery.value);
+        salesHistory.value = response.data.content || [];
+        totalSalesHistoryPages.value = response.data.totalPages || 1;
+    } catch (error) {
+        console.error('Lỗi khi tải lịch sử bán hàng:', error);
+        toast.error('Không thể tải lịch sử bán hàng. Vui lòng thử lại.');
+    }
+};
+
+const searchSalesHistory = async () => {
+    salesHistoryPage.value = 0; 
+    await loadSalesHistory();
+};
+
+const previousSalesHistoryPage = () => {
+    if (salesHistoryPage.value > 0) {
+        salesHistoryPage.value--;
+        loadSalesHistory();
+    }
+};
+
+const nextSalesHistoryPage = () => {
+    if (salesHistoryPage.value < totalSalesHistoryPages.value - 1) {
+        salesHistoryPage.value++;
+        loadSalesHistory();
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+watch(salesHistorySearchQuery, () => {
+    searchSalesHistory();
+});
 
 </script>
 

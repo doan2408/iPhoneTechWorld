@@ -104,11 +104,33 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
 
     List<XuLySauBanHang> findXuLySauBanHangByIdHoaDon_IdAndHanhDongSauVuViec(Integer idHoaDon, ActionAfterCase action);
 
-    int countByHanhDongSauVuViec(ActionAfterCase hanhDongSauVuViec);
+    @Query(value = """
+        SELECT COUNT(DISTINCT xl.id_hoa_don) AS count
+        FROM xu_ly_sau_ban_hang xl
+        WHERE xl.hanh_dong_sau_vu_viec = :hanhDongSauVuViec;
+    """, nativeQuery = true)
+    int countByHanhDongSauVuViec(String hanhDongSauVuViec);
 
-    int countByLoaiVuViec(CaseType loaiVuViec);
+    @Query(value = """
+        SELECT COUNT(DISTINCT xl.id_hoa_don) AS count
+        FROM xu_ly_sau_ban_hang xl
+        WHERE xl.loai_vu_viec = :loaiVuViec;
+    """, nativeQuery = true)
+    int countByLoaiVuViec(String loaiVuViec);
 
-    int countByThoiGianXuLy(LocalDateTime thoiGianXuLy);
+    @Query(value = """
+        SELECT COUNT(*) AS count
+        FROM (
+        SELECT xl.id_hoa_don
+                FROM xu_ly_sau_ban_hang xl
+                GROUP BY xl.id_hoa_don
+                HAVING
+                SUM(CASE WHEN xl.thoi_gian_xu_ly IS NULL THEN 1 ELSE 0 END) = 0
+        AND SUM(CASE WHEN CAST(xl.thoi_gian_xu_ly AS DATE) = CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) > 0
+        ) AS SUB;
+    """, nativeQuery = true)
+    int countByThoiGianXuLy();
+}
     
     XuLySauBanHang findByIdImeiDaBan_IdAndIdHoaDon_IdAndHanhDongSauVuViec(
             Integer idImei, Integer idHoaDon, ActionAfterCase hanhDongSauVuViec

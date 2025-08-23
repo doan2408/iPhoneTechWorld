@@ -42,4 +42,5 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
 """)
     Integer countPendingHoaDonByNhanVien(Integer id, TrangThaiThanhToan trangThaiThanhToan);
 
+    List<LichSuHoaDon> findByIdHoaDon(HoaDon idHoaDon);
 }

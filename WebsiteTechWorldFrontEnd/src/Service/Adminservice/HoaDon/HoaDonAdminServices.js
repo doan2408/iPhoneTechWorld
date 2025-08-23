@@ -18,6 +18,16 @@ export const hoaDonGetAll = (pageNo = 0, pageSize = 10, keyWord, trangThai, loai
     })
 }
 
+export const getAllLichSuBanHang = (pageNo = 0, pageSize = 10, search) => {
+    return api.get(url_base + '/lich-su', {
+        params: {
+            pageNo,
+            pageSize,
+            search
+        }
+    })
+}
+
 //api detail hoa don
 export const hoaDonDetail = (id) => {
     const url = url_base + '/' + id;
@@ -73,13 +83,14 @@ export const deleteDetailInvoice = (idChiTietHoaDon) => {
     return api.delete(url)
 }
 
-export const fetchImeisJs = (productId, page, size) => {
+export const fetchImeisJs = (productId, page, size, search) => {
     const url = '/admin/imei/available'
     return api.get(url, {
         params: {
             productId: productId,
             page: page,
-            size: size
+            size: size,
+            search: search
         }
     });
 
