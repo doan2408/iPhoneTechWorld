@@ -317,7 +317,7 @@
       <div class="pagination-section">
         <div class="pagination-info">
           Hiển thị {{ pageNo * pageSize + 1 }} -
-          {{ pageNo * pageSize + 5 }} trong tổng số {{ totalElement }} hóa đơn
+          {{ pageNo * pageSize + hoaDons.length }} trong tổng số {{ totalElement }} hóa đơn
         </div>
         <div class="pagination-controls">
           <button class="pagination-btn" :disabled="pageNo === 0" @click="changePage(pageNo - 1)">
@@ -646,18 +646,17 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in lichSuHoaDon" :key="item.idLichSuHoaDon"
-                          class="product-row">
-                          <td class="product-name">
-                            {{ item.maNhanVien }} - {{ item.tenNhanVien }}
-                          </td>
-                          <td class="text-center">
-                            {{ item.thoiGianThayDoi }}
-                          </td>
-                          <td class="text-right">
-                            {{ item.hanhDong }}
-                          </td>
-                        </tr>
+                      <tr v-for="item in lichSuHoaDon" :key="item.idLichSuHoaDon" class="product-row">
+                        <td class="product-name">
+                          {{ item.maNhanVien }} - {{ item.tenNhanVien }}
+                        </td>
+                        <td class="text-center">
+                          {{ item.thoiGianThayDoi }}
+                        </td>
+                        <td class="text-right">
+                          {{ item.hanhDong }}
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
