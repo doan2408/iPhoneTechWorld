@@ -118,7 +118,8 @@
         </div>
 
         <div class="export-actions">
-          <button class="btn btn-outline" @click="refreshFilter">
+          <button class="btn btn-outline"
+            @click="openConfirm('Bạn có chắc muốn làm mới bộ lọc?', () => refreshFilter())">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -135,6 +136,8 @@
             Xuất Excel
           </button>
         </div>
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+          @cancel="showConfirm = false" />
       </div>
     </div>
 
@@ -675,7 +678,6 @@
               </div>
             </div>
           </div>
-
           <!-- Footer -->
           <div class="modal-footer">
             <button class="modal-btn" @click="closeModal">
@@ -1109,15 +1111,28 @@ const exportExcel = async () => {
 }
 
 const refreshFilter = () => {
-  pageNo.value = 0
-  , pageSize.value = 6
-  , searchQuery.value = ''
-  , statusFilter.value = ''
-  , typeFilter.value = ''
-  , dateFilterFrom.value = ''
-  , dateFilterTo.value = ''
+  pageNo.value = 0;
+  pageSize.value = 6;
+  searchQuery.value = '';
+  statusFilter.value = '';
+  typeFilter.value = '';
+  dateFilterFrom.value = '';
+  dateFilterTo.value = '';
 }
 
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+function openConfirm(message, callback) {
+  confirmMessage.value = message
+  confirmCallback = callback
+  showConfirm.value = true
+}
+
+function handleConfirm() {
+  if (confirmCallback) confirmCallback()
+  showConfirm.value = false
+}
 </script>
 
 <style scoped src="@/style/HoaDon/HoaDon.css"></style>
