@@ -12,15 +12,11 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DonBaoHanhAdminResponse {
+public class BaoHanhHistoryAdminResponse {
     private Integer idLsbh;
-    private String soImei;
-    private String tenSanPham;
-    private String mau;
-    private String rom;
+    private TrangThaiLichSuBaoHanh status;
     private String loaiBaoHanh;
-    private String tenKhachHang;
-    private Date ngayTiepNhan;
+    private String moTa;
+    private Date ngayYeuCau;
     private Date ngayHoanThanh;
-    private TrangThaiLichSuBaoHanh trangThai;
 }

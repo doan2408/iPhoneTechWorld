@@ -83,6 +83,7 @@ public class BaoHanhAdminMappper {
             }
         }
         response.setNgayTiepNhan(lichSuBaoHanh.getNgayTiepNhan());
+        response.setNgayHoanThanh(lichSuBaoHanh.getNgayHoanThanh());
         response.setTrangThai(lichSuBaoHanh.getTrangThai());
         return response;
     }

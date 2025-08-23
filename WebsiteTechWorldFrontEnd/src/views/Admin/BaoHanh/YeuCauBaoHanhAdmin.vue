@@ -110,7 +110,8 @@
                             <th>Sản Phẩm</th>
                             <th>Loại BH</th>
                             <th>Khách Hàng</th>
-                            <th>Ngày Tạo</th>
+                            <th>Ngày Tiếp Nhận</th>
+                            <th>Ngày Hoàn Thành</th>
                             <th>Trạng Thái</th>
                             <th>Thao Tác</th>
                         </tr>
@@ -123,17 +124,17 @@
                             <td>{{ warranty.loaiBaoHanh }}</td>
                             <td>{{ warranty.tenKhachHang }}</td>
                             <td>{{ warranty.ngayTiepNhan }}</td>
+                            <td>{{ warranty.ngayHoanThanh || 'Đơn hàng đang được xử lý'}}</td>
                             <td>
                                 <span :class="['status-badge', warranty.status]">
                                     {{ warranty.trangThai === 'IN_REPAIR' ? 'Đang sửa chữa' : 'Đã sửa chữa' }}
                                 </span>
                             </td>
                             <td>
-                                <button v-if="warranty.trangThai === 'IN_REPAIR'" @click="completeWarranty(warranty.idLsbh)"
-                                    class="complete-btn">
+                                <button v-if="warranty.trangThai === 'IN_REPAIR'"
+                                    @click="completeWarranty(warranty.idLsbh)" class="complete-btn">
                                     Hoàn Thành
                                 </button>
-                                <button @click="viewDetails(warranty)" class="detail-btn">Chi Tiết</button>
                             </td>
                         </tr>
                     </tbody>
@@ -151,6 +152,7 @@
         <!-- Tab Lịch Sử Bảo Hành -->
         <div v-if="activeTab === 'history'" class="tab-content">
             <h2>Lịch Sử Bảo Hành</h2>
+            <br>
             <div class="history-search">
                 <input v-model="historyImei" type="text" placeholder="Nhập IMEI để xem lịch sử" class="imei-input">
                 <button @click="searchHistory" class="search-btn">Tìm Kiếm</button>
@@ -159,57 +161,24 @@
             <div v-if="historyData.length > 0" class="history-results">
                 <h3>Lịch Sử Bảo Hành - IMEI: {{ historyImei }}</h3>
                 <div class="history-list">
-                    <div v-for="item in historyData" :key="item.id" class="history-item">
+                    <div v-for="item in historyData" :key="item.idLsbh" class="history-item">
                         <div class="history-header">
-                            <span class="order-id">Đơn #{{ item.id }}</span>
+                            <span class="order-id">Lần #{{ item.idLsbh }}</span>
                             <span :class="['status-badge', item.status]">
-                                {{ item.status === 'completed' ? 'Hoàn thành' : 'Đang xử lý' }}
+                                {{ item.status === 'IN_REPAIR' ? 'Đang sửa chữa' : 'Đã sửa chữa' }}
                             </span>
                         </div>
                         <div class="history-details">
-                            <p><strong>Loại bảo hành:</strong> {{ item.warrantyType }}</p>
-                            <p><strong>Mô tả:</strong> {{ item.description }}</p>
-                            <p><strong>Ngày tạo:</strong> {{ item.createdDate }}</p>
-                            <p v-if="item.completedDate"><strong>Ngày hoàn thành:</strong> {{ item.completedDate }}</p>
+                            <p><strong>Loại bảo hành:</strong> {{ item.loaiBaoHanh }}</p>
+                            <p><strong>Mô tả:</strong> {{ item.moTa }}</p>
+                            <p><strong>Ngày tạo:</strong> {{ item.ngayYeuCau }}</p>
+                            <p v-if="item.ngayHoanThanh"><strong>Ngày hoàn thành:</strong> {{ item.ngayHoanThanh }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div v-if="showDetailModal" class="modal-overlay" @click="closeModal">
-            <div class="modal-content" @click.stop>
-                <div class="modal-header">
-                    <h3>Chi Tiết Đơn Bảo Hành #{{ selectedOrder.id }}</h3>
-                    <button @click="closeModal" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="detail-section">
-                        <h4>Thông Tin Sản Phẩm</h4>
-                        <p><strong>IMEI:</strong> {{ selectedOrder.imei }}</p>
-                        <p><strong>Sản phẩm:</strong> {{ selectedOrder.productName }}</p>
-                        <p><strong>Loại bảo hành:</strong> {{ selectedOrder.warrantyType }}</p>
-                    </div>
-                    <div class="detail-section">
-                        <h4>Thông Tin Khách Hàng</h4>
-                        <p><strong>Tên:</strong> {{ selectedOrder.customerName }}</p>
-                        <p><strong>SĐT:</strong> {{ selectedOrder.phone }}</p>
-                    </div>
-                    <div class="detail-section">
-                        <h4>Chi Tiết Bảo Hành</h4>
-                        <p><strong>Mô tả lỗi:</strong> {{ selectedOrder.description }}</p>
-                        <p><strong>Ngày tạo:</strong> {{ selectedOrder.createdDate }}</p>
-                        <p v-if="selectedOrder.completedDate"><strong>Ngày hoàn thành:</strong> {{
-                            selectedOrder.completedDate }}</p>
-                        <p><strong>Trạng thái:</strong>
-                            <span :class="['status-badge', selectedOrder.status]">
-                                {{ selectedOrder.status === 'completed' ? 'Hoàn thành' : 'Đang xử lý' }}
-                            </span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Toast Notification -->
         <div v-if="showToast" :class="['toast', toastType]">
@@ -220,7 +189,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { checkedWarranty, createRequestWarranty, findDonBaoHanh, hoanThanhDon } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
+import { checkedWarranty, createRequestWarranty, findDonBaoHanh, findHistoryBaoHanh, hoanThanhDon } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
 import { tr } from 'element-plus/es/locales.mjs'
 
 const activeTab = ref('lookup')
@@ -318,23 +287,14 @@ async function completeWarranty(orderId) {
     }
 }
 
-function viewDetails(order) {
-    selectedOrder.value = order
-    showDetailModal.value = true
-}
-
-function closeModal() {
-    showDetailModal.value = false
-    selectedOrder.value = null
-}
-
-function searchHistory() {
+async function searchHistory() {
     if (!historyImei.value) {
         showToastMsg('Vui lòng nhập IMEI', 'error')
         return
     }
 
-    historyData.value = warrantyOrders.value.filter(order => order.imei === historyImei.value)
+    const res = await findHistoryBaoHanh(historyImei.value);
+    historyData.value = res.data
 
     if (historyData.value.length === 0) {
         showToastMsg('Không tìm thấy lịch sử bảo hành cho IMEI này', 'error')

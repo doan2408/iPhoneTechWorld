@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.BaoHanhRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.YeuCauBaoHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhHistoryAdminResponse;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
 import org.example.websitetechworld.Repository.BaoHanhRepository;
 import org.example.websitetechworld.Services.AdminServices.BaoHanhAdminServices.BaoHanhAdminServices;
@@ -111,5 +112,10 @@ public class BaoHanhAdminController {
     @PutMapping("/hoan-thanh-don/{idLsbh}")
     public void hoanThanhDon(@PathVariable Integer idLsbh){
          baoHanhAdminServices.hoanThanhXuLy(idLsbh);
+    }
+
+    @GetMapping("/lsbh/{soImei}")
+    public List<BaoHanhHistoryAdminResponse> findHistory(@PathVariable String soImei){
+        return baoHanhAdminServices.findHistory(soImei);
     }
 }

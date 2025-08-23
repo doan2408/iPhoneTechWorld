@@ -3,6 +3,7 @@ package org.example.websitetechworld.Services.AdminServices.BaoHanhAdminServices
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.BaoHanhRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.YeuCauBaoHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhHistoryAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.DonBaoHanhAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.YeuCauBaoHanhAdminResponse;
 import org.example.websitetechworld.Entity.*;
@@ -162,5 +163,9 @@ public class BaoHanhAdminServices {
         lichSuBaoHanh.setTrangThai(TrangThaiLichSuBaoHanh.REPAIRED);
 
         lichSuBaoHanhRepository.save(lichSuBaoHanh);
+    }
+
+    public List<BaoHanhHistoryAdminResponse> findHistory(String soImei){
+        return lichSuBaoHanhRepository.findHistory(soImei);
     }
 }

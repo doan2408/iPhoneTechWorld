@@ -77,3 +77,7 @@ export const findDonBaoHanh = (pageNo, pageSize) => {
 export const hoanThanhDon = (idLsbh) => {
   return api.put("/admin/bao-hanh/hoan-thanh-don/" + idLsbh);
 }
+
+export const findHistoryBaoHanh = (soImei) => {
+  return api.get("/admin/bao-hanh/lsbh/" + soImei);
+}
