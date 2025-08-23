@@ -90,3 +90,8 @@ export const hoaDonDetailGuest = (id) => {
     return api.get(url)
 }
 
+export const getOrderHistory = (id) => {
+    const url = baseURL + '/' + id + '/lich-su';
+    return api.get(url)
+}
+

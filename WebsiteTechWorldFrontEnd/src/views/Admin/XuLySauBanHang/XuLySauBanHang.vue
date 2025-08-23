@@ -295,6 +295,7 @@ const updateStatus = async (idHoaDon,status) => {
     } else if (status === 'RECEIVED') {
         toast.success("Đã nhận được hàng")
     }
+    getStats()
     getAllLyDoXuLyView()
 }
 

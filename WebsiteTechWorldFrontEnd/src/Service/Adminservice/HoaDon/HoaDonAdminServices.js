@@ -13,6 +13,16 @@ export const hoaDonGetAll = (pageNo = 0, pageSize = 10) => {
     })
 }
 
+export const getAllLichSuBanHang = (pageNo = 0, pageSize = 10, search) => {
+    return api.get(url_base + '/lich-su', {
+        params: {
+            pageNo,
+            pageSize,
+            search
+        }
+    })
+}
+
 //api detail hoa don
 export const hoaDonDetail = (id) => {
     const url = url_base + '/' + id;

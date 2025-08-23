@@ -78,7 +78,7 @@
 
                 <!-- Quick actions : hành động  -->
                 <div class="quick-actions">
-                    <button class="quick-btn">
+                    <button class="quick-btn" @click="openSalesHistoryModal()">
                         <History class="btn-icon" />
                         Lịch sử bán hàng
                     </button>
@@ -609,6 +609,55 @@
             </div>
         </div>
     </transition>
+
+    <div v-if="showSalesHistoryModal" class="modal-overlay" @click="closeSalesHistoryModal">
+        <div class="modal-content" @click.stop style="height: 600px;">
+            <div class="modal-header">
+                <h3>Lịch sử bán hàng</h3>
+                <button @click="closeSalesHistoryModal" class="close-modal-btn">
+                    <X class="close-icon" />
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <Search class="search-icon" />
+                    <input v-model="salesHistorySearchQuery" type="text" placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input" @input="searchSalesHistory" />
+                </div>
+                <div class="sales-history-list">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã hóa đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(history, index) in salesHistory" :key="history.id">
+                                <td>{{ salesHistoryPage * 5 + index + 1 }}</td>
+                                <td>{{ history.maHoaDon || 'N/A' }}</td>
+                                <td>{{ history.tenKhachHang || 'Khách lẻ' }}</td>
+                                <td>{{ formatCurrency(history.thanhTien || 0) }}</td>
+                                <td>{{ formatDate(history.ngayTao) }}</td>
+                                <td>{{ formatTrangThaiThanhToan(history.trangThaiThanhToan) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-controls">
+                    <button @click="previousSalesHistoryPage" :disabled="salesHistoryPage === 0">Trước</button>
+                    <span>Trang {{ salesHistoryPage + 1 }} / {{ totalSalesHistoryPages }}</span>
+                    <button @click="nextSalesHistoryPage" :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeSalesHistoryModal" class="cancel-btn">Đóng</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -628,7 +677,8 @@ import {
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
     , findHdctByImeiDaBan, findProductByImei,
-    updateGia
+    updateGia,
+    getAllLichSuBanHang
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -2277,6 +2327,18 @@ const handleClose = () => {
     showInvoice.value = false;
 };
 
+const formatTrangThaiThanhToan = (trangThai) => {
+    const mapping = {
+        PENDING: 'Chờ thanh toán',
+        CONFIRMED: 'Đã xác nhận',
+        PAID: 'Đã thanh toán',
+        CANCELLED: 'Đã hủy',
+        REFUNDED: 'Đã hoàn tiền',
+        COMPLETED: 'Hoàn tất',
+    };
+    return mapping[trangThai] || 'Không rõ';
+};
+
 const formatTrangThai = (trangThai) => {
     const mapping = {
         AVAILABLE: 'Có sẵn',
@@ -2366,6 +2428,71 @@ const applyDiscount = (discount) => {
 const clearDiscount = () => {
     selectedDiscount.value = null;
 };
+
+// Biến cho modal lịch sử bán hàng
+const showSalesHistoryModal = ref(false);
+const salesHistory = ref([]);
+const salesHistoryPage = ref(0);
+const salesHistoryPageSize = ref(5);
+const totalSalesHistoryPages = ref(1);
+const salesHistorySearchQuery = ref('');
+
+const openSalesHistoryModal = async () => {
+    showSalesHistoryModal.value = true;
+    await loadSalesHistory();
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+    salesHistorySearchQuery.value = '';
+    salesHistoryPage.value = 0;
+};
+
+const loadSalesHistory = async () => {
+    try {
+        const response = await getAllLichSuBanHang(salesHistoryPage.value, salesHistoryPageSize.value, salesHistorySearchQuery.value);
+        salesHistory.value = response.data.content || [];
+        totalSalesHistoryPages.value = response.data.totalPages || 1;
+    } catch (error) {
+        console.error('Lỗi khi tải lịch sử bán hàng:', error);
+        toast.error('Không thể tải lịch sử bán hàng. Vui lòng thử lại.');
+    }
+};
+
+const searchSalesHistory = async () => {
+    salesHistoryPage.value = 0; 
+    await loadSalesHistory();
+};
+
+const previousSalesHistoryPage = () => {
+    if (salesHistoryPage.value > 0) {
+        salesHistoryPage.value--;
+        loadSalesHistory();
+    }
+};
+
+const nextSalesHistoryPage = () => {
+    if (salesHistoryPage.value < totalSalesHistoryPages.value - 1) {
+        salesHistoryPage.value++;
+        loadSalesHistory();
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+watch(salesHistorySearchQuery, () => {
+    searchSalesHistory();
+});
 
 </script>
 

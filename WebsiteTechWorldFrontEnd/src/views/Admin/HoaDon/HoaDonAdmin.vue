@@ -583,7 +583,7 @@
               <!-- Action Buttons Section -->
               <div class="invoice-card-actions">
                 <button class="invoice-action-button invoice-process-button"
-                  @click="devliveryProcessing(selectedInvoice)">
+                  @click="devliveryProcessing(selectedInvoice)" :disabled="!selectedInvoice?.isShipping">
                   <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -622,38 +622,24 @@
                   <table class="invoice-history-table">
                     <thead>
                       <tr>
-                        <th>Mã giao dịch</th>
-                        <th>Ngày</th>
-                        <th>Số tiền</th>
-                        <th>Trạng thái</th>
+                        <th>Người thao tác</th>
+                        <th>Ngày thao tác</th>
+                        <th>Hành động</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>TX-12345</td>
-                        <td>15/06/2024</td>
-                        <td>250.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-paid">Đã thanh toán</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>TX-12346</td>
-                        <td>16/06/2024</td>
-                        <td>150.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-pending">Đang xử lý</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>TX-12347</td>
-                        <td>17/06/2024</td>
-                        <td>350.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-failed">Thất bại</span>
-                        </td>
-                      </tr>
-                      <!-- Thêm các hàng khác nếu cần -->
+                      <tr v-for="item in lichSuHoaDon" :key="item.idLichSuHoaDon"
+                          class="product-row">
+                          <td class="product-name">
+                            {{ item.maNhanVien }} - {{ item.tenNhanVien }}
+                          </td>
+                          <td class="text-center">
+                            {{ item.thoiGianThayDoi }}
+                          </td>
+                          <td class="text-right">
+                            {{ item.hanhDong }}
+                          </td>
+                        </tr>
                     </tbody>
                   </table>
                 </div>
