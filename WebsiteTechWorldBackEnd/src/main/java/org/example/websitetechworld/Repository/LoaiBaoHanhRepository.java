@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface LoaiBaoHanhRepository extends JpaRepository<LoaiBaoHanh,Integer> {
 
     @Query("SELECT lbh FROM LoaiBaoHanh lbh WHERE :search IS NULL OR lbh.tenLoaiBaoHanh LIKE %:search% ")
@@ -19,4 +21,9 @@ public interface LoaiBaoHanhRepository extends JpaRepository<LoaiBaoHanh,Integer
             "where l.tenLoaiBaoHanh = :tenLoai " +
             "and l.idModelSanPham.idModelSanPham = :idModel")
     boolean existsByTenLoaiBaoHanhAndIdModel(@Param("tenLoai") String tenLoaiBaoHanh, @Param("idModel") Integer idModel);
+
+    @Query(value = "select lbh from LoaiBaoHanh lbh " +
+            "where lbh.trangThai = :trangThai " +
+            "and lbh.idModelSanPham.idModelSanPham = :idModel")
+    List<LoaiBaoHanh> findByIdModelAndTrangThai(@Param("trangThai") Boolean trangThai, @Param("idModel") Integer idModel);
 }

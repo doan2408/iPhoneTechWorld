@@ -33,6 +33,9 @@ public class LoaiBaoHanh {
     @Column(name = "mo_ta")
     private String moTa;
 
+    @Column(name = "trang_thai")
+    private Boolean trangThai;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_model_san_pham")
     private ModelSanPham idModelSanPham;

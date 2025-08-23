@@ -4,9 +4,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.LoaiBaoHanhAdminResponse;
 import org.example.websitetechworld.Entity.LoaiBaoHanh;
 import org.example.websitetechworld.Entity.ModelSanPham;
-import org.example.websitetechworld.Repository.LoaiBaoHanhRepository;
-import org.example.websitetechworld.Repository.LoaiRepository;
-import org.example.websitetechworld.Repository.ModelSanPhamRepository;
+import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,15 +19,27 @@ import java.util.Objects;
 @Service
 public class LoaiBaoHanhAdminServices {
     private final LoaiBaoHanhRepository loaiBaohanhRepository;
+    private final ImeiDaBanRepository imeiDaBanRepository;
+    private final BaoHanhRepository baoHanhRepository;
 
-    public LoaiBaoHanhAdminServices(LoaiBaoHanhRepository loaiBaohanhRepository, ModelSanPhamRepository modelSanPhamRepository) {
+    public LoaiBaoHanhAdminServices(LoaiBaoHanhRepository loaiBaohanhRepository, ModelSanPhamRepository modelSanPhamRepository, ImeiDaBanRepository imeiDaBanRepository, BaoHanhRepository baoHanhRepository) {
         this.loaiBaohanhRepository = loaiBaohanhRepository;
+        this.imeiDaBanRepository = imeiDaBanRepository;
+        this.baoHanhRepository = baoHanhRepository;
+    }
+
+    private Integer idModelByIdImeiDaBan(Integer idImeiDaBan) {
+        return imeiDaBanRepository.idModelByidImeiDaBan(idImeiDaBan);
     }
 
     // using for dropdown
-    public List<LoaiBaoHanhAdminResponse> loaiBaoHanhList() {
-        return loaiBaohanhRepository.findAll().stream()
-                .map(LoaiBaoHanhAdminResponse::convertDto)
+    public List<LoaiBaoHanhAdminResponse> loaiBaoHanhList(Integer idImeiDaBan) {
+        Integer idModel = idModelByIdImeiDaBan(idImeiDaBan);
+        return loaiBaohanhRepository.findByIdModelAndTrangThai(true, idModel).stream()
+                .map(lbh -> {
+                    Boolean daCo = baoHanhRepository.existsByBaoHanh(idImeiDaBan, lbh.getId());
+                    return LoaiBaoHanhAdminResponse.convertDto(lbh, daCo);
+                })
                 .toList();
     }
 
@@ -52,6 +62,7 @@ public class LoaiBaoHanhAdminServices {
                     response.setTenLoaiBaoHanh(loaiBaoHanh.getTenLoaiBaoHanh());
                     response.setThoiGianThang(loaiBaoHanh.getThoiGianThang());
                     response.setMoTa(loaiBaoHanh.getMoTa());
+                    response.setTrangThai(loaiBaoHanh.getTrangThai());
                     return response;
                 });
     }
@@ -65,8 +76,7 @@ public class LoaiBaoHanhAdminServices {
         List<Map<String, String>> errors = new ArrayList<>();
         if (loaiBaohanhRepository.existsByTenLoaiBaoHanhAndIdModel(request.getTenLoaiBaoHanh(),
                 request.getIdModelSanPham())
-        )
-        {
+        ) {
             errors.add(Map.of("field", "loaiBaoHanh", "message", "Loại bảo hành này và model đã được áp dụng"));
         }
         if (!errors.isEmpty()) {
@@ -87,9 +97,9 @@ public class LoaiBaoHanhAdminServices {
 
         if (
                 (!Objects.equals(request.getTenLoaiBaoHanh().trim(), loaiBaoHanhExisting.getTenLoaiBaoHanh())
-                || !Objects.equals(request.getIdModelSanPham(), loaiBaoHanhExisting.getIdModelSanPham().getIdModelSanPham())
+                        || !Objects.equals(request.getIdModelSanPham(), loaiBaoHanhExisting.getIdModelSanPham().getIdModelSanPham())
                 )
-                && loaiBaohanhRepository.existsByTenLoaiBaoHanhAndIdModel(
+                        && loaiBaohanhRepository.existsByTenLoaiBaoHanhAndIdModel(
                         request.getTenLoaiBaoHanh(),
                         request.getIdModelSanPham()
                 )
@@ -107,6 +117,7 @@ public class LoaiBaoHanhAdminServices {
         loaiBaoHanhExisting.setTenLoaiBaoHanh(request.getTenLoaiBaoHanh().trim());
         loaiBaoHanhExisting.setThoiGianThang(request.getThoiGianThang());
         loaiBaoHanhExisting.setMoTa(request.getMoTa());
+        loaiBaoHanhExisting.setTrangThai(request.getTrangThai());
 
         LoaiBaoHanh updated = loaiBaohanhRepository.save(loaiBaoHanhExisting);
         return LoaiBaoHanhAdminResponse.convertDto(updated);

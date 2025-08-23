@@ -49,7 +49,7 @@ public class BaoHanhAdminServices {
 
     public BaoHanhAdminResponse addWarranty(BaoHanhRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
-        if (baoHanhRepository.existsByBaoHanh(request.getIdKhachHang(), request.getIdImeiDaBan(), request.getIdLoaiBaoHanh())) {
+        if (baoHanhRepository.existsByBaoHanh(request.getIdImeiDaBan(), request.getIdLoaiBaoHanh())) {
             errors.add(Map.of("field", "baoHanh", "message", "Sản phẩm của khách hàng đã được áp dụng bảo hành này"));
         }
         if (!errors.isEmpty()) {
@@ -82,11 +82,11 @@ public class BaoHanhAdminServices {
 
         if (
                 (
-                        !Objects.equals(request.getIdKhachHang(), baoHanh.getIdKhachHang().getId()) ||
+//                        !Objects.equals(request.getIdKhachHang(), baoHanh.getIdKhachHang().getId()) ||
                                 !Objects.equals(request.getIdImeiDaBan(), baoHanh.getIdImeiDaBan().getId()) ||
                                 !Objects.equals(request.getIdLoaiBaoHanh(), baoHanh.getIdLoaiBaoHanh().getId())
                 )
-                        && baoHanhRepository.existsByBaoHanh(request.getIdKhachHang(), request.getIdImeiDaBan(), request.getIdLoaiBaoHanh())
+                        && baoHanhRepository.existsByBaoHanh(request.getIdImeiDaBan(), request.getIdLoaiBaoHanh())
         ) {
             errors.add(Map.of("field", "baoHanh", "message", "Sản phẩm của khách hàng đã được áp dụng bảo hành này"));
 

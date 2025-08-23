@@ -411,7 +411,7 @@ CREATE TABLE khuyen_mai_san_pham_chi_tiet (
 CREATE TABLE imei (
                       id_imei INT IDENTITY(1,1) PRIMARY KEY,
                       id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
-                      so_imei VARCHAR(70),
+                      so_imei VARCHAR(70) NOT NULL UNIQUE,
                       trang_thai_imei NVARCHAR(50),
 );
 
@@ -459,7 +459,7 @@ CREATE TABLE chi_tiet_hoa_don (
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
-                             so_imei VARCHAR(70),
+                             so_imei VARCHAR(70) NOT NULL UNIQUE,
                              trang_thai NVARCHAR(50)
 );
 
@@ -468,8 +468,9 @@ CREATE TABLE loai_bao_hanh (
                                id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
                                ten_loai_bao_hanh NVARCHAR(100),
                                thoi_gian_thang INT,
-							                 id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
-                               mo_ta NVARCHAR(255)
+							   id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
+                               mo_ta NVARCHAR(255),
+							   trang_thai BIT
 );
 
 --39
@@ -1123,7 +1124,7 @@ WITH SPCT_Data AS (
     SELECT
         id_san_pham_chi_tiet,
         ma_san_pham_chi_tiet,
-        so_luong - 1 AS NumIMEIsToGenerate
+        so_luong AS NumIMEIsToGenerate
     FROM
         san_pham_chi_tiet
     WHERE
@@ -1339,3 +1340,18 @@ SELECT * FROM ly_do_xu_ly;
 
 -- 48. Xử lý sau bán hàng
 SELECT * FROM xu_ly_sau_ban_hang;
+
+SELECT 
+    spct.id_san_pham_chi_tiet,
+    spct.ma_san_pham_chi_tiet,
+    spct.so_luong as so_luong_can_co,
+    COUNT(i.so_imei) as so_imei_da_tao,
+    CASE 
+        WHEN COUNT(i.so_imei) = spct.so_luong THEN 'OK'
+        WHEN COUNT(i.so_imei) > spct.so_luong THEN 'THỪA'
+        ELSE 'THIẾU'
+    END as trang_thai
+FROM san_pham_chi_tiet spct
+LEFT JOIN imei i ON spct.id_san_pham_chi_tiet = i.id_san_pham_chi_tiet
+GROUP BY spct.id_san_pham_chi_tiet, spct.ma_san_pham_chi_tiet, spct.so_luong
+ORDER BY spct.id_san_pham_chi_tiet;

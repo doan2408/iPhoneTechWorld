@@ -1,7 +1,7 @@
 package org.example.websitetechworld.Repository;
 
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiDaBangAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
-import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.ImeiDaBan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
@@ -70,9 +70,34 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
 
     ImeiDaBan findByIdHoaDonChiTiet_IdAndSoImei(Integer idHoaDonChiTiet_Id, String soImei);
 
-    @Query(value = "select i from ImeiDaBan i " +
-            "where i.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang " +
-            "order by i.id desc")
-    List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
+    @Query(value = """
+    select new org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiDaBangAdminResponse (
+    imdb.id,
+    imdb.soImei,
+    imdb.trangThai,
+    mdsp.tenModel,
+    xx.maXuatXu
+    )
+    from ImeiDaBan imdb
+    join imdb.idHoaDonChiTiet.idSanPhamChiTiet.idSanPham.idModelSanPham mdsp 
+    join mdsp.idXuatXu xx 
+    where imdb.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang 
+    and imdb.trangThai != :trangThaiImeiDaBan 
+    order by imdb.id desc
+""")
+    List<ImeiDaBangAdminResponse> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang,
+                                                           @Param("trangThaiImeiDaBan") TrangThaiImei trangThaiImeiDaBan);
+
+    @Query(value = """
+    select md.id_model_san_pham from model_san_pham md
+    join xuat_xu xx on xx.id_xuat_xu = md.id_xuat_xu
+    join san_pham sp on sp.id_model_san_pham = md.id_model_san_pham
+    join san_pham_chi_tiet spct on spct.id_san_pham = sp.id_san_pham
+    join chi_tiet_hoa_don cthd on cthd.id_san_pham_chi_tiet = spct.id_san_pham_chi_tiet
+    join imei_da_ban iDaBan on iDaBan.id_chi_tiet_hoa_don = cthd.id_chi_tiet_hoa_don
+    where iDaBan.id_imei_da_ban = ?1
+""", nativeQuery = true)
+    Integer idModelByidImeiDaBan(Integer idImeiDaBan);
+
     ImeiDaBan findBySoImei(String soImei);
 }
