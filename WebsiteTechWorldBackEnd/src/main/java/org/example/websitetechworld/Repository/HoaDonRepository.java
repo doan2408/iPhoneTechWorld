@@ -4,6 +4,7 @@ import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
-    Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(Pageable pageable);
+    @Query("""
+        SELECT hd
+        FROM HoaDon hd
+        LEFT JOIN hd.idKhachHang kh
+        WHERE (hd.isDelete = false OR hd.isDelete IS NULL)
+          AND (:keyword IS NULL OR hd.maHoaDon LIKE %:keyword% OR kh.tenKhachHang LIKE %:keyword%)
+          AND (:trangThai IS NULL OR hd.trangThaiThanhToan = :trangThai)
+          AND (:loaiHoaDon IS NULL OR hd.loaiHoaDon = :loaiHoaDon)
+          AND (:from IS NULL OR hd.ngayTaoHoaDon >= :from)
+          AND (:to IS NULL OR hd.ngayTaoHoaDon <= :to)
+    """)
+    Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(
+            @Param("keyword") String keyword,
+            @Param("trangThai") TrangThaiThanhToan trangThai,
+            @Param("loaiHoaDon") LoaiHoaDon loaiHoaDon,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
+
     Integer countByTrangThaiThanhToan(TrangThaiThanhToan trangThaiThanhToan);
 
     @Query (value = """
