@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,6 @@ public class ClientAdminService {
 
     private KhachHang convertToKhachHang(AdminClientRequest adminClientRequest) {
         KhachHang khachHang = new KhachHang();
-        khachHang.setId(adminClientRequest.getId());
         khachHang.setMaKhachHang(adminClientRequest.getMaKhachHang());
         khachHang.setTenKhachHang(adminClientRequest.getTenKhachHang());
         khachHang.setSdt(adminClientRequest.getSdt());
@@ -86,7 +87,7 @@ public class ClientAdminService {
         khachHang.setGioiTinh(adminClientRequest.getGioiTinh());
         khachHang.setAnh(adminClientRequest.getAnh());
         khachHang.setTrangThai(adminClientRequest.getTrangThai());
-        khachHang.setHangThanhVien(adminClientRequest.getHangKhachHang());
+//        khachHang.setHangThanhVien(adminClientRequest.getHangKhachHang());
      return khachHang;
     }
 
@@ -136,6 +137,7 @@ public class ClientAdminService {
     }
 
     //add client
+    @Transactional
     public KhachHang addClient(AdminClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
@@ -198,6 +200,7 @@ public class ClientAdminService {
     }
 
     //update khách hàng
+    @Transactional
     public KhachHang updateClient(Integer id, AdminClientRequest khachHangRequest) {
         KhachHang existing = khachHangRepository.findById(id).orElse(null);
 
