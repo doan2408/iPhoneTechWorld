@@ -193,7 +193,7 @@ function toggleBaoHanhMenu() {
               <router-link to="/admin/warranty">Quản lý bảo hành</router-link>
             </li>
             <li>
-              <router-link to="/admin/warrantyHistory">Lịch sử bảo hành</router-link>
+              <router-link to="/admin/warranty-request">Yêu cầu bảo hành</router-link>
             </li>
           </ul>
         </ul>

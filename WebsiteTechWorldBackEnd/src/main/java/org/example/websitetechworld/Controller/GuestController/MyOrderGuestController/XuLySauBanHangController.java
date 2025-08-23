@@ -91,4 +91,10 @@ public class XuLySauBanHangController {
         StatsTrangThaiHoaDon banHangList = xuLySauBanHangServices.getStatsTrangThaiHoaDon();
         return ResponseEntity.ok(banHangList);
     }
+
+    @DeleteMapping("/{idHoaDon}")
+    public void deleteById(@PathVariable Integer idHoaDon){
+        xuLySauBanHangServices.tuChoiDonHang(idHoaDon);
+    }
+
 }

@@ -1,16 +1,16 @@
 package org.example.websitetechworld.Services.AdminServices.BaoHanhAdminServices;
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.BaoHanhRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.YeuCauBaoHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhAdminResponse;
-import org.example.websitetechworld.Entity.BaoHanh;
-import org.example.websitetechworld.Entity.ImeiDaBan;
-import org.example.websitetechworld.Entity.KhachHang;
-import org.example.websitetechworld.Entity.LoaiBaoHanh;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhHistoryAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.DonBaoHanhAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.YeuCauBaoHanhAdminResponse;
+import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
-import org.example.websitetechworld.Repository.BaoHanhRepository;
-import org.example.websitetechworld.Repository.ImeiDaBanRepository;
-import org.example.websitetechworld.Repository.KhachHangRepository;
-import org.example.websitetechworld.Repository.LoaiBaoHanhRepository;
+import org.example.websitetechworld.Enum.BaoHanh.TrangThaiLichSuBaoHanh;
+import org.example.websitetechworld.Mapper.Admin.BaoHanh.BaoHanhAdminMappper;
+import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,12 +27,18 @@ public class BaoHanhAdminServices {
     private final LoaiBaoHanhRepository loaiBaoHanhRepository;
     private final KhachHangRepository khachHangRepository;
     private final ImeiDaBanRepository imeiDaBanRepository;
+    private final BaoHanhAdminMappper baoHanhAdminMappper;
+    private final LichSuHoaDonRepository lichSuHoaDonRepository;
+    private final LichSuBaoHanhRepository lichSuBaoHanhRepository;
 
-    public BaoHanhAdminServices(BaoHanhRepository baoHanhRepository, LoaiBaoHanhRepository loaiBaoHanhRepository, KhachHangRepository khachHangRepository, ImeiDaBanRepository imeiDaBanRepository) {
+    public BaoHanhAdminServices(BaoHanhRepository baoHanhRepository, LoaiBaoHanhRepository loaiBaoHanhRepository, KhachHangRepository khachHangRepository, ImeiDaBanRepository imeiDaBanRepository, BaoHanhAdminMappper baoHanhAdminMappper, LichSuHoaDonRepository lichSuHoaDonRepository, LichSuBaoHanhRepository lichSuBaoHanhRepository) {
         this.baoHanhRepository = baoHanhRepository;
         this.loaiBaoHanhRepository = loaiBaoHanhRepository;
         this.khachHangRepository = khachHangRepository;
         this.imeiDaBanRepository = imeiDaBanRepository;
+        this.baoHanhAdminMappper = baoHanhAdminMappper;
+        this.lichSuHoaDonRepository = lichSuHoaDonRepository;
+        this.lichSuBaoHanhRepository = lichSuBaoHanhRepository;
     }
 
     public Page<BaoHanhAdminResponse> getAllBaoHanh(String search, TrangThaiBaoHanh trangThai,
@@ -65,7 +71,7 @@ public class BaoHanhAdminServices {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(ngayBatDau);
-        cal.add(Calendar.MONTH, thoiGianThang); // startDate + thoi gian thang
+        cal.add(Calendar.MONTH, thoiGianThang);
 
         Date ngayKetThuc = new Date(cal.getTimeInMillis());
         baoHanh.setNgayKetThuc(ngayKetThuc);
@@ -119,5 +125,47 @@ public class BaoHanhAdminServices {
         baoHanh.setTrangThaiBaoHanh(request.getTrangThaiBaoHanh());
         BaoHanh updated = baoHanhRepository.save(baoHanh);
         return BaoHanhAdminResponse.convertDto(updated);
+    }
+
+    public YeuCauBaoHanhAdminResponse  checkWarranty(String soImei){
+        ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImeiWithValidWarranty(soImei);
+        YeuCauBaoHanhAdminResponse response = baoHanhAdminMappper.toYeuCauBaoHanhAdminResponse(imeiDaBan) ;
+        return response;
+    }
+
+    public void createRequestWarranty(YeuCauBaoHanhAdminRequest yeuCauBaoHanhAdminRequest){
+
+        BaoHanh baoHanh = baoHanhRepository.findById(yeuCauBaoHanhAdminRequest.getIdBaoHanh()).orElseThrow(
+                ()-> new IllegalArgumentException("BaoHanh Not Found")
+        );
+
+        LichSuBaoHanh lichSuBaoHanh = new LichSuBaoHanh();
+        lichSuBaoHanh.setIdBaoHanh(baoHanh);
+        lichSuBaoHanh.setNgayTiepNhan(Date.valueOf(LocalDate.now()));
+        lichSuBaoHanh.setMoTaLoi(yeuCauBaoHanhAdminRequest.getLyDoBaoHanh());
+        lichSuBaoHanh.setTrangThai(TrangThaiLichSuBaoHanh.IN_REPAIR);
+
+        lichSuBaoHanhRepository.save(lichSuBaoHanh);
+
+    }
+
+    public Page<DonBaoHanhAdminResponse> findDonBaoHanh(Integer pageNo, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Page<LichSuBaoHanh> resLst = lichSuBaoHanhRepository.findDonBaoHanh(pageable);
+        return resLst.map(BaoHanhAdminMappper::toDonBaoHanhAdminResponse);
+    }
+
+    public void hoanThanhXuLy(Integer idCtbh){
+        LichSuBaoHanh lichSuBaoHanh =  lichSuBaoHanhRepository.findById(idCtbh).orElseThrow(
+                () -> new IllegalArgumentException("LichSuBaoHanh Not Found")
+        );
+        lichSuBaoHanh.setNgayHoanThanh(Date.valueOf(LocalDate.now()));
+        lichSuBaoHanh.setTrangThai(TrangThaiLichSuBaoHanh.REPAIRED);
+
+        lichSuBaoHanhRepository.save(lichSuBaoHanh);
+    }
+
+    public List<BaoHanhHistoryAdminResponse> findHistory(String soImei){
+        return lichSuBaoHanhRepository.findHistory(soImei);
     }
 }

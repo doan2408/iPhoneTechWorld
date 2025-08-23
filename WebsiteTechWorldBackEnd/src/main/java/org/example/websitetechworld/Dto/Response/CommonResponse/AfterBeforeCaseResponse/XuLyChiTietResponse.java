@@ -28,4 +28,6 @@ public class XuLyChiTietResponse {
     private CaseType loaiVuViec;
     private BigDecimal donGia;
     private BigDecimal soTienHoan;
+    private String urlHinh;
+    private String urlVideo;
 }

@@ -14,5 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ChangeStatusRequest {
     private List<String> soImeis;
+    private Integer idHoaDon;
     private ActionAfterCase status;
 }

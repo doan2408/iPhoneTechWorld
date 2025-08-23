@@ -243,8 +243,8 @@ public class MyOrderClientServices {
         return new PageImpl<>(content, pageable, lstHoaDon.getTotalElements());
     }
 
-    public List<Integer> findIdHoaDonByMVD(String maVanDon){
-        return hoaDonRepository.findIdHoaDonByMVD(maVanDon);
+    public List<Integer> findIdHoaDonByMVDAndSdt (String sdt, String maVanDon){
+        return hoaDonRepository.findIdHoaDonByMVDAndSdt(maVanDon, sdt);
     }
 
     public HoaDonAdminResponse findById(Integer id){

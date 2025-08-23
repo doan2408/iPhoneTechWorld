@@ -10,6 +10,9 @@
                     <label for="tracking-number" class="form-label">Mã Vận Đơn</label>
                     <input id="tracking-number" type="text" v-model="trackingNumber" placeholder="Ví dụ: VD001"
                         class="form-input" required />
+                    <label for="tracking-number" class="form-label">Số điện thoại người nhận</label>
+                    <input id="tracking-number" type="text" v-model="sdt" placeholder="Ví dụ: 0987 654 321"
+                        class="form-input" required />
                 </div>
                 <button type="submit" class="submit-button">
                     <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -30,17 +33,24 @@
 
 <script setup>
 import router from '@/router'
-import { ref } from 'vue'
-import { findIdHoaDonByMVD } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { ref, watch } from 'vue'
+import { findIdHoaDonByMVDAndSdt } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { useToast } from "vue-toastification";
 
 const trackingNumber = ref('')
+const sdt = ref('')
+const toast = useToast()
 
 const handleSubmit = async () => {
-    console.log('Mã vận đơn đã nhập:', trackingNumber.value)
-    const res = await findIdHoaDonByMVD(trackingNumber.value);
+    console.log('Mã vận đơn đã nhập:', trackingNumber.value, sdt.value)
+    const res = await findIdHoaDonByMVDAndSdt(trackingNumber.value, sdt.value);
     const data = res.data
-    devliveryProcessing(data);
-
+    if (data.length > 0) {
+        toast.success('Tìm thấy đơn hàng thành công')
+        devliveryProcessing(data);
+    } else {
+        toast.error('Không tìm thấy đơn hàng bạn muốn theo dõi')
+    }
 }
 
 const devliveryProcessing = async (data) => {
@@ -49,6 +59,10 @@ const devliveryProcessing = async (data) => {
     params: { id: data[0] },
   });
 };
+
+watch(sdt, (newVal) => {
+  sdt.value = newVal.replace(/\s+/g, '')
+})
 </script>
     
 <style scoped>
