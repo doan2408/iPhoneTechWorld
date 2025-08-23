@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiDaBangAdminResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Entity.ImeiDaBan;
+import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,7 +62,7 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
         LEFT JOIN MauSac ms ON ms.id = spct.idMau.id
         LEFT JOIN Rom rom ON rom.id = spct.idRom.id
         LEFT JOIN XuLySauBanHang xlbh ON xlbh.idImeiDaBan.id = imbd.id
-        WHERE cthd.id = :ctHoaDonId AND xlbh.idHoaDon.id IS NULL
+        WHERE cthd.id = :ctHoaDonId AND ( xlbh.idHoaDon.id IS NULL OR xlbh.hanhDongSauVuViec = 'CANCEL')
         ORDER BY imbd.id DESC
     """)
     List<ImeiTrangHoaDonResponse> imeiTrongHdct(Integer ctHoaDonId);
@@ -100,4 +101,19 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
     Integer idModelByidImeiDaBan(Integer idImeiDaBan);
 
     ImeiDaBan findBySoImei(String soImei);
+           
+    @Query(value = "select i from ImeiDaBan i " +
+            "where i.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang " +
+            "order by i.id desc")
+    List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
+
+    @Query("""
+    SELECT DISTINCT imdb
+    FROM ImeiDaBan imdb
+    JOIN FETCH imdb.idBaoHanh bh
+    WHERE imdb.trangThai <> 'RETURNED'
+      AND imdb.soImei = :soImei
+      AND bh.trangThaiBaoHanh = 'UNDER_WARRANTY'
+""")
+    ImeiDaBan findBySoImeiWithValidWarranty(String soImei);
 }

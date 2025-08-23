@@ -142,6 +142,12 @@
                                     </span>
                                 </div>
                             </label>
+                            <div v-if="imeis.length === 0"
+                                class="return-selected-empty">
+                                <p style="text-align: center; color: red;">
+                                    Tất cả sản phẩm đều đã được gửi yêu cầu trả hàng
+                                </p>
+                            </div>
                         </div>
 
                         <div v-if="imeis.some(i => i.selected)" class="return-selected">
@@ -724,6 +730,8 @@ const callCustomer = () => {
 const emailCustomer = () => {
     window.open(`mailto:${order.customer.email}`)
 }
+
+
 
 const callDriver = () => {
     if (order.driver) {

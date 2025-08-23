@@ -1312,8 +1312,8 @@ input:checked+.slider:before {
 .modal-content {
     background: white;
     border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
+    width: 100%;
+    max-width: 1200px;
     max-height: 90vh;
     overflow-y: auto;
 }
@@ -1648,7 +1648,7 @@ input:checked+.slider:before {
     /* Tăng kích thước tối đa của modal */
     width: 95%;
     /* Chiếm nhiều không gian hơn trên màn hình */
-    max-width: 800px;
+    max-width: 1000px;
     /* Tăng max-width đáng kể */
     /* min-width: 500px; */
     /* Có thể thêm min-width nếu cần */
@@ -1701,6 +1701,30 @@ input:checked+.slider:before {
     overflow-x: hidden;
 }
 
+.imei-container {
+    display: flex;
+    gap: 20px;
+}
+
+.imei-list-container, .selected-imeis-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.imei-list-container h3, .selected-imeis-container h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.imei-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
 .imei-list {
     display: grid;
     /* Thay đổi để đảm bảo số cột và kích thước ô phù hợp với modal lớn hơn */
@@ -1712,6 +1736,68 @@ input:checked+.slider:before {
     /* Tăng khoảng cách giữa các ô */
     padding: 0 10px;
     /* Thêm padding ngang cho lưới IMEI để tránh dính lề */
+}
+
+.selected-imeis {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.selected-imeis ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.selected-imeis li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.remove-imei-btn {
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.remove-imei-btn:hover {
+    background: #d9363e;
+}
+
+.imei-search {
+    margin: 10px 0;
+}
+
+.imei-search .search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.imei-search .search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 5px;
+}
+
+.imei-search .search-icon {
+    margin-right: 5px;
+    color: #888;
 }
 
 .imei-item {
@@ -1769,7 +1855,6 @@ input:checked+.slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 25px;
     gap: 15px;
     /* Thêm padding ngang để căn chỉnh với imei-list */
     padding: 0 10px;
@@ -1954,7 +2039,7 @@ input:checked+.slider:before {
 }
 
 .imei-item {
-    margin-bottom: 10px;
+    margin-bottom: 2px;
 }
 
 .imei-checkbox {
@@ -2974,6 +3059,8 @@ input:checked+.slider:before {
     justify-content: space-between;
     align-items: center;
     padding: 16px;
+    margin-bottom: 0;
+    padding: 0;
 }
 
 .modal-title {

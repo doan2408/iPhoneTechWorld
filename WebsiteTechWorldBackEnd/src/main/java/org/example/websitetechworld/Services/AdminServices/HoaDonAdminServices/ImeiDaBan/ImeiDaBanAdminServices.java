@@ -79,7 +79,6 @@ public class ImeiDaBanAdminServices {
         return imeiDaBanRepository.imeiTrongHdct(ctHoaDonId);
     }
 
-    // list imei đã bán cho 1 khách
     public List<ImeiDaBangAdminResponse> imeiDaBanListByKhachHang(Integer idKhachHang) {
         return imeiDaBanRepository.imeiDaBanListByKhachHang(idKhachHang, TrangThaiImei.RETURNED);
     }

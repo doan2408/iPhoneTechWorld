@@ -469,7 +469,7 @@ CREATE TABLE loai_bao_hanh (
                                ten_loai_bao_hanh NVARCHAR(100),
                                thoi_gian_thang INT,
 							   id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
-                               mo_ta NVARCHAR(255),
+                               mo_ta NVARCHAR(255)
 							   trang_thai BIT
 );
 
@@ -1150,6 +1150,15 @@ FROM
     IMEI_Generator i;
 
 -- Ảnh 1 -> biến thể 1..4
+INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
+VALUES
+    (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
+    (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
+    (N'Khách đổi ý', 'RETURN'),
+    (N'Sản phẩm không đúng mô tả', 'RETURN'),
+    (N'Khách đổi ý', 'CANCELLED');
+
+-- 20 ảnh đầu tiên -> id = 1..20
 UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562841/iemqzr3nxhwi0vdvywcd.webp',
     image_public_id = 'iemqzr3nxhwi0vdvywcd'
