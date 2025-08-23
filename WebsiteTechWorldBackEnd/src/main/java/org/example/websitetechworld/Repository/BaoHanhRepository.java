@@ -29,11 +29,9 @@ public interface BaoHanhRepository extends JpaRepository<BaoHanh,Integer> {
 
     @Query(value = "select case when count(bh) > 0 then true else false end " +
             "from BaoHanh bh " +
-            "where bh.idKhachHang.id = :idKhachHang " +
-            "and bh.idImeiDaBan.id = :idImeiDaBan " +
+            "where bh.idImeiDaBan.id = :idImeiDaBan " +
             "and bh.idLoaiBaoHanh.id = :idLoaiBaoHanh")
-    boolean existsByBaoHanh(@Param("idKhachHang") Integer idKhachHang,
-                            @Param("idImeiDaBan") Integer idImeiDaBan,
+    boolean existsByBaoHanh(@Param("idImeiDaBan") Integer idImeiDaBan,
                             @Param("idLoaiBaoHanh") Integer idLoaiBaoHanh);
 
     @Query(value = "select bh from BaoHanh bh " +

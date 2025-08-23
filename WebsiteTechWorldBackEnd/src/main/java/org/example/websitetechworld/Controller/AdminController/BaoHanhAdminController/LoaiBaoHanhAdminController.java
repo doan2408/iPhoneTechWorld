@@ -23,9 +23,10 @@ public class LoaiBaoHanhAdminController {
         this.loaiBaoHanhAdminServices = loaiBaoHanhAdminServices;
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<List<LoaiBaoHanhAdminResponse>> loaiBaoHanhList() {
-        return ResponseEntity.ok(loaiBaoHanhAdminServices.loaiBaoHanhList());
+    @GetMapping("/list/{idImeiDaBan}")
+    public ResponseEntity<List<LoaiBaoHanhAdminResponse>> loaiBaoHanhList(@PathVariable Integer idImeiDaBan) {
+        List<LoaiBaoHanhAdminResponse> loaiBaoHanh = loaiBaoHanhAdminServices.loaiBaoHanhList(idImeiDaBan);
+        return ResponseEntity.ok(loaiBaoHanh);
     }
 
     @GetMapping

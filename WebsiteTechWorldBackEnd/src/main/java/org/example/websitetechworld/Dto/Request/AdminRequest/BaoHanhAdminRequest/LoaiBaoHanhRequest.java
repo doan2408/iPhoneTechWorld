@@ -26,6 +26,9 @@ public class LoaiBaoHanhRequest {
 
     private String moTa;
 
+    @NotNull(message = "Trạng thái không được để trống")
+    private Boolean trangThai;
+
     @NotNull(message = "Model sản phẩm không được để trống")
     private Integer idModelSanPham;
 
@@ -35,6 +38,7 @@ public class LoaiBaoHanhRequest {
         loaiBaoHanh.setTenLoaiBaoHanh(loaiBaoHanhRequest.getTenLoaiBaoHanh());
         loaiBaoHanh.setThoiGianThang(loaiBaoHanhRequest.getThoiGianThang());
         loaiBaoHanh.setMoTa(loaiBaoHanhRequest.getMoTa());// Model sản phẩm
+        loaiBaoHanh.setTrangThai(loaiBaoHanhRequest.getTrangThai());
         if (loaiBaoHanhRequest.getIdModelSanPham() != null) {
             ModelSanPham model = new ModelSanPham();
             model.setIdModelSanPham(loaiBaoHanhRequest.getIdModelSanPham());

@@ -227,7 +227,7 @@
                   class="action-btn edit-btn"
                 />
               </el-tooltip>
-              <el-tooltip content="Xóa" placement="top">
+              <!-- <el-tooltip content="Xóa" placement="top">
                 <el-button
                   size="small"
                   type="danger"
@@ -236,7 +236,7 @@
                   @click="xoaBaoHanh(scope.row)"
                   class="action-btn delete-btn"
                 />
-              </el-tooltip>
+              </el-tooltip> -->
             </div>
           </template>
         </el-table-column>
@@ -307,11 +307,12 @@
                 clearable
                 style="width: 100%"
                 :disabled="!form.idKhachHang"
+                @change="onImeiDaBanChange"
               >
                 <el-option
                   v-for="imei in imeiDaBans"
                   :key="imei.id"
-                  :label="imei.soImei"
+                  :label="`${imei.soImei}` + ' | ' + `${imei.tenModel}` + ' ' + `${imei.maXuatXu}`"
                   :value="imei.id"
                 />
               </el-select>
@@ -330,12 +331,13 @@
                 filterable
                 clearable
                 style="width: 100%"
+                :disabled="!form.idImeiDaBan"
                 @change="onWarrantyTypeChange"
               >
                 <el-option
                   v-for="type in loaiBaoHanhs"
                   :key="type.id"
-                  :label="`${type.tenLoaiBaoHanh} (${type.thoiGianThang} tháng)`"
+                  :label="`${type.tenLoaiBaoHanh} (${type.thoiGianThang} tháng) | ${type.daCo ==true ? 'Đã có' : 'Chưa có'}`"
                   :value="type.id"
                 />
               </el-select>
@@ -633,9 +635,8 @@ const loadDropdownData = async () => {
     khachHangs.value = khachHangResponse.content || khachHangResponse || [];
 
     // Load loại bảo hành
-    const loaiBaoHanhResponse = await loaiBaoHanhList();
-    loaiBaoHanhs.value =
-      loaiBaoHanhResponse.content || loaiBaoHanhResponse || [];
+    // const loaiBaoHanhResponse = await loaiBaoHanhList(form.value.idImeiDaBan);
+    // loaiBaoHanhResponse.content || loaiBaoHanhResponse || [];
   } catch (error) {
     console.error("Load dropdown error:", error);
     ElMessage.error("Lỗi khi tải dữ liệu dropdown");
@@ -643,21 +644,50 @@ const loadDropdownData = async () => {
 };
 
 const onCustomerChange = async (customerId) => {
+  // Luôn reset IMEI và loại bảo hành khi đổi khách hàng
+  form.value.idImeiDaBan = null;
+  form.value.idLoaiBaoHanh = null;
+  loaiBaoHanhs.value = [];
+  
   if (customerId) {
     try {
       const response = await imeiDaBanListByKhachHang(customerId);
-      imeiDaBans.value = response || [];
-      // Reset IMEI selection only if not editing or if customer changed
-      if (!isEditing.value) {
-        form.value.idImeiDaBan = null;
+      if (response && response.length > 0) {
+        imeiDaBans.value = response;
+      } else {
+        imeiDaBans.value = [];
+        ElMessage.error("Khách hàng chưa mua sản phẩm nào");
       }
     } catch (error) {
       console.error("Load IMEI error:", error);
       ElMessage.error("Lỗi khi tải danh sách IMEI");
+      imeiDaBans.value = [];
     }
   } else {
     imeiDaBans.value = [];
-    form.value.idImeiDaBan = null;
+  }
+};
+
+const onImeiDaBanChange = async (idImeiDaBan) => {
+  // Luôn reset loại bảo hành khi đổi IMEI
+  form.value.idLoaiBaoHanh = null;
+  
+  if (idImeiDaBan) {
+    try {
+      const loaiBaoHanhResponse = await loaiBaoHanhList(idImeiDaBan);
+      if (loaiBaoHanhResponse && loaiBaoHanhResponse.length > 0) {
+        loaiBaoHanhs.value = loaiBaoHanhResponse || loaiBaoHanhResponse;
+      } else {
+        loaiBaoHanhs.value = [];
+        ElMessage.error("Sản phẩm này chưa có loại bảo hành");
+      }
+    } catch (err) {
+      console.error("Load warranty types error:", err);
+      ElMessage.error("Lỗi khi tải dữ liệu dropdown");
+      loaiBaoHanhs.value = [];
+    }
+  } else {
+    loaiBaoHanhs.value = [];
   }
 };
 
@@ -701,6 +731,10 @@ const openEditDialog = async (row) => {
   // Load IMEI for selected customer
   if (row.idKhachHang) {
     await onCustomerChange(row.idKhachHang);
+  }
+
+  if (row.idImeiDaBan) {
+    await onImeiDaBanChange(row.idImeiDaBan);
   }
 
   // Wait for next tick to ensure all data is loaded
@@ -751,7 +785,7 @@ const resetForm = () => {
 };
 
 const handleSubmit = async () => {
-  Object.keys(errors).forEach(key => delete errors[key]); // clear error
+  Object.keys(errors).forEach((key) => delete errors[key]); // clear error
   if (!formRef.value) return;
 
   // Check if dropdown data is loaded
