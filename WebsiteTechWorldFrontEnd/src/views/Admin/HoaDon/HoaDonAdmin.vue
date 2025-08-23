@@ -835,7 +835,7 @@ const onConfirmCreateInvoice = async () => {
   } catch (error) {
     console.error('Error:', error)
     const messages = error.response?.data?.map(e => e.message)?.join(' | ') || 'Lỗi hệ thống!'
-    ElMessage.warning(messages)
+    toast.warning(messages)
   } finally {
     isLoading.value = false
   }
@@ -1089,10 +1089,16 @@ const exportExcel = async () => {
 
     link.setAttribute('download', fileName)
     document.body.appendChild(link)
+    toast.info("File Excel đã sẵn sàng, vui lòng chọn nơi lưu")
     link.click()
     document.body.removeChild(link)
+
+    setTimeout(() => {
+      toast("Nếu bạn đã lưu file, hãy kiểm tra thư mục tải xuống nhé!")
+    }, 3000)
+
   } catch (error) {
-    console.error('Lỗi khi xuất Excel:', error)
+    toast.error('Lỗi khi xuất Excel:', error)
   }
 }
 
@@ -1104,6 +1110,7 @@ const refreshFilter = () => {
   typeFilter.value = '';
   dateFilterFrom.value = '';
   dateFilterTo.value = '';
+  toast.success("Làm mới bộ lọc thành công")
 }
 
 const showConfirm = ref(false)

@@ -130,10 +130,8 @@ public interface XuLySauBanHangRepository extends JpaRepository<XuLySauBanHang, 
         ) AS SUB;
     """, nativeQuery = true)
     int countByThoiGianXuLy();
-}
-    
+
     XuLySauBanHang findByIdImeiDaBan_IdAndIdHoaDon_IdAndHanhDongSauVuViec(
             Integer idImei, Integer idHoaDon, ActionAfterCase hanhDongSauVuViec
     );
-
 }
