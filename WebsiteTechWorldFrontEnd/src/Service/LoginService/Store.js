@@ -130,12 +130,12 @@ const store = createStore({
         throw error.response?.data || "Lỗi lấy thông tin người dùng";
       }
     },
-    async register({ commit }, userData) {
+    async registerVerify({ commit }, userData) {
       try {
         commit("setRegistrationStatus", "loading");
 
         //call signUp service
-        const response = await SignUp.register(userData);
+        const response = await SignUp.registerVerify(userData);
         commit("setRegistrationStatus", "success");
       } catch (error) {
         commit("setRegistrationStatus", "error");

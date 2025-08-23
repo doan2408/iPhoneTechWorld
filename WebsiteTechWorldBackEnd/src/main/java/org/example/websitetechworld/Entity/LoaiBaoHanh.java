@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.sql.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,6 +32,13 @@ public class LoaiBaoHanh {
     @Nationalized
     @Column(name = "mo_ta")
     private String moTa;
+
+    @Column(name = "trang_thai")
+    private Boolean trangThai;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_model_san_pham")
+    private ModelSanPham idModelSanPham;
 
     @OneToMany(mappedBy = "idLoaiBaoHanh",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();

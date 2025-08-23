@@ -61,14 +61,16 @@
                     <div class="bulk-actions-top">
                         <span class="toolbar-label">Xử lý hàng loạt ({{ selectedImeis.length }} đã chọn):</span>
                         <div class="toolbar-buttons">
-                            <button class="toolbar-btn retry" @click="processBulk('retry')"
-                                :disabled="selectedImeis.length === 0" title="Giao lại">
-                                🚚 Giao lại
-                            </button>
 
-                            <button class="toolbar-btn return" @click="processBulk('return_to_stock')"
-                                :disabled="selectedImeis.length === 0" title="Trả kho">
-                                📦 Trả kho
+                            <button class="toolbar-btn return"
+                                @click="openConfirm('Bạn có chắc chắn muốn trả số sản phẩm đã chọn vào kho?', () => processBulk('return_to_stock'))"
+                                title="Trả kho" :disabled="selectedImeis.length === 0">
+                                📦Trả kho
+                            </button>
+                            <button class="toolbar-btn refund"
+                                @click="openConfirm('Bạn có chắc chắn muốn hoàn tiền cho toàn bộ sản phẩm trong đơn?', () => processBulk('refund'))"
+                                title="Hoàn tiền" :disabled="selectedImeis.length === 0">
+                                💰 Hoàn tiền
                             </button>
                         </div>
                     </div>
@@ -94,6 +96,7 @@
                                     <th>Sản phẩm</th>
                                     <th>Trạng thái</th>
                                     <th>Giá bán</th>
+                                    <th>Lý do trả hàng</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -104,7 +107,7 @@
                                             class="row-checkbox">
                                     </td>
                                     <td class="imei-code">{{ imei.soImei }}</td>
-                                    <td class="product-name">{{ imei.tenSanPham +' '+ imei.mau +' '+ imei.dungLuong }}
+                                    <td class="product-name">{{ imei.tenSanPham +'-'+ imei.mau +'-'+ imei.dungLuong }}
                                     </td>
                                     <td>
                                         <span class="imei-status" :class="imei.trangThaiDon">
@@ -114,20 +117,24 @@
                                     <td>
                                         <span> {{ formatPrice(imei.donGia) }}</span>
                                     </td>
+                                    <td>
+                                        <span> {{ imei.tenLyDo }}</span>
+                                    </td>
                                     <td class="action-col">
                                         <div class="row-actions">
 
                                             <button class="action-btn return"
                                                 @click="openConfirm('Bạn có chắc chắn muốn gửi yêu cầu nhập kho?', () => processImei(imei.soImei, 'return_to_stock'))"
-                                                title="Trả kho" :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK'" >
+                                                title="Trả kho"
+                                                :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK' || imei.trangThaiDon === 'REFUND'">
                                                 📦
                                             </button>
 
-                                            <button class=" action-btn refund"
+                                            <!-- <button class=" action-btn refund"
                                                 @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
-                                                title="Hoàn tiền" :disabled="!imei.trangThaiDon === 'RETURN_TO_STOCK'">
+                                                title="Hoàn tiền" :disabled="imei.trangThaiDon !== 'RETURN_TO_STOCK'">
                                                 💰
-                                            </button>
+                                            </button> -->
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
                                                 @confirm="handleConfirm" @cancel="showConfirm = false" />
                                         </div>
@@ -159,7 +166,7 @@
                     </div>
                     <div class="contact-item">
                         <label>Ghi chú khách hàng:</label>
-                        <span>{{ orderInformation.customerNote }}</span>
+                        <span>{{ orderInformation.customerNote || 'Không có ghi chú' }}</span>
                     </div>
                 </div>
             </div>
@@ -199,10 +206,11 @@ import { useRoute } from 'vue-router'
 import { hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
 import router from '@/router'
+import { useToast } from 'vue-toastification'
 
 const route = useRoute()
 const idHoaDon = route.params.idHoaDon
-
+const toast = useToast()
 const orderInformation = ref([])
 const orderInformations = async () => {
     const res = await hoaDonDetailGuest(idHoaDon);
@@ -358,7 +366,7 @@ const processBulk = async (action) => {
     }
     console.log(selectedImeis.value);
     console.log(`[v0] Processing ${selectedImeis.value.length} IMEIs with action: ${action}`)
-    alert(`Xử lý ${selectedImeis.value.length} IMEI với hành động: ${getActionText(action)}`)
+    // alert(`Xử lý ${selectedImeis.value.length} IMEI với hành động: ${getActionText(action)}`)
 
     switch (action) {
         case 'retry':
@@ -367,6 +375,9 @@ const processBulk = async (action) => {
         case 'return_to_stock':
             returnToStockDelivery(selectedImeis.value,action)
             break
+        case 'refund':
+            returnToStockDelivery(selectedImeis.value, action)
+            break
         default:
             alert(`Hành động ${action} chưa được hỗ trợ!`)
     }
@@ -374,10 +385,50 @@ const processBulk = async (action) => {
     selectedImeis.value = []
 }
 const returnToStockDelivery = async (selectedImeis, action) => {
-    const status = action.toUpperCase() 
-    const res = await changeStatusPending(selectedImeis, status)
+    const status = action.toUpperCase()
+
+    const invalidImeis = []
+
+    selectedImeis.forEach(imei => {
+        const item = orderProduct.value.find(p => p.soImei === imei)
+        if (!item) return
+
+        if (item.trangThaiDon === 'REFUND') {
+            invalidImeis.push({ imei, reason: 'đã được hoàn tiền' })
+        }
+
+        if (action === 'return_to_stock' && item.trangThaiDon === 'RETURN_TO_STOCK') {
+            invalidImeis.push({ imei, reason: 'đã được trả về kho và đang chờ hoàn tiền' })
+        }
+    })
+
+    if (invalidImeis.length > 0) {
+        const message = invalidImeis.map(i => `IMEI ${i.imei} ${i.reason}`).join('\n')
+        toast.error(`Không thể thực hiện hành động vì có sản phẩm không hợp lệ:\n${message}`)
+        return
+    }
+
+    if (action === 'refund') {
+        if (!allSelected.value) {
+            toast.error('Bạn phải chọn tất cả sản phẩm để hoàn tiền.')
+            return
+        }
+
+        const isAllReturned = orderProduct.value.every(item => item.trangThaiDon === 'RETURN_TO_STOCK')
+        if (!isAllReturned) {
+            toast.error('Chỉ được hoàn tiền khi tất cả sản phẩm đã được trả về kho.')
+            return
+        }
+    }
+    const res = await changeStatusPending(selectedImeis,idHoaDon, status)
     orderSanPham()
     orderInformations()
+    if (status === 'RETURN_TO_STOCK') {
+        toast.success("Trả về kho thành công")
+    }else{
+        toast.success("Hoàn tiền thành công")
+    }
+    
 }
 
 const retryDelivery = () => {
@@ -389,7 +440,7 @@ const processImei = async (imeiCode, action) => {
 
     const imeiList = [imeiCode];  
 
-    const res = await changeStatusPending(imeiList,status)
+    const res = await changeStatusPending(imeiList,idHoaDon,status)
     orderSanPham()
     orderInformations()
 }
