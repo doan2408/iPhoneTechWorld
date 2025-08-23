@@ -112,6 +112,15 @@
             </div>
           </template>
         </el-table-column>
+
+        <el-table-column prop="trangThai" label="Trạng thái" min-width="300">
+          <template #default="scope">
+            <div class="name-cell">
+              <span class="warranty-name">{{ scope.row.trangThai == true ? "Đang hoạt động" : "Không hoạt động" }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="moTa" label="Mô tả" min-width="300">
           <template #default="scope">
             <div class="name-cell">
@@ -119,6 +128,7 @@
             </div>
           </template>
         </el-table-column>
+
         <el-table-column
           v-if="isAdmin"
           label="Thao tác"
@@ -237,6 +247,23 @@
         </el-form-item>
 
         <el-form-item
+          label="Trạng thái"
+          prop="trangThai"
+          :error="errors.tranGThai"
+        >
+          <el-select
+            v-model="form.trangThai"
+            placeholder="Chọn trạng thái"
+            style="width: 100%"
+            filterable
+            clearable
+          >
+            <el-option label="Hoạt động" value="true" />
+            <el-option label="Không hoạt động" value="false" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
           label="Thời gian bảo hành"
           prop="thoiGianThang"
           :error="errors.thoiGianThang"
@@ -347,6 +374,23 @@
         </el-form-item>
 
         <el-form-item
+          label="Trạng thái"
+          prop="trangThai"
+          :error="errors.tranGThai"
+        >
+          <el-select
+            v-model="form.trangThai"
+            placeholder="Chọn trạng thái"
+            style="width: 100%"
+            filterable
+            clearable
+          >
+            <el-option label="Hoạt động" value="true" />
+            <el-option label="Không hoạt động" value="false" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
           label="Thời gian bảo hành"
           prop="thoiGianThang"
           :error="errors.thoiGianThang"
@@ -401,6 +445,13 @@
           <label class="detail-label">Model sản phẩm:</label>
           <span class="detail-value">{{
             selectedBaoHanh.tenModelSanPham || "Chưa có thông tin"
+          }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label class="detail-label">Trạng thái:</label>
+          <span class="detail-value">{{
+            selectedBaoHanh.trangThai == true ? "Đang hoạt động" : "Không hoạt động" || "Chưa có thông tin"
           }}</span>
         </div>
 
@@ -506,12 +557,20 @@ const rules = ref({
       trigger: "blur",
     },
   ],
+  trangThai : [
+    {
+      required: true,
+      message: "Vui lòng chọn trạng thái",
+      trigger: "blur"
+    }
+
+  ],
   moTa: [{ max: 500, message: "Mô tả không quá 500 ký tự", trigger: "blur" }],
   idModelSanPham: [
     {
       required: true,
       message: "Vui lòng chọn model sản phẩm",
-      trigger: "change",
+      trigger: "blur",
     },
   ],
 });
@@ -535,10 +594,18 @@ const editRules = ref({
     {
       type: "number",
       min: 1,
-      max: 120,
-      message: "Thời gian từ 1-120 tháng",
+      max: 12,
+      message: "Thời gian từ 1-12 tháng",
       trigger: "blur",
     },
+  ],
+    trangThai : [
+    {
+      required: true,
+      message: "Vui lòng chọn trạng thái",
+      trigger: "blur"
+    }
+
   ],
   moTa: [{ max: 500, message: "Mô tả không quá 500 ký tự", trigger: "blur" }],
 });
@@ -654,6 +721,7 @@ const openEditDialog = async (row) => {
       idModelSanPham: response.idModelSanPham,
       thoiGianThang: response.thoiGianThang,
       moTa: response.moTa || "",
+      trangThai: response.trangThai == true ? "Đang hoạt động" : "Không hoạt động"
     };
 
     clearAllErrors();
@@ -695,13 +763,13 @@ const submitCreate = async () => {
 
   try {
     await createFormRef.value.validate(); // only proceed if valid
-    console.log("Form data before submit: ", form.value)
+    console.log("Form data before submit: ", form.value);
 
-      await addWarrantyType(form.value);
-      ElMessage.success("Thêm loại bảo hành thành công");
-      showCreateDialog.value = false;
-      resetForm();
-      await fetchLoaiBaoHanh();
+    await addWarrantyType(form.value);
+    ElMessage.success("Thêm loại bảo hành thành công");
+    showCreateDialog.value = false;
+    resetForm();
+    await fetchLoaiBaoHanh();
   } catch (error) {
     console.error("Error creating warranty type:", error);
     if (Array.isArray(error)) {

@@ -3,9 +3,9 @@ import api from "@/Service/LoginService/axiosInstance";
 const baseURL = '/admin/loai-bao-hanh';
 
 // using for dropdown
-export const loaiBaoHanhList = async() => {
+export const loaiBaoHanhList = async(idImeiDaBan) => {
   try {
-    const response = await api.get(`${baseURL}/list`);
+    const response = await api.get(`${baseURL}/list/${idImeiDaBan}`);
     return response.data;
   }
   catch(err) {
