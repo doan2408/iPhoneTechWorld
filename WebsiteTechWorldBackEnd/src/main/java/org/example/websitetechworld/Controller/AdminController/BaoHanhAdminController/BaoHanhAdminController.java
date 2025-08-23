@@ -2,8 +2,10 @@ package org.example.websitetechworld.Controller.AdminController.BaoHanhAdminCont
 
 import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.BaoHanhRequest;
+import org.example.websitetechworld.Dto.Request.AdminRequest.BaoHanhAdminRequest.YeuCauBaoHanhAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.BaoHanhAdminResponse.BaoHanhAdminResponse;
 import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
+import org.example.websitetechworld.Repository.BaoHanhRepository;
 import org.example.websitetechworld.Services.AdminServices.BaoHanhAdminServices.BaoHanhAdminServices;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
@@ -85,5 +87,16 @@ public class BaoHanhAdminController {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/check-bao-hanh/{soImei}")
+    public ResponseEntity<?> checkedWarranty (@PathVariable String soImei) {
+        return ResponseEntity.ok(baoHanhAdminServices.checkWarranty(soImei));
+    }
+
+    @PostMapping("/create-request-warranty")
+    public ResponseEntity<?> creaetRequestWarranty(@RequestBody YeuCauBaoHanhAdminRequest request){
+        baoHanhAdminServices.createRequestWarranty(request);
+        return ResponseEntity.ok("Tao yeu cau bao hanh thanh cong");
     }
 }

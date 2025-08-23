@@ -468,7 +468,7 @@ CREATE TABLE loai_bao_hanh (
                                id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
                                ten_loai_bao_hanh NVARCHAR(100),
                                thoi_gian_thang INT,
-							                 id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
+							   id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
                                mo_ta NVARCHAR(255)
 );
 

@@ -140,7 +140,7 @@
                                 <td class="failure-cell">
                                     <span class="failure-reason">{{ order.trangThaiDonHang }}</span>
                                 </td>
-                                <td class="retry-cell">{{ order.thoiGianYeuCau }}</td>
+                                <td class="retry-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
                                     <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">

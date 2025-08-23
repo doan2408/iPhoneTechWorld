@@ -55,3 +55,11 @@ export const imeiDaBanListByKhachHang = async (idKhachHang) => {
       throw err.response?.data || "Error occurred whild get imeiDaBan list by idKhachHang";
   }
 }
+
+export const checkedWarranty = (soImei) => {
+  return api.get("/admin/bao-hanh/check-bao-hanh/" + soImei)
+}
+
+export const createRequestWarranty = (request) => {
+  return api.post("/admin/bao-hanh/create-request-warranty" ,request)
+}

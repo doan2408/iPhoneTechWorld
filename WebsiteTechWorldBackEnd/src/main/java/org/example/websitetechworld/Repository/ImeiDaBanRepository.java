@@ -3,6 +3,7 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ImeiTrangHoaDonResponse;
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.ImeiDaBan;
+import org.example.websitetechworld.Enum.BaoHanh.TrangThaiBaoHanh;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,5 +75,16 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
             "where i.idHoaDonChiTiet.idHoaDon.idKhachHang.id = :idKhachHang " +
             "order by i.id desc")
     List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
-    ImeiDaBan findBySoImeiAndIdHoaDonChiTiet_Id(String soImei,Integer idCthd);
+
+    @Query("""
+    SELECT DISTINCT imdb
+    FROM ImeiDaBan imdb
+    JOIN FETCH imdb.idBaoHanh bh
+    WHERE imdb.trangThai <> 'RETURNED'
+      AND imdb.soImei = :soImei
+      AND bh.trangThaiBaoHanh = 'UNDER_WARRANTY'
+""")
+    ImeiDaBan findBySoImeiWithValidWarranty(String soImei);
+
+
 }
