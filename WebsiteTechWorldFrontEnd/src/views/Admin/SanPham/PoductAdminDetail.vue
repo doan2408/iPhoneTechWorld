@@ -1199,14 +1199,14 @@ const submitForm = async () => {
     const formValid = await sanPhamForm.value.validate();
     console.log("✅ Form Element Plus hợp lệ:", formValid);
     if (!formValid) {
-      ElMessage.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
+      toast.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
       return;
     }
 
     const logicValid = validateForm();
     console.log("✅ Form logic validate hợp lệ:", logicValid);
     if (!logicValid) {
-      ElMessage.error(error.value);
+      toast.error(error.value);
       return;
     }
 
@@ -1254,7 +1254,7 @@ const submitForm = async () => {
     await putDataSanPham(id.value, payload);
 
     console.log("✅ Cập nhật thành công");
-    ElMessage.success("Cập nhật sản phẩm thành công!");
+    toast.success("Cập nhật sản phẩm thành công!");
     router.push("/admin/products");
   } catch (err) {
     const errorMessage =
@@ -1269,9 +1269,9 @@ const submitForm = async () => {
       err.response?.status === 400 &&
       errorMessage.includes("IMEI trùng lặp")
     ) {
-      ElMessage.error("Không thể cập nhật: Có IMEI trùng lặp trong dữ liệu.");
+      toast.error("Không thể cập nhật: Có IMEI trùng lặp trong dữ liệu.");
     } else {
-      ElMessage.error(errorMessage);
+      toast.error(errorMessage);
     }
   } finally {
     loading.submit = false;
