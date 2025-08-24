@@ -17,6 +17,7 @@ import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -31,6 +32,7 @@ import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,8 +76,10 @@ public class HoaDonAdminService {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final GioHangRepository gioHangRepository;
     private final ViDiemRepository viDiemRepository;
+    private final NhanVienRepository nhanVienRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository,
+                              NhanVienRepository nhanVienRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -92,6 +98,7 @@ public class HoaDonAdminService {
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
         this.gioHangRepository = gioHangRepository;
         this.viDiemRepository = viDiemRepository;
+        this.nhanVienRepository = nhanVienRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -209,6 +216,7 @@ public class HoaDonAdminService {
 
         if (khachHangId == null){
             hoaDon.setIdKhachHang(null);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Xóa khách hàng");
         } else {
             KhachHang khachHang = khachHangRepository.findById(khachHangId)
                     .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
@@ -225,8 +233,9 @@ public class HoaDonAdminService {
             hoaDon.setIdKhachHang(khachHang);
             hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
-        }
 
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Thêm khách hàng "+khachHang.getTenKhachHang());
+        }
 
         hoaDonRepository.save(hoaDon);
     }
@@ -652,5 +661,20 @@ public class HoaDonAdminService {
 
     private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
         return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
+    }
+
+    public void createLshd(HoaDon hoaDon,HanhDongLichSuHoaDon action, String moTa){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer nhanVienId = customUserDetails.getId();
+            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+            lichSuHoaDon.setIdHoaDon(hoaDon);
+            lichSuHoaDon.setHanhDong(HanhDongLichSuHoaDon.UPDATE);
+            lichSuHoaDon.setIdNhanVien(nhanVienRepository.findById(nhanVienId).orElse(null));
+            lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
+            lichSuHoaDon.setMoTa(moTa);
+            lichSuHoaDonRepository.save(lichSuHoaDon);
+        }
     }
 }
