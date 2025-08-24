@@ -755,6 +755,7 @@ const openDetailDialog = async (row) => {
   }
 };
 
+
 const submitCreate = async () => {
   if (!createFormRef.value) return;
 
@@ -765,12 +766,28 @@ const submitCreate = async () => {
     await createFormRef.value.validate(); // only proceed if valid
     console.log("Form data before submit: ", form.value);
 
+    // Confirm trước khi thêm
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn thêm loại bảo hành này?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
+
     await addWarrantyType(form.value);
     ElMessage.success("Thêm loại bảo hành thành công");
     showCreateDialog.value = false;
     resetForm();
     await fetchLoaiBaoHanh();
   } catch (error) {
+    // Nếu cancel confirm thì dừng, không báo lỗi gì cả
+    if (error === "cancel" || error === "close") {
+      return;
+    }
+
     console.error("Error creating warranty type:", error);
     if (Array.isArray(error)) {
       let messages = [];
@@ -787,6 +804,7 @@ const submitCreate = async () => {
   }
 };
 
+
 const submitEdit = async () => {
   if (!editFormRef.value) return;
 
@@ -798,16 +816,31 @@ const submitEdit = async () => {
     if (!isValid) {
       return;
     }
-    if (isValid) {
-      console.log("Form data before update:", form.value);
 
-      await updateWarrantyType(form.value.id, form.value);
-      ElMessage.success("Cập nhật loại bảo hành thành công");
-      showEditDialog.value = false;
-      resetForm();
-      await fetchLoaiBaoHanh();
-    }
+    // Confirm trước khi cập nhật
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn cập nhật loại bảo hành này?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
+
+    console.log("Form data before update:", form.value);
+
+    await updateWarrantyType(form.value.id, form.value);
+    ElMessage.success("Cập nhật loại bảo hành thành công");
+    showEditDialog.value = false;
+    resetForm();
+    await fetchLoaiBaoHanh();
   } catch (error) {
+    // Nếu cancel confirm thì không báo lỗi gì cả
+    if (error === "cancel" || error === "close") {
+      return;
+    }
+
     console.error("Error updating warranty type:", error);
     if (Array.isArray(error)) {
       let messages = [];
@@ -823,6 +856,7 @@ const submitEdit = async () => {
     isSubmitting.value = false;
   }
 };
+
 
 const cancelCreate = () => {
   showCreateDialog.value = false;

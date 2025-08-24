@@ -17,10 +17,21 @@ import java.util.List;
 @NoArgsConstructor
 public class MyOrderClientResponse {
     private Integer idHoaDon;
+    private String maHoaDon;
     private String maVanDon;
     private String trangThaiGiaoHang;
     private String trangThaiThanhToan;
     private BigDecimal thanhTien;
     private LocalDateTime ngayDatHang;
     private List<MyOrderProductClientResponse> myOrderClientResponseList;
+
+    public MyOrderClientResponse (Integer idHoaDon, String maVanDon, String trangThaiGiaoHang, String trangThaiThanhToan, BigDecimal thanhTien, LocalDateTime ngayDatHang, List<MyOrderProductClientResponse> myOrderClientResponseList) {
+        this.idHoaDon = idHoaDon;
+        this.maVanDon = maVanDon;
+        this.trangThaiGiaoHang = trangThaiGiaoHang;
+        this.trangThaiThanhToan = trangThaiThanhToan;
+        this.thanhTien = thanhTien;
+        this.ngayDatHang = ngayDatHang;
+        this.myOrderClientResponseList = myOrderClientResponseList;
+    }
 }

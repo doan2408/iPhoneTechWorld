@@ -86,8 +86,8 @@ public class HoaDonAdminController {
     }
 
     @GetMapping("/{idHoaDon}/lich-su")
-    public Page<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo) {
-        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon, pageNo, PAGE_SIZE);
+    public List<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon) {
+        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon);
     }
 
     @GetMapping("/{idHoaDon}/chi-tiet-thanh-toan")

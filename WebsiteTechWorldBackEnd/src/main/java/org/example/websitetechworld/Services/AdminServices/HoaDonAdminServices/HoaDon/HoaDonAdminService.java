@@ -168,9 +168,12 @@ public class HoaDonAdminService {
         return hoaDonRepository.findById(id).orElseThrow();
     }
 
-    public Page<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId,Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return lichSuHoaDonRepository.findByIdHoaDon_Id(hoaDonId,pageable).map(LichSuHoaDonAdminResponse::convertDto);
+    public List<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
+        return lichSuHoaDonRepository.findByIdHoaDon(hoaDon)
+                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId))
+                .map(LichSuHoaDonAdminResponse::convertDto)
+                .collect(Collectors.toList());
     }
 
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(Integer hoaDonId,Integer pageNo, Integer pageSize){

@@ -35,15 +35,9 @@ export const hoaDonDetail = (id) => {
 }
 
 // api view lich su hoa don
-export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
+export const viewLichSuHoaDon = (id) => {
     const url = url_base + '/' + id + '/lich-su';
-    return api.get(url, {
-        params: {
-            pageNo,
-            pageSize
-        }
-    }
-    )
+    return api.get(url)
 }
 
 

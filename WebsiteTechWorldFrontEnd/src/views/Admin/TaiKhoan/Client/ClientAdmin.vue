@@ -6,7 +6,7 @@ import {
   updateClient,
   detailClient,
 } from "@/Service/Adminservice/TaiKhoan/KhachHangServices";
-import { ElMessage, ElIcon } from "element-plus";
+import { ElMessage, ElIcon, ElMessageBox } from "element-plus";
 import { Edit, Plus, Search, Loading } from "@element-plus/icons-vue";
 
 const clientList = ref([]);
@@ -250,6 +250,7 @@ const resetForm = () => {
 };
 
 // Handle submit
+
 const handleAddClient = async () => {
   clearAllErrors();
   isSubmitting.value = true;
@@ -258,20 +259,51 @@ const handleAddClient = async () => {
     const isValid = await formRef.value.validate();
     if (isValid) {
       if (isEditMode.value) {
+        // confirm khi update
+        await ElMessageBox.confirm(
+          "Bạn có chắc chắn muốn cập nhật khách hàng này?",
+          "Xác nhận",
+          {
+            confirmButtonText: "Đồng ý",
+            cancelButtonText: "Hủy",
+            type: "warning",
+          }
+        );
+
         const payload = { ...clientRequest.value };
         if (!payload.matKhau) {
           delete payload.matKhau; // Không gửi matKhau nếu rỗng
         }
+        delete payload.hangKhachHang;
+
         await updateClient(editingClientId.value, payload);
         ElMessage.success("Cập nhật khách hàng thành công");
       } else {
+        // confirm khi thêm
+        await ElMessageBox.confirm(
+          "Bạn có chắc chắn muốn thêm khách hàng này?",
+          "Xác nhận",
+          {
+            confirmButtonText: "Đồng ý",
+            cancelButtonText: "Hủy",
+            type: "warning",
+          }
+        );
+
         await addClient(clientRequest.value);
         ElMessage.success("Thêm khách hàng thành công");
       }
+
       closeModal();
       loadClient(currentPage.value, searchKeyword.value || null);
     }
   } catch (err) {
+    // Nếu hủy confirm thì err = "cancel" hoặc "close" → không báo gì cả
+    if (err === "cancel" || err === "close") {
+      // user bấm Hủy -> thoát nhẹ nhàng, không báo gì
+      return;
+    }
+
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
         setError(field, message);
@@ -579,14 +611,14 @@ onMounted(() => {
             </el-form-item>
           </el-col>
 
-          <el-col :span="12">
+          <!-- <el-col :span="12">
             <el-form-item label="Tên đăng nhập" :error="errors.taiKhoan">
               <el-input
                 v-model.trim="clientRequest.taiKhoan"
                 placeholder="Nhập tên đăng nhập"
               />
             </el-form-item>
-          </el-col>
+          </el-col> -->
         </el-row>
 
         <el-row :gutter="20">

@@ -17,6 +17,7 @@ public class MyOrderClientMapper {
     public MyOrderClientResponse toMyOrderClientResponse(HoaDon hoaDon){
         MyOrderClientResponse dto = new MyOrderClientResponse();
         dto.setIdHoaDon(hoaDon.getId());
+        dto.setMaHoaDon(hoaDon.getMaHoaDon());
         dto.setMaVanDon(hoaDon.getMaVanDon());
         if (hoaDon.getTrangThaiDonHang() != null ){
             dto.setTrangThaiGiaoHang(hoaDon.getTrangThaiDonHang().getDisplayName());
