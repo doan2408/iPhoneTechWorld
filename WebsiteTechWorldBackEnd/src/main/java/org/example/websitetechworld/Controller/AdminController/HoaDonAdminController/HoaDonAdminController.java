@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -293,7 +295,15 @@ public class HoaDonAdminController {
     }
 
     @PutMapping("/update-invoice/{id}")
-    public ResponseEntity<String> updateInvoice(@PathVariable("id") Integer id, @RequestBody InvoiceRequest request) {
+    public ResponseEntity<?> updateInvoice(@PathVariable("id") Integer id, @Valid @RequestBody InvoiceRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> {
+                errors.put(error.getField(), error.getDefaultMessage());
+            });
+            return ResponseEntity.badRequest().body(Map.of("errors", errors));
+        }
+
         try {
             hoaDonAdminService.updateInvoice(id, request);
             return ResponseEntity.ok("Invoice updated successfully");

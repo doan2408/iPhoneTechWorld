@@ -439,7 +439,7 @@
                             <input type="checkbox" v-model="isShipping" @change="toggleShipping">
                             <span class="slider round"></span>
                         </label>
-                        <span class="label-text">GIAO HÀNG ( Mặc định là đơn giao nhanh )</span>
+                        <span class="label-text">GIAO HÀNG ( Giao nhanh )</span>
                     </div>
 
                     <div class="shipping-discount-container">
@@ -1721,11 +1721,8 @@ watch(isShipping, (newVal) => {
             phiShip: null,
             shippingMethod: 'express'
         };
-        // Reset dropdowns
         selectedTinh.value = null;
-        // selectedHuyen.value = null;
         selectedXa.value = null;
-        // huyenList.value = [];
         xaList.value = [];
     } else {
         console.log('Đã bật giao hàng');
@@ -2201,6 +2198,11 @@ const openShippingPopup = () => {
 
 const closeShippingPopup = () => {
     showShippingPopup.value = false;
+    shippingInfo.value.tenNguoiNhan = ''
+    shippingInfo.value.sdtNguoiNhan = ''
+    shippingInfo.value.emailNguoiNhan = ''
+    shippingInfo.value.diaChiChiTiet = ''
+    shippingInfo.value.tinh
 };
 
 const showMessageConfirmShipping = ref(null)
@@ -2243,11 +2245,28 @@ const confirmShippingInfo = async () => {
         showShippingPopup.value = false;
     } catch (error) {
         console.error('Lỗi khi cập nhật hóa đơn:', error);
-        if (error.response?.status === 401) {
-            // Interceptor sẽ xử lý refresh token và thử lại hoặc chuyển hướng đến /login
+        const status = error.response?.status;
+        const data = error.response?.data;
+
+        if (status === 401) {
             toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-        } else if (error.response?.status === 500) {
-            toast.error('Lỗi server: ' + (error.response.data.message || 'Không thể cập nhật hóa đơn.'));
+            return;
+        }
+
+        if (data?.errors && typeof data.errors === 'object') {
+            Object.values(data.errors).forEach(msg => {
+                toast.warning(msg);
+            });
+            return;
+        }
+
+        if (data?.message) {
+            toast.error(data.message);
+            return;
+        }
+
+        if (status === 500) {
+            toast.error('Lỗi server: ' + (data?.message || 'Không thể cập nhật hóa đơn.'));
         } else {
             toast.error('Có lỗi xảy ra khi cập nhật thông tin giao hàng: ' + error.message);
         }
