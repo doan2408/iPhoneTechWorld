@@ -196,6 +196,14 @@ public class HoaDonAdminController {
         }
     }
 
+    //total
+    @GetMapping("/count")
+    public ResponseEntity<Long> countHoaDon() {
+        Long total = hoaDonAdminService.countHoaDon();
+        return ResponseEntity.ok(total);
+
+    }
+
     //So hoa don cho xy ly
     @GetMapping("/count/pending")
     public ResponseEntity<Integer> countHoaDonPending() {
