@@ -425,7 +425,7 @@ onMounted(() => {
 
 .search-btn {
     padding: 15px 30px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
     border: none;
     border-radius: 10px;

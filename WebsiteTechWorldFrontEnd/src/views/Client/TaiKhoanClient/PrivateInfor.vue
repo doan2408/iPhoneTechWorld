@@ -105,7 +105,7 @@
 
 <script setup>
 import { detailClient, updateInfor } from "@/Service/ClientService/TaiKhoan/ClientServices";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 
@@ -168,8 +168,24 @@ const toggleEditMode = () => {
 
 const saveProfile = async () => {
   Object.keys(errors.value).forEach((key) => delete errors.value[key]);
+
   try {
+    // Confirm trước khi update
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn cập nhật thông tin cá nhân?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    ).catch(() => {
+      // Nếu bấm Hủy thì dừng hàm luôn, không chạy tiếp
+      throw "cancel";
+    });
+
     isLoading.value = true;
+
     const idUser = user.value?.id;
     if (!form.value.matKhau) delete form.value.matKhau;
     delete form.value.hangKhachHang;
@@ -179,6 +195,11 @@ const saveProfile = async () => {
     ElMessage.success("Update thành công");
     isEditing.value = false;
   } catch (err) {
+    if (err === "cancel") {
+      // Người dùng bấm Hủy confirm → thoát im lặng
+      return;
+    }
+
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
         errors.value[field] = message;
@@ -204,16 +225,28 @@ const confirmPasswordChange = async () => {
   }
 
   try {
+    // Confirm trước khi đổi mật khẩu
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn đổi mật khẩu?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    ).catch(() => {
+      throw "cancel";
+    });
+
     isLoading.value = true;
     const idUser = user.value?.id;
 
-    // Gửi cả mật khẩu cũ và mới
     const payload = {
       ...form.value,
       matKhau: passwordForm.value.newPwd,
       matKhauCu: passwordForm.value.oldPwd,
     };
-    console.log("payload: ", payload)
+    console.log("payload: ", payload);
     delete payload.hangKhachHang;
 
     await updateInfor(idUser, payload);
@@ -224,7 +257,11 @@ const confirmPasswordChange = async () => {
     passwordForm.value.oldPwd = "";
     passwordForm.value.newPwd = "";
   } catch (err) {
-      ElMessage.error("Mật khẩu cũ không đúng");
+    if (err === "cancel") {
+      // Bấm Hủy confirm → không làm gì
+      return;
+    }
+    ElMessage.error("Mật khẩu cũ không đúng");
   } finally {
     isLoading.value = false;
   }

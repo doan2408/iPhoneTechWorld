@@ -8,7 +8,7 @@ import {
 } from "@/Service/Adminservice/TaiKhoan/DiaChiServices";
 import { useRoute, useRouter } from "vue-router";
 import { add } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowLeft, Plus, Edit, Delete } from "@element-plus/icons-vue";
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
@@ -174,6 +174,7 @@ const closeModal = () => {
   resetForm();
 };
 
+
 // Handle form submission
 const handleSubmit = async () => {
   if (!formRef.value) return;
@@ -184,38 +185,57 @@ const handleSubmit = async () => {
 
     Object.keys(errors).forEach((key) => delete errors[key]);
 
-    const selectedTinh = tinhList.value.find(t => t.code === formData.tinhThanhPho)
-    const selectedXa = allXaList.value.find(xa => xa.code === formData.xaPhuong)
+    const selectedTinh = tinhList.value.find(t => t.code === formData.tinhThanhPho);
+    const selectedXa = allXaList.value.find(xa => xa.code === formData.xaPhuong);
 
     if (!selectedTinh || !selectedXa) {
       toast.warning("Vui lòng chọn tỉnh và xã hợp lệ.");
       return;
     }
 
-    // Prepare data for API
-    // Update existing address - sử dụng ID của địa chỉ
+    // Chuẩn bị dữ liệu gửi API
     const addressData = {
       id: formData.id, // ID của địa chỉ để update
       tenNguoiNhan: formData.tenNguoiNhan,
       sdtNguoiNhan: formData.sdtNguoiNhan,
       soNha: formData.soNha,
       tenDuong: formData.tenDuong,
-      xaPhuong: selectedXa?.name || '',
+      xaPhuong: selectedXa?.name || "",
       emailNguoiNhan: formData.emailNguoiNhan,
-      tinhThanhPho: selectedTinh?.name || '',
+      tinhThanhPho: selectedTinh?.name || "",
       diaChiChinh: formData.diaChiChinh,
       idKhachHang: route.params.idClient, // ID khách hàng từ params
     };
 
     if (isEditMode.value) {
+      // Confirm khi update
+      await ElMessageBox.confirm(
+        "Bạn có chắc chắn muốn cập nhật địa chỉ này?",
+        "Xác nhận",
+        {
+          confirmButtonText: "Đồng ý",
+          cancelButtonText: "Hủy",
+          type: "warning",
+        }
+      );
+
       const response = await updateAddress(addressData.id, addressData);
-      console.log(response);
-      console.log("Updating address:", addressData);
+      console.log("Updating address:", addressData, response);
       ElMessage.success("Cập nhật địa chỉ thành công!");
     } else {
+      // Confirm khi thêm
+      await ElMessageBox.confirm(
+        "Bạn có chắc chắn muốn thêm địa chỉ này?",
+        "Xác nhận",
+        {
+          confirmButtonText: "Đồng ý",
+          cancelButtonText: "Hủy",
+          type: "warning",
+        }
+      );
+
       const response = await addAddress(addressData);
-      console.log(response);
-      console.log("Adding new address:", addressData);
+      console.log("Adding new address:", addressData, response);
       ElMessage.success("Thêm địa chỉ thành công!");
     }
 
@@ -223,18 +243,28 @@ const handleSubmit = async () => {
     await loadAddresses();
     closeModal();
   } catch (error) {
+    // Nếu hủy confirm thì error = "cancel" hoặc "close" => không báo gì cả
+    if (error === "cancel" || error === "close") {
+      return; // Người dùng chọn Hủy -> thoát nhẹ, không show error
+    }
+
     console.error("Form validation failed:", error);
     if (Array.isArray(error)) {
       error.forEach(({ field, message }) => {
         errors[field] = message;
       });
     } else {
-      ElMessage.error("Cập nhật địa chỉ thất bại");
+      ElMessage.error(
+        isEditMode.value
+          ? "Cập nhật địa chỉ thất bại"
+          : "Thêm địa chỉ thất bại"
+      );
     }
   } finally {
     loading.value = false;
   }
 };
+
 
 // const selectAddress = (id) => {
 //   // Chỉ cho phép chọn địa chỉ phụ (không phải mặc định)
@@ -356,11 +386,11 @@ onMounted(() => {
                 </el-icon>
               </el-button>
 
-              <el-button type="danger" size="small" circle @click.stop title="Xóa">
+              <!-- <el-button type="danger" size="small" circle @click.stop title="Xóa">
                 <el-icon>
                   <Delete />
                 </el-icon>
-              </el-button>
+              </el-button> -->
 
               <el-button v-if="selectedAddressId === address.id && !address.diaChiChinh" type="success" size="small"
                 @click.stop="setPrimary(address)" class="set-primary-btn">

@@ -16,6 +16,7 @@ import org.example.websitetechworld.Services.LoginServices.MailService;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.math.BigDecimal;
@@ -102,6 +103,7 @@ public class ClientService {
     }
 
     // Send verify code
+    @Transactional
     public Map<String, Object> verifyRegister(ClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
@@ -171,6 +173,7 @@ public class ClientService {
         }
     }
 
+    @Transactional
     public Map<String, Object> completeRegistration(String email, String verificationCode) {
         List<Map<String, String>> errors = new ArrayList<>();
 
@@ -284,6 +287,7 @@ public class ClientService {
     }
 
     //update thong tin ca nhan (client)
+    @Transactional
     public KhachHang updateClient(Integer id, ClientRequest khachHangRequest) {
         KhachHang existing = khachHangRepository.findById(id).orElse(null);
         List<Map<String, String>> errors = new ArrayList<>();

@@ -15,7 +15,7 @@ public interface BaoHanhRepository extends JpaRepository<BaoHanh,Integer> {
 
     @Query("SELECT bh FROM BaoHanh bh WHERE " +
             "(:search IS NULL OR bh.idKhachHang.maKhachHang LIKE %:search% OR bh.idKhachHang.tenKhachHang LIKE %:search% " +
-            "or bh.idKhachHang.sdt like %:search%" +
+            "or bh.idKhachHang.sdt like %:search% or bh.idImeiDaBan.soImei like %:search%" +
             "  OR bh.idKhachHang.sdt LIKE %:search%  OR bh.idLoaiBaoHanh.tenLoaiBaoHanh LIKE %:search%) AND " +
             "(:trangThai IS NULL OR bh.trangThaiBaoHanh = :trangThai) AND " +
             "(:ngayBatDau IS NULL OR bh.ngayBatDau >= :ngayBatDau) AND " +

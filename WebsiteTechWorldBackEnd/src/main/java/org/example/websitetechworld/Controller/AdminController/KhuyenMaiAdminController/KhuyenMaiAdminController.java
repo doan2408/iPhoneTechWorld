@@ -58,14 +58,14 @@ public class KhuyenMaiAdminController {
         return ResponseEntity.ok(khuyenMaiAdminService.updateKhuyenMai(id, request));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         khuyenMaiAdminService.deleteKhuyenMai(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/san-pham")
     public ResponseEntity<List<SanPhamAdminResponse>> getAllSanPham(
             @RequestParam(required = false) String search,
@@ -73,19 +73,19 @@ public class KhuyenMaiAdminController {
         return ResponseEntity.ok(khuyenMaiAdminService.layDanhSachSanPham(search, filter));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/san-pham-chi-tiet")
     public ResponseEntity<List<SanPhamChiTietResponse>> getSanPhamChiTietsBySanPhamIds(@RequestBody List<Integer> sanPhamIds) {
         return ResponseEntity.ok(khuyenMaiAdminService.getSanPhamChiTietsBySanPhamIds(sanPhamIds));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/san-pham-chi-tiet/{id}")
     public ResponseEntity<List<SanPhamChiTietResponse>> getSanPhamChiTietByIdKhuyenMai(@PathVariable Integer id) {
         return ResponseEntity.ok(khuyenMaiAdminService.getSanPhamChiTietByIdKhuyenMai(id));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/san-pham-chi-tiet/{sanPhamChiTietId}/promotions")
     public ResponseEntity<List<KhuyenMaiAdminResponse>> getExistingPromotions(@PathVariable Integer sanPhamChiTietId) {
         return ResponseEntity.ok(khuyenMaiAdminService.getExistingPromotions(sanPhamChiTietId));

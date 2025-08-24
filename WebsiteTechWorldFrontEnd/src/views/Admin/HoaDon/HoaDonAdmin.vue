@@ -1090,8 +1090,8 @@ const closeSalesHistoryModal = () => {
 const xemLichSu = async (hoaDon) => {
     try {
         const response = await viewLichSuHoaDon(hoaDon.idHoaDon);
-        maHoaDon.value = response.data.content[0].maHoaDon
-        orderHistory.value = response.data.content;
+        maHoaDon.value = response.data[0].maHoaDon
+        orderHistory.value = response.data;
         showSalesHistoryModal.value = true;
     } catch (error) {
         console.error('Lỗi khi lấy lịch sử hóa đơn:', error);

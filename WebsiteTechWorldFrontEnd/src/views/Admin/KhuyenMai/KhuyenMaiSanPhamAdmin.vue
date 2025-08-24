@@ -1058,7 +1058,7 @@ onUnmounted(() => {
     font-weight: 700;
     color: #1a202c;
     margin: 0 0 8px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1076,7 +1076,7 @@ onUnmounted(() => {
     border-radius: 12px;
     font-weight: 600;
     font-size: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     border: none;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     transition: all 0.3s ease;
@@ -1337,12 +1337,12 @@ onUnmounted(() => {
 }
 
 .custom-pagination :deep(.el-pager li:hover) {
-    background: #667eea;
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
 }
 
 .custom-pagination :deep(.el-pager li.is-active) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
 }
 
@@ -1436,8 +1436,7 @@ onUnmounted(() => {
 .form-item :deep(.el-input__wrapper.is-focus),
 .form-item :deep(.el-select .el-input__wrapper.is-focus),
 .form-item :deep(.el-date-editor.el-input.is-focus),
-.form-item :deep(.el-textarea__inner:focus) {
-    border-color: #667eea;
+.form-item :deep(.el-textarea__inner:focus) {    
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -1474,7 +1473,7 @@ onUnmounted(() => {
     height: 44px;
     padding: 0 24px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     border: none;
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
@@ -1532,7 +1531,7 @@ onUnmounted(() => {
     height: 44px;
     padding: 0 24px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     border: none;
     font-weight: 600;
     color: white;
@@ -1574,7 +1573,7 @@ onUnmounted(() => {
 }
 
 .custom-pagination :deep(.el-pager li.is-active) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
 }
 

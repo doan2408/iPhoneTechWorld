@@ -135,17 +135,20 @@ public class MyOrderClientServices {
                             .filter(h -> h.getTrangThaiThanhToan() != null &&
                                     "PENDING".equalsIgnoreCase(h.getTrangThaiThanhToan().name()))
                             .toList();
-                } else if ("vận chuyển".equalsIgnoreCase(statusKeyword)) {
+                } else if ("Chờ vận chuyển".equalsIgnoreCase(statusKeyword)) {
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
                                     ("CONFIRM".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
-                                            "PACKED".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
-                                            "SHIPPING".equalsIgnoreCase(h.getTrangThaiDonHang().name())))
+                                            "PACKED".equalsIgnoreCase(h.getTrangThaiDonHang().name())
+                                    ))
                             .toList();
                 } else if ("chờ giao hàng".equalsIgnoreCase(statusKeyword)) {
                     filtered = filtered.stream()
                             .filter(h -> h.getTrangThaiDonHang() != null &&
-                                    "READYFORPICKUP".equalsIgnoreCase(h.getTrangThaiDonHang().name()))
+                                    (
+                                            "READYFORPICKUP".equalsIgnoreCase(h.getTrangThaiDonHang().name()) ||
+                                                    "SHIPPING".equalsIgnoreCase(h.getTrangThaiDonHang().name())
+                                    ))
                             .toList();
                 } else if ("trả hàng/hoàn tiền".equalsIgnoreCase(statusKeyword)) {
                     filtered = filtered.stream()
@@ -216,7 +219,6 @@ public class MyOrderClientServices {
     }
 
 
-
     public Page<MyReviewClientResponse> getReview(Integer userLoginId, Integer pageNo, Integer pageSize) {
         // Khởi tạo phân trang
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -246,19 +248,19 @@ public class MyOrderClientServices {
         return new PageImpl<>(content, pageable, lstHoaDon.getTotalElements());
     }
 
-    public List<Integer> findIdHoaDonByMVDAndSdt (String sdt, String maVanDon){
+    public List<Integer> findIdHoaDonByMVDAndSdt(String sdt, String maVanDon) {
         return hoaDonRepository.findIdHoaDonByMVDAndSdt(maVanDon, sdt);
     }
 
-    public HoaDonAdminResponse findById(Integer id){
+    public HoaDonAdminResponse findById(Integer id) {
         return hoaDonRepository.findById(id).map(HoaDonAdminResponse::convertDto).orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
     }
 
-    public ThanhToanAdminResponse xuLyThanhToanClient(RequestThanhToanTongHop requestThanhToanTongHop, Integer idKhachHang){
+    public ThanhToanAdminResponse xuLyThanhToanClient(RequestThanhToanTongHop requestThanhToanTongHop, Integer idKhachHang) {
         KhachHang khachHang = khachHangRepository.findById(idKhachHang).orElseThrow(() -> new IllegalArgumentException("Khách hàng không tồn tại"));
 
         HoaDon hoaDon = new HoaDon();
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,khachHang);
+        hoaDon = saveHoaDon(hoaDon, requestThanhToanTongHop, khachHang);
         hoaDonRepository.save(hoaDon);
 
         ThanhToanAdminRequest thanhToanAdminRequest = new ThanhToanAdminRequest();
@@ -267,16 +269,16 @@ public class MyOrderClientServices {
 
         String hinhThucThanhToan = requestThanhToanTongHop.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
-        ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
+        ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon, thanhToanAdminRequest);
 
-        List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
+        List<ChiTietHoaDon> danhSachChiTiet = chiTietHoaDonClientServices.createInvoiceDetail(hoaDon, requestThanhToanTongHop);
 
-        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())) {
             hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
-        }else {
-            for (ChiTietHoaDon chiTietHoaDon: danhSachChiTiet){
+        } else {
+            for (ChiTietHoaDon chiTietHoaDon : danhSachChiTiet) {
                 gioHangClientService.xoaAllGioHang(chiTietHoaDon.getIdSanPhamChiTiet());
             }
         }
@@ -287,10 +289,10 @@ public class MyOrderClientServices {
         return response;
     }
 
-    public ThanhToanAdminResponse xuLyThanhToanGuest(RequestThanhToanTongHop requestThanhToanTongHop){
+    public ThanhToanAdminResponse xuLyThanhToanGuest(RequestThanhToanTongHop requestThanhToanTongHop) {
 
         HoaDon hoaDon = new HoaDon();
-        hoaDon = saveHoaDon(hoaDon,requestThanhToanTongHop,null);
+        hoaDon = saveHoaDon(hoaDon, requestThanhToanTongHop, null);
 //        String maVanDon = generateMaVanDon(hoaDon.getId());
 //        hoaDon.setMaVanDon(maVanDon);
         hoaDonRepository.save(hoaDon);
@@ -301,24 +303,25 @@ public class MyOrderClientServices {
 
         String hinhThucThanhToan = requestThanhToanTongHop.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
-        ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,thanhToanAdminRequest);
+        ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon, thanhToanAdminRequest);
 
-        List<ChiTietHoaDon> danhSachChiTiet =  chiTietHoaDonClientServices.createInvoiceDetail(hoaDon,requestThanhToanTongHop);
+        List<ChiTietHoaDon> danhSachChiTiet = chiTietHoaDonClientServices.createInvoiceDetail(hoaDon, requestThanhToanTongHop);
 
-        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())){
+        if (TenHinhThuc.VNPAY.equals(requestThanhToanTongHop.getHinhThucThanhToan())) {
             hoaDonChiTiet_ImeiAdminServices.ganImeiChoHoaDon(danhSachChiTiet);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
         }
         return response;
     }
-    private HoaDon saveHoaDon(HoaDon hoaDon, RequestThanhToanTongHop requestThanhToanTongHop, KhachHang khachHang){
-        if (khachHang != null){
+
+    private HoaDon saveHoaDon(HoaDon hoaDon, RequestThanhToanTongHop requestThanhToanTongHop, KhachHang khachHang) {
+        if (khachHang != null) {
             hoaDon.setIdKhachHang(khachHang);
             hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
         }
-        if (requestThanhToanTongHop.getIdPhieuGiamGia() != null){
+        if (requestThanhToanTongHop.getIdPhieuGiamGia() != null) {
             PhieuGiamGia phieuGiamGia = new PhieuGiamGia();
             phieuGiamGia.setId(requestThanhToanTongHop.getIdPhieuGiamGia());
             if (khachHang != null) {
@@ -344,7 +347,7 @@ public class MyOrderClientServices {
         hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
-        if (requestThanhToanTongHop.getSoTienGiam() != null){
+        if (requestThanhToanTongHop.getSoTienGiam() != null) {
             hoaDon.setSoTienGiam(requestThanhToanTongHop.getSoTienGiam());
         }
         return hoaDonRepository.save(hoaDon);
@@ -363,6 +366,7 @@ public class MyOrderClientServices {
                 ))
                 .collect(Collectors.toList());
     }
+
     private String generateMaVanDon(Integer invoiceId) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
@@ -373,12 +377,12 @@ public class MyOrderClientServices {
         return "VD" + invoiceId + "-" + suffix;
     }
 
-    public void sendMailFromInvoice(HoaDon hoaDon){
+    public void sendMailFromInvoice(HoaDon hoaDon) {
         String maHoaDon = null;
         if (hoaDon.getId() < 10) {
-            maHoaDon =  "HD00" + hoaDon.getId();
-        } else if (hoaDon.getId()  < 100) {
-            maHoaDon =  "HD0" + hoaDon.getId();
+            maHoaDon = "HD00" + hoaDon.getId();
+        } else if (hoaDon.getId() < 100) {
+            maHoaDon = "HD0" + hoaDon.getId();
         } else {
             maHoaDon = "HD" + hoaDon.getId();
         }
@@ -394,7 +398,7 @@ public class MyOrderClientServices {
         emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
     }
 
-    public void sendMailByyMaVanDon(HoaDon hoaDon){
+    public void sendMailByyMaVanDon(HoaDon hoaDon) {
         String maHoaDon = null;
         String subject = "Xác nhận đơn hàng #" + hoaDon.getMaVanDon();
 
@@ -423,15 +427,16 @@ public class MyOrderClientServices {
                 .collect(Collectors.toList());
     }
 
-    public void deleteHoaDonById(Integer id){
+    public void deleteHoaDonById(Integer id) {
         hoaDonRepository.deleteById(id);
     }
 
-    public List<LichSuHoaDonAdminResponse> getLichSuHoaDon(Integer id){
+    public List<LichSuHoaDonAdminResponse> getLichSuHoaDon(Integer id) {
 
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + id));
 
         return lichSuHoaDonRepository.findByIdHoaDon(hoaDon).stream()
+                .sorted(Comparator.comparing(LichSuHoaDon::getId))
                 .map(LichSuHoaDonAdminResponse::convertDto)
                 .collect(Collectors.toList());
     }

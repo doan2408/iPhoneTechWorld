@@ -199,7 +199,6 @@
         </el-table-column>
 
         <el-table-column
-          v-if="isAdmin"
           label="Thao tác"
           width="200"
           align="center"
@@ -219,6 +218,7 @@
               </el-tooltip>
               <el-tooltip content="Chỉnh sửa" placement="top">
                 <el-button
+                  v-if="isAdmin"
                   size="small"
                   type="primary"
                   :icon="Edit"
@@ -814,39 +814,27 @@ const handleSubmit = async () => {
       trangThaiBaoHanh: form.value.trangThaiBaoHanh,
     });
 
-    // Validate required fields manually với logging
-    console.log("Validating fields:", {
-      idKhachHang: form.value.idKhachHang,
-      idImeiDaBan: form.value.idImeiDaBan,
-      idLoaiBaoHanh: form.value.idLoaiBaoHanh,
-      ngayBatDau: form.value.ngayBatDau,
-      trangThaiBaoHanh: form.value.trangThaiBaoHanh,
-    });
-
+    // Validate required fields manually
     if (!form.value.idKhachHang) {
       ElMessage.error("Vui lòng chọn khách hàng");
       submitLoading.value = false;
       return;
     }
-
     if (!form.value.idImeiDaBan) {
       ElMessage.error("Vui lòng chọn IMEI đã bán");
       submitLoading.value = false;
       return;
     }
-
     if (!form.value.idLoaiBaoHanh) {
       ElMessage.error("Vui lòng chọn loại bảo hành");
       submitLoading.value = false;
       return;
     }
-
     if (!form.value.ngayBatDau) {
       ElMessage.error("Vui lòng chọn ngày bắt đầu");
       submitLoading.value = false;
       return;
     }
-
     if (!form.value.trangThaiBaoHanh) {
       ElMessage.error("Vui lòng chọn trạng thái bảo hành");
       submitLoading.value = false;
@@ -857,19 +845,41 @@ const handleSubmit = async () => {
       idKhachHang: Number(form.value.idKhachHang),
       idImeiDaBan: Number(form.value.idImeiDaBan),
       idLoaiBaoHanh: Number(form.value.idLoaiBaoHanh),
-      ngayBatDau: form.value.ngayBatDau, // Send as string in YYYY-MM-DD format
-      ngayKetThuc: form.value.ngayKetThuc, // Send as string in YYYY-MM-DD format
+      ngayBatDau: form.value.ngayBatDau, // YYYY-MM-DD
+      ngayKetThuc: form.value.ngayKetThuc, // YYYY-MM-DD
       trangThaiBaoHanh: form.value.trangThaiBaoHanh,
     };
 
     console.log("Final payload to submit:", payload);
 
     if (isEditing.value) {
+      // confirm update
+      await ElMessageBox.confirm(
+        "Bạn có chắc chắn muốn cập nhật bảo hành này?",
+        "Xác nhận",
+        {
+          confirmButtonText: "Đồng ý",
+          cancelButtonText: "Hủy",
+          type: "warning",
+        }
+      );
+
       payload.idBaoHanh = Number(form.value.idBaoHanh);
       console.log("Updating warranty with id:", form.value.idBaoHanh);
       await updateWarranty(form.value.idBaoHanh, payload);
       ElMessage.success("Cập nhật bảo hành thành công");
     } else {
+      // confirm add
+      await ElMessageBox.confirm(
+        "Bạn có chắc chắn muốn thêm bảo hành này?",
+        "Xác nhận",
+        {
+          confirmButtonText: "Đồng ý",
+          cancelButtonText: "Hủy",
+          type: "warning",
+        }
+      );
+
       console.log("Creating new warranty...");
       await addWarranty(payload);
       ElMessage.success("Thêm bảo hành thành công");
@@ -882,6 +892,11 @@ const handleSubmit = async () => {
       fetchBaoHanh();
     }, 500);
   } catch (error) {
+    // nếu cancel confirm thì không báo gì cả
+    if (error === "cancel" || error === "close") {
+      return;
+    }
+
     console.error("Submit error:", error);
     if (Array.isArray(error)) {
       error.forEach(({ field, message }) => {
@@ -889,8 +904,7 @@ const handleSubmit = async () => {
         ElMessage.error(message);
       });
     }
-    // Không refresh nếu có lỗi validation
-    return;
+    return; // Không refresh nếu có lỗi validation
   } finally {
     submitLoading.value = false;
   }
