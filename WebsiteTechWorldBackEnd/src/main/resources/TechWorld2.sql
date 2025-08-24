@@ -1031,21 +1031,6 @@ VALUES
     (6, 1, 2, 10, 12000000.00), -- Đen Phantôm, 256GB
     (6, 9, 2, 8, 12000000.00);  -- Đỏ Rực Rỡ, 256GB
 
--- Insert IMEI for each product variant (based on so_luong)
--- iPhone 16 Thường variants (1-4)
-INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
-SELECT 
-    spct.id_san_pham_chi_tiet,
-    CONCAT('35', RIGHT('000000000000' + CAST(spct.id_san_pham_chi_tiet AS VARCHAR), 12), 
-           RIGHT('0' + CAST(ROW_NUMBER() OVER(PARTITION BY spct.id_san_pham_chi_tiet ORDER BY (SELECT NULL)) AS VARCHAR), 1)) as so_imei,
-    'AVAILABLE' as trang_thai_imei
-FROM san_pham_chi_tiet spct
-CROSS APPLY (
-    SELECT TOP (spct.so_luong) 1 as n
-    FROM sys.objects
-) numbers
-WHERE spct.id_san_pham BETWEEN 1 AND 6;
-
 -- Insert hinh_anh (one image per product variant)
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
 VALUES
@@ -1118,36 +1103,69 @@ VALUES
     (N'Khách đổi ý', 'CANCELLED');
 
 
-	-- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
+-- Script IMEI hoàn chỉnh
 WITH SPCT_Data AS (
-    -- Chọn các sản phẩm chi tiết có số lượng lớn hơn 0
+    -- Lấy tất cả sản phẩm chi tiết cần tạo IMEI
     SELECT
-        id_san_pham_chi_tiet,
-        ma_san_pham_chi_tiet,
-        so_luong AS NumIMEIsToGenerate
-    FROM
-        san_pham_chi_tiet
-    WHERE
-        so_luong > 0
+        spct.id_san_pham_chi_tiet,
+        spct.ma_san_pham_chi_tiet,
+        spct.id_san_pham,
+        -- Chỉ tạo IMEI cho số lượng còn thiếu
+        spct.so_luong - ISNULL(existing_count.count_existing, 0) AS NumIMEIsToGenerate
+    FROM san_pham_chi_tiet spct
+    LEFT JOIN (
+        SELECT 
+            id_san_pham_chi_tiet, 
+            COUNT(*) as count_existing 
+        FROM imei 
+        GROUP BY id_san_pham_chi_tiet
+    ) existing_count ON spct.id_san_pham_chi_tiet = existing_count.id_san_pham_chi_tiet
+    WHERE 
+        spct.so_luong > 0 
+        AND spct.so_luong > ISNULL(existing_count.count_existing, 0)
 ),
-     IMEI_Generator AS (
-         SELECT
-             s.id_san_pham_chi_tiet,
-             s.ma_san_pham_chi_tiet,
-             ROW_NUMBER() OVER (PARTITION BY s.id_san_pham_chi_tiet ORDER BY (SELECT NULL)) AS RowNum
-         FROM
-             SPCT_Data s
-    CROSS APPLY
-        (SELECT TOP (s.NumIMEIsToGenerate) 1 AS N FROM sys.all_columns) AS a
+IMEI_Generator AS (
+    SELECT
+        s.id_san_pham_chi_tiet,
+        s.ma_san_pham_chi_tiet,
+        s.id_san_pham,
+        -- Tạo sequence number global để tránh trùng lặp
+        ROW_NUMBER() OVER (ORDER BY s.id_san_pham_chi_tiet, (SELECT NULL)) AS GlobalSequence,
+        -- Tạo sequence number local trong từng sản phẩm chi tiết  
+        ROW_NUMBER() OVER (PARTITION BY s.id_san_pham_chi_tiet ORDER BY (SELECT NULL)) AS LocalSequence
+    FROM SPCT_Data s
+    CROSS APPLY (
+        SELECT TOP (s.NumIMEIsToGenerate) 1 AS N 
+        FROM sys.all_columns
+    ) AS generator
+    WHERE s.NumIMEIsToGenerate > 0
+),
+Generated_IMEI AS (
+    SELECT
+        i.id_san_pham_chi_tiet,
+        i.ma_san_pham_chi_tiet,
+        i.id_san_pham,
+        -- Tạo IMEI theo format: 35 + timestamp(5) + product_id(2) + detail_id(3) + sequence(3) = 15 chữ số
+        CONCAT(
+            '35',  -- TAC prefix (Type Allocation Code) - 2 digits
+            FORMAT(DATEDIFF(SECOND, '2020-01-01', GETDATE()) % 100000, '00000'),   -- 5 digits timestamp
+            FORMAT(i.id_san_pham % 100, '00'),              -- 2 digits product id
+            FORMAT(i.id_san_pham_chi_tiet % 1000, '000'),   -- 3 digits detail id  
+            FORMAT(i.LocalSequence, '000')                  -- 3 digits sequence
+        ) AS so_imei
+    FROM IMEI_Generator i
 )
+-- INSERT DỮ LIỆU
 INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
 SELECT
-    i.id_san_pham_chi_tiet,
-    -- Sinh số IMEI 15 chữ số
-    LEFT(CAST(ABS(CHECKSUM(NEWID())) AS VARCHAR(15)) + '000000000000000', 15),
-    N'AVAILABLE'
-FROM
-    IMEI_Generator i;
+    g.id_san_pham_chi_tiet,
+    g.so_imei,
+    'AVAILABLE'
+FROM Generated_IMEI g
+WHERE NOT EXISTS (
+    SELECT 1 FROM imei existing 
+    WHERE existing.so_imei = g.so_imei
+);
 
 -- Ảnh 1 -> biến thể 1..4
 INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
@@ -1350,17 +1368,19 @@ SELECT * FROM ly_do_xu_ly;
 -- 48. Xử lý sau bán hàng
 SELECT * FROM xu_ly_sau_ban_hang;
 
+-- Báo cáo kết quả (optional nhưng hữu ích)
 SELECT 
     spct.id_san_pham_chi_tiet,
     spct.ma_san_pham_chi_tiet,
     spct.so_luong as so_luong_can_co,
     COUNT(i.so_imei) as so_imei_da_tao,
     CASE 
-        WHEN COUNT(i.so_imei) = spct.so_luong THEN 'OK'
-        WHEN COUNT(i.so_imei) > spct.so_luong THEN 'THỪA'
-        ELSE 'THIẾU'
+        WHEN COUNT(i.so_imei) = spct.so_luong THEN '✓ OK'
+        WHEN COUNT(i.so_imei) > spct.so_luong THEN '⚠ THỪA'
+        ELSE '✗ THIẾU'
     END as trang_thai
 FROM san_pham_chi_tiet spct
 LEFT JOIN imei i ON spct.id_san_pham_chi_tiet = i.id_san_pham_chi_tiet
+WHERE spct.so_luong > 0
 GROUP BY spct.id_san_pham_chi_tiet, spct.ma_san_pham_chi_tiet, spct.so_luong
 ORDER BY spct.id_san_pham_chi_tiet;
