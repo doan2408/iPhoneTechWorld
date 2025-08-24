@@ -33,6 +33,7 @@ import {
 } from "@element-plus/icons-vue";
 import { h } from "vue";
 import CompareBar from "./Compare/CompareBar.vue";
+import { useToast } from "vue-toastification";
 
 const showClearFilter = ref(false);
 const filterKeyword = ref("");
@@ -44,6 +45,7 @@ const totalProducts = ref(0);
 const selectedSort = ref("");
 // Product data
 const products = ref([]);
+const toast = useToast();
 
 // Debounce timer
 let debounceTimer = null;
@@ -217,6 +219,11 @@ onMounted(() => {
 });
 const compareList = ref([]);
 const addToCompare = (product) => {
+  if (compareList.value.length >= 3) {
+    toast.warning('Bạn chỉ có thể so sánh tối đa 3 sản phẩm');
+    return;
+  }
+
   if (!compareList.value.find((p) => p.id === product.id)) {
     compareList.value.push(product);
   }

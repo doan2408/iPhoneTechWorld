@@ -292,6 +292,7 @@ const fetchListAnhByMau = async () => {
 const addToCart = async (buy) => {
   try {
     if (!quantity?.value || quantity.value <= 0) {
+      quantity.value = 1;
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }

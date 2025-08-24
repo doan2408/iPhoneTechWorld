@@ -325,10 +325,13 @@ const fetchListAnhByMau = async () => {
 
 const themVaoGio = async (buy) => {
   try {
-    if (quantity.value < 0) {
+
+    if (!quantity?.value || quantity.value <= 0) {
+      quantity.value = 1;
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
+
     const soLuongTonKho = bienThe.value.soLuong;
     if (soLuongTonKho < 0) {
       ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
@@ -681,7 +684,7 @@ const toggleWishlist = async () => {
             <div class="quantity-control">
               <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
 
-              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
+              <input type="number" v-model="quantity" min="1" :max="bienThe?.soLuong || 1" />
               <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
                 +
               </button>
