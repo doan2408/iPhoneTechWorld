@@ -2530,8 +2530,8 @@ const xemLichSu = async () => {
     try {
         const storedId = localStorage.getItem("selectedInvoiceId");
         const response = await viewLichSuHoaDon(storedId);
-        maHoaDon.value = response.data.content[0].maHoaDon
-        orderHistory.value = response.data.content;
+        maHoaDon.value = response.data[0].maHoaDon
+        orderHistory.value = response.data;
         showSalesHistoryModal.value = true;
     } catch (error) {
         console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
