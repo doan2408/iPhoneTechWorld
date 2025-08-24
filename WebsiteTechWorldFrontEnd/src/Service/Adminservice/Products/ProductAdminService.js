@@ -87,7 +87,9 @@ export const findSanPhamBanHang = (
   tenSanPham,
   pageNo,
   pageSize,
-  selectedIdKhachHang
+  selectedIdKhachHang,
+  loaiSanPham,
+  giaTu, giaDen, soLuongTu, soLuongDen, maSpct, dungLuong, tenMau
 ) => {
   const urlProduct = "/admin/product";
   const url = urlProduct + "/ten-san-pham";
@@ -96,10 +98,18 @@ export const findSanPhamBanHang = (
       tenSanPham,
       pageNo,
       pageSize,
-      selectedIdKhachHang,
+      selectedIdKhachHang, loaiSanPham,
+      giaTu, giaDen, soLuongTu, soLuongDen
+      , maSpct, dungLuong, tenMau
     },
   });
 };
+
+export const fillDataFulldown = () => {
+    const urlProduct = "/admin/product";
+  const url = urlProduct + "/filldata-for-pulldown";
+    return api.get(url);
+  };
 
 export const findSanPhamByMa = (maSanPham, pageNo, pageSize) => {
   const urlProduct = "/admin/product";

@@ -90,7 +90,7 @@
                 <!-- Customer search -->
                 <div class="customer-search">
                     <div class="search-box">
-                        <select v-model="searchType" class="search-select">
+                        <!-- <select v-model="searchType" class="search-select">
                             <option disabled value="">-- Chọn loại tìm kiếm --</option>
                             <option value="name">Tên</option>
                             <option value="ma">Mã</option>
@@ -101,15 +101,87 @@
                             <input v-model="customerSearchQuery" type="text"
                                 :placeholder="searchType === 'ma' ? 'Nhập mã sản phẩm' : 'Nhập tên sản phẩm'"
                                 class="search-input" @keydown.f4.prevent="searchCustomer" @blur="searchCustomer" />
-                        </div>
+                        </div> -->
                     </div>
                     <div class="customer-actions">
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
-                            <Plus class="btn-icon" />
+                            <Plus class="btn-icon" /> Thêm khách hàng
                         </button>
-                        <button class="customer-btn" title="Lọc">
-                            <Filter class="btn-icon" />
+                        <button class="customer-btn" title="Lọc" @click="toggleFilter">
+                            <Filter class="btn-icon" /> Bộ lọc
                         </button>
+
+                        <div v-if="isFilterOpen" class="filter-overlay">
+                            <div class="filter-popup">
+                                <h2>Bộ lọc sản phẩm</h2>
+
+                                <!-- Mã sản phẩm chi tiết -->
+                                <div class="filter-group">
+                                    <label>Mã SPCT</label>
+                                    <input type="text" v-model="filters.maSpct"
+                                        placeholder="Nhập mã SPCT (VD: SPCT001)" />
+                                </div>
+
+                                <!-- Loại sản phẩm -->
+                                <div class="filter-group">
+                                    <label>Loại sản phẩm</label>
+                                    <select v-model="filters.model">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="loai in pulldownData.loai" :key="loai" :value="loai.id"> {{
+                                            loai.tenLoai }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Dung lượng -->
+                                <div class="filter-group">
+                                    <label>Dung lượng</label>
+                                    <select v-model="filters.storage">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="dungLuongRom in pulldownData.dungLuong" :key="dungLuongRom"
+                                            :value="dungLuongRom.id"> {{ dungLuongRom.dungLuong }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Màu sắc -->
+                                <div class="filter-group">
+                                    <label>Màu sắc</label>
+                                    <select v-model="filters.color">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="mau in pulldownData.mauSac" :key="mau"
+                                            :value="mau.id"> {{ mau.tenMau }} </option>
+                                    </select>
+                                </div>
+
+                                <!-- Khoảng giá -->
+                                <div class="filter-group">
+                                    <label>Khoảng giá (triệu VND)</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.priceMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.priceMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Số lượng tồn kho -->
+                                <div class="filter-group">
+                                    <label>Số lượng tồn kho</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.quantityMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.quantityMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Nút hành động -->
+                                <div class="filter-actions">
+                                    <button class="apply-btn-filter" @click="applyFilters">Áp dụng</button>
+                                    <button class="reset-btn-filter" @click="resetFilters">Xóa bộ lọc</button>
+                                    <button class="close-btn-filter" @click="toggleFilter">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
                         <button class="customer-btn" @click="openQRModal" title="Quét mã QR">
                             <ScanLine class="btn-icon" /> Quét QR
                         </button>
@@ -140,12 +212,15 @@
                             <div class="product-info">
                                 <h4>{{ product.tenSanPham }} {{ product.rom }}</h4>
                                 <div class="product-color">{{ product.mau }}</div>
-                                <div class="product-price" v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
+                                <div class="product-price"
+                                    v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
                                     <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
-                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-price" v-else>
-                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
@@ -174,45 +249,48 @@
 
                         <div class="imei-search">
                             <div class="search-box">
-                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input"/>
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI"
+                                    class="search-input" />
                             </div>
                         </div>
 
                         <div class="modal-body">
                             <div class="imei-container">
-                            <!-- Danh sách IMEI có sẵn (bên trái) -->
-                            <div class="imei-list-container">
-                                <h3>Danh sách IMEI</h3>
-                                <div class="imei-list">
-                                    <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
-                                        <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
-                                            v-model="selectedImeis" />
-                                        <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                <!-- Danh sách IMEI có sẵn (bên trái) -->
+                                <div class="imei-list-container">
+                                    <h3>Danh sách IMEI</h3>
+                                    <div class="imei-list">
+                                        <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
+                                            <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
+                                                v-model="selectedImeis" />
+                                            <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="pagination-controls">
+                                        <button @click="goToImeiPage(imeiCurrentPage - 1)"
+                                            :disabled="imeiCurrentPage === 0">Trước</button>
+                                        <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
+                                        <button @click="goToImeiPage(imeiCurrentPage + 1)"
+                                            :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
                                     </div>
                                 </div>
-                                <div class="pagination-controls">
-                                    <button @click="goToImeiPage(imeiCurrentPage - 1)" :disabled="imeiCurrentPage === 0">Trước</button>
-                                    <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
-                                    <button @click="goToImeiPage(imeiCurrentPage + 1)" :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
-                                </div>
-                            </div>
 
-                            <!-- Danh sách IMEI đã chọn (bên phải) -->
-                            <div class="selected-imeis-container" style="max-width: 200px;">
-                                <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
-                                <div class="selected-imeis">
-                                    <ul>
-                                        <li v-for="imei in selectedImeis" :key="imei.id">
-                                            {{ imei.imei }}
-                                            <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
-                                        </li>
-                                    </ul>
+                                <!-- Danh sách IMEI đã chọn (bên phải) -->
+                                <div class="selected-imeis-container" style="max-width: 200px;">
+                                    <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
+                                    <div class="selected-imeis">
+                                        <ul>
+                                            <li v-for="imei in selectedImeis" :key="imei.id">
+                                                {{ imei.imei }}
+                                                <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </div>
 
-                        
+
 
                         <div class="modal-footer">
                             <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{
@@ -376,7 +454,8 @@
                                 </p>
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
-                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật' }}
+                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật'
+                                    }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
@@ -535,7 +614,7 @@
             </div>
 
             <div class="modal-header" style="margin-bottom: 0;">
-                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2>
+                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2> &nbsp;
                 <div class="search-box">
                     <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
                 </div>
@@ -618,7 +697,9 @@
             </div>
             <div class="modal-body">
                 <div class="search-box">
-                    <input v-model="salesHistorySearchQuery" type="text" placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input" @input="searchSalesHistory" />
+                    <input v-model="salesHistorySearchQuery" type="text"
+                        placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input"
+                        @input="searchSalesHistory" />
                 </div>
                 <div class="sales-history-list">
                     <table class="table table-hover">
@@ -647,7 +728,8 @@
                 <div class="pagination-controls">
                     <button @click="previousSalesHistoryPage" :disabled="salesHistoryPage === 0">Trước</button>
                     <span>Trang {{ salesHistoryPage + 1 }} / {{ totalSalesHistoryPages }}</span>
-                    <button @click="nextSalesHistoryPage" :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
+                    <button @click="nextSalesHistoryPage"
+                        :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -666,7 +748,8 @@ import {
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
-    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa,
+    fillDataFulldown
 } from '@/Service/Adminservice/Products/ProductAdminService';
 import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
@@ -855,14 +938,19 @@ const danhMucSanPham = async () => {
 }
 
 const selectedIdKhachHang = ref(0)
+const pulldownData = ref(null)
 
 const loadProducts = async () => {
-    // selectedCategory.value = category.tenSanPham;
+    
+    const res = await fillDataFulldown();
+    pulldownData.value = res.data
+
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
         response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
     } else {
-        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
+        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+            , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color);
     }
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
@@ -1112,29 +1200,7 @@ const removeFromCart = async () => {
     }
 }
 
-const searchCustomer = async () => {
-    const type = searchType.value || 'name';
 
-    if (!customerSearchQuery.value.trim()) {
-        await loadProducts();
-        return;
-    }
-
-    try {
-        let response;
-        if (type === 'name') {
-            response = await findSanPhamBanHang(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        } else if (type === 'ma') {
-            response = await findSanPhamByMa(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        }
-
-        products.value = response.data.content;
-        totalPagesProdut.value = response.data.totalPages;
-        console.log('da vao day');
-    } catch (error) {
-        console.error('Search error:', error);
-    }
-};
 
 watch([searchType, customerSearchQuery], () => {
     searchCustomer();
@@ -2490,6 +2556,45 @@ const formatDate = (dateString) => {
 watch(salesHistorySearchQuery, () => {
     searchSalesHistory();
 });
+
+const isFilterOpen = ref(false)
+
+const filters = reactive({
+    model: '',
+    storage: '',
+    color: '',
+    priceMin: null,
+    priceMax: null,
+    quantityMin: null,
+    quantityMax: null,
+    maSpct : ''
+})
+
+const toggleFilter = () => {
+    isFilterOpen.value = !isFilterOpen.value
+}
+
+const applyFilters = async () => {
+    const response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+        , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color
+    );
+    
+    products.value = response.data.content;
+    totalPagesProdut.value = response.data.totalPages
+    isFilterOpen.value = false
+}
+
+const resetFilters = () => {
+    filters.model = ''
+    filters.storage = ''
+    filters.color = ''
+    filters.priceMin = null
+    filters.priceMax = null
+    filters.quantityMin = null
+    filters.quantityMax = null
+    filters.maSpct = null
+}
+
 
 </script>
 
