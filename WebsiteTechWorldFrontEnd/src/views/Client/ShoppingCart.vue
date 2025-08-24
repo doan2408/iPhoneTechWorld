@@ -50,7 +50,7 @@
                     :class="{ 'selected': product.selected }">
                     <div class="product-selection">
                         <el-checkbox v-model="product.selected" :disabled="product.soLuongTon <= 0"
-                            @change="handleProductSelect" />
+                            @change="value => handleProductSelect(value, product)" />
                     </div>
 
                     <div class="product-image">
@@ -74,13 +74,10 @@
                     </div>
 
                     <div class="product-info">
+                        <div class="product-name">{{ product.maSanPhamChiTiet }}</div>
                         <div class="product-name">{{ product.tenSanPham }}</div>
                         <div class="product-variant">
                             <el-tag size="small" type="info">{{ product.phienBan }}</el-tag>
-                        </div>
-                        <div class="product-features">
-                            <span class="feature-tag">Miễn phí đổi trả</span>
-                            <span class="feature-tag">Chính hãng</span>
                         </div>
                     </div>
 
@@ -99,7 +96,8 @@
                     </div>
 
                     <div class="product-quantity">
-                        <div class="label">Số lượng</div>
+                        <div class="label">Số lượng (tối đa: {{ product.selected ? Math.max(1, 2 -
+                            selectedTotalQuantityExcludingProduct(product)) : Math.min(2, product.soLuongTon) }})</div>
                         <div class="quantity-controls">
                             <el-button size="small" :disabled="product.soLuong <= 1 || product.soLuongTon <= 0"
                                 @click="decreaseQuantity(product)" class="quantity-btn">
@@ -109,7 +107,8 @@
                             </el-button>
                             <el-input-number v-model="product.soLuong" size="large" :controls="false" readonly
                                 class="quantity-input" @change="updateQuantity(product)" />
-                            <el-button size="small" :disabled="product.soLuong >= product.soLuongTon"
+                            <el-button size="small"
+                                :disabled="product.soLuong >= (product.selected ? Math.max(1, 2 - selectedTotalQuantityExcludingProduct(product)) : Math.min(2, product.soLuongTon)) || product.soLuong >= product.soLuongTon"
                                 @click="increaseQuantity(product)" class="quantity-btn">
                                 <el-icon>
                                     <Plus />
@@ -140,9 +139,6 @@
                     <el-checkbox v-model="selectAll" @change="handleSelectAll">
                         Chọn tất cả ({{ totalItems }})
                     </el-checkbox>
-                    <el-button type="danger" text :disabled="selectedItems.length === 0" @click="handleBulkDelete">
-                        Xóa
-                    </el-button>
                 </div>
 
                 <div class="checkout-right">
@@ -242,6 +238,7 @@ async function fetchCart() {
             cartData.value = response.items.map(item => ({
                 idGioHangChiTiet: item.idGioHangChiTiet,
                 idSanPhamChiTiet: item.idSanPhamChiTiet,
+                maSanPhamChiTiet: item.maSanPhamChiTiet || 'SPCT000',
                 tenSanPham: item.tenSanPham || 'Sản phẩm',
                 phienBan: item.phienBan || 'Mặc định',
                 imageUrl: item.imageUrl || '',
@@ -252,6 +249,13 @@ async function fetchCart() {
                 ngayThem: item.ngayThem || new Date().toISOString(),
                 selected: false
             }));
+            try {
+                count.value = await cartService.cartCount(user.value?.id);
+            } catch (error) {
+                console.error('Lỗi khi tải giỏ hàng:', error);
+            }
+            guiLenHeader()
+
         } else {
             const storedCart = localStorage.getItem('shoppingCart');
             if (storedCart) {
@@ -268,6 +272,7 @@ async function fetchCart() {
                 cartData.value = localCart.map(item => ({
                     idGioHangChiTiet: item.idGioHangChiTiet || null,
                     idSanPhamChiTiet: item.idSanPhamChiTiet,
+                    maSanPhamChiTiet: item.maSanPhamChiTiet || 'SPCT000',
                     tenSanPham: item.tenSanPham || 'Sản phẩm',
                     phienBan: item.phienBan || 'Mặc định',
                     imageUrl: item.imageUrl || '',
@@ -285,12 +290,6 @@ async function fetchCart() {
                 selected: item.idSanPhamChiTiet == selectedId
             }));
         }
-        try {
-            count.value = await cartService.cartCount(user.value?.id);
-        } catch (error) {
-            console.error('Lỗi khi tải giỏ hàng:', error);
-        }
-        guiLenHeader()
         if (hetHangList.value.length > 0) {
             hetHangList.value.forEach(item => {
                 ElMessage.error(`Sản phẩm "${item.tenSanPham}" đã hết hàng`)
@@ -334,19 +333,48 @@ const formatPrice = (price) => {
     return price.toLocaleString('vi-VN') + ' ₫';
 };
 
+const selectedTotalQuantityExcludingProduct = (currentProduct) => {
+    return cartData.value
+        .filter(product => product.selected && product !== currentProduct)
+        .reduce((sum, product) => sum + product.soLuong, 0);
+};
+
+const selectedTotalQuantity = computed(() => {
+    return cartData.value
+        .filter(product => product.selected)
+        .reduce((sum, product) => sum + product.soLuong, 0);
+});
+
 async function updateQuantity(product) {
     try {
+        let maxQuantity;
+        if (product.selected) {
+            const totalSelectedQuantity = selectedTotalQuantityExcludingProduct(product);
+            maxQuantity = Math.max(1, 2 - totalSelectedQuantity);
+            if (product.soLuong + totalSelectedQuantity > 2) {
+                ElMessage.warning('Giới hạn số lượng mua là 2');
+                product.soLuong = Math.max(1, 2 - totalSelectedQuantity);
+            }
+        } else {
+            maxQuantity = Math.min(2, product.soLuongTon);
+        }
+
         if (product.soLuong <= 0) {
-            throw new Error(`Số lượng không hợp lệ. Phải từ 1 đến ${product.soLuongTon}.`);
+            throw new Error(`Số lượng không hợp lệ. Phải từ 1 đến ${maxQuantity}.`);
+        }
+        if (product.soLuong > maxQuantity) {
+            ElMessage.warning(`Số lượng tối đa cho sản phẩm này là ${maxQuantity}.`);
+            product.soLuong = maxQuantity;
         }
         if (product.soLuong > product.soLuongTon) {
-            ElMessage.warning('Sản phẩm còn: ' + product.soLuongTon);
-            product.soLuong = product.soLuongTon
+            ElMessage.warning(`Số lượng tồn kho chỉ còn ${product.soLuongTon}.`);
+            product.soLuong = product.soLuongTon;
         }
+
         if (user.value?.id) {
             await cartService.updateQuantity(product.idGioHangChiTiet, product.soLuong);
         } else {
-            const success = CartService.capNhatSoLuong(product.idSanPhamChiTiet, product.soLuong);
+            CartService.capNhatSoLuong(product.idSanPhamChiTiet, product.soLuong);
         }
         ElMessage.success('Cập nhật số lượng thành công');
     } catch (error) {
@@ -363,7 +391,27 @@ async function decreaseQuantity(product) {
 }
 
 async function increaseQuantity(product) {
-    if (product.soLuong >= product.soLuongTon) return;
+    let maxQuantity;
+    if (product.selected) {
+        const totalSelectedQuantity = selectedTotalQuantityExcludingProduct(product);
+        maxQuantity = Math.max(1, 2 - totalSelectedQuantity);
+        if (product.soLuong + totalSelectedQuantity >= 2) {
+                ElMessage.warning('Giới hạn số lượng mua là 2');
+            return;
+        }
+    } else {
+        maxQuantity = Math.min(2, product.soLuongTon);
+    }
+
+    if (product.soLuong >= maxQuantity) {
+        ElMessage.warning(`Số lượng tối đa cho sản phẩm này là ${maxQuantity}.`);
+        return;
+    }
+    if (product.soLuong >= product.soLuongTon) {
+        ElMessage.warning(`Số lượng tồn kho chỉ còn ${product.soLuongTon}.`);
+        return;
+    }
+
     product.soLuong++;
     await updateQuantity(product);
 }
@@ -382,7 +430,7 @@ async function removeProduct(idGioHangChiTiet) {
         if (user.value?.id) {
             await cartService.removeItem(idGioHangChiTiet);
         } else {
-            const success = CartService.xoaSanPhamKhoiGio(idSanPhamChiTiet)
+            const success = CartService.xoaSanPhamKhoiGio(idGioHangChiTiet)
         }
         await fetchCart();
         ElMessage.success('Đã xóa sản phẩm khỏi giỏ hàng');
@@ -422,14 +470,36 @@ async function handleBulkDelete() {
 }
 
 const handleSelectAll = (value) => {
+    if (value) {
+        const totalQuantity = cartData.value.reduce((sum, product) => sum + product.soLuong, 0);
+        if (totalQuantity > 2) {
+            ElMessage.warning('Giới hạn số lượng mua là 2');
+            selectAll.value = false;
+            cartData.value.forEach(product => {
+                product.selected = false;
+            });
+            return;
+        }
+    }
     cartData.value.forEach(product => {
-        product.selected = value;
+        if (product.soLuongTon > 0) {
+            product.selected = value;
+        }
     });
     selectAll.value = value;
 };
 
-const handleProductSelect = () => {
-    const allSelected = cartData.value.length > 0 && cartData.value.every(product => product.selected);
+const handleProductSelect = (value, product) => {
+    console.log('b', value)
+    if (value) {
+        const currentSelectedQuantity = selectedTotalQuantityExcludingProduct(product);
+        if (currentSelectedQuantity + product.soLuong > 2) {
+            ElMessage.warning('Giới hạn số lượng mua là 2');
+            product.selected = false;
+            return;
+        }
+    }
+    const allSelected = cartData.value.length > 0 && cartData.value.every(product => product.selected || product.soLuongTon <= 0);
     selectAll.value = allSelected;
 };
 
@@ -530,7 +600,7 @@ const handleCheckout = () => {
 .logo-icon {
     font-size: 24px;
     color: white;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .brand-info {
@@ -1159,9 +1229,12 @@ const handleCheckout = () => {
 
 /* Animation keyframes */
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-5px);
     }

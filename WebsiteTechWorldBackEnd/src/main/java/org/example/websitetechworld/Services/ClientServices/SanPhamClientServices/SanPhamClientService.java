@@ -114,6 +114,7 @@ public class SanPhamClientService {
 
         ClientProductDetailResponse response = new ClientProductDetailResponse();
         response.setIdSpct(spct.getId());
+        response.setMaSanPhamChiTiet(spct.getMaSanPhamChiTiet());
         response.setTenSanPham(sp.getTenSanPham());
         List<String> hinhAnh = sanPhamRepo.getListAnhByMau(idSanPham, idMau);
         response.setHinhAnh(hinhAnh);

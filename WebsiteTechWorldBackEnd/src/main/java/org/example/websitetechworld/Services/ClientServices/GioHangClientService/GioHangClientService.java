@@ -115,6 +115,7 @@ public class GioHangClientService {
             GioHangClientResponse.GioHangChiTietResponse itemDTO = new GioHangClientResponse.GioHangChiTietResponse();
             itemDTO.setIdGioHangChiTiet(item.getId());
             itemDTO.setIdSanPhamChiTiet(item.getIdSanPhamChiTiet().getId());
+            itemDTO.setMaSanPhamChiTiet(item.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
             itemDTO.setTenSanPham(item.getIdSanPhamChiTiet().getIdSanPham().getTenSanPham());
             itemDTO.setPhienBan(String.format("%s, %s",
                     item.getIdSanPhamChiTiet().getIdMau().getTenMau(),

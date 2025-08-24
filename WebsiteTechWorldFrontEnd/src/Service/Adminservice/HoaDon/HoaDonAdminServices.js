@@ -57,6 +57,11 @@ export const hoaDonHardDelete = (id) => {
     return api.delete(url)
 }
 
+export const countHoaDon = () => {
+    const url = url_base + '/count';
+    return api.get(url)
+}
+
 export const doanhThuTheoThang = () => {
     const url = url_base + '/doanh-thu-thang';
     return api.get(url)

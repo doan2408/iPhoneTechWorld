@@ -315,6 +315,10 @@ public class HoaDonAdminService {
         hoaDonRepository.delete(hoaDon);
     }
 
+    public Long countHoaDon () {
+        return hoaDonRepository.count();
+    }
+
     public Integer countHoaDonPending () {
         return hoaDonRepository.countByTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
     }

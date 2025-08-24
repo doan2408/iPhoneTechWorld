@@ -692,7 +692,7 @@
 <script setup>
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
-import { createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
+import { countHoaDon, createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { hoaDonDetail } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { viewLichSuHoaDon } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import {
@@ -803,13 +803,14 @@ const loadData = async () => {
   try {
     const response = await hoaDonGetAll(pageNo.value, pageSize.value, searchQuery.value, statusFilter.value, typeFilter.value, dateFilterFrom.value, dateFilterTo.value);
 
+    const total = await countHoaDon();
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
 
     if (Array.isArray(response.data.content)) {
       hoaDons.value = response.data.content;
       totalPage.value = response.data.totalPages || 0;
-      totalElement.value = response.data.totalElements || 0;
+      totalElement.value = total.data || 0;
       choXuLy.value = count.data || 0;
       doanhThuThang.value = formatCurrency(doanhThu.data || 0);
     } else {
