@@ -745,6 +745,12 @@ const updateOrderStatus = async (newStatus) => {
         }
     } catch (error) {
         console.error('Failed to update order status:', error.response?.data || error.message);
+        if (error.response?.data) {
+            // Nếu backend trả về object JSON { message: "..."}
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     } finally {
         isProcessing.value = false;
     }
@@ -765,6 +771,11 @@ const updateStatusInvoicePaid = async (newStatus) => {
         }
     } catch (error) {
         console.error('Failed to update invoice status:', error.response?.data || error.message)
+        if (error.response?.data) {
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     }
 }
 
