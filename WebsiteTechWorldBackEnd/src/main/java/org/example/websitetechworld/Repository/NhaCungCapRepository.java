@@ -12,4 +12,11 @@ public interface NhaCungCapRepository extends JpaRepository<NhaCungCap, Integer>
     boolean existsByTenNhaCungCap(String tenNhaCungCap);
     boolean existsByTenNhaCungCapAndIdNot(String tenNhaCungCap, Integer id);
     Page<NhaCungCap> findByTenNhaCungCapContainingIgnoreCaseOrEmailContainingIgnoreCase(@Size(max = 50) String tenNhaCungCap, @Size(max = 50) String email, Pageable pageable);
+
+    boolean existsByEmailAndIdNot(String email, Integer id);
+    boolean existsBySdtAndIdNot(String sdt, Integer id);
+
+    boolean existsByEmail(String email);
+    boolean existsBySdt(String sdt);
+
 }

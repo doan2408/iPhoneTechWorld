@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.CameraTruocAdminResponse;
 import org.example.websitetechworld.Entity.CameraTruoc;
 import org.example.websitetechworld.Repository.CameraTruocRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
@@ -61,21 +62,32 @@ public class CameraTruocAdminService {
 
     @Transactional
     public CameraTruocAdminResponse createCameraTruoc(CameraTruocAdminRequest cameraTruocAdminRequest) {
-        List<Map<String, String>> errors = new ArrayList<>();
-        Integer count = cameraTruocRepository.countCheckTrung(
-                cameraTruocAdminRequest.getLoaiCamera(),
-                cameraTruocAdminRequest.getDoPhanGiai(),
-                cameraTruocAdminRequest.getKhauDo(),
-                cameraTruocAdminRequest.getLoaiZoom(),
-                cameraTruocAdminRequest.getCheDoChup()
-        );
 
-        if(count > 0) {
-            errors.add(Map.of("field", "cameraTruoc", "message", "Camera trước với những thuộc tính này đã tồn tại"));
+        if (!cameraTruocAdminRequest.getLoaiCamera().matches("^[a-zA-Z0-9\\s]+$")) {
+            throw new BusinessException("Loại camera không hợp lệ! Chỉ cho phép chữ cái, số và khoảng trắng (không dấu, không ký tự đặc biệt).");
         }
 
-        if(!errors.isEmpty()) {
-            throw new ValidationException(errors);
+        if (!cameraTruocAdminRequest.getDoPhanGiai().matches("^[0-9]+\\s?MP$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ! Ví dụ: 12MP, 48MP, 108MP.");
+        }
+
+        if (!cameraTruocAdminRequest.getKhauDo().matches("^f\\/[0-9]+(\\.[0-9]+)?$")) {
+            throw new BusinessException("Khẩu độ không hợp lệ! Ví dụ: f/1.8, f/2.2.");
+        }
+
+
+        if (cameraTruocRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDo(
+                cameraTruocAdminRequest.getLoaiCamera(),
+                cameraTruocAdminRequest.getDoPhanGiai(),
+                cameraTruocAdminRequest.getKhauDo())) {
+
+            throw new BusinessException(
+                    String.format("Camera trước với loại [%s], độ phân giải [%s], khẩu độ [%s] đã tồn tại!",
+                            cameraTruocAdminRequest.getLoaiCamera(),
+                            cameraTruocAdminRequest.getDoPhanGiai(),
+                            cameraTruocAdminRequest.getKhauDo()
+                    )
+            );
         }
 
         CameraTruoc cameraTruoc = cameraTruocRepository.save(modelMapper.map(cameraTruocAdminRequest, CameraTruoc.class));
@@ -85,6 +97,34 @@ public class CameraTruocAdminService {
 
     @Transactional
     public CameraTruocAdminResponse createCameraTruocQuick(CameraTruocQuickCreateAdminRequest cameraTruocAdminRequest) {
+
+        if (!cameraTruocAdminRequest.getLoaiCamera().matches("^[a-zA-Z0-9\\s]+$")) {
+            throw new BusinessException("Loại camera không hợp lệ! Chỉ cho phép chữ cái, số và khoảng trắng (không dấu, không ký tự đặc biệt).");
+        }
+
+        if (!cameraTruocAdminRequest.getDoPhanGiai().matches("^[0-9]+\\s?MP$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ! Ví dụ: 12MP, 48MP, 108MP.");
+        }
+
+        if (!cameraTruocAdminRequest.getKhauDo().matches("^f\\/[0-9]+(\\.[0-9]+)?$")) {
+            throw new BusinessException("Khẩu độ không hợp lệ! Ví dụ: f/1.8, f/2.2.");
+        }
+
+        if (cameraTruocRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDo(
+                cameraTruocAdminRequest.getLoaiCamera(),
+                cameraTruocAdminRequest.getDoPhanGiai(),
+                cameraTruocAdminRequest.getKhauDo())) {
+
+            throw new BusinessException(
+                    String.format("Camera trước với loại [%s], độ phân giải [%s], khẩu độ [%s] đã tồn tại!",
+                            cameraTruocAdminRequest.getLoaiCamera(),
+                            cameraTruocAdminRequest.getDoPhanGiai(),
+                            cameraTruocAdminRequest.getKhauDo()
+                    )
+            );
+        }
+
+
         CameraTruoc cameraTruoc = cameraTruocRepository.save(modelMapper.map(cameraTruocAdminRequest, CameraTruoc.class));
         return convert(cameraTruoc);
     }
@@ -93,30 +133,19 @@ public class CameraTruocAdminService {
     public CameraTruocAdminResponse updateCameraTruoc(Integer id, CameraTruocAdminRequest cameraTruocAdminRequest) {
         CameraTruoc cameraTruocOld = cameraTruocRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Camera trước ID: " + id));
-        List<Map<String, String>> errors = new ArrayList<>();
-        boolean unchanged =
-                Objects.equals(cameraTruocAdminRequest.getLoaiCamera(), cameraTruocOld.getLoaiCamera()) &&
-                        Objects.equals(cameraTruocAdminRequest.getDoPhanGiai(), cameraTruocOld.getDoPhanGiai()) &&
-                        Objects.equals(cameraTruocAdminRequest.getKhauDo(), cameraTruocOld.getKhauDo()) &&
-                        Objects.equals(cameraTruocAdminRequest.getLoaiZoom(), cameraTruocOld.getLoaiZoom()) &&
-                        Objects.equals(cameraTruocAdminRequest.getCheDoChup(), cameraTruocOld.getCheDoChup());
-        if(unchanged) {
-            return convert(cameraTruocOld);
-        }
-        else {
-            Integer count = cameraTruocRepository.countCheckTrung(
-                    cameraTruocAdminRequest.getLoaiCamera(),
-                    cameraTruocAdminRequest.getDoPhanGiai(),
-                    cameraTruocAdminRequest.getKhauDo(),
-                    cameraTruocAdminRequest.getLoaiZoom(),
-                    cameraTruocAdminRequest.getCheDoChup()
+        if (cameraTruocRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDoAndIdNot(
+                cameraTruocAdminRequest.getLoaiCamera(),
+                cameraTruocAdminRequest.getDoPhanGiai(),
+                cameraTruocAdminRequest.getKhauDo(),
+                cameraTruocAdminRequest.getId())) {
+
+            throw new BusinessException(
+                    String.format("Camera trước với loại [%s], độ phân giải [%s], khẩu độ [%s] đã tồn tại!",
+                            cameraTruocAdminRequest.getLoaiCamera(),
+                            cameraTruocAdminRequest.getDoPhanGiai(),
+                            cameraTruocAdminRequest.getKhauDo()
+                    )
             );
-            if(count > 0) {
-                errors.add(Map.of("field", "cameraTruoc", "message", "Camera trước với những thuộc tính này đã tồn tại"));
-            }
-        }
-        if(!errors.isEmpty()) {
-            throw new ValidationException(errors);
         }
         modelMapper.map(cameraTruocAdminRequest, cameraTruocOld);
         cameraTruocRepository.save(cameraTruocOld);

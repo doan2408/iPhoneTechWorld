@@ -5,65 +5,37 @@
       <div class="header-divider"></div>
     </div>
 
-    <el-form
-      :model="sanPhamModel"
-      ref="sanPhamForm"
-      label-width="120px"
-      :rules="rules"
-      class="professional-form"
-    >
+    <el-form :model="sanPhamModel" ref="sanPhamForm" label-width="120px" :rules="rules" class="professional-form">
       <!-- Thông tin sản phẩm chính -->
       <div class="form-section">
         <h3 class="section-title">Thông tin cơ bản</h3>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Tên sản phẩm" prop="tenSanPham">
-              <el-input
-                v-model="sanPhamModel.tenSanPham"
-                placeholder="Nhập tên sản phẩm"
-              ></el-input>
+              <el-input v-model="sanPhamModel.tenSanPham" placeholder="Nhập tên sản phẩm"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="Thương hiệu" prop="thuongHieu">
-              <el-input
-                v-model="sanPhamModel.thuongHieu"
-                placeholder="Nhập thương hiệu"
-              ></el-input>
+              <el-input v-model="sanPhamModel.thuongHieu" placeholder="Nhập thương hiệu"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
-              <el-select
-                v-model="sanPhamModel.idNhaCungCaps"
-                multiple
-                placeholder="Chọn nhà cung cấp"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="ncc in nhaCungCaps"
-                  :key="ncc.id"
-                  :label="ncc.tenNhaCungCap"
-                  :value="ncc.id"
-                ></el-option>
+              <el-select v-model="sanPhamModel.idNhaCungCaps" multiple placeholder="Chọn nhà cung cấp"
+                style="width: 100%">
+                <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap"
+                  :value="ncc.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="Trạng thái" prop="trangThaiSanPham">
-              <el-select
-                v-model="sanPhamModel.trangThaiSanPham"
-                placeholder="Chọn trạng thái"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="tt in danhSachTrangThaiSanPham"
-                  :key="tt.value"
-                  :label="tt.label"
-                  :value="tt.value"
-                ></el-option>
+              <el-select v-model="sanPhamModel.trangThaiSanPham" placeholder="Chọn trạng thái" style="width: 100%">
+                <el-option v-for="tt in danhSachTrangThaiSanPham" :key="tt.value" :label="tt.label"
+                  :value="tt.value"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -71,17 +43,9 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Model sản phẩm" prop="idModelSanPham">
-              <el-select
-                v-model="sanPhamModel.idModelSanPham"
-                placeholder="Chọn model sản phẩm"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="model in modelSanPhams"
-                  :key="model.id"
-                  :label="model.tenModel"
-                  :value="model.idModelSanPham"
-                ></el-option>
+              <el-select v-model="sanPhamModel.idModelSanPham" placeholder="Chọn model sản phẩm" style="width: 100%">
+                <el-option v-for="model in modelSanPhams" :key="model.id" :label="model.tenModel"
+                  :value="model.idModelSanPham"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -92,18 +56,13 @@
       <div class="form-section">
         <h3 class="section-title">Danh sách biến thể sản phẩm</h3>
         <div class="table-container">
-          <el-table
-            :data="sanPhamModel.sanPhamChiTiets"
-            class="professional-table"
-            border
-            @row-click="selectChiTiet"
-          >
-            <el-table-column
-              type="index"
-              label="STT"
-              width="80"
-              :index="indexMethod"
-            />
+          <el-table :data="sanPhamModel.sanPhamChiTiets" class="professional-table" border @row-click="selectChiTiet" :row-class-name="getRowClassName">
+            <el-table-column type="index" label="STT" width="80" :index="indexMethod" />
+            <el-table-column label="Mã sản phẩm chi tiết" sortable prop="maSanPhamChiTiet" width="180">
+              <template #default="scope">
+                <span class="table-cell-content">{{ scope.row.maSanPhamChiTiet }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="Màu sắc" prop="idMau">
               <template #default="{ row }">
                 <span class="table-cell-content">{{
@@ -136,19 +95,10 @@
             <el-table-column label="Hình ảnh" width="120">
               <template #default="{ row }">
                 <div class="table-images">
-                  <div
-                    v-if="row.hinhAnhs && row.hinhAnhs.length > 0"
-                    class="image-preview-container"
-                  >
-                    <img
-                      :src="row.hinhAnhs[0].url"
-                      :alt="row.hinhAnhs[0].name"
-                      class="table-image"
-                      @click="previewTableImage(row.hinhAnhs)"
-                    />
-                    <span v-if="row.hinhAnhs.length > 1" class="image-count"
-                      >+{{ row.hinhAnhs.length - 1 }}</span
-                    >
+                  <div v-if="row.hinhAnhs && row.hinhAnhs.length > 0" class="image-preview-container">
+                    <img :src="row.hinhAnhs[0].url" :alt="row.hinhAnhs[0].name" class="table-image"
+                      @click="previewTableImage(row.hinhAnhs)" />
+                    <span v-if="row.hinhAnhs.length > 1" class="image-count">+{{ row.hinhAnhs.length - 1 }}</span>
                   </div>
                   <div v-else class="no-image">
                     <i class="el-icon-picture-outline"></i>
@@ -159,13 +109,7 @@
             </el-table-column>
             <el-table-column label="Hành động" width="100" align="center">
               <template #default="{ $index }">
-                <el-button
-                  type="danger"
-                  size="small"
-                  :icon="Delete"
-                  circle
-                  @click.stop="removeChiTiet($index)"
-                />
+                <el-button type="danger" size="small" :icon="Delete" circle @click.stop="removeChiTiet($index)" />
               </template>
             </el-table-column>
           </el-table>
@@ -180,121 +124,76 @@
         </h4>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item
-              label="Màu sắc"
-              :prop="`sanPhamChiTiets.${selectedChiTiet}.idMau`"
-              :rules="[{ required: true, message: 'Vui lòng chọn màu sắc' }]"
-            >
-              <el-select
-                v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idMau"
-                placeholder="Chọn màu sắc"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="mau in maus"
-                  :key="mau.id"
-                  :label="mau.tenMau"
-                  :value="mau.id"
-                ></el-option>
+            <el-form-item label="Màu SPCT" :prop="`sanPhamChiTiets.${selectedChiTiet}.maSanPhamChiTiet`">
+              <el-input v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].maSanPhamChiTiet" disabled
+                style="width: 100%">
+              </el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="Màu sắc" :prop="`sanPhamChiTiets.${selectedChiTiet}.idMau`"
+              :rules="[{ required: true, message: 'Vui lòng chọn màu sắc' }]">
+              <el-select v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idMau" placeholder="Chọn màu sắc"
+                style="width: 100%">
+                <el-option v-for="mau in maus" :key="mau.id" :label="mau.tenMau" :value="mau.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="ROM"
-              :prop="`sanPhamChiTiets.${selectedChiTiet}.idRom`"
-              :rules="[{ required: true, message: 'Vui lòng chọn ROM' }]"
-            >
-              <el-select
-                v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idRom"
-                placeholder="Chọn ROM"
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="rom in roms"
-                  :key="rom.id"
-                  :label="rom.dungLuong"
-                  :value="rom.id"
-                ></el-option>
+            <el-form-item label="ROM" :prop="`sanPhamChiTiets.${selectedChiTiet}.idRom`"
+              :rules="[{ required: true, message: 'Vui lòng chọn ROM' }]">
+              <el-select v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].idRom" placeholder="Chọn ROM"
+                style="width: 100%">
+                <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="Giá bán"
-              :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`"
-              :rules="[
-                {
-                  required: true,
-                  message: 'Vui lòng nhập giá bán',
-                  type: 'number',
-                },
-              ]"
-            >
-              <el-input-number
-                v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].giaBan"
-                :min="1000"
-                :precision="0"
-                :step="1000000"
-                style="width: 100%"
-              ></el-input-number>
+            <el-form-item label="Giá bán" :prop="`sanPhamChiTiets.${selectedChiTiet}.giaBan`" :rules="[
+              {
+                required: true,
+                message: 'Vui lòng nhập giá bán',
+                type: 'number',
+              },
+            ]">
+              <el-input-number v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].giaBan" :min="1000" :precision="0"
+                :step="1000000" style="width: 100%"></el-input-number>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <el-form-item
-          label="IMEI"
-          :prop="`sanPhamChiTiets.${selectedChiTiet}.imeisInput`"
-          :rules="[{ required: true, message: 'Vui lòng nhập IMEI' }]"
-        >
-          <el-input
-            type="textarea"
-            v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].imeisInput"
+        <el-form-item label="IMEI" :prop="`sanPhamChiTiets.${selectedChiTiet}.imeisInput`"
+          :rules="[{ required: true, message: 'Vui lòng nhập IMEI' }]">
+          <el-input type="textarea" v-model="sanPhamModel.sanPhamChiTiets[selectedChiTiet].imeisInput"
             placeholder="Nhập danh sách IMEI, phân tách bởi dấu phẩy (có thể kết hợp với file Excel)"
-            @input="capNhatSoLuong(selectedChiTiet)"
-          ></el-input>
+            @input="capNhatSoLuong(selectedChiTiet)"></el-input>
           <div class="imei-upload-container">
-            <el-upload
-              :ref="`upload-${selectedChiTiet}`"
-              :file-list="imeiFileList[selectedChiTiet] || []"
+            <el-upload :ref="`upload-${selectedChiTiet}`" :file-list="imeiFileList[selectedChiTiet] || []"
               :auto-upload="false"
-              :on-change="
-                (file, fileList) =>
-                  handleImeiFileChange(file, selectedChiTiet, fileList)
-              "
-              accept=".xlsx,.xls,.txt"
-              list-type="text"
-              class="custom-upload"
-            >
+              :on-change="(file, fileList) => handleImeiFileChange(file, selectedChiTiet, fileList)"
+              :on-remove="(file, fileList) => handleImeiFileRemove(file, selectedChiTiet, fileList)"
+              :on-exceed="() => toast.warning('Bạn chỉ được chọn 1 file. Vui lòng xóa file khác trước khi tiếp tục.')"
+              :limit="1" accept=".xlsx,.xls,.txt" list-type="text" class="custom-upload">
               <template #trigger>
                 <el-button type="default" plain class="choose-file-btn">
                   <i class="el-icon-upload"></i> Chọn file Excel
                 </el-button>
               </template>
+
               <template #default>
-                <span
-                  v-if="
-                    imeiFileList[selectedChiTiet] &&
-                    imeiFileList[selectedChiTiet].length > 0
-                  "
-                  class="file-name"
-                >
+                <span v-if="imeiFileList[selectedChiTiet] && imeiFileList[selectedChiTiet].length > 0"
+                  class="file-name">
                   {{ imeiFileList[selectedChiTiet][0].name }}
                 </span>
                 <span v-else class="file-placeholder">Chưa chọn file</span>
               </template>
             </el-upload>
-            <el-button
-              type="primary"
-              :disabled="
-                !(
-                  imeiFileList[selectedChiTiet] &&
-                  imeiFileList[selectedChiTiet].length > 0
-                )
-              "
-              @click="confirmUploadImeiFile(selectedChiTiet)"
-              class="upload-btn"
-            >
+
+            <el-button type="primary" :disabled="!(
+              imeiFileList[selectedChiTiet] &&
+              imeiFileList[selectedChiTiet].length > 0
+            )
+              " @click="confirmUploadImeiFile(selectedChiTiet)" class="upload-btn">
               <i class="el-icon-upload"></i>
               {{
                 sanPhamModel.sanPhamChiTiets[selectedChiTiet].imeisInput
@@ -302,33 +201,20 @@
                   : "Upload"
               }}
             </el-button>
-            <el-button
-              type="warning"
-              plain
-              @click="confirmClearImeiInput(selectedChiTiet)"
-              class="clear-btn"
-            >
+            <el-button type="warning" plain @click="confirmClearImeiInput(selectedChiTiet)" class="clear-btn">
               <i class="el-icon-delete"></i> Xóa tất cả IMEI
             </el-button>
           </div>
           <div class="imei-info">
-            <span class="imei-count"
-              >Tổng số IMEI:
-              {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet].soLuong }}</span
-            >
-            <span
-              v-if="sanPhamModel.sanPhamChiTiets[selectedChiTiet].hasExcelData"
-              class="excel-indicator"
-            >
+            <span class="imei-count">Tổng số IMEI:
+              {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
+            <span v-if="sanPhamModel.sanPhamChiTiets[selectedChiTiet].hasExcelData" class="excel-indicator">
               <i class="el-icon-document"></i> (Có dữ liệu từ Excel)
             </span>
-            <span
-              v-if="
-                sanPhamModel.sanPhamChiTiets[selectedChiTiet].invalidImeis
-                  ?.length
-              "
-              class="imei-error"
-            >
+            <span v-if="
+              sanPhamModel.sanPhamChiTiets[selectedChiTiet].invalidImeis
+                ?.length
+            " class="imei-error">
               ({{
                 sanPhamModel.sanPhamChiTiets[selectedChiTiet].invalidImeis
                   .length
@@ -340,13 +226,10 @@
                 )
               }})
             </span>
-            <span
-              v-if="
-                sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis
-                  ?.length
-              "
-              class="imei-error"
-            >
+            <span v-if="
+              sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis
+                ?.length
+            " class="imei-error">
               ({{
                 sanPhamModel.sanPhamChiTiets[selectedChiTiet].duplicateImeis
                   .length
@@ -365,50 +248,27 @@
         <el-form-item label="Hình ảnh sản phẩm">
           <div class="image-upload-section">
             <!-- Current Images Display -->
-            <div
-              v-if="
-                sanPhamModel.sanPhamChiTiets[selectedChiTiet].hinhAnhs.length >
-                0
-              "
-              class="current-images"
-            >
+            <div v-if="
+              sanPhamModel.sanPhamChiTiets[selectedChiTiet].hinhAnhs.length >
+              0
+            " class="current-images">
               <h5 class="images-subtitle">
                 Hình ảnh hiện tại ({{
                   sanPhamModel.sanPhamChiTiets[selectedChiTiet].hinhAnhs.length
                 }}/5)
               </h5>
               <div class="images-grid">
-                <div
-                  v-for="(image, imgIndex) in sanPhamModel.sanPhamChiTiets[
-                    selectedChiTiet
-                  ].hinhAnhs"
-                  :key="imgIndex"
-                  class="image-item"
-                >
+                <div v-for="(image, imgIndex) in sanPhamModel.sanPhamChiTiets[
+                  selectedChiTiet
+                ].hinhAnhs" :key="imgIndex" class="image-item">
                   <div class="image-wrapper">
-                    <img
-                      :src="image.url"
-                      :alt="image.name"
-                      class="preview-image"
-                      @click="previewSingleImage(image.url, imgIndex)"
-                    />
+                    <img :src="image.url" :alt="image.name" class="preview-image"
+                      @click="previewSingleImage(image.url, imgIndex)" />
                     <div class="image-overlay">
-                      <el-button
-                        type="primary"
-                        size="small"
-                        :icon="View"
-                        circle
-                        class="overlay-btn view-btn"
-                        @click="previewSingleImage(image.url, imgIndex)"
-                      />
-                      <el-button
-                        type="danger"
-                        size="small"
-                        :icon="Delete"
-                        circle
-                        class="overlay-btn delete-btn"
-                        @click="removeImage(selectedChiTiet, imgIndex)"
-                      />
+                      <el-button type="primary" size="small" :icon="View" circle class="overlay-btn view-btn"
+                        @click="previewSingleImage(image.url, imgIndex)" />
+                      <el-button type="danger" size="small" :icon="Delete" circle class="overlay-btn delete-btn"
+                        @click="removeImage(selectedChiTiet, imgIndex)" />
                     </div>
                     <div class="image-info">
                       <span class="image-name">{{
@@ -423,23 +283,10 @@
 
             <!-- Upload Area -->
             <div class="upload-area">
-              <el-upload
-                wool-upload
-                ref="imageUpload"
-                :file-list="[]"
-                :on-change="
-                  (file, fileList) =>
-                    handleFileChange(file, fileList, selectedChiTiet)
-                "
-                :on-exceed="handleExceed"
-                :before-upload="beforeImageUpload"
-                :auto-upload="false"
-                accept="image/jpeg,image/png,image/webp,image/jpg"
-                :limit="5"
-                multiple
-                drag
-                class="image-uploader"
-              >
+              <el-upload wool-upload ref="imageUpload" :file-list="[]" :on-change="(file, fileList) =>
+                handleFileChange(file, fileList, selectedChiTiet)
+                " :on-exceed="handleExceed" :before-upload="beforeImageUpload" :auto-upload="false"
+                accept="image/jpeg,image/png,image/webp,image/jpg" :limit="5" multiple drag class="image-uploader">
                 <div class="upload-content">
                   <i class="el-icon-upload upload-icon"></i>
                   <div class="upload-text">
@@ -447,23 +294,16 @@
                       Kéo thả hoặc <em>click để tải ảnh</em>
                     </p>
                     <p class="upload-subtitle">
-                      Hỗ trợ: JPG, PNG, WEBP (tối đa 5 ảnh, mỗi ảnh < 5MB)
-                    </p>
+                      Hỗ trợ: JPG, PNG, WEBP (tối đa 5 ảnh, mỗi ảnh < 5MB) </p>
                   </div>
                 </div>
               </el-upload>
 
               <!-- Upload Progress -->
               <div v-if="uploadProgress.show" class="upload-progress">
-                <el-progress
-                  :percentage="uploadProgress.percent"
-                  :status="uploadProgress.status"
-                  :stroke-width="8"
-                >
+                <el-progress :percentage="uploadProgress.percent" :status="uploadProgress.status" :stroke-width="8">
                   <template #default="{ percentage }">
-                    <span class="progress-text"
-                      >{{ uploadProgress.text }} {{ percentage }}%</span
-                    >
+                    <span class="progress-text">{{ uploadProgress.text }} {{ percentage }}%</span>
                   </template>
                 </el-progress>
               </div>
@@ -473,70 +313,36 @@
       </div>
 
       <div v-else class="form-section">
-        <el-alert
-          title="Vui lòng chọn một biến thể để chỉnh sửa"
-          type="info"
-          show-icon
-          class="selection-alert"
-        />
+        <el-alert title="Vui lòng chọn một biến thể để chỉnh sửa" type="info" show-icon class="selection-alert" />
       </div>
 
       <!-- Nút hành động -->
       <div class="form-actions">
-        <el-button
-          type="success"
-          size="large"
-          :loading="loading.submit"
-          @click="submitForm"
-          class="action-btn primary-btn"
-        >
+        <el-button type="success" size="large" :loading="loading.submit" @click="submitForm"
+          class="action-btn primary-btn">
           <i class="el-icon-check"></i>
           Cập nhật sản phẩm
         </el-button>
-        <el-button
-          type="default"
-          size="large"
-          @click="$router.push('/admin/products')"
-          class="action-btn secondary-btn"
-        >
+        <el-button type="default" size="large" @click="$router.push('/admin/products')"
+          class="action-btn secondary-btn">
           <i class="el-icon-close"></i>
           Hủy
         </el-button>
       </div>
     </el-form>
 
-    <el-alert
-      v-if="error"
-      :title="error"
-      type="error"
-      show-icon
-      class="error-alert"
-    />
+    <el-alert v-if="error" :title="error" type="error" show-icon class="error-alert" />
 
     <!-- Image Preview Dialog -->
-    <el-dialog
-      v-model="imagePreview.visible"
-      title="Xem trước hình ảnh"
-      width="80%"
-      :before-close="closeImagePreview"
-      class="image-preview-dialog"
-    >
+    <el-dialog v-model="imagePreview.visible" title="Xem trước hình ảnh" width="80%" :before-close="closeImagePreview"
+      class="image-preview-dialog">
       <div class="preview-container">
         <div class="preview-main">
-          <img
-            :src="imagePreview.currentImage"
-            :alt="imagePreview.currentName"
-            class="preview-main-image"
-          />
+          <img :src="imagePreview.currentImage" :alt="imagePreview.currentName" class="preview-main-image" />
         </div>
         <div v-if="imagePreview.images.length > 1" class="preview-thumbnails">
-          <div
-            v-for="(img, index) in imagePreview.images"
-            :key="index"
-            class="thumbnail-item"
-            :class="{ active: index === imagePreview.currentIndex }"
-            @click="changePreviewImage(index)"
-          >
+          <div v-for="(img, index) in imagePreview.images" :key="index" class="thumbnail-item"
+            :class="{ active: index === imagePreview.currentIndex }" @click="changePreviewImage(index)">
             <img :src="img.url" :alt="img.name" class="thumbnail-image" />
           </div>
         </div>
@@ -548,23 +354,14 @@
             {{ imagePreview.images.length }}
           </span>
           <div class="preview-actions">
-            <el-button
-              @click="prevImage"
-              :disabled="imagePreview.currentIndex === 0"
-            >
+            <el-button @click="prevImage" :disabled="imagePreview.currentIndex === 0">
               <i class="el-icon-arrow-left"></i> Trước
             </el-button>
-            <el-button
-              @click="nextImage"
-              :disabled="
-                imagePreview.currentIndex === imagePreview.images.length - 1
-              "
-            >
+            <el-button @click="nextImage" :disabled="imagePreview.currentIndex === imagePreview.images.length - 1
+              ">
               Sau <i class="el-icon-arrow-right"></i>
             </el-button>
-            <el-button type="primary" @click="closeImagePreview"
-              >Đóng</el-button
-            >
+            <el-button type="primary" @click="closeImagePreview">Đóng</el-button>
           </div>
         </div>
       </template>
@@ -588,6 +385,8 @@ import {
 import { debounce } from "lodash";
 import api from "@/Service/LoginService/axiosInstance";
 import * as XLSX from "xlsx";
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const route = useRoute();
 const router = useRouter();
@@ -722,6 +521,18 @@ const closeImagePreview = () => {
   imagePreview.currentName = "";
 };
 
+const handleImeiFileRemove = (file, index, fileList) => {
+  try {
+    // Cập nhật fileList sau khi xóa
+    imeiFileList[index] = fileList;
+    toast.success("Đã xóa file thành công!");
+  } catch (error) {
+    toast.error("Đã xảy ra lỗi khi xóa file: " + (error.message || "Vui lòng thử lại."));
+    console.error("Lỗi khi xóa file:", error);
+  }
+};
+
+
 const removeImage = async (variantIndex, imageIndex) => {
   try {
     await ElMessageBox.confirm(
@@ -735,7 +546,7 @@ const removeImage = async (variantIndex, imageIndex) => {
     );
 
     sanPhamModel.sanPhamChiTiets[variantIndex].hinhAnhs.splice(imageIndex, 1);
-    ElMessage.success("Đã xóa hình ảnh thành công!");
+    toast.success("Đã xóa hình ảnh thành công!");
   } catch {
     // User cancelled
   }
@@ -762,18 +573,18 @@ const beforeImageUpload = (file) => {
   const isLt5M = file.size / 1024 / 1024 < 5;
 
   if (!isValidType) {
-    ElMessage.error("Chỉ hỗ trợ định dạng JPG, PNG, WEBP!");
+    toast.error("Chỉ hỗ trợ định dạng JPG, PNG, WEBP!");
     return false;
   }
   if (!isLt5M) {
-    ElMessage.error("Kích thước ảnh phải nhỏ hơn 5MB!");
+    toast.error("Kích thước ảnh phải nhỏ hơn 5MB!");
     return false;
   }
   return true;
 };
 
 const handleExceed = () => {
-  ElMessage.warning("Chỉ được tải lên tối đa 5 ảnh cho mỗi biến thể!");
+  toast.warning("Chỉ được tải lên tối đa 5 ảnh cho mỗi biến thể!");
 };
 
 const handleFileChange = async (file, fileList, index) => {
@@ -783,7 +594,7 @@ const handleFileChange = async (file, fileList, index) => {
 
   const currentImages = sanPhamModel.sanPhamChiTiets[index].hinhAnhs.length;
   if (currentImages >= 5) {
-    ElMessage.warning("Đã đạt giới hạn 5 ảnh cho biến thể này!");
+    toast.warning("Đã đạt giới hạn 5 ảnh cho biến thể này!");
     return;
   }
 
@@ -821,7 +632,7 @@ const handleFileChange = async (file, fileList, index) => {
       imagePublicId: response.data.imagePublicId,
     });
 
-    ElMessage.success(`Tải ảnh ${file.name} thành công!`);
+    toast.success(`Tải ảnh ${file.name} thành công!`);
 
     setTimeout(() => {
       uploadProgress.show = false;
@@ -829,7 +640,7 @@ const handleFileChange = async (file, fileList, index) => {
   } catch (err) {
     uploadProgress.status = "exception";
     uploadProgress.text = "Tải lên thất bại";
-    ElMessage.error(
+    toast.error(
       "Lỗi khi tải ảnh: " + (err.response?.data?.message || err.message)
     );
     setTimeout(() => {
@@ -839,9 +650,13 @@ const handleFileChange = async (file, fileList, index) => {
 };
 
 const handleImeiFileChange = (file, index, fileList) => {
+  if (fileList.length > 1) {
+    toast.warning("Bạn chỉ được chọn 1 file. Vui lòng xóa file khác trước khi tiếp tục.");
+    return; // Ngăn không gán fileList vào imeiFileList
+  }
   imeiFileList[index] = fileList;
   if (file.raw.size > 1024 * 1024) {
-    ElMessage.error("File quá lớn, vui lòng chọn file dưới 1MB");
+    toast.error("File quá lớn, vui lòng chọn file dưới 1MB.");
     imeiFileList[index] = [];
   } else if (
     ![
@@ -849,33 +664,32 @@ const handleImeiFileChange = (file, index, fileList) => {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ].includes(file.raw.type)
   ) {
-    ElMessage.error("Vui lòng chọn file .xlsx hoặc .xls");
+    toast.error("Vui lòng chọn file có định dạng .xlsx hoặc .xls.");
     imeiFileList[index] = [];
   }
 };
 
 const confirmUploadImeiFile = (index) => {
   if (selectedChiTiet.value === null || selectedChiTiet.value !== index) {
-    ElMessage.error("Vui lòng chọn biến thể trước khi tải file IMEI!");
+    toast.error("Vui lòng chọn biến thể trước khi tải file IMEI!");
     return;
   }
   if (!imeiFileList[index] || imeiFileList[index].length === 0) {
-    ElMessage.error("Vui lòng chọn file trước khi upload!");
+    toast.error("Vui lòng chọn file trước khi upload!");
     return;
   }
 
   const existingCount = sanPhamModel.sanPhamChiTiets[index].imeisInput
     ? sanPhamModel.sanPhamChiTiets[index].imeisInput
-        .split(",")
-        .filter((im) => im.trim()).length
+      .split(",")
+      .filter((im) => im.trim()).length
     : 0;
 
   const message =
     existingCount > 0
       ? `Bạn đã có ${existingCount} IMEI trong input. File "${imeiFileList[index][0].name}" sẽ được thêm vào danh sách hiện tại. Tiếp tục?`
-      : `Bạn có chắc muốn upload file "${
-          imeiFileList[index][0].name
-        }" cho biến thể ${index + 1}?`;
+      : `Bạn có chắc muốn upload file "${imeiFileList[index][0].name
+      }" cho biến thể ${index + 1}?`;
 
   ElMessageBox.confirm(message, "Xác nhận", {
     confirmButtonText: "Upload",
@@ -926,9 +740,9 @@ const uploadImeiFile = async (index) => {
           sanPhamModel.sanPhamChiTiets[index].imeisInput || "";
         const existingImeis = existingImeisInput
           ? existingImeisInput
-              .split(",")
-              .map((im) => im.trim())
-              .filter((im) => im)
+            .split(",")
+            .map((im) => im.trim())
+            .filter((im) => im)
           : [];
 
         console.log(`✏️ IMEI từ nhập tay: ${existingImeis.length} mã`);
@@ -945,10 +759,8 @@ const uploadImeiFile = async (index) => {
 
         if (duplicateInSameVariant.length > 0) {
           throw new Error(
-            `Có ${
-              duplicateInSameVariant.length
-            } IMEI trùng lặp: ${duplicateInSameVariant.slice(0, 3).join(", ")}${
-              duplicateInSameVariant.length > 3 ? "..." : ""
+            `Có ${duplicateInSameVariant.length
+            } IMEI trùng lặp: ${duplicateInSameVariant.slice(0, 3).join(", ")}${duplicateInSameVariant.length > 3 ? "..." : ""
             }`
           );
         }
@@ -959,8 +771,7 @@ const uploadImeiFile = async (index) => {
           throw new Error(
             `Có ${invalidImeis.length} giá trị không hợp lệ: ${invalidImeis
               .slice(0, 3)
-              .join(", ")}${
-              invalidImeis.length > 3 ? "..." : ""
+              .join(", ")}${invalidImeis.length > 3 ? "..." : ""
             }. IMEI phải là số 15 chữ số.`
           );
         }
@@ -970,9 +781,9 @@ const uploadImeiFile = async (index) => {
           (chiTiet, i) =>
             i !== index
               ? (chiTiet.imeisInput || "")
-                  .split(",")
-                  .map((im) => im.trim())
-                  .filter((im) => im)
+                .split(",")
+                .map((im) => im.trim())
+                .filter((im) => im)
               : []
         );
         const duplicateImeis = uniqueImeis.filter((im) =>
@@ -980,8 +791,7 @@ const uploadImeiFile = async (index) => {
         );
         if (duplicateImeis.length > 0) {
           throw new Error(
-            `Có ${
-              duplicateImeis.length
+            `Có ${duplicateImeis.length
             } IMEI trùng lặp với các biến thể khác: ${duplicateImeis
               .slice(0, 3)
               .join(", ")}${duplicateImeis.length > 3 ? "..." : ""}`
@@ -1006,9 +816,8 @@ const uploadImeiFile = async (index) => {
         const existingCount = existingImeis.length;
 
         ElMessage.success({
-          message: `✅ Thành công!\n📁 Từ file: ${addedCount} IMEI\n✏️ Từ nhập tay: ${existingCount} IMEI\n📊 Tổng cộng: ${finalCount} IMEI cho biến thể ${
-            index + 1
-          }`,
+          message: `✅ Thành công!\n📁 Từ file: ${addedCount} IMEI\n✏️ Từ nhập tay: ${existingCount} IMEI\n📊 Tổng cộng: ${finalCount} IMEI cho biến thể ${index + 1
+            }`,
           duration: 2000,
           showClose: true,
         });
@@ -1022,7 +831,7 @@ const uploadImeiFile = async (index) => {
       } catch (error) {
         console.error("❌ Lỗi khi xử lý file Excel:", error);
         sanPhamModel.sanPhamChiTiets[index].invalidImeis = [error.message];
-        ElMessage.error({
+        toast.error({
           message: `Lỗi khi đọc file Excel: ${error.message}`,
           duration: 2000,
         });
@@ -1032,13 +841,13 @@ const uploadImeiFile = async (index) => {
     };
 
     reader.onerror = () => {
-      ElMessage.error("Lỗi khi đọc file Excel.");
+      toast.error("Lỗi khi đọc file Excel.");
       loadingInstance.close();
     };
 
     reader.readAsArrayBuffer(file.raw);
   } catch (error) {
-    ElMessage.error("Lỗi khi xử lý file IMEI: " + error.message);
+    toast.error("Lỗi khi xử lý file IMEI: " + error.message);
     loadingInstance.close();
   }
 };
@@ -1079,7 +888,7 @@ const clearImeiInput = (index) => {
     }
   });
 
-  ElMessage.success("Đã xóa toàn bộ danh sách IMEI!");
+  toast.success("Đã xóa toàn bộ danh sách IMEI!");
 };
 
 const fetchSanPham = async (productId) => {
@@ -1146,7 +955,7 @@ const capNhatSoLuong = debounce((index) => {
     index === undefined ||
     !sanPhamModel.sanPhamChiTiets[index]
   ) {
-    ElMessage.error("Vui lòng chọn một biến thể trước khi nhập IMEI");
+    toast.error("Vui lòng chọn một biến thể trước khi nhập IMEI");
     return;
   }
 
@@ -1176,9 +985,9 @@ const capNhatSoLuong = debounce((index) => {
   const allOtherImeis = sanPhamModel.sanPhamChiTiets.flatMap((chiTiet, i) =>
     i !== index && chiTiet.imeisInput
       ? chiTiet.imeisInput
-          .split(",")
-          .map((im) => im.trim())
-          .filter((im) => im)
+        .split(",")
+        .map((im) => im.trim())
+        .filter((im) => im)
       : []
   );
   const duplicateImeis = validImeis.filter((im) => allOtherImeis.includes(im));
@@ -1195,16 +1004,14 @@ const capNhatSoLuong = debounce((index) => {
 
   // Hiển thị thông báo lỗi nếu có
   if (duplicateInSameVariant.length > 0) {
-    ElMessage.error(
-      `Biến thể ${index + 1}: Có ${
-        duplicateInSameVariant.length
+    toast.error(
+      `Biến thể ${index + 1}: Có ${duplicateInSameVariant.length
       } IMEI trùng lặp trong cùng biến thể`
     );
   }
   if (duplicateImeis.length > 0) {
-    ElMessage.error(
-      `Biến thể ${index + 1}: Có ${
-        duplicateImeis.length
+    toast.error(
+      `Biến thể ${index + 1}: Có ${duplicateImeis.length
       } IMEI trùng lặp với các biến thể khác`
     );
   }
@@ -1242,16 +1049,40 @@ const selectChiTiet = (row, column, event) => {
   }
 };
 
-const removeChiTiet = (index) => {
-  sanPhamModel.sanPhamChiTiets.splice(index, 1);
-  delete imeiFileList[index];
-  if (selectedChiTiet.value === index) {
-    selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null;
-  } else if (selectedChiTiet.value > index) {
-    selectedChiTiet.value--;
+const getRowClassName = ({ rowIndex }) => {
+  console.log('Row index:', rowIndex, 'Selected index:', selectedChiTiet.value);
+  return selectedChiTiet.value === rowIndex ? 'current-row' : ''
+}
+
+const removeChiTiet = async (index) => {
+  try {
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn xoá chi tiết sản phẩm này?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Xoá",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
+
+    // Nếu nhấn "Xoá"
+    sanPhamModel.sanPhamChiTiets.splice(index, 1);
+    delete imeiFileList[index];
+
+    if (selectedChiTiet.value === index) {
+      selectedChiTiet.value =
+        sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null;
+    } else if (selectedChiTiet.value > index) {
+      selectedChiTiet.value--;
+    }
+
+    toast.success("Xoá chi tiết thành công!");
+  } catch {
+    // Nếu nhấn "Hủy"
+    toast.info("Đã hủy thao tác xoá");
   }
 };
-
 const getMauSacLabel = (idMau) =>
   maus.value.find((m) => m.id === idMau)?.tenMau || "Không rõ";
 const getRomLabel = (idRom) =>
@@ -1293,11 +1124,10 @@ const validateForm = () => {
       error.value = `Biến thể ${index + 1}: Vui lòng chọn ROM`;
       hasError = true;
     } else if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
-      error.value = `Biến thể ${
-        index + 1
-      }: Giá bán phải lớn hơn hoặc bằng 1000 VND`;
+      error.value = `Biến thể ${index + 1
+        }: Giá bán phải lớn hơn hoặc bằng 1000 VND`;
       hasError = true;
-    } 
+    }
     // else if (!chiTiet.soLuong) {
     //   error.value = `Biến thể ${index + 1}: Số lượng phải lớn hơn 0`;
     //   hasError = true;
@@ -1319,11 +1149,9 @@ const validateForm = () => {
       // Kiểm tra IMEI không hợp lệ
       const invalidImeis = imeis.filter((i) => !validateIMEI(i));
       if (invalidImeis.length > 0) {
-        error.value = `Biến thể ${index + 1}: Có ${
-          invalidImeis.length
-        } IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${
-          invalidImeis.length > 3 ? "..." : ""
-        }`;
+        error.value = `Biến thể ${index + 1}: Có ${invalidImeis.length
+          } IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${invalidImeis.length > 3 ? "..." : ""
+          }`;
         hasError = true;
       }
 
@@ -1332,22 +1160,20 @@ const validateForm = () => {
         (im, idx, arr) => arr.indexOf(im) !== idx
       );
       if (duplicateInSameVariant.length > 0) {
-        error.value = `Biến thể ${index + 1}: Có ${
-          duplicateInSameVariant.length
-        } IMEI trùng lặp trong cùng biến thể: ${duplicateInSameVariant
-          .slice(0, 3)
-          .join(", ")}${duplicateInSameVariant.length > 3 ? "..." : ""}`;
+        error.value = `Biến thể ${index + 1}: Có ${duplicateInSameVariant.length
+          } IMEI trùng lặp trong cùng biến thể: ${duplicateInSameVariant
+            .slice(0, 3)
+            .join(", ")}${duplicateInSameVariant.length > 3 ? "..." : ""}`;
         hasError = true;
       }
 
       // Kiểm tra trùng lặp với các biến thể khác
       const duplicates = imeis.filter((im) => allImeis.has(im));
       if (duplicates.length > 0) {
-        error.value = `Biến thể ${index + 1}: Có ${
-          duplicates.length
-        } IMEI trùng lặp với các biến thể khác: ${duplicates
-          .slice(0, 3)
-          .join(", ")}${duplicates.length > 3 ? "..." : ""}`;
+        error.value = `Biến thể ${index + 1}: Có ${duplicates.length
+          } IMEI trùng lặp với các biến thể khác: ${duplicates
+            .slice(0, 3)
+            .join(", ")}${duplicates.length > 3 ? "..." : ""}`;
         hasError = true;
       } else {
         imeis.forEach((im) => allImeis.add(im));
@@ -1395,9 +1221,9 @@ const submitForm = async () => {
       sanPhamChiTiets: sanPhamModel.sanPhamChiTiets.map((chiTiet, index) => {
         const imeis = chiTiet.imeisInput
           ? chiTiet.imeisInput
-              .split(",")
-              .map((i) => i.trim())
-              .filter((i) => i)
+            .split(",")
+            .map((i) => i.trim())
+            .filter((i) => i)
           : [];
         console.log(`📦 Biến thể ${index + 1}:`, {
           id: chiTiet.id || null,
@@ -1479,6 +1305,17 @@ onMounted(() => {
   max-width: 1600px;
   margin: 0 auto;
 }
+
+.professional-table .el-table__body tr.current-row {
+  background-color: #ebf8ff !important;
+  border-left: 4px solid #667eea;
+  transform: scale(1.01);
+}
+
+.professional-table .el-table__body tr.current-row:hover {
+  background-color: #c0ced5 !important;
+  transform: scale(1.01);
+} 
 
 .form-header {
   text-align: center;
@@ -1971,7 +1808,7 @@ onMounted(() => {
 
 .imei-info {
   margin-top: 12px;
-  padding: 12px;
+  /* padding: 12px; */
   background: #f8fafc;
   border-radius: 8px;
   border-left: 4px solid #4299e1;
@@ -2023,6 +1860,7 @@ onMounted(() => {
 
 .upload-btn,
 .clear-btn {
+  margin-right: 12px;
   padding: 8px 16px;
   font-size: 13px;
   height: 36px;

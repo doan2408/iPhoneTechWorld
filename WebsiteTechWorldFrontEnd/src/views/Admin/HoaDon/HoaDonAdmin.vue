@@ -97,20 +97,36 @@
       <div class="filter-controls">
         <select class="filter-select" v-model="statusFilter">
           <option value="">Tất cả trạng thái</option>
-          <option value="completed">Hoàn thành</option>
-          <option value="pending">Chờ xử lý</option>
-          <option value="cancelled">Đã hủy</option>
+          <option value="COMPLETED">Hoàn tất</option>
+          <option value="PENDING">Chờ thanh toán</option>
+          <option value="PAID">Đã thanh toán</option>
+          <option value="REFUNDED">Đã hoàn tiền</option>
         </select>
 
         <select class="filter-select" v-model="typeFilter">
           <option value="">Loại hóa đơn</option>
-          <option value="online">Trực tuyến</option>
-          <option value="offline">Tại cửa hàng</option>
+          <option value="ONLINE">Trực tuyến</option>
+          <option value="POS">Tại quầy</option>
         </select>
 
-        <input type="date" class="filter-date" v-model="dateFilter" />
+        <div class="filter-date-range">
+          <label class="filter-label">Từ ngày</label>
+          <input type="date" class="filter-date" v-model="dateFilterFrom" />
+
+          <label class="filter-label">Đến ngày</label>
+          <input type="date" class="filter-date" v-model="dateFilterTo" />
+        </div>
 
         <div class="export-actions">
+          <button class="btn btn-outline"
+            @click="openConfirm('Bạn có chắc muốn làm mới bộ lọc?', () => refreshFilter())">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+            Làm mới bộ lọc
+          </button>
           <button class="btn btn-outline" @click="exportExcel">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -120,6 +136,8 @@
             Xuất Excel
           </button>
         </div>
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+          @cancel="showConfirm = false" />
       </div>
     </div>
 
@@ -220,10 +238,10 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="goToEdit(hoaDon.idHoaDon)">
+                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="openSalesHistoryModal(hoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z">
                       </path>
                     </svg>
                   </button>
@@ -299,7 +317,7 @@
       <div class="pagination-section">
         <div class="pagination-info">
           Hiển thị {{ pageNo * pageSize + 1 }} -
-          {{ pageNo * pageSize + 5 }} trong tổng số {{ totalElement }} hóa đơn
+          {{ pageNo * pageSize + hoaDons.length }} trong tổng số {{ totalElement }} hóa đơn
         </div>
         <div class="pagination-controls">
           <button class="pagination-btn" :disabled="pageNo === 0" @click="changePage(pageNo - 1)">
@@ -583,7 +601,7 @@
               <!-- Action Buttons Section -->
               <div class="invoice-card-actions">
                 <button class="invoice-action-button invoice-process-button"
-                  @click="devliveryProcessing(selectedInvoice)">
+                  @click="devliveryProcessing(selectedInvoice)" :disabled="!selectedInvoice?.isShipping">
                   <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -622,45 +640,29 @@
                   <table class="invoice-history-table">
                     <thead>
                       <tr>
-                        <th>Mã giao dịch</th>
-                        <th>Ngày</th>
-                        <th>Số tiền</th>
-                        <th>Trạng thái</th>
+                        <th>Người thao tác</th>
+                        <th>Ngày thao tác</th>
+                        <th>Hành động</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>TX-12345</td>
-                        <td>15/06/2024</td>
-                        <td>250.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-paid">Đã thanh toán</span>
+                      <tr v-for="item in lichSuHoaDon" :key="item.idLichSuHoaDon" class="product-row">
+                        <td class="product-name">
+                          {{ item.maNhanVien }} - {{ item.tenNhanVien }}
+                        </td>
+                        <td class="text-center">
+                          {{ item.thoiGianThayDoi }}
+                        </td>
+                        <td class="text-right">
+                          {{ item.hanhDong }}
                         </td>
                       </tr>
-                      <tr>
-                        <td>TX-12346</td>
-                        <td>16/06/2024</td>
-                        <td>150.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-pending">Đang xử lý</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>TX-12347</td>
-                        <td>17/06/2024</td>
-                        <td>350.000 ₫</td>
-                        <td>
-                          <span class="invoice-status invoice-status-failed">Thất bại</span>
-                        </td>
-                      </tr>
-                      <!-- Thêm các hàng khác nếu cần -->
                     </tbody>
                   </table>
                 </div>
               </div>
             </div>
           </div>
-
           <!-- Footer -->
           <div class="modal-footer">
             <button class="modal-btn" @click="closeModal">
@@ -672,6 +674,25 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+            </div>
+        </div>
     </div>
   </div>
 </template>
@@ -706,7 +727,8 @@ const viewMode = ref("table"); // nếu view là table sẽ hiển thị dưới
 const searchQuery = ref("");
 const statusFilter = ref("");
 const typeFilter = ref("");
-const dateFilter = ref("");
+const dateFilterFrom = ref("");
+const dateFilterTo = ref("");
 const isLoading = ref(false);
 const error = ref(null);
 const showModalCreateInvoice = ref(null);
@@ -787,7 +809,7 @@ const loadData = async () => {
   isLoading.value = true;
 
   try {
-    const response = await hoaDonGetAll(pageNo.value, pageSize.value);
+    const response = await hoaDonGetAll(pageNo.value, pageSize.value, searchQuery.value, statusFilter.value, typeFilter.value, dateFilterFrom.value, dateFilterTo.value);
 
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
@@ -831,7 +853,7 @@ const onConfirmCreateInvoice = async () => {
   } catch (error) {
     console.error('Error:', error)
     const messages = error.response?.data?.map(e => e.message)?.join(' | ') || 'Lỗi hệ thống!'
-    ElMessage.warning(messages)
+    toast.warning(messages)
   } finally {
     isLoading.value = false
   }
@@ -1052,12 +1074,33 @@ const isStaff = computed(() => {
   );
 });
 
-const goToEdit = (id) => {
-  router.push({ name: 'CapNhatHoaDon', params: { id } })
-}
+const orderHistory = ref([]);
+const showSalesHistoryModal = ref(false);
+const maHoaDon = ref();
+
+const openSalesHistoryModal = async (hoaDon) => {
+    showSalesHistoryModal.value = true;
+    await xemLichSu(hoaDon);
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+};
+
+const xemLichSu = async (hoaDon) => {
+    try {
+        const response = await viewLichSuHoaDon(hoaDon.idHoaDon);
+        maHoaDon.value = response.data.content[0].maHoaDon
+        orderHistory.value = response.data.content;
+        showSalesHistoryModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
-watch([searchQuery, statusFilter, typeFilter], () => {
+watch([searchQuery, statusFilter, typeFilter, dateFilterFrom,dateFilterTo], () => {
   pageNo.value = 0; // Khi bộ lọc thay đổi, quay về trang đầu tiên
   loadData();
 });
@@ -1085,13 +1128,43 @@ const exportExcel = async () => {
 
     link.setAttribute('download', fileName)
     document.body.appendChild(link)
+    toast.info("File Excel đã sẵn sàng, vui lòng chọn nơi lưu")
     link.click()
     document.body.removeChild(link)
+
+    setTimeout(() => {
+      toast("Nếu bạn đã lưu file, hãy kiểm tra thư mục tải xuống nhé!")
+    }, 3000)
+
   } catch (error) {
-    console.error('Lỗi khi xuất Excel:', error)
+    toast.error('Lỗi khi xuất Excel:', error)
   }
 }
 
+const refreshFilter = () => {
+  pageNo.value = 0;
+  pageSize.value = 6;
+  searchQuery.value = '';
+  statusFilter.value = '';
+  typeFilter.value = '';
+  dateFilterFrom.value = '';
+  dateFilterTo.value = '';
+  toast.success("Làm mới bộ lọc thành công")
+}
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+function openConfirm(message, callback) {
+  confirmMessage.value = message
+  confirmCallback = callback
+  showConfirm.value = true
+}
+
+function handleConfirm() {
+  if (confirmCallback) confirmCallback()
+  showConfirm.value = false
+}
 </script>
 
 <style scoped src="@/style/HoaDon/HoaDon.css"></style>

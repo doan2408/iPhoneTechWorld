@@ -54,7 +54,17 @@ public class LoaiAdminService {
 
     @Transactional
     public LoaiAdminResponse createLoai(LoaiAdminRequest loaiAdminRequest) {
-        if (loaiRepository.existsByTenLoai(loaiAdminRequest.getTenLoai())) {
+
+        if (!loaiAdminRequest.getTenLoai().trim().matches("[\\p{L} ]+")) {
+            throw new BusinessException("Tên loại không được chứa ký tự đặc biệt!");
+        }
+        loaiAdminRequest.setTenLoai(loaiAdminRequest.getTenLoai().trim());
+
+        String tenNormalized = loaiAdminRequest.getTenLoai()
+                .replaceAll("\\s+", "")
+                .toLowerCase();
+
+        if (loaiRepository.existsByTenLoai(tenNormalized)) {
             throw new BusinessException("Tên loại đã tồn tại");
         }
         Loai loai = modelMapper.map(loaiAdminRequest, Loai.class);
@@ -66,7 +76,17 @@ public class LoaiAdminService {
     public LoaiAdminResponse updateLoai(Integer id, LoaiAdminRequest loaiAdminRequest) {
         Loai loai = loaiRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại ID: " + id));
-        if (loaiRepository.existsByTenLoaiAndIdNot(loaiAdminRequest.getTenLoai(), id)) {
+
+        if (!loaiAdminRequest.getTenLoai().trim().matches("[\\p{L} ]+")) {
+            throw new BusinessException("Tên loại không được chứa ký tự đặc biệt!");
+        }
+        loaiAdminRequest.setTenLoai(loaiAdminRequest.getTenLoai().trim());
+
+        String tenNormalized = loaiAdminRequest.getTenLoai()
+                .replaceAll("\\s+", "")
+                .toLowerCase();
+
+        if (loaiRepository.existsByTenLoaiAndIdNot(tenNormalized, loai.getId())) {
             throw new BusinessException("Tên loại đã tồn tại");
         }
         modelMapper.map(loaiAdminRequest, loai);

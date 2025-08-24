@@ -53,9 +53,9 @@ public interface CameraSauRepository extends JpaRepository<CameraSau, Integer> {
     """,nativeQuery = true)
     List<CameraSauResponse> findCameraSauByIdSanPham(@Param("idSanPham") Integer idSanPham);
 
-
-    Optional<CameraSau> findByLoaiCamera (String loaiCamera);
-
     Optional<CameraSau> findByLoaiCameraAndDoPhanGiaiAndKhauDo (String loaiCamera, String doPhanGiai, String khauDo);
 
+    Boolean existsByLoaiCameraAndDoPhanGiaiAndKhauDo (String loaiCamera, String doPhanGiai, String khauDo);
+
+    Boolean existsByLoaiCameraAndDoPhanGiaiAndKhauDoAndIdNot (String loaiCamera, String doPhanGiai, String khauDo, Integer integer);
 }

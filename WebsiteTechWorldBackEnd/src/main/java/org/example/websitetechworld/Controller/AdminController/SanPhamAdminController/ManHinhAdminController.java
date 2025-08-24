@@ -58,7 +58,7 @@ public class ManHinhAdminController {
     }
 
     @PostMapping("/quick-manHinh")
-    public ResponseEntity<?> createManHinhQuick (@RequestBody ManHinhQuickCreateAdminRequest request) {
+    public ResponseEntity<?> createManHinhQuick (@Valid @RequestBody ManHinhQuickCreateAdminRequest request) {
         ManHinhAdminResponse response = manHinhAdminService.createManHinhQuick(request);
         return ResponseEntity.ok(response);
     }

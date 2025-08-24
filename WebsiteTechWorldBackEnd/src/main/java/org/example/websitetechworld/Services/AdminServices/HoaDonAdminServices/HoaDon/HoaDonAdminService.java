@@ -46,6 +46,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,13 +98,45 @@ public class HoaDonAdminService {
         return hoaDonRepository.findAll().stream().map(HoaDonAdminResponse::convertDto).collect(Collectors.toList());
     }
 
-    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(Integer pageNo, Integer pageSize, String sortBy, String direction) {
+    public Page<GetAllHoaDonAdminResponse> getPageHoaDon(
+            Integer pageNo, Integer pageSize, String sortBy, String direction,
+            String keyword,
+            TrangThaiThanhToan trangThai,
+            LoaiHoaDon loaiHoaDon,
+            LocalDate from,
+            LocalDate to
+    ) {
+        Sort.Direction dir = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, sortBy));
+
+        LocalDateTime fromDateTime = null;
+        LocalDateTime toDateTime = null;
+
+        if (from != null && to != null) {
+            fromDateTime = from.atStartOfDay();
+            toDateTime = to.atTime(LocalTime.MAX);
+        } else if (from != null) {
+            fromDateTime = from.atStartOfDay();
+            toDateTime = LocalDate.now().atTime(LocalTime.MAX); // hoặc LocalDateTime.MAX
+        } else if (to != null) {
+            fromDateTime = LocalDate.of(1970, 1, 1).atStartOfDay(); // hoặc LocalDateTime.MIN
+            toDateTime = to.atTime(LocalTime.MAX);
+        }
+
+
+        return hoaDonRepository
+                .findByIsDeleteFalseOrIsDeleteIsNull(keyword,trangThai,loaiHoaDon,fromDateTime,toDateTime,pageable)
+                .map(GetAllHoaDonAdminResponse::convertDto);
+    }
+
+    public Page<HoaDonAdminResponse> getPageLichSuBanHang (Integer pageNo, Integer pageSize, String sortBy, String direction, String search) {
         Sort.Direction dir = Sort.Direction.fromString(direction);
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, sortBy));
         return hoaDonRepository
-                .findByIsDeleteFalseOrIsDeleteIsNull(pageable)
-                .map(GetAllHoaDonAdminResponse::convertDto);
+                .findAllLichSuBanHang(TrangThaiThanhToan.COMPLETED, search, pageable)
+                .map(HoaDonAdminResponse::convertDto);
     }
+
     public List<HoaDonAdminResponse> exportExcel(){
         List<HoaDon> hoaDonList = hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull();
         return hoaDonList.stream().map(HoaDonAdminResponse::convertDto).toList();

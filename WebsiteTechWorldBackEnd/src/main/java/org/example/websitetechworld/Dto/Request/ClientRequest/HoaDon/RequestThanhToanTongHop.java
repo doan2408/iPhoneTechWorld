@@ -21,4 +21,5 @@ public class RequestThanhToanTongHop {
     private String diaChiGiaoHang;
     private List<ChiTietSanPhamRequest> sanPhamRequests;
     private Integer idPhieuGiamGia;
+    private BigDecimal soTienGiam;
 }

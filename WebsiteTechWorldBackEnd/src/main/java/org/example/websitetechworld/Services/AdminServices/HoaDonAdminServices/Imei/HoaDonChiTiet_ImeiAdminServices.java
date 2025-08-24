@@ -163,8 +163,8 @@ public class HoaDonChiTiet_ImeiAdminServices {
         changeStatusImei(imeiList, trangThaiImei);
     }
 
-    public Page<ViewImeiAdminResponse> getAvailableImeisByProductId(Integer productId, Pageable pageable) {
-        Page<Imei> imeiEntitiesPage = imeiReposiory.findByIdSanPhamChiTiet_IdAndTrangThaiImei(productId, TrangThaiImei.AVAILABLE, pageable);
+    public Page<ViewImeiAdminResponse> getAvailableImeisByProductId(Integer productId, Pageable pageable, String search) {
+        Page<Imei> imeiEntitiesPage = imeiReposiory.findByIdSanPhamChiTiet_IdAndTrangThaiImeiAndSoImeiContainingIgnoreCase(productId, TrangThaiImei.AVAILABLE, search, pageable);
         List<ViewImeiAdminResponse> imeiDtos = imeiEntitiesPage.getContent().stream()
                 .map(this::mapToImeiResponse)
                 .collect(Collectors.toList());

@@ -29,23 +29,15 @@
 
             <!-- Header actions -->
             <div class="header-actions">
-                <button class="action-btn" title="Khóa màn hình">
-                    <Lock class="btn-icon" />
+                <button @click="lockScreen" class="action-btn" title="Khóa màn hình ( Ctrl + Q )">
+                    <Lock class="btn-icon" />&ensp; Khóa màn hình
                 </button>
-                <button class="action-btn" title="Quay lại">
-                    <Undo class="btn-icon" />
-                </button>
+                <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" />
-                </button>
-                <button class="action-btn" title="In">
-                    <Printer class="btn-icon" />
-                </button>
-                <!-- <span class="phone-number">0395346933</span> -->
-                <button class="menu-btn">
-                    <Menu class="menu-icon" />
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
                 </button>
             </div>
+            <div id="screen-lock-overlay" style="display: none;"></div>
         </div>
 
         <!-- Main content : nội dung -->
@@ -78,7 +70,7 @@
 
                 <!-- Quick actions : hành động  -->
                 <div class="quick-actions">
-                    <button class="quick-btn">
+                    <button class="quick-btn" @click="openSalesHistoryModal()">
                         <History class="btn-icon" />
                         Lịch sử bán hàng
                     </button>
@@ -90,7 +82,7 @@
                 <!-- Customer search -->
                 <div class="customer-search">
                     <div class="search-box">
-                        <select v-model="searchType" class="search-select">
+                        <!-- <select v-model="searchType" class="search-select">
                             <option disabled value="">-- Chọn loại tìm kiếm --</option>
                             <option value="name">Tên</option>
                             <option value="ma">Mã</option>
@@ -101,15 +93,87 @@
                             <input v-model="customerSearchQuery" type="text"
                                 :placeholder="searchType === 'ma' ? 'Nhập mã sản phẩm' : 'Nhập tên sản phẩm'"
                                 class="search-input" @keydown.f4.prevent="searchCustomer" @blur="searchCustomer" />
-                        </div>
+                        </div> -->
                     </div>
                     <div class="customer-actions">
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
-                            <Plus class="btn-icon" />
+                            <Plus class="btn-icon" /> Thêm khách hàng
                         </button>
-                        <button class="customer-btn" title="Lọc">
-                            <Filter class="btn-icon" />
+                        <button class="customer-btn" title="Lọc" @click="toggleFilter">
+                            <Filter class="btn-icon" /> Bộ lọc
                         </button>
+
+                        <div v-if="isFilterOpen" class="filter-overlay">
+                            <div class="filter-popup">
+                                <h2>Bộ lọc sản phẩm</h2>
+
+                                <!-- Mã sản phẩm chi tiết -->
+                                <div class="filter-group">
+                                    <label>Mã SPCT</label>
+                                    <input type="text" v-model="filters.maSpct"
+                                        placeholder="Nhập mã SPCT (VD: SPCT001)" />
+                                </div>
+
+                                <!-- Loại sản phẩm -->
+                                <div class="filter-group">
+                                    <label>Loại sản phẩm</label>
+                                    <select v-model="filters.model">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="loai in pulldownData.loai" :key="loai" :value="loai.id"> {{
+                                            loai.tenLoai }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Dung lượng -->
+                                <div class="filter-group">
+                                    <label>Dung lượng</label>
+                                    <select v-model="filters.storage">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="dungLuongRom in pulldownData.dungLuong" :key="dungLuongRom"
+                                            :value="dungLuongRom.id"> {{ dungLuongRom.dungLuong }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Màu sắc -->
+                                <div class="filter-group">
+                                    <label>Màu sắc</label>
+                                    <select v-model="filters.color">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="mau in pulldownData.mauSac" :key="mau" :value="mau.id"> {{
+                                            mau.tenMau }} </option>
+                                    </select>
+                                </div>
+
+                                <!-- Khoảng giá -->
+                                <div class="filter-group">
+                                    <label>Khoảng giá (triệu VND)</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.priceMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.priceMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Số lượng tồn kho -->
+                                <div class="filter-group">
+                                    <label>Số lượng tồn kho</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.quantityMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.quantityMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Nút hành động -->
+                                <div class="filter-actions">
+                                    <button class="apply-btn-filter" @click="applyFilters">Áp dụng</button>
+                                    <button class="reset-btn-filter" @click="resetFilters">Xóa bộ lọc</button>
+                                    <button class="close-btn-filter" @click="toggleFilter">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
                         <button class="customer-btn" @click="openQRModal" title="Quét mã QR">
                             <ScanLine class="btn-icon" /> Quét QR
                         </button>
@@ -140,12 +204,15 @@
                             <div class="product-info">
                                 <h4>{{ product.tenSanPham }} {{ product.rom }}</h4>
                                 <div class="product-color">{{ product.mau }}</div>
-                                <div class="product-price" v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
+                                <div class="product-price"
+                                    v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
                                     <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
-                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-price" v-else>
-                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
@@ -174,46 +241,48 @@
 
                         <div class="imei-search">
                             <div class="search-box">
-                                <!-- <Search class="search-icon" /> -->
-                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input" @input="searchImeis" />
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI"
+                                    class="search-input" />
                             </div>
                         </div>
 
                         <div class="modal-body">
                             <div class="imei-container">
-                            <!-- Danh sách IMEI có sẵn (bên trái) -->
-                            <div class="imei-list-container">
-                                <h3>Danh sách IMEI</h3>
-                                <div class="imei-list">
-                                    <div v-for="imei in filteredImeis" :key="imei.id" class="imei-item">
-                                        <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
-                                            v-model="selectedImeis" />
-                                        <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                <!-- Danh sách IMEI có sẵn (bên trái) -->
+                                <div class="imei-list-container">
+                                    <h3>Danh sách IMEI</h3>
+                                    <div class="imei-list">
+                                        <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
+                                            <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
+                                                v-model="selectedImeis" />
+                                            <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="pagination-controls">
+                                        <button @click="goToImeiPage(imeiCurrentPage - 1)"
+                                            :disabled="imeiCurrentPage === 0">Trước</button>
+                                        <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
+                                        <button @click="goToImeiPage(imeiCurrentPage + 1)"
+                                            :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
                                     </div>
                                 </div>
-                                <div class="pagination-controls">
-                                    <button @click="goToImeiPage(imeiCurrentPage - 1)" :disabled="imeiCurrentPage === 0">Trước</button>
-                                    <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
-                                    <button @click="goToImeiPage(imeiCurrentPage + 1)" :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
-                                </div>
-                            </div>
 
-                            <!-- Danh sách IMEI đã chọn (bên phải) -->
-                            <div class="selected-imeis-container" style="max-width: 200px;">
-                                <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
-                                <div class="selected-imeis">
-                                    <ul>
-                                        <li v-for="imei in selectedImeis" :key="imei.id">
-                                            {{ imei.imei }}
-                                            <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
-                                        </li>
-                                    </ul>
+                                <!-- Danh sách IMEI đã chọn (bên phải) -->
+                                <div class="selected-imeis-container" style="max-width: 200px;">
+                                    <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
+                                    <div class="selected-imeis">
+                                        <ul>
+                                            <li v-for="imei in selectedImeis" :key="imei.id">
+                                                {{ imei.imei }}
+                                                <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </div>
 
-                        
+
 
                         <div class="modal-footer">
                             <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{
@@ -301,6 +370,7 @@
                             </button>
                         </div>
                     </div>
+
                     <!-- Modal xác nhận -->
                     <Transition name="modal-fade">
                         <div v-if="showDeleteConfirmModal" class="modal-overlay">
@@ -330,13 +400,16 @@
                     </Transition>
                 </div>
             </div>
+            <div v-else class="no-product-message">
+                Không có sản phẩm được chọn
+            </div>
 
             <!-- Total tong tien hang -->
             <div class="footer-container">
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }}</b></span>
+                        currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -366,7 +439,7 @@
                             <input type="checkbox" v-model="isShipping" @change="toggleShipping">
                             <span class="slider round"></span>
                         </label>
-                        <span class="label-text">GIAO HÀNG</span>
+                        <span class="label-text">GIAO HÀNG ( Mặc định là đơn giao nhanh )</span>
                     </div>
 
                     <div class="shipping-discount-container">
@@ -377,12 +450,11 @@
                                 </p>
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
-                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật' }}
+                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật'
+                                    }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
-                                <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
-                                    shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                <p><strong>Phí giao hàng:</strong> 50.000 VNĐ </p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -400,7 +472,8 @@
                                             placeholder="Email người nhận" class="input-field" required>
                                         <div class="address-form">
                                             <label>Chọn tỉnh:</label>
-                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
+                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box"
+                                                disabled>
                                                 <option disabled value="">-- Tỉnh/Thành phố --</option>
                                                 <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
                                                 </option>
@@ -425,10 +498,8 @@
                                         <textarea v-model="shippingInfo.diaChiChiTiet"
                                             placeholder="Số nhà, tên đường..." class="input-field" rows="2"
                                             required></textarea>
-                                        <div class="shipping-fee-display"
-                                            v-if="shippingInfo.phiShip !== null && shippingInfo.phiShip !== undefined">
-                                            Phí giao hàng: <span class="fee-amount">{{
-                                                shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                                        <div class="shipping-fee-display">
+                                            Phí giao hàng: <span class="fee-amount">50.000 VNĐ</span>
                                         </div>
                                     </div>
                                     <div class="popup-actions">
@@ -536,9 +607,8 @@
             </div>
 
             <div class="modal-header" style="margin-bottom: 0;">
-                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2>
+                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2> &nbsp;
                 <div class="search-box">
-                    <!-- <Search class="search-icon" /> -->
                     <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
                 </div>
             </div>
@@ -577,6 +647,25 @@
                 <button @click="showCustomerTable = false, showCustomerModal = true" class="btn confirm-btn">Thêm khách
                     hàng mới</button>
                 <button @click="showCustomerTable = false" class="btn cancel-btn">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
             </div>
         </div>
     </div>
@@ -620,7 +709,8 @@ import {
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
-    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa,
+    fillDataFulldown
 } from '@/Service/Adminservice/Products/ProductAdminService';
 import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
@@ -628,7 +718,9 @@ import {
     , loadImeiDaBan, deleteDetailInvoice, addProductIntoInvoice, loadHoaDonByIdNhanVien
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
     , findHdctByImeiDaBan, findProductByImei,
-    updateGia
+    updateGia,
+    getAllLichSuBanHang,
+    viewLichSuHoaDon
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -645,6 +737,7 @@ import wardData from '@/assets/JsonTinhThanh/ward.json'
 import tienMatPng from '@/assets/HinhAnh/tienmat.png'
 import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
+import ScreenLock from '../AdminLock/ScreenLock.vue';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -808,14 +901,19 @@ const danhMucSanPham = async () => {
 }
 
 const selectedIdKhachHang = ref(0)
+const pulldownData = ref(null)
 
 const loadProducts = async () => {
-    // selectedCategory.value = category.tenSanPham;
+    
+    const res = await fillDataFulldown();
+    pulldownData.value = res.data
+
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
         response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
     } else {
-        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
+        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+            , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color);
     }
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
@@ -870,7 +968,7 @@ const loadTabHoaDon = async () => {
             const selected = invoices.value.find(i => i.id == finalId);
             if (selected && !selected.chiTietHoaDonAdminResponseList) {
                 const res = await hoaDonDetail(finalId);
-            console.log('test', res.data)
+                console.log('test', res.data)
                 if (res.data) {
                     addOrUpdateInvoice(res.data);
                     currentInvoiceDetail.value = res.data;
@@ -949,7 +1047,7 @@ const selectInvoice = async (id) => {
     localStorage.setItem('selectedInvoiceId', id);
 
     const invoice = invoices.value.find(i => i.id === id);
-    const hasDetail = invoice?.chiTietSanPham && invoice.chiTietSanPham.length > 0;
+    const hasDetail = false
 
     if (!hasDetail) {
         try {
@@ -959,6 +1057,7 @@ const selectInvoice = async (id) => {
             }
             loadHoaDon()
             getHdctByImeiDaBan()
+            toast.success("Chọn thành công hóa đơn " + res.data.maHoaDon)
         } catch (error) {
             console.error("Lỗi khi load chi tiết hóa đơn:", error);
         }
@@ -1020,16 +1119,23 @@ const addNewInvoice = async () => {
 }
 
 const closeInvoice = (id) => {
-    if (invoices.value.length === 1) return
+    if (invoices.value.length === 1) return;
 
-    const index = invoices.value.findIndex(inv => inv.id === id)
-    if (index > -1) {
-        invoices.value.splice(index, 1)
-        if (currentInvoiceId.value === id) {
-            currentInvoiceId.value = invoices.value[0].id
-        }
+    const index = invoices.value.findIndex(inv => inv.id === id);
+    if (index !== -1) {
+        invoices.value.splice(index, 1);
     }
-}
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    const idStr = String(id); // ép kiểu sang string
+
+    if (storedId === idStr || currentInvoiceId.value === idStr) {
+        const newId = invoices.value[0]?.id || null;
+        currentInvoiceId.value = newId;
+        localStorage.setItem("selectedInvoiceId", newId);
+    }
+};
+
 
 
 const showDeleteConfirmModal = ref(false);
@@ -1065,29 +1171,7 @@ const removeFromCart = async () => {
     }
 }
 
-const searchCustomer = async () => {
-    const type = searchType.value || 'name';
 
-    if (!customerSearchQuery.value.trim()) {
-        await loadProducts();
-        return;
-    }
-
-    try {
-        let response;
-        if (type === 'name') {
-            response = await findSanPhamBanHang(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        } else if (type === 'ma') {
-            response = await findSanPhamByMa(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        }
-
-        products.value = response.data.content;
-        totalPagesProdut.value = response.data.totalPages;
-        console.log('da vao day');
-    } catch (error) {
-        console.error('Search error:', error);
-    }
-};
 
 watch([searchType, customerSearchQuery], () => {
     searchCustomer();
@@ -1161,6 +1245,8 @@ const imeiTotalItems = ref(0); // Tổng số IMEI có sẵn
 const imeiTotalPages = ref(0); // Tổng số trang IMEI
 const quantityToSelect = ref(1); // lưu số lượng 
 
+// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
+const imeiSearchQuery = ref('');
 
 // mở modal imei
 const openImeiModal = async (product) => {
@@ -1187,7 +1273,7 @@ const openImeiModal = async (product) => {
 // --- Hàm để lấy danh sách IMEI từ backend ---
 const fetchImeis = async (productId, page, size) => {
     try {
-        const response = await fetchImeisJs(productId, page, size)
+        const response = await fetchImeisJs(productId, page, size, imeiSearchQuery.value.trim())
 
         let imeis = response.data.content;
 
@@ -1203,7 +1289,7 @@ const fetchImeis = async (productId, page, size) => {
         // imeis = imeis.sort((a, b) => {
         //     const isASelected = selectedImeis.value.some(selected => selected.id === a.id);
         //     const isBSelected = selectedImeis.value.some(selected => selected.id === b.id);
-            
+
         //     // Nếu a được chọn và b không được chọn, a lên đầu
         //     if (isASelected && !isBSelected) return -1;
         //     // Nếu b được chọn và a không được chọn, b lên đầu
@@ -1224,30 +1310,6 @@ const fetchImeis = async (productId, page, size) => {
     }
 };
 
-// Thêm biến để lưu trữ chuỗi tìm kiếm IMEI
-const imeiSearchQuery = ref('');
-
-// Computed property để lọc danh sách IMEI dựa trên tìm kiếm
-const filteredImeis = computed(() => {
-    if (!imeiSearchQuery.value.trim()) {
-        return availableImeis.value;
-    }
-    return availableImeis.value.filter(imei =>
-        imei.imei.toLowerCase().includes(imeiSearchQuery.value.toLowerCase())
-    );
-});
-
-// Hàm tìm kiếm IMEI (được gọi khi input thay đổi)
-const searchImeis = async () => {
-    // Nếu có chuỗi tìm kiếm, lọc trực tiếp trên danh sách hiện tại
-    if (imeiSearchQuery.value.trim()) {
-        // Lọc trên client-side, không gọi lại API
-        return;
-    }
-    // Nếu không có chuỗi tìm kiếm, tải lại danh sách IMEI đầy đủ
-    await fetchImeis(selectedProductForImei.value.idSanPhamChiTiet, imeiCurrentPage.value, imeiPageSize.value);
-};
-
 // Hàm xóa một IMEI khỏi danh sách đã chọn
 const removeImei = (imei) => {
     selectedImeis.value = selectedImeis.value.filter(item => item.id !== imei.id);
@@ -1258,6 +1320,10 @@ watch(isImeiModalOpen, (newVal) => {
     if (newVal) {
         imeiSearchQuery.value = ''; // Reset chuỗi tìm kiếm khi mở modal
     }
+});
+
+watch(imeiSearchQuery, (newValue, oldValue) => {
+    goToImeiPage(0);
 });
 
 // xử lý phân trang imei
@@ -1331,7 +1397,7 @@ const isImeiSelected = (imei) => {
 // tự động chọn imei
 const autoSelectImeis = () => {
     const existingSelected = selectedImeis.value.filter(selected =>
-        filteredImeis.value.some(available => available.id === selected.id)
+        availableImeis.value.some(available => available.id === selected.id)
     );
 
     const remainingToSelect = quantityToSelect.value - existingSelected.length;
@@ -1341,7 +1407,7 @@ const autoSelectImeis = () => {
         return;
     }
 
-    const newSelections = filteredImeis.value
+    const newSelections = availableImeis.value
         .filter(imei => !existingSelected.some(selected => selected.id === imei.id))
         .slice(0, remainingToSelect);
 
@@ -1508,6 +1574,8 @@ const confirmReturnSelected = async () => {
         selectedItems.value = [];
         selectAllItems.value = false;
         await loadTabHoaDon();
+        loadProducts()
+        getHdctByImeiDaBan()
     } catch (error) {
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
     }
@@ -1634,12 +1702,12 @@ const onTinhChange = async () => {
 // };
 
 const onXaChange = async () => {
-    console.log("Xã được chọn:", selectedXa.value);
-    shippingInfo.value.phiShip = null;
-    if (selectedXa.value) {
-        console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
-        await updatePhiShip();
-    }
+    // console.log("Xã được chọn:", selectedXa.value);
+    // shippingInfo.value.phiShip = null;
+    // if (selectedXa.value) {
+    //     console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
+    //     await updatePhiShip();
+    // }
 };
 
 watch(isShipping, (newVal) => {
@@ -2108,6 +2176,27 @@ const showShippingPopup = ref(false);
 const openShippingPopup = () => {
     showShippingPopup.value = true;
     shippingInfo.value.diaChiChiTiet = '';
+    const haNoi = Object.values(tinhList.value).flat().find(t => t.name === "Hà Nội")
+    if (haNoi) {
+        selectedTinh.value = haNoi
+    }
+    selectedXa.value = null;
+    // huyenList.value = [];
+    xaList.value = [];
+    if (selectedTinh.value?.name) {
+        try {
+            // const res = await getHuyen(selectedTinh.value.code);
+            // const data = res.data;
+            // huyenList.value = data.districts || [];
+            // console.log("Danh sách Huyện/Quận:", huyenList.value);
+            xaList.value = allXaList.value.filter(ward =>
+                ward.path.includes(selectedTinh.value.name)
+            )
+            console.log("Danh sách Phường/Xã:", xaList.value)
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách huyện:", error);
+        }
+    }
 };
 
 const closeShippingPopup = () => {
@@ -2295,6 +2384,18 @@ const handleClose = () => {
     showInvoice.value = false;
 };
 
+const formatTrangThaiThanhToan = (trangThai) => {
+    const mapping = {
+        PENDING: 'Chờ thanh toán',
+        CONFIRMED: 'Đã xác nhận',
+        PAID: 'Đã thanh toán',
+        CANCELLED: 'Đã hủy',
+        REFUNDED: 'Đã hoàn tiền',
+        COMPLETED: 'Hoàn tất',
+    };
+    return mapping[trangThai] || 'Không rõ';
+};
+
 const formatTrangThai = (trangThai) => {
     const mapping = {
         AVAILABLE: 'Có sẵn',
@@ -2364,6 +2465,13 @@ const onScannedImei = async (soImei) => {
 }
 const reloadPage = () => {
     loadTabHoaDon()
+    toast.success("Làm mới tab hóa đơn thành công")
+}
+
+const screenLock = ref(null)
+
+function lockScreen() {
+    screenLock.value.lock()
 }
 
 const isVoucherModalOpen = ref(false);
@@ -2385,6 +2493,86 @@ const clearDiscount = () => {
     selectedDiscount.value = null;
 };
 
+// Biến cho modal lịch sử bán hàng
+const orderHistory = ref([]);
+const showSalesHistoryModal = ref(false);
+const maHoaDon = ref();
+
+const openSalesHistoryModal = async () => {
+    showSalesHistoryModal.value = true;
+    await xemLichSu();
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+};
+
+const xemLichSu = async () => {
+    try {
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const response = await viewLichSuHoaDon(storedId);
+        maHoaDon.value = response.data.content[0].maHoaDon
+        orderHistory.value = response.data.content;
+        showSalesHistoryModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) {
+        return 'N/A';
+    }
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+    }
+
+    const day = date.getDate().toString().padStart(2, '0');      // ngày, 2 chữ số
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // tháng, 2 chữ số (tháng bắt đầu từ 0)
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
+const isFilterOpen = ref(false)
+
+const filters = reactive({
+    model: '',
+    storage: '',
+    color: '',
+    priceMin: null,
+    priceMax: null,
+    quantityMin: null,
+    quantityMax: null,
+    maSpct : ''
+})
+
+const toggleFilter = () => {
+    isFilterOpen.value = !isFilterOpen.value
+}
+
+const applyFilters = async () => {
+    const response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+        , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color
+    );
+    
+    products.value = response.data.content;
+    totalPagesProdut.value = response.data.totalPages
+    isFilterOpen.value = false
+}
+
+const resetFilters = () => {
+    filters.model = ''
+    filters.storage = ''
+    filters.color = ''
+    filters.priceMin = null
+    filters.priceMax = null
+    filters.quantityMin = null
+    filters.quantityMax = null
+    filters.maSpct = null
+}
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>

@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Controller.AdminController.SanPhamAdminController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.CameraSauQuickCreateAdminRequest;
@@ -41,21 +42,21 @@ public class CameraSauAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<CameraSauAdminResponse> createCameraSau(@RequestBody CameraSauAdminRequest cameraSauAdminRequest) {
+    public ResponseEntity<CameraSauAdminResponse> createCameraSau(@RequestBody @Valid CameraSauAdminRequest cameraSauAdminRequest) {
         CameraSauAdminResponse response = cameraSauAdminService.createCameraSau(cameraSauAdminRequest);
 
         return ResponseEntity.ok(response);
     }
 
    @PostMapping("/cameraSau-quick")
-    public ResponseEntity<CameraSauAdminResponse> createCameraSauQuick(@RequestBody CameraSauQuickCreateAdminRequest cameraSauAdminRequest) {
+    public ResponseEntity<CameraSauAdminResponse> createCameraSauQuick(@RequestBody @Valid CameraSauQuickCreateAdminRequest cameraSauAdminRequest) {
         CameraSauAdminResponse response = cameraSauAdminService.createCameraSauQuick(cameraSauAdminRequest);
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CameraSauAdminResponse> updateCameraSau(@PathVariable Integer id, @RequestBody CameraSauAdminRequest cameraSauAdminRequest) {
+    public ResponseEntity<CameraSauAdminResponse> updateCameraSau(@Valid @PathVariable Integer id, @RequestBody CameraSauAdminRequest cameraSauAdminRequest) {
         CameraSauAdminResponse response = cameraSauAdminService.updateCameraSau(id, cameraSauAdminRequest);
 
         return ResponseEntity.ok(response);

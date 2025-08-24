@@ -1,11 +1,5 @@
 <template>
-  <el-dialog
-    title="Thêm phiên bản pin mới"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
+  <el-dialog title="Thêm phiên bản pin mới" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
     <el-form :model="NewPin" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Tên phiên bản pin" prop="phienBan">
         <el-input v-model="NewPin.phienBan" autocomplete="off" />
@@ -22,7 +16,7 @@
 <script setup>
 import { postPinList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -36,9 +30,9 @@ const NewPin = reactive({
 const dialogVisible = ref(false);
 const formRef = ref(null);
 
-const rules = {
-  phienBan: [{ required: true, message: 'Vui lòng nhập tên phiên bản pin', trigger: 'blur' }],
-};
+// const rules = {
+//   phienBan: [{ required: true, message: 'Vui lòng nhập tên phiên bản pin', trigger: 'blur' }],
+// };
 
 function open() {
   dialogVisible.value = true;
@@ -56,15 +50,29 @@ async function submitPin() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm phiên bản pin này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
         const newPin = await postPinList({
           phienBan: NewPin.phienBan,
         });
         emit('saved', newPin);
         dialogVisible.value = false;
         handleClose();
-        ElMessage.success('Thêm phiên bản pin thành công!'); // Thêm thông báo thành công
+        toast.success('Thêm phiên bản pin thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error('Lỗi khi lưu màn hình:', error);
+
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
 
         if (error.response && error.response.data) {
           const { message, error: serverError, errors: fieldErrors } = error.response.data;

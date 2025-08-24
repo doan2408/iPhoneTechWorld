@@ -4,11 +4,26 @@ import { ref } from "vue";
 const url_base = "/admin/hoa-don"
 
 // api getAll hoadon
-export const hoaDonGetAll = (pageNo = 0, pageSize = 10) => {
+export const hoaDonGetAll = (pageNo = 0, pageSize = 10, keyWord, trangThai, loaiHoaDon, ngayTaoFrom, ngayTaoTo ) => {
     return api.get(url_base, {
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            keyWord,
+            trangThai,
+            loaiHoaDon,
+            ngayTaoFrom,
+            ngayTaoTo
+        }
+    })
+}
+
+export const getAllLichSuBanHang = (pageNo = 0, pageSize = 10, search) => {
+    return api.get(url_base + '/lich-su', {
+        params: {
+            pageNo,
+            pageSize,
+            search
         }
     })
 }
@@ -68,13 +83,14 @@ export const deleteDetailInvoice = (idChiTietHoaDon) => {
     return api.delete(url)
 }
 
-export const fetchImeisJs = (productId, page, size) => {
+export const fetchImeisJs = (productId, page, size, search) => {
     const url = '/admin/imei/available'
     return api.get(url, {
         params: {
             productId: productId,
             page: page,
-            size: size
+            size: size,
+            search: search
         }
     });
 
@@ -174,7 +190,7 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
         sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
         emailNguoiNhan: shippingInfo.emailNguoiNhan,
         diaChiGiaoHang: fullAddressForDB,
-        phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
+        phiShip: Number(50000),
         isShipping: isShipping,
         maVanDon: null,
         thanhTien: null

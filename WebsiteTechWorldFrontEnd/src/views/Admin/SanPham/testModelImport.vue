@@ -222,13 +222,13 @@
                 <div v-for="cameraId in modelForm.idCameraSau" :key="cameraId"
                   style="display: inline-block; margin-right: 12px">
                   <el-tag :type="(() => {
-                      const cam = cameraSaus.find((c) => c.idCamera === cameraId);
-                      return cam?.loaiCamera === 'Wide'
-                        ? 'success'
-                        : cam?.loaiCamera === 'Ultra Wide'
-                          ? 'primary'
-                          : 'danger';
-                    })()
+                    const cam = cameraSaus.find((c) => c.idCamera === cameraId);
+                    return cam?.loaiCamera === 'Wide'
+                      ? 'success'
+                      : cam?.loaiCamera === 'Ultra Wide'
+                        ? 'primary'
+                        : 'danger';
+                  })()
                     " size="small">
                     {{
                       (() => {
@@ -671,27 +671,36 @@ export default {
 
     const availableCameraSaus = computed(() => {
       return cameraSaus.value.filter((cam) => {
+        // Luôn hiển thị camera đã được chọn
         if (modelForm.value.idCameraSau?.includes(cam.idCamera)) {
           return true;
         }
+
         const selectedCameras = cameraSaus.value.filter((c) =>
           modelForm.value.idCameraSau?.includes(c.idCamera)
         );
+
         const hasWide = selectedCameras.some((c) => c.loaiCamera === 'Wide');
         const hasUltraWide = selectedCameras.some((c) => c.loaiCamera === 'Ultra Wide');
         const hasTelephoto = selectedCameras.some((c) => c.loaiCamera === 'Telephoto');
+
         switch (cam.loaiCamera) {
           case 'Wide':
+            // Chỉ hiển thị nếu chưa có Wide
             return !hasWide;
           case 'Ultra Wide':
+            // Chỉ hiển thị nếu chưa có Ultra Wide và đã có Wide
             return !hasUltraWide && hasWide;
           case 'Telephoto':
+            // Chỉ hiển thị nếu chưa có Telephoto và đã có Wide
             return !hasTelephoto && hasWide;
           default:
-            return true;
+            // Các loại chưa xác định chỉ hiển thị khi đã chọn Wide
+            return hasWide;
         }
       });
     });
+
 
     const handleCameraSauChange = (selectedIds) => {
       const selectedCameras = cameraSaus.value.filter((c) => selectedIds.includes(c.idCamera));
@@ -931,6 +940,7 @@ export default {
 
     const handleFileUpload = async (file) => {
       try {
+
         const formData = new FormData();
         formData.append('file', file.raw);
         const response = await importExcelFileUpload(formData);
@@ -939,12 +949,10 @@ export default {
           return;
         }
 
-        // Lấy dòng đầu tiên để điền vào form
+        // Xử lý dữ liệu như hiện tại
         const firstModel = response[0];
-
-        // Ánh xạ dữ liệu từ response sang modelForm
         const mappedData = {
-          idModelSanPham: null, // Không gán ID để thêm mới
+          idModelSanPham: null,
           tenModel: firstModel.tenModel?.trim() || '',
           idLoai: firstModel.idLoai || null,
           idXuatXu: firstModel.idXuatXu || null,
@@ -1010,7 +1018,6 @@ export default {
               cancelButtonText: 'Không',
             }
           ).then(async () => {
-            // Thêm tất cả model vào danh sách
             modelSanPhams.value = [
               ...response.map((model) => ({
                 ...model,
@@ -1027,22 +1034,25 @@ export default {
             ];
             totalItems.value += response.length;
             toast.success(`Đã thêm ${response.length} model vào danh sách!`);
-            await fetchDanhMuc(); // Cập nhật lại danh sách từ backend
+            await fetchDanhMuc();
           });
         }
       } catch (error) {
         console.error('Lỗi khi import file:', error);
-        if (error.response) {
+        // Kiểm tra lỗi từ response của backend
+        if (error.response && error.response.data) {
           const { status, data } = error.response;
-          if (status === 400 && data.message) {
-            toast.error(data.message);
+          if (status === 400 || status === 404) {
+            // Hiển thị thông điệp lỗi chi tiết từ backend
+            toast.error(data.message || 'Dữ liệu không hợp lệ, vui lòng kiểm tra file Excel!');
           } else if (status === 500) {
-            toast.error('Lỗi máy chủ, vui lòng thử lại sau!');
+            toast.error(data.message || 'Lỗi máy chủ, vui lòng thử lại sau!');
           } else {
-            toast.error('Lỗi khi import file, vui lòng kiểm tra định dạng!');
+            toast.error(data.message || 'Lỗi không xác định, vui lòng thử lại!');
           }
         } else {
-          toast.error('Lỗi khi import file, vui lòng kiểm tra kết nối!');
+          // Lỗi không liên quan đến response (mạng, timeout, v.v.)
+          toast.error('Lỗi kết nối hoặc file không hợp lệ, vui lòng kiểm tra!');
         }
       }
     };

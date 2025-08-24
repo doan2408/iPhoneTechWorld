@@ -50,7 +50,7 @@
 
         <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa nhà cung cấp' : 'Thêm mới nhà cung cấp'"
             width="900px" :close-on-click-modal="false" :destroy-on-close="true">
-            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
+            <el-form :model="formData" ref="formRef" label-width="140px" label-position="left"
                 class="hdh-form">
                 <el-row :gutter="20">
                     <el-col :span="12">
@@ -97,6 +97,8 @@ import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { deleteNCC, getAllNhaCungCapPage, postNCC, putNCC } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete, View } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const tableNCC = ref([]);
 const currentPage = ref(1);
@@ -108,32 +110,32 @@ const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
 
-const rules = {
-    tenNhaCungCap: [
-        { required: true, message: 'Vui lòng nhập tên nhà cung cấp', trigger: 'blur' },
-        { min: 2, max: 100, message: 'Tên phải từ 2 đến 100 ký tự', trigger: 'blur' }
-    ],
-    diaChi: [
-        { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' },
-        { max: 200, message: 'Địa chỉ tối đa 200 ký tự', trigger: 'blur' }
-    ],
-    sdt: [
-        { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
-        {
-            pattern: /^(0|\+84)[0-9]{9,10}$/,
-            message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)',
-            trigger: 'blur'
-        }
-    ],
-    email: [
-        { required: true, message: 'Vui lòng nhập email', trigger: 'blur' },
-        {
-            type: 'email',
-            message: 'Email không đúng định dạng',
-            trigger: ['blur', 'change']
-        }
-    ]
-};
+// const rules = {
+//     tenNhaCungCap: [
+//         { required: true, message: 'Vui lòng nhập tên nhà cung cấp', trigger: 'blur' },
+//         { min: 2, max: 100, message: 'Tên phải từ 2 đến 100 ký tự', trigger: 'blur' }
+//     ],
+//     diaChi: [
+//         { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' },
+//         { max: 200, message: 'Địa chỉ tối đa 200 ký tự', trigger: 'blur' }
+//     ],
+//     sdt: [
+//         { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
+//         {
+//             pattern: /^(0|\+84)[0-9]{9,10}$/,
+//             message: 'Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84)',
+//             trigger: 'blur'
+//         }
+//     ],
+//     email: [
+//         { required: true, message: 'Vui lòng nhập email', trigger: 'blur' },
+//         {
+//             type: 'email',
+//             message: 'Email không đúng định dạng',
+//             trigger: ['blur', 'change']
+//         }
+//     ]
+// };
 
 
 const formData = reactive({
@@ -197,34 +199,71 @@ const submitForm = async () => {
     if (!formRef.value) return;
 
     try {
+
+        await ElMessageBox.confirm(
+            'Bạn có chắc chắn muốn thêm dung lượng rom này?',
+            'Xác nhận',
+            {
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Huỷ',
+                type: 'warning',
+            }
+        );
+
         await formRef.value.validate();
         if (isEditMode.value) {
             await putNCC(formData.id, formData);
-            ElMessage.success('Cập nhật nhà cung cấp thành công!');
+            toast.success('Cập nhật nhà cung cấp thành công!');
         } else {
             await postNCC(formData);
-            ElMessage.success('Thêm mới nhà cung cấp thành công!');
+            toast.success('Thêm mới nhà cung cấp thành công!');
         }
 
         resetForm();
         dialogVisible.value = false;
         loadData();
     } catch (error) {
+
+        if (error === 'cancel' || error === 'close') {
+            toast.info('Đã hủy thao tác');
+            return;
+        }
+
         errors.tenNhaCungCap = error.message.tenNhaCungCap || ''
         errors.diaChi = error.message.diaChi || ''
         errors.sdt = error.message.sdt || ''
         errors.email = error.message.email || ''
 
-        const errorMessages = [];
-        if (errors.tenNhaCungCap) errorMessages.push(errors.tenNhaCungCap);
-        if (errors.diaChi) errorMessages.push(errors.diaChi);
-        if (errors.sdt) errorMessages.push(errors.sdt);
-        if (errors.email) errorMessages.push(errors.email);
+        if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
 
-        if (errorMessages.length > 0) {
-            ElMessage.error('Đã xảy ra lỗi không xác định');
+            if (status === 400) {
+                const msg = data.message;
+
+                if (typeof msg === 'string') {
+                    toast.error(msg);
+                } else if (typeof msg === 'object') {
+                    Object.keys(errors).forEach(key => {
+                        errors[key] = msg[key] || '';
+                    });
+                    const fieldErrors = Object.values(errors).filter(m => m);
+                    toast.error(fieldErrors.length ? fieldErrors.join('\n') : 'Dữ liệu không hợp lệ!');
+                } else {
+                    toast.error('Dữ liệu không hợp lệ!');
+                }
+            } else if (status === 409) {
+                toast.error(data.message || 'Dữ liệu đã tồn tại');
+            } else if (status >= 500) {
+                toast.error('Server lỗi, vui lòng thử lại sau');
+            } else {
+                toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+            }
+
+        } else if (error.request) {
+            toast.error('Không nhận được phản hồi từ server');
         } else {
-            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+            toast.error('Lỗi gửi request: ' + error.message);
         }
     }
 }
@@ -238,11 +277,15 @@ const openDetail = (row) => {
 
 const handleCreate = () => {
     resetForm();
+    isEditMode.value = false;
     dialogVisible.value = true;
 };
 
 const handleClose = () => {
     dialogVisible.value = false;
+    isEditMode.value = false; 
+    resetForm();
+    resetErrors();
 };
 
 
@@ -282,6 +325,31 @@ onMounted(() => {
 watch([currentPage, searchQuery], () => {
     loadData();
 });
+
+watch(
+    () => formData.tenNhaCungCap,
+    () => {
+        errors.tenNhaCungCap = ''; // Xóa lỗi khi người dùng nhập
+    }
+);
+watch(
+    () => formData.diaChi,
+    () => {
+        errors.diaChi = ''; // Xóa lỗi khi người dùng nhập
+    }
+);
+watch(
+    () => formData.sdt,
+    () => {
+        errors.sdt = ''; // Xóa lỗi khi người dùng nhập
+    }
+);
+watch(
+    () => formData.email,
+    () => {
+        errors.email = ''; // Xóa lỗi khi người dùng nhập
+    }
+);
 
 </script>
 

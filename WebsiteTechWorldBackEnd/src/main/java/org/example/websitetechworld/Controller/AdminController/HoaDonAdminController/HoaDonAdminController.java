@@ -13,6 +13,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaD
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.KhachHangGiamGiaResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ChiTietHoaDon.HoaDonChiTietAdminServices;
@@ -24,6 +25,7 @@ import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -59,8 +62,20 @@ public class HoaDonAdminController {
 
     @GetMapping
     public Page<GetAllHoaDonAdminResponse> getAll(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
-                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize) {
-        return hoaDonAdminService.getPageHoaDon(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name());
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize,
+                                                  @RequestParam(required = false) String keyWord,
+                                                  @RequestParam(required = false) TrangThaiThanhToan trangThai,
+                                                  @RequestParam(required = false) LoaiHoaDon loaiHoaDon,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayTaoFrom,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngayTaoTo) {
+        return hoaDonAdminService.getPageHoaDon(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name(),keyWord,trangThai,loaiHoaDon,ngayTaoFrom,ngayTaoTo);
+    }
+
+    @GetMapping("/lich-su")
+    public Page<HoaDonAdminResponse> getLichSuBanHang (@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
+                                                  @RequestParam(defaultValue = "10", value = "pageSize") int pageSize,
+                                                  @RequestParam(defaultValue = "", value = "search") String search) {
+        return hoaDonAdminService.getPageLichSuBanHang(pageNo, pageSize,"ngayTaoHoaDon", Sort.Direction.DESC.name(), search);
     }
 
     @GetMapping("/{idHoaDon}")

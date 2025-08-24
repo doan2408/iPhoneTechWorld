@@ -57,9 +57,24 @@ public class XuatXuAdminService {
 
     @Transactional
     public XuatXuAdminResponse createXuatXu(@Valid XuatXuAdminRequest xuatXuAdminRequest) {
+
+        if (!xuatXuAdminRequest.getMaXuatXu().trim().matches("^[A-Z]+$")) {
+            throw new BusinessException("Mã xuất xứ không hợp lệ! Chỉ được phép chứa chữ in hoa (A-Z), không có số, chữ thường hoặc ký tự đặc biệt. Ví dụ hợp lệ:US, VNA");
+        }
+
+        if (!xuatXuAdminRequest.getTenQuocGia().trim().matches("^[\\p{L}\\s]+$")) {
+            throw new BusinessException(
+                    "Tên quốc gia không hợp lệ! Chỉ được chứa chữ cái và khoảng trắng. Ví dụ hợp lệ: 'Việt Nam', 'Hoa Kỳ', 'Nhật Bản'"
+            );
+        }
+
         if (xuatXuRepo.existsByMaXuatXu(xuatXuAdminRequest.getMaXuatXu())) {
             throw new BusinessException("Mã xuất xứ đã tồn tại");
         }
+
+        xuatXuAdminRequest.setMaXuatXu(xuatXuAdminRequest.getMaXuatXu().trim());
+        xuatXuAdminRequest.setTenQuocGia(xuatXuAdminRequest.getTenQuocGia().trim());
+
         XuatXu xuatXu = modelMapper.map(xuatXuAdminRequest, XuatXu.class);
         XuatXu saved = xuatXuRepo.save(xuatXu);
         return modelMapper.map(saved, XuatXuAdminResponse.class);
@@ -67,9 +82,16 @@ public class XuatXuAdminService {
 
     @Transactional
     public XuatXuAdminResponse createQuickXuatXu(XuatXuQuickCreateAdminRequest req) {
+        if (!req.getMaXuatXu().matches("^[A-Z]+$")) {
+            throw new BusinessException("Mã xuất xứ không hợp lệ! Chỉ được phép chứa chữ in hoa (A-Z), không có số, chữ thường hoặc ký tự đặc biệt. Ví dụ hợp lệ:US, VNA");
+        }
+
         if (xuatXuRepo.existsByMaXuatXu(req.getMaXuatXu())) {
             throw new BusinessException("Mã xuất xứ đã tồn tại");
         }
+
+        req.setMaXuatXu(req.getMaXuatXu().trim());
+
         XuatXu xuatXu = modelMapper.map(req, XuatXu.class);
         xuatXuRepo.save(xuatXu);
 
@@ -81,9 +103,21 @@ public class XuatXuAdminService {
         XuatXu update = xuatXuRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xuất xứ ID: " + id));
 
+        if (!xuatXuAdminRequest.getMaXuatXu().matches("^[A-Z]+$")) {
+            throw new BusinessException("Mã xuất xứ không hợp lệ! Chỉ được phép chứa chữ in hoa (A-Z), không có số, chữ thường hoặc ký tự đặc biệt. Ví dụ hợp lệ:US, VNA");
+        }
+
+        if (!xuatXuAdminRequest.getTenQuocGia().matches("^[\\p{L}\\s]+$")) {
+            throw new BusinessException(
+                    "Tên quốc gia không hợp lệ! Chỉ được chứa chữ cái và khoảng trắng. Ví dụ hợp lệ: 'Việt Nam', 'Hoa Kỳ', 'Nhật Bản'"
+            );
+        }
+        xuatXuAdminRequest.setMaXuatXu(xuatXuAdminRequest.getMaXuatXu().trim());
+        xuatXuAdminRequest.setTenQuocGia(xuatXuAdminRequest.getTenQuocGia().trim());
+
         if (!update.getMaXuatXu().equals(xuatXuAdminRequest.getMaXuatXu()) &&
                 xuatXuRepo.existsByMaXuatXuAndIdNot(xuatXuAdminRequest.getMaXuatXu(), id)) {
-            throw new IllegalArgumentException("Mã xuất xứ đã tồn tại");
+            throw new BusinessException("Mã xuất xứ đã tồn tại");
         }
 
         modelMapper.map(xuatXuAdminRequest, update);

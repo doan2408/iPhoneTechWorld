@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.ClientController.HoaDonClientCon
 
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.LichSuHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
@@ -123,4 +124,10 @@ public class MyOrderController {
                     .body("Xóa thất bại: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{idHoaDon}/lich-su")
+    public ResponseEntity<?> getPageLichSu(@PathVariable Integer idHoaDon) {
+        return ResponseEntity.ok(myOrderClientServices.getLichSuHoaDon(idHoaDon));
+    }
+
 }

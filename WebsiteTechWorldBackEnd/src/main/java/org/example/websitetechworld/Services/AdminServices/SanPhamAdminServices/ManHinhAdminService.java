@@ -62,12 +62,16 @@ public class ManHinhAdminService {
 
     @Transactional
     public ManHinhAdminResponse createManHinh(ManHinhAdminRequest manHinhAdminRequest) {
-        String ten = manHinhAdminRequest.getTenManHinh().trim();
-        if (!ten.matches("^[a-zA-Z0-9 ]+$")) { // chỉ cho phép chữ, số và khoảng trắng
-            throw new BusinessException("Tên màn hình chỉ được chứa chữ, số không chứa ký tự đặc biệt.");
-        }
+
+        ValidateManHinh(manHinhAdminRequest);
+
+
+        String tenNormalized = manHinhAdminRequest.getTenManHinh()
+                .replaceAll("\\s+", "")
+                .toLowerCase();
+
         if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinh(
-                manHinhAdminRequest.getTenManHinh(),
+                tenNormalized,
                 manHinhAdminRequest.getKichThuoc(),
                 manHinhAdminRequest.getLoaiManHinh()
         )) {
@@ -88,10 +92,34 @@ public class ManHinhAdminService {
     public ManHinhAdminResponse createManHinhQuick (ManHinhQuickCreateAdminRequest manHinhAdminRequest) {
         String ten = manHinhAdminRequest.getTenManHinh().trim();
         if (!ten.matches("^[a-zA-Z0-9 ]+$")) {
-            throw new BusinessException("Tên màn hình chỉ được chứa chữ, số không chứa ký tự đặc biệt.");
+            throw new BusinessException("Tên màn hình không hợp lệ. Chỉ được chứa chữ cái không dấu (A-Z, a-z), số (0-9) và khoảng trắng, không được chứa ký tự đặc biệt.");
         }
+
+        manHinhAdminRequest.setTenManHinh(ten.trim());
+
+        String kichThuoc = manHinhAdminRequest.getKichThuoc();
+        if (!kichThuoc.matches("^[0-9.\\sA-Za-z\\\"]+$")) {
+            throw new BusinessException("Kích thước không được chứa ký tự đặc biệt.");
+        }
+        if (!kichThuoc.matches("^[0-9]+(\\.[0-9]+)? inch$")) {
+            throw new BusinessException("Kích thước phải là số (thập phân) và bắt buộc kèm ' inch' với đúng 1 khoảng trắng. Ví dụ: 6.1 inch.");
+        }
+
+        manHinhAdminRequest.setKichThuoc(manHinhAdminRequest.getKichThuoc().trim());
+
+        String loai = manHinhAdminRequest.getLoaiManHinh();
+        if (!loai.matches("^[A-Z0-9]+$")) {
+            throw new BusinessException("Loại màn hình không hợp lệ. Chỉ được chứa chữ cái viết hoa (A-Z) và số (0-9), không khoảng trắng hay ký tự đặc biệt.");
+        }
+
+        manHinhAdminRequest.setLoaiManHinh(manHinhAdminRequest.getLoaiManHinh().trim());
+
+        String tenNormalized = manHinhAdminRequest.getTenManHinh()
+                .replaceAll("\\s+", "")
+                .toLowerCase();
+
         if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinh(
-                manHinhAdminRequest.getTenManHinh(),
+                tenNormalized,
                 manHinhAdminRequest.getKichThuoc(),
                 manHinhAdminRequest.getLoaiManHinh()
         )) {
@@ -113,8 +141,14 @@ public class ManHinhAdminService {
         ManHinh manHinhOld = manHinhRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy màn hình ID: " + id));
 
-        if (manHinhRepository.existsByTenManHinhAndKichThuocAndLoaiManHinhAndIdNot(
-                manHinhAdminRequest.getTenManHinh(),
+        ValidateManHinh(manHinhAdminRequest);
+
+        String tenNormalized = manHinhAdminRequest.getTenManHinh()
+                .replaceAll("\\s+", "")
+                .toLowerCase();
+
+        if (manHinhRepository.existsByTenManHinhNormalizedAndKichThuocAndLoaiManHinhAndIdNot(
+                tenNormalized,
                 manHinhAdminRequest.getKichThuoc(),
                 manHinhAdminRequest.getLoaiManHinh(),
                 manHinhAdminRequest.getId()
@@ -147,5 +181,51 @@ public class ManHinhAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy màn hình ID: " + id));
 
         return convert(manHinh);
+    }
+
+    public void ValidateManHinh (ManHinhAdminRequest manHinhAdminRequest) {
+        String ten = manHinhAdminRequest.getTenManHinh().trim();
+        if (!ten.matches("^[a-zA-Z0-9 ]+$")) {
+            throw new BusinessException("Tên màn hình không hợp lệ. Chỉ được chứa chữ cái không dấu (A-Z, a-z), số (0-9) và khoảng trắng, không được chứa ký tự đặc biệt.");
+        }
+
+        manHinhAdminRequest.setTenManHinh(ten.trim());
+
+        String kichThuoc = manHinhAdminRequest.getKichThuoc().trim();
+        if (!kichThuoc.matches("^[0-9.\\sA-Za-z\\\"]+$")) {
+            throw new BusinessException("Kích thước không được chứa ký tự đặc biệt.");
+        }
+        if (!kichThuoc.matches("^[0-9]+(\\.[0-9]+)? inch$")) {
+            throw new BusinessException("Kích thước phải là số (thập phân) và bắt buộc kèm ' inch' với đúng 1 khoảng trắng. Ví dụ: 6.1 inch.");
+        }
+
+        manHinhAdminRequest.setKichThuoc(manHinhAdminRequest.getKichThuoc().trim());
+
+        String loai = manHinhAdminRequest.getLoaiManHinh().trim();
+        if (!loai.matches("^[A-Z0-9]+$")) {
+            throw new BusinessException("Loại màn hình không hợp lệ. Chỉ được chứa chữ cái viết hoa (A-Z) và số (0-9), không khoảng trắng hay ký tự đặc biệt.");
+        }
+
+        manHinhAdminRequest.setLoaiManHinh(manHinhAdminRequest.getLoaiManHinh().trim());
+
+        if (!manHinhAdminRequest.getDoPhanGiai().trim().matches("^\\d+x\\d+$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ. Ví dụ: 1792x828");
+        }
+        manHinhAdminRequest.setDoPhanGiai(manHinhAdminRequest.getDoPhanGiai().trim());
+
+        if (!manHinhAdminRequest.getTanSoQuet().trim().matches("^\\d+Hz$")) {
+            throw new BusinessException("Tần số quét không hợp lệ. Ví dụ: 60Hz");
+        }
+        manHinhAdminRequest.setTanSoQuet(manHinhAdminRequest.getTanSoQuet().trim());
+
+        if (!manHinhAdminRequest.getDoSang().trim().matches("^\\d+ nit$")) {
+            throw new BusinessException("Độ sáng không hợp lệ. Ví dụ: 700 nit");
+        }
+        manHinhAdminRequest.setDoSang(manHinhAdminRequest.getDoSang().trim());
+
+        if (!manHinhAdminRequest.getChatLieuKinh().trim().matches("^[a-zA-Z ]+$")) {
+            throw new BusinessException("Kính bảo vệ không hợp lệ. Ví dụ: Ceramic Shield");
+        }
+        manHinhAdminRequest.setChatLieuKinh(manHinhAdminRequest.getChatLieuKinh().trim());
     }
 }

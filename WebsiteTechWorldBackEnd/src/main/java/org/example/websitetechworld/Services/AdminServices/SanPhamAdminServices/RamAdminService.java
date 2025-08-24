@@ -66,6 +66,11 @@ public class RamAdminService {
             );
         }
 
+        ramAdminRequest.setDungLuong(ramAdminRequest.getDungLuong().trim());
+        ramAdminRequest.setLoai(ramAdminRequest.getLoai().trim());
+        ramAdminRequest.setNhaSanXuat(ramAdminRequest.getNhaSanXuat().trim());
+        ramAdminRequest.setTocDoDocGhi(ramAdminRequest.getTocDoDocGhi().trim());
+
         Ram ram = modelMapper.map(ramAdminRequest, Ram.class);
         Ram saved = ramRepository.save(ram);
         return convert(saved);
@@ -99,6 +104,9 @@ public class RamAdminService {
                             ramAdminRequest.getDungLuong(), ramAdminRequest.getLoai())
             );
         }
+        ramAdminRequest.setDungLuong(ramAdminRequest.getDungLuong().trim());
+        ramAdminRequest.setLoai(ramAdminRequest.getLoai().trim());
+
         Ram ram = modelMapper.map(ramAdminRequest, Ram.class);
         Ram saved = ramRepository.save(ram);
         return convert(saved);
@@ -109,9 +117,17 @@ public class RamAdminService {
         validateRamRequest(ramAdminRequest);
         Ram ram = ramRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy RAM ID: " + id));
-        if (ramRepository.existsByDungLuongAndLoaiAndIdNot(ramAdminRequest.getDungLuong(),ramAdminRequest.getLoai(), id)) {
+
+        if (ramRepository.existsByDungLuongAndLoaiAndIdNot(ramAdminRequest.getDungLuong().trim(),ramAdminRequest.getLoai().trim(), id)) {
             throw new BusinessException("Dung lượng đã tồn tại");
         }
+
+
+        ramAdminRequest.setDungLuong(ramAdminRequest.getDungLuong().trim());
+        ramAdminRequest.setLoai(ramAdminRequest.getLoai().trim());
+        ramAdminRequest.setNhaSanXuat(ramAdminRequest.getNhaSanXuat().trim());
+        ramAdminRequest.setTocDoDocGhi(ramAdminRequest.getTocDoDocGhi().trim());
+
         modelMapper.map(ramAdminRequest, ram);
         Ram saved = ramRepository.save(ram);
         return convert(saved);
@@ -133,23 +149,22 @@ public class RamAdminService {
 
     public void validateRamRequest(RamAdminRequest ramAdminRequest) {
         // Validate dung lượng
-        String dungLuong = ramAdminRequest.getDungLuong();
-        if (dungLuong == null || dungLuong.trim().isEmpty()) {
-            throw new BusinessException("Dung lượng RAM không được để trống.");
+        if (!ramAdminRequest.getDungLuong().trim().matches("^\\d+GB$")) {
+            throw new BusinessException("Dung lượng phải là số và kết thúc bằng 'GB' (ví dụ: 128GB, 64GB).");
         }
 
-        if (!dungLuong.trim().matches("^[a-zA-Z0-9]+$")) {
-            throw new BusinessException("Dung lượng RAM chỉ được chứa chữ và số, không có khoảng trắng hoặc ký tự đặc biệt.");
+        if (!ramAdminRequest.getLoai().trim().matches("^[a-zA-Z0-9]+$")) {
+            throw new BusinessException("Loại chỉ được chứa chữ cái và số, không được chứa khoảng trắng hoặc ký tự đặc biệt.");
         }
 
-        // Validate loại
-        String loai = ramAdminRequest.getLoai();
-        if (loai == null || loai.trim().isEmpty()) {
-            throw new BusinessException("Loại RAM không được để trống.");
+        if (!ramAdminRequest.getTocDoDocGhi().trim().matches("^\\d+\\s?MB/s$")) {
+            throw new BusinessException("Tốc độ đọc/ghi phải là số và kết thúc bằng 'MB/s' (ví dụ: 500MB/s, 1000 MB/s).");
         }
-        if (!loai.matches("^[a-zA-Z0-9 ]+$")) {
-            throw new BusinessException("Loại RAM không được chứa ký tự đặc biệt.");
+
+        if (ramAdminRequest.getNamRaMat().getYear() < 2007) {
+            throw new BusinessException("Năm ra mắt RAM của iPhone phải từ 2007 trở đi");
         }
+
     }
 
 //    public boolean existsByDungLuong(String dungLuong) {

@@ -11,6 +11,7 @@ import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
+import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Events.KhuyenMaiUpdatedEvent;
 import org.example.websitetechworld.Repository.*;
 import org.modelmapper.ModelMapper;
@@ -60,6 +61,9 @@ public class KhuyenMaiAdminService {
     @Transactional
     public KhuyenMaiAdminResponse createKhuyenMai(KhuyenMaiAdminRequest request) {
         validateRequest(request);
+        if (!hasNotStarted(request.getNgayBatDau())) {
+            throw new IllegalArgumentException("Ngày bắt đầu phải sau ngày hiện tại");
+        }
         if (request.getMaKhuyenMai() == null || request.getMaKhuyenMai().trim().isEmpty()) {
             request.setMaKhuyenMai(taoMaGiamGiaNgauNhien());
         }
@@ -80,8 +84,14 @@ public class KhuyenMaiAdminService {
         KhuyenMai khuyenMai = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Khuyến mại không tồn tại: " + id));
         validateRequest(request);
-
+        if (!khuyenMai.getMaKhuyenMai().equalsIgnoreCase(request.getMaKhuyenMai())) {
+            throw new IllegalArgumentException("Mã khuyến mãi không được thay đổi");
+        }
+        if (!khuyenMai.getTrangThai().equals(TrangThaiKhuyenMai.EXPIRED) && !hasNotStarted(request.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày kết thúc phải sau ngày hiện tại");
+        }
         modelMapper.map(request, khuyenMai);
+        khuyenMai.setId(id);
         khuyenMai.setMucDoUuTien(request.getMucDoUuTien() != null ? request.getMucDoUuTien() : 1);
         khuyenMai = khuyenMaiRepository.save(khuyenMai);
         updateKhuyenMaiSanPhamChiTiet(khuyenMai, request.getIdSanPhamChiTietList());
@@ -94,10 +104,14 @@ public class KhuyenMaiAdminService {
     public void deleteKhuyenMai(Integer id) {
         KhuyenMai khuyenMai = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Khuyến mại không tồn tại: " + id));
-        List<KhuyenMaiSanPhamChiTiet> danhSachCanXoa = khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(id);
-        khuyenMaiSanPhamChiTietRepo.deleteAll(danhSachCanXoa);
-        khuyenMaiRepository.delete(khuyenMai);
-        eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
+        if (!hasNotStarted(khuyenMai.getNgayBatDau())) {
+            throw new IllegalArgumentException("Không thể xóa khuyến mại đã bắt đầu");
+        } else {
+            List<KhuyenMaiSanPhamChiTiet> danhSachCanXoa = khuyenMaiSanPhamChiTietRepo.findByIdKhuyenMai_Id(id);
+            khuyenMaiSanPhamChiTietRepo.deleteAll(danhSachCanXoa);
+            khuyenMaiRepository.delete(khuyenMai);
+            eventPublisher.publishEvent(new KhuyenMaiUpdatedEvent(khuyenMai.getId()));
+        }
     }
 
     public List<SanPhamAdminResponse> layDanhSachSanPham(String timKiem, String filter) {
@@ -300,5 +314,9 @@ public class KhuyenMaiAdminService {
         if (hienTai.isBefore(khuyenMai.getNgayBatDau())) return TrangThaiKhuyenMai.NOT_STARTED;
         if (hienTai.isAfter(khuyenMai.getNgayKetThuc())) return TrangThaiKhuyenMai.EXPIRED;
         return TrangThaiKhuyenMai.ACTIVE;
+    }
+
+    private boolean hasNotStarted(LocalDateTime time) {
+        return LocalDateTime.now().isBefore(time);
     }
 }

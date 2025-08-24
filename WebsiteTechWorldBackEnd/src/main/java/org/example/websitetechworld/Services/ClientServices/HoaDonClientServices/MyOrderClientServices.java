@@ -2,9 +2,8 @@ package org.example.websitetechworld.Services.ClientServices.HoaDonClientService
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
-import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.*;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
-import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
 import org.example.websitetechworld.Entity.*;
@@ -37,6 +36,8 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 public class MyOrderClientServices {
     private final ChiTietHoaDonRepository chiTietHoaDonRepository;
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
+    private final ImeiDaBanRepository imeiDaBanRepository;
+    private final LichSuHoaDonRepository lichSuHoaDonRepository;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -49,7 +50,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository, LichSuHoaDonRepository lichSuHoaDonRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -61,6 +62,8 @@ public class MyOrderClientServices {
         this.emailServicces = emailServicces;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
+        this.imeiDaBanRepository = imeiDaBanRepository;
+        this.lichSuHoaDonRepository = lichSuHoaDonRepository;
     }
 
 
@@ -341,6 +344,9 @@ public class MyOrderClientServices {
         hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
+        if (requestThanhToanTongHop.getSoTienGiam() != null){
+            hoaDon.setSoTienGiam(requestThanhToanTongHop.getSoTienGiam());
+        }
         return hoaDonRepository.save(hoaDon);
     }
 
@@ -419,5 +425,14 @@ public class MyOrderClientServices {
 
     public void deleteHoaDonById(Integer id){
         hoaDonRepository.deleteById(id);
+    }
+
+    public List<LichSuHoaDonAdminResponse> getLichSuHoaDon(Integer id){
+
+        HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + id));
+
+        return lichSuHoaDonRepository.findByIdHoaDon(hoaDon).stream()
+                .map(LichSuHoaDonAdminResponse::convertDto)
+                .collect(Collectors.toList());
     }
 }

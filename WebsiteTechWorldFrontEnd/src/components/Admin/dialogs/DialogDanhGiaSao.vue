@@ -29,26 +29,19 @@
               <!-- Bình luận cho sản phẩm -->
               <div class="comment-section">
                 <label class="label">Bình luận:</label>
-                <textarea
-                  :id="'comment-' + product.idSanPhamChiTiet"
-                  v-model="productComments[product.idSanPhamChiTiet]"
-                  class="text-input"
-                  rows="4"
-                  :placeholder="'Nhập nhận xét cho ' + product.tenSanPham"
-                ></textarea>
+                <textarea :id="'comment-' + product.idSanPhamChiTiet"
+                  v-model="productComments[product.idSanPhamChiTiet]" class="text-input" rows="4"
+                  :placeholder="'Nhập nhận xét cho ' + product.tenSanPham"></textarea>
                 <span class="debug-info">Comment: {{ productComments[product.idSanPhamChiTiet] || 'Trống' }}</span>
               </div>
               <!-- Tải lên ảnh cho sản phẩm -->
               <div class="media-upload">
                 <label class="label">Tải lên ảnh (tối đa 5):</label>
-                <div
-                  class="drop-zone"
-                  :class="{ 'drag-over': isImageDragOver[product.idSanPhamChiTiet] }"
+                <div class="drop-zone" :class="{ 'drag-over': isImageDragOver[product.idSanPhamChiTiet] }"
                   @dragover.prevent="onDragOver($event, 'image', product.idSanPhamChiTiet)"
                   @dragenter.prevent="onDragEnter($event, 'image', product.idSanPhamChiTiet)"
                   @dragleave.prevent="onDragLeave($event, 'image', product.idSanPhamChiTiet)"
-                  @drop.prevent="onImageDrop($event, product.idSanPhamChiTiet)"
-                >
+                  @drop.prevent="onImageDrop($event, product.idSanPhamChiTiet)">
                   <div class="drop-zone-content">
                     <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -56,48 +49,37 @@
                     </svg>
                     <p>Kéo và thả ảnh vào đây hoặc nhấp để chọn (JPG, PNG, tối đa 5MB)</p>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    @change="handleImageUpload($event, product.idSanPhamChiTiet)"
-                    class="file-input"
-                  />
+                  <input type="file" accept="image/jpeg,image/png,image/webp" multiple
+                    @change="handleImageUpload($event, product.idSanPhamChiTiet)" class="file-input" />
                 </div>
                 <div class="media-preview">
                   <!-- Hiển thị ảnh hiện có -->
                   <div
                     v-for="(media, index) in (existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'image')"
-                    :key="'existing-image-' + media.id"
-                    class="preview-item"
-                  >
+                    :key="'existing-image-' + media.id" class="preview-item">
                     <img :src="media.url" class="preview-image" />
-                    <button class="remove-media" @click="removeExistingMedia(product.idSanPhamChiTiet, media.id)">✖</button>
+                    <button class="remove-media"
+                      @click="removeExistingMedia(product.idSanPhamChiTiet, media.id)">✖</button>
                   </div>
                   <!-- Hiển thị ảnh mới -->
-                  <div
-                    v-for="(image, index) in (imagePreviews[product.idSanPhamChiTiet] || [])"
-                    :key="'new-image-' + index"
-                    class="preview-item"
-                  >
+                  <div v-for="(image, index) in (imagePreviews[product.idSanPhamChiTiet] || [])"
+                    :key="'new-image-' + index" class="preview-item">
                     <img :src="image.url" class="preview-image" />
                     <button class="remove-media" @click="removeImage(product.idSanPhamChiTiet, index)">✖</button>
                   </div>
-                  <span class="debug-info">Existing Images: {{ (existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'image').length }} items</span>
-                  <span class="debug-info">New Images: {{ (imagePreviews[product.idSanPhamChiTiet] || []).length }} items</span>
+                  <span class="debug-info">Existing Images: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'image').length}} items</span>
+                  <span class="debug-info">New Images: {{ (imagePreviews[product.idSanPhamChiTiet] || []).length }}
+                    items</span>
                 </div>
               </div>
               <!-- Tải lên video cho sản phẩm -->
               <div class="media-upload">
                 <label class="label">Tải lên video (tối đa 2):</label>
-                <div
-                  class="drop-zone"
-                  :class="{ 'drag-over': isVideoDragOver[product.idSanPhamChiTiet] }"
+                <div class="drop-zone" :class="{ 'drag-over': isVideoDragOver[product.idSanPhamChiTiet] }"
                   @dragover.prevent="onDragOver($event, 'video', product.idSanPhamChiTiet)"
                   @dragenter.prevent="onDragEnter($event, 'video', product.idSanPhamChiTiet)"
                   @dragleave.prevent="onDragLeave($event, 'video', product.idSanPhamChiTiet)"
-                  @drop.prevent="onVideoDrop($event, product.idSanPhamChiTiet)"
-                >
+                  @drop.prevent="onVideoDrop($event, product.idSanPhamChiTiet)">
                   <div class="drop-zone-content">
                     <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -105,35 +87,27 @@
                     </svg>
                     <p>Kéo và thả video vào đây hoặc nhấp để chọn (MP4, WebM, tối đa 50MB)</p>
                   </div>
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm"
-                    multiple
-                    @change="handleVideoUpload($event, product.idSanPhamChiTiet)"
-                    class="file-input"
-                  />
+                  <input type="file" accept="video/mp4,video/webm" multiple
+                    @change="handleVideoUpload($event, product.idSanPhamChiTiet)" class="file-input" />
                 </div>
                 <div class="media-preview">
                   <!-- Hiển thị video hiện có -->
                   <div
                     v-for="(media, index) in (existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'video')"
-                    :key="'existing-video-' + media.id"
-                    class="preview-item"
-                  >
+                    :key="'existing-video-' + media.id" class="preview-item">
                     <video :src="media.url" controls class="preview-video"></video>
-                    <button class="remove-media" @click="removeExistingMedia(product.idSanPhamChiTiet, media.id)">✖</button>
+                    <button class="remove-media"
+                      @click="removeExistingMedia(product.idSanPhamChiTiet, media.id)">✖</button>
                   </div>
                   <!-- Hiển thị video mới -->
-                  <div
-                    v-for="(video, index) in (videoPreviews[product.idSanPhamChiTiet] || [])"
-                    :key="'new-video-' + index"
-                    class="preview-item"
-                  >
+                  <div v-for="(video, index) in (videoPreviews[product.idSanPhamChiTiet] || [])"
+                    :key="'new-video-' + index" class="preview-item">
                     <video :src="video.url" controls class="preview-video"></video>
                     <button class="remove-media" @click="removeVideo(product.idSanPhamChiTiet, index)">✖</button>
                   </div>
-                  <span class="debug-info">Existing Videos: {{ (existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'video').length }} items</span>
-                  <span class="debug-info">New Videos: {{ (videoPreviews[product.idSanPhamChiTiet] || []).length }} items</span>
+                  <span class="debug-info">Existing Videos: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'video').length}} items</span>
+                  <span class="debug-info">New Videos: {{ (videoPreviews[product.idSanPhamChiTiet] || []).length }}
+                    items</span>
                 </div>
               </div>
             </div>
@@ -605,7 +579,8 @@ const submitRating = async () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Tăng khoảng cách để chứa comment và media */
+  gap: 12px;
+  /* Tăng khoảng cách để chứa comment và media */
 }
 
 .product-name {

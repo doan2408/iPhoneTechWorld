@@ -206,16 +206,8 @@
             </div>
 
             <div class="right-actions">
-                <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" /> IN HÓA ĐƠN
-                </button>
-
-                <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" /> IN PHIẾU GIAO HÀNG
-                </button>
-
-                <button @click="editOrder" class="action-btn edit-btn">
-                    <Edit class="icon-small" /> CHỈNH SỬA
+                <button @click="xemLichSu" class="action-btn print-btn">
+                    <History class="icon-small" /> XEM LỊCH SỬ
                 </button>
             </div>
         </div>
@@ -336,7 +328,24 @@
             </div>
         </div>
 
-
+        <div v-if="showHistoryModal" class="history-overlay">
+            <div class="history-modal">
+                <h3 class="history-title">Lịch sử hóa đơn #{{ order.maHoaDon }}</h3>
+                <div class="history-list">
+                    <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                        <div class="history-action">{{ history.hanhDong }}</div>
+                        <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                        <div class="history-description">{{ history.moTa }}</div>
+                    </div>
+                    <div v-if="!orderHistory.length" class="no-history">
+                        Không có lịch sử nào để hiển thị
+                    </div>
+                </div>
+                <div class="history-actions">
+                    <button class="history-btn cancel" @click="showHistoryModal = false">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -344,9 +353,10 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
     Clock, User, Phone, Mail, MapPin, Package, CreditCard, ScrollText, Check, XCircle, AlertTriangle,
-    CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw
+    CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw,
+    History
 } from 'lucide-vue-next'
-import { hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { getOrderHistory, hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
 import { useToast } from 'vue-toastification'
@@ -739,18 +749,21 @@ const callDriver = () => {
     }
 }
 
-const printInvoice = () => {
-    console.log('Printing invoice')
-    window.print()
-}
+const showHistoryModal = ref(false);
 
-const printDeliveryNote = () => {
-    console.log('Printing delivery note')
-}
+const orderHistory = ref([]);
 
-const editOrder = () => {
-    console.log('Editing order')
-}
+const xemLichSu = async () => {
+    try {
+        const id = route.params.id; 
+        const response = await getOrderHistory(id);
+        orderHistory.value = response.data;
+        showHistoryModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
 
 onMounted(() => {
     viewOrderDetail()
