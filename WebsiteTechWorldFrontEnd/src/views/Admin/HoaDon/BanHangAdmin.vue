@@ -149,8 +149,8 @@
                                     <label>Màu sắc</label>
                                     <select v-model="filters.color">
                                         <option value="">Tất cả</option>
-                                        <option v-for="mau in pulldownData.mauSac" :key="mau"
-                                            :value="mau.id"> {{ mau.tenMau }} </option>
+                                        <option v-for="mau in pulldownData.mauSac" :key="mau" :value="mau.id"> {{
+                                            mau.tenMau }} </option>
                                     </select>
                                 </div>
 
@@ -378,6 +378,7 @@
                             </button>
                         </div>
                     </div>
+
                     <!-- Modal xác nhận -->
                     <Transition name="modal-fade">
                         <div v-if="showDeleteConfirmModal" class="modal-overlay">
@@ -406,6 +407,9 @@
                         </div>
                     </Transition>
                 </div>
+            </div>
+            <div v-else class="no-product-message">
+                Không có sản phẩm được chọn
             </div>
 
             <!-- Total tong tien hang -->
@@ -1603,6 +1607,8 @@ const confirmReturnSelected = async () => {
         selectedItems.value = [];
         selectAllItems.value = false;
         await loadTabHoaDon();
+        loadProducts()
+        getHdctByImeiDaBan()
     } catch (error) {
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
     }

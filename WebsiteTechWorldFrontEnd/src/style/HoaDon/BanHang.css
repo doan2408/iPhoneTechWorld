@@ -3298,3 +3298,24 @@ input:checked+.slider:before {
     border-radius: 6px;
     cursor: pointer;
 }
+.no-product-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #555;
+    background-color: #f9f9f9;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    font-style: italic;
+    transition: all 0.3s ease;
+}
+
+.no-product-message:hover {
+    background-color: #f0f0f0;
+    color: #333;
+    border-color: #999;
+}
