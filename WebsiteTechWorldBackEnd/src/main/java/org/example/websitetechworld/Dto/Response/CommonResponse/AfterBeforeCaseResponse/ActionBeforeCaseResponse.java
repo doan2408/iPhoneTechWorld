@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
 
 import java.math.BigDecimal;
@@ -22,4 +23,5 @@ public class ActionBeforeCaseResponse {
     private LocalDateTime thoiGianYeuCau;
     private BigDecimal giaBan;
     private Integer idHoaDon;
+    private ActionAfterCase hanhDongSauVuViec;
 }

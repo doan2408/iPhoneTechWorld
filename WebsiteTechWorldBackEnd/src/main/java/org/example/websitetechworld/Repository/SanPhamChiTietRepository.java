@@ -2,6 +2,7 @@ package org.example.websitetechworld.Repository;
 
 import jakarta.validation.constraints.Size;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.SanPhamChiTietResponse;
+import org.example.websitetechworld.Entity.KhuyenMai;
 import org.example.websitetechworld.Entity.SanPham;
 import org.example.websitetechworld.Entity.SanPhamChiTiet;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
@@ -14,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +37,33 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             "WHERE s.id = :id")
     Optional<SanPhamChiTiet> findFullById(@Param("id") Integer id);
 
-    Page<SanPhamChiTiet> findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(String tenSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
+    @Query("""
+    SELECT spct FROM SanPhamChiTiet spct
+        WHERE (:tenSanPham IS NULL OR :tenSanPham = '' OR spct.idSanPham.tenSanPham LIKE %:tenSanPham%)
+        AND spct.idSanPham.trangThaiSanPham = :trangThaiSanPham
+        AND (:loaiSanPham IS NULL OR spct.idSanPham.idModelSanPham.idLoai.id = :loaiSanPham)
+        AND (:giaTu IS NULL OR spct.giaBan >= :giaTu)
+        AND (:giaDen IS NULL OR spct.giaBan <= :giaDen)
+        AND (:soLuongTu IS NULL OR spct.soLuong >= :soLuongTu)
+        AND (:soLuongDen IS NULL OR spct.soLuong <= :soLuongDen)
+        AND (:maSpct IS NULL OR :maSpct = '' OR spct.maSanPhamChiTiet LIKE %:maSpct%)
+        AND (:dungLuong IS NULL OR spct.idRom.id =  :dungLuong)
+        AND (:mau IS NULL OR spct.idMau.id = :mau)
+""")
+    Page<SanPhamChiTiet> findByTenSanPhamAndTrangThai(
+            @Param("tenSanPham") String tenSanPham,
+            @Param("trangThaiSanPham") TrangThaiSanPham trangThaiSanPham,
+            @Param("loaiSanPham") Integer loaiSanPham,
+            @Param("giaTu") BigDecimal giaTu,
+            @Param("giaDen") BigDecimal giaDen,
+            @Param("soLuongTu") Integer soLuongTu,
+            @Param("soLuongDen") Integer soLuongDen,
+            @Param("maSpct") String maSpct,
+            @Param("dungLuong") Integer dungLuong,
+            @Param("mau") Integer mau,
+            Pageable pageable
+    );
+
 
     Page<SanPhamChiTiet> findByIdSanPham_MaSanPhamContainingAndIdSanPham_TrangThaiSanPham(String maSanPham,TrangThaiSanPham trangThaiSanPham, Pageable pageable);
 
@@ -102,4 +130,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     List<SanPhamChiTiet> findBySanPhamIds(@Param("sanPhamIds") List<Integer> sanPhamIds);
 
     List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
+
+    Integer id(Integer id);
 }

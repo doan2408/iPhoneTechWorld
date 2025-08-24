@@ -10,4 +10,7 @@ public class ReturnImeiRequest {
     private Integer idHoaDonChiTiet;
     private String soImei;
     private Integer idFailReason;
+
+    private String urlHinh;
+    private String urlVideo;
 }

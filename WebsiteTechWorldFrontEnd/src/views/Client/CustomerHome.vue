@@ -633,7 +633,7 @@ const removeCompare = (product) => {
             <div class="trust-icon">🚚</div>
             <div class="trust-content">
               <h4>Giao hàng toàn quốc</h4>
-              <p>Miễn phí từ 500K</p>
+              <p>Giao tận tay</p>
             </div>
           </div>
           <div class="trust-item">
@@ -647,7 +647,7 @@ const removeCompare = (product) => {
             <div class="trust-icon">↩️</div>
             <div class="trust-content">
               <h4>Đổi trả dễ dàng</h4>
-              <p>Trong vòng 30 ngày</p>
+              <p>Đối với sản phẩm lỗi từ chúng tôi</p>
             </div>
           </div>
         </div>

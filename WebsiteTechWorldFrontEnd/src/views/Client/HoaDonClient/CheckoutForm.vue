@@ -6,13 +6,22 @@
             <!-- Địa chỉ nhận hàng -->
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
-                <div class="current-address-display">
-                    <p class="address-name-display">{{ shippingAddress.tenNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.sdtNguoiNhan }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.emailNguoiNhan }}</p>
-                    <p class="address-detail-display">{{ shippingAddress.soNha + ', ' + shippingAddress.tenDuong + ', '
-                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho }}</p>
+                <div class="current-address-display" v-if="hasShippingInfo">
+                    <p class="address-name-display"><span style="color: blue;">Họ tên:</span> {{
+                        shippingAddress.tenNguoiNhan || 'Chưa có' }}</p>
+                    <p class="address-phone-display"><span style="color: blue;">Số điện thoại:</span> {{
+                        shippingAddress.sdtNguoiNhan || 'Chưa có' }}</p>
+                    <p class="address-phone-display"><span style="color: blue;">Email:</span> {{
+                        shippingAddress.emailNguoiNhan || 'Chưa có' }}</p>
+                    <p class="address-detail-display"><span style="color: blue;">Địa chỉ nhận hàng:</span> {{
+                        shippingAddress.soNha + ', ' +
+                        shippingAddress.tenDuong + ', '
+                        + shippingAddress.xaPhuong + ', ' + shippingAddress.tinhThanhPho || 'Chưa có' }}</p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
+                </div>
+                <div v-else class="no-address">
+                    <p style="color: red;">Chưa cập nhật thông tin giao hàng</p>
+                    <button @click="openAddressModal" class="change-button">Thêm địa chỉ</button>
                 </div>
             </div>
 
@@ -48,26 +57,6 @@
 
 
                 <div class="separator"></div>
-
-                <div class="insurance-item">
-                    <input type="checkbox" id="fashion-insurance" v-model="hasInsurance" class="checkbox-field" />
-                    <div class="insurance-details">
-                        <label for="fashion-insurance" class="insurance-label">
-                            {{ insurance.name }} <span class="new-tag">Mới</span>
-                        </label>
-                        <p class="insurance-description">
-                            {{ insurance.description }}
-                            <a href="#" class="learn-more-link">Tìm hiểu thêm</a>
-                        </p>
-                    </div>
-                    <div class="insurance-pricing">
-                        <div class="insurance-price">₫{{ insurance.gia }}</div>
-                        <div class="insurance-quantity">x{{ insurance.quantity }}</div>
-                        <div class="insurance-total">
-                            ₫{{ (insurance.gia * insurance.quantity) }}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Phương thức vận chuyển -->
@@ -76,11 +65,13 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <div class="radio-content">
-                            <input type="radio" name="shipping-method" value="ghtk" v-model="selectedShippingMethod"
+                            <input type="radio" name="shipping-method" value="standard" v-model="selectedShippingMethod"
                                 class="radio-field" />
                             <span>Vận chuyển tiêu chuẩn</span>
                         </div>
-                        <span class="shipping-cost">₫25.000</span>
+                        <span class="shipping-cost">
+                            đ{{ formatCurrency(phiShipTieuChuan) }}
+                        </span>
                     </label>
                     <label class="radio-option">
                         <div class="radio-content">
@@ -106,16 +97,6 @@
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
                     <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
-            <!-- Áp dụng điểm -->
-            <div class="section">
-                <h2 class="section-title">Áp dụng điểm</h2>
-                <div class="points-input-group">
-                    <input v-model="pointsToApply" type="number" placeholder="Nhập số điểm muốn áp dụng"
-                        class="input-field flex-grow" />
-                    <button class="apply-button">Áp dụng</button>
                 </div>
             </div>
 
@@ -259,8 +240,8 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-if="discountList?.length" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
-                                    class="input-field flex-grow" />
+                                <input v-if="discountList?.length" v-model="modalVoucherCode" type="text"
+                                    placeholder="Nhập mã giảm giá" class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
                                 <p v-if="!discountList?.length" style="text-align: center; font-style: italic;">
@@ -286,7 +267,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button v-if="!discountList?.length" @click="closeVoucherModal" class="apply-button">Đóng</button>
+                        <button v-if="!discountList?.length" @click="closeVoucherModal"
+                            class="apply-button">Đóng</button>
                     </div>
                 </div>
             </div>
@@ -303,7 +285,8 @@ import { useToast } from "vue-toastification";
 import router from '@/router';
 import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
-
+import codIcon from '@/assets/HinhAnh/images.jpg'
+import vnPayIcon from '@/assets/HinhAnh/vnpay.png'
 import { useStore } from "vuex";
 import headerState from "@/components/Client/modules/headerState";
 
@@ -417,6 +400,18 @@ const validateNewAddress = () => {
     return Object.keys(errors.value).length === 0;
 };
 
+const hasShippingInfo = computed(() => {
+    const addr = shippingAddress.value;
+    return addr
+        && addr.tenNguoiNhan
+        && addr.sdtNguoiNhan
+        && addr.emailNguoiNhan
+        && addr.soNha
+        && addr.tenDuong
+        && addr.xaPhuong
+        && addr.tinhThanhPho;
+});
+
 const confirmAddressSelection = () => {
     if (modalSelectedAddressId.value === 'new') {
         errors.value = {};
@@ -518,6 +513,8 @@ const handleApplyVoucherInModal = () => {
 };
 
 // --- Other Checkout Data ---
+const phiShipTieuChuan = ref(0);
+const phishipDisplay = ref(0);
 const selectedShippingMethod = ref('standard')
 const pointsToApply = ref('')
 const hasInsurance = ref(false)
@@ -537,8 +534,8 @@ onMounted(() => {
 });
 
 watch(product, (newVal) => {
-    console.log("👀 product thay đổi:", newVal);
-    console.log("💵 Subtotal mới:", calculateSubtotal.value);
+    console.log("product thay đổi:", newVal);
+    console.log("Subtotal mới:", calculateSubtotal.value);
     loadDiscountList()
 });
 
@@ -553,8 +550,8 @@ const insurance = ref({
 
 const getShippingCost = computed(() => {
     switch (selectedShippingMethod.value) {
-        case 'ghtk':
-            return 25000;
+        case 'standard':
+            return phiShipTieuChuan.value;
         case 'express':
             return phishipDisplay.value;
         default:
@@ -606,7 +603,8 @@ const handleBuy = async () => {
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
         })),
-        idPhieuGiamGia: selectedDiscount.value?.id
+        idPhieuGiamGia: selectedDiscount.value?.id,
+        soTienGiam: appliedVoucher.value.discount
     };
     if (getShippingCost.value == 0) {
         toast.warning('Chưa chọn phương thức giao hàng')
@@ -682,19 +680,17 @@ const fetchPaymentMethods = async () => {
 };
 const getIconUrl = (code) => {
     switch (code) {
-        case 'TIEN_MAT':
-            return '/icons/cod.png'; // Đảm bảo file cod.png có trong public/icons
-        case 'NGAN_HANG':
-            return '/icons/bank.png'; // Đảm bảo file bank.png có trong public/icons
+        case 'COD':
+            return codIcon; 
+        case 'VNPAY':
+            return vnPayIcon; 
         default:
-            return '/icons/default.png'; // Icon mặc định
+            return '/icons/default.png'; 
     }
 };
 onMounted(async () => {
     fetchPaymentMethods();
 })
-
-const phishipDisplay = ref(0);
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
@@ -715,12 +711,6 @@ const updatePhiShip = async () => {
         console.log("Tọa độ cửa hàng (from):", from);
         console.log("Tọa độ người nhận (to):", to);
 
-        if (!from || !to) {
-            phishipDisplay.value = 30000; // Phí mặc định
-            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Áp dụng phí mặc định: 30,000 VNĐ.");
-            return;
-        }
-
         const distance = await getDistanceInKm(from, to);
         console.log("Khoảng cách tính được:", distance);
 
@@ -732,12 +722,14 @@ const updatePhiShip = async () => {
         // }
 
         phishipDisplay.value = calcPhiShip(distance);
+        phiShipTieuChuan.value = calcPhiShipTieuChuan(distance)
         console.log(
             `Khoảng cách: ${distance} km, Phí ship: ${phishipDisplay.value.toLocaleString('vi-VN')} VNĐ`
         );
     } catch (err) {
         console.error("Lỗi khi tính phí ship:", err);
-        phishipDisplay.value = 30000; // Phí mặc định
+        phishipDisplay.value = 50000; 
+        phiShipTieuChuan.value = 30000;
         console.log("Áp dụng phí mặc định do lỗi: 30,000 VNĐ");
     }
 };
@@ -808,14 +800,27 @@ const getDistanceInKm = async (from, to) => {
     }
 };
 const calcPhiShip = (km) => {
-    const baseFee = 15000;
-    const additionalFeePerKm = 2000;
+    return 50000
+};
 
-    if (km <= 2) return baseFee;
 
-    const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
+const calcPhiShipTieuChuan = (km) => {
 
-    return calculatedFee;
+    if (km <= 30) return 30000;
+
+    if (km >= 30 || km <= 50) return 40000;
+
+    if (km >= 50 || km <= 100) {
+        return 1500 * km;
+    }
+
+    if (km >= 100 || km <= 500) {
+        return 1200 * km;
+    }
+
+    if (km => 1000) {
+        return 1000 * km;
+    }
 };
 </script>
 

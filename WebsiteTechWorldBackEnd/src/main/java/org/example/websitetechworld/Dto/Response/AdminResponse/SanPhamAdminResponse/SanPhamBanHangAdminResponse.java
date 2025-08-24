@@ -30,6 +30,8 @@ public class SanPhamBanHangAdminResponse {
 
     private BigDecimal giaBan;
 
+    private BigDecimal giaTruocKhuyenMai;
+
 
     public static SanPhamBanHangAdminResponse converDto(SanPhamChiTiet sanPhamChiTiet){
         SanPhamBanHangAdminResponse response = new SanPhamBanHangAdminResponse();
@@ -45,7 +47,7 @@ public class SanPhamBanHangAdminResponse {
             response.setRom(sanPhamChiTiet.getIdRom().getDungLuong());
         }
         response.setSoLuong(sanPhamChiTiet.getSoLuong());
-        response.setGiaBan(sanPhamChiTiet.getGiaBan());
+        response.setGiaTruocKhuyenMai(sanPhamChiTiet.getGiaBan());
         Set<HinhAnh> hinhAnhs = sanPhamChiTiet.getHinhAnhs();
         if (hinhAnhs != null && !hinhAnhs.isEmpty()) {
             HinhAnh hinhAnhDauTien = hinhAnhs.iterator().next();

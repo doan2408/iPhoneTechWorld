@@ -100,16 +100,16 @@ const scrollTabIntoView = (tabId) => {
     );
     if (activeTabElement) {
       const container = specTabsContainer.value;
-      
+
       // Tính toán vị trí để tab luôn ở góc trái với padding 20px
       const targetScrollLeft = activeTabElement.offsetLeft - 20;
-      
+
       // Scroll container để đưa tab về góc trái
       container.scrollTo({
         left: Math.max(0, targetScrollLeft), // Đảm bảo không scroll âm
         behavior: "smooth"
       });
-      
+
       // Debug log
       console.log('Tab scrolled to left:', tabId, targetScrollLeft);
     }
@@ -127,9 +127,9 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
       const containerWidth = container.clientWidth;
       const tabLeft = activeTabElement.offsetLeft;
       const tabWidth = activeTabElement.offsetWidth;
-      
+
       let targetScrollLeft;
-      
+
       switch (position) {
         case 'left':
           // Tab ở góc trái với padding 20px
@@ -146,13 +146,13 @@ const scrollTabIntoViewAdvanced = (tabId, position = 'left') => {
         default:
           targetScrollLeft = tabLeft - 20;
       }
-      
+
       // Scroll container
       container.scrollTo({
         left: Math.max(0, targetScrollLeft),
         behavior: "smooth"
       });
-      
+
       console.log(`Tab "${tabId}" scrolled to ${position}:`, targetScrollLeft);
     }
   }
@@ -168,21 +168,21 @@ const scrollToSection = (sectionId) => {
       const targetSection = specModalContent.value.querySelector(
         `[data-section="${sectionId}"]`
       );
-      
+
       if (targetSection) {
         const modalContent = specModalContent.value;
         const headerHeight = 81; // Modal header
         const tabsHeight = 49; // Tabs height
-        
+
         // Tính toán vị trí chính xác của section
         const sectionTop = targetSection.offsetTop;
         const scrollPosition = sectionTop - headerHeight - tabsHeight - 10;
-        
+
         // Debug log để kiểm tra
         console.log('Section ID:', sectionId);
         console.log('Section top:', sectionTop);
         console.log('Scroll to:', scrollPosition);
-        
+
         modalContent.scrollTo({
           top: Math.max(0, scrollPosition), // Đảm bảo không scroll âm
           behavior: "smooth",
@@ -269,7 +269,8 @@ const fetchChiTietBienThe = async () => {
     const res = await getChiTietBienThe(
       idSanPham,
       selectedMau.value,
-      selectedRom.value
+      selectedRom.value,
+      0
     );
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
@@ -299,7 +300,7 @@ const addToCart = async (buy) => {
       ElMessage.error("Sản phẩm đã hết hàng hoặc không hợp lệ!");
       return;
     }
-    
+
     console.log(bienThe.value)
     const idSanPhamChiTiet = bienThe.value.idSpct;
     const soLuongMoi = quantity.value;
@@ -308,18 +309,16 @@ const addToCart = async (buy) => {
     // const idSanPhamChiTiet = bienThe.value.idSpct;
     // const soLuongMoi = quantity.value;
     const tenSanPham = sanPham.value?.tenSanPham || "Sản phẩm không xác định";
-    const phienBan = `${
-      sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
-    } - ${
-      sanPham.value?.rom?.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
-    }`;
+    const phienBan = `${sanPham.value?.mau?.find((m) => m.id === selectedMau.value)?.ten || "Mặc định"
+      } - ${sanPham.value?.rom?.find((r) => r.id === selectedRom.value)?.ten || "Mặc định"
+      }`;
     const imageUrl = bienThe.value?.hinhAnh?.[0] || "/default-image.png";
     const gia = bienThe.value?.giaBan ?? 0;
     const soLuongTon = bienThe.value.soLuong;
 
     const isValid = validateCartItem(idSanPhamChiTiet, soLuongMoi, soLuongTon);
     console.log("");
-    
+
     const success = CartService.themVaoGio(
       idSanPhamChiTiet,
       soLuongMoi,
@@ -484,10 +483,10 @@ watch(showSpecModal, (newVal) => {
       if (specModalContent.value) {
         // Reset scroll position về đầu
         specModalContent.value.scrollTop = 0;
-        
+
         // Add scroll listener
         specModalContent.value.addEventListener("scroll", handleScroll, { passive: true });
-        
+
         // Set default active tab
         activeTab.value = "thong-tin-hang-hoa";
         scrollTabIntoView("thong-tin-hang-hoa");
@@ -512,11 +511,8 @@ onMounted(() => {
     <div class="product-container">
       <!-- Cột trái: Hình ảnh (55%) -->
       <div class="product-image">
-        <img
-          :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'"
-          alt="Hình ảnh sản phẩm"
-          class="main-image"
-        />
+        <img :src="selectedImage || bienThe?.hinhAnh?.[0] || '/img/no-image.png'" alt="Hình ảnh sản phẩm"
+          class="main-image" />
         <!-- Danh sách ảnh thu nhỏ -->
         <div class="thumbnail-list" v-if="bienThe?.hinhAnh?.length > 0">
           <img v-for="(img, index) in bienThe.hinhAnh" :key="index" :src="img" class="thumbnail"
@@ -592,7 +588,18 @@ onMounted(() => {
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
 
-          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+          <p class="price">
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai !== bienThe.giaBan" class="old-price">
+              {{ formatPrice(bienThe.giaTruocKhuyenMai) }}
+            </span>
+            <span class="current-price">
+              {{ formatPrice(bienThe?.giaBan) }}
+            </span>
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai > bienThe.giaBan"
+              class="discount-badge">
+              -{{ Math.round(((bienThe.giaTruocKhuyenMai - bienThe.giaBan) / bienThe.giaTruocKhuyenMai) * 100) }}%
+            </span>
+          </p>
 
           <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
@@ -608,11 +615,7 @@ onMounted(() => {
 
           <div class="banner-tichDiem">
             <router-link to="/client/doiDiem">
-              <img
-                src="/src/components/images/bannerTichDiem.jpg"
-                alt="Banner tích điểm"
-                class="tich-diem-img"
-              />
+              <img src="/src/components/images/bannerTichDiem.jpg" alt="Banner tích điểm" class="tich-diem-img" />
             </router-link>
           </div>
 
@@ -623,21 +626,13 @@ onMounted(() => {
 
           <!-- Hành động -->
           <div class="button-group">
-            <el-button
-              type="primary"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="buy-btn"
-              @click="addToCart(true)"
-            >
+            <el-button type="primary" :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="buy-btn"
+              @click="addToCart(true)">
               Mua ngay
             </el-button>
-            <el-button
-              type="success"
-              :icon="ShoppingCart"
-              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0"
-              class="cart-btn"
-              @click="addToCart(false)"
-            >
+            <el-button type="success" :icon="ShoppingCart"
+              :disabled="!selectedRom || !selectedMau || bienThe?.soLuong <= 0" class="cart-btn"
+              @click="addToCart(false)">
               Thêm vào giỏ hàng
             </el-button>
           </div>
@@ -646,11 +641,7 @@ onMounted(() => {
     </div>
 
     <!-- Specifications Modal -->
-    <div
-      v-if="showSpecModal"
-      class="spec-modal-overlay"
-      @click="closeSpecModal"
-    >
+    <div v-if="showSpecModal" class="spec-modal-overlay" @click="closeSpecModal">
       <div class="spec-modal" @click.stop>
         <div class="spec-modal-header">
           <h2>Thông số sản phẩm</h2>
@@ -661,60 +652,32 @@ onMounted(() => {
         <div class="spec-modal-content" v-if="thongSo" ref="specModalContent">
           <div class="spec-tabs-wrapper">
             <div class="spec-tabs" ref="specTabsContainer">
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
-                @click="scrollToSection('thong-tin-hang-hoa')"
-                data-tab="thong-tin-hang-hoa"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thong-tin-hang-hoa' }"
+                @click="scrollToSection('thong-tin-hang-hoa')" data-tab="thong-tin-hang-hoa">
                 Thông tin hàng hóa
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
-                @click="scrollToSection('thiet-ke-trong-luong')"
-                data-tab="thiet-ke-trong-luong"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'thiet-ke-trong-luong' }"
+                @click="scrollToSection('thiet-ke-trong-luong')" data-tab="thiet-ke-trong-luong">
                 Thiết kế & Trọng lượng
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'bo-xu-ly' }"
-                @click="scrollToSection('bo-xu-ly')"
-                data-tab="bo-xu-ly"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'bo-xu-ly' }" @click="scrollToSection('bo-xu-ly')"
+                data-tab="bo-xu-ly">
                 Bộ xử lý
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'ram' }"
-                @click="scrollToSection('ram')"
-                data-tab="ram"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'ram' }" @click="scrollToSection('ram')"
+                data-tab="ram">
                 Lưu trữ
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'man-hinh' }"
-                @click="scrollToSection('man-hinh')"
-                data-tab="man-hinh"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'man-hinh' }" @click="scrollToSection('man-hinh')"
+                data-tab="man-hinh">
                 Màn hình
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'camera' }"
-                @click="scrollToSection('camera')"
-                data-tab="camera"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'camera' }" @click="scrollToSection('camera')"
+                data-tab="camera">
                 Camera
               </div>
-              <div
-                class="tab-item"
-                :class="{ active: activeTab === 'pin-sac' }"
-                @click="scrollToSection('pin-sac')"
-                data-tab="pin-sac"
-              >
+              <div class="tab-item" :class="{ active: activeTab === 'pin-sac' }" @click="scrollToSection('pin-sac')"
+                data-tab="pin-sac">
                 Pin & Sạc
               </div>
             </div>
@@ -1093,11 +1056,32 @@ onMounted(() => {
 }
 
 .price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.old-price {
+  font-size: 18px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.current-price {
   font-size: 28px;
   color: #d70018;
   font-weight: 700;
-  margin: 15px 0;
-  display: inline-block;
+}
+
+.discount-badge {
+  background: #ffeee8;
+  color: #d70018;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
 .danhGia {
@@ -1502,6 +1486,7 @@ onMounted(() => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1511,6 +1496,7 @@ onMounted(() => {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }

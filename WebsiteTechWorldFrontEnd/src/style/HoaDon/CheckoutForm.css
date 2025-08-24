@@ -1170,3 +1170,14 @@
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+.quantity-badge {
+    display: inline-block;
+    min-width: 28px;
+    padding: 4px 8px;
+    text-align: center;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}

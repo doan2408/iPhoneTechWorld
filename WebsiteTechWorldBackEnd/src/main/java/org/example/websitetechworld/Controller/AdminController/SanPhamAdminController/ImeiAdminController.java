@@ -148,10 +148,11 @@ public class ImeiAdminController {
     public ResponseEntity<Page<ViewImeiAdminResponse>> getAvailableImeis(
             @RequestParam("productId") Integer productId, // Tên parameter phải khớp với frontend
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam("search") String search) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<ViewImeiAdminResponse> imeisPage = imeiAdminServices.getAvailableImeisByProductId(productId, pageable);
+        Page<ViewImeiAdminResponse> imeisPage = imeiAdminServices.getAvailableImeisByProductId(productId, pageable, search);
         return ResponseEntity.ok(imeisPage);
     }
 

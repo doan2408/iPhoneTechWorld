@@ -10,7 +10,7 @@ var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
 })();
 </script>
 <script setup>
-import { ref, onMounted, watch, nextTick, reactive } from "vue";
+import { ref, onMounted, watch, nextTick, reactive, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import {
@@ -27,6 +27,7 @@ import { ShoppingCart } from "@element-plus/icons-vue";
 import headerState from "@/components/Client/modules/headerState";
 import axios from "axios";
 import { useToast } from "vue-toastification";
+import { nextDelayClient } from "@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService";
 const toast = useToast()
 const count = ref(0);
 const store = useStore();
@@ -299,7 +300,8 @@ const fetchThongSo = async () => {
 const fetchChiTietBienThe = async () => {
   if (!selectedRom.value || !selectedMau.value) return;
   try {
-    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value);
+    const res = await getChiTietBienThe(idSanPham, selectedMau.value, selectedRom.value, user.id);
+    console.log('hehe', res)
     bienThe.value = res;
     if (res.hinhAnh?.length > 0) selectedImage.value = res.hinhAnh[0];
     await fetchReviews();
@@ -495,10 +497,36 @@ watch([selectedRom], () => {
   checkIfFavorite();
 });
 
-onMounted(() => {
+let statusUpdateInterval = null;
+const getNextUpdateDelay = async () => {
+  try {
+    const response = await nextDelayClient()
+    const delay = Math.max(1000, response.delay || 60_000);
+    return delay;
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Không thể lấy thời gian cập nhật:', error);
+      toast.error('Không thể lấy thời gian cập nhật');
+    }
+    return 60_000;
+  }
+};
+
+onMounted(async () => {
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   fetchSanPhamDetail();
   setupInfiniteScroll();
+  const initialDelay = await getNextUpdateDelay(); // <-- await ở đây
+  statusUpdateInterval = setInterval(async () => {
+    await fetchChiTietBienThe();
+  }, initialDelay);
+});
+
+onUnmounted(() => {
+  if (statusUpdateInterval) {
+    clearInterval(statusUpdateInterval);
+    statusUpdateInterval = null;
+  }
 });
 
 watch(showSpecModal, (newVal) => {
@@ -634,7 +662,18 @@ const toggleWishlist = async () => {
             <h3>Số lượng còn: {{ bienThe.soLuong ?? 0 }}</h3>
           </div>
 
-          <p class="price">{{ formatPrice(bienThe?.giaBan) }}</p>
+          <p class="price">
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai !== bienThe.giaBan" class="old-price">
+              {{ formatPrice(bienThe.giaTruocKhuyenMai) }}
+            </span>
+            <span class="current-price">
+              {{ formatPrice(bienThe?.giaBan) }}
+            </span>
+            <span v-if="bienThe?.giaTruocKhuyenMai && bienThe.giaTruocKhuyenMai > bienThe.giaBan"
+              class="discount-badge">
+              -{{ Math.round(((bienThe.giaTruocKhuyenMai - bienThe.giaBan) / bienThe.giaTruocKhuyenMai) * 100) }}%
+            </span>
+          </p>
 
           <!-- Chọn số lượng -->
           <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
@@ -1083,11 +1122,32 @@ const toggleWishlist = async () => {
 }
 
 .price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.old-price {
+  font-size: 18px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.current-price {
   font-size: 28px;
   color: #d70018;
   font-weight: 700;
-  margin: 15px 0;
-  display: inline-block;
+}
+
+.discount-badge {
+  background: #ffeee8;
+  color: #d70018;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
 .danhGia {

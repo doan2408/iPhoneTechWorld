@@ -7,7 +7,9 @@ import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.hibernate.annotations.Nationalized;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -15,7 +17,6 @@ import java.util.List;
 public class ModelSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_model_san_pham")
     private Integer idModelSanPham;
 
@@ -61,6 +62,9 @@ public class ModelSanPham {
 
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ModelCameraSau> cameraSaus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "idModelSanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LoaiBaoHanh> idLoaiBaoHanh = new LinkedHashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_xuat_xu")

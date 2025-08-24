@@ -3,15 +3,18 @@ package org.example.websitetechworld.Services.ClientServices.GioHangClientServic
 import org.example.websitetechworld.Dto.Request.ClientRequest.GioHangClientRequest.GioHangClientRequest;
 import org.example.websitetechworld.Dto.Response.ClientResponse.GioHangClientResponse.GioHangClientResponse;
 import org.example.websitetechworld.Entity.*;
-import org.example.websitetechworld.Repository.GioHangChiTietRepository;
-import org.example.websitetechworld.Repository.GioHangRepository;
-import org.example.websitetechworld.Repository.KhachHangRepository;
-import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
+import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,12 +24,14 @@ public class GioHangClientService {
     private final GioHangChiTietRepository gioHangChiTietRepository;
     private final KhachHangRepository khachHangRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final HoaDonRepository hoaDonRepository;
 
-    public GioHangClientService(GioHangRepository gioHangRepository, GioHangChiTietRepository gioHangChiTietRepository, KhachHangRepository khachHangRepository, SanPhamChiTietRepository sanPhamChiTietRepository) {
+    public GioHangClientService(GioHangRepository gioHangRepository, GioHangChiTietRepository gioHangChiTietRepository, KhachHangRepository khachHangRepository, SanPhamChiTietRepository sanPhamChiTietRepository, HoaDonRepository hoaDonRepository) {
         this.gioHangRepository = gioHangRepository;
         this.gioHangChiTietRepository = gioHangChiTietRepository;
         this.khachHangRepository = khachHangRepository;
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
+        this.hoaDonRepository = hoaDonRepository;
     }
 
     public GioHangClientResponse layGioHang (Integer idKhachHang) {
@@ -87,7 +92,7 @@ public class GioHangClientService {
 
     @Transactional
     public void xoaSanPhamKhoiGio (Integer idSanPhamChiTiet) {
-        gioHangChiTietRepository.deleteByIdSanPhamChiTiet_Id (idSanPhamChiTiet);
+        gioHangChiTietRepository.deleteById(idSanPhamChiTiet);
     }
 
     @Transactional
@@ -116,12 +121,74 @@ public class GioHangClientService {
                     item.getIdSanPhamChiTiet().getIdRom().getDungLuong()));
             itemDTO.setImageUrl(item.getIdSanPhamChiTiet().getHinhAnhs().stream()
                     .findFirst().map(HinhAnh::getUrl).orElse(""));
-            itemDTO.setGia(item.getGia());
+            itemDTO.setGiaTruocKhuyenMai(item.getGia());
+            itemDTO.setGia(tinhGiaKhuyenMai(item.getIdSanPhamChiTiet().getId(), gioHang.getIdKhachHang().getId()));
             itemDTO.setSoLuong(item.getSoLuong());
             itemDTO.setSoLuongTon(item.getIdSanPhamChiTiet().getSoLuong());
             itemDTO.setNgayThem(item.getNgayThem());
             return itemDTO;
         }).collect(Collectors.toList()));
         return response;
+    }
+
+    private BigDecimal tinhGiaKhuyenMai(Integer idSpct, Integer selectedIdKhachHang) {
+        try {
+            if (idSpct == null) {
+                return BigDecimal.ZERO;
+            }
+            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(idSpct)
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm chi tiết với ID: " + idSpct));
+
+            BigDecimal giaGoc = spct.getGiaBan();
+            if (giaGoc == null) {
+                return BigDecimal.ZERO;
+            }
+            List<KhuyenMai> danhSachKhuyenMai = spct.getDanhSachKhuyenMai().stream()
+                    .map(KhuyenMaiSanPhamChiTiet::getIdKhuyenMai)
+                    .toList();
+            LocalDateTime hienTai = LocalDateTime.now();
+            KhuyenMai khuyenMai = danhSachKhuyenMai.stream()
+                    .filter(km -> km.getNgayBatDau() != null && km.getNgayKetThuc() != null)
+                    .filter(km -> !km.getNgayBatDau().isAfter(hienTai) && !km.getNgayKetThuc().isBefore(hienTai))
+                    .findFirst()
+                    .orElse(null);
+            if (khuyenMai == null) {
+                return giaGoc;
+            }
+            if (khuyenMai.getTrangThai() != TrangThaiKhuyenMai.ACTIVE) {
+                return giaGoc;
+            }
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(khuyenMai.getNgayBatDau()) || now.isAfter(khuyenMai.getNgayKetThuc())) {
+                return giaGoc;
+            }
+
+            Integer discountValue = Optional.ofNullable(khuyenMai.getPhanTramGiam()).orElse(0);
+            BigDecimal tyLeGiam = BigDecimal.valueOf(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            DoiTuongApDung doiTuong = khuyenMai.getDoiTuongApDung();
+            if (doiTuong == DoiTuongApDung.ALL) {
+                return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+            }
+            if (selectedIdKhachHang == null || selectedIdKhachHang == 0) {
+                return giaGoc;
+            }
+            boolean khachHangCu = hoaDonRepository.countHoaDonByIdKhachHang(selectedIdKhachHang) > 0;
+            boolean khongHopLe =
+                    (doiTuong == DoiTuongApDung.NEW_CUSTOMER && khachHangCu) ||
+                            (doiTuong == DoiTuongApDung.OLD_CUSTOMER && !khachHangCu);
+            if (khongHopLe) {
+                return giaGoc;
+            }
+
+            return tinhGiaKhuyenMai(giaGoc, tyLeGiam);
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
+        return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
     }
 }

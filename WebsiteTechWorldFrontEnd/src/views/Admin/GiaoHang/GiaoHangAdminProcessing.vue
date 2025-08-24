@@ -520,7 +520,7 @@ const orderStepsFalse = computed(() => [
         id: 1,
         title: 'Giao Thất Bại',
         icon: XCircle,
-        status: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
+        status: ['Giao thất bại'].includes(order.trangThaiDonHang) ? 'current' : 'pending',
         timestamp: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? order.failedAt : null,
         description: ['Giao thất bại', 'Trả hàng'].includes(order.trangThaiDonHang) ? 'Đơn hàng giao thất bại' : null
     },

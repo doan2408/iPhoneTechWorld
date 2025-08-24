@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +82,21 @@ public class SanPhamAdminController {
 
     // ham lay ten san pham
     @GetMapping("/ten-san-pham")
-    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham( @RequestParam(value = "tenSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
-        return ResponseEntity.ok(sanPhamAdminService.getProductNames(tenSanPham,pageNo, pageSize));
+    public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getTenSanPham(
+            @RequestParam(value = "tenSanPham") String tenSanPham ,
+            @RequestParam(value = "pageNo",defaultValue = "5") int pageNo,
+            @RequestParam(value = "pageSize",defaultValue = "0") int pageSize,
+            @RequestParam(value = "selectedIdKhachHang",defaultValue = "0") int selectedIdKhachHang,
+            @RequestParam(value = "loaiSanPham", required = false) Integer loaiSanPham,
+            @RequestParam(value = "giaTu", required = false) BigDecimal giaTu,
+            @RequestParam(value = "giaDen", required = false) BigDecimal giaDen,
+            @RequestParam(value = "soLuongTu", required = false) Integer soLuongTu,
+            @RequestParam(value = "soLuongDen", required = false) Integer soLuongDen,
+            @RequestParam(value = "maSpct", required = false) String maSpct,
+            @RequestParam(value = "dungLuong", required = false) Integer dungLuong,
+            @RequestParam(value = "tenMau", required = false) Integer tenMau) {
+        return ResponseEntity.ok(sanPhamAdminService.getProductNames(tenSanPham,pageNo, pageSize, selectedIdKhachHang,loaiSanPham,
+                giaTu,giaDen,soLuongTu,soLuongDen,maSpct,dungLuong,tenMau));
     }
 
     @GetMapping("/category")
@@ -94,6 +108,11 @@ public class SanPhamAdminController {
     @GetMapping("/search-by-ma")
     public ResponseEntity<Page<SanPhamBanHangAdminResponse>> getSanPhamByMa( @RequestParam(value = "maSanPham") String tenSanPham ,@RequestParam(value = "pageNo",defaultValue = "5") int pageNo, @RequestParam(value = "pageSize",defaultValue = "0") int pageSize) {
         return ResponseEntity.ok(sanPhamAdminService.getProductMas(tenSanPham,pageNo, pageSize));
+    }
+
+    @GetMapping("/filldata-for-pulldown")
+    public ResponseEntity<?> fillDatePulldown(){
+        return ResponseEntity.ok(sanPhamAdminService.fillDataForPulldown());
     }
 
 }

@@ -7,13 +7,20 @@
             <div class="section">
                 <h2 class="section-title">Địa chỉ nhận hàng</h2>
                 <div class="current-address-display">
-                    <p class="address-name-display">{{ shippingAddress.name || '' }}</p>
-                    <p class="address-phone-display">{{ shippingAddress.phone || ''}}</p>
-                    <p class="address-phone-display">{{ shippingAddress.email || '' }}</p>
-                    <p v-if="shippingAddress.address" class="address-detail-display">
-                        {{ shippingAddress.address }}
+                    <p class="address-name-display"><span style="color: blue;">Họ tên:</span>
+                        {{ shippingAddress.name || 'Chưa có' }}</p>
+                    <p class="address-phone-display">
+                        <span style="color: blue;">Số điện thoại:</span>
+                        {{ shippingAddress.phone || 'Chưa có'}}
                     </p>
-                    <p v-else class="address-detail-display text-gray-400">
+                    <p class="address-phone-display">
+                        <span style="color: blue;">Email:</span>
+                        {{ shippingAddress.email || 'Chưa có' }}
+                    </p>
+                    <p v-if="shippingAddress.address" class="address-detail-display">
+                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }} 
+                    </p>
+                    <p v-else class="address-detail-display text-gray-400" style="color: red;">
                         Chưa có địa chỉ nhận hàng
                     </p>
                     <button @click="openAddressModal" class="change-button">Thay đổi địa chỉ</button>
@@ -52,26 +59,6 @@
 
 
                 <div class="separator"></div>
-
-                <div class="insurance-item">
-                    <input type="checkbox" id="fashion-insurance" v-model="hasInsurance" class="checkbox-field" />
-                    <div class="insurance-details">
-                        <label for="fashion-insurance" class="insurance-label">
-                            {{ insurance.name }} <span class="new-tag">Mới</span>
-                        </label>
-                        <p class="insurance-description">
-                            {{ insurance.description }}
-                            <a href="#" class="learn-more-link">Tìm hiểu thêm</a>
-                        </p>
-                    </div>
-                    <div class="insurance-pricing">
-                        <div class="insurance-price">₫{{ insurance.gia }}</div>
-                        <div class="insurance-quantity">x{{ insurance.quantity }}</div>
-                        <div class="insurance-total">
-                            ₫{{ (insurance.gia * insurance.quantity) }}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Phương thức vận chuyển -->
@@ -110,16 +97,6 @@
                     </div>
                     <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
                     <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
-            <!-- Áp dụng điểm -->
-            <div class="section">
-                <h2 class="section-title">Áp dụng điểm</h2>
-                <div class="points-input-group">
-                    <input v-model="pointsToApply" type="number" placeholder="Nhập số điểm muốn áp dụng"
-                        class="input-field flex-grow" />
-                    <button class="apply-button">Áp dụng</button>
                 </div>
             </div>
 
@@ -181,19 +158,19 @@
                                     <label for="modal-name" class="label">Họ và tên</label>
                                     <input id="modal-name" v-model="modalNewAddress.name" type="text"
                                         placeholder="Nhập họ và tên" class="input-field" />
-                                        <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
+                                    <span v-if="errors.name" class="error-text">{{ errors.name }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Số điện thoại</label>
                                     <input id="modal-phone" v-model="modalNewAddress.phone" type="tel"
                                         placeholder="Nhập số điện thoại" class="input-field" />
-                                        <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
+                                    <span v-if="errors.phone" class="error-text">{{ errors.phone }}</span>
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Email</label>
                                     <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
                                         placeholder="Nhập email người nhận" class="input-field" />
-                                        <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
+                                    <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
                                 </div>
                                 <label>Chọn tỉnh:</label>
                                 <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
@@ -216,7 +193,7 @@
                                     <label for="modal-address" class="label">Địa chỉ</label>
                                     <input id="modal-address" v-model="addressDetail" type="text"
                                         placeholder="Nhập địa chỉ chi tiết" class="input-field" />
-                                        <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
+                                    <span v-if="errors.address" class="error-text">{{ errors.address }}</span>
                                 </div>
                             </div>
                         </div>
@@ -247,8 +224,8 @@
                     <div class="modal-body">
                         <div class="voucher-modal-content">
                             <div class="voucher-input-group">
-                                <input v-if="discountList" v-model="modalVoucherCode" type="text" placeholder="Nhập mã giảm giá"
-                                    class="input-field flex-grow" />
+                                <input v-if="discountList" v-model="modalVoucherCode" type="text"
+                                    placeholder="Nhập mã giảm giá" class="input-field flex-grow" />
                             </div>
                             <ul class="voucher-list">
                                 <p v-if="!discountList" style="text-align: center; font-style: italic;">
@@ -293,7 +270,8 @@ import { getLatLon, getDistance } from '@/Service/ClientService/HoaDon/MyOrderCl
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
 import { add } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
-
+import codIcon from '@/assets/HinhAnh/images.jpg'
+import vnPayIcon from '@/assets/HinhAnh/vnpay.png'
 import { CartService } from "@/Service/ClientService/GioHang/CartService";
 import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
 
@@ -675,12 +653,12 @@ const fetchPaymentMethods = async () => {
 };
 const getIconUrl = (code) => {
     switch (code) {
-        case 'TIEN_MAT':
-            return '/icons/cod.png'; // Đảm bảo file cod.png có trong public/icons
-        case 'NGAN_HANG':
-            return '/icons/bank.png'; // Đảm bảo file bank.png có trong public/icons
+        case 'COD':
+            return codIcon;
+        case 'VNPAY':
+            return vnPayIcon;
         default:
-            return '/icons/default.png'; // Icon mặc định
+            return '/icons/default.png';
     }
 };
 onMounted(async () => {

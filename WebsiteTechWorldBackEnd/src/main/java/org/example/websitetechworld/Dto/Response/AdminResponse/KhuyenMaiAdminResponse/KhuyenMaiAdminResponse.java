@@ -21,6 +21,8 @@ public class KhuyenMaiAdminResponse {
     private LocalDateTime ngayBatDau;
     private LocalDateTime ngayKetThuc;
     private DoiTuongApDung doiTuongApDung;
+    private Integer mucDoUuTien;
+    private LocalDateTime ngayTao;
     private String trangThai;
     private List<Integer> idSanPhamChiTietList;
 }

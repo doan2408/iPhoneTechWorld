@@ -5,8 +5,11 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest.SanPhamChiTietAdminRepuest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.*;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
+import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.KhuyenMaiAdminService.KhuyenMaiAdminService;
 import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -17,9 +20,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +33,8 @@ public class SanPhamChiTietAdminService {
     private final SanPhamRepository sanPhamRepo;
     private final MauSacRepository mauSacRepo;
     private final RomRepository romRepo;
+    private final HoaDonRepository hoaDonRepository;
+    private final KhuyenMaiAdminService khuyenMaiAdminService;
 
 
     private void mapRequestToEntity(SanPhamChiTietAdminRepuest req, SanPhamChiTiet entity) {
@@ -130,9 +136,15 @@ public class SanPhamChiTietAdminService {
         return mapEntityToResponse(save);
     }
 
-    public Page<SanPhamChiTietHienThiResponse> getAllSanPhamChiTiet(int pageNo, int pageSize){
+    public Page<SanPhamChiTietHienThiResponse> getAllSanPhamChiTiet(int pageNo, int pageSize, Integer selectedIdKhachHang){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return sanPhamChiTietRepo.findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable).map(SanPhamChiTietHienThiResponse::converDto);
+        return sanPhamChiTietRepo
+                .findByIdSanPham_TrangThaiSanPham(TrangThaiSanPham.ACTIVE,pageable)
+                .map(spct -> {
+                    SanPhamChiTietHienThiResponse response = SanPhamChiTietHienThiResponse.converDto(spct);
+                    response.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(spct, selectedIdKhachHang));
+                    return response;
+                });
     }
 
 
@@ -167,8 +179,4 @@ public class SanPhamChiTietAdminService {
             }
         }
     }
-
-
-
-
 }

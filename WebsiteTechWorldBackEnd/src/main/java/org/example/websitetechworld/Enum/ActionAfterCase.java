@@ -8,7 +8,8 @@ public enum ActionAfterCase {
     CANCEL("Hủy bỏ"),
     HOLD("Giữ"),
     RETURN_TO_STOCK("Trả lại kho"),
-    REFUND("Hoàn tiền"),
+    REFUND("Đã hoàn tiền"),
+    RECEIVED("Đã nhận hàng"),
     EXCHANGE("Trao đổi");
 
     private final String displayName;

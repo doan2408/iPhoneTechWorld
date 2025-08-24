@@ -404,7 +404,7 @@
 
 <script setup>
 import { ref, onMounted, watch, reactive, computed, onUnmounted, readonly } from "vue";
-import { getAll, detail, add, update, deletePhieuGiamGia, giftVoucher } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
+import { getAll, detail, add, update, deletePhieuGiamGia, giftVoucher, nextDelay } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Plus, Edit, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
 import store from "@/Service/LoginService/Store";
@@ -906,6 +906,20 @@ const isAdmin = computed(() => {
     .includes("ROLE_ADMIN");
 });
 
+const getNextUpdateDelay = async () => {
+  try {
+    const response = await nextDelay()
+    const delay = Math.max(1000, response.data.delay || 60_000);
+    return delay;
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Không thể lấy thời gian cập nhật:', error);
+      toast.error('Không thể lấy thời gian cập nhật');
+    }
+    return 60_000; 
+  }
+};
+
 // Watchers
 watch([search, trangThaiFilter, ngayBatDauFilter, ngayKetThucFilter], () => {
   loadPhieuGiamGia(0);
@@ -914,12 +928,14 @@ watch([search, trangThaiFilter, ngayBatDauFilter, ngayKetThucFilter], () => {
 // Lifecycle
 onMounted(() => {
   loadPhieuGiamGia(currentPage.value);
-  statusUpdateInterval = setInterval(updateStatuses, 1000);
+  const initialDelay = getNextUpdateDelay();
+  statusUpdateInterval = setInterval(updateStatuses, initialDelay);
 });
 
 onUnmounted(() => {
   if (statusUpdateInterval) {
     clearInterval(statusUpdateInterval);
+    statusUpdateInterval = null;
   }
 });
 </script>

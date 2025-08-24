@@ -39,14 +39,15 @@ public class SanPhamClientController {
         return ResponseEntity.ok(clientProductDetailResponse);
     }
 
-    @GetMapping("/{idsp}/mau/{idMau}/rom/{idRom}")
+    @GetMapping("/{selectedIdKhachHang}/{idsp}/mau/{idMau}/rom/{idRom}")
     public ResponseEntity<ClientProductDetailResponse> getChiTietBienThe(
             @PathVariable("idsp") Integer idsp,
             @PathVariable("idMau") Integer idMau,
-            @PathVariable("idRom") Integer idRom
+            @PathVariable("idRom") Integer idRom,
+            @PathVariable("selectedIdKhachHang") Integer selectedIdKhachHang
     ) {
         try {
-            ClientProductDetailResponse response = sanPhamClientService.getChiTietBienThe(idsp, idMau, idRom);
+            ClientProductDetailResponse response = sanPhamClientService.getChiTietBienThe(idsp, idMau, idRom, selectedIdKhachHang);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             System.out.println("không có sản phẩm tương ứng");

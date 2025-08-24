@@ -50,8 +50,8 @@ public class SanPhamChiTiet {
     @Column(name = "gia_ban", precision = 10, scale = 2)
     private BigDecimal giaBan;
 
-    @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
+//    @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    private Set<BaoHanh> baoHanhs = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "idSanPhamChiTiet",cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<ChiTietHoaDon> chiTietHoaDons = new LinkedHashSet<>();
@@ -68,4 +68,6 @@ public class SanPhamChiTiet {
     @OneToMany(mappedBy = "idSanPhamChiTiet", cascade = {CascadeType.PERSIST , CascadeType.MERGE})
     private List<DanhGiaSanPham> danhGiaSanPhams = new ArrayList<>();
 
+    @OneToMany(mappedBy = "idSanPhamChiTiet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KhuyenMaiSanPhamChiTiet> danhSachKhuyenMai;
 }

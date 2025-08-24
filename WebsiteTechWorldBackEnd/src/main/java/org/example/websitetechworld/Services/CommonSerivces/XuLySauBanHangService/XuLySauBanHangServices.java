@@ -1,8 +1,10 @@
 package org.example.websitetechworld.Services.CommonSerivces.XuLySauBanHangService;
 
+import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.AccepAndInAccepAction;
 import org.example.websitetechworld.Dto.Request.CommonRequest.ActionBeforeCase.ChangeStatusRequest;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateActionBeforeAfter;
 import org.example.websitetechworld.Dto.Request.CommonRequest.CreateReturnRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.StatsTrangThaiHoaDon;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.ActionBeforeCaseResponse;
 import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseResponse.XuLyChiTietResponse;
 import org.example.websitetechworld.Entity.*;
@@ -11,14 +13,18 @@ import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +39,7 @@ public class XuLySauBanHangServices {
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ImeiReposiory imeiReposiory;
+    private static final Logger log = LoggerFactory.getLogger(XuLySauBanHangServices.class);
 
     public XuLySauBanHangServices(XuLySauBanHangRepository xuLySauBanHangRepository, LyDoXuLyRepository lyDoXuLyRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, ImeiDaBanRepository imeiDaBanRepository, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiReposiory imeiReposiory) {
         this.xuLySauBanHangRepository = xuLySauBanHangRepository;
@@ -97,18 +104,40 @@ public class XuLySauBanHangServices {
                             imeiReq.getSoImei()
                     );
 
-                    LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findById(imeiReq.getIdFailReason())
-                            .orElseThrow(() -> new IllegalArgumentException("Lý do không tồn tại"));
+                    XuLySauBanHang xuLyTonTai = xuLySauBanHangRepository
+                            .findByIdImeiDaBan_IdAndIdHoaDon_IdAndHanhDongSauVuViec(
+                                    imei.getId(), hoaDon.getId(), ActionAfterCase.CANCEL
+                            );
+                    if (xuLyTonTai != null) {
+                        LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findById(imeiReq.getIdFailReason())
+                                .orElseThrow(() -> new IllegalArgumentException("Lý do không tồn tại"));
+                        xuLyTonTai.setIdHoaDon(hoaDon);
+                        xuLyTonTai.setIdImeiDaBan(imei);
+                        xuLyTonTai.setThoiGianYeuCau(LocalDateTime.now());
+                        xuLyTonTai.setIdLyDo(lyDoXuLy);
+                        xuLyTonTai.setUrlHinh(imeiReq.getUrlHinh());
+                        xuLyTonTai.setUrlVideo(imeiReq.getUrlVideo());
+                        xuLyTonTai.setHanhDongSauVuViec(ActionAfterCase.PENDING);
+                        xuLyTonTai.setDaKiemTra(false);
+                        return xuLyTonTai;
+                    }else {
+                        LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findById(imeiReq.getIdFailReason())
+                                .orElseThrow(() -> new IllegalArgumentException("Lý do không tồn tại"));
 
-                    XuLySauBanHang xuLy = new XuLySauBanHang();
-                    xuLy.setIdHoaDon(hoaDon);
-                    xuLy.setIdImeiDaBan(imei);
-                    xuLy.setLoaiVuViec(lyDoXuLy.getLoaiVuViec());
-                    xuLy.setThoiGianYeuCau(LocalDateTime.now());
-                    xuLy.setIdLyDo(lyDoXuLy);
-                    xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
-                    xuLy.setDaKiemTra(false);
-                    return xuLy;
+                        XuLySauBanHang xuLy = new XuLySauBanHang();
+                        xuLy.setIdHoaDon(hoaDon);
+                        xuLy.setIdImeiDaBan(imei);
+                        xuLy.setLoaiVuViec(lyDoXuLy.getLoaiVuViec());
+                        xuLy.setThoiGianYeuCau(LocalDateTime.now());
+                        xuLy.setIdLyDo(lyDoXuLy);
+                        xuLy.setUrlHinh(imeiReq.getUrlHinh());
+                        xuLy.setUrlVideo(imeiReq.getUrlVideo());
+                        xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
+                        xuLy.setDaKiemTra(false);
+                        return xuLy;
+                    }
+
+
                 })
                 .collect(Collectors.toList());
 
@@ -117,21 +146,48 @@ public class XuLySauBanHangServices {
         }
     }
 
-    public Page<ActionBeforeCaseResponse> getAllLyDoXuLy(Integer pageNo, Integer pageSize){
+    public Page<ActionBeforeCaseResponse> getAllLyDoXuLy(Integer pageNo, Integer pageSize, String search, CaseType status, String sortDir){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return xuLySauBanHangRepository.getAllLyDoXuLy(pageable);
+        log.info(">>> getAllLyDoXuLy called with search={}, status={}, sortDir={}, pageNo={}, pageSize={}",
+                search, status, sortDir, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ActionBeforeCaseResponse> responses =  xuLySauBanHangRepository.getAllLyDoXuLy(search, status, pageable,sortDir);
+        log.info("Total:{}", responses.getTotalElements());
+        return responses;
     }
 
     public List<XuLyChiTietResponse> findByIdHoaDon(Integer idHoaDon){
         List<XuLyChiTietResponse> lstResponse = xuLySauBanHangRepository.getAllCtXuLy(idHoaDon);
-        BigDecimal soTienHoan = tinhTienCanTra(lstResponse);
+        log.info("data return:{}", lstResponse);
+
+        BigDecimal soTienHoan = BigDecimal.ZERO;
 
         if (!lstResponse.isEmpty()) {
             XuLyChiTietResponse firstItem = lstResponse.get(0);
+            if (firstItem.getTrangThaiDon().equals(ActionAfterCase.RETURN_TO_STOCK)){
+                if (CaseType.RETURN.equals(firstItem.getLoaiVuViec())){
+                    soTienHoan = tinhTienCanTra(lstResponse);
+                } else if (CaseType.FAILED_DELIVERY.equals(firstItem.getLoaiVuViec())) {
+                    soTienHoan = tinhTienCanTraGiaoThatBai(lstResponse);
+                }
+            }
             firstItem.setSoTienHoan(soTienHoan);
         }
-
+        log.info("tien can tra:{}", soTienHoan);
         return lstResponse;
+    }
+
+    public BigDecimal tinhTienCanTraGiaoThatBai(List<XuLyChiTietResponse> lstResponse) {
+        if (lstResponse == null || lstResponse.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách xử lý chi tiết trống");
+        }
+        Integer idHoaDon = lstResponse.get(0).getIdHoaDon();
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hoa don ko ton tai"));
+        BigDecimal thanhTien = Optional.ofNullable(hoaDon.getThanhTien()).orElse(BigDecimal.ZERO);
+        BigDecimal phiShip = Optional.ofNullable(hoaDon.getPhiShip()).orElse(BigDecimal.ZERO);
+
+        BigDecimal soTienCanTra = thanhTien.subtract(phiShip.multiply(BigDecimal.TWO));
+        return soTienCanTra;
     }
 
     public BigDecimal tinhTienCanTra(List<XuLyChiTietResponse> lstResponse) {
@@ -187,19 +243,55 @@ public class XuLySauBanHangServices {
 
 
     public void changeStatus(ChangeStatusRequest request) {
-        XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImei(request.getSoImei());
-        if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
-            ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImei(request.getSoImei());
-            imeiDaBan.setTrangThai(TrangThaiImei.RETURNED);
-            imeiDaBanRepository.save(imeiDaBan);
-            Imei imei = imeiReposiory.findBySoImei(request.getSoImei());
-            imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-            sanPhamChiTietRepository.tangSoLuongTon(imei.getIdSanPhamChiTiet().getId(),1);
-
+        for (String s : request.getSoImeis()){
+            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImeiAndIdHoaDon_Id(s,request.getIdHoaDon());
+            if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
+                ImeiDaBan imeiDaBan = imeiDaBanRepository.findById(xuLySauBanHang.getIdImeiDaBan().getId()).orElseThrow(
+                        () -> new IllegalArgumentException("Imei da ban ko ton tai")
+                );
+                imeiDaBan.setTrangThai(TrangThaiImei.RETURNED);
+                imeiDaBanRepository.save(imeiDaBan);
+                Imei imei = imeiReposiory.findBySoImei(s);
+                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                sanPhamChiTietRepository.tangSoLuongTon(imei.getIdSanPhamChiTiet().getId(),1);
+            }
+            xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
+            xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
+//            xuLySauBanHang.setDaKiemTra(true);
+            xuLySauBanHangRepository.save(xuLySauBanHang);
         }
-        xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
-        xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
-        xuLySauBanHang.setDaKiemTra(true);
-        xuLySauBanHangRepository.save(xuLySauBanHang);
+    }
+    public void changeStatus(AccepAndInAccepAction action) {
+        List<XuLySauBanHang> xuLySauBanHangList = xuLySauBanHangRepository.findByIdHoaDon_IdAndAndIdImeiDaBan_SoImei(action.getIdHoaDon(),action.getSoImei());
+        List<XuLySauBanHang> listUpdate = new ArrayList<>();
+        for (XuLySauBanHang x : xuLySauBanHangList) {
+            x.setDaKiemTra(true);
+            x.setHanhDongSauVuViec(action.getHanhDong());
+            listUpdate.add(x);
+        }
+        xuLySauBanHangRepository.saveAll(listUpdate);
+
+    }
+
+    public StatsTrangThaiHoaDon getStatsTrangThaiHoaDon() {
+        StatsTrangThaiHoaDon statsTrangThaiHoaDon = new StatsTrangThaiHoaDon();
+        statsTrangThaiHoaDon.setTotal(countStatus());
+        statsTrangThaiHoaDon.setFailed(countStatus(CaseType.FAILED_DELIVERY));
+        statsTrangThaiHoaDon.setReturns(countStatus(CaseType.RETURN));
+        statsTrangThaiHoaDon.setResolved(xuLySauBanHangRepository.countByThoiGianXuLy());
+        return statsTrangThaiHoaDon;
+    }
+
+
+    private int countStatus() {
+        return xuLySauBanHangRepository.countByHanhDongSauVuViec(String.valueOf(ActionAfterCase.PENDING));
+    }
+
+    private int countStatus(CaseType caseType) {
+        return xuLySauBanHangRepository.countByLoaiVuViec(String.valueOf(caseType));
+    }
+
+    public void tuChoiDonHang(Integer idHoaDon){
+        xuLySauBanHangRepository.deleteById(idHoaDon);
     }
 }

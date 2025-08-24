@@ -97,4 +97,5 @@ public interface KhachHangRepository extends JpaRepository<KhachHang,Integer> {
 
     @Query("SELECT kh FROM KhachHang kh LEFT JOIN FETCH kh.hangThanhVien WHERE kh.id = :id")
     Optional<KhachHang> findByIdWithHangThanhVien(@Param("id") Integer id);
+
 }

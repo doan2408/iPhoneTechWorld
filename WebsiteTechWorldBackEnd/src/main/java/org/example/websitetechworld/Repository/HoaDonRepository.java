@@ -1,8 +1,10 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +18,28 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
-    Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(Pageable pageable);
+    @Query("""
+        SELECT hd
+        FROM HoaDon hd
+        LEFT JOIN hd.idKhachHang kh
+        WHERE (hd.isDelete = false OR hd.isDelete IS NULL)
+          AND (:keyword IS NULL OR hd.maHoaDon LIKE %:keyword% OR kh.tenKhachHang LIKE %:keyword%)
+          AND (:trangThai IS NULL OR hd.trangThaiThanhToan = :trangThai)
+          AND (:loaiHoaDon IS NULL OR hd.loaiHoaDon = :loaiHoaDon)
+          AND (:from IS NULL OR hd.ngayTaoHoaDon >= :from)
+          AND (:to IS NULL OR hd.ngayTaoHoaDon <= :to)
+    """)
+    Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(
+            @Param("keyword") String keyword,
+            @Param("trangThai") TrangThaiThanhToan trangThai,
+            @Param("loaiHoaDon") LoaiHoaDon loaiHoaDon,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
+
     Integer countByTrangThaiThanhToan(TrangThaiThanhToan trangThaiThanhToan);
 
     @Query (value = """
@@ -53,11 +74,13 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                        @Param("emailNguoiNhan") String emailNguoiNhan,
                        @Param("ngayDatHang") LocalDateTime ngayDatHang);
 
-    public Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
+    Page<HoaDon> findByIdKhachHang_Id(Integer userLoginId,Pageable pageable);
+
+    List<HoaDon> findByIdKhachHang_Id(Integer userLoginId);
 
 
-    @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon ")
-    public List<Integer> findIdHoaDonByMVD(@Param("maVanDon") String maVanDon);
+    @Query("SELECT hd.id FROM HoaDon hd WHERE hd.maVanDon = :maVanDon AND hd.sdtNguoiNhan = :sdt ")
+    List<Integer> findIdHoaDonByMVDAndSdt(@Param("maVanDon") String maVanDon, @Param("sdt") String sdt);
 
 
     @Query(value = """
@@ -74,4 +97,26 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     List<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull();
 
     List<HoaDon> findByMaHoaDon(String maHoaDon);
+
+    @Query(value = """
+    SELECT COUNT(*) 
+    FROM hoa_don 
+    WHERE 
+        (trang_thai_thanh_toan = 'PAID' OR trang_thai_thanh_toan = 'COMPLETED')
+        AND id_khach_hang = :idKhachHang
+    """, nativeQuery = true)
+    int countHoaDonByIdKhachHang(@Param("idKhachHang") Integer idKhachHang);
+
+    @Query("SELECT h FROM HoaDon h " +
+            "WHERE (h.isDelete = false OR h.isDelete IS NULL) " +
+            "AND h.trangThaiThanhToan = :trangThaiThanhToan " +
+            "AND ( :search IS NULL " +
+            "   OR h.maHoaDon LIKE %:search% " +
+            "   OR h.idKhachHang.sdt LIKE %:search% " +
+            "   OR h.idKhachHang.tenKhachHang LIKE %:search% )")
+    Page<HoaDon> findAllLichSuBanHang(
+            @Param("trangThaiThanhToan") TrangThaiThanhToan trangThaiThanhToan,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }

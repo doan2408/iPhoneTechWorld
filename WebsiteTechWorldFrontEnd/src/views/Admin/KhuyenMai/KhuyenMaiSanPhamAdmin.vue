@@ -34,8 +34,9 @@
                         <el-select v-model="trangThai" placeholder="Chọn trạng thái" clearable class="filter-select"
                             @change="fetchKhuyenMai">
                             <el-option label="Tất cả" value="" />
+                            <el-option label="Chưa bắt đầu" value="NOT_STARTED" />
                             <el-option label="Đang hoạt động" value="ACTIVE" />
-                            <el-option label="Hết hạn" value="IN_ACTIVE" />
+                            <el-option label="Đã hết hạn" value="EXPIRED" />
                         </el-select>
                     </div>
                     <div class="filter-item">
@@ -88,6 +89,13 @@
                     <template #default="scope">
                         <div class="value-cell">
                             <span class="discount-percent">{{ scope.row.phanTramGiam }}%</span>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="Mức độ ưu tiên" width="140" align="center">
+                    <template #default="scope">
+                        <div class="value-cell">
+                            <span class="priority-level">{{ converMucDoUuTien(scope.row.mucDoUuTien) }}</span>
                         </div>
                     </template>
                 </el-table-column>
@@ -144,7 +152,7 @@
             </div>
         </el-card>
 
-        <el-dialog v-model="dialog" width="1000px" style="margin-top: 30px;" class="promotion-dialog"
+        <el-dialog v-model="dialog" width="1100px" style="margin-top: 30px;" class="promotion-dialog"
             :close-on-click-modal="false">
             <div class="dialog-content">
                 <el-form :model="form" label-position="top" class="promotion-form" :rules="rules" ref="formRef">
@@ -164,6 +172,15 @@
                                     <el-input-number v-model="form.phanTramGiam" :min="1" :max="100" placeholder="0"
                                         class="full-width" />
                                 </el-form-item>
+                                <el-form-item label="Mức độ ưu tiên" prop="mucDoUuTien" class="form-item">
+                                        <el-select v-model="form.mucDoUuTien" placeholder="Chọn đối tượng áp dụng">
+                                        <el-option label="Cao" value="3" />
+                                        <el-option label="Trung bình" value="2" />
+                                        <el-option label="Thấp" value="1" />
+                                    </el-select>
+                                </el-form-item>
+                            </div>
+                            <div class="form-row">
                                 <el-form-item label="Đối tượng áp dụng" prop="doiTuongApDung" class="form-item">
                                     <el-select v-model="form.doiTuongApDung" placeholder="Chọn đối tượng áp dụng">
                                         <el-option label="Tất cả" value="ALL" />
@@ -182,13 +199,13 @@
                             <div class="form-row">
                                 <el-form-item label="Thời gian bắt đầu" prop="ngayBatDau" class="form-item">
                                     <el-date-picker v-model="form.ngayBatDau" type="datetime"
-                                        placeholder="Chọn thời gian bắt đầu" value-format="YYYY-MM-DD HH:mm:ss"
-                                        class="full-width" />
+                                        placeholder="Chọn thời gian bắt đầu" value-format="YYYY-MM-DD HH:mm"
+                                        class="full-width" @change="handleNgayBatDauChange"/>
                                 </el-form-item>
                                 <el-form-item label="Thời gian kết thúc" prop="ngayKetThuc" class="form-item">
                                     <el-date-picker v-model="form.ngayKetThuc" type="datetime"
-                                        placeholder="Chọn thời gian kết thúc" value-format="YYYY-MM-DD HH:mm:ss"
-                                        class="full-width" />
+                                        placeholder="Chọn thời gian kết thúc" value-format="YYYY-MM-DD HH:mm"
+                                        class="full-width"/>
                                 </el-form-item>
                             </div>
                         </div>
@@ -204,7 +221,16 @@
                                     </template>
                                 </el-input>
                             </div>
-                            <el-form-item label="Danh sách sản phẩm" prop="idSanPhamChiTietList"
+
+                            <div class="quick-filter-buttons" style="margin-top: 10px; display: flex; gap: 10px;">
+                                <el-button type="primary" size="small" @click="filterLowStockProducts">Sản phẩm sắp hết
+                                    hàng</el-button>
+                                <el-button type="info" size="small" @click="filterHighStockProducts">Sản phẩm tồn kho
+                                    nhiều</el-button>
+                                <el-button type="default" size="small" @click="resetProductFilters">Tất cả sản
+                                    phẩm</el-button>
+                            </div>
+                            <el-form-item label="Danh sách sản phẩm" prop="idSanPhamList"
                                 class="form-item full-width" style="margin-top: 10px;">
                                 <el-table :data="displaySanPhams" class="product-table" border ref="productTable"
                                     v-loading="sanPhamLoading" :row-key="row => row.id">
@@ -233,11 +259,11 @@
                             </el-form-item>
 
                             <el-form-item label="Sản phẩm chi tiết" class="form-item full-width"
-                                v-if="selectedSanPhamIds.length">
+                                v-if="selectedSanPhamIds.length" prop="idSanPhamChiTietList">
                                 <el-table :data="paginatedSanPhamChiTiets" class="product-detail-table" border
                                     ref="sanPhamChiTietTable" v-loading="sanPhamChiTietLoading"
                                     :row-key="row => row.id">
-                                    <el-table-column prop="selected" width="80">
+                                    <el-table-column prop="selected" width="70">
                                         <template #header>
                                             <el-checkbox
                                                 :model-value="paginatedSanPhamChiTiets.length > 0 && paginatedSanPhamChiTiets.every(spct => spct.selected)"
@@ -245,14 +271,15 @@
                                             </el-checkbox>
                                         </template>
                                         <template #default="{ row }">
-                                            <el-checkbox v-model="row.selected" />
+                                            <el-checkbox v-model="row.selected"
+                                                @change="checkExistingPromotions(row)" />
                                         </template>
                                     </el-table-column>
                                     <el-table-column prop="maSanPhamChiTiet" label="Mã SPCT" width="150" />
-                                    <el-table-column prop="soLuongSPCT" label="Số lượng" min-width="150" />
-                                    <el-table-column prop="tenMau" label="Màu sắc" width="160" />
-                                    <el-table-column prop="dungLuongRom" label="Kích thước" width="150" />
-                                    <el-table-column prop="giaBan" label="Giá bán" width="160">
+                                    <el-table-column prop="soLuongSPCT" label="Số lượng" min-width="100" />
+                                    <el-table-column prop="tenMau" label="Màu sắc" width="150" />
+                                    <el-table-column prop="dungLuongRom" label="Kích thước" width="130" />
+                                    <el-table-column prop="giaBan" label="Giá bán" width="150">
                                         <template #default="scope">
                                             {{ formatCurrency(scope.row.giaBan) }}
                                         </template>
@@ -287,22 +314,25 @@
                 <h3 class="section-title">Chi tiết khuyến mãi</h3>
                 <el-descriptions :column="2" border>
                     <el-descriptions-item label="Mã khuyến mãi">{{ selectedKhuyenMai?.maKhuyenMai
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="Tên khuyến mãi">{{ selectedKhuyenMai?.tenKhuyenMai
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="Phần trăm giảm">{{ selectedKhuyenMai?.phanTramGiam
-                    }}%</el-descriptions-item>
+                        }}%</el-descriptions-item>
+                    <el-descriptions-item label="Mức độ ưu tiên">{{ 
+                        converMucDoUuTien(selectedKhuyenMai?.mucDoUuTien)
+                        }}</el-descriptions-item>
+                    <el-descriptions-item label="Thời gian bắt đầu">{{ formatDateTime(selectedKhuyenMai?.ngayBatDau)
+                        }}</el-descriptions-item>
+                    <el-descriptions-item label="Thời gian kết thúc">{{ formatDateTime(selectedKhuyenMai?.ngayKetThuc)
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="Đối tượng áp dụng">{{
                         convertDoiTuongApDung(selectedKhuyenMai?.doiTuongApDung)
-                    }}</el-descriptions-item>
-                    <el-descriptions-item label="Thời gian bắt đầu">{{ formatDateTime(selectedKhuyenMai?.ngayBatDau)
-                    }}</el-descriptions-item>
-                    <el-descriptions-item label="Thời gian kết thúc">{{ formatDateTime(selectedKhuyenMai?.ngayKetThuc)
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="Trạng thái">{{ convertTrangThai(selectedKhuyenMai?.trangThai)
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="Mô tả" :span="2">{{ selectedKhuyenMai?.moTa || 'Không có mô tả'
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                 </el-descriptions>
                 <div class="form-section" style="margin-top: 20px;">
                     <h3 class="section-title">Sản phẩm chi tiết áp dụng</h3>
@@ -338,10 +368,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Edit, Delete, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
-import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai } from '@/service/KhuyenMai/KhuyenMaiSanPhamService';
+import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai, getKhuyenMai, nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import store from '@/Service/LoginService/Store';
 
 const search = ref('');
@@ -391,12 +421,14 @@ const form = ref({
     tenKhuyenMai: '',
     moTa: '',
     phanTramGiam: 0,
+    mucDoUuTien: '1',
     ngayBatDau: '',
     ngayKetThuc: '',
     trangThai: '',
     doiTuongApDung: 'ALL',
     idSanPhamChiTietList: [],
 });
+
 const formRef = ref(null);
 const rules = {
     maKhuyenMai: [
@@ -407,10 +439,27 @@ const rules = {
         { min: 3, message: 'Tên khuyến mãi phải có ít nhất 3 ký tự', trigger: 'blur' },
     ],
     phanTramGiam: [
-        { type: 'number', min: 1, max: 100, message: 'Phần trăm giảm phải từ 1-100', trigger: 'blur' },
+        { type: 'number', min: 1, max: 60, message: 'Phần trăm giảm phải từ 1-60', trigger: 'blur' },
+    ],
+    mucDoUuTien: [
+        { type: 'number', min: 1, max: 100, message: 'Mức độ ưu tiên phải từ 1-100', trigger: 'blur' },
     ],
     ngayBatDau: [
         { required: true, message: 'Thời gian bắt đầu là bắt buộc', trigger: 'change' },
+        {
+            validator: (rule, value, callback) => {
+                if (isEdit.value) {
+                    callback();
+                    return;
+                }
+                if (value && form.value.ngayBatDau && new Date(value) <= new Date()) {
+                    callback(new Error('Thời gian bắt đầu phải sau thời gian hiện tại'));
+                } else {
+                    callback();
+                }
+            },
+            trigger: 'change',
+        },
     ],
     ngayKetThuc: [
         { required: true, message: 'Thời gian kết thúc là bắt buộc', trigger: 'change' },
@@ -425,7 +474,7 @@ const rules = {
             trigger: 'change',
         },
     ],
-    idSanPhamList: [
+    idSanPhamChiTietList: [
         { required: true, message: 'Vui lòng chọn ít nhất một sản phẩm chi tiết', trigger: 'change', type: 'array', min: 1 },
     ],
 };
@@ -475,6 +524,30 @@ const fetchKhuyenMai = async () => {
     }
 };
 
+const productFilter = ref('ALL'); // ALL, LOW_STOCK, HIGH_STOCK
+
+// Hàm lọc sản phẩm sắp hết hàng (ví dụ: số lượng < 10)
+const filterLowStockProducts = async () => {
+    productFilter.value = 'LOW_STOCK';
+    sanPhamPagination.value.page = 1;
+    await fetchSanPhams();
+};
+
+// Hàm lọc sản phẩm tồn kho nhiều (ví dụ: số lượng > 100)
+const filterHighStockProducts = async () => {
+    productFilter.value = 'HIGH_STOCK';
+    sanPhamPagination.value.page = 1;
+    await fetchSanPhams();
+};
+
+// Hàm reset bộ lọc
+const resetProductFilters = async () => {
+    productFilter.value = 'ALL';
+    sanPhamSearch.value = '';
+    sanPhamPagination.value.page = 1;
+    await fetchSanPhams();
+};
+
 const fetchSanPhams = async () => {
     sanPhamLoading.value = true;
     try {
@@ -482,6 +555,7 @@ const fetchSanPhams = async () => {
             search: sanPhamSearch.value,
             page: sanPhamPagination.value.page - 1,
             size: sanPhamPagination.value.size,
+            filter: productFilter.value
         });
         sanPhams.value = response.map(sp => ({
             ...sp,
@@ -490,9 +564,50 @@ const fetchSanPhams = async () => {
         sanPhamPagination.value.total = response.length;
     } catch (error) {
         ElMessage.error('Lỗi khi lấy danh sách sản phẩm');
+        console.error(error)
     } finally {
         sanPhamLoading.value = false;
     }
+};
+
+const selectedProductDetail = ref(null);
+
+const conflictPagination = ref({
+    page: 1,
+    size: 5,
+    total: 0
+});
+
+// Computed property để lọc danh sách xung đột dựa trên tìm kiếm
+const filteredConflictedSanPhamChiTiets = computed(() => {
+    const searchTerm = conflictSearch.value.toLowerCase();
+    if (!searchTerm) return conflictedSanPhamChiTiets.value;
+    return conflictedSanPhamChiTiets.value.filter(spct =>
+        spct.maSanPhamChiTiet.toLowerCase().includes(searchTerm) ||
+        spct.khuyenMais.some(km =>
+            km.maKhuyenMai.toLowerCase().includes(searchTerm) ||
+            km.tenKhuyenMai.toLowerCase().includes(searchTerm)
+        )
+    );
+});
+
+const toggleAllSpctSelection = async (val) => {
+    const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
+    const end = Math.min(start + sanPhamChiTietPagination.value.size, sanPhamChiTiets.value.length);
+    sanPhamChiTiets.value = sanPhamChiTiets.value.map((spct, index) => {
+        if (index >= start && index < end) {
+            return { ...spct, selected: val };
+        }
+        return spct;
+    });
+    updateSanPhamChiTietSelection();
+};
+
+const updateSanPhamChiTietSelection = () => {
+    selectedSanPhamChiTietIds.value = sanPhamChiTiets.value
+        .filter(spct => spct.selected)
+        .map(spct => spct.id);
+    form.value.idSanPhamChiTietList = selectedSanPhamChiTietIds.value;
 };
 
 const fetchSanPhamChiTiets = async (sanPhamIds) => {
@@ -505,6 +620,7 @@ const fetchSanPhamChiTiets = async (sanPhamIds) => {
     sanPhamChiTietLoading.value = true;
     try {
         const response = await getSanPhamChiTietsBySanPhamIds(sanPhamIds);
+        console.log('response', response)
         sanPhamChiTiets.value = response.map(spct => ({
             ...spct,
             selected: selectedSanPhamChiTietIds.value.includes(spct.id)
@@ -512,10 +628,12 @@ const fetchSanPhamChiTiets = async (sanPhamIds) => {
         sanPhamChiTietPagination.value.total = response.length;
     } catch (error) {
         ElMessage.error('Lỗi khi lấy danh sách sản phẩm chi tiết');
+        console.error(error)
     } finally {
         sanPhamChiTietLoading.value = false;
     }
 };
+
 
 const fetchDetailSanPhamChiTiets = async (idKhuyenMai) => {
     if (!idKhuyenMai) {
@@ -541,12 +659,6 @@ const updateSelectedSanPhams = () => {
     fetchSanPhamChiTiets(selectedSanPhamIds.value);
 };
 
-const handleSanPhamChiTietSelection = () => {
-    selectedSanPhamChiTietIds.value = sanPhamChiTiets.value
-        .filter(spct => spct.selected)
-        .map(spct => spct.id);
-    form.value.idSanPhamChiTietList = selectedSanPhamChiTietIds.value;
-};
 
 
 const openCreateDialog = () => {
@@ -557,6 +669,7 @@ const openCreateDialog = () => {
         tenKhuyenMai: '',
         moTa: '',
         phanTramGiam: 0,
+        mucDoUuTien: '1',
         ngayBatDau: '',
         ngayKetThuc: '',
         trangThai: '',
@@ -574,15 +687,19 @@ const openCreateDialog = () => {
         fetchSanPhams();
         if (productTable.value) productTable.value.clearSelection();
         if (sanPhamChiTietTable.value) sanPhamChiTietTable.value.clearSelection();
+        if (formRef.value) formRef.value.clearValidate();
     });
 };
 
 const openEditDialog = async (item) => {
     isEdit.value = true;
+    if (formRef.value) formRef.value.clearValidate();
     form.value = {
         ...item,
         doiTuongApDung: item.doiTuongApDung || 'ALL',
-        idSanPhamChiTietList: item.idSanPhamChiTietList || []
+        mucDoUuTien: item.mucDoUuTien || '1',
+        idSanPhamChiTietList: item.idSanPhamChiTietList || [],
+        mucDoUuTien: item.mucDoUuTien || 1
     };
     selectedSanPhamChiTietIds.value = form.value.idSanPhamChiTietList;
     selectedSanPhamIds.value = [];
@@ -615,7 +732,6 @@ const saveKhuyenMai = async () => {
                 loading.value = true;
                 const payload = {
                     ...form.value,
-                    trangThai: 'ACTIVE',
                     ngayBatDau: formatToSQLDateTime(form.value.ngayBatDau),
                     ngayKetThuc: formatToSQLDateTime(form.value.ngayKetThuc),
                 };
@@ -629,7 +745,7 @@ const saveKhuyenMai = async () => {
                 dialog.value = false;
                 fetchKhuyenMai();
             } catch (error) {
-                ElMessage.error(error || 'Lỗi khi lưu khuyến mãi');
+                ElMessage.error(error?.response?.data?.message || 'Lỗi khi lưu khuyến mãi');
             } finally {
                 loading.value = false;
             }
@@ -661,6 +777,21 @@ const xoaKhuyenMai = async (item) => {
         loading.value = false;
     }
 };
+import dayjs from "dayjs";
+const handleNgayBatDauChange = (value) => {
+    if (!value) return;
+
+    let start = new Date(value);
+    let end;
+
+    start = new Date(start.getTime() + 60 * 1000);
+    form.value.ngayBatDau = dayjs(start).format("YYYY-MM-DD HH:mm");
+
+    if (!isEdit.value) {
+        end = new Date(start.getTime() + 2 * 24 * 60 * 60 * 1000);
+        form.value.ngayKetThuc = dayjs(end).format("YYYY-MM-DD HH:mm");
+    }
+}
 
 const toggleAllSpSelection = (val) => {
     sanPhams.value = sanPhams.value.map((sp, index) => {
@@ -670,17 +801,6 @@ const toggleAllSpSelection = (val) => {
             return { ...sp, selected: val };
         }
         return sp;
-    });
-};
-
-const toggleAllSpctSelection = (val) => {
-    sanPhamChiTiets.value = sanPhamChiTiets.value.map((spctp, index) => {
-        const start = (sanPhamChiTietPagination.value.page - 1) * sanPhamChiTietPagination.value.size;
-        const end = start + sanPhamChiTietPagination.value.size;
-        if (index >= start && index < end) {
-            return { ...spctp, selected: val };
-        }
-        return spctp;
     });
 };
 
@@ -749,8 +869,9 @@ const formatCurrency = (value) => {
 
 const convertTrangThai = (trangThai) => {
     const trangThaiLabels = {
-        ACTIVE: 'Đang hoạt động',
-        IN_ACTIVE: 'Hết hạn',
+        NOT_STARTED: "Chưa bắt đầu",
+        ACTIVE: "Đang hoạt động",
+        EXPIRED: "Đã hết hạn",
     };
     return trangThaiLabels[trangThai] || 'Không xác định';
 };
@@ -764,12 +885,43 @@ const convertDoiTuongApDung = (doiTuongApDung) => {
     return doiTuongLabels[doiTuongApDung] || 'Không xác định';
 };
 
+const converMucDoUuTien = (mucDoUuTien) => {
+    const uuTienLabels = {
+        1: 'Thấp',
+        2: 'Trung bình',
+        3: 'Cao',
+    };
+    return uuTienLabels[mucDoUuTien] || 'Thấp';
+};
+
 const getStatusType = (status) => {
     const statusTypes = {
+        NOT_STARTED: 'info',
         ACTIVE: 'success',
-        IN_ACTIVE: 'danger',
+        EXPIRED: 'danger'
     };
     return statusTypes[status] || 'info';
+};
+
+const calculateStatus = (ngayBatDau, ngayKetThuc) => {
+    const now = new Date();
+    const startDate = new Date(ngayBatDau);
+    const endDate = new Date(ngayKetThuc);
+
+    if (now < startDate) {
+        return 'NOT_STARTED';
+    } else if (now >= startDate && now <= endDate) {
+        return 'ACTIVE';
+    } else {
+        return 'EXPIRED';
+    }
+};
+
+const updateStatuses = () => {
+    khuyenMais.value = khuyenMais.value.map(item => ({
+        ...item,
+        trangThai: calculateStatus(item.ngayBatDau, item.ngayKetThuc)
+    }));
 };
 
 const getRowClassName = ({ rowIndex }) => {
@@ -792,6 +944,20 @@ function formatToSQLDateTime(date) {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
+const getNextUpdateDelay = async () => {
+    try {
+        const response = await nextDelay()
+        const delay = Math.max(1000, response.delay || 60_000);
+        return delay;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Không thể lấy thời gian cập nhật:', error);
+            toast.error('Không thể lấy thời gian cập nhật');
+        }
+        return 60_000;
+    }
+};
+
 watch(
     () => sanPhams.value.map(sp => ({ id: sp.id, selected: sp.selected })),
     () => {
@@ -803,7 +969,7 @@ watch(
 watch(
     () => sanPhamChiTiets.value.map(spct => ({ id: spct.id, selected: spct.selected })),
     () => {
-        handleSanPhamChiTietSelection();
+        updateSanPhamChiTietSelection();
     },
     { deep: true }
 );
@@ -818,9 +984,20 @@ watch(sanPhamSearch, () => {
     fetchSanPhams();
 });
 
+let statusUpdateInterval = null;
+
 onMounted(() => {
     fetchKhuyenMai();
     fetchSanPhams();
+    const initialDelay = getNextUpdateDelay();
+    statusUpdateInterval = setInterval(updateStatuses, initialDelay);
+});
+
+onUnmounted(() => {
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+        statusUpdateInterval = null;
+    }
 });
 </script>
 
@@ -1288,6 +1465,106 @@ onMounted(() => {
 .delete-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.quick-filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.quick-filter-buttons .el-button {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.dialog-footer {
+    padding: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.cancel-btn {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #6b7280;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #f9fafb;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.confirm-btn {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.confirm-btn:disabled {
+    background: #d1d5db;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.pagination-wrapper {
+    padding: 16px 0;
+    display: flex;
+    justify-content: center;
+    background: #fafbfc;
+}
+
+.custom-pagination :deep(.el-pagination) {
+    gap: 8px;
+}
+
+.custom-pagination :deep(.el-pager li) {
+    border-radius: 8px;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+}
+
+.custom-pagination :deep(.el-pager li:hover) {
+    background: #667eea;
+    color: white;
+}
+
+.custom-pagination :deep(.el-pager li.is-active) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dialog-footer {
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+    }
+
+    .cancel-btn,
+    .confirm-btn {
+        width: 100%;
+    }
 }
 
 @media (max-width: 1200px) {

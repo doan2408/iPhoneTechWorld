@@ -21,7 +21,7 @@
             <div class="stats-grid">
                 <div class="stat-card urgent">
                     <div class="stat-number">{{ stats.total }}</div>
-                    <div class="stat-label">Tổng đơn cần xử lý</div>
+                    <div class="stat-label">Tổng đơn cần phê duyệt</div>
                 </div>
                 <div class="stat-card warning">
                     <div class="stat-number">{{ stats.failed }}</div>
@@ -47,9 +47,8 @@
                     <button class="search-btn">🔍</button>
                 </div>
                 <select v-model="sortBy" class="sort-select">
-                    <option value="date">Sắp xếp theo ngày</option>
-                    <option value="priority">Sắp xếp theo độ ưu tiên</option>
-                    <option value="amount">Sắp xếp theo giá trị</option>
+                    <option value="asc">Sắp xếp theo ngày giảm dần</option>
+                    <option value="desc">Sắp xếp theo ngày tăng dần</option>
                 </select>
             </div>
         </section>
@@ -71,9 +70,10 @@
                             <tr>
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
-                                <th>Trạng thái</th>
+                                <th>Loại yêu cầu</th>
                                 <th>Ngày yêu cầu xử lý</th>
                                 <th>Giá trị</th>
+                                <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -82,20 +82,33 @@
                                 <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.tenKhachHang }}</strong>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
                                         <span class="phone">{{ order.sdt }}</span>
                                     </div>
                                 </td>
                                 <td class="status-cell">
-                                    <span :class="['order-status', order.trangThaiDonHang]">{{ getStatusText(order.trangThaiDonHang)
+                                    <span :class="['order-status', order.trangThaiDonHang]">{{
+                                        getStatusText(order.trangThaiDonHang)
                                         }}</span>
                                 </td>
+
                                 <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
                                 <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
+                                <td class="status-cell">
+                                    <span :class="['order-status', order.hanhDongSauVuViec]">{{
+                                        getStatusText(order.hanhDongSauVuViec)
+                                        }}</span>
+                                </td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
-                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử lý</button>
-                                        <button class="action-btn secondary">Chi tiết</button>
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
+                                    </div>
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -103,36 +116,42 @@
                     </table>
                 </div>
 
-                <div v-if="activeTab === 'failed'" class="table-container">
+                <div v-if="activeTab === 'failed_delivery'" class="table-container">
                     <table class="orders-table">
                         <thead>
                             <tr>
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
                                 <th>Lý do thất bại</th>
-                                <th>Lần thử</th>
+                                <th>Thời gian yêu cầu</th>
                                 <th>Giá trị</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="order in failedOrders" :key="order.id" class="order-row failed">
-                                <td class="order-id-cell">#{{ order.id }}</td>
+                            <tr v-for="order in orders" :key="order.idXuLyBanHang" class="order-row failed">
+                                <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.customerName }}</strong>
-                                        <span class="address">{{ order.address }}</span>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
+                                        <span class="address">{{ order.sdt }}</span>
                                     </div>
                                 </td>
                                 <td class="failure-cell">
-                                    <span class="failure-reason">{{ order.failureReason }}</span>
+                                    <span class="failure-reason">{{ order.trangThaiDonHang }}</span>
                                 </td>
-                                <td class="retry-cell">{{ order.retryCount }}/3</td>
-                                <td class="amount-cell">{{ formatCurrency(order.amount) }}</td>
+                                <td class="retry-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
+                                <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
-                                        <button class="action-btn warning">Giao lại</button>
-                                        <button class="action-btn danger">Hủy đơn</button>
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
+                                    </div>
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -140,7 +159,7 @@
                     </table>
                 </div>
 
-                <div v-if="activeTab === 'returns'" class="table-container">
+                <div v-if="activeTab === 'return'" class="table-container">
                     <table class="orders-table">
                         <thead>
                             <tr>
@@ -153,23 +172,29 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="order in returnOrders" :key="order.id" class="order-row return">
-                                <td class="order-id-cell">#{{ order.id }}</td>
+                            <tr v-for="order in orders" :key="order.idXuLyBanHang" class="order-row return">
+                                <td class="order-id-cell">#{{ order.maHoaDon }}</td>
                                 <td class="customer-cell">
                                     <div class="customer-info">
-                                        <strong>{{ order.customerName }}</strong>
-                                        <span class="return-type">{{ order.returnType }}</span>
+                                        <strong>{{ order.tenKhachHang || 'Khách vãng lai' }}</strong>
+                                        <span class="return-type">{{ order.trangThaiDonHang }}</span>
                                     </div>
                                 </td>
                                 <td class="return-cell">
                                     <span class="return-reason">{{ order.returnReason }}</span>
                                 </td>
-                                <td class="date-cell">{{ formatDate(order.returnDate) }}</td>
-                                <td class="amount-cell">{{ formatCurrency(order.amount) }}</td>
+                                <td class="date-cell">{{ formatDate(order.thoiGianYeuCau) }}</td>
+                                <td class="amount-cell">{{ formatCurrency(order.giaBan) }}</td>
                                 <td class="actions-cell">
-                                    <div class="order-actions">
-                                        <button class="action-btn success">Chấp nhận</button>
-                                        <button class="action-btn danger">Từ chối</button>
+                                    <div class="order-actions" v-if="!statusNotXuLy.includes(order.hanhDongSauVuViec)">
+                                        <button class="action-btn primary" @click="xuLyClick(order.idHoaDon)">Xử
+                                            lý</button>
+                                    </div>
+                                    <div class="order-actions"
+                                        v-if="order.hanhDongSauVuViec === 'PENDING' || order.hanhDongSauVuViec === 'HOLD'">
+                                        <button class="action-btn info" @click="openDetail(order.idHoaDon)">
+                                            Xem chi tiết
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -177,44 +202,237 @@
                     </table>
                 </div>
             </div>
+            <!-- Modal chi tiết -->
+            <div v-if="showDetailModal" class="tw-modal-overlay">
+                <div class="tw-modal-content">
+                    <button class="tw-modal-close" @click="closeDetail">✕</button>
+
+                    <h2>Chi tiết yêu cầu xử lý</h2>
+                    <table class="tw-product-table">
+                        <thead>
+                            <tr>
+                                <th>IMEI</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Hình ảnh</th>
+                                <th>Video</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in orderProduct" :key="item.idImei">
+                                <td>{{ item.soImei }}</td>
+                                <td>{{ item.tenSanPham + '-' + item.mau + '-' + item.dungLuong }}</td>
+                                <td>
+                                    <img v-if="item.urlHinh" :src="item.urlHinh"
+                                        style="max-width: 80px; cursor: zoom-in;"
+                                        @click="previewImage = item.urlHinh" />
+                                    <span style="color: gray; font-size: 14px;">Không có hình ảnh</span>
+                                </td>
+
+                                <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
+                                    <div class="tw-modal-content"
+                                        style="max-width: 80%; max-height: 80%; padding: 0; background: transparent; box-shadow: none;">
+                                        <img :src="previewImage"
+                                            style="max-width: 100%; max-height: 100%; border-radius: 8px;" />
+                                    </div>
+                                </div>
+                                <td>
+                                    <video v-if="item.urlVideo" ref="videoThumb" controls
+                                        style="max-width: 120px; cursor: pointer;" @click="openVideo">
+                                        <source :src="item.urlVideo" type="video/mp4" />
+                                    </video>
+                                    <span style="color: gray; font-size: 14px;">Không có video</span>
+                                </td>
+
+
+                                <!-- Modal xem video to -->
+                                <div v-if="showVideo" class="modal" @click="closeVideo">
+                                    <video controls autoplay style="max-width: 80%; max-height: 80%;">
+                                        <source :src="item.urlVideo" type="video/mp4" />
+                                    </video>
+                                </div>
+                                <td class="order-actions" v-if="item.trangThaiDon === 'PENDING'">
+                                    <button class="tw-btn tw-btn-success"
+                                        @click="openConfirm('Bạn có chắc chắn muốn chấp nhận yêu cầu?', () => updateStatus(item.idHoaDon, item.soImei, 'HOLD'))"
+                                        title="Chấp nhận">
+                                        Chấp nhận
+                                    </button>
+                                    <button class="tw-btn tw-btn-danger"
+                                        @click="openConfirm('Bạn có chắc chắn muốn từ chối yêu cầu?', () => updateStatus(item.idHoaDon, item.soImei, 'CANCEL'))"
+                                        title="Từ chối">
+                                        Từ chối
+                                    </button>
+                                </td>
+                                <td>
+                                    <button v-if="item.trangThaiDon === 'HOLD'" class="tw-btn tw-btn-success"
+                                        @click="openConfirm('Xác nhận đã nhận được hàng?', () => updateStatus(item.idHoaDon,item.soImei, 'RECEIVED'))"
+                                        title="Đã nhận hàng">
+                                        Đã nhận hàng
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="tw-modal-actions">
+                        <button class="tw-btn" @click="closeDetail">Đóng</button>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="pagination-controls">
+                <button @click="prevPage" :disabled="pageNo === 0"> &lt; </button>
+                <span>Trang {{ pageNo + 1 }} / {{ totalPages }}</span>
+                <button @click="nextPage" :disabled="pageNo + 1 >= totalPages"> &gt; </button>
+            </div>
+            <br>
+            <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+                @cancel="showConfirm = false" />
         </section>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { getAllLyDoXuLy } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { ref, computed, onMounted, watch } from 'vue'
+import { countDonHangByStatus, getAllCtXuLy, getAllLyDoXuLy, updateStatusPending } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
 import router from '@/router'
+import { useToast } from 'vue-toastification'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
+import { findHdctByImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 
 // Reactive data
 const activeTab = ref('all')
 const searchQuery = ref('')
-const sortBy = ref('date')
+const sortBy = ref('desc')
+const previewImage = ref(null)
+const showVideo = ref(false);
+const showDetailModal = ref(false)
+const orderProduct = ref([])
+function openDetail(idHoaDon) {
+    showDetailModal.value = true
+    loadXuLy(idHoaDon)
+}
 
+async function loadXuLy(idHoaDon) {
+    const res = await getAllCtXuLy(idHoaDon);
+    orderProduct.value = res.data
+}
+
+
+function closeDetail() {
+    showDetailModal.value = false
+}
+
+function openVideo() {
+    showVideo.value = true;
+}
+
+function closeVideo() {
+    showVideo.value = false;
+}
+
+const statusNotXuLy = ['PENDING', 'HOLD','CANCEL']
+const toast = useToast()
 // Mock data
 const stats = ref({
-    total: 24,
-    failed: 8,
-    returns: 12,
-    resolved: 15
+    total: 0,
+    failed: 0,
+    returns: 0,
+    resolved: 0
 })
+
+
+
+const getStats = async () => {
+    
+    try {
+    const res = await countDonHangByStatus();
+    console.log("Kết quả:", res.data);
+    stats.value = res.data
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu:", error);
+  }
+}
 
 const tabs = ref([
     { id: 'all', label: 'Tất cả' },
-    { id: 'failed', label: 'Giao hàng thất bại'},
-    { id: 'returns', label: 'Yêu cầu trả hàng'}
+    { id: 'failed_delivery', label: 'Giao hàng thất bại' },
+    { id: 'return', label: 'Yêu cầu trả hàng' }
 ])
 
-const orders = ref();
+const currentTabData = computed(() => {
+    return tabs.value.find(tab => tab.id === activeTab.value);
+});
+
+
+const orders = ref([]);
 const pageNo = ref(0);
 const pageSize = ref(5);
+const totalPages = ref(1)
 const getAllLyDoXuLyView = async () => {
-    const res = await getAllLyDoXuLy(pageNo.value, pageSize.value);
+    const status = activeTab.value === 'all' ? null : activeTab.value.toUpperCase();
+    const res = await getAllLyDoXuLy(pageNo.value, pageSize.value, searchQuery.value, status, sortBy.value);
+    totalPages.value = res.data.totalPages
     orders.value = res.data.content
 }
 
+const updateStatus = async (idHoaDon,imei,status) => {
+    await updateStatusPending(idHoaDon,imei,status)
+    if (status === 'HOLD') {
+        toast.success("Bạn đã chấp nhận yêu cầu!")
+    } else if (status === 'CANCEL') {
+        toast.success("Bạn đã từ chối yêu cầu!")
+    } else if (status === 'RECEIVED') {
+        toast.success("Đã nhận được hàng")
+    }
+    getStats()
+    getAllLyDoXuLyView()
+    loadXuLy(idHoaDon)
+}
+
+const nextPage = async () => {
+    if (pageNo.value + 1 < totalPages.value) {
+        pageNo.value++
+        await getAllLyDoXuLyView()
+    }
+
+}
+
+const prevPage = async () => {
+    if (pageNo.value > 0) {
+        pageNo.value--
+        await getAllLyDoXuLyView()
+    }
+
+}
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
+}
+
+watch(
+    [pageNo, pageSize, searchQuery, activeTab, sortBy],
+    () => {
+        getAllLyDoXuLyView();
+        console.log('order value:', orders.value, 'status', activeTab.value);
+    },
+    { immediate: true }
+);
+
 const xuLyClick = (id) => {
-    router.push(`/admin/handle-detail/`+id)
+    router.push(`/admin/handle-detail/` + id)
+    toast.success("Chuyển thành công qua trang xử lý")
 }
 
 const failedOrders = computed(() =>
@@ -236,7 +454,7 @@ const getStatusText = (status) => {
 }
 
 function formatDate(date) {
-    if (!date) return ""; 
+    if (!date) return "";
     return new Intl.DateTimeFormat("vi-VN", {
         year: "numeric",
         month: "2-digit",
@@ -253,6 +471,7 @@ const formatCurrency = (amount) => {
 
 onMounted(() => {
     getAllLyDoXuLyView()
+    getStats()
 })
 </script>
 
@@ -727,5 +946,222 @@ onMounted(() => {
     .action-btn {
         flex: 1;
     }
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* Pagination - ĐƠN GIẢN */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px 0;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+}
+
+.page-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .pagination {
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .page-btn {
+        padding: 6px 10px;
+    }
+
+    .page-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .page-info {
+        font-size: 13px;
+        min-width: 50px;
+    }
+}
+
+.pagination-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pagination-controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.pagination-controls span {
+    font-weight: 500;
+    color: #666;
+    font-size: 1em;
+}
+/* overlay nền mờ */
+.tw-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    /* nền mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* nội dung modal */
+.tw-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    animation: tw-fadeIn 0.3s ease;
+    position: relative;
+}
+
+/* animation mở modal */
+@keyframes tw-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* table trong modal */
+.tw-product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.tw-product-table th,
+.tw-product-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.tw-product-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+/* action button */
+.tw-modal-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.tw-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 14px;
+}
+
+.tw-btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.tw-btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.tw-btn-info {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* nút X để đóng modal */
+.tw-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+}
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 </style>

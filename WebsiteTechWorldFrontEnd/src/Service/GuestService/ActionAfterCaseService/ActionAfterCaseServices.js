@@ -1,4 +1,5 @@
 import api from "@/Service/LoginService/axiosInstance";
+import { id } from "element-plus/es/locales.mjs";
 import { ref } from "vue";
 
 const baseURL = "/action-after-case";
@@ -17,12 +18,15 @@ export const createActionAfterCaseReturn = (data) => {
     return api.post(url, data)
 }
 
-export const getAllLyDoXuLy = (pageNo, pageSize) => {
+export const getAllLyDoXuLy = (pageNo, pageSize, search, status, sortDir) => {
     const url = baseURL ;
     return api.get(url,{
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            search,
+            status,
+            sortDir
         }
     })
 }
@@ -32,11 +36,37 @@ export const getAllCtXuLy = (idHoaDon) => {
     return api.get(url)
 }
 
-export const changeStatusPending = (soImei,status) => {
+export const changeStatusPending = (soImeis,idHoaDon,status) => {
     const url = baseURL + '/change-status'
     const request = {
-        soImei: soImei,
+        soImeis: soImeis,
+        idHoaDon:idHoaDon,
         status: status
     };
     return api.post(url,request)
+}
+
+export const uploadAnhAndVid = (formData) => {
+    const url = '/api/upload/upload-imei'
+    return api.post(url, formData)
+}
+
+export const updateStatusPending = (idHoaDon,soImei, hanhDong) => {
+    const url = baseURL + '/update-status'
+    const request = {
+        idHoaDon: idHoaDon,
+        soImei: soImei,
+        hanhDong: hanhDong
+    };
+    return api.put(url, request)
+}
+
+export const countDonHangByStatus = () => {
+    const url = baseURL + '/stats';
+    return api.get(url)
+}
+
+export const tuChoiDonHang = (idHoaDon) => {
+    const url = baseURL+'/'+idHoaDon;
+    return api.post(url)
 }

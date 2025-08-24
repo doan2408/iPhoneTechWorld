@@ -40,7 +40,9 @@ onMounted( async () => {
     const responseCode = route.query.vnp_ResponseCode;
     const orderId = route.query.vnp_TxnRef;
     
-    const orderIdNumber = parseInt(orderId.replace(/^HD/, ''), 10);
+    if (orderId) {
+        const orderIdNumber = parseInt(orderId.replace(/^HD/, ''), 10);
+    }
 
     if(orderId && orderId.trim() !== ''){
         const response = await hoaDonDetail(orderIdNumber);

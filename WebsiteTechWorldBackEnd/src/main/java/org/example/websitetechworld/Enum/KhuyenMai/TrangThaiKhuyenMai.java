@@ -4,8 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum TrangThaiKhuyenMai {
+    NOT_STARTED("Chưa bắt đầu"),
     ACTIVE("Đang hoạt động"),
-    IN_ACTIVE("Hết hạn");
+    EXPIRED("Đã hết hạn");
 
     private final String displayName;
     TrangThaiKhuyenMai (String displayName) {

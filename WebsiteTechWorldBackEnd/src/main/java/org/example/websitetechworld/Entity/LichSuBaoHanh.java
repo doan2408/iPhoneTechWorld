@@ -9,7 +9,7 @@ import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 @Getter
 @Setter
@@ -24,13 +24,13 @@ public class LichSuBaoHanh {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_san_pham_bao_hanh")
-    private BaoHanh idSanPhamBaoHanh;
+    private BaoHanh idBaoHanh;
 
     @Column(name = "ngay_tiep_nhan")
-    private LocalDate ngayTiepNhan;
+    private Date ngayTiepNhan;
 
     @Column(name = "ngay_hoan_thanh")
-    private LocalDate ngayHoanThanh;
+    private Date ngayHoanThanh;
 
     @Size(max = 255)
     @Nationalized

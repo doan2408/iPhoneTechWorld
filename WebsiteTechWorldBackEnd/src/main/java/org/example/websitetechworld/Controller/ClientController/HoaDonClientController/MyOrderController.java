@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.ClientController.HoaDonClientCon
 
 import org.example.websitetechworld.Dto.Request.ClientRequest.HoaDon.RequestThanhToanTongHop;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
+import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.LichSuHoaDonAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.HoaDonAndChiTietHoaDonClientResponse;
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ThanhToanAdminResponse;
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyOrderClientResponse;
@@ -12,12 +13,17 @@ import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.H
 import org.example.websitetechworld.Services.ClientServices.HoaDonClientServices.MyOrderClientServices;
 import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -35,12 +41,20 @@ public class MyOrderController {
 
     @GetMapping()
     public Page<MyOrderClientResponse> myOrder(@RequestParam(defaultValue = "0", value = "pageNo") int pageNo,
-                                               @RequestParam(defaultValue = "10",value = "pageSize") int pageSize) {
+                                               @RequestParam(defaultValue = "5",value = "pageSize") int pageSize,
+                                               @RequestParam(value = "keyword", required = false) String keyword,
+                                               @RequestParam(value = "minPrice", required = false)BigDecimal minPrice,
+                                               @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+                                               @RequestParam(value = "startDate", required = false) LocalDateTime startDate,
+                                               @RequestParam(value = "endDate", required = false) LocalDateTime endDate,
+                                               @RequestParam(value = "trangThaiGiaoHang", required = false) String trangThaiGiaoHang
+                                               ) {
         Page<MyOrderClientResponse> myOrderClientResponses = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails){
             Integer userLoginId = customUserDetails.getId();
-            myOrderClientResponses = myOrderClientServices.getOrderByUserLogin(userLoginId,pageNo,pageSize);
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+            myOrderClientResponses = myOrderClientServices.getOrderByUserLogin(userLoginId, pageNo, pageSize, keyword, minPrice, maxPrice, startDate, endDate, trangThaiGiaoHang);
         }
         return myOrderClientResponses;
         }
@@ -58,8 +72,8 @@ public class MyOrderController {
     }
 
     @GetMapping("/mvd/{maVanDon}")
-    public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon) {
-        return myOrderClientServices.findIdHoaDonByMVD(maVanDon);
+    public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon, @RequestParam String sdt) {
+        return myOrderClientServices.findIdHoaDonByMVDAndSdt(sdt, maVanDon);
     }
 
     @GetMapping("/{idHoaDon}")
@@ -110,4 +124,10 @@ public class MyOrderController {
                     .body("Xóa thất bại: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{idHoaDon}/lich-su")
+    public ResponseEntity<?> getPageLichSu(@PathVariable Integer idHoaDon) {
+        return ResponseEntity.ok(myOrderClientServices.getLichSuHoaDon(idHoaDon));
+    }
+
 }

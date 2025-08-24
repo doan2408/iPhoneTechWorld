@@ -67,8 +67,7 @@
                     <img :src="image.url" class="preview-image" />
                     <button class="remove-media" @click="removeImage(product.idSanPhamChiTiet, index)">✖</button>
                   </div>
-                  <span class="debug-info">Existing Images: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m
-                    => m.type === 'image').length}} items</span>
+                  <span class="debug-info">Existing Images: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'image').length}} items</span>
                   <span class="debug-info">New Images: {{ (imagePreviews[product.idSanPhamChiTiet] || []).length }}
                     items</span>
                 </div>
@@ -106,8 +105,7 @@
                     <video :src="video.url" controls class="preview-video"></video>
                     <button class="remove-media" @click="removeVideo(product.idSanPhamChiTiet, index)">✖</button>
                   </div>
-                  <span class="debug-info">Existing Videos: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m
-                    => m.type === 'video').length}} items</span>
+                  <span class="debug-info">Existing Videos: {{(existingMedia[product.idSanPhamChiTiet] || []).filter(m => m.type === 'video').length}} items</span>
                   <span class="debug-info">New Videos: {{ (videoPreviews[product.idSanPhamChiTiet] || []).length }}
                     items</span>
                 </div>

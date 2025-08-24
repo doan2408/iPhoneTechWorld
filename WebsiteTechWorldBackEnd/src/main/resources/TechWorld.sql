@@ -378,9 +378,10 @@ CREATE TABLE khuyen_mai (
                             ngay_bat_dau DATETIME,
                             ngay_ket_thuc DATETIME,
                             doi_tuong_ap_dung NVARCHAR(50),
+                            muc_do_uu_tien INT,
+                            ngay_tao DATETIME,
                             trang_thai NVARCHAR(50) -- ENUM('DANG_HOAT_DONG', 'HET_HAN')
 );
-
 
 --31
 CREATE TABLE san_pham_chi_tiet (
@@ -396,49 +397,25 @@ CREATE TABLE san_pham_chi_tiet (
                                    id_mau INT REFERENCES mau_sac(id_mau_sac),
                                    id_rom INT REFERENCES rom(id_rom),
                                    so_luong INT,
-                                   gia_ban DECIMAL(10,2),
-                                   id_khuyen_mai INT REFERENCES khuyen_mai(id)
+                                   gia_ban DECIMAL(10,2)
 );
 
 --32
-CREATE TABLE imei (
-                      id_imei INT IDENTITY(1,1) PRIMARY KEY,
-                      id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
-                      so_imei VARCHAR(70),
-                      trang_thai_imei NVARCHAR(50),
+CREATE TABLE khuyen_mai_san_pham_chi_tiet (
+                                              id INT IDENTITY(1,1) PRIMARY KEY,
+                                              id_khuyen_mai INT REFERENCES khuyen_mai(id),
+                                              id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet),
 );
 
 --33
-CREATE TABLE loai_bao_hanh (
-                               id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
-                               ten_loai_bao_hanh NVARCHAR(100),
-                               thoi_gian_thang INT,
-                               mo_ta NVARCHAR(255)
+CREATE TABLE imei (
+                      id_imei INT IDENTITY(1,1) PRIMARY KEY,
+                      id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
+                      so_imei VARCHAR(70) NOT NULL UNIQUE,
+                      trang_thai_imei NVARCHAR(50),
 );
 
 --34
-CREATE TABLE bao_hanh (
-                          id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
-                          id_khach_hang INT,
-                          id_imei INT REFERENCES imei(id_imei),
-                          ngay_bat_dau DATE,
-                          ngay_ket_thuc DATE,
-                          id_loai_bao_hanh INT REFERENCES loai_bao_hanh(id_loai_bao_hanh),
-                          trang_thai_bao_hanh NVARCHAR(50)
-);
-
---35
-CREATE TABLE lich_su_bao_hanh (
-                                  id INT IDENTITY(1,1) PRIMARY KEY,
-                                  id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
-                                  ngay_tiep_nhan DATE,
-                                  ngay_hoan_thanh DATE,
-                                  mo_ta_loi NVARCHAR(255),
-                                  trang_thai NVARCHAR(50)
-);
-
-
---36
 CREATE TABLE hinh_anh (
                           id_hinh_anh INT IDENTITY(1,1) PRIMARY KEY,
                           id_san_pham_chi_tiet INT REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet) ON DELETE CASCADE,
@@ -446,7 +423,7 @@ CREATE TABLE hinh_anh (
                           image_public_id VARCHAR(100)
 );
 
---37
+--35
 CREATE TABLE gio_hang_chi_tiet (
                                    id_gio_hang_chi_tiet INT IDENTITY(1,1) PRIMARY KEY,
                                    id_gio_hang INT,
@@ -458,7 +435,7 @@ CREATE TABLE gio_hang_chi_tiet (
                                    FOREIGN KEY (id_san_pham_chi_tiet) REFERENCES san_pham_chi_tiet(id_san_pham_chi_tiet)
 );
 
---38
+--36
 CREATE TABLE chi_tiet_hoa_don (
                                   id_chi_tiet_hoa_don INT IDENTITY(1,1) PRIMARY KEY,
                                   id_hoa_don INT REFERENCES hoa_don(id_hoa_don) ON DELETE CASCADE,
@@ -478,22 +455,53 @@ CREATE TABLE chi_tiet_hoa_don (
                                   don_gia DECIMAL(10,2)
 );
 
---49
+--37
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
-                             so_imei VARCHAR(70),
+                             so_imei VARCHAR(70) NOT NULL UNIQUE,
                              trang_thai NVARCHAR(50)
 );
 
+--38
+CREATE TABLE loai_bao_hanh (
+                               id_loai_bao_hanh INT IDENTITY PRIMARY KEY,
+                               ten_loai_bao_hanh NVARCHAR(100),
+                               thoi_gian_thang INT,
+							   id_model_san_pham INT REFERENCES model_san_pham(id_model_san_pham),
+                               mo_ta NVARCHAR(255)
+							   trang_thai BIT
+);
+
+--39
+CREATE TABLE bao_hanh (
+                          id_bao_hanh INT IDENTITY(1,1) PRIMARY KEY,
+                          id_khach_hang INT,
+                          id_imei_da_ban INT REFERENCES imei_da_ban(id_imei_da_ban),
+                          ngay_bat_dau DATE,
+                          ngay_ket_thuc DATE,
+                          id_loai_bao_hanh INT REFERENCES loai_bao_hanh(id_loai_bao_hanh),
+                          trang_thai_bao_hanh NVARCHAR(50)
+);
+
 --40
+CREATE TABLE lich_su_bao_hanh (
+                                  id INT IDENTITY(1,1) PRIMARY KEY,
+                                  id_san_pham_bao_hanh INT REFERENCES bao_hanh(id_bao_hanh) ON DELETE CASCADE,
+                                  ngay_tiep_nhan DATE,
+                                  ngay_hoan_thanh DATE,
+                                  mo_ta_loi NVARCHAR(255),
+                                  trang_thai NVARCHAR(50)
+);
+
+--41
 CREATE TABLE phuong_thuc_thanh_toan (
                                         id_phuong_thuc_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                         ten_phuong_thuc NVARCHAR(50),
                                         loai_hinh_thuc NVARCHAR(50)
 );
 
---41
+--42
 CREATE TABLE chi_tiet_thanh_toan (
                                      id_chi_tiet_thanh_toan INT IDENTITY(1,1) PRIMARY KEY,
                                      id_hoa_don INT REFERENCES hoa_don (id_hoa_don ) ON DELETE CASCADE,
@@ -502,7 +510,7 @@ CREATE TABLE chi_tiet_thanh_toan (
                                      thoi_gian_thanh_toan DATETIME
 );
 
---42
+--43
 CREATE TABLE danh_gia_san_pham (
                                    id_danh_gia INT IDENTITY(1,1) PRIMARY KEY,
                                    id_khach_hang INT NOT NULL,
@@ -517,7 +525,7 @@ CREATE TABLE danh_gia_san_pham (
                                    FOREIGN KEY (id_chi_tiet_hoa_don) REFERENCES chi_tiet_hoa_don(id_chi_tiet_hoa_don)
 );
 
---43
+--44
 CREATE TABLE media_danh_gia (
                                 id_media INT IDENTITY(1,1) PRIMARY KEY,
                                 id_danh_gia INT NOT NULL,
@@ -532,7 +540,7 @@ CREATE TABLE media_danh_gia (
                                 FOREIGN KEY (id_danh_gia) REFERENCES danh_gia_san_pham(id_danh_gia) ON DELETE CASCADE
 );
 
---44
+--45
 CREATE TABLE phan_hoi_danh_gia (
                                    id_phan_hoi INT IDENTITY(1,1) PRIMARY KEY,
                                    id_danh_gia INT NOT NULL,
@@ -543,7 +551,7 @@ CREATE TABLE phan_hoi_danh_gia (
                                    FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id_nhan_vien)
 );
 
---45
+--46
 CREATE TABLE wishlist (
                           id BIGINT PRIMARY KEY IDENTITY,
                           khac_hang_id INT NOT NULL,
@@ -555,14 +563,14 @@ CREATE TABLE wishlist (
                           CONSTRAINT uc_user_product_detail UNIQUE (khac_hang_id, chi_tiet_san_pham_id)
 );
 
---46 Bảng lý do xử lý
+--47 Bảng lý do xử lý
 CREATE TABLE ly_do_xu_ly (
                              id_ly_do INT IDENTITY(1,1) PRIMARY KEY,
                              ten_ly_do NVARCHAR(255) NOT NULL,
                              loai_vu_viec NVARCHAR(20) NOT NULL -- FAILED_DELIVERY, RETURN
 );
 
---47 Bảng xử lý sau bán hàng
+--48 Bảng xử lý sau bán hàng
 CREATE TABLE xu_ly_sau_ban_hang (
                                     id_xu_ly_sau_ban_hang INT IDENTITY(1,1) PRIMARY KEY,
                                     id_hoa_don INT NOT NULL,
@@ -573,6 +581,8 @@ CREATE TABLE xu_ly_sau_ban_hang (
                                     id_ly_do INT NULL,
                                     hanh_dong_sau_vu_viec NVARCHAR(20) NOT NULL, -- RETRY, CANCEL, HOLD, RETURN_TO_STOCK, REFUND, EXCHANGE
                                     da_kiem_tra BIT NOT NULL DEFAULT 0,
+                                    url_hinh NVARCHAR(500) NULL,
+                                    url_video NVARCHAR(500) NULL,
                                     FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id_hoa_don),
                                     FOREIGN KEY (id_imei_da_ban) REFERENCES imei_da_ban(id_imei_da_ban),
                                     FOREIGN KEY (id_ly_do) REFERENCES ly_do_xu_ly(id_ly_do)
@@ -943,620 +953,143 @@ VALUES
     (N'HNam Mobile', N'555 Nguyễn Đình Chiểu, Hà Nội', '0935678901', 'hnam@example.com'),
     (N'Minh Tuấn Mobile', N'666 Lê Lai, TP.HCM', '0946789012', 'minhtuan@example.com');
 
+-- Insert model_san_pham (6 models instead of 15)
 INSERT INTO model_san_pham (ten_model, id_cpu, id_man_hinh, id_camera_truoc, id_pin, id_he_dieu_hanh, id_xuat_xu, id_loai, id_ram, nam_ra_mat, trang_thai)
 VALUES
-    (N'iPhone 6 Thường', 15, 1, 1, 1, 1, 1, 1, 1, '2014-09-01', N'ACTIVE'),
     (N'iPhone 16 Thường', 1, 2, 2, 2, 2, 1, 1, 2, '2024-09-01', N'ACTIVE'),
     (N'iPhone 16 Pro', 2, 3, 3, 3, 2, 2, 3, 3, '2024-09-01', N'ACTIVE'),
     (N'iPhone 15 Thường', 3, 4, 4, 4, 3, 3, 1, 4, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Thường', 4, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Thường', 5, 6, 6, 6, 5, 5, 1, 1, '2021-09-01', N'ACTIVE'),
-    (N'iPhone 16 Plus', 6, 7, 7, 7, 2, 6, 2, 2, '2024-09-01', N'ACTIVE'),
     (N'iPhone 15 Pro', 7, 8, 8, 8, 3, 7, 3, 3, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Pro', 8, 9, 9, 9, 4, 8, 3, 4, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Pro', 9, 10, 10, 10, 5, 9, 3, 5, '2021-09-01', N'ACTIVE'),
-    (N'iPhone 12 Thường', 10, 11, 11, 11, 6, 10, 1, 1, '2020-09-01', N'ACTIVE'),
-    (N'iPhone 16 Pro Max', 11, 12, 12, 12, 2, 11, 4, 2, '2024-09-01', N'ACTIVE'),
-    (N'iPhone 15 Pro Max', 12, 13, 13, 13, 3, 12, 4, 3, '2023-09-01', N'ACTIVE'),
-    (N'iPhone 14 Plus', 13, 14, 14, 2, 4, 13, 2, 4, '2022-09-01', N'ACTIVE'),
-    (N'iPhone 13 Mini', 14, 15, 15, 1, 5, 14, 5, 5, '2021-09-01', N'ACTIVE');
+    (N'iPhone 14 Thường', 4, 5, 5, 5, 4, 4, 1, 5, '2022-09-01', N'ACTIVE'),
+    (N'iPhone 13 Thường', 5, 6, 6, 6, 5, 5, 1, 1, '2021-09-01', N'ACTIVE');
 
---Table model_camera_sau
+-- Insert model_camera_sau (for 6 models)
 INSERT INTO model_camera_sau (id_model_san_pham, id_camera_sau, is_chinh)
 VALUES
-    (1,  1, 1), (1, 2, 0), (1, 3, 0),
-    (2,  4, 0), (2, 5, 0), (2, 6, 1),
-    (3,  7, 1), (3, 8, 0), (3, 9, 0),
-    (4, 10, 0), (4,11, 1), (4,12, 0),
-    (5, 13, 1), (5,14, 0), (5,15, 0),
-    (6,  1, 1), (6, 2, 0), (6, 3, 0),
-    (7,  4, 0), (7, 5, 0), (7, 6, 1),
-    (8,  7, 1), (8, 8, 0), (8, 9, 0),
-    (9, 10, 0), (9,11, 1), (9,12, 0),
-    (10,13, 1), (10,14, 0), (10,15, 0),
-    (11, 1, 1), (11, 2, 0), (11, 3, 0),
-    (12, 4, 0), (12, 5, 0), (12, 6, 1),
-    (13, 7, 1), (13, 8, 0), (13, 9, 0),
-    (14,10, 0), (14,11, 1), (14,12, 0),
-    (15,13, 1), (15,14, 0), (15,15, 0);
+    (1, 4, 0), (1, 5, 0), (1, 6, 1), -- iPhone 16 Thường
+    (2, 7, 1), (2, 8, 0), (2, 9, 0), -- iPhone 16 Pro
+    (3, 10, 0), (3, 11, 1), (3, 12, 0), -- iPhone 15 Thường
+    (4, 7, 1), (4, 8, 0), (4, 9, 0), -- iPhone 15 Pro
+    (5, 13, 1), (5, 14, 0), (5, 15, 0), -- iPhone 14 Thường
+    (6, 1, 1), (6, 2, 0), (6, 3, 0); -- iPhone 13 Thường
 
--- Table san_pham
+-- Insert san_pham (6 products)
 INSERT INTO san_pham (ten_san_pham, thuong_hieu, trang_thai, id_model_san_pham)
 VALUES
-    (N'iPhone 6 Thường', N'Apple', N'ACTIVE', 1),
-    (N'iPhone 16 Thường', N'Apple', N'ACTIVE', 2),
-    (N'iPhone 16 Pro', N'Apple', N'ACTIVE', 3),
-    (N'iPhone 15 Thường', N'Apple', N'ACTIVE', 4),
+    (N'iPhone 16 Thường', N'Apple', N'ACTIVE', 1),
+    (N'iPhone 16 Pro', N'Apple', N'ACTIVE', 2),
+    (N'iPhone 15 Thường', N'Apple', N'ACTIVE', 3),
+    (N'iPhone 15 Pro', N'Apple', N'ACTIVE', 4),
     (N'iPhone 14 Thường', N'Apple', N'ACTIVE', 5),
-    (N'iPhone 13 Thường', N'Apple', N'ACTIVE', 6),
-    (N'iPhone 16 Plus', N'Apple', N'ACTIVE', 7),
-    (N'iPhone 15 Pro', N'Apple', N'ACTIVE', 8),
-    (N'iPhone 14 Pro', N'Apple', N'ACTIVE', 9),
-    (N'iPhone 13 Pro', N'Apple', N'ACTIVE', 10),
-    (N'iPhone 12 Thường', N'Apple', N'ACTIVE', 11),
-    (N'iPhone 16 Pro Max', N'Apple', N'ACTIVE', 12),
-    (N'iPhone 15 Pro Max', N'Apple', N'ACTIVE', 13),
-    (N'iPhone 14 Plus', N'Apple', N'ACTIVE', 14),
-    (N'iPhone 13 Mini', N'Apple', N'ACTIVE', 15);
+    (N'iPhone 13 Thường', N'Apple', N'ACTIVE', 6);
 
-Insert into nha_cung_cap_sp(id_nha_cung_cap, id_san_pham) values
-                                                              (1,1),
-                                                              (1,2),
-                                                              (1,3),
-                                                              (1,4),
-                                                              (1,5),
-                                                              (1,6),
-                                                              (1,7),
-                                                              (3,8),
-                                                              (1,9),
-                                                              (1,10),
-                                                              (2,11),
-                                                              (1,12),
-                                                              (1,13),
-                                                              (1,14),
-                                                              (1,15);
+-- Insert nha_cung_cap_sp
+INSERT INTO nha_cung_cap_sp(id_nha_cung_cap, id_san_pham) 
+VALUES
+    (1,1), (1,2), (1,3), (2,4), (1,5), (1,6);
 
--- Table san_pham_chi_tiet
+-- Insert san_pham_chi_tiet (reduced variants per product)
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
 VALUES
-    -- iPhone 6 Thường (id_san_pham = 1, chỉ có 16GB/64GB, 3 màu)
-    (1, 1, 1, 10, 5000000.00), -- Đen Phantôm, 64GB
-    (1, 2, 1, 8, 5200000.00), -- Trắng Ngọc Trai, 64GB
-    (1, 3, 1, 5, 5400000.00), -- Vàng Ánh Kim, 64GB
-    -- iPhone 16 Thường (id_san_pham = 2, 128GB/256GB/512GB, 4 màu)
-    (2, 1, 1, 12, 20000000.00), -- Đen Phantôm, 128GB
-    (2, 2, 1, 10, 20000000.00), -- Trắng Ngọc Trai, 128GB
-    (2, 4, 1, 15, 24000000.00), -- Xanh Biển Sâu, 128GB
-    (2, 5, 1, 8, 20000000.00), -- Hồng Phấn, 128GB
-    (2, 1, 2, 10, 22000000.00), -- Đen Phantôm, 256GB
-    (2, 2, 2, 9, 22000000.00), -- Trắng Ngọc Trai, 256GB
-    (2, 4, 2, 12, 22000000.00), -- Xanh Biển Sâu, 256GB
-    (2, 5, 2, 7, 24000000.00), -- Hồng Phấn, 256GB
-    (2, 1, 3, 8, 27000000.00), -- Đen Phantôm, 512GB
-    (2, 2, 3, 6, 25000000.00), -- Trắng Ngọc Trai, 512GB
-    (2, 4, 3, 10, 26000000.00), -- Xanh Biển Sâu, 512GB
-    (2, 5, 3, 5, 24000000.00), -- Hồng Phấn, 512GB
-    -- iPhone 16 Pro (id_san_pham = 3, 128GB/256GB/512GB/1TB, 4 màu)
-    (3, 1, 1, 10, 25000000.00), -- Đen Phantôm, 128GB
-    (3, 2, 1, 8, 25000000.00), -- Trắng Ngọc Trai, 128GB
-    (3, 6, 1, 12, 25000000.00), -- Xám Không Gian, 128GB
-    (3, 7, 1, 9, 25000000.00), -- Bạc Ánh Kim, 128GB
-    (3, 1, 2, 7, 27000000.00), -- Đen Phantôm, 256GB
-    (3, 2, 2, 6, 37000000.00), -- Trắng Ngọc Trai, 256GB
-    (3, 6, 2, 10, 27000000.00), -- Xám Không Gian, 256GB
-    (3, 7, 2, 8, 27000000.00), -- Bạc Ánh Kim, 256GB
-    (3, 1, 3, 5, 29000000.00), -- Đen Phantôm, 512GB
-    (3, 2, 3, 7, 29000000.00), -- Trắng Ngọc Trai, 512GB
-    (3, 6, 3, 6, 25000000.00), -- Xám Không Gian, 512GB
-    (3, 7, 3, 5, 29000000.00), -- Bạc Ánh Kim, 512GB
-    (3, 1, 4, 4, 32000000.00), -- Đen Phantôm, 1TB
-    (3, 2, 4, 3, 32000000.00), -- Trắng Ngọc Trai, 1TB
-    (3, 6, 4, 5, 32000000.00), -- Xám Không Gian, 1TB
-    (3, 7, 4, 4, 32000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 15 Thường (id_san_pham = 4, 128GB/256GB/512GB, 4 màu)
-    (4, 1, 1, 15, 15000000.00), -- Đen Phantôm, 128GB
-    (4, 2, 1, 12, 15000000.00), -- Trắng Ngọc Trai, 128GB
-    (4, 4, 1, 10, 15000000.00), -- Xanh Biển Sâu, 128GB
-    (4, 5, 1, 8, 15000000.00), -- Hồng Phấn, 128GB
-    (4, 1, 2, 10, 17000000.00), -- Đen Phantôm, 256GB
-    (4, 2, 2, 9, 17000000.00), -- Trắng Ngọc Trai, 256GB
-    (4, 4, 2, 7, 17000000.00), -- Xanh Biển Sâu, 256GB
-    (4, 5, 2, 6, 17000000.00), -- Hồng Phấn, 256GB
-    (4, 1, 3, 5, 19000000.00), -- Đen Phantôm, 512GB
-    (4, 2, 3, 4, 19000000.00), -- Trắng Ngọc Trai, 512GB
-    (4, 4, 3, 6, 19000000.00), -- Xanh Biển Sâu, 512GB
-    (4, 5, 3, 5, 19000000.00), -- Hồng Phấn, 512GB
-    -- iPhone 14 Thường (id_san_pham = 5, 128GB/256GB/512GB, 4 màu)
-    (5, 1, 1, 12, 12000000.00), -- Đen Phantôm, 128GB
-    (5, 2, 1, 10, 12000000.00), -- Trắng Ngọc Trai, 128GB
-    (5, 4, 1, 8, 12000000.00), -- Xanh Biển Sâu, 128GB
-    (5, 5, 1, 7, 12000000.00), -- Hồng Phấn, 128GB
-    (5, 1, 2, 9, 14000000.00), -- Đen Phantôm, 256GB
-    (5, 2, 2, 8, 14000000.00), -- Trắng Ngọc Trai, 256GB
-    (5, 4, 2, 6, 14000000.00), -- Xanh Biển Sâu, 256GB
-    (5, 5, 2, 5, 14000000.00), -- Hồng Phấn, 256GB
-    (5, 1, 3, 4, 16000000.00), -- Đen Phantôm, 512GB
-    (5, 2, 3, 3, 16000000.00), -- Trắng Ngọc Trai, 512GB
-    (5, 4, 3, 5, 16000000.00), -- Xanh Biển Sâu, 512GB
-    (5, 5, 3, 4, 16000000.00), -- Hồng Phấn, 512GB
-    -- iPhone 13 Thường (id_san_pham = 6, 128GB/256GB/512GB, 4 màu)
-    (6, 1, 1, 20, 10000000.00), -- Đen Phantôm, 128GB
-    (6, 2, 1, 18, 10000000.00), -- Trắng Ngọc Trai, 128GB
-    (6, 5, 1, 15, 10000000.00), -- Hồng Phấn, 128GB
+    -- iPhone 16 Thường (id_san_pham = 1, 2 colors x 2 storage = 4 variants)
+    (1, 1, 1, 10, 20000000.00), -- Đen Phantôm, 128GB
+    (1, 2, 1, 8, 20000000.00),  -- Trắng Ngọc Trai, 128GB
+    (1, 1, 2, 6, 22000000.00),  -- Đen Phantôm, 256GB
+    (1, 2, 2, 5, 22000000.00),  -- Trắng Ngọc Trai, 256GB
+    
+    -- iPhone 16 Pro (id_san_pham = 2, 2 colors x 3 storage = 6 variants)
+    (2, 1, 1, 8, 25000000.00),  -- Đen Phantôm, 128GB
+    (2, 6, 1, 7, 25000000.00),  -- Xám Không Gian, 128GB
+    (2, 1, 2, 6, 27000000.00),  -- Đen Phantôm, 256GB
+    (2, 6, 2, 5, 27000000.00),  -- Xám Không Gian, 256GB
+    (2, 1, 3, 4, 29000000.00),  -- Đen Phantôm, 512GB
+    (2, 6, 3, 3, 29000000.00),  -- Xám Không Gian, 512GB
+    
+    -- iPhone 15 Thường (id_san_pham = 3, 2 colors x 2 storage = 4 variants)
+    (3, 1, 1, 12, 15000000.00), -- Đen Phantôm, 128GB
+    (3, 4, 1, 10, 15000000.00), -- Xanh Biển Sâu, 128GB
+    (3, 1, 2, 8, 17000000.00),  -- Đen Phantôm, 256GB
+    (3, 4, 2, 7, 17000000.00),  -- Xanh Biển Sâu, 256GB
+    
+    -- iPhone 15 Pro (id_san_pham = 4, 2 colors x 3 storage = 6 variants)
+    (4, 2, 1, 7, 27000000.00),  -- Trắng Ngọc Trai, 128GB
+    (4, 7, 1, 6, 27000000.00),  -- Bạc Ánh Kim, 128GB
+    (4, 2, 2, 5, 29000000.00),  -- Trắng Ngọc Trai, 256GB
+    (4, 7, 2, 4, 29000000.00),  -- Bạc Ánh Kim, 256GB
+    (4, 2, 3, 3, 31000000.00),  -- Trắng Ngọc Trai, 512GB
+    (4, 7, 3, 3, 31000000.00),  -- Bạc Ánh Kim, 512GB
+    
+    -- iPhone 14 Thường (id_san_pham = 5, 2 colors x 2 storage = 4 variants)
+    (5, 1, 1, 10, 12000000.00), -- Đen Phantôm, 128GB
+    (5, 5, 1, 9, 12000000.00),  -- Hồng Phấn, 128GB
+    (5, 1, 2, 7, 14000000.00),  -- Đen Phantôm, 256GB
+    (5, 5, 2, 6, 14000000.00),  -- Hồng Phấn, 256GB
+    
+    -- iPhone 13 Thường (id_san_pham = 6, 2 colors x 2 storage = 4 variants)
+    (6, 1, 1, 15, 10000000.00), -- Đen Phantôm, 128GB
     (6, 9, 1, 12, 10000000.00), -- Đỏ Rực Rỡ, 128GB
     (6, 1, 2, 10, 12000000.00), -- Đen Phantôm, 256GB
-    (6, 2, 2, 9, 12000000.00), -- Trắng Ngọc Trai, 256GB
-    (6, 5, 2, 8, 12000000.00), -- Hồng Phấn, 256GB
-    (6, 9, 2, 7, 12000000.00), -- Đỏ Rực Rỡ, 256GB
-    (6, 1, 3, 6, 14000000.00), -- Đen Phantôm, 512GB
-    (6, 2, 3, 5, 14000000.00), -- Trắng Ngọc Trai, 512GB
-    (6, 5, 3, 4, 14000000.00), -- Hồng Phấn, 512GB
-    (6, 9, 3, 3, 14000000.00), -- Đỏ Rực Rỡ, 512GB
-    -- iPhone 16 Plus (id_san_pham = 7, 128GB/256GB/512GB, 4 màu)
-    (7, 1, 1, 10, 22000000.00), -- Đen Phantôm, 128GB
-    (7, 2, 1, 9, 22000000.00), -- Trắng Ngọc Trai, 128GB
-    (7, 4, 1, 8, 22000000.00), -- Xanh Biển Sâu, 128GB
-    (7, 5, 1, 7, 22000000.00), -- Hồng Phấn, 128GB
-    (7, 1, 2, 6, 24000000.00), -- Đen Phantôm, 256GB
-    (7, 2, 2, 5, 24000000.00), -- Trắng Ngọc Trai, 256GB
-    (7, 4, 2, 4, 24000000.00), -- Xanh Biển Sâu, 256GB
-    (7, 5, 2, 3, 24000000.00), -- Hồng Phấn, 256GB
-    (7, 1, 3, 5, 26000000.00), -- Đen Phantôm, 512GB
-    (7, 2, 3, 4, 26000000.00), -- Trắng Ngọc Trai, 512GB
-    (7, 4, 3, 3, 26000000.00), -- Xanh Biển Sâu, 512GB
-    (7, 5, 3, 2, 26000000.00), -- Hồng Phấn, 512GB
-    -- iPhone 15 Pro (id_san_pham = 8, 128GB/256GB/512GB/1TB, 4 màu)
-    (8, 1, 1, 8, 27000000.00), -- Đen Phantôm, 128GB
-    (8, 2, 1, 7, 27000000.00), -- Trắng Ngọc Trai, 128GB
-    (8, 6, 1, 6, 27000000.00), -- Xám Không Gian, 128GB
-    (8, 7, 1, 5, 27000000.00), -- Bạc Ánh Kim, 128GB
-    (8, 1, 2, 4, 29000000.00), -- Đen Phantôm, 256GB
-    (8, 2, 2, 3, 29000000.00), -- Trắng Ngọc Trai, 256GB
-    (8, 6, 2, 5, 29000000.00), -- Xám Không Gian, 256GB
-    (8, 7, 2, 4, 29000000.00), -- Bạc Ánh Kim, 256GB
-    (8, 1, 3, 3, 31000000.00), -- Đen Phantôm, 512GB
-    (8, 2, 3, 2, 31000000.00), -- Trắng Ngọc Trai, 512GB
-    (8, 6, 3, 4, 31000000.00), -- Xám Không Gian, 512GB
-    (8, 7, 3, 3, 31000000.00), -- Bạc Ánh Kim, 512GB
-    (8, 1, 4, 2, 34000000.00), -- Đen Phantôm, 1TB
-    (8, 2, 4, 2, 34000000.00), -- Trắng Ngọc Trai, 1TB
-    (8, 6, 4, 3, 34000000.00), -- Xám Không Gian, 1TB
-    (8, 7, 4, 2, 34000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 14 Pro (id_san_pham = 9, 128GB/256GB/512GB/1TB, 4 màu)
-    (9, 1, 1, 14, 18000000.00), -- Đen Phantôm, 128GB
-    (9, 2, 1, 12, 18000000.00), -- Trắng Ngọc Trai, 128GB
-    (9, 6, 1, 10, 18000000.00), -- Xám Không Gian, 128GB
-    (9, 7, 1, 8, 18000000.00), -- Bạc Ánh Kim, 128GB
-    (9, 1, 2, 7, 20000000.00), -- Đen Phantôm, 256GB
-    (9, 2, 2, 6, 20000000.00), -- Trắng Ngọc Trai, 256GB
-    (9, 6, 2, 5, 20000000.00), -- Xám Không Gian, 256GB
-    (9, 7, 2, 4, 20000000.00), -- Bạc Ánh Kim, 256GB
-    (9, 1, 3, 3, 22000000.00), -- Đen Phantôm, 512GB
-    (9, 2, 3, 2, 22000000.00), -- Trắng Ngọc Trai, 512GB
-    (9, 6, 3, 4, 22000000.00), -- Xám Không Gian, 512GB
-    (9, 7, 3, 3, 22000000.00), -- Bạc Ánh Kim, 512GB
-    (9, 1, 4, 2, 25000000.00), -- Đen Phantôm, 1TB
-    (9, 2, 4, 2, 25000000.00), -- Trắng Ngọc Trai, 1TB
-    (9, 6, 4, 3, 25000000.00), -- Xám Không Gian, 1TB
-    (9, 7, 4, 2, 25000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 13 Pro (id_san_pham = 10, 128GB/256GB/512GB/1TB, 4 màu)
-    (10, 1, 1, 11, 13000000.00), -- Đen Phantôm, 128GB
-    (10, 2, 1, 10, 13000000.00), -- Trắng Ngọc Trai, 128GB
-    (10, 6, 1, 9, 13000000.00), -- Xám Không Gian, 128GB
-    (10, 7, 1, 8, 13000000.00), -- Bạc Ánh Kim, 128GB
-    (10, 1, 2, 7, 15000000.00), -- Đen Phantôm, 256GB
-    (10, 2, 2, 6, 15000000.00), -- Trắng Ngọc Trai, 256GB
-    (10, 6, 2, 5, 15000000.00), -- Xám Không Gian, 256GB
-    (10, 7, 2, 4, 15000000.00), -- Bạc Ánh Kim, 256GB
-    (10, 1, 3, 3, 17000000.00), -- Đen Phantôm, 512GB
-    (10, 2, 3, 2, 17000000.00), -- Trắng Ngọc Trai, 512GB
-    (10, 6, 3, 4, 17000000.00), -- Xám Không Gian, 512GB
-    (10, 7, 3, 3, 17000000.00), -- Bạc Ánh Kim, 512GB
-    (10, 1, 4, 2, 20000000.00), -- Đen Phantôm, 1TB
-    (10, 2, 4, 2, 20000000.00), -- Trắng Ngọc Trai, 1TB
-    (10, 6, 4, 3, 20000000.00), -- Xám Không Gian, 1TB
-    (10, 7, 4, 2, 20000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 12 Thường (id_san_pham = 11, 64GB/128GB/256GB, 4 màu)
-    (11, 1, 5, 18, 9000000.00), -- Đen Phantôm, 64GB
-    (11, 2, 5, 15, 9000000.00), -- Trắng Ngọc Trai, 64GB
-    (11, 9, 5, 12, 9000000.00), -- Đỏ Rực Rỡ, 64GB
-    (11, 10, 5, 10, 9000000.00), -- Tím Hoàng Gia, 64GB
-    (11, 1, 1, 8, 11000000.00), -- Đen Phantôm, 128GB
-    (11, 2, 1, 7, 11000000.00), -- Trắng Ngọc Trai, 128GB
-    (11, 9, 1, 6, 11000000.00), -- Đỏ Rực Rỡ, 128GB
-    (11, 10, 1, 5, 11000000.00), -- Tím Hoàng Gia, 128GB
-    (11, 1, 2, 4, 13000000.00), -- Đen Phantôm, 256GB
-    (11, 2, 2, 3, 13000000.00), -- Trắng Ngọc Trai, 256GB
-    (11, 9, 2, 5, 13000000.00), -- Đỏ Rực Rỡ, 256GB
-    (11, 10, 2, 4, 13000000.00), -- Tím Hoàng Gia, 256GB
-    -- iPhone 16 Pro Max (id_san_pham = 12, 128GB/256GB/512GB/1TB, 4 màu)
-    (12, 1, 1, 6, 30000000.00), -- Đen Phantôm, 128GB
-    (12, 2, 1, 5, 30000000.00), -- Trắng Ngọc Trai, 128GB
-    (12, 6, 1, 4, 30000000.00), -- Xám Không Gian, 128GB
-    (12, 7, 1, 3, 30000000.00), -- Bạc Ánh Kim, 128GB
-    (12, 1, 2, 5, 32000000.00), -- Đen Phantôm, 256GB
-    (12, 2, 2, 4, 32000000.00), -- Trắng Ngọc Trai, 256GB
-    (12, 6, 2, 3, 32000000.00), -- Xám Không Gian, 256GB
-    (12, 7, 2, 2, 32000000.00), -- Bạc Ánh Kim, 256GB
-    (12, 1, 3, 4, 34000000.00), -- Đen Phantôm, 512GB
-    (12, 2, 3, 3, 34000000.00), -- Trắng Ngọc Trai, 512GB
-    (12, 6, 3, 2, 34000000.00), -- Xám Không Gian, 512GB
-    (12, 7, 3, 2, 34000000.00), -- Bạc Ánh Kim, 512GB
-    (12, 1, 4, 3, 36000000.00), -- Đen Phantôm, 1TB
-    (12, 2, 4, 2, 36000000.00), -- Trắng Ngọc Trai, 1TB
-    (12, 6, 4, 2, 36000000.00), -- Xám Không Gian, 1TB
-    (12, 7, 4, 2, 36000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 15 Pro Max (id_san_pham = 13, 128GB/256GB/512GB/1TB, 4 màu)
-    (13, 1, 1, 5, 28000000.00), -- Đen Phantôm, 128GB
-    (13, 2, 1, 4, 28000000.00), -- Trắng Ngọc Trai, 128GB
-    (13, 6, 1, 3, 28000000.00), -- Xám Không Gian, 128GB
-    (13, 7, 1, 2, 28000000.00), -- Bạc Ánh Kim, 128GB
-    (13, 1, 2, 4, 30000000.00), -- Đen Phantôm, 256GB
-    (13, 2, 2, 3, 30000000.00), -- Trắng Ngọc Trai, 256GB
-    (13, 6, 2, 2, 30000000.00), -- Xám Không Gian, 256GB
-    (13, 7, 2, 2, 30000000.00), -- Bạc Ánh Kim, 256GB
-    (13, 1, 3, 3, 32000000.00), -- Đen Phantôm, 512GB
-    (13, 2, 3, 2, 32000000.00), -- Trắng Ngọc Trai, 512GB
-    (13, 6, 3, 2, 32000000.00), -- Xám Không Gian, 512GB
-    (13, 7, 3, 2, 32000000.00), -- Bạc Ánh Kim, 512GB
-    (13, 1, 4, 2, 35000000.00), -- Đen Phantôm, 1TB
-    (13, 2, 4, 2, 35000000.00), -- Trắng Ngọc Trai, 1TB
-    (13, 6, 4, 2, 35000000.00), -- Xám Không Gian, 1TB
-    (13, 7, 4, 2, 35000000.00), -- Bạc Ánh Kim, 1TB
-    -- iPhone 14 Plus (id_san_pham = 14, 128GB/256GB/512GB, 4 màu)
-    (14, 1, 1, 13, 16000000.00), -- Đen Phantôm, 128GB
-    (14, 2, 1, 12, 16000000.00), -- Trắng Ngọc Trai, 128GB
-    (14, 4, 1, 10, 16000000.00), -- Xanh Biển Sâu, 128GB
-    (14, 5, 1, 8, 16000000.00), -- Hồng Phấn, 128GB
-    (14, 1, 2, 7, 18000000.00), -- Đen Phantôm, 256GB
-    (14, 2, 2, 6, 18000000.00), -- Trắng Ngọc Trai, 256GB
-    (14, 4, 2, 5, 18000000.00), -- Xanh Biển Sâu, 256GB
-    (14, 5, 2, 4, 18000000.00), -- Hồng Phấn, 256GB
-    (14, 1, 3, 3, 20000000.00), -- Đen Phantôm, 512GB
-    (14, 2, 3, 2, 20000000.00), -- Trắng Ngọc Trai, 512GB
-    (14, 4, 3, 4, 20000000.00), -- Xanh Biển Sâu, 512GB
-    (14, 5, 3, 3, 20000000.00), -- Hồng Phấn, 512GB
-    -- iPhone 13 Mini (id_san_pham = 15, 128GB/256GB/512GB, 4 màu)
-    (15, 1, 1, 10, 14000000.00), -- Đen Phantôm, 128GB
-    (15, 2, 1, 9, 14000000.00), -- Trắng Ngọc Trai, 128GB
-    (15, 5, 1, 8, 14000000.00), -- Hồng Phấn, 128GB
-    (15, 9, 1, 7, 14000000.00), -- Đỏ Rực Rỡ, 128GB
-    (15, 1, 2, 6, 16000000.00), -- Đen Phantôm, 256GB
-    (15, 2, 2, 5, 16000000.00), -- Trắng Ngọc Trai, 256GB
-    (15, 5, 2, 4, 16000000.00), -- Hồng Phấn, 256GB
-    (15, 9, 2, 3, 16000000.00), -- Đỏ Rực Rỡ, 256GB
-    (15, 1, 3, 5, 18000000.00), -- Đen Phantôm, 512GB
-    (15, 2, 3, 4, 18000000.00), -- Trắng Ngọc Trai, 512GB
-    (15, 5, 3, 3, 18000000.00), -- Hồng Phấn, 512GB
-    (15, 9, 3, 2, 18000000.00); -- Đỏ Rực Rỡ, 512GB
+    (6, 9, 2, 8, 12000000.00);  -- Đỏ Rực Rỡ, 256GB
 
-
--- Table imei
+-- Insert IMEI for each product variant (based on so_luong)
+-- iPhone 16 Thường variants (1-4)
 INSERT INTO imei (id_san_pham_chi_tiet, so_imei, trang_thai_imei)
-VALUES
-    (1, '123456789012345', 'AVAILABLE'), -- iPhone 6 Thường, Đen Phantôm, 64GB
-    (2, '123456789012346', 'AVAILABLE'), -- iPhone 6 Thường, Trắng Ngọc Trai, 64GB
-    (3, '123456789012347', 'AVAILABLE'), -- iPhone 6 Thường, Vàng Ánh Kim, 64GB
-    (4, '123456789012348', 'AVAILABLE'), -- iPhone 16 Thường, Đen Phantôm, 128GB
-    (5, '123456789012349', 'AVAILABLE'), -- iPhone 16 Thường, Trắng Ngọc Trai, 128GB
-    (6, '123456789012350', 'AVAILABLE'), -- iPhone 16 Thường, Xanh Biển Sâu, 128GB
-    (7, '123456789012351', 'AVAILABLE'), -- iPhone 16 Thường, Hồng Phấn, 128GB
-    (8, '123456789012352', 'AVAILABLE'), -- iPhone 16 Thường, Đen Phantôm, 256GB
-    (9, '123456789012353', 'AVAILABLE'), -- iPhone 16 Thường, Trắng Ngọc Trai, 256GB
-    (10, '123456789012354', 'AVAILABLE'), -- iPhone 16 Thường, Xanh Biển Sâu, 256GB
-    (11, '123456789012355', 'AVAILABLE'), -- iPhone 16 Thường, Hồng Phấn, 256GB
-    (12, '123456789012356', 'AVAILABLE'), -- iPhone 16 Thường, Đen Phantôm, 512GB
-    (13, '123456789012357', 'AVAILABLE'), -- iPhone 16 Thường, Trắng Ngọc Trai, 512GB
-    (14, '123456789012358', 'AVAILABLE'), -- iPhone 16 Thường, Xanh Biển Sâu, 512GB
-    (15, '123456789012359', 'AVAILABLE'), -- iPhone 16 Thường, Hồng Phấn, 512GB
-    (16, '123456789012360', 'AVAILABLE'), -- iPhone 16 Pro, Đen Phantôm, 128GB
-    (17, '123456789012361', 'AVAILABLE'), -- iPhone 16 Pro, Trắng Ngọc Trai, 128GB
-    (18, '123456789012362', 'AVAILABLE'), -- iPhone 16 Pro, Xám Không Gian, 128GB
-    (19, '123456789012363', 'AVAILABLE'), -- iPhone 16 Pro, Bạc Ánh Kim, 128GB
-    (20, '123456789012364', 'AVAILABLE'), -- iPhone 16 Pro, Đen Phantôm, 256GB
-    (21, '123456789012365', 'AVAILABLE'), -- iPhone 16 Pro, Trắng Ngọc Trai, 256GB
-    (22, '123456789012366', 'AVAILABLE'), -- iPhone 16 Pro, Xám Không Gian, 256GB
-    (23, '123456789012367', 'AVAILABLE'), -- iPhone 16 Pro, Bạc Ánh Kim, 256GB
-    (24, '123456789012368', 'AVAILABLE'), -- iPhone 16 Pro, Đen Phantôm, 512GB
-    (25, '123456789012369', 'AVAILABLE'), -- iPhone 16 Pro, Trắng Ngọc Trai, 512GB
-    (26, '123456789012370', 'AVAILABLE'), -- iPhone 16 Pro, Xám Không Gian, 512GB
-    (27, '123456789012371', 'AVAILABLE'), -- iPhone 16 Pro, Bạc Ánh Kim, 512GB
-    (28, '123456789012372', 'AVAILABLE'), -- iPhone 16 Pro, Đen Phantôm, 1TB
-    (29, '123456789012373', 'AVAILABLE'), -- iPhone 16 Pro, Trắng Ngọc Trai, 1TB
-    (30, '123456789012374', 'AVAILABLE'), -- iPhone 16 Pro, Xám Không Gian, 1TB
-    (31, '123456789012375', 'AVAILABLE'), -- iPhone 16 Pro, Bạc Ánh Kim, 1TB
-    (32, '123456789012376', 'AVAILABLE'), -- iPhone 15 Thường, Đen Phantôm, 128GB
-    (33, '123456789012377', 'AVAILABLE'), -- iPhone 15 Thường, Trắng Ngọc Trai, 128GB
-    (34, '123456789012378', 'AVAILABLE'), -- iPhone 15 Thường, Xanh Biển Sâu, 128GB
-    (35, '123456789012379', 'AVAILABLE'), -- iPhone 15 Thường, Hồng Phấn, 128GB
-    (36, '123456789012380', 'AVAILABLE'), -- iPhone 15 Thường, Đen Phantôm, 256GB
-    (37, '123456789012381', 'AVAILABLE'), -- iPhone 15 Thường, Trắng Ngọc Trai, 256GB
-    (38, '123456789012382', 'AVAILABLE'), -- iPhone 15 Thường, Xanh Biển Sâu, 256GB
-    (39, '123456789012383', 'AVAILABLE'), -- iPhone 15 Thường, Hồng Phấn, 256GB
-    (40, '123456789012384', 'AVAILABLE'), -- iPhone 15 Thường, Đen Phantôm, 512GB
-    (41, '123456789012385', 'AVAILABLE'), -- iPhone 15 Thường, Trắng Ngọc Trai, 512GB
-    (42, '123456789012386', 'AVAILABLE'), -- iPhone 15 Thường, Xanh Biển Sâu, 512GB
-    (43, '123456789012387', 'AVAILABLE'), -- iPhone 15 Thường, Hồng Phấn, 512GB
-    (44, '123456789012388', 'AVAILABLE'), -- iPhone 14 Thường, Đen Phantôm, 128GB
-    (45, '123456789012389', 'AVAILABLE'), -- iPhone 14 Thường, Trắng Ngọc Trai, 128GB
-    (46, '123456789012390', 'AVAILABLE'), -- iPhone 14 Thường, Xanh Biển Sâu, 128GB
-    (47, '123456789012391', 'AVAILABLE'), -- iPhone 14 Thường, Hồng Phấn, 128GB
-    (48, '123456789012392', 'AVAILABLE'), -- iPhone 14 Thường, Đen Phantôm, 256GB
-    (49, '123456789012393', 'AVAILABLE'), -- iPhone 14 Thường, Trắng Ngọc Trai, 256GB
-    (50, '123456789012394', 'AVAILABLE'), -- iPhone 14 Thường, Xanh Biển Sâu, 256GB
-    (51, '123456789012395', 'AVAILABLE'), -- iPhone 14 Thường, Hồng Phấn, 256GB
-    (52, '123456789012396', 'AVAILABLE'), -- iPhone 14 Thường, Đen Phantôm, 512GB
-    (53, '123456789012397', 'AVAILABLE'), -- iPhone 14 Thường, Trắng Ngọc Trai, 512GB
-    (54, '123456789012398', 'AVAILABLE'), -- iPhone 14 Thường, Xanh Biển Sâu, 512GB
-    (55, '123456789012399', 'AVAILABLE'), -- iPhone 14 Thường, Hồng Phấn, 512GB
-    (56, '123456789012400', 'AVAILABLE'), -- iPhone 13 Thường, Đen Phantôm, 128GB
-    (57, '123456789012401', 'AVAILABLE'), -- iPhone 13 Thường, Trắng Ngọc Trai, 128GB
-    (58, '123456789012402', 'AVAILABLE'), -- iPhone 13 Thường, Hồng Phấn, 128GB
-    (59, '123456789012403', 'AVAILABLE'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 128GB
-    (60, '123456789012404', 'AVAILABLE'), -- iPhone 13 Thường, Đen Phantôm, 256GB
-    (61, '123456789012405', 'AVAILABLE'), -- iPhone 13 Thường, Trắng Ngọc Trai, 256GB
-    (62, '123456789012406', 'AVAILABLE'), -- iPhone 13 Thường, Hồng Phấn, 256GB
-    (63, '123456789012407', 'AVAILABLE'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 256GB
-    (64, '123456789012408', 'AVAILABLE'), -- iPhone 13 Thường, Đen Phantôm, 512GB
-    (65, '123456789012409', 'AVAILABLE'), -- iPhone 13 Thường, Trắng Ngọc Trai, 512GB
-    (66, '123456789012410', 'AVAILABLE'), -- iPhone 13 Thường, Hồng Phấn, 512GB
-    (67, '123456789012411', 'AVAILABLE'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 512GB
-    (68, '123456789012412', 'AVAILABLE'), -- iPhone 16 Plus, Đen Phantôm, 128GB
-    (69, '123456789012413', 'AVAILABLE'), -- iPhone 16 Plus, Trắng Ngọc Trai, 128GB
-    (70, '123456789012414', 'AVAILABLE'), -- iPhone 16 Plus, Xanh Biển Sâu, 128GB
-    (71, '123456789012415', 'AVAILABLE'), -- iPhone 16 Plus, Hồng Phấn, 128GB
-    (72, '123456789012416', 'AVAILABLE'), -- iPhone 16 Plus, Đen Phantôm, 256GB
-    (73, '123456789012417', 'AVAILABLE'), -- iPhone 16 Plus, Trắng Ngọc Trai, 256GB
-    (74, '123456789012418', 'AVAILABLE'), -- iPhone 16 Plus, Xanh Biển Sâu, 256GB
-    (75, '123456789012419', 'AVAILABLE'), -- iPhone 16 Plus, Hồng Phấn, 256GB
-    (76, '123456789012420', 'AVAILABLE'), -- iPhone 16 Plus, Đen Phantôm, 512GB
-    (77, '123456789012421', 'AVAILABLE'), -- iPhone 16 Plus, Trắng Ngọc Trai, 512GB
-    (78, '123456789012422', 'AVAILABLE'), -- iPhone 16 Plus, Xanh Biển Sâu, 512GB
-    (79, '123456789012423', 'AVAILABLE'), -- iPhone 16 Plus, Hồng Phấn, 512GB
-    (80, '123456789012424', 'AVAILABLE'), -- iPhone 15 Pro, Đen Phantôm, 128GB
-    (81, '123456789012425', 'AVAILABLE'), -- iPhone 15 Pro, Trắng Ngọc Trai, 128GB
-    (82, '123456789012426', 'AVAILABLE'), -- iPhone 15 Pro, Xám Không Gian, 128GB
-    (83, '123456789012427', 'AVAILABLE'), -- iPhone 15 Pro, Bạc Ánh Kim, 128GB
-    (84, '123456789012428', 'AVAILABLE'), -- iPhone 15 Pro, Đen Phantôm, 256GB
-    (85, '123456789012429', 'AVAILABLE'), -- iPhone 15 Pro, Trắng Ngọc Trai, 256GB
-    (86, '123456789012430', 'AVAILABLE'), -- iPhone 15 Pro, Xám Không Gian, 256GB
-    (87, '123456789012431', 'AVAILABLE'), -- iPhone 15 Pro, Bạc Ánh Kim, 256GB
-    (88, '123456789012432', 'AVAILABLE'), -- iPhone 15 Pro, Đen Phantôm, 512GB
-    (89, '123456789012433', 'AVAILABLE'), -- iPhone 15 Pro, Trắng Ngọc Trai, 512GB
-    (90, '123456789012434', 'AVAILABLE'), -- iPhone 15 Pro, Xám Không Gian, 512GB
-    (91, '123456789012435', 'AVAILABLE'), -- iPhone 15 Pro, Bạc Ánh Kim, 512GB
-    (92, '123456789012436', 'AVAILABLE'), -- iPhone 15 Pro, Đen Phantôm, 1TB
-    (93, '123456789012437', 'AVAILABLE'), -- iPhone 15 Pro, Trắng Ngọc Trai, 1TB
-    (94, '123456789012438', 'AVAILABLE'), -- iPhone 15 Pro, Xám Không Gian, 1TB
-    (95, '123456789012439', 'AVAILABLE'), -- iPhone 15 Pro, Bạc Ánh Kim, 1TB
-    (96, '123456789012440', 'AVAILABLE'), -- iPhone 14 Pro, Đen Phantôm, 128GB
-    (97, '123456789012441', 'AVAILABLE'), -- iPhone 14 Pro, Trắng Ngọc Trai, 128GB
-    (98, '123456789012442', 'AVAILABLE'), -- iPhone 14 Pro, Xám Không Gian, 128GB
-    (99, '123456789012443', 'AVAILABLE'), -- iPhone 14 Pro, Bạc Ánh Kim, 128GB
-    (100, '123456789012444', 'AVAILABLE'), -- iPhone 14 Pro, Đen Phantôm, 256GB
-    (101, '123456789012445', 'AVAILABLE'), -- iPhone 14 Pro, Trắng Ngọc Trai, 256GB
-    (102, '123456789012446', 'AVAILABLE'), -- iPhone 14 Pro, Xám Không Gian, 256GB
-    (103, '123456789012447', 'AVAILABLE'), -- iPhone 14 Pro, Bạc Ánh Kim, 256GB
-    (104, '123456789012448', 'AVAILABLE'), -- iPhone 14 Pro, Đen Phantôm, 512GB
-    (105, '123456789012449', 'AVAILABLE'), -- iPhone 14 Pro, Trắng Ngọc Trai, 512GB
-    (106, '123456789012450', 'AVAILABLE'), -- iPhone 14 Pro, Xám Không Gian, 512GB
-    (107, '123456789012451', 'AVAILABLE'), -- iPhone 14 Pro, Bạc Ánh Kim, 512GB
-    (108, '123456789012452', 'AVAILABLE'), -- iPhone 14 Pro, Đen Phantôm, 1TB
-    (109, '123456789012453', 'AVAILABLE'), -- iPhone 14 Pro, Trắng Ngọc Trai, 1TB
-    (110, '123456789012454', 'AVAILABLE'), -- iPhone 14 Pro, Xám Không Gian, 1TB
-    (111, '123456789012455', 'AVAILABLE'), -- iPhone 14 Pro, Bạc Ánh Kim, 1TB
-    (112, '123456789012456', 'AVAILABLE'), -- iPhone 13 Pro, Đen Phantôm, 128GB
-    (113, '123456789012457', 'AVAILABLE'), -- iPhone 13 Pro, Trắng Ngọc Trai, 128GB
-    (114, '123456789012458', 'AVAILABLE'), -- iPhone 13 Pro, Xám Không Gian, 128GB
-    (115, '123456789012459', 'AVAILABLE'), -- iPhone 13 Pro, Bạc Ánh Kim, 128GB
-    (116, '123456789012460', 'AVAILABLE'), -- iPhone 13 Pro, Đen Phantôm, 256GB
-    (117, '123456789012461', 'AVAILABLE'), -- iPhone 13 Pro, Trắng Ngọc Trai, 256GB
-    (118, '123456789012462', 'AVAILABLE'), -- iPhone 13 Pro, Xám Không Gian, 256GB
-    (119, '123456789012463', 'AVAILABLE'), -- iPhone 13 Pro, Bạc Ánh Kim, 256GB
-    (120, '123456789012464', 'AVAILABLE'), -- iPhone 13 Pro, Đen Phantôm, 512GB
-    (121, '123456789012465', 'AVAILABLE'), -- iPhone 13 Pro, Trắng Ngọc Trai, 512GB
-    (122, '123456789012466', 'AVAILABLE'), -- iPhone 13 Pro, Xám Không Gian, 512GB
-    (123, '123456789012467', 'AVAILABLE'), -- iPhone 13 Pro, Bạc Ánh Kim, 512GB
-    (124, '123456789012468', 'AVAILABLE'), -- iPhone 13 Pro, Đen Phantôm, 1TB
-    (125, '123456789012469', 'AVAILABLE'), -- iPhone 13 Pro, Trắng Ngọc Trai, 1TB
-    (126, '123456789012470', 'AVAILABLE'), -- iPhone 13 Pro, Xám Không Gian, 1TB
-    (127, '123456789012471', 'AVAILABLE'), -- iPhone 13 Pro, Bạc Ánh Kim, 1TB
-    (128, '123456789012472', 'AVAILABLE'), -- iPhone 12 Thường, Đen Phantôm, 64GB
-    (129, '123456789012473', 'AVAILABLE'), -- iPhone 12 Thường, Trắng Ngọc Trai, 64GB
-    (130, '123456789012474', 'AVAILABLE'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 64GB
-    (131, '123456789012475', 'AVAILABLE'), -- iPhone 12 Thường, Tím Hoàng Gia, 64GB
-    (132, '123456789012476', 'AVAILABLE'), -- iPhone 12 Thường, Đen Phantôm, 128GB
-    (133, '123456789012477', 'AVAILABLE'), -- iPhone 12 Thường, Trắng Ngọc Trai, 128GB
-    (134, '123456789012478', 'AVAILABLE'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 128GB
-    (135, '123456789012479', 'AVAILABLE'), -- iPhone 12 Thường, Tím Hoàng Gia, 128GB
-    (136, '123456789012480', 'AVAILABLE'), -- iPhone 12 Thường, Đen Phantôm, 256GB
-    (137, '123456789012481', 'AVAILABLE'), -- iPhone 12 Thường, Trắng Ngọc Trai, 256GB
-    (138, '123456789012482', 'AVAILABLE'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 256GB
-    (139, '123456789012483', 'AVAILABLE'), -- iPhone 12 Thường, Tím Hoàng Gia, 256GB
-    (140, '123456789012484', 'AVAILABLE'), -- iPhone 16 Pro Max, Đen Phantôm, 128GB
-    (141, '123456789012485', 'AVAILABLE'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 128GB
-    (142, '123456789012486', 'AVAILABLE'), -- iPhone 16 Pro Max, Xám Không Gian, 128GB
-    (143, '123456789012487', 'AVAILABLE'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 128GB
-    (144, '123456789012488', 'AVAILABLE'), -- iPhone 16 Pro Max, Đen Phantôm, 256GB
-    (145, '123456789012489', 'AVAILABLE'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 256GB
-    (146, '123456789012490', 'AVAILABLE'), -- iPhone 16 Pro Max, Xám Không Gian, 256GB
-    (147, '123456789012491', 'AVAILABLE'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 256GB
-    (148, '123456789012492', 'AVAILABLE'), -- iPhone 16 Pro Max, Đen Phantôm, 512GB
-    (149, '123456789012493', 'AVAILABLE'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 512GB
-    (150, '123456789012494', 'AVAILABLE'), -- iPhone 16 Pro Max, Xám Không Gian, 512GB
-    (151, '123456789012495', 'AVAILABLE'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 512GB
-    (152, '123456789012496', 'AVAILABLE'), -- iPhone 16 Pro Max, Đen Phantôm, 1TB
-    (153, '123456789012497', 'AVAILABLE'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 1TB
-    (154, '123456789012498', 'AVAILABLE'), -- iPhone 16 Pro Max, Xám Không Gian, 1TB
-    (155, '123456789012499', 'AVAILABLE'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 1TB
-    (156, '123456789012500', 'AVAILABLE'), -- iPhone 14 Plus, Đen Phantôm, 128GB
-    (157, '123456789012501', 'AVAILABLE'), -- iPhone 14 Plus, Trắng Ngọc Trai, 128GB
-    (158, '123456789012502', 'AVAILABLE'); -- iPhone 14 Plus, Xanh Biển Sâu, 128GB
+SELECT 
+    spct.id_san_pham_chi_tiet,
+    CONCAT('35', RIGHT('000000000000' + CAST(spct.id_san_pham_chi_tiet AS VARCHAR), 12), 
+           RIGHT('0' + CAST(ROW_NUMBER() OVER(PARTITION BY spct.id_san_pham_chi_tiet ORDER BY (SELECT NULL)) AS VARCHAR), 1)) as so_imei,
+    'AVAILABLE' as trang_thai_imei
+FROM san_pham_chi_tiet spct
+CROSS APPLY (
+    SELECT TOP (spct.so_luong) 1 as n
+    FROM sys.objects
+) numbers
+WHERE spct.id_san_pham BETWEEN 1 AND 6;
 
--- Table hinh_anh
+-- Insert hinh_anh (one image per product variant)
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
 VALUES
-    (1, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 6 Thường, Đen Phantôm, 64GB
-    (2, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 6 Thường, Trắng Ngọc Trai, 64GB
-    (3, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 6 Thường, Vàng Ánh Kim, 64GB
-    (4, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 16 Thường, Đen Phantôm, 128GB
-    (5, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 16 Thường, Trắng Ngọc Trai, 128GB
-    (6, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 16 Thường, Xanh Biển Sâu, 128GB
-    (7, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 16 Thường, Hồng Phấn, 128GB
-    (8, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 16 Thường, Đen Phantôm, 256GB
-    (9, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 16 Thường, Trắng Ngọc Trai, 256GB
-    (10, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 16 Thường, Xanh Biển Sâu, 256GB
-    (11, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 16 Thường, Hồng Phấn, 256GB
-    (12, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 16 Thường, Đen Phantôm, 512GB
-    (13, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 16 Thường, Trắng Ngọc Trai, 512GB
-    (14, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 16 Thường, Xanh Biển Sâu, 512GB
-    (15, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 16 Thường, Hồng Phấn, 512GB
-    (16, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 16 Pro, Đen Phantôm, 128GB
-    (17, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 16 Pro, Trắng Ngọc Trai, 128GB
-    (18, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 16 Pro, Xám Không Gian, 128GB
-    (19, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 16 Pro, Bạc Ánh Kim, 128GB
-    (20, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 16 Pro, Đen Phantôm, 256GB
-    (21, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 16 Pro, Trắng Ngọc Trai, 256GB
-    (22, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 16 Pro, Xám Không Gian, 256GB
-    (23, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 16 Pro, Bạc Ánh Kim, 256GB
-    (24, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 16 Pro, Đen Phantôm, 512GB
-    (25, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 16 Pro, Trắng Ngọc Trai, 512GB
-    (26, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 16 Pro, Xám Không Gian, 512GB
-    (27, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 16 Pro, Bạc Ánh Kim, 512GB
-    (28, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 16 Pro, Đen Phantôm, 1TB
-    (29, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 16 Pro, Trắng Ngọc Trai, 1TB
-    (30, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 16 Pro, Xám Không Gian, 1TB
-    (31, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 16 Pro, Bạc Ánh Kim, 1TB
-    (32, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 15 Thường, Đen Phantôm, 128GB
-    (33, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 15 Thường, Trắng Ngọc Trai, 128GB
-    (34, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 15 Thường, Xanh Biển Sâu, 128GB
-    (35, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 15 Thường, Hồng Phấn, 128GB
-    (36, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 15 Thường, Đen Phantôm, 256GB
-    (37, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 15 Thường, Trắng Ngọc Trai, 256GB
-    (38, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 15 Thường, Xanh Biển Sâu, 256GB
-    (39, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 15 Thường, Hồng Phấn, 256GB
-    (40, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 15 Thường, Đen Phantôm, 512GB
-    (41, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 15 Thường, Trắng Ngọc Trai, 512GB
-    (42, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 15 Thường, Xanh Biển Sâu, 512GB
-    (43, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 15 Thường, Hồng Phấn, 512GB
-    (44, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 14 Thường, Đen Phantôm, 128GB
-    (45, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 14 Thường, Trắng Ngọc Trai, 128GB
-    (46, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 14 Thường, Xanh Biển Sâu, 128GB
-    (47, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 14 Thường, Hồng Phấn, 128GB
-    (48, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 14 Thường, Đen Phantôm, 256GB
-    (49, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 14 Thường, Trắng Ngọc Trai, 256GB
-    (50, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 14 Thường, Xanh Biển Sâu, 256GB
-    (51, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 14 Thường, Hồng Phấn, 256GB
-    (52, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 14 Thường, Đen Phantôm, 512GB
-    (53, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 14 Thường, Trắng Ngọc Trai, 512GB
-    (54, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 14 Thường, Xanh Biển Sâu, 512GB
-    (55, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 14 Thường, Hồng Phấn, 512GB
-    (56, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 13 Thường, Đen Phantôm, 128GB
-    (57, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 13 Thường, Trắng Ngọc Trai, 128GB
-    (58, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 13 Thường, Hồng Phấn, 128GB
-    (59, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 128GB
-    (60, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 13 Thường, Đen Phantôm, 256GB
-    (61, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 13 Thường, Trắng Ngọc Trai, 256GB
-    (62, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 13 Thường, Hồng Phấn, 256GB
-    (63, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 256GB
-    (64, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 13 Thường, Đen Phantôm, 512GB
-    (65, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 13 Thường, Trắng Ngọc Trai, 512GB
-    (66, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 13 Thường, Hồng Phấn, 512GB
-    (67, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 13 Thường, Đỏ Rực Rỡ, 512GB
-    (68, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 16 Plus, Đen Phantôm, 128GB
-    (69, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 16 Plus, Trắng Ngọc Trai, 128GB
-    (70, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 16 Plus, Xanh Biển Sâu, 128GB
-    (71, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 16 Plus, Hồng Phấn, 128GB
-    (72, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 16 Plus, Đen Phantôm, 256GB
-    (73, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 16 Plus, Trắng Ngọc Trai, 256GB
-    (74, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 16 Plus, Xanh Biển Sâu, 256GB
-    (75, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 16 Plus, Hồng Phấn, 256GB
-    (76, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 16 Plus, Đen Phantôm, 512GB
-    (77, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 16 Plus, Trắng Ngọc Trai, 512GB
-    (78, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 16 Plus, Xanh Biển Sâu, 512GB
-    (79, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 16 Plus, Hồng Phấn, 512GB
-    (80, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 15 Pro, Đen Phantôm, 128GB
-    (81, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 15 Pro, Trắng Ngọc Trai, 128GB
-    (82, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 15 Pro, Xám Không Gian, 128GB
-    (83, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 15 Pro, Bạc Ánh Kim, 128GB
-    (84, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 15 Pro, Đen Phantôm, 256GB
-    (85, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 15 Pro, Trắng Ngọc Trai, 256GB
-    (86, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 15 Pro, Xám Không Gian, 256GB
-    (87, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 15 Pro, Bạc Ánh Kim, 256GB
-    (88, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 15 Pro, Đen Phantôm, 512GB
-    (89, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 15 Pro, Trắng Ngọc Trai, 512GB
-    (90, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 15 Pro, Xám Không Gian, 512GB
-    (91, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 15 Pro, Bạc Ánh Kim, 512GB
-    (92, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 15 Pro, Đen Phantôm, 1TB
-    (93, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 15 Pro, Trắng Ngọc Trai, 1TB
-    (94, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 15 Pro, Xám Không Gian, 1TB
-    (95, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 15 Pro, Bạc Ánh Kim, 1TB
-    (96, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 14 Pro, Đen Phantôm, 128GB
-    (97, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 14 Pro, Trắng Ngọc Trai, 128GB
-    (98, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 14 Pro, Xám Không Gian, 128GB
-    (99, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 14 Pro, Bạc Ánh Kim, 128GB
-    (100, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 14 Pro, Đen Phantôm, 256GB
-    (101, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 14 Pro, Trắng Ngọc Trai, 256GB
-    (102, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 14 Pro, Xám Không Gian, 256GB
-    (103, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 14 Pro, Bạc Ánh Kim, 256GB
-    (104, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 14 Pro, Đen Phantôm, 512GB
-    (105, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 14 Pro, Trắng Ngọc Trai, 512GB
-    (106, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 14 Pro, Xám Không Gian, 512GB
-    (107, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 14 Pro, Bạc Ánh Kim, 512GB
-    (108, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 14 Pro, Đen Phantôm, 1TB
-    (109, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 14 Pro, Trắng Ngọc Trai, 1TB
-    (110, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 14 Pro, Xám Không Gian, 1TB
-    (111, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 14 Pro, Bạc Ánh Kim, 1TB
-    (112, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 13 Pro, Đen Phantôm, 128GB
-    (113, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 13 Pro, Trắng Ngọc Trai, 128GB
-    (114, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 13 Pro, Xám Không Gian, 128GB
-    (115, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 13 Pro, Bạc Ánh Kim, 128GB
-    (116, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 13 Pro, Đen Phantôm, 256GB
-    (117, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 13 Pro, Trắng Ngọc Trai, 256GB
-    (118, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 13 Pro, Xám Không Gian, 256GB
-    (119, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 13 Pro, Bạc Ánh Kim, 256GB
-    (120, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 13 Pro, Đen Phantôm, 512GB
-    (121, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 13 Pro, Trắng Ngọc Trai, 512GB
-    (122, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 13 Pro, Xám Không Gian, 512GB
-    (123, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 13 Pro, Bạc Ánh Kim, 512GB
-    (124, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 13 Pro, Đen Phantôm, 1TB
-    (125, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 13 Pro, Trắng Ngọc Trai, 1TB
-    (126, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 13 Pro, Xám Không Gian, 1TB
-    (127, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 13 Pro, Bạc Ánh Kim, 1TB
-    (128, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 12 Thường, Đen Phantôm, 64GB
-    (129, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 12 Thường, Trắng Ngọc Trai, 64GB
-    (130, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 64GB
-    (131, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 12 Thường, Tím Hoàng Gia, 64GB
-    (132, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 12 Thường, Đen Phantôm, 128GB
-    (133, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 12 Thường, Trắng Ngọc Trai, 128GB
-    (134, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 128GB
-    (135, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 12 Thường, Tím Hoàng Gia, 128GB
-    (136, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 12 Thường, Đen Phantôm, 256GB
-    (137, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 12 Thường, Trắng Ngọc Trai, 256GB
-    (138, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 12 Thường, Đỏ Rực Rỡ, 256GB
-    (139, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 12 Thường, Tím Hoàng Gia, 256GB
-    (140, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 16 Pro Max, Đen Phantôm, 128GB
-    (141, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 128GB
-    (142, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 16 Pro Max, Xám Không Gian, 128GB
-    (143, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 128GB
-    (144, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/iphone11-tr%E1%BA%AFng_ovvdt8.webp', '11 thường-Trắng'), -- iPhone 16 Pro Max, Đen Phantôm, 256GB
-    (145, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353317/anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516.webp', 'anh_san_pham/anh_san_pham/iphone_15vang_webp_1751353312516'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 256GB
-    (146, 'https://res.cloudinary.com/dgkdd8x2a/image/upload/v1751353346/anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297.webp', 'anh_san_pham/anh_san_pham/iphone_15_den_webp_1751353343297'), -- iPhone 16 Pro Max, Xám Không Gian, 256GB
-    (147, 'https://example.com/images/iphone15promax_gold.jpg', 'iphone15promax_gold_012'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 256GB
-    (148, 'https://example.com/images/iphone14plus_black.jpg', 'iphone14plus_black_013'), -- iPhone 16 Pro Max, Đen Phantôm, 512GB
-    (149, 'https://example.com/images/iphone13mini_white.jpg', 'iphone13mini_white_014'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 512GB
-    (150, 'https://example.com/images/iphone12pro_silver.jpg', 'iphone12pro_silver_015'), -- iPhone 16 Pro Max, Xám Không Gian, 512GB
-    (151, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844546/dhskdcvv6ponqfv2en7l.jpg', 'dhskdcvv6ponqfv2en7l'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 512GB
-    (152, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750844499/rmxlzcvpjuncocon6p56.jpg', 'rmxlzcvpjuncocon6p56'), -- iPhone 16 Pro Max, Đen Phantôm, 1TB
-    (153, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750840234/jb7nwuhuwreitwk9yy6c.jpg', 'jb7nwuhuwreitwk9yy6c'), -- iPhone 16 Pro Max, Trắng Ngọc Trai, 1TB
-    (154, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750839933/es4llawnv93b4dquikuj.jpg', 'es4llawnv93b4dquikuj'), -- iPhone 16 Pro Max, Xám Không Gian, 1TB
-    (155, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750148542/fccx3npqk9ed0zlgpm39.jpg', 'fccx3npqk9ed0zlgpm39'), -- iPhone 16 Pro Max, Bạc Ánh Kim, 1TB
-    (156, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140999/ig9rtfrfeucfrxy7fjt8.jpg', 'ig9rtfrfeucfrxy7fjt8'), -- iPhone 14 Plus, Đen Phantôm, 128GB
-    (157, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1750140572/u46mgpbfu8aigdm3zbhg.jpg', 'u46mgpbfu8aigdm3zbhg'), -- iPhone 14 Plus, Trắng Ngọc Trai, 128GB
-    (158, 'https://res.cloudinary.com/dzs764s5c/image/upload/v1746884362/11pro-xanh_dpkrnp.webp', '11pro-xanh'); -- iPhone 14 Plus, Xanh Biển Sâu, 128GB
+    -- iPhone 16 Thường variants
+    (1, 'https://res.cloudinary.com/example/iphone16_black_128gb.webp', 'iphone16_black_128gb'),
+    (2, 'https://res.cloudinary.com/example/iphone16_white_128gb.webp', 'iphone16_white_128gb'),
+    (3, 'https://res.cloudinary.com/example/iphone16_black_256gb.webp', 'iphone16_black_256gb'),
+    (4, 'https://res.cloudinary.com/example/iphone16_white_256gb.webp', 'iphone16_white_256gb'),
+    
+    -- iPhone 16 Pro variants
+    (5, 'https://res.cloudinary.com/example/iphone16pro_black_128gb.webp', 'iphone16pro_black_128gb'),
+    (6, 'https://res.cloudinary.com/example/iphone16pro_gray_128gb.webp', 'iphone16pro_gray_128gb'),
+    (7, 'https://res.cloudinary.com/example/iphone16pro_black_256gb.webp', 'iphone16pro_black_256gb'),
+    (8, 'https://res.cloudinary.com/example/iphone16pro_gray_256gb.webp', 'iphone16pro_gray_256gb'),
+    (9, 'https://res.cloudinary.com/example/iphone16pro_black_512gb.webp', 'iphone16pro_black_512gb'),
+    (10, 'https://res.cloudinary.com/example/iphone16pro_gray_512gb.webp', 'iphone16pro_gray_512gb'),
+    
+    -- iPhone 15 Thường variants
+    (11, 'https://res.cloudinary.com/example/iphone15_black_128gb.webp', 'iphone15_black_128gb'),
+    (12, 'https://res.cloudinary.com/example/iphone15_blue_128gb.webp', 'iphone15_blue_128gb'),
+    (13, 'https://res.cloudinary.com/example/iphone15_black_256gb.webp', 'iphone15_black_256gb'),
+    (14, 'https://res.cloudinary.com/example/iphone15_blue_256gb.webp', 'iphone15_blue_256gb'),
+    
+    -- iPhone 15 Pro variants
+    (15, 'https://res.cloudinary.com/example/iphone15pro_white_128gb.webp', 'iphone15pro_white_128gb'),
+    (16, 'https://res.cloudinary.com/example/iphone15pro_silver_128gb.webp', 'iphone15pro_silver_128gb'),
+    (17, 'https://res.cloudinary.com/example/iphone15pro_white_256gb.webp', 'iphone15pro_white_256gb'),
+    (18, 'https://res.cloudinary.com/example/iphone15pro_silver_256gb.webp', 'iphone15pro_silver_256gb'),
+    (19, 'https://res.cloudinary.com/example/iphone15pro_white_512gb.webp', 'iphone15pro_white_512gb'),
+    (20, 'https://res.cloudinary.com/example/iphone15pro_silver_512gb.webp', 'iphone15pro_silver_512gb'),
+    
+    -- iPhone 14 Thường variants
+    (21, 'https://res.cloudinary.com/example/iphone14_black_128gb.webp', 'iphone14_black_128gb'),
+    (22, 'https://res.cloudinary.com/example/iphone14_pink_128gb.webp', 'iphone14_pink_128gb'),
+    (23, 'https://res.cloudinary.com/example/iphone14_black_256gb.webp', 'iphone14_black_256gb'),
+    (24, 'https://res.cloudinary.com/example/iphone14_pink_256gb.webp', 'iphone14_pink_256gb'),
+    
+    -- iPhone 13 Thường variants
+    (25, 'https://res.cloudinary.com/example/iphone13_black_128gb.webp', 'iphone13_black_128gb'),
+    (26, 'https://res.cloudinary.com/example/iphone13_red_128gb.webp', 'iphone13_red_128gb'),
+    (27, 'https://res.cloudinary.com/example/iphone13_black_256gb.webp', 'iphone13_black_256gb'),
+    (28, 'https://res.cloudinary.com/example/iphone13_red_256gb.webp', 'iphone13_red_256gb');
 
-
--- Table phuong_thuc_thanh_toan
+-- Insert phuong_thuc_thanh_toan
 INSERT INTO phuong_thuc_thanh_toan (ten_phuong_thuc, loai_hinh_thuc)
 VALUES
     (N'TIEN_MAT', N'OFFLINE'),
@@ -1564,35 +1097,34 @@ VALUES
     (N'COD', N'ONLINE'),
     (N'VNPAY', N'ONLINE');
 
-
-
--- Table gio_hang_chi_tiet
+-- Insert gio_hang_chi_tiet (sample cart items)
 INSERT INTO gio_hang_chi_tiet (id_gio_hang, id_san_pham_chi_tiet, so_luong, gia, ngay_them)
 VALUES
-    (1, 1, 2, 20000000.00, '2025-05-05'),
-    (2, 2, 1, 25000000.00, '2025-05-05'),
-    (3, 3, 1, 15000000.00, '2025-05-05'),
-    (4, 4, 1, 12000000.00, '2025-05-06'),
-    (5, 5, 1, 10000000.00, '2025-05-06'),
-    (6, 6, 2, 22000000.00, '2025-05-07'),
-    (7, 7, 1, 27000000.00, '2025-05-07'),
-    (8, 8, 1, 18000000.00, '2025-05-08'),
-    (9, 9, 1, 13000000.00, '2025-05-08'),
-    (10, 10, 1, 11000000.00, '2025-05-09'),
-    (11, 11, 2, 30000000.00, '2025-05-09'),
-    (12, 12, 1, 28000000.00, '2025-05-10'),
-    (13, 13, 1, 16000000.00, '2025-05-10'),
-    (14, 14, 1, 14000000.00, '2025-05-11'),
-    (15, 15, 1, 12000000.00, '2025-05-11');
+    (1, 1, 2, 20000000.00, '2025-01-20'),
+    (2, 5, 1, 25000000.00, '2025-01-20'),
+    (3, 11, 1, 15000000.00, '2025-01-21'),
+    (4, 21, 1, 12000000.00, '2025-01-21'),
+    (5, 25, 1, 10000000.00, '2025-01-22');
+
+-- Insert ly_do_xu_ly
+INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
+VALUES
+    (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
+    (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
+    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
+    (N'Khách đổi ý', 'RETURN'),
+    (N'Sản phẩm không đúng mô tả', 'RETURN'),
+    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
+    (N'Khách đổi ý', 'CANCELLED');
 
 
--- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
+	-- Chèn dữ liệu IMEI với 2 số IMEI (so_imei và so_imei_2)
 WITH SPCT_Data AS (
     -- Chọn các sản phẩm chi tiết có số lượng lớn hơn 0
     SELECT
         id_san_pham_chi_tiet,
         ma_san_pham_chi_tiet,
-        so_luong - 1 AS NumIMEIsToGenerate
+        so_luong AS NumIMEIsToGenerate
     FROM
         san_pham_chi_tiet
     WHERE
@@ -1617,134 +1149,218 @@ SELECT
 FROM
     IMEI_Generator i;
 
+-- Ảnh 1 -> biến thể 1..4
 INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
 VALUES
     (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
     (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
-    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
     (N'Khách đổi ý', 'RETURN'),
     (N'Sản phẩm không đúng mô tả', 'RETURN'),
-    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
     (N'Khách đổi ý', 'CANCELLED');
 
+-- 20 ảnh đầu tiên -> id = 1..20
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562841/iemqzr3nxhwi0vdvywcd.webp',
+    image_public_id = 'iemqzr3nxhwi0vdvywcd'
+WHERE id_hinh_anh BETWEEN 1 AND 4;
 
--- 1. nhan_vien
+-- Ảnh 2 -> biến thể 5..8
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562744/xq9bxvzytcm8dwbkqnpk.webp',
+    image_public_id = 'xq9bxvzytcm8dwbkqnpk'
+WHERE id_hinh_anh BETWEEN 5 AND 8;
+
+-- Ảnh 3 -> biến thể 9..12
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562704/imsnuvtjwjpfkqhszkxn.webp',
+    image_public_id = 'imsnuvtjwjpfkqhszkxn'
+WHERE id_hinh_anh BETWEEN 9 AND 12;
+
+-- Ảnh 4 -> biến thể 13..16
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562653/yesdc6rszdhxgbhxhbnh.webp',
+    image_public_id = 'yesdc6rszdhxgbhxhbnh'
+WHERE id_hinh_anh BETWEEN 13 AND 16;
+
+-- Ảnh 5 -> biến thể 17..19
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1751562629/ddoxprv7d6cvfltwqgxw.webp',
+    image_public_id = 'ddoxprv7d6cvfltwqgxw'
+WHERE id_hinh_anh BETWEEN 17 AND 19;
+
+-- Ảnh 6 -> biến thể 20..22
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802104/ievxl7iehsy3d5cbhkdw.webp',
+    image_public_id = 'ievxl7iehsy3d5cbhkdw'
+WHERE id_hinh_anh BETWEEN 20 AND 22;
+
+-- Ảnh 7 -> biến thể 23..25
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753802102/c0166slcdkfkxszvwujn.webp',
+    image_public_id = 'c0166slcdkfkxszvwujn'
+WHERE id_hinh_anh BETWEEN 23 AND 25;
+
+-- Ảnh 8 -> biến thể 26..28
+UPDATE hinh_anh
+SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753800593/bqvwkuqlwuc2slzrkzug.webp',
+    image_public_id = 'bqvwkuqlwuc2slzrkzug'
+WHERE id_hinh_anh BETWEEN 26 AND 28;
+
+-- 1. Nhân viên
 SELECT * FROM nhan_vien;
 
--- 2. khach_hang
+-- 2. Hạng thành viên
+SELECT * FROM hang_thanh_vien;
+
+-- 3. Khách hàng
 SELECT * FROM khach_hang;
 
--- 3. phieu_giam_gia
+-- 4. User tokens
+SELECT * FROM user_tokens;
+
+-- 5. Phiếu giảm giá
 SELECT * FROM phieu_giam_gia;
 
--- 4. hoa_don
-SELECT * FROM hoa_don ;
+-- 6. Hóa đơn
+SELECT * FROM hoa_don;
 
--- 5. lich_su_hoa_don
-SELECT * FROM lich_su_hoa_don ;
+-- 7. Lịch sử hóa đơn
+SELECT * FROM lich_su_hoa_don;
 
--- 6. khach_hang_giam_gia
+-- 8. Khách hàng giảm giá
 SELECT * FROM khach_hang_giam_gia;
 
--- 7. dia_chi
+-- 9. Ví điểm
+SELECT * FROM vi_diem;
+
+-- 10. Lịch sử điểm
+SELECT * FROM lich_su_diem;
+
+-- 11. Chi tiết lịch sử điểm
+SELECT * FROM chi_tiet_lich_su_diem;
+
+-- 12. Địa chỉ
 SELECT * FROM dia_chi;
 
--- 8. gio_hang
+-- 13. Giỏ hàng
 SELECT * FROM gio_hang;
 
--- 9. camera_sau
+-- 14. Camera sau
 SELECT * FROM camera_sau;
 
--- 10. camera_truoc
+-- 15. Camera trước
 SELECT * FROM camera_truoc;
 
--- 11. cpu
+-- 16. CPU
 SELECT * FROM cpu;
 
--- 12. loai
+-- 17. Loại
 SELECT * FROM loai;
 
--- 13. xuat_xu
+-- 18. Xuất xứ
 SELECT * FROM xuat_xu;
 
--- 14. pin
+-- 19. Pin
 SELECT * FROM pin;
 
--- 15. he_dieu_hanh
+-- 20. Hệ điều hành
 SELECT * FROM he_dieu_hanh;
 
--- 16. man_hinh
+-- 21. Màn hình
 SELECT * FROM man_hinh;
 
--- 17. rom
+-- 22. ROM
 SELECT * FROM rom;
 
--- 18. ram
+-- 23. RAM
 SELECT * FROM ram;
 
--- 19. mau_sac
+-- 24. Màu sắc
 SELECT * FROM mau_sac;
 
--- 20. nha_cung_cap
+-- 25. Nhà cung cấp
 SELECT * FROM nha_cung_cap;
 
--- 21. san_pham
+-- 26. Model sản phẩm
+SELECT * FROM model_san_pham;
+
+-- 27. Model camera sau
+SELECT * FROM model_camera_sau;
+
+-- 28. Sản phẩm
 SELECT * FROM san_pham;
 
--- 22. san_pham_chi_tiet
+-- 29. Nhà cung cấp sản phẩm
+SELECT * FROM nha_cung_cap_sp;
+
+-- 30. Khuyến mãi
+SELECT * FROM khuyen_mai;
+
+-- 31. Sản phẩm chi tiết
 SELECT * FROM san_pham_chi_tiet;
 
--- 23. bao_hanh
-SELECT * FROM bao_hanh;
+-- 32. Khuyến mãi sản phẩm chi tiết
+SELECT * FROM khuyen_mai_san_pham_chi_tiet;
 
--- 24. imei
+-- 33. IMEI
 SELECT * FROM imei;
 
--- 25. hinh_anh
+-- 34. Hình ảnh
 SELECT * FROM hinh_anh;
 
--- 26. gio_hang_chi_tiet
+-- 35. Giỏ hàng chi tiết
 SELECT * FROM gio_hang_chi_tiet;
 
--- 27. chi_tiet_hoa_don
-SELECT * FROM chi_tiet_hoa_don ;
+-- 36. Chi tiết hóa đơn
+SELECT * FROM chi_tiet_hoa_don;
 
--- 28. imei_da_ban
+-- 37. IMEI đã bán
 SELECT * FROM imei_da_ban;
 
--- 31. phuong_thuc_thanh_toan
+-- 38. Loại bảo hành
+SELECT * FROM loai_bao_hanh;
+
+-- 39. Bảo hành
+SELECT * FROM bao_hanh;
+
+-- 40. Lịch sử bảo hành
+SELECT * FROM lich_su_bao_hanh;
+
+-- 41. Phương thức thanh toán
 SELECT * FROM phuong_thuc_thanh_toan;
 
--- 32. chi_tiet_thanh_toan
+-- 42. Chi tiết thanh toán
 SELECT * FROM chi_tiet_thanh_toan;
 
--- 33. loai_bao_hanh
-SELECT * FROM loai_bao_hanh
+-- 43. Đánh giá sản phẩm
+SELECT * FROM danh_gia_san_pham;
 
--- 34. lich_su_bao_hanh
-SELECT * FROM lich_su_bao_hanh
+-- 44. Media đánh giá
+SELECT * FROM media_danh_gia;
 
--- 35. user_tokens
-SELECT * FROM user_tokens
+-- 45. Phản hồi đánh giá
+SELECT * FROM phan_hoi_danh_gia;
 
--- 36. model_san_pham
-SELECT * FROM model_san_pham
+-- 46. Wishlist
+SELECT * FROM wishlist;
 
--- 37. model_camera_sau
-SELECT * FROM model_camera_sau
+-- 47. Lý do xử lý
+SELECT * FROM ly_do_xu_ly;
 
--- 38. lich_su_diem
-SELECT * FROM lich_su_diem
+-- 48. Xử lý sau bán hàng
+SELECT * FROM xu_ly_sau_ban_hang;
 
--- 39. vi_diem
-SELECT * FROM vi_diem
-
--- 40. chi_tiet_lich_su_diem
-SELECT * FROM chi_tiet_lich_su_diem
-
--- 41. hang_thanh_vien
-SELECT * FROM hang_thanh_vien
-
---42. nha_cung_cap_sp
-SELECT * FROM nha_cung_cap_sp
-
+SELECT 
+    spct.id_san_pham_chi_tiet,
+    spct.ma_san_pham_chi_tiet,
+    spct.so_luong as so_luong_can_co,
+    COUNT(i.so_imei) as so_imei_da_tao,
+    CASE 
+        WHEN COUNT(i.so_imei) = spct.so_luong THEN 'OK'
+        WHEN COUNT(i.so_imei) > spct.so_luong THEN 'THỪA'
+        ELSE 'THIẾU'
+    END as trang_thai
+FROM san_pham_chi_tiet spct
+LEFT JOIN imei i ON spct.id_san_pham_chi_tiet = i.id_san_pham_chi_tiet
+GROUP BY spct.id_san_pham_chi_tiet, spct.ma_san_pham_chi_tiet, spct.so_luong
+ORDER BY spct.id_san_pham_chi_tiet;

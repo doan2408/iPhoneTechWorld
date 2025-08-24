@@ -3,13 +3,19 @@ import api from "@/Service/LoginService/axiosInstance";
 const baseURL = "/client/my-order"
 const baseUrlGuest = '/my-order'
 
-export const getMyOrder = async (pageNo,pageSize) => {
-    return  await api.get(baseURL,{
-        params : {
-            pageNo,
-            pageSize
-        }
-    });
+export const getMyOrder = async (params = {}) => {
+    try {
+        console.log('Gọi API getMyOrder với params:', params);
+        
+        const response = await api.get(baseURL, { params });
+        
+        console.log('Response từ API:', response.data);
+        
+        return response;
+    } catch (error) {
+        console.error('Lỗi API getMyOrder:', error);
+        throw error;
+    }
 };  
 
 //bảng đánh giá
@@ -23,8 +29,8 @@ export const getMyReview = async (pageNo,pageSize) => {
 };  
 
 
-export const findIdHoaDonByMVD = async (maVanDon) => {
-    return await api.get(baseURL +'/mvd/'+ maVanDon);
+export const findIdHoaDonByMVDAndSdt = async (maVanDon, sdt) => {
+    return await api.get(baseURL +'/mvd/'+ maVanDon + '?sdt=' + sdt);
 };  
 
 export const hoaDonDetail = (id) => {
@@ -81,6 +87,11 @@ export const findHdctByImeiDaBan = (ctHoaDonId) => {
 
 export const hoaDonDetailGuest = (id) => {
     const url = baseUrlGuest + '/' + id;
+    return api.get(url)
+}
+
+export const getOrderHistory = (id) => {
+    const url = baseURL + '/' + id + '/lich-su';
     return api.get(url)
 }
 

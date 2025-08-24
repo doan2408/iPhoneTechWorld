@@ -4,62 +4,59 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.HoaDonAdminResponse;
 import org.example.websitetechworld.Entity.BaoHanh;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.KhachHang;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class BaoHanhAdminResponse {
-    private Integer id;
+    private Integer idBaoHanh;
 
     private Integer idKhachHang;
     private String maKhachHang;
+    private String sdtKhachHang;
     private String tenKhachHang;
 
-    private Integer idSanPhamChiTiet; // Thay vì sử dụng `SanPhamChiTiet`, bạn có thể chỉ lấy ID
-    private String maSanPhamChiTiet;
+    private Integer idImeiDaBan;
+    private String soImeiDaBan;
 
-    private Integer idLoaiBaoHanh; // Thay vì `LoaiBaoHanh`, bạn có thể chỉ lấy ID
+    private Integer idLoaiBaoHanh;
     private String tenLoaiBaoHanh;
     private Integer thoiGianThang;
 
+    private Date ngayBatDau;
 
-    private LocalDate ngayBatDau;
-
-    private LocalDate ngayKetThuc;
-
+    private Date ngayKetThuc;
 
     private String trangThaiBaoHanh;
 
 
     public static BaoHanhAdminResponse convertDto(BaoHanh baoHanh) {
         BaoHanhAdminResponse baoHanhAdminResponse = new BaoHanhAdminResponse();
-        baoHanhAdminResponse.setId(baoHanh.getId());
+        baoHanhAdminResponse.setIdBaoHanh(baoHanh.getId());
         if (baoHanh.getIdKhachHang() != null) {
             baoHanhAdminResponse.setIdKhachHang(baoHanh.getIdKhachHang().getId());
             baoHanhAdminResponse.setMaKhachHang(baoHanh.getIdKhachHang().getMaKhachHang());
             baoHanhAdminResponse.setTenKhachHang(baoHanh.getIdKhachHang().getTenKhachHang());
+            baoHanhAdminResponse.setSdtKhachHang(baoHanh.getIdKhachHang().getSdt());
         }
 
-        if (baoHanh.getIdSanPhamChiTiet() != null) {
-            baoHanhAdminResponse.setIdSanPhamChiTiet(baoHanh.getIdSanPhamChiTiet().getId());
-            baoHanhAdminResponse.setMaSanPhamChiTiet(baoHanh.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
-        }
         if (baoHanh.getIdLoaiBaoHanh() != null) {
             baoHanhAdminResponse.setIdLoaiBaoHanh(baoHanh.getIdLoaiBaoHanh().getId());
             baoHanhAdminResponse.setTenLoaiBaoHanh(baoHanh.getIdLoaiBaoHanh().getTenLoaiBaoHanh());
             baoHanhAdminResponse.setThoiGianThang(baoHanh.getIdLoaiBaoHanh().getThoiGianThang());
         }
+
+        if(baoHanh.getIdImeiDaBan() != null) {
+            baoHanhAdminResponse.setIdImeiDaBan(baoHanh.getIdImeiDaBan().getId());
+            baoHanhAdminResponse.setSoImeiDaBan(baoHanh.getIdImeiDaBan().getSoImei());
+        }
         baoHanhAdminResponse.setNgayBatDau(baoHanh.getNgayBatDau());
         baoHanhAdminResponse.setNgayKetThuc(baoHanh.getNgayKetThuc());
         baoHanhAdminResponse.setTrangThaiBaoHanh(baoHanh.getTrangThaiBaoHanh() != null ? baoHanh.getTrangThaiBaoHanh().name() : null);
-
 
         return baoHanhAdminResponse;
     }

@@ -75,6 +75,11 @@ const showUuDai = ref(false);
 function toggleUuDaiMenu() {
   showUuDai.value = !showUuDai.value;
 }
+
+const showBaoHanh = ref(false);
+function toggleBaoHanhMenu() {
+  showBaoHanh.value = !showBaoHanh.value;
+}
 </script>
 
 <template>
@@ -175,6 +180,22 @@ function toggleUuDaiMenu() {
           <li>
             <router-link to="/admin/danhGiaSanPham">Quản lý bình luận</router-link>
           </li>
+
+          <li @click="toggleBaoHanhMenu" class="menu-toggle">
+            Quản lý bảo hành
+            <i :class="showBaoHanh ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+          </li>
+          <ul v-if="showBaoHanh" class="submenu">
+            <li>
+              <router-link to="/admin/warranty-type">Loại bảo hành</router-link>
+            </li>
+            <li>
+              <router-link to="/admin/warranty">Quản lý bảo hành</router-link>
+            </li>
+            <li>
+              <router-link to="/admin/warranty-request">Yêu cầu bảo hành</router-link>
+            </li>
+          </ul>
         </ul>
       </nav>
     </div>

@@ -8,6 +8,7 @@ import giaoHangRoutes from "./GiaoHangRoutes/giaoHangRoutes";
 import sanPhamAdminRouters from "./SanPhamRotes/sanPhamRouters";
 import uuDaiAdminRoutes from "./UuDaiRoutes/uuDaiRoutes";
 import xuLySauBanHangAdminRoutes from "./XuLySauBanHang/XuLySauBanHangRoutes";
+import baoHanhRouters from "./BaoHanhRoutes/baoHanhRouters";
 
 const adminRoutes: RouteRecordRaw[] = [
   {
@@ -24,7 +25,8 @@ const adminRoutes: RouteRecordRaw[] = [
       ...giaoHangRoutes,
       ...sanPhamAdminRouters,
       ...uuDaiAdminRoutes,
-      ...xuLySauBanHangAdminRoutes
+      ...xuLySauBanHangAdminRoutes,
+      ...baoHanhRouters
     ],
   },
 ];

@@ -42,6 +42,7 @@ public class ModelSanPhamService {
     private final LoaiRepository loaiRepo;
     private final ModelSanPhamRepository modelSanPhamRepository;
     private final ModelCameraSauRepository modelCameraSauRepository;
+    private final ImeiDaBanRepository imeiDaBanRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -221,7 +222,7 @@ public class ModelSanPhamService {
         return mapEntityToResponseList(list);
     }
 
-    public Page<ModelSanPhamHienThiAdminResponse> getAllPageModelSanPhamAdmin(int page , int size) {
+    public Page<ModelSanPhamHienThiAdminResponse> getAllPageModelSanPhamAdmin(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Object[]> modelSanPhamsPage = modelSanPhamRepo.getAllPage(pageable);
@@ -317,8 +318,8 @@ public class ModelSanPhamService {
                 !Objects.equals(request.getIdXuatXu(), model.getIdXuatXu().getId()) ||
                 !Objects.equals(request.getIdLoai(), model.getIdLoai().getId());
 
-        if(isChanged) {
-            if(modelSanPhamRepository.existsModelWithSameConfig(
+        if (isChanged) {
+            if (modelSanPhamRepository.existsModelWithSameConfig(
                     tenFormat,
                     request.getIdXuatXu(),
                     request.getIdLoai()
@@ -356,7 +357,6 @@ public class ModelSanPhamService {
         ModelSanPham updatedModel = modelSanPhamRepository.save(model);
         return mapEntityToResponse(updatedModel);
     }
-
 
 
     @Transactional
