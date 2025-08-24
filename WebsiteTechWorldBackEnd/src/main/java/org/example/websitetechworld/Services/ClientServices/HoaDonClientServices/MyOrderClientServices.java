@@ -344,6 +344,9 @@ public class MyOrderClientServices {
         hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);
+        if (requestThanhToanTongHop.getSoTienGiam() != null){
+            hoaDon.setSoTienGiam(requestThanhToanTongHop.getSoTienGiam());
+        }
         return hoaDonRepository.save(hoaDon);
     }
 
