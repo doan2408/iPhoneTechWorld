@@ -30,7 +30,10 @@ import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { deleteHoaDon, hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { cartService } from'@/Service/ClientService/GioHang/GioHangClientService'
+import { useToast } from 'vue-toastification';
 
+
+const toast = useToast()
 const route = useRoute();
 const viewMyOrder = () => {
     router.push({ name: 'myorder' });
@@ -40,8 +43,9 @@ onMounted( async () => {
     const responseCode = route.query.vnp_ResponseCode;
     const orderId = route.query.vnp_TxnRef;
     
+    let orderIdNumber = 0
     if (orderId) {
-        const orderIdNumber = parseInt(orderId.replace(/^HD/, ''), 10);
+        orderIdNumber  = parseInt(orderId.replace(/^HD/, ''), 10);
     }
 
     if(orderId && orderId.trim() !== ''){
@@ -49,6 +53,7 @@ onMounted( async () => {
         if (responseCode === '24' && orderId) {
             deleteHoaDon(orderId)
             router.push({ name: 'shoppingCardClient' });
+            toast.warning("Đã hủy thanh toán đang chuyển về trang giỏ hàng")
         } else {
             const chiTietList = response.data.chiTietHoaDonAdminResponseList;
 
@@ -59,6 +64,7 @@ onMounted( async () => {
                     }
                 });
             }
+            toast.success("Thanh toán thành công")
         }
     }
 });

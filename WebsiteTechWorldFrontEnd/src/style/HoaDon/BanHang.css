@@ -3214,6 +3214,23 @@ input:checked+.slider:before {
     background: #a8a8a8;
 }
 
+
+.filter-overlay {
+    position: fixed;
+    /* quan trọng: bám vào toàn màn hình */
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* phủ ngang màn hình */
+    height: 100%;
+    /* phủ dọc màn hình */
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
 .history-overlay {
     position: fixed;
     top: 0;

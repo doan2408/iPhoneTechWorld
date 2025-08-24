@@ -34,7 +34,7 @@
                 </button>
                 <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới tab
                 </button>
             </div>
             <div id="screen-lock-overlay" style="display: none;"></div>
@@ -421,7 +421,7 @@
                 </div>
                 <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
+                    <span class="shipping-fee-amount">50.000</span>
                 </div>
                 <div class="discount-section" v-if="discountAmount > 0"
                     style="flex-direction: row; max-height: 40.8px;">
@@ -589,10 +589,6 @@
                     <label>Email</label>
                     <input v-model="newCustomer.email" type="email" class="form-input" />
                 </div>
-                <!-- <div class="form-group">
-                    <label>Địa chỉ</label>
-                    <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
-                </div> -->
             </div>
             <div class="modal-footer">
                 <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
@@ -720,7 +716,8 @@ import {
     , findHdctByImeiDaBan, findProductByImei,
     updateGia,
     getAllLichSuBanHang,
-    viewLichSuHoaDon
+    viewLichSuHoaDon,
+    deleteTTShipping
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -811,7 +808,7 @@ const shippingInfo = ref({
 });
 
 
-const calculateTotal = () => {
+const calculateTotal = async () => {
     totalProductAmount.value = 0;
     if (currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList?.length) {
         for (const hd of currentInvoiceDetail.value.chiTietHoaDonAdminResponseList) {
@@ -834,7 +831,13 @@ const calculateTotal = () => {
         shippingFee.value = shippingInfo.value.phiShip
     }
 
-    grandTotal.value = totalProductAmount.value + shippingFee.value - discountAmount.value
+    if (isShipping.value) {
+        grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
+        
+    }
+    else{
+        grandTotal.value = totalProductAmount.value - discountAmount.value
+    }
 }
 
 
@@ -1026,7 +1029,6 @@ const newCustomer = reactive({
     name: '',
     phone: '',
     email: '',
-    address: ''
 })
 
 // Cart display
@@ -1163,7 +1165,6 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts();
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
@@ -1183,7 +1184,31 @@ const clearCustomer = () => {
 }
 
 const addCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return
+
+    if (!newCustomer.name || !newCustomer.name.trim()) {
+        toast.error("Vui lòng nhập tên khách hàng");
+        return;
+    }
+
+    // validate số điện thoại
+    if (!newCustomer.phone || !newCustomer.phone.trim()) {
+        toast.error("Vui lòng nhập số điện thoại");
+        return;
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(newCustomer.phone)) {
+        toast.error("Số điện thoại không đúng định dạng");
+        return;
+    }
+
+    // validate email (nếu có nhập)
+    if (newCustomer.email && newCustomer.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newCustomer.email)) {
+            toast.error("Email không đúng định dạng");
+            return;
+        }
+    }
 
     currentInvoice.value.customer = { ...newCustomer }
     // customerSearchQuery.value = newCustomer.phone
@@ -1537,7 +1562,6 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
@@ -1710,7 +1734,7 @@ const onXaChange = async () => {
     // }
 };
 
-watch(isShipping, (newVal) => {
+watch(isShipping, async (newVal)  => {
     if (!newVal) {
         console.log('Tắt giao hàng, xóa thông tin giao hàng');
         shippingInfo.value = {
@@ -1724,6 +1748,10 @@ watch(isShipping, (newVal) => {
         selectedTinh.value = null;
         selectedXa.value = null;
         xaList.value = [];
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const fullAddressForDB = ''
+        await deleteTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
+        calculateTotal()
     } else {
         console.log('Đã bật giao hàng');
     }
@@ -2239,6 +2267,7 @@ const confirmShippingInfo = async () => {
 
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
+        calculateTotal()
         toast.success('Cập nhật thông tin giao hàng thành công!');
 
         showMessageConfirmShipping.value = false;
@@ -2279,22 +2308,14 @@ const onCancelCreate = () => {
 
 const toggleShipping = () => {
     if (!isShipping.value) {
-        console.log('Tắt giao hàng, xóa thông tin giao hàng');
-        shippingInfo.value = {
-            tenNguoiNhan: '',
-            sdtNguoiNhan: '',
-            diaChiChiTiet: '',
-            phiShip: null,
-            shippingMethod: 'express'
-        };
-        selectedTinh.value = null;
-        // selectedHuyen.value = null;
-        selectedXa.value = null;
-        // huyenList.value = [];
-        xaList.value = [];
-    } else {
+        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' }; 
+        selectedTinh.value = null;  
+        selectedXa.value = null;  
+        xaList.value = []; 
+    } else { 
         console.log('Đã bật giao hàng');
-    }
+        calculateTotal()
+    } 
 };
 
 // Hàm để lấy danh sách phương thức thanh toán từ API
@@ -2344,7 +2365,7 @@ const processPayment = async () => {
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip,
+        soTienKhachDua: grandTotal.value,
         soTienGiam: discountAmount.value
     };
     console.log("tien khach dua", paymentPayload);
