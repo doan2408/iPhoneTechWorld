@@ -589,10 +589,6 @@
                     <label>Email</label>
                     <input v-model="newCustomer.email" type="email" class="form-input" />
                 </div>
-                <!-- <div class="form-group">
-                    <label>Địa chỉ</label>
-                    <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
-                </div> -->
             </div>
             <div class="modal-footer">
                 <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
@@ -1026,7 +1022,6 @@ const newCustomer = reactive({
     name: '',
     phone: '',
     email: '',
-    address: ''
 })
 
 // Cart display
@@ -1183,7 +1178,31 @@ const clearCustomer = () => {
 }
 
 const addCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return
+
+    if (!newCustomer.name || !newCustomer.name.trim()) {
+        toast.error("Vui lòng nhập tên khách hàng");
+        return;
+    }
+
+    // validate số điện thoại
+    if (!newCustomer.phone || !newCustomer.phone.trim()) {
+        toast.error("Vui lòng nhập số điện thoại");
+        return;
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(newCustomer.phone)) {
+        toast.error("Số điện thoại không đúng định dạng");
+        return;
+    }
+
+    // validate email (nếu có nhập)
+    if (newCustomer.email && newCustomer.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newCustomer.email)) {
+            toast.error("Email không đúng định dạng");
+            return;
+        }
+    }
 
     currentInvoice.value.customer = { ...newCustomer }
     // customerSearchQuery.value = newCustomer.phone
