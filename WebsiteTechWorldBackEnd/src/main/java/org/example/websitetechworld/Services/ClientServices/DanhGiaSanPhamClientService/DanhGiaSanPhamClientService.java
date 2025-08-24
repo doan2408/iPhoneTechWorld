@@ -13,6 +13,8 @@ import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
 import org.example.websitetechworld.exception.BusinessException;
+import org.example.websitetechworld.exception.NotFoundException;
+import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +47,7 @@ public class DanhGiaSanPhamClientService {
     public DanhGiaSanPhamClientResponse taoMoiDanhGia(DanhGiaSanPhamClientRequest request) {
         // 1. Validate số sao
         if (request.getSoSao() == null || request.getSoSao() < 1 || request.getSoSao() > 5) {
-            throw new IllegalArgumentException("Số sao phải từ 1 đến 5");
+            throw new BusinessException("Số sao phải từ 1 đến 5");
         }
 
         // 2. Tạo mới đối tượng đánh giá
@@ -59,38 +61,38 @@ public class DanhGiaSanPhamClientService {
 
         // 3. Kiểm tra và set khách hàng
         KhachHang khachHang = khachHangRepository.findById(request.getIdKhachHang())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
         danhGia.setIdKhachHang(khachHang);
 
         // 4. Kiểm tra và set sản phẩm chi tiết
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm chi tiết"));
         danhGia.setIdSanPhamChiTiet(sanPhamChiTiet);
 
         // 5. Kiểm tra chi tiết hóa đơn
         ChiTietHoaDon chiTietHoaDon = chiTietHoaDonRepository.findById(request.getIdChiTietHoaDon())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết hóa đơn"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết hóa đơn"));
 
         //  Kiểm tra chi tiết hóa đơn có thuộc về khách hàng không
         if (!chiTietHoaDon.getIdHoaDon().getIdKhachHang().getId().equals(request.getIdKhachHang())) {
-            throw new RuntimeException("Chi tiết hóa đơn không thuộc về khách hàng này");
+            throw new NotFoundException("Chi tiết hóa đơn không thuộc về khách hàng này");
         }
 
         //  Kiểm tra chi tiết hóa đơn có đúng sản phẩm không
         if (!chiTietHoaDon.getIdSanPhamChiTiet().getId().equals(request.getIdSanPhamChiTiet())) {
-            throw new RuntimeException("Chi tiết hóa đơn không đúng với sản phẩm đã mua");
+            throw new NotFoundException("Chi tiết hóa đơn không đúng với sản phẩm đã mua");
         }
 
         //  Kiểm tra đã đánh giá chưa
         boolean daDanhGia = danhGiaRepository.existsByChiTietHoaDonId(request.getIdChiTietHoaDon());
         if (daDanhGia) {
-            throw new RuntimeException("Sản phẩm này đã được đánh giá rồi");
+            throw new NotFoundException("Sản phẩm này đã được đánh giá rồi");
         }
 
-        LocalDateTime ngayMua = chiTietHoaDon.getIdHoaDon().getNgayThanhToan();
-        if (ngayMua.plusMinutes(1).isBefore(LocalDateTime.now())) {
-            throw new BusinessException("Hết thời gian cho phép đánh giá (sau 1 phút kể từ ngày mua)");
-        }
+//        LocalDateTime ngayMua = chiTietHoaDon.getIdHoaDon().getNgayThanhToan();
+//        if (ngayMua.plusMinutes(1).isBefore(LocalDateTime.now())) {
+//            throw new BusinessException("Hết thời gian cho phép đánh giá (sau 1 phút kể từ ngày mua)");
+//        }
 
         danhGia.setIdChiTietHoaDon(chiTietHoaDon);
 
@@ -126,7 +128,7 @@ public class DanhGiaSanPhamClientService {
 
     public void xoaDanhGia(Integer id) {
         if (!danhGiaRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy đánh giá với ID: " + id);
+            throw new NotFoundException("Không tìm thấy đánh giá với ID: " + id);
         }
         danhGiaRepository.deleteById(id);
     }
@@ -134,7 +136,7 @@ public class DanhGiaSanPhamClientService {
     @Transactional(readOnly = true)
     public DanhGiaSanPhamClientResponse layDanhGiaTheoId(Integer id) {
         DanhGiaSanPham danhGia = danhGiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá với ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy đánh giá với ID: " + id));
         return chuyenDoiSangResponse(danhGia);
     }
 
@@ -253,7 +255,7 @@ public class DanhGiaSanPhamClientService {
     public List<DanhGiaAndHoaDonClientResponse> getDanhGiaByHoaDon(Integer idHoaDon) {
         // Kiểm tra đầu vào
         if (idHoaDon == null) {
-            throw new IllegalArgumentException("ID hóa đơn không được để trống");
+            throw new ResourceNotFoundException("ID hóa đơn không được để trống");
         }
 
         // Gọi repository để lấy dữ liệu
@@ -273,6 +275,7 @@ public class DanhGiaSanPhamClientService {
                 newDto.setSoSao(result[5] != null ? (Integer) result[5] : null);
                 newDto.setNoiDung(result[6] != null ? (String) result[6] : null);
                 newDto.setTrangThaiDanhGia(result[7] != null ? TrangThaiDanhGia.valueOf((String) result[7]) : null);
+                newDto.setNgayDanhGia(result[13] != null ? ((Timestamp) result[13]).toLocalDateTime() : null);
                 newDto.setReviewClientResponsesList(new ArrayList<>());
                 return newDto;
             });
@@ -305,7 +308,7 @@ public class DanhGiaSanPhamClientService {
     public Map<String, Boolean> checkDaDanhGiaVaPhanHoi(Integer idHoaDon, Integer idKhachHang) {
         // Kiểm tra tham số đầu vào
         if (idHoaDon == null || idKhachHang == null) {
-            throw new IllegalArgumentException("idHoaDon và idKhachHang không được null");
+            throw new ResourceNotFoundException("idHoaDon và idKhachHang không được null");
         }
 
         // Gọi repository để thực hiện truy vấn

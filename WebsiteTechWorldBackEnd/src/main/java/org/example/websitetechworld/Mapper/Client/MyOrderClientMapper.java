@@ -62,6 +62,7 @@ public class MyOrderClientMapper {
             dto.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan().getDisplayName());
         }
         dto.setThanhTien(hoaDon.getThanhTien());
+        dto.setNgayThanhToan(hoaDon.getNgayThanhToan());
         dto.setMyOrderClientResponseList(
                 hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)
                         .collect(Collectors.toList())
