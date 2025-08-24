@@ -757,7 +757,6 @@ const xemLichSu = async () => {
     try {
         const id = route.params.id; 
         const response = await getOrderHistory(id);
-        console.log('data', response)
         orderHistory.value = response.data;
         showHistoryModal.value = true;
     } catch (error) {
