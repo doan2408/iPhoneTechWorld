@@ -34,7 +34,7 @@
                 </button>
                 <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới tab
                 </button>
             </div>
             <div id="screen-lock-overlay" style="display: none;"></div>
