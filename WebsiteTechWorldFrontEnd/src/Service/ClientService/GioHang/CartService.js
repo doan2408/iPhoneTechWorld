@@ -40,6 +40,7 @@ const setupStorageListener = () => {
 
 const themVaoGio = (
   idSanPhamChiTiet,
+  maSanPhamChiTiet,
   soLuong,
   tenSanPham,
   phienBan,
@@ -52,9 +53,9 @@ const themVaoGio = (
       (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
     );
     const soLuongHienTai = itemHienTai ? itemHienTai.soLuong : 0;
-    console.log('denbug',soLuongTon);
+    const max = soLuongTon < 2 ? soLuongTon : 2
     
-    if (soLuongHienTai + soLuong > soLuongTon) {
+    if (soLuongHienTai + soLuong > max) {
       return false; 
     }
 
@@ -65,6 +66,7 @@ const themVaoGio = (
       cartData.value.push({
         idGioHangChiTiet: Date.now(),
         idSanPhamChiTiet,
+        maSanPhamChiTiet,
         soLuong,
         tenSanPham,
         phienBan,
@@ -83,11 +85,11 @@ const themVaoGio = (
   }
 };
 
-const xoaSanPhamKhoiGio = (idSanPhamChiTiet) => {
+const xoaSanPhamKhoiGio = (idGioHangChiTiet) => {
   try {
     const initialLength = cartData.value.length;
     cartData.value = cartData.value.filter(
-      (item) => item.idSanPhamChiTiet !== idSanPhamChiTiet
+      (item) => item.idGioHangChiTiet !== idGioHangChiTiet
     );
     luuGioHangVaoLocalStorage();
     return cartData.value.length < initialLength;

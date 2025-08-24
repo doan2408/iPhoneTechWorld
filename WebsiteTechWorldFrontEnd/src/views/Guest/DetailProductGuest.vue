@@ -227,18 +227,6 @@ const handleScroll = () => {
   }
 };
 
-const increaseQty = () => {
-  if (bienThe.value && quantity.value < bienThe.value.soLuong) {
-    quantity.value++;
-  }
-};
-
-const decreaseQty = () => {
-  if (quantity.value > 1) {
-    quantity.value--;
-  }
-};
-
 const fetchSanPhamDetail = async () => {
   try {
     const data = await detailSanPham(idSanPham);
@@ -304,6 +292,7 @@ const addToCart = async (buy) => {
 
     console.log(bienThe.value)
     const idSanPhamChiTiet = bienThe.value.idSpct;
+    const maSanPhamChiTiet = bienThe.value.maSanPhamChiTiet;
     const soLuongMoi = quantity.value;
     const soLuongTonKho = bienThe.value.soLuong;
 
@@ -322,6 +311,7 @@ const addToCart = async (buy) => {
 
     const success = CartService.themVaoGio(
       idSanPhamChiTiet,
+      maSanPhamChiTiet,
       soLuongMoi,
       tenSanPham,
       phienBan,
@@ -334,9 +324,15 @@ const addToCart = async (buy) => {
       const itemHienTai = CartService.cartData.value.find(
         (item) => item.idSanPhamChiTiet === idSanPhamChiTiet
       );
-      ElMessage.error(
-        `Số lượng vượt quá tồn kho. Đã có ${itemHienTai?.soLuong || 0} sản phẩm trong giỏ.`
-      );
+      if (itemHienTai?.soLuong < 2) {
+        ElMessage.error(
+          `Số lượng vượt quá tồn kho. Đã có ${itemHienTai?.soLuong || 0} sản phẩm trong giỏ.`
+        )
+      } else {
+        ElMessage.error(
+          `Giới hạn số lượng mua là 2. Đã có 2 sản phẩm trong giỏ.`
+        )
+      }
       return;
     }
 
@@ -601,18 +597,6 @@ onMounted(() => {
               -{{ Math.round(((bienThe.giaTruocKhuyenMai - bienThe.giaBan) / bienThe.giaTruocKhuyenMai) * 100) }}%
             </span>
           </p>
-
-          <!-- Chọn số lượng -->
-          <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
-            <h3>Chọn số lượng:</h3>
-            <div class="quantity-control">
-              <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
-              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
-                +
-              </button>
-            </div>
-          </div>
 
           <div class="banner-tichDiem">
             <router-link to="/client/doiDiem">
