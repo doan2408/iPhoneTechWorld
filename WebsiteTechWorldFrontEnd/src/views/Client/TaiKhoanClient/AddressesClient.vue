@@ -355,11 +355,11 @@ onMounted(() => {
                 </el-icon>
               </el-button>
 
-              <el-button type="danger" size="small" circle @click.stop title="Xóa">
+              <!-- <el-button type="danger" size="small" circle @click.stop title="Xóa">
                 <el-icon>
                   <Delete />
                 </el-icon>
-              </el-button>
+              </el-button> -->
 
               <el-button v-if="selectedAddressId === address.id && !address.diaChiChinh" type="success" size="small"
                 @click.stop="setPrimary(address)" class="set-primary-btn">
