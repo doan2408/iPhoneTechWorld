@@ -4,11 +4,16 @@ import { ref } from "vue";
 const url_base = "/admin/hoa-don"
 
 // api getAll hoadon
-export const hoaDonGetAll = (pageNo = 0, pageSize = 10) => {
+export const hoaDonGetAll = (pageNo = 0, pageSize = 10, keyWord, trangThai, loaiHoaDon, ngayTaoFrom, ngayTaoTo ) => {
     return api.get(url_base, {
         params: {
             pageNo,
-            pageSize
+            pageSize,
+            keyWord,
+            trangThai,
+            loaiHoaDon,
+            ngayTaoFrom,
+            ngayTaoTo
         }
     })
 }

@@ -12,5 +12,6 @@ import org.example.websitetechworld.Enum.ActionAfterCase;
 @NoArgsConstructor
 public class AccepAndInAccepAction {
     private Integer idHoaDon;
+    private String soImei;
     private ActionAfterCase hanhDong;
 }

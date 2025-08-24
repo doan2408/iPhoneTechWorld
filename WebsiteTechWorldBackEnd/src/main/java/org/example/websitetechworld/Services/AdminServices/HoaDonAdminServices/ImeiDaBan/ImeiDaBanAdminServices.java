@@ -78,4 +78,8 @@ public class ImeiDaBanAdminServices {
     public List<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(Integer ctHoaDonId) {
         return imeiDaBanRepository.imeiTrongHdct(ctHoaDonId);
     }
+
+    public List<ImeiDaBangAdminResponse> imeiDaBanListByKhachHang(Integer idKhachHang) {
+        return imeiDaBanRepository.imeiDaBanListByKhachHang(idKhachHang, TrangThaiImei.RETURNED);
+    }
 }

@@ -172,6 +172,8 @@ const saveProfile = async () => {
     isLoading.value = true;
     const idUser = user.value?.id;
     if (!form.value.matKhau) delete form.value.matKhau;
+    delete form.value.hangKhachHang;
+
     await updateInfor(idUser, form.value);
     await loadCurrentUserProfile();
     ElMessage.success("Update thành công");
@@ -211,6 +213,8 @@ const confirmPasswordChange = async () => {
       matKhau: passwordForm.value.newPwd,
       matKhauCu: passwordForm.value.oldPwd,
     };
+    console.log("payload: ", payload)
+    delete payload.hangKhachHang;
 
     await updateInfor(idUser, payload);
     await loadCurrentUserProfile();
@@ -225,7 +229,6 @@ const confirmPasswordChange = async () => {
     isLoading.value = false;
   }
 };
-
 </script>
 
 <style scoped>

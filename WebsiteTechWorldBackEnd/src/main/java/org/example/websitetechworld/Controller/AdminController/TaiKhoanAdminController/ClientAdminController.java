@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminClientRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.TaiKhoanAdminRequest.AdminDiaChiRequest;
+import org.example.websitetechworld.Dto.Response.AdminResponse.TaiKhoanAdminResponse.AdminClientResponse;
 import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.ClientAdminService;
 import org.example.websitetechworld.Services.AdminServices.TaiKhoanAdminServices.DiaChiAdminService;
@@ -25,6 +26,11 @@ public class ClientAdminController {
 
     private final ClientAdminService clientAdminService;
     private final DiaChiAdminService diaChiAdminService;
+
+    @GetMapping("/list")
+    public ResponseEntity<List<AdminClientResponse>> getList() {
+        return ResponseEntity.ok(clientAdminService.clientList());
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllClients(@RequestParam(value = "page",defaultValue = "0") int page,

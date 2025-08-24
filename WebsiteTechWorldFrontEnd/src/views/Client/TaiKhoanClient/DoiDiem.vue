@@ -56,6 +56,25 @@ const formatDiem = (diem) => {
   return new Intl.NumberFormat("vi-VN").format(diem);
 };
 
+// Format giảm giá dựa vào loại_giam_gia
+const formatDiscount = (value, loaiGiamGia) => {
+  if (typeof value !== "number") return "";
+
+  if (loaiGiamGia === "Phần trăm") {
+    return value + "%";
+  }
+
+  if (loaiGiamGia === "Cố định") {
+    return value.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND"
+    });
+  }
+
+  return value;
+};
+
+
 const formatDateTime = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -131,6 +150,11 @@ const doiDiemVouCher = async (phieuGiamGia) => {
   if (new Date(phieuGiamGia.ngayKetThuc) <= new Date()) {
     ElMessage.warning("Phiếu giảm giá đã hết hạn!");
     return; 
+  }
+
+  if (new Date(phieuGiamGia.ngayBatDau) > new Date()) {
+    ElMessage.warning("Phiếu giảm giá chưa bắt đầu!");
+    return;
   }
 
   try {
@@ -218,7 +242,7 @@ onMounted(() => {
 
           <el-table-column label="Giá trị giảm">
             <template #default="scope">
-              {{ formatCurrency(scope.row.giaTriGiamGia) }}
+              {{ formatDiscount(scope.row.giaTriGiamGia, scope.row.loaiGiamGia) }}
             </template>
           </el-table-column>
 

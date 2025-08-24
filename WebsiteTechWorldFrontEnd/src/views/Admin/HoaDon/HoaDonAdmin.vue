@@ -97,20 +97,36 @@
       <div class="filter-controls">
         <select class="filter-select" v-model="statusFilter">
           <option value="">Tất cả trạng thái</option>
-          <option value="completed">Hoàn thành</option>
-          <option value="pending">Chờ xử lý</option>
-          <option value="cancelled">Đã hủy</option>
+          <option value="COMPLETED">Hoàn tất</option>
+          <option value="PENDING">Chờ thanh toán</option>
+          <option value="PAID">Đã thanh toán</option>
+          <option value="REFUNDED">Đã hoàn tiền</option>
         </select>
 
         <select class="filter-select" v-model="typeFilter">
           <option value="">Loại hóa đơn</option>
-          <option value="online">Trực tuyến</option>
-          <option value="offline">Tại cửa hàng</option>
+          <option value="ONLINE">Trực tuyến</option>
+          <option value="POS">Tại quầy</option>
         </select>
 
-        <input type="date" class="filter-date" v-model="dateFilter" />
+        <div class="filter-date-range">
+          <label class="filter-label">Từ ngày</label>
+          <input type="date" class="filter-date" v-model="dateFilterFrom" />
+
+          <label class="filter-label">Đến ngày</label>
+          <input type="date" class="filter-date" v-model="dateFilterTo" />
+        </div>
 
         <div class="export-actions">
+          <button class="btn btn-outline"
+            @click="openConfirm('Bạn có chắc muốn làm mới bộ lọc?', () => refreshFilter())">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+            Làm mới bộ lọc
+          </button>
           <button class="btn btn-outline" @click="exportExcel">
             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -120,6 +136,8 @@
             Xuất Excel
           </button>
         </div>
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+          @cancel="showConfirm = false" />
       </div>
     </div>
 
@@ -646,7 +664,6 @@
               </div>
             </div>
           </div>
-
           <!-- Footer -->
           <div class="modal-footer">
             <button class="modal-btn" @click="closeModal">
@@ -711,7 +728,8 @@ const viewMode = ref("table"); // nếu view là table sẽ hiển thị dưới
 const searchQuery = ref("");
 const statusFilter = ref("");
 const typeFilter = ref("");
-const dateFilter = ref("");
+const dateFilterFrom = ref("");
+const dateFilterTo = ref("");
 const isLoading = ref(false);
 const error = ref(null);
 const showModalCreateInvoice = ref(null);
@@ -792,13 +810,11 @@ const loadData = async () => {
   isLoading.value = true;
 
   try {
-    // const response = await axios.get('/admin/hoa-don');
-    const response = await hoaDonGetAll(pageNo.value, pageSize.value);
+    const response = await hoaDonGetAll(pageNo.value, pageSize.value, searchQuery.value, statusFilter.value, typeFilter.value, dateFilterFrom.value, dateFilterTo.value);
 
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
 
-    //Nếu response.data là object chứa content - trong backend trả về page là trả về object json
     if (Array.isArray(response.data.content)) {
       hoaDons.value = response.data.content;
       totalPage.value = response.data.totalPages || 0;
@@ -1085,7 +1101,7 @@ const xemLichSu = async (hoaDon) => {
 };
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
-watch([searchQuery, statusFilter, typeFilter], () => {
+watch([searchQuery, statusFilter, typeFilter, dateFilterFrom,dateFilterTo], () => {
   pageNo.value = 0; // Khi bộ lọc thay đổi, quay về trang đầu tiên
   loadData();
 });
@@ -1120,6 +1136,29 @@ const exportExcel = async () => {
   }
 }
 
+const refreshFilter = () => {
+  pageNo.value = 0;
+  pageSize.value = 6;
+  searchQuery.value = '';
+  statusFilter.value = '';
+  typeFilter.value = '';
+  dateFilterFrom.value = '';
+  dateFilterTo.value = '';
+}
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+function openConfirm(message, callback) {
+  confirmMessage.value = message
+  confirmCallback = callback
+  showConfirm.value = true
+}
+
+function handleConfirm() {
+  if (confirmCallback) confirmCallback()
+  showConfirm.value = false
+}
 </script>
 
 <style scoped src="@/style/HoaDon/HoaDon.css"></style>

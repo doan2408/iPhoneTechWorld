@@ -10,16 +10,24 @@ import org.example.websitetechworld.Enum.KhachHang.TrangThaiKhachHang;
 import org.example.websitetechworld.Repository.DiaChiRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.NhanVienRepository;
+import org.example.websitetechworld.Services.LoginServices.ForgotPasswordService;
 import org.example.websitetechworld.Services.LoginServices.JwtService;
+import org.example.websitetechworld.Services.LoginServices.MailService;
 import org.example.websitetechworld.exception.ValidationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +35,14 @@ public class ClientService {
     private final PasswordEncoder passwordEncoder;
     private final KhachHangRepository khachHangRepository;
     private final NhanVienRepository nhanVienRepository;
-    private final DiaChiRepository diaChiRepository;
     private final JwtService jwtService;
+
+    private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
+    private final Map<String, ClientRequest> tempRegistrationStorage = new ConcurrentHashMap<>();
+
+    private static final SecureRandom random = new SecureRandom();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final MailService mailService;
 
     //convert
     private ClientResponse convert(KhachHang khachHang) {
@@ -74,8 +88,6 @@ public class ClientService {
 
     private KhachHang convertToKhachHang(ClientRequest request) {
         KhachHang khachHang = new KhachHang();
-        khachHang.setId(request.getId());
-        khachHang.setMaKhachHang(request.getMaKhachHang());
         khachHang.setTenKhachHang(request.getTenKhachHang());
         khachHang.setSdt(request.getSdt());
         khachHang.setTaiKhoan(request.getTaiKhoan());
@@ -85,27 +97,56 @@ public class ClientService {
         khachHang.setGioiTinh(request.getGioiTinh());
         khachHang.setAnh(request.getAnh());
         khachHang.setTrangThai(request.getTrangThai());
-        khachHang.setHangThanhVien(request.getHangKhachHang());
+//        khachHang.setHangThanhVien(request.getHangKhachHang());
         return khachHang;
     }
 
-    //SignUp, add mới
-    public Map<String, Object> addClient(ClientRequest request) {
+    // Send verify code
+    public Map<String, Object> verifyRegister(ClientRequest request) {
         List<Map<String, String>> errors = new ArrayList<>();
         // Check trùng tài khoản, email, sdt
-        if(request.getTaiKhoan() != null) {
+        if (request.getTaiKhoan() != null) {
             if (khachHangRepository.existsByTaiKhoan(request.getTaiKhoan().trim()) || nhanVienRepository.existsByTaiKhoan(request.getTaiKhoan())) {
                 errors.add(Map.of("field", "taiKhoan", "message", "Tên tài khoản đã tồn tại!"));
             }
         }
 
-        if(request.getEmail() != null) {
-            if (khachHangRepository.existsByEmail(request.getEmail().trim()) || nhanVienRepository.existsByEmail(request.getEmail())) {
-                errors.add(Map.of("field", "email", "message", "Email đã tồn tại!"));
+        // nếu là email nhân viên thì k cho dky
+        if (nhanVienRepository.existsByEmail(request.getEmail())) {
+            errors.add(Map.of("field", "emailExist", "message", "Email đã tồn tại"));
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+
+        // In case the direct customer has purchased the product but does not have an account
+        if (khachHangRepository.existsByEmail(request.getEmail())) {
+            Optional<KhachHang> khachHangOptional = khachHangRepository.findByEmail(request.getEmail());
+            if (khachHangOptional.isPresent()) {
+                KhachHang khachHangExist = khachHangOptional.get();
+                if (khachHangExist.getTaiKhoan() != null) {
+                    errors.add(Map.of("field", "emailExist", "message", "Email đã tồn tại"));
+                } else {
+                    // send mail for guest has purchased the product
+                    boolean emailSent = sendRegistrationVerificationEmail(request.getEmail());
+
+                    if (emailSent) {
+                        tempRegistrationStorage.put(request.getEmail(), request);
+                        return Map.of(
+                                "field", true,
+                                "message", "Mã xác nhận đã được gửi đến email của bạn. Vui lòng kiểm tra email và nhập mã xác nhận",
+                                "email", request.getEmail()
+                        );
+                    } else {
+                        errors.add(Map.of("field", "email", "message", "Không thể gửi email xác nhận"));
+                        throw new ValidationException(errors);
+                    }
+                }
             }
         }
 
-        if(request.getSdt() != null) {
+        if (request.getSdt() != null) {
             if (khachHangRepository.existsBySdt(request.getSdt().trim()) || nhanVienRepository.existsBySdt(request.getSdt())) {
                 errors.add(Map.of("field", "sdt", "message", "Số điện thoại đã tồn tại!"));
             }
@@ -115,52 +156,128 @@ public class ClientService {
             throw new ValidationException(errors);
         }
 
-        String hashedPassword = passwordEncoder.encode(request.getMatKhau());
-        request.setMatKhau(hashedPassword);
-
-        request.setAnh("Default.jpg");
-        request.setTrangThai(TrangThaiKhachHang.ACTIVE);
-
-        request.setGioiTinh(true);
-        HangThanhVien hangThanhVien = new HangThanhVien();
-        hangThanhVien.setId(1);
-        request.setHangKhachHang(hangThanhVien);
-
-        KhachHang khachHang = convertToKhachHang(request);
-
-        KhachHang khachHangAdd = khachHangRepository.save(khachHang);
-
-        //tạo giỏ hàng tương ứng với khách hàng mới vừa tạo
-        GioHang gioHang = new GioHang();
-        gioHang.setIdKhachHang(khachHangAdd); //oneToOne
-
-        //tạo ví tương ứng với khách hàng mới vừa tạo
-        ViDiem viDiem = new ViDiem();
-        viDiem.setKhachHang(khachHangAdd);
-        viDiem.setDiemKhaDung(new BigDecimal(0));
-
-        //set ngược lại one to one
-        khachHangAdd.setGioHang(gioHang);
-        khachHangAdd.setViDiem(viDiem);
-
-//        DiaChi diaChi = new DiaChi();
-//        diaChi.setIdKhachHang(khachHangAdd);
-//        diaChi.setDiaChiChinh(true); // địa chỉ đầu tiên add : chính
-//        diaChiRepository.save(diaChi);
-        khachHangRepository.save(khachHangAdd);
-
-        // ✅ Tạo token dựa trên KhachHang
-        String accessToken = jwtService.generateAccessToken(khachHangAdd);
-        String refreshToken = jwtService.generateRefreshToken(khachHangAdd);
-
-        return Map.of(
-                "accessToken", accessToken,
-                "refreshToken", refreshToken,
-                "message", "Đăng ký thành công!",
-                "roles", List.of(khachHangAdd.getRole()) // nếu có role
-        );
-
+        boolean emailSent = sendRegistrationVerificationEmail(request.getEmail());
+        if (emailSent) {
+            tempRegistrationStorage.put(request.getEmail(), request);
+            // store registration data temporarily
+            return Map.of(
+                    "requireVerification", true,
+                    "message", "Mã xác nhận đã được gửi đến email của bạn. Vui lòng kiểm tra email và nhập mã xác nhận.",
+                    "email", request.getEmail()
+            );
+        } else {
+            errors.add(Map.of("field", "email", "message", "Không thể gửi email xác nhận"));
+            throw new ValidationException(errors);
+        }
     }
+
+    public Map<String, Object> completeRegistration(String email, String verificationCode) {
+        List<Map<String, String>> errors = new ArrayList<>();
+
+        System.out.println("email nhan duoc: "+ email);
+        System.out.println("code nhan duoc: "+ verificationCode);
+        System.out.println("verifycode: " + verifyCode(email, verificationCode));
+        // Verify the code first
+        if (!verifyCode(email, verificationCode)) {
+            errors.add(Map.of("field", "code", "message", "Mã xác nhận không đúng hoặc đã hết hạn"));
+            throw new ValidationException(errors);
+        }
+
+        // Get temporarily stored registration data
+        ClientRequest request = tempRegistrationStorage.get(email);
+        if (request == null) {
+            errors.add(Map.of("field", "session", "message", "Phiên đăng ký đã hết hạn. Vui lòng thử lại"));
+            throw new ValidationException(errors);
+        }
+
+        try {
+            // Check if this is updating an existing guest or creating new customer
+            Optional<KhachHang> khachHangOptional = khachHangRepository.findByEmail(email);
+
+            if (khachHangOptional.isPresent()) {
+                KhachHang khachHangExist = khachHangOptional.get();
+                if (khachHangExist.getTaiKhoan() == null) {
+                    khachHangExist.setTaiKhoan(request.getTaiKhoan());
+                    // Update existing guest customer
+                    String hashedPassword = passwordEncoder.encode(request.getMatKhau());
+                    khachHangExist.setMatKhau(hashedPassword);
+                    khachHangExist.setTenKhachHang(request.getTenKhachHang());
+                    khachHangExist.setAnh("Default.jpg");
+                    khachHangExist.setTrangThai(TrangThaiKhachHang.ACTIVE);
+                    khachHangExist.setGioiTinh(true);
+                    khachHangRepository.save(khachHangExist);
+
+                    // Clean up
+                    removeCode(email);
+                    tempRegistrationStorage.remove(email);
+
+                    // ✅ Tạo token dựa trên KhachHang đã update
+                    String accessToken = jwtService.generateAccessToken(khachHangExist);
+                    String refreshToken = jwtService.generateRefreshToken(khachHangExist);
+
+                    return Map.of(
+                            "accessToken", accessToken,
+                            "refreshToken", refreshToken,
+                            "message", "Tài khoản đã được tạo thành công!",
+                            "roles", List.of(khachHangExist.getRole())
+                    );
+
+                } else {
+                    errors.add(Map.of("field", "emailExist", "message", "Email này đã được đăng ký tài khoản"));
+                    throw new ValidationException(errors);
+                }
+            } else {
+                // Create completely new customer
+                String hashedPassword = passwordEncoder.encode(request.getMatKhau());
+                request.setMatKhau(hashedPassword);
+                request.setAnh("Default.jpg");
+                request.setTrangThai(TrangThaiKhachHang.ACTIVE);
+                request.setGioiTinh(true);
+
+                HangThanhVien hangThanhVien = new HangThanhVien();
+                hangThanhVien.setId(1);
+                request.setHangKhachHang(hangThanhVien);
+
+                KhachHang khachHang = convertToKhachHang(request);
+                KhachHang khachHangAdd = khachHangRepository.save(khachHang);
+
+                //tạo giỏ hàng tương ứng với khách hàng mới vừa tạo
+                GioHang gioHang = new GioHang();
+                gioHang.setIdKhachHang(khachHangAdd);
+
+                //tạo ví tương ứng với khách hàng mới vừa tạo
+                ViDiem viDiem = new ViDiem();
+                viDiem.setKhachHang(khachHangAdd);
+                viDiem.setDiemKhaDung(new BigDecimal(0));
+
+                //set ngược lại one to one
+                khachHangAdd.setGioHang(gioHang);
+                khachHangAdd.setViDiem(viDiem);
+
+                khachHangRepository.save(khachHangAdd);
+
+                // Clean up
+                removeCode(email);
+                tempRegistrationStorage.remove(email);
+
+                // ✅ Tạo token dựa trên KhachHang mới
+                String accessToken = jwtService.generateAccessToken(khachHangAdd);
+                String refreshToken = jwtService.generateRefreshToken(khachHangAdd);
+
+                return Map.of(
+                        "accessToken", accessToken,
+                        "refreshToken", refreshToken,
+                        "message", "Đăng ký thành công!",
+                        "roles", List.of(khachHangAdd.getRole())
+                );
+            }
+
+        } catch (Exception e) {
+            errors.add(Map.of("field", "system", "message", "Có lỗi xảy ra: " + e.getMessage()));
+            throw new ValidationException(errors);
+        }
+    }
+
 
     public Optional<ClientResponse> hienThi(Integer id) {
         return khachHangRepository.findById(id).map(this::convert);
@@ -206,7 +323,7 @@ public class ClientService {
             existing.setAnh(khachHangRequest.getAnh());
 
             if (khachHangRequest.getMatKhau() != null && !khachHangRequest.getMatKhau().isEmpty()) {
-                String oldPassword = khachHangRequest.getMatKhauCu(); // cần thêm trường này trong ClientRequest
+                String oldPassword = khachHangRequest.getMatKhauCu();
 
                 if (!passwordEncoder.matches(oldPassword, existing.getMatKhau())) {
                     errors.add(Map.of("field", "matKhauCu", "message", "Mật khẩu cũ không đúng!"));
@@ -215,12 +332,61 @@ public class ClientService {
                 existing.setMatKhau(passwordEncoder.encode(khachHangRequest.getMatKhau()));
             }
 
-            if(!errors.isEmpty()) {
+            if (!errors.isEmpty()) {
                 throw new ValidationException(errors);
             }
 
             return khachHangRepository.save(existing);
         }
         return null;
+    }
+
+    // Tạo mã random
+    private String generateCode(int length) {
+        // Sử dụng cả chữ và số để tăng độ bảo mật
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int idx = random.nextInt(chars.length());
+            sb.append(chars.charAt(idx));
+        }
+        return sb.toString();
+    }
+
+    public boolean sendRegistrationVerificationEmail(String email) {
+        try {
+            String verificationCode = generateCode(8); // Tăng lên 8 ký tự
+            verificationCodes.put(email, verificationCode);
+
+            // Tăng thời gian expire lên 5 phút
+            scheduler.schedule(() -> {
+                verificationCodes.remove(email);
+            }, 5, TimeUnit.MINUTES);
+
+            String subject = "Xác nhận tài khoản - Tech World";
+            String body = "Chào bạn,\n\n" +
+                    "Bạn đang tạo tài khoản tại Tech World.\n <br>" +
+                    "Mã xác nhận của bạn là: " + verificationCode + "\n\n <br>" +
+                    "Mã này có hiệu lực trong vòng 5 phút.\n\n <br>" +
+                    "Nếu bạn không thực hiện hành động này, vui lòng bỏ qua email này.\n\n <br>" +
+                    "Trân trọng,\n <br>" +
+                    "Tech World Shop";
+
+            mailService.sendMail(email, subject, body);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+    // Bạn có thể thêm các phương thức kiểm tra mã, xóa mã nếu muốn
+    public boolean verifyCode(String email, String code) {
+        String savedCode = verificationCodes.get(email);
+        return savedCode != null && savedCode.equals(code);
+    }
+
+    public void removeCode(String email) {
+        verificationCodes.remove(email);
     }
 }
