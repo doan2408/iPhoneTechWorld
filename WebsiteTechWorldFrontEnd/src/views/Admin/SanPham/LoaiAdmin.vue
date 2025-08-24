@@ -49,8 +49,8 @@
 
         <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa Loại' : 'Thêm mới Loại'" width="900px"
             :close-on-click-modal="false" :destroy-on-close="true" @close="handleClose">
-            <el-form :model="formData" ref="formRef" :rules="rules" label-width="140px" label-position="left"
-                size="default" class="hdh-form">
+            <el-form :model="formData" ref="formRef" label-width="140px" label-position="left" size="default"
+                class="hdh-form">
                 <el-row :gutter="20">
                     <el-col>
                         <el-form-item label="Tên loại" prop="tenLoai">
@@ -93,13 +93,13 @@ const loading = ref(false); // Thêm trạng thái loading cho bảng
 const formLoading = ref(false); // Thêm trạng thái loading cho form
 const formRef = ref(null); // Thêm tham chiếu đến form
 
-const rules = {
-    tenLoai: [
-        { required: true, message: 'Vui lòng nhập tên loại', trigger: 'blur' },
-        { max: 50, message: 'Tên loại không được vượt quá 50 ký tự', trigger: 'blur' },
-        { pattern: /^[a-zA-Z0-9\sÀ-ỹ]*$/, message: 'Tên loại không được chứa ký tự đặc biệt', trigger: 'blur' },
-    ],
-};
+// const rules = {
+//     tenLoai: [
+//         { required: true, message: 'Vui lòng nhập tên loại', trigger: 'blur' },
+//         { max: 50, message: 'Tên loại không được vượt quá 50 ký tự', trigger: 'blur' },
+//         { pattern: /^[a-zA-Z0-9\sÀ-ỹ]*$/, message: 'Tên loại không được chứa ký tự đặc biệt', trigger: 'blur' },
+//     ],
+// };
 
 const formData = reactive({
     id: null,
@@ -123,41 +123,66 @@ const loadData = async () => {
 
 const submitForm = async () => {
     if (!formRef.value) return;
+
     formRef.value.validate(async (valid) => {
         if (!valid) return;
+
         try {
+            // Hiển thị confirm trước khi submit
+            await ElMessageBox.confirm(
+                isEditMode.value
+                    ? "Bạn có chắc chắn muốn cập nhật loại này?"
+                    : "Bạn có chắc chắn muốn thêm loại mới?",
+                "Xác nhận",
+                {
+                    confirmButtonText: "Đồng ý",
+                    cancelButtonText: "Hủy",
+                    type: "warning",
+                }
+            );
+
             formLoading.value = true;
+
             if (isEditMode.value) {
                 await putLoai(formData.id, formData);
-                toast.success('Cập nhật loại thành công!');
+                toast.success("Cập nhật loại thành công!");
             } else {
                 await postLoai(formData);
-                toast.success('Thêm mới loại thành công!');
+                toast.success("Thêm mới loại thành công!");
             }
+
             resetForm();
             dialogVisible.value = false;
             loadData();
         } catch (err) {
-            console.error('Lỗi xử lý form:', err);
+            // Nếu người dùng nhấn Hủy
+            if (err === "cancel" || err?.message === "cancel") {
+                toast.info("Hủy thao tác");
+                return;
+            }
+
+            console.error("Lỗi xử lý form:", err);
+
             if (err.response?.data) {
                 const { message, errors } = err.response.data;
                 if (Array.isArray(message)) {
                     message.forEach((error) => toast.error(error));
-                } else if (typeof message === 'object' && message) {
+                } else if (typeof message === "object" && message) {
                     Object.values(message).forEach((msg) => toast.error(msg));
-                } else if (typeof errors === 'object' && errors) {
+                } else if (typeof errors === "object" && errors) {
                     Object.values(errors).forEach((msg) => toast.error(msg));
                 } else {
-                    toast.error(message || errors || 'Lỗi không xác định!');
+                    toast.error(message || errors || "Lỗi không xác định!");
                 }
             } else {
-                toast.error('Lỗi kết nối server. Vui lòng thử lại sau!');
+                toast.error("Lỗi kết nối server. Vui lòng thử lại sau!");
             }
         } finally {
             formLoading.value = false;
         }
     });
 };
+
 
 const handleEdit = (row) => {
     isEditMode.value = true;
@@ -273,6 +298,7 @@ watch([currentPage, searchQuery], () => {
 :deep(.el-table .el-loading-spinner) {
     margin-top: -20px;
 }
+
 ::v-deep(.el-pagination button) {
     font-size: 16px;
     padding: 8px 16px;

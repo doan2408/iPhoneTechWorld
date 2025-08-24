@@ -1,12 +1,6 @@
 <template>
-  <el-dialog
-    title="Thêm loại mới"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
-    <el-form :model="newTenLoai" ref="formRef" label-position="top" :rules="rules">
+  <el-dialog title="Thêm loại mới" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
+    <el-form :model="newTenLoai" ref="formRef" label-position="top">
       <el-form-item label="Tên loại" prop="tenLoai">
         <el-input v-model="newTenLoai.tenLoai" autocomplete="off" />
       </el-form-item>
@@ -35,9 +29,9 @@ const newTenLoai = reactive({
 const dialogVisible = ref(false);
 const formRef = ref(null);
 
-const rules = {
-  tenLoai: [{ required: true, message: 'Vui lòng nhập tên loại', trigger: 'blur' }],
-};
+// const rules = {
+//   tenLoai: [{ required: true, message: 'Vui lòng nhập tên loại', trigger: 'blur' }],
+// };
 
 function open() {
   dialogVisible.value = true;
@@ -55,15 +49,31 @@ async function submitLoai() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm loại này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
+
         const savedLoai = await postLoai({
           tenLoai: newTenLoai.tenLoai,
         });
         emit('saved', savedLoai);
         dialogVisible.value = false;
         handleClose();
-        ElMessage.success('Thêm loại thành công!'); // Thêm thông báo thành công
+        toast.success('Thêm loại thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error("Lỗi khi lưu dung lượng:", error);
+        console.error("Lỗi khi lưu loại:", error);
+
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
 
         if (error.response) {
           const { status, data } = error.response;
@@ -90,7 +100,7 @@ async function submitLoai() {
         } else if (error.request) {
           toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!");
         } else {
-          toast.error("Có lỗi xảy ra khi thêm dung lượng!");
+          toast.error("Có lỗi xảy ra khi thêm loại!");
         }
       }
     }

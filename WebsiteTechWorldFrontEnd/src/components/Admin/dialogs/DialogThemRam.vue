@@ -1,13 +1,13 @@
 <template>
   <el-dialog title="Thêm dung lượng ram mới" v-model="dialogVisible" width="600px" @close="handleClose"
     destroy-on-close>
-    <el-form :model="NewDungLuong" ref="formRef" label-position="top" >
+    <el-form :model="NewDungLuong" ref="formRef" label-position="top">
       <el-form-item label="Dung lượng" prop="dungLuong">
         <el-input v-model="NewDungLuong.dungLuong" autocomplete="off" />
       </el-form-item>
     </el-form>
 
-    <el-form :model="NewDungLuong" ref="formRef" label-position="top" >
+    <el-form :model="NewDungLuong" ref="formRef" label-position="top">
       <el-form-item label="Loại ram" prop="loai">
         <el-input v-model="NewDungLuong.loai" autocomplete="off" />
       </el-form-item>
@@ -23,7 +23,7 @@
 <script setup>
 import { postRamList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -54,6 +54,17 @@ async function submitRam() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm phiên bản này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
+
         const savedDungLuong = await postRamList({
           dungLuong: NewDungLuong.dungLuong,
           loai: NewDungLuong.loai,
@@ -61,9 +72,14 @@ async function submitRam() {
         emit('saved', savedDungLuong);
         dialogVisible.value = false;
         handleClose();
-        ElMestoastsage.success('Thêm dung lượng thành công!');
+        toast.success('Thêm dung lượng thành công!');
       } catch (error) {
         console.error("Lỗi khi lưu dung lượng:", error);
+
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
 
         if (error.response) {
           const { status, data } = error.response;

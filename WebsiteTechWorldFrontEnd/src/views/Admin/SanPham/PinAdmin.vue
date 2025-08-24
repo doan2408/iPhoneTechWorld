@@ -161,26 +161,54 @@ const loadData = async () => {
 const submitForm = async () => {
     if (!formRef.value) return;
 
+    // 1. Hộp thoại xác nhận
+    const confirmMsg = isEditMode.value
+        ? 'Bạn có chắc chắn muốn cập nhật Pin này?'
+        : 'Bạn có chắc chắn muốn thêm mới Pin này?';
+
     try {
+        await ElMessageBox.confirm(
+            confirmMsg,
+            'Xác nhận',
+            {
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                type: 'warning',
+            }
+        );
+
+        // 2. Nếu người dùng đồng ý → validate form
         await formRef.value.validate();
 
+        // 3. Gửi request
         if (isEditMode.value) {
             await putPin(formData.id, formData);
-            ElMessage.success('Cập nhật pin thành công!');
+            toast.success('Cập nhật pin thành công!');
         } else {
             await postPin(formData);
-            ElMessage.success('Thêm mới pin thành công!');
+            toast.success('Thêm mới pin thành công!');
         }
+
+        // 4. Reset form & đóng dialog
         resetForm();
         dialogVisible.value = false;
         loadData();
-    } catch (error) {
-        errors.phienBan = error.message.phienBan || ''
-        errors.congSuatSac = error.message.congSuatSac || ''
-        errors.thoiGianSuDung = error.message.thoiGianSuDung || ''
-        errors.soLanSacToiDa = error.message.soLanSacToiDa || ''
 
-         if (error.response) {
+    } catch (error) {
+        // Người dùng nhấn Hủy hoặc đóng confirm
+        if (!error.response && !error.request) {
+            toast.info('Đã hủy thao tác');
+            return;
+        }
+
+        // Reset lỗi cũ
+        errors.phienBan = '';
+        errors.congSuatSac = '';
+        errors.thoiGianSuDung = '';
+        errors.soLanSacToiDa = '';
+
+        // Lỗi từ API
+        if (error.response) {
             const status = error.response.status;
             const data = error.response.data;
 
@@ -188,19 +216,13 @@ const submitForm = async () => {
                 const msg = data.message;
 
                 if (typeof msg === 'string') {
-                    // Backend trả về message chung
-                    toast.error(msg);
+                    ElMessage.error(msg);
                 } else if (typeof msg === 'object') {
                     Object.keys(errors).forEach(key => {
                         errors[key] = msg[key] || '';
                     });
-
                     const fieldErrors = Object.values(errors).filter(m => m);
-                    if (fieldErrors.length > 0) {
-                        toast.error(fieldErrors.join('\n'));
-                    } else {
-                        toast.error('Dữ liệu không hợp lệ!');
-                    }
+                    toast.error(fieldErrors.length ? fieldErrors.join('\n') : 'Dữ liệu không hợp lệ!');
                 } else {
                     toast.error('Dữ liệu không hợp lệ!');
                 }
@@ -218,8 +240,10 @@ const submitForm = async () => {
             toast.error('Lỗi gửi request: ' + error.message);
         }
 
+        console.error('Lỗi submitForm:', error);
     }
-}
+};
+
 
 const handleDelete = async (id) => {
     try {
@@ -233,11 +257,12 @@ const handleDelete = async (id) => {
             }
         );
         await deletePin(id);
-        ElMessage.success('Xoá thành công!');
+        toast.success('Xoá thành công!');
         loadData(); // tải lại danh sách sau khi xoá
     } catch (error) {
-        if (error !== 'cancel') {
-            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+        if (!error.response && !error.request) {
+            toast.info('Đã hủy thao tác');
+            return;
         }
     }
 }

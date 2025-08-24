@@ -198,6 +198,7 @@ const isRateDialogOpen = ref(false);
 const selectedOrderId = ref(null);
 const selectedOrderProducts = ref([]);
 const idSanPhamChiTietList = ref([]);
+const existingRatingData = ref([]);
 const user = ref(JSON.parse(localStorage.getItem('user')) || null);
 import { useToast } from 'vue-toastification';
 const toast = useToast();
@@ -368,80 +369,45 @@ window.addEventListener('click', (event) => {
   }
 });
 
-// Dialog đánh giá
+
 const openRateDialog = async (orderId, products) => {
   if (!user.value?.id) {
-    console.error('Không thể mở dialog vì thiếu thông tin user:', user.value);
-    alert('Vui lòng đăng nhập để đánh giá!');
+    toast.error('Vui lòng đăng nhập để đánh giá!');
     return;
   }
 
-  console.log('Mở dialog đánh giá cho đơn hàng:', {
-    orderId,
-    products: Array.from(products), // Log dữ liệu gốc của products
-  });
-
-  selectedOrderId.value = orderId; // Chuyển thành chuỗi để tránh lỗi prop
-  selectedOrderProducts.value = Array.from(products); // Chuyển Proxy thành mảng
+  selectedOrderId.value = orderId;
+  selectedOrderProducts.value = Array.from(products);
+  // isEditing.value = false;
+  existingRatingData.value = [];
 
   try {
     const chiTietList = await getHoaDonAndIdChiTietHoaDon(orderId);
-    console.log('API getHoaDonAndIdChiTietHoaDon response:', chiTietList.data);
-
-    // Kiểm tra tính hợp lệ của chiTietList
-    if (!chiTietList.data || !Array.isArray(chiTietList.data)) {
-      console.error('Dữ liệu chiTietList không hợp lệ:', chiTietList.data);
-      alert('Không thể lấy chi tiết hóa đơn. Dữ liệu không hợp lệ!');
+    if (!Array.isArray(chiTietList.data)) {
+      toast.error('Dữ liệu chi tiết hóa đơn không hợp lệ!');
       return;
     }
 
-    // Tạo idSanPhamChiTietList
-    idSanPhamChiTietList.value = chiTietList.data.map(item => {
-      const product = products.find(p => p.idSanPhamChiTiet === item.idSanPhamChiTiet);
-      return {
-        idSanPhamChiTiet: item.idSanPhamChiTiet,
-        idChiTietHoaDon: item.idChiTietHoaDon,
-        tenSanPham: product?.tenSanPham || 'Unknown',
-      };
-    });
+    idSanPhamChiTietList.value = chiTietList.data.map(item => ({
+      idSanPhamChiTiet: item.idSanPhamChiTiet,
+      idChiTietHoaDon: item.idChiTietHoaDon,
+      tenSanPham: products.find(p => p.idSanPhamChiTiet === item.idSanPhamChiTiet)?.tenSanPham || 'Unknown',
+    }));
 
-    // Bổ sung idChiTietHoaDon vào selectedOrderProducts
-    selectedOrderProducts.value = selectedOrderProducts.value.map(product => {
-      const chiTiet = chiTietList.data.find(item => item.idSanPhamChiTiet === product.idSanPhamChiTiet);
-      return {
-        ...product,
-        idChiTietHoaDon: chiTiet?.idChiTietHoaDon || null,
-      };
-    });
+    selectedOrderProducts.value = selectedOrderProducts.value.map(product => ({
+      ...product,
+      idChiTietHoaDon: chiTietList.data.find(item => item.idSanPhamChiTiet === product.idSanPhamChiTiet)?.idChiTietHoaDon || null,
+    }));
 
-    // Kiểm tra tính hợp lệ của selectedOrderProducts
-    const invalidProducts = selectedOrderProducts.value.filter(p => !p.idSanPhamChiTiet || !p.idChiTietHoaDon);
-    if (invalidProducts.length > 0) {
-      console.error('Dữ liệu selectedOrderProducts không hợp lệ:', {
-        invalidProducts,
-        fullOrderProducts: selectedOrderProducts.value,
-        chiTietList: chiTietList.data,
-      });
-      alert('Dữ liệu sản phẩm không hợp lệ! Vui lòng kiểm tra lại.');
+    if (selectedOrderProducts.value.some(p => !p.idSanPhamChiTiet || !p.idChiTietHoaDon)) {
+      toast.error('Dữ liệu sản phẩm không hợp lệ!');
       return;
     }
-
-    // Log dữ liệu trước khi mở dialog
-    console.log('Dữ liệu truyền vào DialogDanhGiaSao:', {
-      isOpen: isRateDialogOpen.value,
-      orderId: selectedOrderId.value,
-      idKhachHang: user.value?.id,
-      orderProducts: selectedOrderProducts.value,
-      idSanPhamChiTietList: idSanPhamChiTietList.value,
-    });
 
     isRateDialogOpen.value = true;
   } catch (error) {
-    console.error('Lỗi khi lấy chi tiết hóa đơn:', {
-      error: error.message,
-      stack: error.stack,
-    });
-    alert('Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.');
+    console.error('Lỗi khi lấy chi tiết hóa đơn:', error);
+    toast.error('Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.');
   }
 };
 
@@ -453,113 +419,162 @@ const closeRateDialog = () => {
   idSanPhamChiTietList.value = [];
 };
 
-const submitRating = async (ratingData) => {
+const submitRating = async ({ payload }) => {
+  console.log('submitRating nhận payload:', JSON.stringify(payload, null, 2));
   try {
+    // 1. Kiểm tra đăng nhập
     if (!user.value?.id) {
-      toast.warning('⚠️ Vui lòng đăng nhập để đánh giá!');
+      toast.error('Vui lòng đăng nhập để đánh giá!');
       return;
     }
 
-    const data = ratingData.payload;
+    const { idHoaDon, ratings, trangThaiDanhGia } = payload;
+    console.log('Đang lấy chiTietList cho idHoaDon:', idHoaDon);
 
-    console.log("🔍 Dữ liệu nhận từ dialog:", data);
-    console.log("🔍 idHoaDon:", data.idHoaDon);
+    const chiTietList = await getHoaDonAndIdChiTietHoaDon(idHoaDon);
 
-    const chiTietList = await getHoaDonAndIdChiTietHoaDon(data.idHoaDon);
-    const chiTietArray = chiTietList.data;
-
-    if (!chiTietArray || !Array.isArray(chiTietArray) || chiTietArray.length === 0) {
-      console.error('Không có chi tiết hóa đơn!');
-      toast.error('❌ Không tìm thấy chi tiết hóa đơn.');
+    // 2. Kiểm tra dữ liệu chi tiết hóa đơn
+    if (!Array.isArray(chiTietList.data) || chiTietList.data.length === 0) {
+      console.error('Dữ liệu chiTietList không hợp lệ:', chiTietList);
+      toast.error('Không tìm thấy chi tiết hóa đơn!');
       return;
     }
 
-    // Sử dụng data.ratings thay vì data.soSao
-    if (chiTietArray.length !== data.ratings.length) {
-      console.error('Số lượng chi tiết hóa đơn không khớp với số lượng đánh giá!');
-      toast.error('❌ Số lượng đánh giá không khớp với sản phẩm trong hóa đơn.');
+    if (chiTietList.data.length !== ratings.length) {
+      console.error('Số lượng đánh giá không khớp:', {
+        ratingsCount: ratings.length,
+        chiTietListCount: chiTietList.data.length,
+      });
+      toast.error('Số lượng đánh giá không khớp với sản phẩm trong hóa đơn!');
       return;
     }
 
-    const isValid = data.ratings.every((rating) => {
-      return chiTietArray.some((chiTiet) => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet);
-    });
-
-    console.log('🔍 Dữ liệu chi tiết hóa đơn:', chiTietArray);
-
+    const isValid = ratings.every(rating =>
+      chiTietList.data.some(chiTiet => chiTiet.idSanPhamChiTiet === rating.idSanPhamChiTiet)
+    );
     if (!isValid) {
-      console.error('Dữ liệu không khớp: Có sản phẩm đánh giá không thuộc hóa đơn!');
-      toast.error('❌ Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này.');
+      console.error('Dữ liệu đánh giá không hợp lệ:', ratings);
+      toast.error('Một hoặc nhiều sản phẩm đánh giá không thuộc hóa đơn này!');
       return;
     }
 
-    if (data.ratings.length > chiTietArray.length) {
-      console.error('Dữ liệu không khớp: Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn!');
-      toast.error('❌ Số lượng đánh giá vượt quá số sản phẩm trong hóa đơn.');
-      return;
-    }
-
-    const danhGiaPromises = data.ratings.map(async (rating, index) => {
-      if (!chiTietArray[index]?.idChiTietHoaDon) {
-        throw new Error(`Không tìm thấy idChiTietHoaDon cho sản phẩm tại index ${index}`);
-      }
-
-      const danhGiaRequest = {
-        idHoaDon: data.idHoaDon,
-        idSanPhamChiTiet: chiTietArray[index].idSanPhamChiTiet,
-        idChiTietHoaDon: chiTietArray[index].idChiTietHoaDon,
+    // 3. Xử lý tạo đánh giá
+    console.log('Đang xử lý tạo mới cho ratings:', ratings);
+    const danhGiaPromises = ratings.map(async (rating) => {
+      const request = {
+        idHoaDon,
+        idSanPhamChiTiet: rating.idSanPhamChiTiet,
+        idChiTietHoaDon: rating.idChiTietHoaDon,
         idKhachHang: user.value.id,
         soSao: rating.soSao,
         noiDung: rating.noiDung,
-        trangThaiDanhGia: data.trangThaiDanhGia,
+        trangThaiDanhGia,
       };
 
-      console.log('📤 Gửi yêu cầu đánh giá:', danhGiaRequest);
-      return await DanhGiaSanPhamClientService.taoMoiDanhGia(danhGiaRequest);
+      try {
+        const danhGiaResponse = await DanhGiaSanPhamClientService.taoMoiDanhGia(request);
+        console.log(`Tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, danhGiaResponse);
+
+        const mediaPromises = [];
+
+        // Upload ảnh
+        if (Array.isArray(rating.imageFiles)) {
+          rating.imageFiles.forEach(file => {
+            if (file && file.name && file.size && file.type) {
+              mediaPromises.push(
+                MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia)
+                  .then(uploadResponse => {
+                    console.log(`Tải lên ảnh ${file.name} thành công`);
+                    return { status: 'fulfilled', value: uploadResponse };
+                  })
+                  .catch(err => {
+                    console.error(`Lỗi khi tải ảnh ${file.name}:`, err);
+                    toast.error(`Không thể tải lên ảnh ${file.name}`);
+                    return { status: 'rejected', reason: err };
+                  })
+              );
+            }
+          });
+        }
+
+        // Upload video
+        if (Array.isArray(rating.videoFiles)) {
+          rating.videoFiles.forEach(file => {
+            if (file && file.name && file.size && file.type) {
+              mediaPromises.push(
+                MediaDanhGiaClientService.uploadMedia(file, danhGiaResponse.idDanhGia)
+                  .then(uploadResponse => {
+                    console.log(`Tải lên video ${file.name} thành công`);
+                    return { status: 'fulfilled', value: uploadResponse };
+                  })
+                  .catch(err => {
+                    console.error(`Lỗi khi tải video ${file.name}:`, err);
+                    toast.error(`Không thể tải lên video ${file.name}`);
+                    return { status: 'rejected', reason: err };
+                  })
+              );
+            }
+          });
+        }
+
+        await Promise.allSettled(mediaPromises);
+
+        return { status: 'fulfilled', value: danhGiaResponse };
+      } catch (error) {
+        console.error(`Lỗi khi tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, error);
+
+        const backendMsg =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Lỗi không xác định từ server';
+
+        toast.error(
+          `Tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} thất bại: ${backendMsg}`
+        );
+
+        return { status: 'rejected', reason: error };
+      }
     });
 
-    const danhGiaResponses = await Promise.all(danhGiaPromises);
-    console.log('✅ Phản hồi đánh giá:', danhGiaResponses);
+    const danhGiaResults = await Promise.allSettled(danhGiaPromises);
 
-    // Upload media
-    const mediaPromises = [];
-    const idDanhGia = danhGiaResponses[0]?.idDanhGia;
-    if (!idDanhGia) {
-      console.error('Không có idDanhGia trong phản hồi:', danhGiaResponses);
-      toast.error('❌ Không nhận được id đánh giá từ máy chủ.');
+    // 4. Tổng hợp kết quả
+    const successCount = danhGiaResults.filter(r => r.status === 'fulfilled').length;
+    const errorCount = danhGiaResults.filter(r => r.status === 'rejected').length;
+
+    if (errorCount > 0 && successCount === 0) {
+      toast.error('Gửi tất cả đánh giá thất bại!');
       return;
+    } else if (errorCount > 0 && successCount > 0) {
+      toast.warning(`Gửi thành công ${successCount}, thất bại ${errorCount} đánh giá!`);
+      return;
+    } else {
+      toast.success('Gửi đánh giá thành công!');
     }
 
-    for (const rating of data.ratings) {
-      for (const file of rating.imageFiles) {
-        console.log("📂 Image file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
-      }
-      for (const file of rating.videoFiles) {
-        console.log("📹 Video file chuẩn bị upload:", file.name, "👉 idDanhGia:", idDanhGia);
-        mediaPromises.push(MediaDanhGiaClientService.uploadMedia(file, idDanhGia));
-      }
-    }
-
-    await Promise.all(mediaPromises);
-
-    toast.success('🎉 Gửi đánh giá thành công!');
+    // 5. Làm mới đơn hàng
+    console.log('Đang làm mới danh sách đơn hàng và đóng dialog');
     await allMyOrde();
     closeRateDialog();
-  } catch (error) {
-    console.error('❌ Lỗi khi gửi đánh giá:', error);
 
-    if (
-      error.response &&
-      error.response.status === 500 &&
-      error.response.data.message === 'Sản phẩm này đã được đánh giá rồi'
-    ) {
-      toast.error('⚠️ Sản phẩm này đã được đánh giá trước đó. Bạn không thể gửi thêm đánh giá.');
+  } catch (error) {
+    console.error('Lỗi trong submitRating:', error);
+
+    const statusCode = error.response?.status;
+    const backendMsg = error.response?.data?.message || error.message || 'Lỗi không xác định';
+
+    if (statusCode === 400) {
+      toast.error(`Yêu cầu không hợp lệ: ${backendMsg}`);
+    } else if (statusCode === 404) {
+      toast.error(`Không tìm thấy tài nguyên: ${backendMsg}`);
+    } else if (statusCode === 500) {
+      toast.error(`Lỗi máy chủ: ${backendMsg}`);
     } else {
-      toast.error('❌ Gửi đánh giá thất bại. Vui lòng thử lại.');
+      toast.error(`Gửi/cập nhật đánh giá thất bại: ${backendMsg}`);
     }
   }
 };
+
 
 
 onMounted(async () => {

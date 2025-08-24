@@ -1,11 +1,5 @@
 <template>
-  <el-dialog
-    title="Thêm mã xuất xứ mới"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
+  <el-dialog title="Thêm mã xuất xứ mới" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
     <el-form :model="newXuatXu" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Mã xuất xứ" prop="maXuatXu">
         <el-input v-model="newXuatXu.maXuatXu" autocomplete="off" />
@@ -22,7 +16,7 @@
 <script setup>
 import { postXuatXuList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -56,15 +50,31 @@ async function submitXuatXu() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm mã xuất xứ này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
+
         const savedMaXuatXu = await postXuatXuList({
           maXuatXu: newXuatXu.maXuatXu,
         });
         emit('saved', savedMaXuatXu);
         dialogVisible.value = false;
         handleClose();
-        ElMessage.success('Thêm mã xuất xứ thành công!'); // Thêm thông báo thành công
+        toast.success('Thêm mã xuất xứ thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error("Lỗi khi lưu dung lượng:", error);
+        
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
+        console.error("Lỗi khi lưu mã xuất xứ:", error);
 
         if (error.response) {
           const { status, data } = error.response;
@@ -91,7 +101,7 @@ async function submitXuatXu() {
         } else if (error.request) {
           toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!");
         } else {
-          toast.error("Có lỗi xảy ra khi thêm dung lượng!");
+          toast.error("Có lỗi xảy ra khi thêm mã xuất xứ!");
         }
       }
     }
