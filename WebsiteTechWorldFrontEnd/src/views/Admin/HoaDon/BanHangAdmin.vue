@@ -140,12 +140,15 @@
                             <div class="product-info">
                                 <h4>{{ product.tenSanPham }} {{ product.rom }}</h4>
                                 <div class="product-color">{{ product.mau }}</div>
-                                <div class="product-price" v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
+                                <div class="product-price"
+                                    v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
                                     <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
-                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-price" v-else>
-                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai) }}</span>
+                                    <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai)
+                                        }}</span>
                                 </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
@@ -175,45 +178,48 @@
                         <div class="imei-search">
                             <div class="search-box">
                                 <Search class="search-icon" />
-                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI" class="search-input"/>
+                                <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI"
+                                    class="search-input" />
                             </div>
                         </div>
 
                         <div class="modal-body">
                             <div class="imei-container">
-                            <!-- Danh sách IMEI có sẵn (bên trái) -->
-                            <div class="imei-list-container">
-                                <h3>Danh sách IMEI</h3>
-                                <div class="imei-list">
-                                    <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
-                                        <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
-                                            v-model="selectedImeis" />
-                                        <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                <!-- Danh sách IMEI có sẵn (bên trái) -->
+                                <div class="imei-list-container">
+                                    <h3>Danh sách IMEI</h3>
+                                    <div class="imei-list">
+                                        <div v-for="imei in availableImeis" :key="imei.id" class="imei-item">
+                                            <input type="checkbox" :id="`imei-${imei.id}`" :value="imei"
+                                                v-model="selectedImeis" />
+                                            <label :for="`imei-${imei.id}`">{{ imei.imei }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="pagination-controls">
+                                        <button @click="goToImeiPage(imeiCurrentPage - 1)"
+                                            :disabled="imeiCurrentPage === 0">Trước</button>
+                                        <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
+                                        <button @click="goToImeiPage(imeiCurrentPage + 1)"
+                                            :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
                                     </div>
                                 </div>
-                                <div class="pagination-controls">
-                                    <button @click="goToImeiPage(imeiCurrentPage - 1)" :disabled="imeiCurrentPage === 0">Trước</button>
-                                    <span>Trang {{ imeiCurrentPage + 1 }} / {{ imeiTotalPages }}</span>
-                                    <button @click="goToImeiPage(imeiCurrentPage + 1)" :disabled="imeiCurrentPage + 1 === imeiTotalPages">Sau</button>
-                                </div>
-                            </div>
 
-                            <!-- Danh sách IMEI đã chọn (bên phải) -->
-                            <div class="selected-imeis-container" style="max-width: 200px;">
-                                <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
-                                <div class="selected-imeis">
-                                    <ul>
-                                        <li v-for="imei in selectedImeis" :key="imei.id">
-                                            {{ imei.imei }}
-                                            <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
-                                        </li>
-                                    </ul>
+                                <!-- Danh sách IMEI đã chọn (bên phải) -->
+                                <div class="selected-imeis-container" style="max-width: 200px;">
+                                    <h3>IMEI đã chọn ({{ selectedImeis.length }}/{{ quantityToSelect || 0 }})</h3>
+                                    <div class="selected-imeis">
+                                        <ul>
+                                            <li v-for="imei in selectedImeis" :key="imei.id">
+                                                {{ imei.imei }}
+                                                <button @click="removeImei(imei)" class="remove-imei-btn">X</button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </div>
 
-                        
+
 
                         <div class="modal-footer">
                             <button @click="autoSelectImeis" class="btn auto-select-btn"> Tự động chọn ({{
@@ -336,7 +342,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }}</b></span>
+                        currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -377,12 +383,13 @@
                                 </p>
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
-                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật' }}
+                                <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật'
+                                    }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
                                     shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                ' VNĐ' : 'Chưa tính' }}</p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -581,6 +588,25 @@
         </div>
     </div>
 
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <transition name="modal-fade">
         <div v-if="isVoucherModalOpen" class="modal-overlay-pgg" @click.self="closeVoucherModal">
             <div class="modal-content-pgg">
@@ -609,55 +635,6 @@
             </div>
         </div>
     </transition>
-
-    <div v-if="showSalesHistoryModal" class="modal-overlay" @click="closeSalesHistoryModal">
-        <div class="modal-content" @click.stop style="height: 600px;">
-            <div class="modal-header">
-                <h3>Lịch sử bán hàng</h3>
-                <button @click="closeSalesHistoryModal" class="close-modal-btn">
-                    <X class="close-icon" />
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="search-box">
-                    <Search class="search-icon" />
-                    <input v-model="salesHistorySearchQuery" type="text" placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input" @input="searchSalesHistory" />
-                </div>
-                <div class="sales-history-list">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã hóa đơn</th>
-                                <th>Khách hàng</th>
-                                <th>Tổng tiền</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(history, index) in salesHistory" :key="history.id">
-                                <td>{{ salesHistoryPage * 5 + index + 1 }}</td>
-                                <td>{{ history.maHoaDon || 'N/A' }}</td>
-                                <td>{{ history.tenKhachHang || 'Khách lẻ' }}</td>
-                                <td>{{ formatCurrency(history.thanhTien || 0) }}</td>
-                                <td>{{ formatDate(history.ngayTao) }}</td>
-                                <td>{{ formatTrangThaiThanhToan(history.trangThaiThanhToan) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pagination-controls">
-                    <button @click="previousSalesHistoryPage" :disabled="salesHistoryPage === 0">Trước</button>
-                    <span>Trang {{ salesHistoryPage + 1 }} / {{ totalSalesHistoryPages }}</span>
-                    <button @click="nextSalesHistoryPage" :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="closeSalesHistoryModal" class="cancel-btn">Đóng</button>
-            </div>
-        </div>
-    </div>
 </template>
 
 <script setup>
@@ -678,7 +655,8 @@ import {
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
     , findHdctByImeiDaBan, findProductByImei,
     updateGia,
-    getAllLichSuBanHang
+    getAllLichSuBanHang,
+    viewLichSuHoaDon
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -920,7 +898,7 @@ const loadTabHoaDon = async () => {
             const selected = invoices.value.find(i => i.id == finalId);
             if (selected && !selected.chiTietHoaDonAdminResponseList) {
                 const res = await hoaDonDetail(finalId);
-            console.log('test', res.data)
+                console.log('test', res.data)
                 if (res.data) {
                     addOrUpdateInvoice(res.data);
                     currentInvoiceDetail.value = res.data;
@@ -1255,7 +1233,7 @@ const fetchImeis = async (productId, page, size) => {
         // imeis = imeis.sort((a, b) => {
         //     const isASelected = selectedImeis.value.some(selected => selected.id === a.id);
         //     const isBSelected = selectedImeis.value.some(selected => selected.id === b.id);
-            
+
         //     // Nếu a được chọn và b không được chọn, a lên đầu
         //     if (isASelected && !isBSelected) return -1;
         //     // Nếu b được chọn và a không được chọn, b lên đầu
@@ -1289,7 +1267,7 @@ watch(isImeiModalOpen, (newVal) => {
 });
 
 watch(imeiSearchQuery, (newValue, oldValue) => {
-  goToImeiPage(0);
+    goToImeiPage(0);
 });
 
 // xử lý phân trang imei
@@ -2430,70 +2408,47 @@ const clearDiscount = () => {
 };
 
 // Biến cho modal lịch sử bán hàng
+const orderHistory = ref([]);
 const showSalesHistoryModal = ref(false);
-const salesHistory = ref([]);
-const salesHistoryPage = ref(0);
-const salesHistoryPageSize = ref(5);
-const totalSalesHistoryPages = ref(1);
-const salesHistorySearchQuery = ref('');
+const maHoaDon = ref();
 
 const openSalesHistoryModal = async () => {
     showSalesHistoryModal.value = true;
-    await loadSalesHistory();
+    await xemLichSu();
 };
 
 const closeSalesHistoryModal = () => {
     showSalesHistoryModal.value = false;
-    salesHistorySearchQuery.value = '';
-    salesHistoryPage.value = 0;
 };
 
-const loadSalesHistory = async () => {
+const xemLichSu = async () => {
     try {
-        const response = await getAllLichSuBanHang(salesHistoryPage.value, salesHistoryPageSize.value, salesHistorySearchQuery.value);
-        salesHistory.value = response.data.content || [];
-        totalSalesHistoryPages.value = response.data.totalPages || 1;
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const response = await viewLichSuHoaDon(storedId);
+        maHoaDon.value = response.data.content[0].maHoaDon
+        orderHistory.value = response.data.content;
+        showSalesHistoryModal.value = true;
     } catch (error) {
-        console.error('Lỗi khi tải lịch sử bán hàng:', error);
-        toast.error('Không thể tải lịch sử bán hàng. Vui lòng thử lại.');
-    }
-};
-
-const searchSalesHistory = async () => {
-    salesHistoryPage.value = 0; 
-    await loadSalesHistory();
-};
-
-const previousSalesHistoryPage = () => {
-    if (salesHistoryPage.value > 0) {
-        salesHistoryPage.value--;
-        loadSalesHistory();
-    }
-};
-
-const nextSalesHistoryPage = () => {
-    if (salesHistoryPage.value < totalSalesHistoryPages.value - 1) {
-        salesHistoryPage.value++;
-        loadSalesHistory();
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
     }
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) {
+        return 'N/A';
+    }
     const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+    }
+
+    const day = date.getDate().toString().padStart(2, '0');      // ngày, 2 chữ số
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // tháng, 2 chữ số (tháng bắt đầu từ 0)
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 };
-
-watch(salesHistorySearchQuery, () => {
-    searchSalesHistory();
-});
-
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>

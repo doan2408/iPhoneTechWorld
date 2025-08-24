@@ -220,10 +220,10 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="goToEdit(hoaDon.idHoaDon)">
+                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="openSalesHistoryModal(hoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z">
                       </path>
                     </svg>
                   </button>
@@ -659,6 +659,25 @@
         </div>
       </div>
     </div>
+
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
@@ -1040,9 +1059,30 @@ const isStaff = computed(() => {
   );
 });
 
-const goToEdit = (id) => {
-  router.push({ name: 'CapNhatHoaDon', params: { id } })
-}
+const orderHistory = ref([]);
+const showSalesHistoryModal = ref(false);
+const maHoaDon = ref();
+
+const openSalesHistoryModal = async (hoaDon) => {
+    showSalesHistoryModal.value = true;
+    await xemLichSu(hoaDon);
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+};
+
+const xemLichSu = async (hoaDon) => {
+    try {
+        const response = await viewLichSuHoaDon(hoaDon.idHoaDon);
+        maHoaDon.value = response.data.content[0].maHoaDon
+        orderHistory.value = response.data.content;
+        showSalesHistoryModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter], () => {

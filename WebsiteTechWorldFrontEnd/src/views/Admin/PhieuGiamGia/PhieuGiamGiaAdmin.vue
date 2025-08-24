@@ -231,14 +231,17 @@
               <div class="form-row">
                 <el-form-item label="Thời gian bắt đầu *" class="form-item">
                   <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian bắt đầu"
-                    :readonly="phieuActive" value-format="YYYY-MM-DD HH:mm:ss" class="full-width"
-                    :class="{ 'error': errors.ngayBatDau }" />
+                    :readonly="phieuActive" class="full-width" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
+                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false"
+                    :class="{ 'error': errors.ngayBatDau }" @change="handleNgayBatDauChange" />
                   <span v-if="errors.ngayBatDau" class="error-text">{{ errors.ngayBatDau }}</span>
                 </el-form-item>
 
                 <el-form-item label="Thời gian kết thúc *" class="form-item">
                   <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian kết thúc"
-                    value-format="YYYY-MM-DD HH:mm:ss" class="full-width" :class="{ 'error': errors.ngayKetThuc }" />
+                    format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
+                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false" class="full-width"
+                    :class="{ 'error': errors.ngayKetThuc }" />
                   <span v-if="errors.ngayKetThuc" class="error-text">{{ errors.ngayKetThuc }}</span>
                 </el-form-item>
               </div>
@@ -338,11 +341,11 @@
         <div class="detail-section">
           <h3 class="section-title">Thời gian hiệu lực</h3>
           <div class="detail-row">
-            <span class="detail-label">Ngày bắt đầu:</span>
+            <span class="detail-label">Thời gian bắt đầu:</span>
             <span class="detail-value">{{ formatDateTime(detailData.ngayBatDau) }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Ngày kết thúc:</span>
+            <span class="detail-label">Thời gian kết thúc:</span>
             <span class="detail-value">{{ formatDateTime(detailData.ngayKetThuc) }}</span>
           </div>
         </div>
@@ -411,6 +414,7 @@ import store from "@/Service/LoginService/Store";
 import { Gift } from "lucide-vue-next";
 import { useToast } from "vue-toastification";
 import Swal from "sweetalert2";
+import dayjs from "dayjs";
 
 const toast = useToast()
 
@@ -555,25 +559,32 @@ const validateForm = () => {
   }
 
   if (!formData.ngayBatDau) {
-    errors.ngayBatDau = "Ngày bắt đầu là bắt buộc";
+    errors.ngayBatDau = "Thời gian bắt đầu là bắt buộc";
     isValid = false;
   } else {
     const now = new Date();
     const startDate = new Date(formData.ngayBatDau);
     if (startDate < now && !formData.id) {
-      errors.ngayBatDau = "Ngày bắt đầu không được nằm trong quá khứ";
+      errors.ngayBatDau = "Thời gian bắt đầu phải sau Thời gian hiện tại";
       isValid = false;
     }
   }
 
   if (!formData.ngayKetThuc) {
-    errors.ngayKetThuc = "Ngày kết thúc là bắt buộc";
+    errors.ngayKetThuc = "Thời gian kết thúc là bắt buộc";
     isValid = false;
-  } else if (formData.ngayBatDau && formData.ngayKetThuc) {
+  } else {
     const startDate = new Date(formData.ngayBatDau);
     const endDate = new Date(formData.ngayKetThuc);
-    if (endDate < startDate) {
-      errors.ngayKetThuc = "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu";
+    const now = new Date();
+
+    if (formData.ngayBatDau && endDate <= startDate) {
+      errors.ngayKetThuc = "Thời gian kết thúc phải sau Thời gian bắt đầu";
+      isValid = false;
+    }
+
+    if (formData.id && formData.trangThaiPhieuGiamGia !== "EXPIRED" && endDate <= now) {
+      errors.ngayKetThuc = "Thời gian kết thúc phải sau Thời gian hiện tại";
       isValid = false;
     }
   }
@@ -673,7 +684,7 @@ const savePhieuGiamGia = async () => {
     await loadPhieuGiamGia(currentPage.value);
   } catch (error) {
     console.error("Error saving phieu giam gia:", error);
-    toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi lưu phiếu giảm giá");
+    toast.error(error?.message || "Đã xảy ra lỗi khi lưu phiếu giảm giá");
   } finally {
     isLoading.value = false;
   }
@@ -791,7 +802,30 @@ const clear = () => {
   loadPhieuGiamGia(0);
 };
 
-import dayjs from 'dayjs';
+const handleNgayBatDauChange = (value) => {
+  if (!value) return;
+
+  let start = new Date(value);
+  const now = new Date()
+
+  if (
+    start.getFullYear() === now.getFullYear() &&
+    start.getMonth() === now.getMonth() &&
+    start.getDate() === now.getDate() &&
+    start.getHours() === now.getHours() &&
+    start.getMinutes() === now.getMinutes()
+  ) {
+    start.setMinutes(start.getMinutes() + 1)
+  }
+  formData.ngayBatDau = dayjs(start).format('YYYY-MM-DD HH:mm')
+
+  if (!formData.id && !formData.ngayKetThuc) {
+    let end = new Date(start);
+    end.setDate(start.getDate() + 2)
+    formData.ngayKetThuc = dayjs(end).format("YYYY-MM-DD HH:mm");
+  }
+}
+
 const checkPhieuActive = (ngayBatDau) => {
   const now = dayjs();
   const startDate = dayjs(ngayBatDau);
@@ -916,7 +950,7 @@ const getNextUpdateDelay = async () => {
       console.error('Không thể lấy thời gian cập nhật:', error);
       toast.error('Không thể lấy thời gian cập nhật');
     }
-    return 60_000; 
+    return 60_000;
   }
 };
 
