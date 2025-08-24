@@ -6,6 +6,7 @@ public enum HanhDongLichSuHoaDon {
     , DELETE("Xóa hóa đơn")
     , THANH_TOAN("Thanh toán hóa đơn")
     , HUY("Hủy hóa đơn")
+    , RETURN("Trả hàng")
     , COMFIRM("Xác nhận hóa đơn");
 
     private final String displayName;

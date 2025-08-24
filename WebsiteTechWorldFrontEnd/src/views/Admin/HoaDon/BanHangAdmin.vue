@@ -439,7 +439,7 @@
                             <input type="checkbox" v-model="isShipping" @change="toggleShipping">
                             <span class="slider round"></span>
                         </label>
-                        <span class="label-text">GIAO HÀNG</span>
+                        <span class="label-text">GIAO HÀNG ( Mặc định là đơn giao nhanh )</span>
                     </div>
 
                     <div class="shipping-discount-container">
@@ -454,9 +454,7 @@
                                     }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
-                                <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
-                                    shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                <p><strong>Phí giao hàng:</strong> 50.000 VNĐ </p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -474,7 +472,8 @@
                                             placeholder="Email người nhận" class="input-field" required>
                                         <div class="address-form">
                                             <label>Chọn tỉnh:</label>
-                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
+                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box"
+                                                disabled>
                                                 <option disabled value="">-- Tỉnh/Thành phố --</option>
                                                 <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
                                                 </option>
@@ -499,10 +498,8 @@
                                         <textarea v-model="shippingInfo.diaChiChiTiet"
                                             placeholder="Số nhà, tên đường..." class="input-field" rows="2"
                                             required></textarea>
-                                        <div class="shipping-fee-display"
-                                            v-if="shippingInfo.phiShip !== null && shippingInfo.phiShip !== undefined">
-                                            Phí giao hàng: <span class="fee-amount">{{
-                                                shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                                        <div class="shipping-fee-display">
+                                            Phí giao hàng: <span class="fee-amount">50.000 VNĐ</span>
                                         </div>
                                     </div>
                                     <div class="popup-actions">
@@ -1736,12 +1733,12 @@ const onTinhChange = async () => {
 // };
 
 const onXaChange = async () => {
-    console.log("Xã được chọn:", selectedXa.value);
-    shippingInfo.value.phiShip = null;
-    if (selectedXa.value) {
-        console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
-        await updatePhiShip();
-    }
+    // console.log("Xã được chọn:", selectedXa.value);
+    // shippingInfo.value.phiShip = null;
+    // if (selectedXa.value) {
+    //     console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
+    //     await updatePhiShip();
+    // }
 };
 
 watch(isShipping, (newVal) => {
@@ -2210,6 +2207,27 @@ const showShippingPopup = ref(false);
 const openShippingPopup = () => {
     showShippingPopup.value = true;
     shippingInfo.value.diaChiChiTiet = '';
+    const haNoi = Object.values(tinhList.value).flat().find(t => t.name === "Hà Nội")
+    if (haNoi) {
+        selectedTinh.value = haNoi
+    }
+    selectedXa.value = null;
+    // huyenList.value = [];
+    xaList.value = [];
+    if (selectedTinh.value?.name) {
+        try {
+            // const res = await getHuyen(selectedTinh.value.code);
+            // const data = res.data;
+            // huyenList.value = data.districts || [];
+            // console.log("Danh sách Huyện/Quận:", huyenList.value);
+            xaList.value = allXaList.value.filter(ward =>
+                ward.path.includes(selectedTinh.value.name)
+            )
+            console.log("Danh sách Phường/Xã:", xaList.value)
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách huyện:", error);
+        }
+    }
 };
 
 const closeShippingPopup = () => {
@@ -2609,6 +2627,12 @@ const resetFilters = () => {
     filters.maSpct = null
 }
 
+onMounted(async () => {
+    const haNoi = Object.values(tinhList.value).flat().find(t => t.name === "Hà Nội")
+    if (haNoi) {
+        selectedTinh.value = haNoi
+    }
+})
 
 </script>
 

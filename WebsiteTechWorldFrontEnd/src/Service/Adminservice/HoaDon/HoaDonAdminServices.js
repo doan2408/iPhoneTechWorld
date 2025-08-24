@@ -190,7 +190,7 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
         sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
         emailNguoiNhan: shippingInfo.emailNguoiNhan,
         diaChiGiaoHang: fullAddressForDB,
-        phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
+        phiShip: Number(50000),
         isShipping: isShipping,
         maVanDon: null,
         thanhTien: null
