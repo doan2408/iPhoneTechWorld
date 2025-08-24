@@ -3319,3 +3319,15 @@ input:checked+.slider:before {
     color: #333;
     border-color: #999;
 }
+#screen-lock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.4);
+    /* có thể chỉnh độ mờ */
+    z-index: 999999;
+    pointer-events: all;
+    cursor: not-allowed;
+}

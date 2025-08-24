@@ -29,23 +29,15 @@
 
             <!-- Header actions -->
             <div class="header-actions">
-                <button class="action-btn" title="Khóa màn hình">
-                    <Lock class="btn-icon" />
+                <button @click="lockScreen" class="action-btn" title="Khóa màn hình ( Ctrl + Q )">
+                    <Lock class="btn-icon" />&ensp; Khóa màn hình
                 </button>
-                <button class="action-btn" title="Quay lại">
-                    <Undo class="btn-icon" />
-                </button>
+                <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" />
-                </button>
-                <button class="action-btn" title="In">
-                    <Printer class="btn-icon" />
-                </button>
-                <!-- <span class="phone-number">0395346933</span> -->
-                <button class="menu-btn">
-                    <Menu class="menu-icon" />
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
                 </button>
             </div>
+            <div id="screen-lock-overlay" style="display: none;"></div>
         </div>
 
         <!-- Main content : nội dung -->
@@ -779,6 +771,7 @@ import wardData from '@/assets/JsonTinhThanh/ward.json'
 import tienMatPng from '@/assets/HinhAnh/tienmat.png'
 import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
+import ScreenLock from '../AdminLock/ScreenLock.vue';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -1088,7 +1081,7 @@ const selectInvoice = async (id) => {
     localStorage.setItem('selectedInvoiceId', id);
 
     const invoice = invoices.value.find(i => i.id === id);
-    const hasDetail = invoice?.chiTietSanPham && invoice.chiTietSanPham.length > 0;
+    const hasDetail = false
 
     if (!hasDetail) {
         try {
@@ -1098,6 +1091,7 @@ const selectInvoice = async (id) => {
             }
             loadHoaDon()
             getHdctByImeiDaBan()
+            toast.success("Chọn thành công hóa đơn " + res.data.maHoaDon)
         } catch (error) {
             console.error("Lỗi khi load chi tiết hóa đơn:", error);
         }
@@ -1159,16 +1153,23 @@ const addNewInvoice = async () => {
 }
 
 const closeInvoice = (id) => {
-    if (invoices.value.length === 1) return
+    if (invoices.value.length === 1) return;
 
-    const index = invoices.value.findIndex(inv => inv.id === id)
-    if (index > -1) {
-        invoices.value.splice(index, 1)
-        if (currentInvoiceId.value === id) {
-            currentInvoiceId.value = invoices.value[0].id
-        }
+    const index = invoices.value.findIndex(inv => inv.id === id);
+    if (index !== -1) {
+        invoices.value.splice(index, 1);
     }
-}
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    const idStr = String(id); // ép kiểu sang string
+
+    if (storedId === idStr || currentInvoiceId.value === idStr) {
+        const newId = invoices.value[0]?.id || null;
+        currentInvoiceId.value = newId;
+        localStorage.setItem("selectedInvoiceId", newId);
+    }
+};
+
 
 
 const showDeleteConfirmModal = ref(false);
@@ -2477,6 +2478,13 @@ const onScannedImei = async (soImei) => {
 }
 const reloadPage = () => {
     loadTabHoaDon()
+    toast.success("Làm mới tab hóa đơn thành công")
+}
+
+const screenLock = ref(null)
+
+function lockScreen() {
+    screenLock.value.lock()
 }
 
 const isVoucherModalOpen = ref(false);
