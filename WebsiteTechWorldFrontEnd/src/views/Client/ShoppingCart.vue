@@ -406,7 +406,7 @@ async function handleBulkDelete() {
         );
         if (user.value?.id) {
             for (const item of selectedItems.value) {
-                await cartService.removeItem(item.idSanPhamChiTiet);
+                await cartService.removeItem(item.idGioHangChiTiet);
             }
         } else {
             for (const item of selectedItems.value) {
