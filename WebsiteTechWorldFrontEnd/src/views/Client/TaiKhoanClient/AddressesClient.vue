@@ -8,7 +8,7 @@ import {
 } from "@/Service/ClientService/TaiKhoan/DiaChiServices";
 import { useRoute, useRouter } from "vue-router";
 import { add } from "@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowLeft, Plus, Edit, Delete } from "@element-plus/icons-vue";
 import provinceData from '@/assets/JsonTinhThanh/province.json'
 import wardData from '@/assets/JsonTinhThanh/ward.json'
@@ -185,15 +185,33 @@ const handleSubmit = async () => {
 
   try {
     await formRef.value.validate();
+
+    // Confirm trước khi gọi API
+    await ElMessageBox.confirm(
+      isEditMode.value
+        ? "Bạn có chắc chắn muốn cập nhật địa chỉ này?"
+        : "Bạn có chắc chắn muốn thêm địa chỉ mới?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    ).catch(() => {
+      throw "cancel";
+    });
+
     loading.value = true;
-
     const idKhachHang = user.value?.id;
-
     Object.keys(errors).forEach((key) => delete errors[key]);
 
     // Tìm tên tỉnh và xã dựa trên code
-    const selectedTinh = tinhList.value.find(t => t.code === formData.tinhThanhPho)
-    const selectedXa = allXaList.value.find(xa => xa.code === formData.xaPhuong)
+    const selectedTinh = tinhList.value.find(
+      (t) => t.code === formData.tinhThanhPho
+    );
+    const selectedXa = allXaList.value.find(
+      (xa) => xa.code === formData.xaPhuong
+    );
 
     if (!selectedTinh || !selectedXa) {
       ElMessage.warning("Vui lòng chọn tỉnh và xã hợp lệ.");
@@ -207,9 +225,9 @@ const handleSubmit = async () => {
       sdtNguoiNhan: formData.sdtNguoiNhan,
       soNha: formData.soNha,
       tenDuong: formData.tenDuong,
-      xaPhuong: selectedXa?.name || '', // Lưu tên thay vì code
+      xaPhuong: selectedXa?.name || "",
       emailNguoiNhan: formData.emailNguoiNhan,
-      tinhThanhPho: selectedTinh?.name || '', // Lưu tên thay vì code
+      tinhThanhPho: selectedTinh?.name || "",
       diaChiChinh: formData.diaChiChinh,
       idKhachHang: idKhachHang,
     };
@@ -226,10 +244,13 @@ const handleSubmit = async () => {
       ElMessage.success("Thêm địa chỉ thành công!");
     }
 
-    // Reload addresses and close modal
     await loadAddresses();
     closeModal();
   } catch (error) {
+    if (error === "cancel") {
+      // Người dùng bấm Hủy confirm → thoát im lặng
+      return;
+    }
     console.error("Form validation failed:", error);
     if (Array.isArray(error)) {
       error.forEach(({ field, message }) => {
@@ -242,6 +263,7 @@ const handleSubmit = async () => {
     loading.value = false;
   }
 };
+
 
 // const selectAddress = (id) => {
 //   // Chỉ cho phép chọn địa chỉ phụ (không phải mặc định)

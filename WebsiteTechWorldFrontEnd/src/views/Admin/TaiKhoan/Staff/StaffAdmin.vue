@@ -630,6 +630,7 @@ onMounted(() => {
 
 .add-staff-btn {
   margin-bottom: 16px;
+  background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
 }
 
 .search-section {
