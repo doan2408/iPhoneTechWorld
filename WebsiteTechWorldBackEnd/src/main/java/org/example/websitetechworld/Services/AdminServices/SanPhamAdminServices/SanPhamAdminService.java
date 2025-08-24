@@ -19,6 +19,7 @@ import org.example.websitetechworld.exception.NotFoundException;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class SanPhamAdminService {
     private final HoaDonRepository hoaDonRepository;
     private final KhachHangRepository khachHangRepository;
     private final KhuyenMaiAdminService khuyenMaiAdminService;
+    private final LoaiRepository loaiRepository;
 
     private SanPhamChiTietResponse mapToChiTietResponse(SanPhamChiTiet chiTiet) {
         SanPhamChiTietResponse response = new SanPhamChiTietResponse();
@@ -1026,10 +1028,19 @@ public class SanPhamAdminService {
         sanPham.setTrangThaiSanPham(TrangThaiSanPham.TEMPORARILY_UNAVAILABLE);
         sanPhamRepo.save(sanPham);
     }
+    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size, Integer selectedIdKhachHang,
+                                                             Integer loaiSanPham, BigDecimal giaTu,BigDecimal giaDen,
+                                                             Integer soLuongTu, Integer soLuongDen,
+                                                             String maSpct, Integer dungLuong, Integer tenMau) {
 
-    public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size, Integer selectedIdKhachHang) {
+        String keyword = (tenSanPham == null || tenSanPham.trim().isEmpty() || tenSanPham.trim().equalsIgnoreCase("all"))
+                ? ""
+                : tenSanPham.trim();
+        String maSpctKeyword = (maSpct == null || maSpct.trim().isEmpty()) ? "" : maSpct.trim();
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByIdSanPham_TenSanPhamContainingAndIdSanPham_TrangThaiSanPham(tenSanPham, TrangThaiSanPham.ACTIVE, pageable);
+        Page<SanPhamChiTiet> chiTietPage = sanPhamChiTietRepository.findByTenSanPhamAndTrangThai(keyword, TrangThaiSanPham.ACTIVE,
+                loaiSanPham,giaTu,giaDen,soLuongTu,soLuongDen,maSpctKeyword,dungLuong,tenMau, pageable);
 
         return chiTietPage.map(spct -> {
             SanPhamBanHangAdminResponse response = SanPhamBanHangAdminResponse.converDto(spct);
@@ -1107,6 +1118,14 @@ public class SanPhamAdminService {
                 throw new BusinessException("IMEI phải đúng với số lượng: " + rq.getSoLuong());
             }
         }
+    }
+
+    public Map<String,List<?>> fillDataForPulldown(){
+        Map<String,List<?>> map = new HashMap<>();
+        map.put("loai",loaiRepository.findAll());
+        map.put("mauSac",mauSacRepository.findAll());
+        map.put("dungLuong",romRepository.findAll());
+        return map;
     }
 }
 

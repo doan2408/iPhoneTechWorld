@@ -603,7 +603,8 @@ const handleBuy = async () => {
             idSanPham: p.idSanPhamChiTiet,
             soLuong: p.soLuong
         })),
-        idPhieuGiamGia: selectedDiscount.value?.id
+        idPhieuGiamGia: selectedDiscount.value?.id,
+        soTienGiam: appliedVoucher.value.discount
     };
     if (getShippingCost.value == 0) {
         toast.warning('Chưa chọn phương thức giao hàng')

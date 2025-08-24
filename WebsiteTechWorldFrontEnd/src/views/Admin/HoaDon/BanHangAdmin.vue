@@ -29,23 +29,15 @@
 
             <!-- Header actions -->
             <div class="header-actions">
-                <button class="action-btn" title="Khóa màn hình">
-                    <Lock class="btn-icon" />
+                <button @click="lockScreen" class="action-btn" title="Khóa màn hình ( Ctrl + Q )">
+                    <Lock class="btn-icon" />&ensp; Khóa màn hình
                 </button>
-                <button class="action-btn" title="Quay lại">
-                    <Undo class="btn-icon" />
-                </button>
+                <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" />
-                </button>
-                <button class="action-btn" title="In">
-                    <Printer class="btn-icon" />
-                </button>
-                <!-- <span class="phone-number">0395346933</span> -->
-                <button class="menu-btn">
-                    <Menu class="menu-icon" />
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
                 </button>
             </div>
+            <div id="screen-lock-overlay" style="display: none;"></div>
         </div>
 
         <!-- Main content : nội dung -->
@@ -90,7 +82,7 @@
                 <!-- Customer search -->
                 <div class="customer-search">
                     <div class="search-box">
-                        <select v-model="searchType" class="search-select">
+                        <!-- <select v-model="searchType" class="search-select">
                             <option disabled value="">-- Chọn loại tìm kiếm --</option>
                             <option value="name">Tên</option>
                             <option value="ma">Mã</option>
@@ -101,15 +93,87 @@
                             <input v-model="customerSearchQuery" type="text"
                                 :placeholder="searchType === 'ma' ? 'Nhập mã sản phẩm' : 'Nhập tên sản phẩm'"
                                 class="search-input" @keydown.f4.prevent="searchCustomer" @blur="searchCustomer" />
-                        </div>
+                        </div> -->
                     </div>
                     <div class="customer-actions">
                         <button @click="listKhachHang(0)" class="customer-btn" title="Thêm khách hàng">
-                            <Plus class="btn-icon" />
+                            <Plus class="btn-icon" /> Thêm khách hàng
                         </button>
-                        <button class="customer-btn" title="Lọc">
-                            <Filter class="btn-icon" />
+                        <button class="customer-btn" title="Lọc" @click="toggleFilter">
+                            <Filter class="btn-icon" /> Bộ lọc
                         </button>
+
+                        <div v-if="isFilterOpen" class="filter-overlay">
+                            <div class="filter-popup">
+                                <h2>Bộ lọc sản phẩm</h2>
+
+                                <!-- Mã sản phẩm chi tiết -->
+                                <div class="filter-group">
+                                    <label>Mã SPCT</label>
+                                    <input type="text" v-model="filters.maSpct"
+                                        placeholder="Nhập mã SPCT (VD: SPCT001)" />
+                                </div>
+
+                                <!-- Loại sản phẩm -->
+                                <div class="filter-group">
+                                    <label>Loại sản phẩm</label>
+                                    <select v-model="filters.model">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="loai in pulldownData.loai" :key="loai" :value="loai.id"> {{
+                                            loai.tenLoai }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Dung lượng -->
+                                <div class="filter-group">
+                                    <label>Dung lượng</label>
+                                    <select v-model="filters.storage">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="dungLuongRom in pulldownData.dungLuong" :key="dungLuongRom"
+                                            :value="dungLuongRom.id"> {{ dungLuongRom.dungLuong }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Màu sắc -->
+                                <div class="filter-group">
+                                    <label>Màu sắc</label>
+                                    <select v-model="filters.color">
+                                        <option value="">Tất cả</option>
+                                        <option v-for="mau in pulldownData.mauSac" :key="mau" :value="mau.id"> {{
+                                            mau.tenMau }} </option>
+                                    </select>
+                                </div>
+
+                                <!-- Khoảng giá -->
+                                <div class="filter-group">
+                                    <label>Khoảng giá (triệu VND)</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.priceMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.priceMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Số lượng tồn kho -->
+                                <div class="filter-group">
+                                    <label>Số lượng tồn kho</label>
+                                    <div class="range-inputs">
+                                        <input type="number" v-model.number="filters.quantityMin" placeholder="Từ" />
+                                        <span>–</span>
+                                        <input type="number" v-model.number="filters.quantityMax" placeholder="Đến" />
+                                    </div>
+                                </div>
+
+                                <!-- Nút hành động -->
+                                <div class="filter-actions">
+                                    <button class="apply-btn-filter" @click="applyFilters">Áp dụng</button>
+                                    <button class="reset-btn-filter" @click="resetFilters">Xóa bộ lọc</button>
+                                    <button class="close-btn-filter" @click="toggleFilter">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
                         <button class="customer-btn" @click="openQRModal" title="Quét mã QR">
                             <ScanLine class="btn-icon" /> Quét QR
                         </button>
@@ -177,7 +241,10 @@
 
                         <div class="imei-search">
                             <div class="search-box">
+<<<<<<< HEAD
                                 <Search class="search-icon" />
+=======
+>>>>>>> b2782dd6c142d6979ca2dd8c585486e041e3dcc0
                                 <input v-model="imeiSearchQuery" type="text" placeholder="Tìm kiếm IMEI"
                                     class="search-input" />
                             </div>
@@ -307,6 +374,7 @@
                             </button>
                         </div>
                     </div>
+
                     <!-- Modal xác nhận -->
                     <Transition name="modal-fade">
                         <div v-if="showDeleteConfirmModal" class="modal-overlay">
@@ -335,6 +403,9 @@
                         </div>
                     </Transition>
                 </div>
+            </div>
+            <div v-else class="no-product-message">
+                Không có sản phẩm được chọn
             </div>
 
             <!-- Total tong tien hang -->
@@ -543,9 +614,8 @@
             </div>
 
             <div class="modal-header" style="margin-bottom: 0;">
-                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2>
+                <h2>{{ currentInvoiceDetail?.maHoaDon }} : Chọn khách hàng</h2> &nbsp;
                 <div class="search-box">
-                    <!-- <Search class="search-icon" /> -->
                     <input v-model="searchKhachHang" type="text" placeholder="Tìm khách hàng" class="search-input" />
                 </div>
             </div>
@@ -646,7 +716,8 @@ import {
     Smartphone, Laptop, Watch, Headphones, Camera, Gamepad2, ScanLine
 } from 'lucide-vue-next'
 import {
-    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa
+    loadSanPhamChiTiet, findSanPhamBanHang, loadCategory, findSanPhamByMa,
+    fillDataFulldown
 } from '@/Service/Adminservice/Products/ProductAdminService';
 import {
     createPendingInvoice, hoaDonDetail, fetchImeisJs, updateTTShipping
@@ -673,6 +744,7 @@ import wardData from '@/assets/JsonTinhThanh/ward.json'
 import tienMatPng from '@/assets/HinhAnh/tienmat.png'
 import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
+import ScreenLock from '../AdminLock/ScreenLock.vue';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -836,14 +908,19 @@ const danhMucSanPham = async () => {
 }
 
 const selectedIdKhachHang = ref(0)
+const pulldownData = ref(null)
 
 const loadProducts = async () => {
-    // selectedCategory.value = category.tenSanPham;
+    
+    const res = await fillDataFulldown();
+    pulldownData.value = res.data
+
     let response;
     if (selectedCategory.value.toLowerCase() === 'all') {
         response = await loadSanPhamChiTiet(pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
     } else {
-        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value);
+        response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+            , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color);
     }
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
@@ -977,7 +1054,7 @@ const selectInvoice = async (id) => {
     localStorage.setItem('selectedInvoiceId', id);
 
     const invoice = invoices.value.find(i => i.id === id);
-    const hasDetail = invoice?.chiTietSanPham && invoice.chiTietSanPham.length > 0;
+    const hasDetail = false
 
     if (!hasDetail) {
         try {
@@ -987,6 +1064,7 @@ const selectInvoice = async (id) => {
             }
             loadHoaDon()
             getHdctByImeiDaBan()
+            toast.success("Chọn thành công hóa đơn " + res.data.maHoaDon)
         } catch (error) {
             console.error("Lỗi khi load chi tiết hóa đơn:", error);
         }
@@ -1048,16 +1126,23 @@ const addNewInvoice = async () => {
 }
 
 const closeInvoice = (id) => {
-    if (invoices.value.length === 1) return
+    if (invoices.value.length === 1) return;
 
-    const index = invoices.value.findIndex(inv => inv.id === id)
-    if (index > -1) {
-        invoices.value.splice(index, 1)
-        if (currentInvoiceId.value === id) {
-            currentInvoiceId.value = invoices.value[0].id
-        }
+    const index = invoices.value.findIndex(inv => inv.id === id);
+    if (index !== -1) {
+        invoices.value.splice(index, 1);
     }
-}
+
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    const idStr = String(id); // ép kiểu sang string
+
+    if (storedId === idStr || currentInvoiceId.value === idStr) {
+        const newId = invoices.value[0]?.id || null;
+        currentInvoiceId.value = newId;
+        localStorage.setItem("selectedInvoiceId", newId);
+    }
+};
+
 
 
 const showDeleteConfirmModal = ref(false);
@@ -1093,29 +1178,7 @@ const removeFromCart = async () => {
     }
 }
 
-const searchCustomer = async () => {
-    const type = searchType.value || 'name';
 
-    if (!customerSearchQuery.value.trim()) {
-        await loadProducts();
-        return;
-    }
-
-    try {
-        let response;
-        if (type === 'name') {
-            response = await findSanPhamBanHang(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        } else if (type === 'ma') {
-            response = await findSanPhamByMa(customerSearchQuery.value.trim(), pageNoProduct.value, pageSizeProduct.value);
-        }
-
-        products.value = response.data.content;
-        totalPagesProdut.value = response.data.totalPages;
-        console.log('da vao day');
-    } catch (error) {
-        console.error('Search error:', error);
-    }
-};
 
 watch([searchType, customerSearchQuery], () => {
     searchCustomer();
@@ -1518,6 +1581,8 @@ const confirmReturnSelected = async () => {
         selectedItems.value = [];
         selectAllItems.value = false;
         await loadTabHoaDon();
+        loadProducts()
+        getHdctByImeiDaBan()
     } catch (error) {
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
     }
@@ -2386,6 +2451,13 @@ const onScannedImei = async (soImei) => {
 }
 const reloadPage = () => {
     loadTabHoaDon()
+    toast.success("Làm mới tab hóa đơn thành công")
+}
+
+const screenLock = ref(null)
+
+function lockScreen() {
+    screenLock.value.lock()
 }
 
 const isVoucherModalOpen = ref(false);
@@ -2449,6 +2521,45 @@ const formatDate = (dateString) => {
 
     return `${day}/${month}/${year}`;
 };
+
+const isFilterOpen = ref(false)
+
+const filters = reactive({
+    model: '',
+    storage: '',
+    color: '',
+    priceMin: null,
+    priceMax: null,
+    quantityMin: null,
+    quantityMax: null,
+    maSpct : ''
+})
+
+const toggleFilter = () => {
+    isFilterOpen.value = !isFilterOpen.value
+}
+
+const applyFilters = async () => {
+    const response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
+        , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color
+    );
+    
+    products.value = response.data.content;
+    totalPagesProdut.value = response.data.totalPages
+    isFilterOpen.value = false
+}
+
+const resetFilters = () => {
+    filters.model = ''
+    filters.storage = ''
+    filters.color = ''
+    filters.priceMin = null
+    filters.priceMax = null
+    filters.quantityMin = null
+    filters.quantityMax = null
+    filters.maSpct = null
+}
+
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>
