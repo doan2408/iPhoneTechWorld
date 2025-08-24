@@ -3,13 +3,8 @@
     <el-row :gutter="20" class="mb-4" align="middle">
       <!-- Thanh tìm kiếm căn trái -->
       <el-col :span="8">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="Tìm kiếm theo phiên bản, nhà phát triển..."
-          clearable
-          prefix-icon="Search"
-          @clear="clearSearch"
-        />
+        <el-input v-model="searchKeyword" placeholder="Tìm kiếm theo phiên bản, nhà phát triển..." clearable
+          prefix-icon="Search" @clear="clearSearch" />
       </el-col>
 
       <!-- Các nút căn phải -->
@@ -59,8 +54,7 @@
 
           <el-col :span="12">
             <el-form-item label="Nhà phát triển" prop="nhaPhatTrien">
-              <el-input v-model="formData.nhaPhatTrien"
-                placeholder="Nhập tên nhà phát triển (ví dụ: Apple...)" />
+              <el-input v-model="formData.nhaPhatTrien" placeholder="Nhập tên nhà phát triển (ví dụ: Apple...)" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -93,6 +87,8 @@ import {
 } from '@/Service/Adminservice/Products/ProductAdminService';
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const tableHDH = ref([]);
 const currentPage = ref(1);
@@ -161,7 +157,7 @@ const handleCreate = () => {
     isEditMode.value = false;
   } catch (error) {
     console.error('Lỗi khi mở form tạo mới:', error);
-    ElMessage.error('Không thể mở form tạo mới');
+    toast.error('Không thể mở form tạo mới');
   }
 };
 
@@ -169,25 +165,61 @@ const submitForm = async () => {
   if (!formRef.value) return;
 
   try {
-    await formRef.value.validate();
+
+    await ElMessageBox.confirm(
+      isEditMode.value
+        ? "Bạn có chắc chắn muốn cập nhật loại này?"
+        : "Bạn có chắc chắn muốn thêm loại mới?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
+    // await formRef.value.validate();
 
     if (isEditMode.value) {
       await putHDH(formData.id, formData);
-      ElMessage.success('Cập nhật thành công!');
+      toast.success('Cập nhật thành công!');
     } else {
       await postHDH(formData);
-      ElMessage.success('Thêm mới thành công!');
+      toast.success('Thêm mới thành công!');
     }
 
     resetForm();
     dialogVisible.value = false;
     loadData();
   } catch (error) {
-    console.error('Lỗi xử lý form:', error, error.response);
-    if(Array.isArray(error)) {
-      error.forEach(({field, message}) => {
-        ElMessage.error(errors[field] = message)
-      }) 
+    if (error === 'cancel' || error === 'close') {
+      toast.info('Đã hủy thao tác');
+      return;
+    }
+    console.error('Lỗi khi lưu màu sắc:', error);
+
+    if (error.response && error.response.data) {
+      const { message, error: serverError, errors: fieldErrors } = error.response.data;
+
+      if (fieldErrors) {
+        const msgs = Object.values(fieldErrors).flat().join('\n');
+        toast.error(msgs);
+      } else if (message && typeof message === 'object') {
+        const msgs = Object.values(message).join('\n');
+        toast.error(msgs);
+      } else if (message) {
+        toast.error(message);
+      } else if (serverError) {
+        toast.error(typeof serverError === 'string' ? serverError : JSON.stringify(serverError));
+      } else {
+        toast.error('Dữ liệu không hợp lệ, vui lòng kiểm tra lại!');
+      }
+    } else if (error.response) {
+      const status = error.response.status;
+      if (status === 401) toast.error('Bạn không có quyền thực hiện hành động này!');
+      else if (status === 403) toast.error('Bạn không có quyền truy cập tài nguyên này!');
+      else toast.error('Đã xảy ra lỗi, vui lòng thử lại!');
+    } else {
+      toast.error('Không thể kết nối đến server!');
     }
   }
 };
@@ -211,12 +243,12 @@ const handleDelete = async (id) => {
     });
 
     await deleteHDH(id);
-    ElMessage.success('Xóa thành công');
+    toast.success('Xóa thành công');
     loadData();
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Lỗi khi xóa:', error);
-      ElMessage.error('Xóa thất bại');
+      toast.error('Xóa thất bại');
     }
   }
 };

@@ -113,6 +113,8 @@ import { deleteRom, getAllRomPage, postRom, putRom } from '@/Service/Adminservic
 import { Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ro } from 'element-plus/es/locales.mjs';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const tableRom = ref([]);
 const currentPage = ref(1);
@@ -123,6 +125,7 @@ const searchQuery = ref('');
 const dialogVisible = ref(false);
 const isEditMode = ref(false);
 const formRef = ref(null);
+
 
 // const rules = {
 //     dungLuong: [{ required: true, message: 'Vui lòng nhập dung lượng', trigger: 'blur' }],
@@ -167,7 +170,7 @@ const resetForm = () => {
     formData.dungLuong = '';
     formData.loai = '';
     formData.tocDoDocGhi = '';
-    formData.nhaSanXuat = '';
+    formData.nhaSanXuat = "Apple";
     formData.namRaMat = '';
     errors.dungLuong = '';
     errors.loai = '';
@@ -188,40 +191,83 @@ const resetErrors = () => {
 const submitForm = async () => {
     if (!formRef.value) return;
 
+    // 1. Hiển thị hộp thoại xác nhận
+    const confirmMsg = isEditMode.value
+        ? 'Bạn có chắc chắn muốn cập nhật ROM này?'
+        : 'Bạn có chắc chắn muốn thêm mới ROM này?';
+
     try {
-        // await formRef.value.validate();
+        await ElMessageBox.confirm(
+            confirmMsg,
+            'Xác nhận',
+            {
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                type: 'warning',
+            }
+        );
+
+        // 2. Nếu người dùng chọn "Đồng ý", tiếp tục submit
+        // await formRef.value.validate(); // Uncomment nếu muốn validate frontend
 
         if (isEditMode.value) {
             await putRom(formData.id, formData);
-            ElMessage.success('Cập nhật rom thành công!');
+            toast.success('Cập nhật ROM thành công!');
         } else {
             await postRom(formData);
-            ElMessage.success('Thêm mới rom thành công!');
+            toast.success('Thêm mới ROM thành công!');
         }
+
+        // 3. Reset form và đóng dialog
         resetForm();
         dialogVisible.value = false;
         loadData();
+
     } catch (error) {
-        errors.dungLuong = error.message.dungLuong || ''
-        errors.loai = error.message.loai || ''
-        errors.tocDoDocGhi = error.message.tocDoDocGhi || ''
-        errors.nhaSanXuat = error.message.nhaSanXuat || ''
-        errors.namRaMat = error.message.namRaMat || ''
-
-        const errorMessages = [];
-        if (errors.dungLuong) errorMessages.push(errors.dungLuong);
-        if (errors.loai) errorMessages.push(errors.loai);
-        if (errors.tocDoDocGhi) errorMessages.push(errors.tocDoDocGhi);
-        if (errors.nhaSanXuat) errorMessages.push(errors.nhaSanXuat);
-        if (errors.namRaMat) errorMessages.push(errors.namRaMat);
-
-        if (errorMessages.length > 0) {
-            ElMessage.error('Đã xảy ra lỗi không xác định');
-        } else {
-            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        // 4. Nếu người dùng nhấn Hủy ở confirm
+        if (error && error === 'cancel') {
+            toast.info('Đã hủy thao tác');
+            return;
         }
+
+        // 5. Reset lỗi cũ
+        Object.keys(errors).forEach(key => errors[key] = '');
+
+        // 6. Xử lý lỗi từ API
+        if (error.response) {
+            const { status, data } = error.response;
+
+            if (status === 400) {
+                const msg = data.message;
+                if (typeof msg === 'string') {
+                    toast.error(msg);
+                } else if (typeof msg === 'object') {
+                    Object.keys(errors).forEach(key => {
+                        errors[key] = msg[key] || '';
+                    });
+                    const fieldErrors = Object.values(errors).filter(Boolean);
+                    toast.error(fieldErrors.length ? fieldErrors.join('\n') : 'Dữ liệu không hợp lệ!');
+                } else {
+                    toast.error('Dữ liệu không hợp lệ!');
+                }
+            } else if (status === 409) {
+                toast.error(data.message || 'Dữ liệu đã tồn tại');
+            } else if (status >= 500) {
+                toast.error('Server lỗi, vui lòng thử lại sau');
+            } else {
+                toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+            }
+
+        } else if (error.request) {
+            toast.error('Không nhận được phản hồi từ server');
+        } else {
+            toast.error('Lỗi gửi request: ' + error.message);
+        }
+
+        console.error('Lỗi submitForm:', error);
     }
 }
+
 
 const handleDelete = async (id) => {
     try {
@@ -235,11 +281,11 @@ const handleDelete = async (id) => {
             }
         );
         await deleteRom(id);
-        ElMessage.success('Xoá thành công!');
+        toast.success('Xoá thành công!');
         loadData(); // tải lại danh sách sau khi xoá
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+            toast.error('Xoá thất bại! Vui lòng thử lại.');
         }
     }
 }

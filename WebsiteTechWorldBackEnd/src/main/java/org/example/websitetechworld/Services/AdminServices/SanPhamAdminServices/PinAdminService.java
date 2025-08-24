@@ -55,20 +55,51 @@ public class PinAdminService {
 
     @Transactional
     public PinAdminResponse createPin(PinAdminRequest pinAdminRequest) {
-        if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
+        String rawPhienBanPin = pinAdminRequest.getPhienBan().trim();
+        String normalizedPhienBanPin = normalizePhienBanPin(rawPhienBanPin);
+
+        // B2: Validate bằng regex (cho phép prefix + dung lượng)
+        if (!normalizedPhienBanPin.trim().matches("^[A-Za-z-]+\\d+mAh$")) {
+            throw new BusinessException(
+                    "Dung lượng pin không hợp lệ! Ví dụ: Li-Ion3800mAh hoặc Li-Ion 3800mAh. " +
+                            "Không được có khoảng trắng giữa số và 'mAh', không chứa ký tự đặc biệt ngoài '-' trong tên công nghệ."
+            );
+        }
+
+        // B3: Check trùng (so với normalized)
+        if (pinRepository.existsByPhienBan(normalizedPhienBanPin)) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
+
         Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
+        pin.setPhienBan(normalizedPhienBanPin);
+
         Pin saved = pinRepository.save(pin);
         return convert(saved);
     }
 
     @Transactional
     public PinAdminResponse createPinQuick(PinQuicKCreateAdminRequest pinAdminRequest) {
-        if (pinRepository.existsByPhienBan(pinAdminRequest.getPhienBan())) {
+        String rawPhienBanPin = pinAdminRequest.getPhienBan().trim();
+        String normalizedPhienBanPin = normalizePhienBanPin(rawPhienBanPin);
+
+        // B2: Validate bằng regex (cho phép prefix + dung lượng)
+        if (!normalizedPhienBanPin.trim().matches("^[A-Za-z-]+\\d+mAh$")) {
+            throw new BusinessException(
+                    "Dung lượng pin không hợp lệ! Ví dụ: Li-Ion3800mAh hoặc Li-Ion 3800mAh. " +
+                            "Không được có khoảng trắng giữa số và 'mAh', không chứa ký tự đặc biệt ngoài '-' trong tên công nghệ."
+            );
+        }
+
+        // B3: Check trùng (so với normalized)
+        if (pinRepository.existsByPhienBan(normalizedPhienBanPin)) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
+
+        // B4: Lưu với normalized
         Pin pin = modelMapper.map(pinAdminRequest, Pin.class);
+        pin.setPhienBan(normalizedPhienBanPin); // dùng bản chuẩn hóa
+
         Pin saved = pinRepository.save(pin);
         return convert(saved);
     }
@@ -77,10 +108,24 @@ public class PinAdminService {
     public PinAdminResponse updatePin(Integer id, PinAdminRequest pinAdminRequest) {
         Pin pin = pinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Pin ID: " + id));
-        if (pinRepository.existsByPhienBanAndIdNot(pinAdminRequest.getPhienBan(), id)) {
+
+        String rawPhienBanPin = pinAdminRequest.getPhienBan().trim();
+        String normalizedPhienBanPin = normalizePhienBanPin(rawPhienBanPin);
+
+        // B2: Validate bằng regex (cho phép prefix + dung lượng)
+        if (!normalizedPhienBanPin.trim().matches("^[A-Za-z-]+\\d+mAh$")) {
+            throw new BusinessException(
+                    "Dung lượng pin không hợp lệ! Ví dụ: Li-Ion3800mAh hoặc Li-Ion 3800mAh. " +
+                            "Không được có khoảng trắng giữa số và 'mAh', không chứa ký tự đặc biệt ngoài '-' trong tên công nghệ."
+            );
+        }
+
+        if (pinRepository.existsByPhienBanAndIdNot(normalizedPhienBanPin, pin.getId())) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
         modelMapper.map(pinAdminRequest, pin);
+        pin.setPhienBan(normalizedPhienBanPin);
+        
         Pin saved = pinRepository.save(pin);
         return convert(saved);
     }
@@ -99,11 +144,9 @@ public class PinAdminService {
         return convert(pin);
     }
 
-    public boolean existsByPhienBan(String phienBan) {
-        return pinRepository.existsByPhienBan(phienBan);
-    }
-
-    public boolean existsByPhienBanAndIdNot(String phienBan, Integer id) {
-        return pinRepository.existsByPhienBanAndIdNot(phienBan, id);
+    private String normalizePhienBanPin(String input) {
+        if (input == null) return null;
+        // Bỏ khoảng trắng giữa chữ và số (Li-Ion 3800mAh -> Li-Ion3800mAh)
+        return input.trim().replaceAll("([A-Za-z-])\\s+(\\d)", "$1$2");
     }
 }

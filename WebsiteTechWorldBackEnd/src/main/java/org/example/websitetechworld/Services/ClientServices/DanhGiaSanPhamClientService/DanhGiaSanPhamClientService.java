@@ -12,6 +12,7 @@ import org.example.websitetechworld.Repository.ChiTietHoaDonRepository;
 import org.example.websitetechworld.Repository.DanhGiaSanPhamRepository;
 import org.example.websitetechworld.Repository.KhachHangRepository;
 import org.example.websitetechworld.Repository.SanPhamChiTietRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,6 +85,11 @@ public class DanhGiaSanPhamClientService {
         boolean daDanhGia = danhGiaRepository.existsByChiTietHoaDonId(request.getIdChiTietHoaDon());
         if (daDanhGia) {
             throw new RuntimeException("Sản phẩm này đã được đánh giá rồi");
+        }
+
+        LocalDateTime ngayMua = chiTietHoaDon.getIdHoaDon().getNgayThanhToan();
+        if (ngayMua.plusMinutes(1).isBefore(LocalDateTime.now())) {
+            throw new BusinessException("Hết thời gian cho phép đánh giá (sau 1 phút kể từ ngày mua)");
         }
 
         danhGia.setIdChiTietHoaDon(chiTietHoaDon);

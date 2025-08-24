@@ -279,10 +279,24 @@ const handleCreate = () => {
   }
 };
 
+
 const submitForm = async () => {
+  // Xóa lỗi cũ
   Object.keys(errors).forEach((key) => delete errors[key]);
 
   try {
+    // Hiển thị confirm trước khi submit
+    await ElMessageBox.confirm(
+      isEditMode.value ? "Bạn có chắc chắn muốn cập nhật màn hình này?" : "Bạn có chắc chắn muốn thêm màn hình mới?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
+
+    // Gọi API sau khi confirm
     if (isEditMode.value) {
       await putManHinh(formData.id, formData);
       toast.success("Cập nhật thành công!");
@@ -295,6 +309,13 @@ const submitForm = async () => {
     dialogVisible.value = false;
     loadData();
   } catch (error) {
+    // Xử lý khi người dùng hủy confirm
+    if (error === "cancel" || error?.message === "cancel") {
+      toast.info("Hủy thao tác");
+      return;
+    }
+
+    // Xử lý lỗi API
     if (error.response && error.response.data) {
       const { statusCode, message, error: serverError, errors: fieldErrors } = error.response.data;
 
@@ -322,7 +343,6 @@ const submitForm = async () => {
       toast.error("Không thể kết nối đến server!");
     }
   }
-
 };
 
 
@@ -339,22 +359,29 @@ const handleEdit = (row) => {
 
 const handleDelete = async (id) => {
   try {
-    await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa không?", "Xác nhận", {
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      "Bạn có chắc chắn muốn xóa không?",
+      "Xác nhận",
+      {
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy",
+        type: "warning",
+      }
+    );
 
     await deleteManHinh(id);
-    ElMessage.success("Xóa thành công");
+    toast.success("Xóa thành công");
     loadData();
   } catch (error) {
-    if (error !== "cancel") {
+    if (error === "cancel" || error?.message === "cancel") {
+      toast.info("Hủy thao tác");
+    } else {
       console.error("Lỗi khi xóa:", error);
       toast.error("Xóa thất bại");
     }
   }
 };
+
 
 const indexMethod = (index) => {
   return (currentPage.value - 1) * pageSize + index + 1;

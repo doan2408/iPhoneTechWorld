@@ -1,12 +1,6 @@
 <template>
-  <el-dialog
-    title="Thêm Cpu mới"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
-    <el-form :model="NewCpu" ref="formRef" label-position="top" >
+  <el-dialog title="Thêm Cpu mới" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
+    <el-form :model="NewCpu" ref="formRef" label-position="top">
       <el-form-item label="Chíp xử lý" prop="chipXuLy">
         <el-input v-model="NewCpu.chipXuLy" autocomplete="off" />
       </el-form-item>
@@ -22,7 +16,7 @@
 <script setup>
 import { postCpuList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -52,6 +46,17 @@ async function submitCpu() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm chíp xử lý này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
+
         const savedCpu = await postCpuList({
           chipXuLy: NewCpu.chipXuLy,
         });
@@ -60,7 +65,12 @@ async function submitCpu() {
         handleClose();
         ElMessage.success('Thêm chíp xử lý thành công!'); // Thêm thông báo thành công
       } catch (error) {
-        console.error("Lỗi khi lưu dung lượng:", error);
+        console.error("Lỗi khi lưu chíp xử lý:", error);
+
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
 
         if (error.response) {
           const { status, data } = error.response;
@@ -87,10 +97,10 @@ async function submitCpu() {
         } else if (error.request) {
           toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!");
         } else {
-          toast.error("Có lỗi xảy ra khi thêm dung lượng!");
+          toast.error("Có lỗi xảy ra khi thêm chíp xử lý!");
         }
       }
-      
+
     }
   });
 }

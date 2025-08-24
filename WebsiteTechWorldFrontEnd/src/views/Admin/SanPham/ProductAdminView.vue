@@ -16,7 +16,7 @@
 
     <el-row :gutter="24" class="main-content">
       <!-- Left Column - Main Information -->
-      <el-col :xs="24" :lg="16">
+      <el-col :xs="24" :lg="24">
         <div class="info-sections">
           <!-- General Information -->
           <el-card class="info-card" shadow="hover">
@@ -73,7 +73,8 @@
               <el-table-column prop="sdt" label="Số điện thoại" />
               <el-table-column prop="email" label="Email" />
             </el-table>
-            <el-empty v-if="!sanPhamModel.nhaCungCaps?.length" description="Không có thông tin nhà cung cấp" :image-size="80" class="empty-supplier" />
+            <el-empty v-if="!sanPhamModel.nhaCungCaps?.length" description="Không có thông tin nhà cung cấp"
+              :image-size="80" class="empty-supplier" />
           </el-card>
 
           <!-- Model Information -->
@@ -115,10 +116,131 @@
             </el-row>
           </el-card>
 
+          <!-- Right Column - Variants and Details -->
+          <el-col :xs="24" :lg="24" style="padding: 0;">
+            <div class="sidebar-content">
+              <!-- Product Variants -->
+              <el-card class="variants-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon">
+                      <Grid />
+                    </el-icon>
+                    <span class="header-title">Biến thể sản phẩm</span>
+                  </div>
+                </template>
+                <el-table :data="sanPhamModel.sanPhamChiTiets" class="variants-table" @row-click="selectChiTiet"
+                  :row-class-name="getRowClassName">
+                  <el-table-column type="index" label="STT" width="60" :index="indexMethod" />
+                  <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
+                  <el-table-column label="Màu sắc" prop="tenMau">
+                    <template #default="{ row }">
+                      <div class="color-cell">
+                        <div class="color-dot" :style="{ backgroundColor: row.maMau }"></div>
+                        <span class="color-name">{{ row.tenMau }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="dungLuongRom" label="ROM" />
+                  <el-table-column prop="soLuongSPCT" label="Số lượng" width="120" />
+                  <el-table-column label="Giá bán" width="120">
+                    <template #default="{ row }">
+                      <span class="price-text">{{ formatPrice(row.giaBan) }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-card>
+
+              <!-- Selected Variant Details -->
+              <el-card v-if="selectedChiTiet !== null" class="variant-details-card" shadow="hover">
+                <template #header>
+                  <div class="card-header">
+                    <el-icon class="header-icon">
+                      <View />
+                    </el-icon>
+                    <span class="header-title">Chi tiết biến thể {{ selectedChiTiet + 1 }}</span>
+                  </div>
+                </template>
+                <div class="variant-details">
+                  <!-- Thông tin cơ bản -->
+                  <div class="detail-section">
+                    <h5 class="section-title">Thông tin cơ bản</h5>
+                    <el-row :gutter="20">
+                      <el-col :xs="24" :sm="12">
+                        <div class="form-field">
+                          <label class="field-label">Mã sản phẩm chi tiết</label>
+                          <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''"
+                            readonly class="readonly-input" />
+                        </div>
+                        <div class="form-field">
+                          <label class="field-label">Màu sắc</label>
+                          <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" readonly
+                            class="readonly-input" />
+                        </div>
+                        <div class="form-field">
+                          <label class="field-label">Mã màu</label>
+                          <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" readonly
+                            class="readonly-input" />
+                        </div>
+                      </el-col>
+                      <el-col :xs="24" :sm="12">
+                        <div class="form-field">
+                          <label class="field-label">Dung lượng ROM</label>
+                          <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" readonly
+                            class="readonly-input" />
+                        </div>
+                        <div class="form-field">
+                          <label class="field-label">Giá bán</label>
+                          <el-input :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" readonly
+                            class="readonly-input price-input" />
+                        </div>
+                        <div class="form-field">
+                          <label class="field-label">Số lượng</label>
+                          <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" readonly
+                            class="readonly-input" />
+                        </div>
+                      </el-col>
+                    </el-row>
+                  </div>
+
+                  <el-divider />
+
+                  <!-- IMEI -->
+                  <div class="detail-section">
+                    <h5 class="section-title">IMEI</h5>
+                    <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''"
+                      readonly :rows="4" class="imei-textarea" />
+                    <div class="imei-count">
+                      Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
+                    </div>
+                  </div>
+
+                  <el-divider />
+
+                  <!-- Hình ảnh sản phẩm -->
+                  <div class="detail-section">
+                    <h5 class="section-title">Hình ảnh sản phẩm</h5>
+                    <div class="image-gallery">
+                      <el-image v-for="(img, index) in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []"
+                        :key="index" :src="img.url || defaultImage" :preview-src-list="previewImageList"
+                        class="gallery-image" fit="cover" :preview-teleported="true" :lazy="true"
+                        @error="handleImageError" />
+                      <el-empty v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length"
+                        description="Không có hình ảnh" :image-size="80" class="empty-image" />
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+
+              <el-alert v-else title="Vui lòng chọn một biến thể để xem chi tiết" type="info" show-icon
+                :closable="false" class="select-variant-alert" />
+            </div>
+          </el-col>
+
           <!-- Technical Specifications Grid -->
           <el-row :gutter="24">
             <!-- RAM Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -155,7 +277,7 @@
             </el-col>
 
             <!-- Display Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -200,7 +322,7 @@
             </el-col>
 
             <!-- Operating System Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -230,7 +352,7 @@
             </el-col>
 
             <!-- CPU Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -280,7 +402,7 @@
             </el-col>
 
             <!-- Battery Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -313,7 +435,7 @@
             </el-col>
 
             <!-- Origin Information -->
-            <el-col :xs="24" :md="12">
+            <el-col :xs="24" :md="8" style="padding: 12px;">
               <el-card class="spec-card" shadow="hover">
                 <template #header>
                   <div class="card-header">
@@ -414,117 +536,7 @@
         </div>
       </el-col>
 
-      <!-- Right Column - Variants and Details -->
-      <el-col :xs="24" :lg="8">
-        <div class="sidebar-content">
-          <!-- Product Variants -->
-          <el-card class="variants-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <el-icon class="header-icon">
-                  <Grid />
-                </el-icon>
-                <span class="header-title">Biến thể sản phẩm</span>
-              </div>
-            </template>
-            <el-table :data="sanPhamModel.sanPhamChiTiets" class="variants-table" @row-click="selectChiTiet"
-              :row-class-name="getRowClassName">
-              <el-table-column type="index" label="STT" width="60" :index="indexMethod" />
-              <el-table-column label="Mã SP chi tiết" prop="maSanPhamChiTiet" width="150" />
-              <el-table-column label="Màu sắc" prop="tenMau">
-                <template #default="{ row }">
-                  <div class="color-cell">
-                    <div class="color-dot" :style="{ backgroundColor: row.maMau }"></div>
-                    <span class="color-name">{{ row.tenMau }}</span>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="dungLuongRom" label="ROM" />
-              <el-table-column prop="soLuongSPCT" label="Số lượng" width="120" />
-              <el-table-column label="Giá bán" width="120">
-                <template #default="{ row }">
-                  <span class="price-text">{{ formatPrice(row.giaBan) }}</span>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
 
-          <!-- Selected Variant Details -->
-          <el-card v-if="selectedChiTiet !== null" class="variant-details-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <el-icon class="header-icon">
-                  <View />
-                </el-icon>
-                <span class="header-title">Chi tiết biến thể {{ selectedChiTiet + 1 }}</span>
-              </div>
-            </template>
-            <div class="variant-details">
-              <div class="detail-section">
-                <h5 class="section-title">Thông tin cơ bản</h5>
-                <div class="form-field">
-                  <label class="field-label">Mã sản phẩm chi tiết</label>
-                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maSanPhamChiTiet || ''" readonly
-                    class="readonly-input" />
-                </div>
-                <div class="form-field">
-                  <label class="field-label">Màu sắc</label>
-                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.tenMau || ''" readonly
-                    class="readonly-input" />
-                </div>
-                <div class="form-field">
-                  <label class="field-label">Mã màu</label>
-                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.maMau || ''" readonly
-                    class="readonly-input" />
-                </div>
-                <div class="form-field">
-                  <label class="field-label">Dung lượng ROM</label>
-                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.dungLuongRom || ''" readonly
-                    class="readonly-input" />
-                </div>
-                <div class="form-field">
-                  <label class="field-label">Giá bán</label>
-                  <el-input :value="formatPrice(sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.giaBan)" readonly
-                    class="readonly-input price-input" />
-                </div>
-                <div class="form-field">
-                  <label class="field-label">Số lượng</label>
-                  <el-input :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || ''" readonly
-                    class="readonly-input" />
-                </div>
-              </div>
-
-              <el-divider />
-
-              <div class="detail-section">
-                <h5 class="section-title">IMEI</h5>
-                <el-input type="textarea" :value="sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.imeisInput || ''"
-                  readonly :rows="4" class="imei-textarea" />
-                <div class="imei-count">
-                  Số lượng IMEI: {{ sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.soLuongSPCT || 0 }}
-                </div>
-              </div>
-
-              <el-divider />
-
-              <div class="detail-section">
-                <h5 class="section-title">Hình ảnh sản phẩm</h5>
-                <div class="image-gallery">
-                  <el-image v-for="(img, index) in sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs || []"
-                    :key="index" :src="img.url || defaultImage" :preview-src-list="previewImageList"
-                    class="gallery-image" fit="cover" :preview-teleported="true" :lazy="true"
-                    @error="handleImageError" />
-                  <el-empty v-if="!sanPhamModel.sanPhamChiTiets[selectedChiTiet]?.hinhAnhs?.length"
-                    description="Không có hình ảnh" :image-size="80" class="empty-image" />
-                </div>
-              </div>
-            </div>
-          </el-card>
-
-          <el-alert v-else title="Vui lòng chọn một biến thể để xem chi tiết" type="info" show-icon :closable="false"
-            class="select-variant-alert" />
-        </div>
-      </el-col>
     </el-row>
 
     <!-- Footer Actions -->
@@ -800,6 +812,7 @@ onMounted(async () => {
   padding: 24px;
 }
 
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -920,7 +933,7 @@ onMounted(async () => {
 }
 
 .readonly-input :deep(.el-input__wrapper:hover) {
-  border-color: #cbd5e0;
+  border-color: #0f1011;
 }
 
 .spec-card {
@@ -935,7 +948,7 @@ onMounted(async () => {
 
 .camera-section {
   padding: 16px;
-  background: #f8fafc;
+  background: #edf0f3;
   border-radius: 12px;
   margin-bottom: 16px;
 }
@@ -1007,7 +1020,7 @@ onMounted(async () => {
 }
 
 .variants-table :deep(.selected-row) {
-  background-color: #ebf8ff !important;
+  background-color: #b8d9eb !important;
 }
 
 .variants-table :deep(.selected-row:hover) {

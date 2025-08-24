@@ -64,42 +64,16 @@ public class HeDieuHanhAdminController {
     }
 
     @PostMapping("/quick-hdh")
-    public ResponseEntity<?> createHDHQuick (@RequestBody HDHQuickCreateAdminRequest request) {
+    public ResponseEntity<?> createHDHQuick (@RequestBody @Valid HDHQuickCreateAdminRequest request) {
         HeDieuHanhAdminResponse response = heDieuHanhAdminService.createHDHQuick(request);
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateHeDieuHanh(@PathVariable Integer id, @RequestBody @Valid HeDieuHanhAdminRequest heDieuHanhAdminRequest, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            List<Map<String, String>> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .map(e -> Map.of("field", e.getField(),
-                            "message", e.getDefaultMessage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
-        }
-        try {
+    public ResponseEntity<?> updateHeDieuHanh(@PathVariable Integer id, @RequestBody @Valid HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
             HeDieuHanhAdminResponse response = heDieuHanhAdminService.updateHeDieuHanh(id, heDieuHanhAdminRequest);
-
             return ResponseEntity.ok(response);
-        }
-        catch (ValidationException e) {
-            // Bắt riêng FieldException trả lỗi với field cụ thể
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getErrors());
-        }
-        catch (IllegalArgumentException e) {
-            // Trả về lỗi với field = "other" để frontend biết là lỗi chung
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    List.of(Map.of("field", "other", "message", e.getMessage()))
-            );
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    List.of(Map.of("field", "other", "message", "Lỗi hệ thống: " + e.getMessage()))
-            );
-        }
     }
 
     @DeleteMapping("/{id}")

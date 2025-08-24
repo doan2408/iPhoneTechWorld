@@ -35,8 +35,11 @@ public interface CameraTruocRepository extends JpaRepository<CameraTruoc, Intege
             @Param("cheDoChup") String cheDoChup
     );
 
-    Optional<CameraTruoc> findByLoaiCamera(String loaiCamera);
 
     Optional<CameraTruoc> findByLoaiCameraAndKhauDoAndDoPhanGiai(String loaiCamera, String khauDo, String doPhanGiai);
+
+    Boolean existsByLoaiCameraAndDoPhanGiaiAndKhauDo (String loaiCamera, String doPhanGiai, String khauDo);
+
+    Boolean existsByLoaiCameraAndDoPhanGiaiAndKhauDoAndIdNot (String loaiCamera, String doPhanGiai, String khauDo, Integer integer);
 
 }

@@ -15,13 +15,13 @@
     </el-form>
 
     <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Tên kích thước màn hình" prop="kichThuoc">
+      <el-form-item label="Kích thước màn hình" prop="kichThuoc">
         <el-input v-model="NewManHinh.kichThuoc" autocomplete="off" />
       </el-form-item>
     </el-form>
 
     <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Tên loại màn hình" prop="loaiManHinh">
+      <el-form-item label="Loại màn hình" prop="loaiManHinh">
         <el-input v-model="NewManHinh.loaiManHinh" autocomplete="off" />
       </el-form-item>
     </el-form>
@@ -36,7 +36,7 @@
 <script setup>
 import { postManHinhList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -51,11 +51,11 @@ const NewManHinh = reactive({
 const dialogVisible = ref(false);
 const formRef = ref(null);
 
-const rules = {
-  tenManHinh: [{ required: true, message: 'Vui lòng nhập tên màn hình', trigger: 'blur' }],
-  kichThuoc: [{ required: true, message: 'Vui lòng nhập kích thước màn hình', trigger: 'blur' }],
-  loaiManHinh: [{ required: true, message: 'Vui lòng nhập loại màn hình', trigger: 'blur' }],
-};
+// const rules = {
+//   tenManHinh: [{ required: true, message: 'Vui lòng nhập tên màn hình', trigger: 'blur' }],
+//   kichThuoc: [{ required: true, message: 'Vui lòng nhập kích thước màn hình', trigger: 'blur' }],
+//   loaiManHinh: [{ required: true, message: 'Vui lòng nhập loại màn hình', trigger: 'blur' }],
+// };
 
 function open() {
   dialogVisible.value = true;
@@ -77,6 +77,17 @@ async function submitMH() {
   formRef.value?.validate(async (valid) => {
     if (valid) {
       try {
+
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn thêm Màn hình này?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Huỷ',
+            type: 'warning',
+          }
+        );
+
         const savedManHinh = await postManHinhList({
           kichThuoc: NewManHinh.kichThuoc,
           loaiManHinh: NewManHinh.loaiManHinh,
@@ -89,6 +100,11 @@ async function submitMH() {
         toast.success('Thêm màn hình thành công!');
       } catch (error) {
         console.error('Lỗi khi lưu màn hình:', error);
+
+        if (error && error === 'cancel') {
+          toast.info('Đã hủy thao tác');
+          return;
+        }
 
         if (error.response && error.response.data) {
           const { message, error: serverError, errors: fieldErrors } = error.response.data;

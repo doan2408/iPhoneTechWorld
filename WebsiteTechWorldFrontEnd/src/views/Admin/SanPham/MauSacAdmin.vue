@@ -92,6 +92,8 @@ import { getAllMauSacPage, postMauSac, putMauSac, deleteMauSac } from '@/Service
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import chroma from 'chroma-js'
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 
 const tableMauSac = ref([]);
@@ -142,30 +144,73 @@ const loadData = async () => {
 const submitForm = async () => {
     if (!formRef.value) return;
 
+        const confirmMsg = isEditMode.value
+        ? 'Bạn có chắc chắn muốn cập nhật RAM này?'
+        : 'Bạn có chắc chắn muốn thêm mới RAM này?';
+
     try {
+        await ElMessageBox.confirm(
+            confirmMsg,
+            'Xác nhận',
+            {
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                type: 'warning',
+            }
+        );
+
         if (isEditMode.value) {
             await putMauSac(formData.id, formData);
-            ElMessage.success('Cập nhật màu sắc thành công!');
+            toast.success('Cập nhật màu sắc thành công!');
         } else {
             await postMauSac(formData);
-            ElMessage.success('Thêm mới màu sắc thành công!');
+            toast.success('Thêm mới màu sắc thành công!');
         }
         resetForm();
         dialogVisible.value = false;
         loadData();
     } catch (error) {
-        errors.tenMau = error.message?.tenMau || '';
-        errors.maMau = error.message?.maMau || '';
-
-        const errorMessages = [];
-        if (errors.tenMau) errorMessages.push(errors.tenMau);
-        if (errors.maMau) errorMessages.push(errors.maMau);
-
-        if (errorMessages.length > 0) {
-            ElMessage.error(errorMessages.join(', '));
-        } else {
-            ElMessage.error(error.message || 'Đã xảy ra lỗi không xác định');
+        // 4. Nếu người dùng nhấn Hủy ở confirm
+        if (error && error === 'cancel') {
+            toast.info('Đã hủy thao tác');
+            return;
         }
+
+        // 5. Reset lỗi cũ
+        Object.keys(errors).forEach(key => errors[key] = '');
+
+        // 6. Xử lý lỗi từ API
+        if (error.response) {
+            const { status, data } = error.response;
+
+            if (status === 400) {
+                const msg = data.message;
+                if (typeof msg === 'string') {
+                    toast.error(msg);
+                } else if (typeof msg === 'object') {
+                    Object.keys(errors).forEach(key => {
+                        errors[key] = msg[key] || '';
+                    });
+                    const fieldErrors = Object.values(errors).filter(Boolean);
+                    toast.error(fieldErrors.length ? fieldErrors.join('\n') : 'Dữ liệu không hợp lệ!');
+                } else {
+                    toast.error('Dữ liệu không hợp lệ!');
+                }
+            } else if (status === 409) {
+                toast.error(data.message || 'Dữ liệu đã tồn tại');
+            } else if (status >= 500) {
+                toast.error('Server lỗi, vui lòng thử lại sau');
+            } else {
+                toast.error(data.message || 'Đã xảy ra lỗi không xác định');
+            }
+
+        } else if (error.request) {
+            toast.error('Không nhận được phản hồi từ server');
+        } else {
+            toast.error('Lỗi gửi request: ' + error.message);
+        }
+
+        console.error('Lỗi submitForm:', error);
     }
 };
 
@@ -181,11 +226,11 @@ const handleDelete = async (id) => {
             }
         );
         await deleteMauSac(id); 
-        ElMessage.success('Xoá thành công!');
+        toast.success('Xoá thành công!');
         loadData();
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('Xoá thất bại! Vui lòng thử lại.');
+            toast.error('Xoá thất bại! Vui lòng thử lại.');
         }
     }
 };

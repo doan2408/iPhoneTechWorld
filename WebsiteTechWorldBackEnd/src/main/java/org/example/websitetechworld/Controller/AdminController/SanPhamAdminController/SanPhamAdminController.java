@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin/product")
 public class SanPhamAdminController {
 
-//    private final SanPhamAdminService adminService;
     private final SanPhamAdminService sanPhamAdminService;
 
 

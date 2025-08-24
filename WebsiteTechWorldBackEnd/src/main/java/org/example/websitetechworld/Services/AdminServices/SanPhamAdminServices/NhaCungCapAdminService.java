@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.NhaCungCapAdminResponse;
 import org.example.websitetechworld.Entity.NhaCungCap;
 import org.example.websitetechworld.Repository.NhaCungCapRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -54,9 +55,26 @@ public class NhaCungCapAdminService {
 
     @Transactional
     public NhaCungCapAdminResponse createNCC(NhaCungCapAdminRequest nhaCungCapAdminRequest) {
-        if (nhaCungCapRepository.existsByTenNhaCungCap(nhaCungCapAdminRequest.getTenNhaCungCap())) {
-            throw new IllegalArgumentException("Tên nhà cung cấp đã tồn tại");
+
+        if (!nhaCungCapAdminRequest.getSdt().trim().matches("^(03|05|07|08|09)\\d{8}$")) {
+            throw new BusinessException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09 (ví dụ: 0987654321)");
         }
+
+        nhaCungCapAdminRequest.setSdt(nhaCungCapAdminRequest.getSdt().trim());
+
+        if (nhaCungCapRepository.existsBySdt(nhaCungCapAdminRequest.getSdt().trim())) {
+            throw new BusinessException("Số điện thoại này đã tồn tại trong hệ thống");
+        }
+
+        if (nhaCungCapRepository.existsByEmail(nhaCungCapAdminRequest.getEmail().trim())) {
+            throw new BusinessException("Email này đã tồn tại trong hệ thống");
+        }
+
+        if (nhaCungCapRepository.existsByTenNhaCungCap(nhaCungCapAdminRequest.getTenNhaCungCap())) {
+            throw new BusinessException("Tên nhà cung cấp đã tồn tại");
+        }
+
+
         NhaCungCap cungCap = modelMapper.map(nhaCungCapAdminRequest, NhaCungCap.class);
         NhaCungCap saved = nhaCungCapRepository.save(cungCap);
         return convert(saved);
@@ -65,7 +83,7 @@ public class NhaCungCapAdminService {
     @Transactional
     public NhaCungCapAdminResponse quickCreateNCC(NhaCungCapQuickCreateAdminRequest req) {
         if (nhaCungCapRepository.existsByTenNhaCungCap(req.getTenNhaCungCap())) {
-            throw new IllegalArgumentException("Tên nhà cung cấp đã tồn tại");
+            throw new BusinessException("Tên nhà cung cấp đã tồn tại");
         }
         NhaCungCap cungCap = modelMapper.map(req, NhaCungCap.class);
         NhaCungCap saved = nhaCungCapRepository.save(cungCap);
@@ -73,16 +91,41 @@ public class NhaCungCapAdminService {
     }
 
     @Transactional
-    public NhaCungCapAdminResponse updateNCC(Integer id, NhaCungCapAdminRequest nhaCungCapAdminRequest) {
-        NhaCungCap cungCap = nhaCungCapRepository.findById(id)
+    public NhaCungCapAdminResponse updateNCC(Integer id, NhaCungCapAdminRequest request) {
+        // 1. Tìm NCC theo id
+        NhaCungCap ncc = nhaCungCapRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp ID: " + id));
-        if (nhaCungCapRepository.existsByTenNhaCungCapAndIdNot(nhaCungCapAdminRequest.getTenNhaCungCap(), id)) {
-            throw new IllegalArgumentException("Tên nhà cung cấp đã tồn tại");
+
+        String sdt = request.getSdt() != null ? request.getSdt().trim() : null;
+        String email = request.getEmail() != null ? request.getEmail().trim() : null;
+        String tenNCC = request.getTenNhaCungCap() != null ? request.getTenNhaCungCap().trim() : null;
+
+        if (sdt != null && !sdt.matches("^(03|05|07|08|09)\\d{8}$")) {
+            throw new BusinessException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09 (ví dụ: 0987654321)");
         }
-        modelMapper.map(nhaCungCapAdminRequest, cungCap);
-        NhaCungCap saved = nhaCungCapRepository.save(cungCap);
+
+        if (sdt != null && nhaCungCapRepository.existsBySdtAndIdNot(sdt, id)) {
+            throw new BusinessException("Số điện thoại này đã tồn tại trong hệ thống");
+        }
+
+        if (email != null && nhaCungCapRepository.existsByEmailAndIdNot(email, id)) {
+            throw new BusinessException("Email này đã tồn tại trong hệ thống");
+        }
+
+        if (tenNCC != null && nhaCungCapRepository.existsByTenNhaCungCapAndIdNot(tenNCC, id)) {
+            throw new BusinessException("Tên nhà cung cấp đã tồn tại");
+        }
+
+        ncc.setTenNhaCungCap(tenNCC);
+        ncc.setSdt(sdt);
+        ncc.setEmail(email);
+        ncc.setDiaChi(request.getDiaChi() != null ? request.getDiaChi().trim() : null);
+
+        NhaCungCap saved = nhaCungCapRepository.save(ncc);
+
         return convert(saved);
     }
+
 
     @Transactional
     public NhaCungCapAdminResponse deleteNCC(Integer id) {
@@ -98,11 +141,4 @@ public class NhaCungCapAdminService {
         return convert(cungCap);
     }
 
-    public boolean existsByTenNhaCungCap(String tenNhaCungCap) {
-        return nhaCungCapRepository.existsByTenNhaCungCap(tenNhaCungCap);
-    }
-
-    public boolean existsByTenNhaCungCapAndIdNot(String tenNhaCungCap, Integer id) {
-        return nhaCungCapRepository.existsByTenNhaCungCapAndIdNot(tenNhaCungCap, id);
-    }
 }

@@ -2273,6 +2273,7 @@ export default {
 }
 
 .choose-file-btn {
+  background-color: var(--el-color-danger-light-9);
   padding: 8px 16px;
   font-size: 13px;
 }

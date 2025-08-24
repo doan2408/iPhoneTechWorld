@@ -137,12 +137,25 @@ const loadData = async () => {
 };
 
 const submitForm = async () => {
-
   if (!formRef.value) return;
 
   try {
-    // await formRef.value.validate();
+    // Hiện confirm trước khi gọi API
+    const confirmMsg = isEditMode.value
+      ? 'Bạn có chắc chắn muốn cập nhật xuất xứ này không?'
+      : 'Bạn có chắc chắn muốn thêm mới xuất xứ này không?';
 
+    await ElMessageBox.confirm(
+      confirmMsg,
+      'Xác nhận',
+      {
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
+    // Nếu người dùng ấn Đồng ý → gọi API
     if (isEditMode.value) {
       await putXuatXu(formData.id, formData);
       toast.success('Cập nhật xuất xứ thành công!');
@@ -150,13 +163,20 @@ const submitForm = async () => {
       await postXuatXu(formData);
       toast.success('Thêm mới xuất xứ thành công!');
     }
+
     resetForm();
     dialogVisible.value = false;
     loadData();
-  } catch (error) {
 
-    errors.maXuatXu = error.message.maXuatXu || ''
-    errors.tenQuocGia = error.message.tenQuocGia || ''
+  } catch (error) {
+    // Nếu người dùng ấn "Hủy" thì ElMessageBox sẽ throw ra, mình cần phân biệt với lỗi API
+    if (error === 'cancel' || error === 'close') {
+      toast.info('Đã hủy thao tác');
+      return;
+    }
+
+    errors.maXuatXu = error.message?.maXuatXu || '';
+    errors.tenQuocGia = error.message?.tenQuocGia || '';
 
     if (error.response) {
       const status = error.response.status;
@@ -166,7 +186,6 @@ const submitForm = async () => {
         const msg = data.message;
 
         if (typeof msg === 'string') {
-          // Backend trả về message chung
           toast.error(msg);
         } else if (typeof msg === 'object') {
           Object.keys(errors).forEach(key => {
@@ -189,14 +208,14 @@ const submitForm = async () => {
       } else {
         toast.error(data.message || 'Đã xảy ra lỗi không xác định');
       }
-
     } else if (error.request) {
       toast.error('Không nhận được phản hồi từ server');
     } else {
       toast.error('Lỗi gửi request: ' + error.message);
     }
   }
-}
+};
+
 
 const handleDelete = async (id) => {
   try {
@@ -213,8 +232,9 @@ const handleDelete = async (id) => {
     toast.success('Xoá thành công!');
     loadData(); // tải lại danh sách sau khi xoá
   } catch (error) {
-    if (error !== 'cancel') {
-      toast.error('Xoá thất bại! Vui lòng thử lại.');
+    if (error === 'cancel' || error === 'close') {
+      toast.info('Đã hủy thao tác');
+      return;
     }
   }
 }
@@ -233,6 +253,24 @@ onMounted(() => {
 watch([currentPage, searchQuery], () => {
   loadData();
 });
+
+watch(
+  () => formData.maXuatXu,
+  (newValue) => {
+    if (newValue) {
+      errors.maXuatXu = ''; // Xóa lỗi khi người dùng nhập mã xuất xứ
+    }
+  }
+);
+
+watch(
+  () => formData.tenQuocGia,
+  (newValue) => {
+    if (newValue) {
+      errors.tenQuocGia = ''; // Xóa lỗi khi người dùng nhập tên quốc gia
+    }
+  }
+);
 
 const handleSearch = () => {
   currentPage.value = 1;

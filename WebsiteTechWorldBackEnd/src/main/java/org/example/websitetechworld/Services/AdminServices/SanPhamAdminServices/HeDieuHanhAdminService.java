@@ -62,7 +62,25 @@ public class HeDieuHanhAdminService {
 
     @Transactional
     public HeDieuHanhAdminResponse createHeDieuHanh(HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
-        if (heDieuHanhRepository.existsByPhienBan(heDieuHanhAdminRequest.getPhienBan())) {
+
+        String phienBan = heDieuHanhAdminRequest.getPhienBan().trim();
+        if (!phienBan.matches("^iOS\\s[0-9A-Za-z .]*$")) {
+            throw new BusinessException(
+                    "Phiên bản phải bắt đầu bằng 'iOS ' (có khoảng trắng) và không chứa ký tự đặc biệt. Ví dụ: 'iOS 15', 'iOS 16"
+            );
+        }
+        heDieuHanhAdminRequest.setPhienBan(phienBan);
+
+        String giaoDien = heDieuHanhAdminRequest.getGiaoDienNguoiDung().trim();
+        if (!giaoDien.matches("^iOS\\s[A-Za-z ]+$")) {
+            throw new BusinessException(
+                    "Giao diện người phải bắt đầu bằng 'iOS ' (chữ hoa) và chỉ chứa chữ cái và khoảng trắng. Ví dụ: 'iOS UI', 'iOS Beta', 'iOS Pro'"
+            );
+        }
+        heDieuHanhAdminRequest.setGiaoDienNguoiDung(heDieuHanhAdminRequest.getGiaoDienNguoiDung().trim());
+
+
+        if (heDieuHanhRepository.existsByPhienBan(phienBan.trim())) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
 
@@ -72,7 +90,13 @@ public class HeDieuHanhAdminService {
 
     @Transactional
     public HeDieuHanhAdminResponse createHDHQuick (HDHQuickCreateAdminRequest request) {
-        if (heDieuHanhRepository.existsByPhienBan(request.getPhienBan())) {
+        String phienBan = request.getPhienBan().trim();
+        if (!phienBan.matches("^iOS\\s[0-9A-Za-z .]*$")) {
+            throw new BusinessException("Phiên bản phải bắt đầu bằng 'iOS ' (có khoảng trắng) và không chứa ký tự đặc biệt");
+        }
+        request.setPhienBan(phienBan.trim());
+
+        if (heDieuHanhRepository.existsByPhienBan(phienBan.trim())) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
         HeDieuHanh dieuHanh = heDieuHanhRepository.save(modelMapper.map(request, HeDieuHanh.class));
@@ -84,7 +108,24 @@ public class HeDieuHanhAdminService {
     public HeDieuHanhAdminResponse updateHeDieuHanh(Integer id, HeDieuHanhAdminRequest heDieuHanhAdminRequest) {
         HeDieuHanh dieuHanhOld = heDieuHanhRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hệ điều hành ID: " + id));
-        if (heDieuHanhRepository.existsByPhienBanAndIdNot(heDieuHanhAdminRequest.getPhienBan(), id)) {
+
+        String phienBan = heDieuHanhAdminRequest.getPhienBan().trim();
+        if (!phienBan.matches("^iOS\\s[0-9A-Za-z .]*$")) {
+            throw new BusinessException(
+                    "Phiên bản phải bắt đầu bằng 'iOS ' (có khoảng trắng) và không chứa ký tự đặc biệt. Ví dụ: 'iOS 15', 'iOS 16"
+            );
+        }
+        heDieuHanhAdminRequest.setPhienBan(phienBan);
+
+        String giaoDien = heDieuHanhAdminRequest.getGiaoDienNguoiDung().trim();
+        if (!giaoDien.matches("^iOS\\s[A-Za-z ]+$")) {
+            throw new BusinessException(
+                    "Giao diện người phải bắt đầu bằng 'iOS ' (chữ hoa) và chỉ chứa chữ cái và khoảng trắng. Ví dụ: 'iOS UI', 'iOS Beta', 'iOS Pro'"
+            );
+        }
+        heDieuHanhAdminRequest.setGiaoDienNguoiDung(heDieuHanhAdminRequest.getGiaoDienNguoiDung().trim());
+
+        if (heDieuHanhRepository.existsByPhienBanAndIdNot(phienBan.trim(), dieuHanhOld.getId())) {
             throw new BusinessException("Phiên bản đã tồn tại");
         }
             modelMapper.map(heDieuHanhAdminRequest, dieuHanhOld);

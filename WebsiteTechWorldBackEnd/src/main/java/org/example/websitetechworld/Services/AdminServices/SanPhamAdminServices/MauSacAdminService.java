@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.MauSacAdminResponse;
 import org.example.websitetechworld.Entity.MauSac;
 import org.example.websitetechworld.Repository.MauSacRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -54,9 +55,16 @@ public class MauSacAdminService {
 
     @Transactional
     public MauSacAdminResponse createMauSac(MauSacAdminRequest mauSacAdminRequest) {
-        if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
-            throw new IllegalArgumentException("Tên màu đã tồn tại");
+        if (!mauSacAdminRequest.getTenMau().trim().matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            throw new BusinessException("Tên màu không được chứa ký tự đặc biệt hoặc số. Ví dụ: Đỏ, Xanh lá, Vàng.");
         }
+
+        if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
+            throw new BusinessException("Tên màu đã tồn tại");
+        }
+
+        mauSacAdminRequest.setTenMau(mauSacAdminRequest.getTenMau().trim());
+
         MauSac mauSac = modelMapper.map(mauSacAdminRequest, MauSac.class);
         MauSac saved = mauSacRepository.save(mauSac);
         return convert(saved);
@@ -64,9 +72,13 @@ public class MauSacAdminService {
 
     @Transactional
     public MauSacAdminResponse createMauSacQuick(MauSacQuickAdminRequest mauSacAdminRequest) {
-        if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
-            throw new IllegalArgumentException("Tên màu đã tồn tại");
+        if (!mauSacAdminRequest.getTenMau().trim().matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            throw new BusinessException("Tên màu không được chứa ký tự đặc biệt hoặc số. Ví dụ: Đỏ, Xanh lá, Vàng.");
         }
+        if (mauSacRepository.existsByTenMau(mauSacAdminRequest.getTenMau())) {
+            throw new BusinessException("Tên màu đã tồn tại");
+        }
+        mauSacAdminRequest.setTenMau(mauSacAdminRequest.getTenMau().trim());
         MauSac mauSac = modelMapper.map(mauSacAdminRequest, MauSac.class);
         MauSac saved = mauSacRepository.save(mauSac);
         return convert(saved);
@@ -78,9 +90,16 @@ public class MauSacAdminService {
     public MauSacAdminResponse updateMauSac(Integer id, MauSacAdminRequest mauSacAdminRequest) {
         MauSac mauSac = mauSacRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy màu sắc ID: " + id));
-        if (mauSacRepository.existsByTenMauAndIdNot(mauSacAdminRequest.getTenMau(), id)) {
-            throw new IllegalArgumentException("Tên màu đã tồn tại");
+
+        if (!mauSacAdminRequest.getTenMau().trim().matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+            throw new BusinessException("Tên màu không được chứa ký tự đặc biệt hoặc số. Ví dụ: Đỏ, Xanh lá, Vàng.");
         }
+
+        if (mauSacRepository.existsByTenMauAndIdNot(mauSacAdminRequest.getTenMau(), mauSac.getId())) {
+            throw new BusinessException("Tên màu đã tồn tại");
+        }
+        mauSacAdminRequest.setTenMau(mauSacAdminRequest.getTenMau().trim());
+
         modelMapper.map(mauSacAdminRequest, mauSac);
         MauSac saved = mauSacRepository.save(mauSac);
         return convert(saved);
@@ -100,11 +119,4 @@ public class MauSacAdminService {
         return convert(mauSac);
     }
 
-    public boolean existsByTenMau(String tenMau) {
-        return mauSacRepository.existsByTenMau(tenMau);
-    }
-
-    public boolean existsByTenMauAndIdNot(String tenMau, Integer id) {
-        return mauSacRepository.existsByTenMauAndIdNot(tenMau, id);
-    }
 }

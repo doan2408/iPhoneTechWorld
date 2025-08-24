@@ -190,10 +190,27 @@ const resetErrors = () => {
 const submitForm = async () => {
     if (!formRef.value) return;
 
+    // 1. Hiển thị hộp thoại xác nhận
+    const confirmMsg = isEditMode.value
+        ? 'Bạn có chắc chắn muốn cập nhật RAM này?'
+        : 'Bạn có chắc chắn muốn thêm mới RAM này?';
+
     try {
-        // Validate frontend trước
+        // Người dùng Đồng ý mới tiếp tục
+        await ElMessageBox.confirm(
+            confirmMsg,
+            'Xác nhận',
+            {
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                type: 'warning',
+            }
+        );
+
+        // 2. Validate frontend trước
         await formRef.value.validate();
 
+        // 3. Gửi request lên backend
         if (isEditMode.value) {
             await putRam(formData.id, formData);
             toast.success('Cập nhật RAM thành công!');
@@ -202,12 +219,18 @@ const submitForm = async () => {
             toast.success('Thêm mới RAM thành công!');
         }
 
-        // Reset form & đóng dialog
+        // 4. Reset form & đóng dialog
         resetForm();
         dialogVisible.value = false;
         loadData();
 
     } catch (error) {
+        // Nếu người dùng nhấn Hủy ở confirm
+        if (!error.response && !error.request) {
+            toast.info('Đã hủy thao tác');
+            return;
+        }
+
         // Reset lỗi cũ
         errors.dungLuong = '';
         errors.loai = '';
@@ -215,27 +238,21 @@ const submitForm = async () => {
         errors.nhaSanXuat = '';
         errors.namRaMat = '';
 
+        // 5. Xử lý lỗi từ API
         if (error.response) {
             const status = error.response.status;
             const data = error.response.data;
 
             if (status === 400) {
                 const msg = data.message;
-
                 if (typeof msg === 'string') {
-                    // Backend trả về message chung
                     toast.error(msg);
                 } else if (typeof msg === 'object') {
                     Object.keys(errors).forEach(key => {
                         errors[key] = msg[key] || '';
                     });
-
                     const fieldErrors = Object.values(errors).filter(m => m);
-                    if (fieldErrors.length > 0) {
-                        toast.error(fieldErrors.join('\n'));
-                    } else {
-                        toast.error('Dữ liệu không hợp lệ!');
-                    }
+                    toast.error(fieldErrors.length ? fieldErrors.join('\n') : 'Dữ liệu không hợp lệ!');
                 } else {
                     toast.error('Dữ liệu không hợp lệ!');
                 }
@@ -256,6 +273,7 @@ const submitForm = async () => {
         console.error('Lỗi submitForm:', error);
     }
 };
+
 
 
 
