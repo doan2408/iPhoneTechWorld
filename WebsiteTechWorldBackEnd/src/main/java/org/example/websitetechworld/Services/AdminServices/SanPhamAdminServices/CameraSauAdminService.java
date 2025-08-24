@@ -9,6 +9,7 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Entity.CameraSau;
 import org.example.websitetechworld.Entity.CameraTruoc;
 import org.example.websitetechworld.Repository.CameraSauRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -46,18 +47,93 @@ public class CameraSauAdminService {
 
     @Transactional
     public CameraSauAdminResponse createCameraSau(CameraSauAdminRequest cameraSauAdminRequest) {
+        if (!cameraSauAdminRequest.getLoaiCamera().matches("^[a-zA-Z0-9\\s]+$")) {
+            throw new BusinessException("Loại camera không hợp lệ! Chỉ cho phép chữ cái, số và khoảng trắng (không dấu, không ký tự đặc biệt).");
+        }
+
+        if (!cameraSauAdminRequest.getDoPhanGiai().matches("^[0-9]+\\s?MP$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ! Ví dụ: 12MP, 48MP, 108MP.");
+        }
+
+        if (!cameraSauAdminRequest.getKhauDo().matches("^f\\/[0-9]+(\\.[0-9]+)?$")) {
+            throw new BusinessException("Khẩu độ không hợp lệ! Ví dụ: f/1.8, f/2.2.");
+        }
+
+        if (cameraSauRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDo(
+                cameraSauAdminRequest.getLoaiCamera(),
+                cameraSauAdminRequest.getDoPhanGiai(),
+                cameraSauAdminRequest.getKhauDo()
+        )) {
+            throw new BusinessException(String.format(
+                    "Camera sau với loại: '%s', độ phân giải: '%s', khẩu độ: '%s' đã tồn tại.",
+                    cameraSauAdminRequest.getLoaiCamera(),
+                    cameraSauAdminRequest.getDoPhanGiai(),
+                    cameraSauAdminRequest.getKhauDo()
+            ));
+        }
+
         CameraSau cameraSau = cameraSauRepository.save(modelMapper.map(cameraSauAdminRequest, CameraSau.class));
         return convert(cameraSau);
     }
 
     @Transactional
     public CameraSauAdminResponse createCameraSauQuick(CameraSauQuickCreateAdminRequest cameraSauAdminRequest) {
+
+        if (!cameraSauAdminRequest.getLoaiCamera().matches("^[a-zA-Z0-9\\s]+$")) {
+            throw new BusinessException("Loại camera không hợp lệ! Chỉ cho phép chữ cái, số và khoảng trắng (không dấu, không ký tự đặc biệt).");
+        }
+
+        if (!cameraSauAdminRequest.getDoPhanGiai().matches("^[0-9]+\\s?MP$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ! Ví dụ: 12MP, 48MP, 108MP.");
+        }
+
+        if (!cameraSauAdminRequest.getKhauDo().matches("^f\\/[0-9]+(\\.[0-9]+)?$")) {
+            throw new BusinessException("Khẩu độ không hợp lệ! Ví dụ: f/1.8, f/2.2.");
+        }
+
+
+        if (cameraSauRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDo(
+                cameraSauAdminRequest.getLoaiCamera(),
+                cameraSauAdminRequest.getDoPhanGiai(),
+                cameraSauAdminRequest.getKhauDo()
+        )) {
+            throw new BusinessException(String.format(
+                    "Camera sau với loại: '%s', độ phân giải: '%s', khẩu độ: '%s' đã tồn tại.",
+                    cameraSauAdminRequest.getLoaiCamera(),
+                    cameraSauAdminRequest.getDoPhanGiai(),
+                    cameraSauAdminRequest.getKhauDo()
+            ));
+        }
+
         CameraSau cameraSau = cameraSauRepository.save(modelMapper.map(cameraSauAdminRequest, CameraSau.class));
         return convert(cameraSau);
     }
 
     @Transactional
     public CameraSauAdminResponse updateCameraSau(Integer id, CameraSauAdminRequest cameraSauAdminRequest) {
+
+        if (!cameraSauAdminRequest.getLoaiCamera().matches("^[a-zA-Z0-9\\s]+$")) {
+            throw new BusinessException("Loại camera không hợp lệ! Chỉ cho phép chữ cái, số và khoảng trắng (không dấu, không ký tự đặc biệt).");
+        }
+
+        if (!cameraSauAdminRequest.getDoPhanGiai().matches("^[0-9]+\\s?MP$")) {
+            throw new BusinessException("Độ phân giải không hợp lệ! Ví dụ: 12MP, 48MP, 108MP.");
+        }
+
+        if (!cameraSauAdminRequest.getKhauDo().matches("^f\\/[0-9]+(\\.[0-9]+)?$")) {
+            throw new BusinessException("Khẩu độ không hợp lệ! Ví dụ: f/1.8, f/2.2.");
+        }
+
+
+        if (cameraSauRepository.existsByLoaiCameraAndDoPhanGiaiAndKhauDoAndIdNot(cameraSauAdminRequest.getLoaiCamera(), cameraSauAdminRequest.getDoPhanGiai(), cameraSauAdminRequest.getKhauDo(), cameraSauAdminRequest.getId())) {
+            throw new BusinessException(String.format(
+                    "Camera sau với loại: '%s', độ phân giải: '%s', khẩu độ: '%s' đã tồn tại.",
+                    cameraSauAdminRequest.getLoaiCamera(),
+                    cameraSauAdminRequest.getDoPhanGiai(),
+                    cameraSauAdminRequest.getKhauDo()
+            ));
+        }
+
         CameraSau cameraSau = cameraSauRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Camera sau ID: " + id));
         modelMapper.map(cameraSauAdminRequest, cameraSau);

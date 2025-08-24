@@ -18,6 +18,6 @@ public class MauSacAdminRequest {
     private String tenMau;
 
     @NotBlank(message = "Mã màu không được để trống")
-    @Size(max = 10, message = "Tên màu không được vượt quá 10 ký tự")
+    @Size(max = 20, message = "Tên màu không được vượt quá 20 ký tự")
     private String maMau;
 }

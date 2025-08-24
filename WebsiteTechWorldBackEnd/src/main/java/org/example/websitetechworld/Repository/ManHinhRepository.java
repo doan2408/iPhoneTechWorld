@@ -43,7 +43,19 @@ public interface ManHinhRepository extends JpaRepository<ManHinh, Integer> {
 
     Boolean existsByTenManHinhAndKichThuocAndLoaiManHinh (String tenManHinh, String kichThuoc, String loaiManHinh);
 
-    Boolean existsByTenManHinhAndKichThuocAndLoaiManHinhAndIdNot (String tenManHinh, String kichThuoc, String loaiManHinh, Integer id);
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END " +
+            "FROM ManHinh m " +
+            "WHERE REPLACE(LOWER(m.tenManHinh), ' ', '') = :tenNormalized " +
+            "AND m.kichThuoc = :kichThuoc " +
+            "AND m.loaiManHinh = :loai " +
+            "AND m.id <> :id")
+    Boolean existsByTenManHinhNormalizedAndKichThuocAndLoaiManHinhAndIdNot(
+            @Param("tenNormalized") String tenNormalized,
+            @Param("kichThuoc") String kichThuoc,
+            @Param("loai") String loai,
+            @Param("id") Integer id
+    );
+
 
     Optional<ManHinh> findBykichThuoc(String kichThuoc);
 

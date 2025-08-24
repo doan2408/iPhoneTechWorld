@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.SanPhamAdminRequest
 import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminResponse.RomAdminResponse;
 import org.example.websitetechworld.Entity.Rom;
 import org.example.websitetechworld.Repository.RomRepository;
+import org.example.websitetechworld.exception.BusinessException;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -55,9 +56,31 @@ public class RomAdminService {
 
     @Transactional
     public RomAdminResponse createRom(RomAdminRequest romAdminRequest) {
-        if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
-            throw new IllegalArgumentException("Dung lượng đã tồn tại");
+
+        if (!romAdminRequest.getDungLuong().trim().matches("^\\d+GB$")) {
+            throw new BusinessException("Dung lượng phải là số, không khoảng trắng và kết thúc bằng 'GB' (ví dụ: 128GB, 64GB).");
         }
+
+        if (!romAdminRequest.getLoai().trim().matches("^[a-zA-Z0-9]+$")) {
+            throw new BusinessException("Loại chỉ được chứa chữ cái và số, không được chứa khoảng trắng hoặc ký tự đặc biệt.");
+        }
+
+        if (!romAdminRequest.getTocDoDocGhi().trim().matches("^\\d+\\s?MB/s$")) {
+            throw new BusinessException("Tốc độ đọc/ghi phải là số và kết thúc bằng 'MB/s' (ví dụ: 500MB/s, 1000 MB/s).");
+        }
+
+        if (romAdminRequest.getNamRaMat().getYear() < 2007) {
+            throw new BusinessException("Năm ra mắt ROM của iPhone phải từ 2007 trở đi");
+        }
+
+        if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
+            throw new BusinessException("Dung lượng đã tồn tại");
+        }
+
+        romAdminRequest.setDungLuong(romAdminRequest.getDungLuong().trim());
+        romAdminRequest.setLoai(romAdminRequest.getLoai().trim());
+        romAdminRequest.setTocDoDocGhi(romAdminRequest.getTocDoDocGhi().trim());
+
         Rom rom = modelMapper.map(romAdminRequest, Rom.class);
         Rom saved = romRepo.save(rom);
         return convert(saved);
@@ -65,9 +88,16 @@ public class RomAdminService {
 
     @Transactional
     public RomAdminResponse createRomQuick(RomQuickAdminRequest romAdminRequest) {
-        if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
-            throw new IllegalArgumentException("Dung lượng đã tồn tại");
+        if (!romAdminRequest.getDungLuong().trim().matches("^\\d+GB$")) {
+            throw new BusinessException("Dung lượng phải là số, không khoảng trắng và kết thúc bằng 'GB' (ví dụ: 128GB, 64GB).");
         }
+
+        if (romRepo.existsByDungLuong(romAdminRequest.getDungLuong())) {
+            throw new BusinessException("Dung lượng đã tồn tại");
+        }
+
+        romAdminRequest.setDungLuong(romAdminRequest.getDungLuong().trim());
+
         Rom rom = modelMapper.map(romAdminRequest, Rom.class);
         Rom saved = romRepo.save(rom);
         return convert(saved);
@@ -77,9 +107,31 @@ public class RomAdminService {
     public RomAdminResponse updateRom(Integer id, RomAdminRequest romAdminRequest) {
         Rom rom = romRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ROM ID: " + id));
-        if (romRepo.existsByDungLuongAndIdNot(romAdminRequest.getDungLuong(), id)) {
-            throw new IllegalArgumentException("Dung lượng đã tồn tại");
+
+        if (!romAdminRequest.getDungLuong().trim().matches("^\\d+GB$")) {
+            throw new BusinessException("Dung lượng phải là số, không khoảng trắng và kết thúc bằng 'GB' (ví dụ: 128GB, 64GB).");
         }
+
+        if (!romAdminRequest.getLoai().trim().matches("^[a-zA-Z0-9]+$")) {
+            throw new BusinessException("Loại chỉ được chứa chữ cái và số, không được chứa khoảng trắng hoặc ký tự đặc biệt.");
+        }
+
+        if (!romAdminRequest.getTocDoDocGhi().trim().matches("^\\d+\\s?MB/s$")) {
+            throw new BusinessException("Tốc độ đọc/ghi phải là số và kết thúc bằng 'MB/s' (ví dụ: 500MB/s, 1000 MB/s).");
+        }
+
+        if (romAdminRequest.getNamRaMat().getYear() < 2007) {
+            throw new BusinessException("Năm ra mắt ROM của iPhone phải từ 2007 trở đi");
+        }
+
+        if (romRepo.existsByDungLuongAndIdNot(romAdminRequest.getDungLuong(), rom.getId())) {
+            throw new BusinessException("Dung lượng đã tồn tại");
+        }
+
+        romAdminRequest.setDungLuong(romAdminRequest.getDungLuong().trim());
+        romAdminRequest.setLoai(romAdminRequest.getLoai().trim());
+        romAdminRequest.setTocDoDocGhi(romAdminRequest.getTocDoDocGhi().trim());
+
         modelMapper.map(romAdminRequest, rom);
         Rom saved = romRepo.save(rom);
         return convert(saved);
@@ -99,11 +151,4 @@ public class RomAdminService {
         return convert(rom);
     }
 
-    public boolean existsByDungLuong(String dungLuong) {
-        return romRepo.existsByDungLuong(dungLuong);
-    }
-
-    public boolean existsByDungLuongAndIdNot(String dungLuong, Integer id) {
-        return romRepo.existsByDungLuongAndIdNot(dungLuong, id);
-    }
 }

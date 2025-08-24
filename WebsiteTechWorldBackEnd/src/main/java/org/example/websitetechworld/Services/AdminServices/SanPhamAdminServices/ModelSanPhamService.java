@@ -384,8 +384,60 @@ public class ModelSanPhamService {
     public List<ModelSanPhamAdminResponse> importExcelFileUpload(MultipartFile file) throws IOException {
         List<ModelSanPham> sanPhams = new ArrayList<>();
 
+        // Validate file không rỗng
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("File Excel không được để trống. Vui lòng chọn một file Excel hợp lệ.");
+        }
+
+        // Validate định dạng file
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || !(fileName.endsWith(".xlsx") || fileName.endsWith(".xls"))) {
+            throw new BusinessException("File không đúng định dạng. Chỉ chấp nhận file Excel (.xlsx hoặc .xls).");
+        }
+
+        // Validate kích thước file
+        long maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.getSize() > maxSize) {
+            throw new BusinessException("File quá lớn. Kích thước file tối đa là 10MB.");
+        }
+
         try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+            // Validate sheet đầu tiên
             Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null) {
+                throw new BusinessException("File Excel không có sheet hợp lệ. Vui lòng kiểm tra nội dung file.");
+            }
+
+            // Validate dòng tiêu đề
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new BusinessException("File Excel không có dòng tiêu đề. Vui lòng thêm dòng tiêu đề theo mẫu.");
+            }
+
+            // Validate tiêu đề cột
+            String[] expectedHeaders = {
+                    "tenModel", "namRaMat", "trangThai", "ram", "loaiRam",
+                    "kichThuocManHinh", "tenManHinh", "loaiManHinh",
+                    "phienBanHeDieuHanh", "phienBanPin", "chipXuLy", "loaiCameraTruoc", "khauDoCameraTruoc",
+                    "doPhanGiaiCameraTruoc", "maXuatXu", "tenLoaiIphone", "loaiCameraSau", "doPhanGiaiCameraSau", "khauDoCameraSau"
+            };
+            for (int i = 0; i < expectedHeaders.length; i++) {
+                String header = getCellValue(headerRow.getCell(i));
+                if (header == null || !header.trim().equalsIgnoreCase(expectedHeaders[i])) {
+                    throw new BusinessException("Cột " + (i + 1) + " phải là '" + expectedHeaders[i] + "', nhưng tìm thấy '" + (header != null ? header : "") + "'.");
+                }
+            }
+
+            // Validate số dòng dữ liệu
+            int dataRowCount = sheet.getPhysicalNumberOfRows() - 1; // Trừ dòng tiêu đề
+            if (dataRowCount == 0) {
+                throw new BusinessException("File Excel không chứa dữ liệu model nào.");
+            }
+            if (dataRowCount > 1) {
+                throw new BusinessException("File Excel chỉ được phép chứa đúng một model (một dòng dữ liệu). Tìm thấy " + dataRowCount + " dòng.");
+            }
+
+            // Xử lý dòng dữ liệu duy nhất
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
                     continue; // Bỏ qua tiêu đề
@@ -396,7 +448,13 @@ public class ModelSanPhamService {
                 // Cột 1: Tên model
                 String tenModel = getCellValue(row.getCell(0));
                 if (tenModel == null || tenModel.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Tên model không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Tên model không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (tenModel.length() > 100) {
+                    throw new BusinessException("Tên model không được dài quá 100 ký tự tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (!tenModel.matches("^[a-zA-Z0-9\\s]+$")) {
+                    throw new BusinessException("Tên model chỉ được chứa chữ cái, số, khoảng trắng tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 String tenFormat = formatTenModel(tenModel);
                 sanPham.setTenModel(tenFormat);
@@ -404,222 +462,255 @@ public class ModelSanPhamService {
                 // Cột 2: Năm ra mắt
                 String namRaMatStr = getCellValue(row.getCell(1));
                 if (namRaMatStr == null || namRaMatStr.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Năm ra mắt không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Năm ra mắt không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 try {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy/MM/dd][d/M/yyyy]");
-                    sanPham.setNamRaMat(LocalDate.parse(namRaMatStr, formatter));
+                    LocalDate namRaMat = LocalDate.parse(namRaMatStr, formatter);
+                    int currentYear = LocalDate.now().getYear();
+                    if (namRaMat.getYear() < 2000 || namRaMat.getYear() > currentYear + 2) {
+                        throw new BusinessException("Năm ra mắt phải nằm trong khoảng từ 2000 đến " + (currentYear + 2) + " tại dòng " + (row.getRowNum() + 1) + ".");
+                    }
+                    sanPham.setNamRaMat(namRaMat);
                 } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException("Năm ra mắt không hợp lệ tại dòng: " + (row.getRowNum() + 1) +
-                            ". Định dạng yêu cầu: yyyy/MM/dd hoặc d/M/yyyy");
+                    throw new BusinessException("Năm ra mắt không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Định dạng yêu cầu: yyyy/MM/dd hoặc d/M/yyyy.");
                 }
 
                 // Cột 3: Trạng thái sản phẩm
                 String trangThai = getCellValue(row.getCell(2));
                 if (trangThai == null || trangThai.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Trạng thái sản phẩm không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Trạng thái sản phẩm không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 try {
-                    sanPham.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.valueOf(trangThai));
+                    sanPham.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.valueOf(trangThai.toUpperCase()));
                 } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException("Trạng thái sản phẩm không hợp lệ tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Trạng thái sản phẩm không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Giá trị hợp lệ: ACTIVE, DISCONTINUED, UPCOMING.");
                 }
 
-                // Cột 4: RAM
+                // Cột 4, 5: RAM
                 String ramDungLuong = getCellValue(row.getCell(3));
                 String loaiRam = getCellValue(row.getCell(4));
                 if (ramDungLuong == null || ramDungLuong.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu dung lượng RAM bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập dung lượng RAM."
-                    );
+                    throw new BusinessException("Dung lượng RAM không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
+                if (!ramDungLuong.matches("^\\d+GB$")) {
+                    throw new BusinessException("Dung lượng RAM phải có định dạng số kèm theo 'GB' (ví dụ: 4GB, 8GB) tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+//                if (loaiRam != null && !loaiRam.isEmpty() && !Arrays.asList("LPDDR4", "LPDDR5", "DDR4", "DDR5").contains(loaiRam)) {
+//                    throw new BusinessException("Loại RAM phải là LPDDR4, LPDDR5, DDR4 hoặc DDR5 tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
                 Ram ram = ramRepo.findByDungLuongAndLoai(ramDungLuong, loaiRam)
-                        .orElseThrow(() -> new IllegalArgumentException(
+                        .orElseThrow(() -> new NotFoundException(
                                 "Không tìm thấy RAM với dung lượng '" + ramDungLuong +
                                         "' và loại '" + (loaiRam != null ? loaiRam : "") +
-                                        "' ở dòng " + (row.getRowNum() + 1) +
-                                        ". Vui lòng kiểm tra dữ liệu RAM hoặc thêm RAM vào hệ thống."
-                        ));
+                                        "' tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu RAM hoặc thêm RAM vào hệ thống."));
                 sanPham.setIdRam(ram);
 
-
-                // Cột 5: Màn hình
+                // Cột 6, 7, 8: Màn hình
                 String manHinhKichThuoc = getCellValue(row.getCell(5));
                 String tenManHinh = getCellValue(row.getCell(6));
                 String loaiManHinh = getCellValue(row.getCell(7));
-
                 if (manHinhKichThuoc == null || manHinhKichThuoc.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu kích thước màn hình bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập kích thước màn hình."
-                    );
+                    throw new BusinessException("Kích thước màn hình không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+                if (!manHinhKichThuoc.trim().matches("^\\d+(\\.\\d+)?(\\s*[a-zA-Z]+)?$")) {
+                    throw new BusinessException("Kích thước màn hình phải là số thập phân và có thể kèm chữ (ví dụ: 6.1 inch, 7.0 OLED) tại dòng " + (row.getRowNum() + 1) + ".");
+                }
                 if (tenManHinh == null || tenManHinh.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu tên màn hình bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập tên màn hình."
-                    );
+                    throw new BusinessException("Tên màn hình không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+                if (tenManHinh.length() > 50) {
+                    throw new BusinessException("Tên màn hình không được dài quá 50 ký tự tại dòng " + (row.getRowNum() + 1) + ".");
+                }
                 if (loaiManHinh == null || loaiManHinh.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu loại màn hình bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập loại màn hình."
-                    );
+                    throw new BusinessException("Loại màn hình không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+//                if (!Arrays.asList("OLED", "LCD", "AMOLED").contains(loaiManHinh.toUpperCase())) {
+//                    throw new BusinessException("Loại màn hình phải là OLED, LCD hoặc AMOLED tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
                 ManHinh manHinh = manHinhRepo
                         .findByKichThuocAndTenManHinhAndLoaiManHinh(manHinhKichThuoc, tenManHinh, loaiManHinh)
-                        .orElseThrow(() -> new IllegalArgumentException(
+                        .orElseThrow(() -> new NotFoundException(
                                 "Không tìm thấy màn hình với kích thước '" + manHinhKichThuoc +
                                         "', tên '" + tenManHinh +
                                         "', loại '" + loaiManHinh +
-                                        "' ở dòng " + (row.getRowNum() + 1) +
-                                        ". Vui lòng kiểm tra dữ liệu màn hình hoặc thêm màn hình vào hệ thống."
-                        ));
-
+                                        "' tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu màn hình hoặc thêm màn hình vào hệ thống."));
                 sanPham.setIdManHinh(manHinh);
 
-
-
-                // Cột 6: Hệ điều hành
+                // Cột 9: Hệ điều hành
                 String hdhPhienBan = getCellValue(row.getCell(8));
+                System.out.println(hdhPhienBan.toString()+ "aaaaaa");
                 if (hdhPhienBan == null || hdhPhienBan.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Hệ điều hành phiên bản không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Hệ điều hành phiên bản không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (!hdhPhienBan.trim().matches("^iOS\\s\\d+(\\.\\d+)?$")) {
+                    throw new BusinessException("Hệ điều hành phải có định dạng ví dụ như: 'iOS 15' tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 HeDieuHanh heDieuHanh = heDieuHanhRepo.findByPhienBan(hdhPhienBan)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy HĐH phiên bản: " + hdhPhienBan + " tại dòng: " + (row.getRowNum() + 1)));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Không tìm thấy HĐH phiên bản: " + hdhPhienBan + " tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm hệ điều hành vào hệ thống."));
                 sanPham.setIdHeDieuHanh(heDieuHanh);
 
-                // Cột 7: Pin
+                // Cột 10: Pin
                 String pinPhienBan = getCellValue(row.getCell(9));
                 if (pinPhienBan == null || pinPhienBan.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Pin phiên bản không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Pin phiên bản không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
+//                if (!pinPhienBan.matches("^\\d+mAh$")) {
+//                    throw new BusinessException("Pin phải có định dạng số kèm theo 'mAh' (ví dụ: 3000mAh) tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
                 Pin pin = pinRepo.findByPhienBan(pinPhienBan)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy pin phiên bản: " + pinPhienBan + " tại dòng: " + (row.getRowNum() + 1)));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Không tìm thấy pin phiên bản: " + pinPhienBan + " tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm pin vào hệ thống."));
                 sanPham.setIdPin(pin);
 
-                // Cột 8: CPU
+                // Cột 11: CPU
                 String cpuChipXuLy = getCellValue(row.getCell(10));
                 if (cpuChipXuLy == null || cpuChipXuLy.trim().isEmpty()) {
-                    throw new IllegalArgumentException("CPU chip xử lý không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("CPU chip xử lý không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (cpuChipXuLy.length() > 50) {
+                    throw new BusinessException("CPU chip xử lý không được dài quá 50 ký tự tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 Cpu cpu = cpuRepo.findByChipXuLy(cpuChipXuLy)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CPU chip xử lý: " + cpuChipXuLy + " tại dòng: " + (row.getRowNum() + 1)));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Không tìm thấy CPU chip xử lý: " + cpuChipXuLy + " tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm CPU vào hệ thống."));
                 sanPham.setIdCpu(cpu);
 
-                // Cột 9: Camera trước
+                // Cột 12, 13, 14: Camera trước
                 String cameraTruocLoai = getCellValue(row.getCell(11));
                 String khauDoCamTruoc = getCellValue(row.getCell(12));
                 String doPhanGiaiCamTruoc = getCellValue(row.getCell(13));
-
                 if (cameraTruocLoai == null || cameraTruocLoai.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu loại camera trước bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập loại camera trước."
-                    );
+                    throw new BusinessException("Loại camera trước không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+//                if (!Arrays.asList("Wide", "Ultra Wide").contains(cameraTruocLoai)) {
+//                    throw new BusinessException("Loại camera trước phải là Wide hoặc Ultra Wide tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
                 if (khauDoCamTruoc == null || khauDoCamTruoc.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu khẩu độ camera trước bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập khẩu độ camera trước."
-                    );
+                    throw new BusinessException("Khẩu độ camera trước không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+                if (!khauDoCamTruoc.matches("^f/\\d+\\.\\d+$")) {
+                    throw new BusinessException("Khẩu độ camera trước phải có định dạng f/số (ví dụ: f/2.2) tại dòng " + (row.getRowNum() + 1) + ".");
+                }
                 if (doPhanGiaiCamTruoc == null || doPhanGiaiCamTruoc.trim().isEmpty()) {
-                    throw new IllegalArgumentException(
-                            "Dữ liệu độ phân giải camera trước bị trống ở dòng " + (row.getRowNum() + 1) +
-                                    ". Vui lòng nhập độ phân giải camera trước."
-                    );
+                    throw new BusinessException("Độ phân giải camera trước không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
-
+                if (!doPhanGiaiCamTruoc.matches("^\\d+MP$")) {
+                    throw new BusinessException("Độ phân giải camera trước phải có định dạng số kèm theo 'MP' (ví dụ: 12MP) tại dòng " + (row.getRowNum() + 1) + ".");
+                }
                 CameraTruoc cameraTruoc = cameraTruocRepo
                         .findByLoaiCameraAndKhauDoAndDoPhanGiai(cameraTruocLoai, khauDoCamTruoc, doPhanGiaiCamTruoc)
-                        .orElseThrow(() -> new IllegalArgumentException(
+                        .orElseThrow(() -> new NotFoundException(
                                 "Không tìm thấy camera trước với loại '" + cameraTruocLoai +
                                         "', khẩu độ '" + khauDoCamTruoc +
                                         "', độ phân giải '" + doPhanGiaiCamTruoc +
-                                        "' ở dòng " + (row.getRowNum() + 1) +
-                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm camera trước vào hệ thống."
-                        ));
-
+                                        "' tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm camera trước vào hệ thống."));
                 sanPham.setIdCameraTruoc(cameraTruoc);
 
-
-
-                // Cột 10: Xuất xứ
+                // Cột 15: Xuất xứ
                 String xuatXuMa = getCellValue(row.getCell(14));
                 if (xuatXuMa == null || xuatXuMa.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Xuất xứ mã không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Xuất xứ mã không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
+                if (!xuatXuMa.trim().matches("^[A-Z]+$")) {
+                    throw new BusinessException("Mã xuất xứ phải là chữ cái in hoa (ví dụ: US, VNA) tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+
                 XuatXu xuatXu = xuatXuRepo.findByMaXuatXu(xuatXuMa)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy xuất xứ mã 11 : " + xuatXuMa + " tại dòng: " + (row.getRowNum() + 1)));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Không tìm thấy xuất xứ mã: " + xuatXuMa + " tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm xuất xứ vào hệ thống."));
                 sanPham.setIdXuatXu(xuatXu);
 
-                // Cột 11: Loại
+                // Cột 16: Loại
                 String loaiTen = getCellValue(row.getCell(15));
                 if (loaiTen == null || loaiTen.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Loại tên không được để trống tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Loại tên không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (loaiTen.length() > 50) {
+                    throw new BusinessException("Loại tên không được dài quá 50 ký tự tại dòng " + (row.getRowNum() + 1) + ".");
                 }
                 Loai loai = loaiRepo.findByTenLoai(loaiTen)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy loại tên: " + loaiTen + " tại dòng: " + (row.getRowNum() + 1)));
+                        .orElseThrow(() -> new NotFoundException(
+                                "Không tìm thấy loại tên: " + loaiTen + " tại dòng " + (row.getRowNum() + 1) +
+                                        ". Vui lòng kiểm tra dữ liệu hoặc thêm loại vào hệ thống."));
                 sanPham.setIdLoai(loai);
 
                 // Kiểm tra trùng lặp
                 if (modelSanPhamRepository.existsModelWithSameConfig(tenFormat, xuatXu.getId(), loai.getId())) {
-                    throw new BusinessException("model.duplicate.config tại dòng: " + (row.getRowNum() + 1));
+                    throw new BusinessException("Model trùng lặp cấu hình tại dòng " + (row.getRowNum() + 1) + ".");
                 }
 
-                // Cột 12: Camera sau
+                // Cột 17, 18, 19: Camera sau
                 List<ModelCameraSau> cameraSaus = new ArrayList<>();
-
                 String cameraLoaiStr = getCellValue(row.getCell(16));
                 String cameraDoPhanGiaiStr = getCellValue(row.getCell(17));
                 String cameraKhauDoStr = getCellValue(row.getCell(18));
-
-                if (cameraLoaiStr != null && !cameraLoaiStr.trim().isEmpty()) {
-                    List<String> cameraLoaiList = Arrays.asList(cameraLoaiStr.split("\\s*,\\s*"));
-                    List<String> cameraDoPhanGiaiList = cameraDoPhanGiaiStr != null
-                            ? Arrays.asList(cameraDoPhanGiaiStr.split("\\s*,\\s*"))
-                            : new ArrayList<>();
-                    List<String> cameraKhauDoList = cameraKhauDoStr != null
-                            ? Arrays.asList(cameraKhauDoStr.split("\\s*,\\s*"))
-                            : new ArrayList<>();
-
-                    for (int i = 0; i < cameraLoaiList.size(); i++) {
-                        String loaiCamSau = cameraLoaiList.get(i).trim();
-                        String doPhanGiaiCamSau = (i < cameraDoPhanGiaiList.size()) ? cameraDoPhanGiaiList.get(i).trim() : null;
-                        String khauDoCamSau = (i < cameraKhauDoList.size()) ? cameraKhauDoList.get(i).trim() : null;
-
-                        if (loaiCamSau.isEmpty()) continue;
-
-                        CameraSau cameraSau = cameraSauRepo
-                                .findByLoaiCameraAndDoPhanGiaiAndKhauDo(loaiCamSau, doPhanGiaiCamSau, khauDoCamSau)
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                        "Không tìm thấy Camera Sau với loại '" + loaiCamSau +
-                                                "', độ phân giải '" + (doPhanGiaiCamSau != null ? doPhanGiaiCamSau : "") +
-                                                "', khẩu độ '" + (khauDoCamSau != null ? khauDoCamSau : "") +
-                                                "' tại dòng: " + (row.getRowNum() + 1) +
-                                                ". Vui lòng kiểm tra dữ liệu hoặc thêm Camera Sau vào hệ thống."
-                                ));
-
-                        ModelCameraSau modelCameraSau = new ModelCameraSau();
-                        modelCameraSau.setCameraSau(cameraSau);
-                        modelCameraSau.setIsChinh(i == 0); // camera đầu tiên là chính
-                        cameraSaus.add(modelCameraSau);
-                    }
+                if (cameraLoaiStr == null || cameraLoaiStr.trim().isEmpty()) {
+                    throw new BusinessException("Danh sách loại camera sau không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
+                List<String> cameraLoaiList = Arrays.asList(cameraLoaiStr.split("\\s*,\\s*"));
+                List<String> cameraDoPhanGiaiList = cameraDoPhanGiaiStr != null
+                        ? Arrays.asList(cameraDoPhanGiaiStr.split("\\s*,\\s*"))
+                        : new ArrayList<>();
+                List<String> cameraKhauDoList = cameraKhauDoStr != null
+                        ? Arrays.asList(cameraKhauDoStr.split("\\s*,\\s*"))
+                        : new ArrayList<>();
 
+                if (cameraLoaiList.size() != cameraDoPhanGiaiList.size() || cameraLoaiList.size() != cameraKhauDoList.size()) {
+                    throw new BusinessException("Danh sách loại camera sau, độ phân giải và khẩu độ phải có cùng số lượng tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                if (cameraLoaiList.size() > 5) {
+                    throw new BusinessException("Danh sách camera sau không được vượt quá 5 camera tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                boolean hasWide = cameraLoaiList.stream().anyMatch(s -> s.trim().toLowerCase().equals("wide"));
+                if (!hasWide) {
+                    throw new BusinessException("Danh sách camera sau phải chứa ít nhất một camera loại Wide tại dòng " + (row.getRowNum() + 1) + ".");
+                }
+                for (int i = 0; i < cameraLoaiList.size(); i++) {
+                    String loaiCamSau = cameraLoaiList.get(i).trim();
+                    String doPhanGiaiCamSau = cameraDoPhanGiaiList.get(i).trim();
+                    String khauDoCamSau = cameraKhauDoList.get(i).trim();
+
+                    if (loaiCamSau.isEmpty()) {
+                        throw new BusinessException("Loại camera sau không được để trống tại vị trí " + (i + 1) + ", dòng " + (row.getRowNum() + 1) + ".");
+                    }
+                    if (!Arrays.asList("Wide", "Ultra Wide", "Telephoto").contains(loaiCamSau)) {
+                        throw new BusinessException("Loại camera sau phải là Wide, Ultra Wide hoặc Telephoto tại vị trí " + (i + 1) + ", dòng " + (row.getRowNum() + 1) + ".");
+                    }
+                    if (doPhanGiaiCamSau.isEmpty() || !doPhanGiaiCamSau.matches("^\\d+MP$")) {
+                        throw new BusinessException("Độ phân giải camera sau phải có định dạng số kèm theo 'MP' (ví dụ: 12MP) tại vị trí " + (i + 1) + ", dòng " + (row.getRowNum() + 1) + ".");
+                    }
+                    if (khauDoCamSau.isEmpty() || !khauDoCamSau.matches("^f/\\d+\\.\\d+$")) {
+                        throw new BusinessException("Khẩu độ camera sau phải có định dạng f/số (ví dụ: f/1.6) tại vị trí " + (i + 1) + ", dòng " + (row.getRowNum() + 1) + ".");
+                    }
+
+                    CameraSau cameraSau = cameraSauRepo
+                            .findByLoaiCameraAndDoPhanGiaiAndKhauDo(loaiCamSau, doPhanGiaiCamSau, khauDoCamSau)
+                            .orElseThrow(() -> new NotFoundException(
+                                    "Không tìm thấy Camera Sau với loại '" + loaiCamSau +
+                                            "', độ phân giải '" + doPhanGiaiCamSau +
+                                            "', khẩu độ '" + khauDoCamSau +
+                                            "' tại dòng " + (row.getRowNum() + 1) +
+                                            ". Vui lòng kiểm tra dữ liệu hoặc thêm Camera Sau vào hệ thống."));
+                    ModelCameraSau modelCameraSau = new ModelCameraSau();
+                    modelCameraSau.setCameraSau(cameraSau);
+                    modelCameraSau.setIsChinh(i == 0);
+                    cameraSaus.add(modelCameraSau);
+                }
                 sanPham.setCameraSaus(cameraSaus);
 
-
-                // Không lưu vào DB, chỉ add vào list
                 sanPhams.add(sanPham);
             }
+        } catch (IOException e) {
+            throw new BusinessException("Lỗi khi đọc file Excel. File không hợp lệ hoặc bị hỏng.");
         }
 
         return mapEntityToResponseList(sanPhams);
