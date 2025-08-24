@@ -73,7 +73,7 @@
                             đ{{ formatCurrency(phiShipTieuChuan) }}
                         </span>
                     </label>
-                    <label class="radio-option">
+                    <label class="radio-option" v-if="shippingAddress.tinhThanhPho && shippingAddress.tinhThanhPho.toLowerCase() === 'hà nội'">
                         <div class="radio-content">
                             <input type="radio" name="shipping-method" value="express" v-model="selectedShippingMethod"
                                 class="radio-field" />
@@ -178,15 +178,8 @@
                                             <span class="address-phone">{{ address.sdtNguoiNhan + '-' }}</span>
                                             <span class="address-detail">{{ address.soNha + ', ' + address.tenDuong +
                                                 ',' + address.xaPhuong
-                                                + ', ' + address.quanHuyen + ', ' + address.tinhThanhPho }}</span>
+                                                + ', ' + address.tinhThanhPho }}</span>
                                         </div>
-                                    </div>
-                                </label>
-                                <label class="radio-option address-option">
-                                    <div class="radio-content">
-                                        <input type="radio" name="modal-shipping-address" value="new"
-                                            v-model="modalSelectedAddressId" class="radio-field" />
-                                        <span class="address-name">Thêm địa chỉ mới</span>
                                     </div>
                                 </label>
                             </div>
@@ -293,6 +286,7 @@ import headerState from "@/components/Client/modules/headerState";
 import { getAllPhieuGiamGia } from '@/Service/Clientservice/HoaDon/PhieuGiamGiaClient';
 
 import Store from "@/Service/LoginService/Store";
+import { addAddress } from '@/Service/Adminservice/TaiKhoan/DiaChiServices';
 const user = computed(() => Store.getters.user || null);
 
 const store = useStore();
@@ -413,26 +407,15 @@ const hasShippingInfo = computed(() => {
 });
 
 const confirmAddressSelection = () => {
-    if (modalSelectedAddressId.value === 'new') {
-        errors.value = {};
-        if (validateNewAddress()) {
-            const newId = (userAddresses.value.length + 1).toString();
-            const savedAddress = { id: newId, ...modalNewAddress.value };
-            userAddresses.value.push(savedAddress);
-            selectedAddressId.value = newId; // Update main form's selected ID
-            shippingAddress.value = { ...savedAddress }; // Update main form's shipping address
-            modalNewAddress.value = { name: '', phone: '', address: '' }; // Clear modal's new address fields
-            closeAddressModal();
-            toast.success('Địa chỉ mới đã được lưu và chọn!');
-        }
-    } else {
-        selectedAddressId.value = modalSelectedAddressId.value; // Update main form's selected ID
-        const selected = userAddresses.value.find(addr => addr.id === selectedAddressId.value);
-        if (selected) {
-            shippingAddress.value = { ...selected }; // Update main form's shipping address
-        }
-        closeAddressModal();
+    
+    selectedAddressId.value = modalSelectedAddressId.value; // Update main form's selected ID
+    const selected = userAddresses.value.find(addr => addr.id === selectedAddressId.value);
+    if (selected) {
+        shippingAddress.value = { ...selected }; // Update main form's shipping address
     }
+    selectedShippingMethod.value = 'standard'
+    closeAddressModal();
+    updatePhiShip();
 }
 
 // --- Voucher Management ---
@@ -537,6 +520,10 @@ watch(product, (newVal) => {
     console.log("product thay đổi:", newVal);
     console.log("Subtotal mới:", calculateSubtotal.value);
     loadDiscountList()
+});
+
+watch(shippingAddress,(newVal) => {
+    console.log('dia chi:',shippingAddress.value.tinhThanhPho);
 });
 
 const insurance = ref({

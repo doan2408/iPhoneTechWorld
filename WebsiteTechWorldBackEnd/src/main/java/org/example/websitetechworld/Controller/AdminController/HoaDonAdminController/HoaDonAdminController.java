@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.CapNhatTrangThaiThanhToan;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -309,6 +310,16 @@ public class HoaDonAdminController {
             return ResponseEntity.ok("Invoice updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error updating invoice: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/delete-shipping/{id}")
+    public ResponseEntity<?> deleteShipping(@PathVariable("id") Integer id) {
+        try {
+            hoaDonAdminService.deleteInvocieShipping(id);
+            return ResponseEntity.ok("Invoice delete successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error delete invoice: " + e.getMessage());
         }
     }
 

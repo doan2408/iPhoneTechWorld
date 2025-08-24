@@ -191,6 +191,10 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
     });
 }
 
+export const deleteTTShipping = (id) => {
+    return api.put(`/admin/hoa-don/delete-shipping/${id}`);
+}
+
 //create pending invoice
 export const createPendingInvoice = () => {
     const url = url_base;

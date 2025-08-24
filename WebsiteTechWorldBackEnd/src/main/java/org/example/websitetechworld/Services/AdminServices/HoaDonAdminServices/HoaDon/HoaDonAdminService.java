@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -171,7 +172,7 @@ public class HoaDonAdminService {
     public List<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId){
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
         return lichSuHoaDonRepository.findByIdHoaDon(hoaDon)
-                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId))
+                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId).reversed())
                 .map(LichSuHoaDonAdminResponse::convertDto)
                 .collect(Collectors.toList());
     }
@@ -411,11 +412,31 @@ public class HoaDonAdminService {
                     invoice.getEmailNguoiNhan(),
                     invoice.getNgayDatHang()
             );
+            createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Cập nhật thông tin giao hàng");
         } catch (Exception e) {
             System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
         }
+    }
+
+    @Transactional
+    public void deleteInvocieShipping(Integer id){
+        HoaDon invoice = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + id));
+
+        invoice.setTenNguoiNhan(null);
+        invoice.setSdtNguoiNhan(null);
+        invoice.setEmailNguoiNhan(null);
+        invoice.setDiaChiGiaoHang(null);
+        invoice.setThanhTien(invoice.getThanhTien().subtract(invoice.getPhiShip()));
+        invoice.setPhiShip(BigDecimal.ZERO);
+        invoice.setIsShipping(false);
+        invoice.setShippingMethod(null);
+
+        hoaDonRepository.save(invoice);
+
+        createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Thay đổi không giao hàng và xóa thông tin");
     }
 
     public void updateMaVanDon(Integer idHoaDon) {
@@ -673,7 +694,7 @@ public class HoaDonAdminService {
             Integer nhanVienId = customUserDetails.getId();
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setIdHoaDon(hoaDon);
-            lichSuHoaDon.setHanhDong(HanhDongLichSuHoaDon.UPDATE);
+            lichSuHoaDon.setHanhDong(action);
             lichSuHoaDon.setIdNhanVien(nhanVienRepository.findById(nhanVienId).orElse(null));
             lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
             lichSuHoaDon.setMoTa(moTa);

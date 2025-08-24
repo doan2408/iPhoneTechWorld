@@ -421,7 +421,7 @@
                 </div>
                 <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
+                    <span class="shipping-fee-amount">50.000</span>
                 </div>
                 <div class="discount-section" v-if="discountAmount > 0"
                     style="flex-direction: row; max-height: 40.8px;">
@@ -716,7 +716,8 @@ import {
     , findHdctByImeiDaBan, findProductByImei,
     updateGia,
     getAllLichSuBanHang,
-    viewLichSuHoaDon
+    viewLichSuHoaDon,
+    deleteTTShipping
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -830,7 +831,12 @@ const calculateTotal = () => {
         shippingFee.value = shippingInfo.value.phiShip
     }
 
-    grandTotal.value = totalProductAmount.value + shippingFee.value - discountAmount.value
+    if (isShipping.value) {
+        grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
+    }
+    else{
+        grandTotal.value = totalProductAmount.value - discountAmount.value
+    }
 }
 
 
@@ -1729,7 +1735,7 @@ const onXaChange = async () => {
     // }
 };
 
-watch(isShipping, (newVal) => {
+watch(isShipping, async (newVal)  => {
     if (!newVal) {
         console.log('Tắt giao hàng, xóa thông tin giao hàng');
         shippingInfo.value = {
@@ -1743,6 +1749,10 @@ watch(isShipping, (newVal) => {
         selectedTinh.value = null;
         selectedXa.value = null;
         xaList.value = [];
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const fullAddressForDB = ''
+        await deleteTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
+        calculateTotal()
     } else {
         console.log('Đã bật giao hàng');
     }
@@ -2258,6 +2268,7 @@ const confirmShippingInfo = async () => {
 
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
+        calculateTotal()
         toast.success('Cập nhật thông tin giao hàng thành công!');
 
         showMessageConfirmShipping.value = false;
@@ -2298,22 +2309,14 @@ const onCancelCreate = () => {
 
 const toggleShipping = () => {
     if (!isShipping.value) {
-        console.log('Tắt giao hàng, xóa thông tin giao hàng');
-        shippingInfo.value = {
-            tenNguoiNhan: '',
-            sdtNguoiNhan: '',
-            diaChiChiTiet: '',
-            phiShip: null,
-            shippingMethod: 'express'
-        };
-        selectedTinh.value = null;
-        // selectedHuyen.value = null;
-        selectedXa.value = null;
-        // huyenList.value = [];
-        xaList.value = [];
-    } else {
+        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' }; 
+        selectedTinh.value = null;  
+        selectedXa.value = null;  
+        xaList.value = []; 
+    } else { 
         console.log('Đã bật giao hàng');
-    }
+        calculateTotal()
+    } 
 };
 
 // Hàm để lấy danh sách phương thức thanh toán từ API
