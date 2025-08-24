@@ -416,6 +416,7 @@ const confirmAddressSelection = () => {
     selectedShippingMethod.value = 'standard'
     closeAddressModal();
     updatePhiShip();
+    toast.success("Chọn địa chỉ giao hàng thành công")
 }
 
 // --- Voucher Management ---

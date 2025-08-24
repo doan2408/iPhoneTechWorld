@@ -574,11 +574,14 @@ public class HoaDonAdminService {
         hoaDon.setTrangThaiThanhToan(newStatus);
         List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
 
-        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
-        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
-            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        if (newStatus.equals(TrangThaiThanhToan.PAID)){
+            List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+            for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+                chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+            }
+            chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.THANH_TOAN,"Đã nhận được tiền");
         }
-        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
@@ -589,9 +592,11 @@ public class HoaDonAdminService {
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.HUY,"Tạo yêu cầu hủy đơn thành công");
         }
         if (TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.REFUNDED.equals(newStatus)){
             hoaDonChiTiet_ImeiAdminServices.updateImeiHoanTien(danhSachChiTiet, TrangThaiImei.AVAILABLE,TrangThaiImei.RETURNED);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Hoàn thành công cho khách hàng "+hoaDon.getThanhTien()+" VND");
         }
 
         hoaDonRepository.save(hoaDon);

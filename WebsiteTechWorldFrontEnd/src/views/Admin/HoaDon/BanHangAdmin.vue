@@ -808,7 +808,7 @@ const shippingInfo = ref({
 });
 
 
-const calculateTotal = () => {
+const calculateTotal = async () => {
     totalProductAmount.value = 0;
     if (currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList?.length) {
         for (const hd of currentInvoiceDetail.value.chiTietHoaDonAdminResponseList) {
@@ -833,6 +833,7 @@ const calculateTotal = () => {
 
     if (isShipping.value) {
         grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
+        
     }
     else{
         grandTotal.value = totalProductAmount.value - discountAmount.value
@@ -1164,7 +1165,6 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts();
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
@@ -1562,7 +1562,6 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
@@ -2366,7 +2365,7 @@ const processPayment = async () => {
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip,
+        soTienKhachDua: grandTotal.value,
         soTienGiam: discountAmount.value
     };
     console.log("tien khach dua", paymentPayload);
