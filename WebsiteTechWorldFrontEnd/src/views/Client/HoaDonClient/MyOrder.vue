@@ -197,7 +197,7 @@
             class="order-card"
           >
             <div class="order-mvd" style="margin: 10px 3px">
-              <b>Mã vận đơn: {{ order.maVanDon }}</b>
+              <b>Mã hóa đơn: {{ order.maHoaDon }}</b> <b v-if="order.maVanDon">|| Mã vận đơn: {{ order.maVanDon }}</b> 
             </div>
             <div class="order-status-bar">
               <div class="order-status">

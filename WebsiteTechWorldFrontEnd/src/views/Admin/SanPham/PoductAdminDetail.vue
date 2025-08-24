@@ -1591,8 +1591,10 @@ onMounted(() => {
 
 .preview-image {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  height: 241px;
+  object-fit: contain; /* luôn giữ nguyên tỷ lệ và hiển thị đủ ảnh */
+  border-radius: 8px;  /* bo góc */
+  background: #000;    /* nền để lấp phần thừa */
   cursor: pointer;
 }
 

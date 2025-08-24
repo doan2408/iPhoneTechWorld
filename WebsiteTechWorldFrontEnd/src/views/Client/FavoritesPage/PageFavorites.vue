@@ -346,13 +346,12 @@ const prevPage = async () => {
 }
 
 .product-image {
-    object-fit: cover;
+    object-fit: contain; /* luôn hiển thị đủ ảnh */
     width: 100%;
     height: 12rem;
-    /* h-48 */
     border-top-left-radius: 0.75rem;
-    /* Match card border radius */
     border-top-right-radius: 0.75rem;
+    background: #f9f9f9; /* thêm nền nhạt cho đẹp nếu ảnh nhỏ hơn khung */
 }
 
 .product-info {
