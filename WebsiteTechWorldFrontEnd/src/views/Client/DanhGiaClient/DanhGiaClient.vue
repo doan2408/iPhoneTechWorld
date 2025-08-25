@@ -6,35 +6,24 @@
         <div class="header-right">
           <div class="search-container">
             <SearchIcon class="search-icon" />
-            <input
-              type="search"
-              placeholder="Tìm kiếm theo ID đơn hàng hoặc Tên sản phẩm"
-              class="search-input"
-              v-model="searchTerm"
-              @input="handleSearch"
-            />
+            <input type="search" placeholder="Tìm kiếm theo ID đơn hàng hoặc Tên sản phẩm" class="search-input"
+              v-model="searchTerm" @input="handleSearch" />
           </div>
         </div>
       </header>
 
       <div class="tabs-container">
         <div class="tabs-list">
-          <button
-            :class="['tab-trigger', { active: activeTab === 'Chưa đánh giá' }]"
-            @click="setActiveTab('Chưa đánh giá')"
-          >
+          <button :class="['tab-trigger', { active: activeTab === 'Chưa đánh giá' }]"
+            @click="setActiveTab('Chưa đánh giá')">
             Chưa đánh giá
           </button>
-          <button
-            :class="['tab-trigger', { active: activeTab === 'Đã đánh giá' }]"
-            @click="setActiveTab('Đã đánh giá')"
-          >
+          <button :class="['tab-trigger', { active: activeTab === 'Đã đánh giá' }]"
+            @click="setActiveTab('Đã đánh giá')">
             Đã đánh giá
           </button>
-          <button
-            :class="['tab-trigger', { active: activeTab === 'Đánh giá có phản hồi' }]"
-            @click="setActiveTab('Đánh giá có phản hồi')"
-          >
+          <button :class="['tab-trigger', { active: activeTab === 'Đánh giá có phản hồi' }]"
+            @click="setActiveTab('Đánh giá có phản hồi')">
             Đánh giá có phản hồi
           </button>
         </div>
@@ -49,11 +38,8 @@
       <div v-else class="order-list">
         <div v-for="order in paginatedOrders" :key="order.idHoaDon" class="order-card">
           <div class="order-products">
-            <div
-              v-for="product in order.myOrderClientResponseList"
-              :key="product.idSanPhamChiTiet"
-              class="product-item"
-            >
+            <div v-for="product in order.myOrderClientResponseList" :key="product.idSanPhamChiTiet"
+              class="product-item">
               <img :src="product.urlImage" :alt="product.tenSanPham" class="product-image" />
               <div class="product-details">
                 <div class="product-name">{{ product.tenSanPham }}</div>
@@ -62,38 +48,27 @@
                 </div>
                 <div class="product-quantity">x{{ product.soLuong }}</div>
                 <!-- Hiển thị số ngày còn lại để đánh giá -->
-                <div
-                  v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order.ngayThanhToan)"
-                  class="remaining-time"
-                >
+                <div v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order.ngayThanhToan)"
+                  class="remaining-time">
                   {{ getRemainingDays(order.ngayThanhToan) }}
                 </div>
                 <!-- Tab "Đã đánh giá" -->
-                <div
-                  v-if="activeTab === 'Đã đánh giá' && order.reviews && order.reviews[product.idSanPhamChiTiet]"
-                  class="review-details"
-                >
+                <div v-if="activeTab === 'Đã đánh giá' && order.reviews && order.reviews[product.idSanPhamChiTiet]"
+                  class="review-details">
                   <div class="review-section">
                     <h3 class="section-title">Đánh giá sản phẩm</h3>
                     <!-- Số sao -->
                     <div class="star-rating-section">
                       <h4 class="subsection-title">Số sao:</h4>
                       <div class="star-rating">
-                        <span
-                          v-for="n in 5"
-                          :key="n"
-                          class="star"
-                          :class="{ filled: n <= order.reviews[product.idSanPhamChiTiet].soSao }"
-                        >
+                        <span v-for="n in 5" :key="n" class="star"
+                          :class="{ filled: n <= order.reviews[product.idSanPhamChiTiet].soSao }">
                           ★
                         </span>
                       </div>
                     </div>
                     <!-- Nội dung đánh giá -->
-                    <div
-                      v-if="order.reviews[product.idSanPhamChiTiet].noiDung"
-                      class="review-content"
-                    >
+                    <div v-if="order.reviews[product.idSanPhamChiTiet].noiDung" class="review-content">
                       <h4 class="subsection-title">Nội dung đánh giá:</h4>
                       <span class="review-label">Đánh giá của bạn:</span>
                       {{ order.reviews[product.idSanPhamChiTiet].noiDung }}
@@ -101,35 +76,20 @@
                     <!-- Hình ảnh/Video -->
                     <div
                       v-if="order.reviews[product.idSanPhamChiTiet].media && order.reviews[product.idSanPhamChiTiet].media.length"
-                      class="review-media"
-                    >
+                      class="review-media">
                       <h4 class="subsection-title">Hình ảnh/Video:</h4>
                       <div class="media-container">
-                        <div
-                          v-for="media in order.reviews[product.idSanPhamChiTiet].media"
-                          :key="media.id"
-                          class="media-item"
-                        >
-                          <img
-                            v-if="media.type === 'image'"
-                            :src="media.url"
-                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham"
-                            class="review-image"
-                          />
-                          <video
-                            v-else-if="media.type === 'video'"
-                            :src="media.url"
-                            controls
-                            class="review-video"
-                          ></video>
+                        <div v-for="media in order.reviews[product.idSanPhamChiTiet].media" :key="media.id"
+                          class="media-item">
+                          <img v-if="media.type === 'image'" :src="media.url"
+                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham" class="review-image" />
+                          <video v-else-if="media.type === 'video'" :src="media.url" controls
+                            class="review-video"></video>
                         </div>
                       </div>
                     </div>
                     <!-- Hiển thị thời gian còn lại để sửa đánh giá -->
-                    <div
-                      v-if="isWithin24Hours(order.reviews)"
-                      class="remaining-time"
-                    >
+                    <div v-if="isWithin24Hours(order.reviews)" class="remaining-time">
                       {{ getRemainingHours(order.reviews) }}
                     </div>
                   </div>
@@ -137,29 +97,21 @@
                 <!-- Tab "Đánh giá có phản hồi" -->
                 <div
                   v-if="activeTab === 'Đánh giá có phản hồi' && order.reviews && order.reviews[product.idSanPhamChiTiet]"
-                  class="review-details"
-                >
+                  class="review-details">
                   <div class="review-section">
                     <h3 class="section-title">Đánh giá sản phẩm</h3>
                     <!-- Số sao -->
                     <div class="star-rating-section">
                       <h4 class="subsection-title">Số sao:</h4>
                       <div class="star-rating">
-                        <span
-                          v-for="n in 5"
-                          :key="n"
-                          class="star"
-                          :class="{ filled: n <= order.reviews[product.idSanPhamChiTiet].soSao }"
-                        >
+                        <span v-for="n in 5" :key="n" class="star"
+                          :class="{ filled: n <= order.reviews[product.idSanPhamChiTiet].soSao }">
                           ★
                         </span>
                       </div>
                     </div>
                     <!-- Nội dung đánh giá -->
-                    <div
-                      v-if="order.reviews[product.idSanPhamChiTiet].noiDung"
-                      class="review-content"
-                    >
+                    <div v-if="order.reviews[product.idSanPhamChiTiet].noiDung" class="review-content">
                       <h4 class="subsection-title">Nội dung đánh giá:</h4>
                       <span class="review-label">Đánh giá của bạn:</span>
                       {{ order.reviews[product.idSanPhamChiTiet].noiDung }}
@@ -167,35 +119,20 @@
                     <!-- Hình ảnh/Video -->
                     <div
                       v-if="order.reviews[product.idSanPhamChiTiet].media && order.reviews[product.idSanPhamChiTiet].media.length"
-                      class="review-media"
-                    >
+                      class="review-media">
                       <h4 class="subsection-title">Hình ảnh/Video:</h4>
                       <div class="media-container">
-                        <div
-                          v-for="media in order.reviews[product.idSanPhamChiTiet].media"
-                          :key="media.id"
-                          class="media-item"
-                        >
-                          <img
-                            v-if="media.type === 'image'"
-                            :src="media.url"
-                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham"
-                            class="review-image"
-                          />
-                          <video
-                            v-else-if="media.type === 'video'"
-                            :src="media.url"
-                            controls
-                            class="review-video"
-                          ></video>
+                        <div v-for="media in order.reviews[product.idSanPhamChiTiet].media" :key="media.id"
+                          class="media-item">
+                          <img v-if="media.type === 'image'" :src="media.url"
+                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham" class="review-image" />
+                          <video v-else-if="media.type === 'video'" :src="media.url" controls
+                            class="review-video"></video>
                         </div>
                       </div>
                     </div>
                     <!-- Phản hồi từ người bán -->
-                    <div
-                      v-if="order.reviews[product.idSanPhamChiTiet].coPhanHoi"
-                      class="seller-response"
-                    >
+                    <div v-if="order.reviews[product.idSanPhamChiTiet].coPhanHoi" class="seller-response">
                       <h4 class="subsection-title">Phản hồi từ người bán:</h4>
                       <span class="response-label">Phản hồi:</span>
                       {{ order.reviews[product.idSanPhamChiTiet].phanHoi || 'Không có nội dung phản hồi.' }}
@@ -204,7 +141,7 @@
                 </div>
               </div>
               <div class="product-prices">
-                <span class="discounted-price">₫{{ formatPrice(product.giaSanPham) }}</span>
+                <span class="discounted-price">{{ formatPrice(product.giaSanPham) }} VNĐ</span>
               </div>
             </div>
           </div>
@@ -220,20 +157,15 @@
               <button class="action-button contact-seller-button" @click="contactSeller">
                 Liên hệ người bán
               </button>
-              <button
-                v-if="!order.daDanhGia && isWithin7Days(order.ngayThanhToan)"
-                class="action-button rate-button"
-                @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)"
-              >
+              <button v-if="!order.daDanhGia && isWithin7Days(order.ngayThanhToan)" class="action-button rate-button"
+                @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
                 Đánh giá
               </button>
-              <!-- <button
-                v-if="order.daDanhGia && isWithin24Hours(order.reviews)"
+              <button v-if="order.daDanhGia && !order.coPhanHoi && isWithin24Hours(order.reviews)"
                 class="action-button edit-rate-button"
-                @click="openEditRateDialog(order.idHoaDon, order.myOrderClientResponseList)"
-              >
+                @click="openEditRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
                 Sửa đánh giá
-              </button> -->
+              </button>
             </div>
           </div>
         </div>
@@ -243,34 +175,19 @@
         <button class="pagination-button" :disabled="currentPage === 0" @click="prevPage">
           Trước
         </button>
-        <button
-          v-for="page in displayedPages"
-          :key="page"
-          :class="['pagination-button', { active: currentPage === page - 1 }]"
-          @click="changePage(page - 1)"
-        >
+        <button v-for="page in displayedPages" :key="page"
+          :class="['pagination-button', { active: currentPage === page - 1 }]" @click="changePage(page - 1)">
           {{ page }}
         </button>
-        <button
-          class="pagination-button"
-          :disabled="currentPage === totalFilteredPages - 1"
-          @click="nextPage"
-        >
+        <button class="pagination-button" :disabled="currentPage === totalFilteredPages - 1" @click="nextPage">
           Sau
         </button>
       </div>
     </main>
 
-    <RateOrderDialog
-      :is-open="isRateDialogOpen"
-      :order-id="selectedOrderId"
-      :order-products="selectedOrderProducts"
-      :id-san-pham-chi-tiet-list="idSanPhamChiTietList"
-      :is-editing="isEditing"
-      :existing-rating-data="existingRatingData"
-      @close="closeRateDialog"
-      @submit="submitRating"
-    />
+    <RateOrderDialog :is-open="isRateDialogOpen" :order-id="selectedOrderId" :order-products="selectedOrderProducts"
+      :id-san-pham-chi-tiet-list="idSanPhamChiTietList" :is-editing="isEditing"
+      :existing-rating-data="existingRatingData" @close="closeRateDialog" @submit="submitRating" />
   </div>
 </template>
 
@@ -404,15 +321,12 @@ const allMyOrders = async () => {
 
     isLoading.value = true;
     const res = await getMyReview(0, 1000, user.value.id, searchTerm.value);
-    console.log('getMyReview response:', res.data);
     const orders = Array.isArray(res.data.content) ? res.data.content : [];
-    console.log('Orders:', orders);
 
     const ordersWithCheck = await Promise.all(
       orders.map(async (order) => {
         try {
           const response = await DanhGiaSanPhamClientService.checkDanhGiaVaDaPhanHoi(order.idHoaDon, user.value.id);
-          console.log(`CheckDanhGiaVaDaPhanHoi for order ${order.idHoaDon}:`, response);
           let reviews = {};
           if (response.da_danh_gia) {
             const reviewResponse = await DanhGiaSanPhamClientService.layDanhGiaTheoHoaDon(order.idHoaDon);
@@ -429,7 +343,6 @@ const allMyOrders = async () => {
                   if (review.idDanhGia) {
                     try {
                       const phanHoiResponse = await PhanHoiDanhGiaClientService.layPhanHoiTheoDanhGia(review.idDanhGia);
-                      console.log(`layPhanHoiTheoDanhGia for review ${review.idDanhGia}:`, phanHoiResponse);
                       if (Array.isArray(phanHoiResponse) && phanHoiResponse.length > 0) {
                         phanHoi = phanHoiResponse[0].noiDungPhanHoi || '';
                         coPhanHoi = true;
@@ -459,7 +372,6 @@ const allMyOrders = async () => {
                 })
               ).then((results) => {
                 const mergedReviews = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-                console.log(`Reviews for order ${order.idHoaDon}:`, mergedReviews);
                 return mergedReviews;
               });
             }
@@ -471,13 +383,11 @@ const allMyOrders = async () => {
             reviews,
           };
         } catch (err) {
-          console.error(`Lỗi kiểm tra đánh giá cho đơn hàng ${order.idHoaDon}:`, err);
           return { ...order, daDanhGia: false, coPhanHoi: false, reviews: {} };
         }
       })
     );
 
-    console.log('Processed ordersWithCheck:', ordersWithCheck);
     allOrders.value = ordersWithCheck;
     filteredOrders.value = ordersWithCheck.filter((order) => {
       const within7Days = isWithin7Days(order.ngayThanhToan);
@@ -490,10 +400,7 @@ const allMyOrders = async () => {
       }
       return true;
     });
-    console.log('Filtered orders:', filteredOrders.value);
-    console.log(`Active tab: ${activeTab.value}, Filtered orders count: ${filteredOrders.value.length}`);
   } catch (error) {
-    console.error('Lỗi khi lấy đơn hàng:', error);
     toast.error('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
   } finally {
     isLoading.value = false;
@@ -593,8 +500,26 @@ const openRateDialog = async (orderId, products) => {
 
     isRateDialogOpen.value = true;
   } catch (error) {
-    console.error('Lỗi khi lấy chi tiết hóa đơn:', error);
-    toast.error('Không thể lấy chi tiết hóa đơn. Vui lòng thử lại.');
+    console.error('Lỗi trong openEditRateDialog:', error);
+
+    let errorMessage = 'Lỗi không xác định';
+    if (error.response) {
+      const statusCode = error.response.status;
+      const backendMsg = error.response.data?.message || 'Lỗi từ server';
+      if (statusCode === 400) {
+        errorMessage = `Yêu cầu không hợp lệ: ${backendMsg}`;
+      } else if (statusCode === 404) {
+        errorMessage = `Không tìm thấy tài nguyên: ${backendMsg}`;
+      } else if (statusCode === 500) {
+        errorMessage = `Lỗi máy chủ: ${backendMsg}`;
+      } else {
+        errorMessage = `Gửi/cập nhật đánh giá thất bại: ${backendMsg}`;
+      }
+    } else {
+      errorMessage = `Lỗi kết nối hoặc client: ${error.message}`;
+    }
+
+    toast.error(errorMessage);
   }
 };
 
@@ -686,24 +611,44 @@ const openEditRateDialog = async (orderId, products) => {
       console.log('Dialog opened after timeout');
     }, 100);
   } catch (error) {
-    console.error('Error in openEditRateDialog:', error);
-    toast.error('Không thể lấy dữ liệu đánh giá. Vui lòng thử lại.');
+    console.error('Lỗi trong openEditRateDialog:', error);
+
+    let errorMessage = 'Lỗi không xác định';
+    if (error.response) {
+      const statusCode = error.response.status;
+      const backendMsg = error.response.data?.message || 'Lỗi từ server';
+      if (statusCode === 400) {
+        errorMessage = `Yêu cầu không hợp lệ: ${backendMsg}`;
+      } else if (statusCode === 404) {
+        errorMessage = `Không tìm thấy tài nguyên: ${backendMsg}`;
+      } else if (statusCode === 500) {
+        errorMessage = `Lỗi máy chủ: ${backendMsg}`;
+      } else {
+        errorMessage = `Gửi/cập nhật đánh giá thất bại: ${backendMsg}`;
+      }
+    } else {
+      errorMessage = `Lỗi kết nối hoặc client: ${error.message}`;
+    }
+
+    toast.error(errorMessage);
   }
 };
 
 // Hàm đóng dialog
 const closeRateDialog = () => {
   isRateDialogOpen.value = false;
-  selectedOrderId.value = null;
-  selectedOrderProducts.value = [];
-  idSanPhamChiTietList.value = [];
-  isEditing.value = false;
-  existingRatingData.value = [];
+  // selectedOrderId.value = null;
+  // selectedOrderProducts.value = [];
+  // idSanPhamChiTietList.value = [];
+  // isEditing.value = false;
+  // existingRatingData.value = [];
 };
 
 // Hàm gửi/cập nhật đánh giá
 const submitRating = async ({ payload }) => {
   console.log('submitRating nhận payload:', JSON.stringify(payload, null, 2));
+  console.log('isEditing trong parent:', isEditing.value); // Log để debug
+
   try {
     if (!user.value?.id) {
       toast.error('Vui lòng đăng nhập để đánh giá!');
@@ -739,14 +684,17 @@ const submitRating = async ({ payload }) => {
       return;
     }
 
-    if (isEditing.value) {
+    // Xác định chế độ dựa trên idDanhGia
+    const isEditingMode = ratings.some(r => r.idDanhGia);
+    console.log('Chế độ xử lý:', isEditingMode ? 'Cập nhật' : 'Tạo mới');
+
+    if (isEditingMode) {
       console.log('Đang xử lý cập nhật cho ratings:', ratings);
       const updatePromises = ratings.map(async (rating) => {
-        const existing = existingRatingData.value.find((r) => r.idSanPhamChiTiet === rating.idSanPhamChiTiet);
-        if (!existing) {
-          console.error(`Không tìm thấy đánh giá hiện có cho sản phẩm ${rating.idSanPhamChiTiet}`);
-          toast.error(`Không tìm thấy đánh giá hiện có cho sản phẩm ${rating.idSanPhamChiTiet}!`);
-          return { status: 'rejected', reason: `Không có đánh giá hiện có cho ${rating.idSanPhamChiTiet}` };
+        if (!rating.idDanhGia) {
+          console.error(`Thiếu idDanhGia cho sản phẩm ${rating.idSanPhamChiTiet}`);
+          toast.error(`Không thể cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}!`);
+          return { status: 'rejected', reason: `Thiếu idDanhGia` };
         }
 
         const request = {
@@ -760,8 +708,8 @@ const submitRating = async ({ payload }) => {
         };
 
         try {
-          console.log(`Đang cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} với idDanhGia ${existing.idDanhGia}`);
-          const updateResponse = await DanhGiaSanPhamClientService.capNhatDanhGia(existing.idDanhGia, request);
+          console.log(`Đang cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet} với idDanhGia ${rating.idDanhGia}`);
+          const updateResponse = await DanhGiaSanPhamClientService.capNhatDanhGia(rating.idDanhGia, request);
           console.log(`Cập nhật thành công cho sản phẩm ${rating.idSanPhamChiTiet}:`, updateResponse);
 
           if (rating.deletedMediaIds && Array.isArray(rating.deletedMediaIds) && rating.deletedMediaIds.length > 0) {
@@ -785,7 +733,7 @@ const submitRating = async ({ payload }) => {
             rating.imageFiles.forEach((file) => {
               if (file && file.name && file.size && file.type) {
                 mediaPromises.push(
-                  MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia)
+                  MediaDanhGiaClientService.uploadMedia(file, rating.idDanhGia)
                     .then((uploadResponse) => {
                       console.log(`Tải lên ảnh ${file.name} thành công`);
                       return { status: 'fulfilled', value: uploadResponse };
@@ -796,8 +744,6 @@ const submitRating = async ({ payload }) => {
                       return { status: 'rejected', reason: err };
                     })
                 );
-              } else {
-                console.warn(`Tệp ảnh không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
             });
           }
@@ -806,7 +752,7 @@ const submitRating = async ({ payload }) => {
             rating.videoFiles.forEach((file) => {
               if (file && file.name && file.size && file.type) {
                 mediaPromises.push(
-                  MediaDanhGiaClientService.uploadMedia(file, existing.idDanhGia)
+                  MediaDanhGiaClientService.uploadMedia(file, rating.idDanhGia)
                     .then((uploadResponse) => {
                       console.log(`Tải lên video ${file.name} thành công`);
                       return { status: 'fulfilled', value: uploadResponse };
@@ -817,14 +763,11 @@ const submitRating = async ({ payload }) => {
                       return { status: 'rejected', reason: err };
                     })
                 );
-              } else {
-                console.warn(`Tệp video không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
             });
           }
 
           await Promise.allSettled(mediaPromises);
-
           return { status: 'fulfilled', value: updateResponse };
         } catch (error) {
           console.error(`Lỗi khi cập nhật đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, error);
@@ -874,8 +817,6 @@ const submitRating = async ({ payload }) => {
                       return { status: 'rejected', reason: err };
                     })
                 );
-              } else {
-                console.warn(`Tệp ảnh không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
             });
           }
@@ -895,14 +836,11 @@ const submitRating = async ({ payload }) => {
                       return { status: 'rejected', reason: err };
                     })
                 );
-              } else {
-                console.warn(`Tệp video không hợp lệ cho sản phẩm ${rating.idSanPhamChiTiet}:`, file);
               }
             });
           }
 
           await Promise.allSettled(mediaPromises);
-
           return { status: 'fulfilled', value: danhGiaResponse };
         } catch (error) {
           console.error(`Lỗi khi tạo đánh giá cho sản phẩm ${rating.idSanPhamChiTiet}:`, error);

@@ -129,6 +129,7 @@
 import { ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { MediaDanhGiaClientService } from '@/Service/ClientService/MediaDanhGiaClientService/MediaDanhGiaClientService';
+import { ElMessageBox } from 'element-plus';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -436,8 +437,8 @@ const closeDialog = () => {
 };
 
 const submitRating = async () => {
-  console.log('submitRating được gọi');
-  console.log('Trạng thái trước khi gửi:', {
+  console.log('submitRating (mới) được gọi:', {
+    propsIsEditing: props.isEditing,
     productRatings: productRatings.value,
     productComments: productComments.value,
     imageFiles: Object.keys(imageFiles.value).reduce((acc, productId) => ({
@@ -458,22 +459,58 @@ const submitRating = async () => {
       console.error(`Không tìm thấy sản phẩm với idSanPhamChiTiet: ${item.idSanPhamChiTiet}`);
       return null;
     }
+    const existingRating = props.existingRatingData?.find(r => r.idSanPhamChiTiet === item.idSanPhamChiTiet);
     return {
       idSanPhamChiTiet: item.idSanPhamChiTiet,
       idChiTietHoaDon: item.idChiTietHoaDon,
-      soSao: productRatings.value[item.idSanPhamChiTiet] || 1,
+      soSao: productRatings.value[item.idSanPhamChiTiet],
       noiDung: productComments.value[item.idSanPhamChiTiet] || '',
       imageFiles: imageFiles.value[item.idSanPhamChiTiet] || [],
       videoFiles: videoFiles.value[item.idSanPhamChiTiet] || [],
       existingMedia: existingMedia.value[item.idSanPhamChiTiet] || [],
-      idDanhGia: props.existingRatingData?.find(r => r.idSanPhamChiTiet === item.idSanPhamChiTiet)?.idDanhGia || null,
-      deletedMediaIds: deletedMediaIds.value[item.idSanPhamChiTiet] || [], // Thêm deletedMediaIds
+      idDanhGia: existingRating?.idDanhGia || null,
+      deletedMediaIds: deletedMediaIds.value[item.idSanPhamChiTiet] || [],
     };
   }).filter(r => r !== null);
 
-  if (ratings.length === 0 || ratings.some(r => !r.soSao)) {
+  console.log('Ratings được tạo:', JSON.stringify(ratings, null, 2));
+
+  // Kiểm tra tính hợp lệ của đánh giá
+  const invalidRatings = ratings.filter(r => !r.soSao || r.soSao < 1 || r.soSao > 5);
+  if (ratings.length === 0 || invalidRatings.length > 0) {
     console.warn('Không có đánh giá hợp lệ hoặc chưa đánh giá sản phẩm');
-    toast.error('Vui lòng đánh giá ít nhất một sản phẩm!');
+    toast.error('Vui lòng chọn số sao (1-5) cho tất cả sản phẩm!');
+    isSubmitting.value = false;
+    return;
+  }
+
+  // Kiểm tra idDanhGia trong chế độ chỉnh sửa
+  if (props.isEditing) {
+    const missingIdDanhGia = ratings.some(r => !r.idDanhGia);
+    if (missingIdDanhGia) {
+      console.error('Một số đánh giá thiếu idDanhGia trong chế độ chỉnh sửa:', ratings);
+      toast.error('Không thể cập nhật vì thiếu thông tin đánh giá hiện có!');
+      isSubmitting.value = false;
+      return;
+    }
+  }
+
+  // Hiển thị hộp thoại xác nhận
+  try {
+    await ElMessageBox.confirm(
+      props.isEditing
+        ? 'Bạn có chắc chắn muốn cập nhật đánh giá này không?'
+        : 'Bạn có chắc chắn muốn gửi đánh giá này không?',
+      'Xác nhận đánh giá',
+      {
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+  } catch (error) {
+    console.log('Người dùng hủy gửi đánh giá', error);
+    toast.info('Thao tác gửi đánh giá đã bị hủy.');
     isSubmitting.value = false;
     return;
   }
@@ -486,14 +523,38 @@ const submitRating = async () => {
       trangThaiDanhGia: 'APPROVED',
     };
     console.log('Payload gửi đi:', JSON.stringify(payload, null, 2));
+
     await emit('submit', { payload });
+    toast.success(props.isEditing ? 'Cập nhật đánh giá thành công!' : 'Gửi đánh giá thành công!');
+    closeDialog();
   } catch (error) {
     console.error('Lỗi khi gửi đánh giá:', error);
-    toast.error('Gửi đánh giá thất bại. Vui lòng thử lại.');
+    let errorMessage = 'Gửi đánh giá thất bại. Vui lòng thử lại.';
+    if (error.response) {
+      const { status, data } = error.response;
+      console.error('Chi tiết lỗi từ backend:', { status, data });
+      if (status === 400) {
+        errorMessage = data.message || 'Dữ liệu gửi lên không hợp lệ. Vui lòng kiểm tra lại.';
+      } else if (status === 401) {
+        errorMessage = 'Vui lòng đăng nhập để gửi đánh giá.';
+      } else if (status === 403) {
+        errorMessage = 'Bạn không có quyền gửi đánh giá cho đơn hàng này.';
+      } else if (status === 409) {
+        errorMessage = 'Đánh giá cho sản phẩm này đã tồn tại.';
+      } else if (status === 413) {
+        errorMessage = 'Tệp tải lên quá lớn. Vui lòng chọn tệp nhỏ hơn.';
+      } else if (status >= 500) {
+        errorMessage = 'Lỗi hệ thống. Vui lòng thử lại sau.';
+      }
+    } else if (error.request) {
+      errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+    }
+    toast.error(errorMessage);
   } finally {
     isSubmitting.value = false;
   }
 };
+
 </script>
 
 <style scoped>

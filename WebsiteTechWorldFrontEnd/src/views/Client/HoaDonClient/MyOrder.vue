@@ -964,8 +964,19 @@ const submitRating = async ({ payload }) => {
   }
 };
 
-
-
+// Hàm liên hệ người bán
+const contactSeller = () => {
+  if (window.Tawk_API?.toggle) {
+    window.Tawk_API.toggle();
+  } else {
+    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
+    setTimeout(() => {
+      if (!window.Tawk_API?.toggle) {
+        toast.error('Không thể mở chat. Vui lòng thử lại sau.');
+      }
+    }, 5000);
+  }
+};
 
 onMounted(async () => {
   await allMyOrder();
