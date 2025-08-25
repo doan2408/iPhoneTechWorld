@@ -189,10 +189,6 @@
                     </div>
                 </div>
 
-                <button v-if="canReturn" @click="openPopupReturn()" class="action-btn cancel-btn">
-                    <X class="icon-small" /> TRẢ HÀNG
-                </button>
-
                 <div v-if="showReturnPopup" class="return-overlay">
                     <div class="return-modal">
                         <h3 class="return-title">Chọn sản phẩm/IMEI muốn trả</h3>
