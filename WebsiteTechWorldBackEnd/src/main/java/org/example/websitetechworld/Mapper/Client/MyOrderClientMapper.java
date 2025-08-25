@@ -67,7 +67,7 @@ public class MyOrderClientMapper {
         dto.setNgayThanhToan(hoaDon.getNgayThanhToan());
         if (hoaDon.getLichSuHoaDons() != null) {
             hoaDon.getLichSuHoaDons().stream()
-                    .filter(ls -> ls.getHanhDong() == HanhDongLichSuHoaDon.THANH_TOAN) // enum COMPLETE
+                    .filter(ls -> ls.getHanhDong() == HanhDongLichSuHoaDon.COMPLETE) // enum COMPLETE
                     .findFirst()
                     .ifPresent(ls -> dto.setNgayNhanhang(ls.getThoiGianThayDoi())); // hoặc ls.getNgayThucHien()
         }
