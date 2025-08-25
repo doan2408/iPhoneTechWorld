@@ -349,7 +349,7 @@
                 <div class="detail-card items-card">
                     <div class="card-header">
                         <Package class="icon" />
-                        <h3>Sản phẩm ({{ order.chiTietHoaDonAdminResponseList?.length || 0 }} món)</h3>
+                        <h3>Sản phẩm</h3>
                     </div>
                     <div class="card-content">
                         <div class="items-summary">
