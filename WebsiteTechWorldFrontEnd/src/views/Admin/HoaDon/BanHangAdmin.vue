@@ -561,8 +561,8 @@
 
 
                     <!-- <button @click="processPayment" class="payment-btn">THANH TOÁN</button> -->
-                    <button @click="processPayment" class="payment-btn" :disabled="isLoading">
-                        <span v-if="isLoading">Đang xử lý...</span>
+                    <button @click="processPayment" class="payment-btn" :disabled="isLoadingPayment">
+                        <span v-if="isLoadingPayment">Đang xử lý...</span>
                         <span v-else>THANH TOÁN</span>
                     </button>
                     <InvoicePrint v-if="showInvoice" :idHoaDon="selectedInvoiceId" ref="invoiceRef" />
@@ -2351,25 +2351,27 @@ const showInvoice = ref(false);
 const selectedInvoiceId = ref(localStorage.getItem("selectedInvoiceId") || null);
 const invoiceRef = ref(null);
 // Hàm xử lý thanh toán
+
+const isLoadingPayment = ref(false)
 const processPayment = async () => {
-    if (isLoading.value) return; // tránh double click
-    isLoading.value = true;
+    if (isLoadingPayment.value) return; // tránh double click
+    isLoadingPayment.value = true;
 
     const storedId = localStorage.getItem("selectedInvoiceId");
 
     if (!selectedPaymentMethod.value) {
         toast.warning('Vui lòng chọn phương thức thanh toán.');
-        isLoading.value = false;
+        isLoadingPayment.value = false;
         return;
     }
     if (!agreedToTerms.value) {
         toast.warning('Bạn phải đồng ý với Điều khoản và Điều kiện để tiếp tục.');
-        isLoading.value = false;
+        isLoadingPayment.value = false;
         return;
     }
     if (currentInvoiceDetail.value.chiTietHoaDonAdminResponseList?.length === 0) {
         toast.error('Hóa đơn không có sản phẩm nào để thanh toán.');
-        isLoading.value = false;
+        isLoadingPayment.value = false;
         return;
     }
 
@@ -2403,7 +2405,7 @@ const processPayment = async () => {
             toast.error('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
         }
     } finally {
-        isLoading.value = false;
+        isLoadingPayment.value = false;
     }
 };
 
