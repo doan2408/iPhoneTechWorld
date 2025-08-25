@@ -350,7 +350,11 @@ public class MyOrderClientServices {
         hoaDon.setTenNguoiNhan(requestThanhToanTongHop.getTenNguoiNhan());
         hoaDon.setEmailNguoiNhan(requestThanhToanTongHop.getEmailNguoiNhan());
         hoaDon.setDiaChiGiaoHang(requestThanhToanTongHop.getDiaChiGiaoHang());
-        hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien().add(requestThanhToanTongHop.getSoTienGiam()).subtract(requestThanhToanTongHop.getPhiShip()));
+        if (requestThanhToanTongHop.getSoTienGiam() != null){
+            hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien().add(requestThanhToanTongHop.getSoTienGiam()).subtract(requestThanhToanTongHop.getPhiShip()));
+        }else{
+            hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien().subtract(requestThanhToanTongHop.getPhiShip()));
+        }
         hoaDon.setThanhTien(requestThanhToanTongHop.getThanhTien());
         hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);

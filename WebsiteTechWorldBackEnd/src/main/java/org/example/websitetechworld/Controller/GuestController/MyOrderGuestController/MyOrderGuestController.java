@@ -74,4 +74,14 @@ public class MyOrderGuestController {
     public HoaDonAdminResponse findById(@PathVariable("idHoaDon") int idHoaDon) {
         return hoaDonAdminService.findById(idHoaDon);
     }
+
+    @GetMapping("/mvd/{maVanDon}")
+    public List<Integer> findIdHoaDonByMVD(@PathVariable String maVanDon, @RequestParam String sdt) {
+        return myOrderClientServices.findIdHoaDonByMVDAndSdt(sdt, maVanDon);
+    }
+
+    @GetMapping("/{idHoaDon}/lich-su")
+    public ResponseEntity<?> getPageLichSu(@PathVariable Integer idHoaDon) {
+        return ResponseEntity.ok(myOrderClientServices.getLichSuHoaDon(idHoaDon));
+    }
 }

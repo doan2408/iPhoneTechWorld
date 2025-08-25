@@ -23,6 +23,7 @@ public class MyOrderClientResponse {
     private String trangThaiThanhToan;
     private BigDecimal thanhTien;
     private LocalDateTime ngayDatHang;
+    private LocalDate ngayNhanHang;
     private List<MyOrderProductClientResponse> myOrderClientResponseList;
 
     public MyOrderClientResponse (Integer idHoaDon, String maVanDon, String trangThaiGiaoHang, String trangThaiThanhToan, BigDecimal thanhTien, LocalDateTime ngayDatHang, List<MyOrderProductClientResponse> myOrderClientResponseList) {

@@ -34,7 +34,7 @@
 <script setup>
 import router from '@/router'
 import { ref, watch } from 'vue'
-import { findIdHoaDonByMVDAndSdt } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { findIdHoaDonByMVDAndSdtGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useToast } from "vue-toastification";
 
 const trackingNumber = ref('')
@@ -43,7 +43,7 @@ const toast = useToast()
 
 const handleSubmit = async () => {
     console.log('Mã vận đơn đã nhập:', trackingNumber.value, sdt.value)
-    const res = await findIdHoaDonByMVDAndSdt(trackingNumber.value, sdt.value);
+    const res = await findIdHoaDonByMVDAndSdtGuest(trackingNumber.value, sdt.value);
     const data = res.data
     if (data.length > 0) {
         toast.success('Tìm thấy đơn hàng thành công')
@@ -55,7 +55,7 @@ const handleSubmit = async () => {
 
 const devliveryProcessing = async (data) => {
   router.push({
-    name: "orderTracking",
+    name: "orderTrackingGuest",
     params: { id: data[0] },
   });
 };
