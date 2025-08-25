@@ -73,7 +73,7 @@
       </el-row>
       <!-- v-if="isAdmin" -->
 
-      <div class="mb-3 action-section">
+      <div class="mb-3 action-section" v-if="isAdmin">
         <router-link to="/admin/products/create" class="el-link--success">
           <el-button type="success" size="default" class="action-btn">
             <el-icon>

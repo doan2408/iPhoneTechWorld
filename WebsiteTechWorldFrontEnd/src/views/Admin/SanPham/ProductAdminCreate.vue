@@ -398,6 +398,7 @@ import {
 import { useRouter } from "vue-router";
 import DialogThemMauSac from "@/components/Admin/dialogs/DialogThemMauSac.vue";
 import DialogThemRom from "@/components/Admin/dialogs/DialogThemRom.vue";
+import store from "@/Service/LoginService/Store";
 import { useToast } from "vue-toastification";
 const toast = useToast();
 
@@ -1640,11 +1641,33 @@ export default {
       }
     };
 
+    const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
+
     onMounted(() => {
       fetchDanhMuc();
     });
 
     return {
+      isAdmin,
+      isStaff,
       sanPham,
       sanPhamForm,
       nhaCungCaps,

@@ -656,6 +656,9 @@ public class HoaDonAdminService {
             resp.setTenGiamGia(pgg.getTenGiamGia());
             resp.setSoLuong(pgg.getSoLuong());
             resp.setGiaTriGiamGia(pgg.getGiaTriGiamGia());
+            resp.setGiaTriDonHangToiThieu(pgg.getGiaTriDonHangToiThieu());
+            resp.setGiaTriGiamGia(pgg.getGiaTriGiamGia());
+            resp.setGiaTriGiamGiaToiDa(pgg.getGiaTriGiamGiaToiDa());
             resp.setLoaiGiamGia(pgg.getLoaiGiamGia());
             resp.setNgayBatDau(pgg.getNgayBatDau());
             resp.setNgayKetThuc(pgg.getNgayKetThuc());
