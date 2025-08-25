@@ -219,7 +219,7 @@ public class MyOrderClientServices {
 
     public Page<MyReviewClientResponse> getReview(Integer userLoginId, Integer pageNo, Integer pageSize) {
         // Khởi tạo phân trang
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "ngayThanhToan"));
         Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
 
         List<MyReviewClientResponse> content = lstHoaDon

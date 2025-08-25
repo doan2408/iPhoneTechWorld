@@ -47,7 +47,7 @@ public class DanhGiaSanPhamClientService {
     public DanhGiaSanPhamClientResponse taoMoiDanhGia(DanhGiaSanPhamClientRequest request) {
         // 1. Validate số sao
         if (request.getSoSao() == null || request.getSoSao() < 1 || request.getSoSao() > 5) {
-            throw new BusinessException("Số sao phải từ 1 đến 5");
+            throw new BusinessException("Vui lòng chọn số sao (1-5) cho tất cả sản phẩm!");
         }
 
         // 2. Tạo mới đối tượng đánh giá
@@ -104,11 +104,11 @@ public class DanhGiaSanPhamClientService {
 
     public DanhGiaSanPhamClientResponse capNhatDanhGia(Integer id, DanhGiaSanPhamClientRequest request) {
         DanhGiaSanPham danhGia = danhGiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đánh giá với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá với ID: " + id));
 
         // Validate dữ liệu
         if (request.getSoSao() != null && (request.getSoSao() < 1 || request.getSoSao() > 5)) {
-            throw new IllegalArgumentException("Số sao phải từ 1 đến 5");
+            throw new BusinessException("Số sao phải từ 1 đến 5");
         }
 
         // Cập nhật thông tin
