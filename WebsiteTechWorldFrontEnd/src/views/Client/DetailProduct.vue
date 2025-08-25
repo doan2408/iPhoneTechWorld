@@ -1733,8 +1733,8 @@ const toggleWishlist = async () => {
 }
 
 .review-video {
-  width: 300px;
-  height: auto;
+  width: 100px;
+  height: 100px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }

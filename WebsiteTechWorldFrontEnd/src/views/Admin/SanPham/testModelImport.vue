@@ -35,7 +35,7 @@
           </div>
           <div class="form-grid">
             <el-form-item label="Tên model" prop="tenModel" :error="errors.tenModel">
-              <el-input v-model="modelForm.tenModel" placeholder="Nhập tên model" @input="clearFieldError('tenModel')"
+              <el-input v-model="modelForm.tenModel" placeholder="Nhập tên model (bắt buộc bắt đầu bằng 'iPhone')"  @input="clearFieldError('tenModel')"
                 clearable size="large" :class="{ 'updated-input': tenModelUpdated }" />
             </el-form-item>
             <el-form-item label="Loại" prop="idLoai" :error="errors.idLoai">
@@ -326,7 +326,7 @@
           </el-select>
 
           <el-select v-model="filters.idRam" placeholder="Lọc theo RAM" clearable size="large" class="filter-select">
-            <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
+            <el-option v-for="ram in rams" :key="ram.idRam" :label="`${ram.dungLuongRam} - ${ram.loaiRam}`" :value="ram.idRam" />
           </el-select>
 
           <el-select v-model="filters.idXuatXu" placeholder="Lọc theo xuất xứ" clearable size="large"

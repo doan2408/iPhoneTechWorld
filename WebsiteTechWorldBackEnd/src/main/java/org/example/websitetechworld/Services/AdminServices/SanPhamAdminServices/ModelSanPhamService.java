@@ -248,7 +248,15 @@ public class ModelSanPhamService {
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
 
+        if (!request.getTenModel().trim().matches("^iPhone(\\s[\\p{L}\\d]+)*$")) {
+            throw new BusinessException(
+                    "Tên model không hợp lệ. Phải bắt đầu bằng 'iPhone' và chỉ chứa chữ cái, số hoặc khoảng trắng. Ví dụ: iPhone 14 Pro Max"
+            );
+        }
+
+
         String tenFormat = formatTenModel(request.getTenModel());
+
 
         //  1. Kiểm tra trùng cấu hình (trừ camera sau)
         if (modelSanPhamRepository.existsModelWithSameConfig(

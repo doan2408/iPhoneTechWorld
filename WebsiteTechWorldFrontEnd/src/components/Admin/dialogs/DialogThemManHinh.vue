@@ -1,30 +1,23 @@
 <template>
-  <el-dialog
-    title="Thêm kích thước màn hình mới"
-    v-model="dialogVisible"
-    width="600px"
-    @close="handleClose"
-    destroy-on-close
-  >
+  <el-dialog title="Thêm kích thước màn hình mới" v-model="dialogVisible" width="600px" @close="handleClose"
+    destroy-on-close>
 
-  
-    <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Tên màn hình" prop="tenManHinh">
-        <el-input v-model="NewManHinh.tenManHinh" autocomplete="off" />
-      </el-form-item>
-    </el-form>
 
-    <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Kích thước màn hình" prop="kichThuoc">
-        <el-input v-model="NewManHinh.kichThuoc" autocomplete="off" />
-      </el-form-item>
-    </el-form>
+    <el-form-item label="Tên màn hình" prop="tenManHinh">
+      <el-input v-model="NewManHinh.tenManHinh" placeholder="Nhập tên màn hình, ví dụ: Màn hình LCD 15 inch"
+        autocomplete="off" />
+    </el-form-item>
 
-    <el-form :model="NewManHinh" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Loại màn hình" prop="loaiManHinh">
-        <el-input v-model="NewManHinh.loaiManHinh" autocomplete="off" />
-      </el-form-item>
-    </el-form>
+    <el-form-item label="Kích thước màn hình" prop="kichThuoc">
+      <el-input v-model="NewManHinh.kichThuoc" placeholder="Nhập kích thước màn hình, ví dụ: 15 inch"
+        autocomplete="off" />
+    </el-form-item>
+
+    <el-form-item label="Loại màn hình" prop="loaiManHinh">
+      <el-input v-model="NewManHinh.loaiManHinh" placeholder="Nhập loại màn hình, ví dụ: LCD / LED / OLED"
+        autocomplete="off" />
+    </el-form-item>
+
 
     <template #footer>
       <el-button @click="dialogVisible = false">Hủy</el-button>

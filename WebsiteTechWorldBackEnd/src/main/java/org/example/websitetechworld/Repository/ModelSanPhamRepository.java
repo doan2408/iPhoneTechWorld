@@ -13,20 +13,18 @@ import java.util.List;
 @Repository
 public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Integer> {
     @Query(value = """
+
     SELECT
         msp.id_model_san_pham AS idModelSanPham,
         msp.ma_model_san_pham AS maModelSanPham,
         msp.ten_model AS tenModel,
         msp.id_loai AS idLoai,
         msp.id_ram AS idRam,
-        msp.id_xuat_xu AS idXuatXu,
-        msp.nam_ra_mat AS namRaMat,
-        msp.trang_thai AS trangThai
+        msp.id_xuat_xu AS idXuatXu
     FROM model_san_pham msp
-        JOIN ram AS r ON r.id_ram = msp.id_ram
-        JOIN xuat_xu xx ON xx.id_xuat_xu = msp.id_xuat_xu
-        JOIN loai l ON l.id_loai = msp.id_loai
-     WHERE msp.trang_thai != 'DELETED'
+        LEFT JOIN ram AS r ON r.id_ram = msp.id_ram
+        LEFT JOIN xuat_xu xx ON xx.id_xuat_xu = msp.id_xuat_xu
+        LEFT JOIN loai l ON l.id_loai = msp.id_loai
      ORDER BY msp.id_model_san_pham DESC
 """, nativeQuery = true)
     Page<Object[]> getAllPage(Pageable pageable);
@@ -35,7 +33,7 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
 
     @Query(value = """
     SELECT * FROM model_san_pham m
-    WHERE m.trang_thai != 'DELETED'
+    WHERE 1=1
       AND (:search IS NULL OR m.ten_model COLLATE Vietnamese_CI_AI LIKE CONCAT('%', :search, '%'))
       AND (:idLoai IS NULL OR m.id_loai = :idLoai)
       AND (:idRam IS NULL OR m.id_ram = :idRam)
@@ -44,7 +42,7 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
     """,
             countQuery = """
     SELECT COUNT(*) FROM model_san_pham m
-    WHERE m.trang_thai != 'DELETED'
+    WHERE 1=1
       AND (:search IS NULL OR m.ten_model COLLATE Vietnamese_CI_AI LIKE CONCAT('%', :search, '%'))
       AND (:idLoai IS NULL OR m.id_loai = :idLoai)
       AND (:idRam IS NULL OR m.id_ram = :idRam)
