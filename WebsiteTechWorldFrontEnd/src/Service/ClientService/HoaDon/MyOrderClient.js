@@ -33,8 +33,17 @@ export const findIdHoaDonByMVDAndSdt = async (maVanDon, sdt) => {
     return await api.get(baseURL +'/mvd/'+ maVanDon + '?sdt=' + sdt);
 };  
 
+export const findIdHoaDonByMVDAndSdtGuest = async (maVanDon, sdt) => {
+    return await api.get(baseUrlGuest +'/mvd/'+ maVanDon + '?sdt=' + sdt);
+}; 
+
 export const hoaDonDetail = (id) => {
     const url = baseURL + '/' + id;
+    return api.get(url)
+}
+
+export const hoaDonDetailGuest = (id) => {
+    const url = baseUrlGuest + '/' + id;
     return api.get(url)
 }
 
@@ -85,13 +94,13 @@ export const findHdctByImeiDaBan = (ctHoaDonId) => {
     return api.get('/my-order' + '/' + ctHoaDonId + '/hdct-by-imei-da-ban')
 }
 
-export const hoaDonDetailGuest = (id) => {
-    const url = baseUrlGuest + '/' + id;
+export const getOrderHistory = (id) => {
+    const url = baseURL + '/' + id + '/lich-su';
     return api.get(url)
 }
 
-export const getOrderHistory = (id) => {
-    const url = baseURL + '/' + id + '/lich-su';
+export const getOrderHistoryGuest = (id) => {
+    const url = baseUrlGuest + '/' + id + '/lich-su';
     return api.get(url)
 }
 
