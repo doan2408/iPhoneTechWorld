@@ -17,6 +17,7 @@ public class GioHangClientResponse {
     public static class GioHangChiTietResponse {
         private Integer idGioHangChiTiet;
         private Integer idSanPhamChiTiet;
+        private String maSanPhamChiTiet;
         private String tenSanPham;
         private String phienBan;
         private String imageUrl;

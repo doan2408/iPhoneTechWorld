@@ -238,10 +238,10 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="goToEdit(hoaDon.idHoaDon)">
+                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="openSalesHistoryModal(hoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z">
                       </path>
                     </svg>
                   </button>
@@ -610,14 +610,6 @@
                   <span>Xử lý đơn hàng</span>
                 </button>
 
-                <button class="invoice-action-button invoice-history-button" @click="loadLichSuHoaDon(selectedInvoice)">
-                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <span>Xem lịch sử hóa đơn</span>
-                </button>
-
                 <button class="invoice-action-button invoice-payment-button">
                   <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -675,13 +667,32 @@
         </div>
       </div>
     </div>
+
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
-import { createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
+import { countHoaDon, createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { hoaDonDetail } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { viewLichSuHoaDon } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import {
@@ -792,13 +803,14 @@ const loadData = async () => {
   try {
     const response = await hoaDonGetAll(pageNo.value, pageSize.value, searchQuery.value, statusFilter.value, typeFilter.value, dateFilterFrom.value, dateFilterTo.value);
 
+    const total = await countHoaDon();
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
 
     if (Array.isArray(response.data.content)) {
       hoaDons.value = response.data.content;
       totalPage.value = response.data.totalPages || 0;
-      totalElement.value = response.data.totalElements || 0;
+      totalElement.value = total.data || 0;
       choXuLy.value = count.data || 0;
       doanhThuThang.value = formatCurrency(doanhThu.data || 0);
     } else {
@@ -1055,9 +1067,30 @@ const isStaff = computed(() => {
   );
 });
 
-const goToEdit = (id) => {
-  router.push({ name: 'CapNhatHoaDon', params: { id } })
-}
+const orderHistory = ref([]);
+const showSalesHistoryModal = ref(false);
+const maHoaDon = ref();
+
+const openSalesHistoryModal = async (hoaDon) => {
+    showSalesHistoryModal.value = true;
+    await xemLichSu(hoaDon);
+};
+
+const closeSalesHistoryModal = () => {
+    showSalesHistoryModal.value = false;
+};
+
+const xemLichSu = async (hoaDon) => {
+    try {
+        const response = await viewLichSuHoaDon(hoaDon.idHoaDon);
+        maHoaDon.value = response.data[0].maHoaDon
+        orderHistory.value = response.data;
+        showSalesHistoryModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
 
 // Theo dõi các thay đổi bộ lọc để cập nhật phân trang
 watch([searchQuery, statusFilter, typeFilter, dateFilterFrom,dateFilterTo], () => {

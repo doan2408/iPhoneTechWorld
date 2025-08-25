@@ -105,7 +105,7 @@ export const nextDelay = async () => {
 
 export const nextDelayClient = async () => {
     try {
-        const response = await api.get(`/client/khuyen-mai/next-delay`);
+        const response = await api.get(`/khuyen-mai/next-delay`);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Lỗi khi lấy thời gian cập nhật');

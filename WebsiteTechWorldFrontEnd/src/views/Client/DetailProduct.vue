@@ -261,18 +261,6 @@ const fetchPhanHoi = async (idDanhGia) => {
   }
 };
 
-const increaseQty = () => {
-  if (bienThe.value && quantity.value < bienThe.value.soLuong) {
-    quantity.value++;
-  }
-};
-
-const decreaseQty = () => {
-  if (quantity.value > 1) {
-    quantity.value--;
-  }
-};
-
 const fetchSanPhamDetail = async () => {
   try {
     const data = await detailSanPham(idSanPham);
@@ -325,10 +313,13 @@ const fetchListAnhByMau = async () => {
 
 const themVaoGio = async (buy) => {
   try {
-    if (quantity.value < 0) {
+
+    if (!quantity?.value || quantity.value <= 0) {
+      quantity.value = 1;
       ElMessage.error("Số lượng phải lớn hơn 0!");
       return;
     }
+
     const soLuongTonKho = bienThe.value.soLuong;
     if (soLuongTonKho < 0) {
       ElMessage.error("Dữ liệu tồn kho không hợp lệ!");
@@ -345,12 +336,18 @@ const themVaoGio = async (buy) => {
       }
     }
     const tongSoLuong = soLuongHienTai + quantity.value;
-    console.log(soLuongTonKho);
+    const max = soLuongTonKho < 2 ? soLuongTonKho : 2
 
-    if (tongSoLuong > soLuongTonKho) {
-      ElMessage.error(
-        `Số lượng vượt quá tồn kho. Trong giỏ hàng đã có ${soLuongHienTai} sản phẩm này.`
-      );
+    if (tongSoLuong > max) {
+      if (soLuongHienTai < 2) {
+        ElMessage.error(
+          `Số lượng vượt quá tồn kho. Đã có ${soLuongHienTai} sản phẩm trong giỏ.`
+        )
+      } else {
+        ElMessage.error(
+          `Giới hạn số lượng mua là 2. Đã có 2 sản phẩm trong giỏ.`
+        )
+      }
       return;
     }
     await cartService.addToCart({
@@ -675,18 +672,6 @@ const toggleWishlist = async () => {
             </span>
           </p>
 
-          <!-- Chọn số lượng -->
-          <div class="options quantity-selector" v-if="bienThe?.soLuong > 0">
-            <h3>Chọn số lượng:</h3>
-            <div class="quantity-control">
-              <button @click="decreaseQty" :disabled="quantity <= 1">-</button>
-
-              <input type="number" v-model="quantity" min="1" :max="bienThe.soLuong" />
-              <button @click="increaseQty" :disabled="quantity >= bienThe.soLuong">
-                +
-              </button>
-            </div>
-          </div>
           <div class="banner-tichDiem">
             <router-link to="/client/doiDiem">
               <img src="/src/components/images/bannerTichDiem.jpg" alt="Banner tích điểm" class="tich-diem-img" />

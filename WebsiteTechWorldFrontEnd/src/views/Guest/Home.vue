@@ -28,7 +28,7 @@ const totalProducts = ref(0);
 const selectedSort = ref("");
 // Product data
 const products = ref([]);
-const toast = useToast()
+const toast = useToast();
 // debounce timer
 let debounceTimer = null;
 

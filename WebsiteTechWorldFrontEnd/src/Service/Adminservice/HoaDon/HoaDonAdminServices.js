@@ -35,15 +35,9 @@ export const hoaDonDetail = (id) => {
 }
 
 // api view lich su hoa don
-export const viewLichSuHoaDon = (id, pageNo, pageSize) => {
+export const viewLichSuHoaDon = (id) => {
     const url = url_base + '/' + id + '/lich-su';
-    return api.get(url, {
-        params: {
-            pageNo,
-            pageSize
-        }
-    }
-    )
+    return api.get(url)
 }
 
 
@@ -61,6 +55,11 @@ export const hoaDonSoftDelete = (id) => {
 export const hoaDonHardDelete = (id) => {
     const url = url_base + '/hard-delete/' + id;
     return api.delete(url)
+}
+
+export const countHoaDon = () => {
+    const url = url_base + '/count';
+    return api.get(url)
 }
 
 export const doanhThuTheoThang = () => {
@@ -190,11 +189,15 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
         sdtNguoiNhan: shippingInfo.sdtNguoiNhan,
         emailNguoiNhan: shippingInfo.emailNguoiNhan,
         diaChiGiaoHang: fullAddressForDB,
-        phiShip: shippingInfo.phiShip ? Number(shippingInfo.phiShip) : null,
+        phiShip: Number(50000),
         isShipping: isShipping,
         maVanDon: null,
         thanhTien: null
     });
+}
+
+export const deleteTTShipping = (id) => {
+    return api.put(`/admin/hoa-don/delete-shipping/${id}`);
 }
 
 //create pending invoice

@@ -40,7 +40,7 @@ public class AdminClientRequest {
     private String email;
 
 
-    @Past(message = "Ngày sinh không được sau hiện tại")
+    @Past(message = "Ngày sinh phải trước hôm nay")
     private LocalDate ngaySinh;
 
     private Boolean gioiTinh; // True: Nam, False: Nữ

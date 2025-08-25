@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -17,6 +18,7 @@ import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
 import org.example.websitetechworld.Enum.GiaoHang.ShippingMethod;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TrangThaiThanhToan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
@@ -31,6 +33,7 @@ import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,8 +77,10 @@ public class HoaDonAdminService {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final GioHangRepository gioHangRepository;
     private final ViDiemRepository viDiemRepository;
+    private final NhanVienRepository nhanVienRepository;
 
-    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository) {
+    public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository,
+                              NhanVienRepository nhanVienRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -92,6 +99,7 @@ public class HoaDonAdminService {
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
         this.gioHangRepository = gioHangRepository;
         this.viDiemRepository = viDiemRepository;
+        this.nhanVienRepository = nhanVienRepository;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -161,9 +169,12 @@ public class HoaDonAdminService {
         return hoaDonRepository.findById(id).orElseThrow();
     }
 
-    public Page<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId,Integer pageNo, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return lichSuHoaDonRepository.findByIdHoaDon_Id(hoaDonId,pageable).map(LichSuHoaDonAdminResponse::convertDto);
+    public List<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
+        return lichSuHoaDonRepository.findByIdHoaDon(hoaDon)
+                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId).reversed())
+                .map(LichSuHoaDonAdminResponse::convertDto)
+                .collect(Collectors.toList());
     }
 
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(Integer hoaDonId,Integer pageNo, Integer pageSize){
@@ -209,6 +220,7 @@ public class HoaDonAdminService {
 
         if (khachHangId == null){
             hoaDon.setIdKhachHang(null);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Xóa khách hàng");
         } else {
             KhachHang khachHang = khachHangRepository.findById(khachHangId)
                     .orElseThrow(()-> new IllegalArgumentException("Khách hang nay khong ton tai"));
@@ -225,8 +237,9 @@ public class HoaDonAdminService {
             hoaDon.setIdKhachHang(khachHang);
             hoaDon.setTenNguoiMua(khachHang.getTenKhachHang());
             hoaDon.setSdtNguoiMua(khachHang.getSdt());
-        }
 
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Thêm khách hàng "+khachHang.getTenKhachHang());
+        }
 
         hoaDonRepository.save(hoaDon);
     }
@@ -300,6 +313,10 @@ public class HoaDonAdminService {
         }
 
         hoaDonRepository.delete(hoaDon);
+    }
+
+    public Long countHoaDon () {
+        return hoaDonRepository.count();
     }
 
     public Integer countHoaDonPending () {
@@ -399,11 +416,31 @@ public class HoaDonAdminService {
                     invoice.getEmailNguoiNhan(),
                     invoice.getNgayDatHang()
             );
+            createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Cập nhật thông tin giao hàng");
         } catch (Exception e) {
             System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
         }
+    }
+
+    @Transactional
+    public void deleteInvocieShipping(Integer id){
+        HoaDon invoice = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + id));
+
+        invoice.setTenNguoiNhan(null);
+        invoice.setSdtNguoiNhan(null);
+        invoice.setEmailNguoiNhan(null);
+        invoice.setDiaChiGiaoHang(null);
+        invoice.setThanhTien(invoice.getThanhTien().subtract(invoice.getPhiShip()));
+        invoice.setPhiShip(BigDecimal.ZERO);
+        invoice.setIsShipping(false);
+        invoice.setShippingMethod(null);
+
+        hoaDonRepository.save(invoice);
+
+        createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Thay đổi không giao hàng và xóa thông tin");
     }
 
     public void updateMaVanDon(Integer idHoaDon) {
@@ -541,11 +578,14 @@ public class HoaDonAdminService {
         hoaDon.setTrangThaiThanhToan(newStatus);
         List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
 
-        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
-        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
-            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        if (newStatus.equals(TrangThaiThanhToan.PAID)){
+            List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+            for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+                chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+            }
+            chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.THANH_TOAN,"Đã nhận được tiền");
         }
-        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
@@ -556,9 +596,11 @@ public class HoaDonAdminService {
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.HUY,"Tạo yêu cầu hủy đơn thành công");
         }
         if (TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.REFUNDED.equals(newStatus)){
             hoaDonChiTiet_ImeiAdminServices.updateImeiHoanTien(danhSachChiTiet, TrangThaiImei.AVAILABLE,TrangThaiImei.RETURNED);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Hoàn thành công cho khách hàng "+hoaDon.getThanhTien()+" VND");
         }
 
         hoaDonRepository.save(hoaDon);
@@ -652,5 +694,20 @@ public class HoaDonAdminService {
 
     private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
         return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
+    }
+
+    public void createLshd(HoaDon hoaDon,HanhDongLichSuHoaDon action, String moTa){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer nhanVienId = customUserDetails.getId();
+            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+            lichSuHoaDon.setIdHoaDon(hoaDon);
+            lichSuHoaDon.setHanhDong(action);
+            lichSuHoaDon.setIdNhanVien(nhanVienRepository.findById(nhanVienId).orElse(null));
+            lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
+            lichSuHoaDon.setMoTa(moTa);
+            lichSuHoaDonRepository.save(lichSuHoaDon);
+        }
     }
 }

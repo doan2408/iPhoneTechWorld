@@ -117,7 +117,7 @@
         <!-- Action Buttons -->
         <div class="actions-section">
             <div class="left-actions">
-                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)"
+                <button v-if="order.trangThaiThanhToan === 'PENDING' && 'Đã giao'.includes(order.trangThaiDonHang)"
                     @click="openConfirm('Xác nhận đã nhận tiền?', () => updateStatusInvoicePaid('PAID'))"
                     class="action-btn complete-btn">
                     <CheckCircle class="icon-small" /> ĐÃ NHẬN TIỀN
@@ -739,8 +739,18 @@ const updateOrderStatus = async (newStatus) => {
         console.log(response.data);
         console.log(`Order status updated to: ${newStatus}`);
         await viewOrderDetail();
+        toast.success("Đã Cập Nhật Thành Công Trạng Thái Thành "+ newStatus)
+        if (newStatus === 'Sẵn sàng giao') {
+            toast.success("Mã vận đơn đã được tạo")
+        }
     } catch (error) {
         console.error('Failed to update order status:', error.response?.data || error.message);
+        if (error.response?.data) {
+            // Nếu backend trả về object JSON { message: "..."}
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     } finally {
         isProcessing.value = false;
     }
@@ -754,9 +764,18 @@ const updateStatusInvoicePaid = async (newStatus) => {
         // Cập nhật trạng thái sau khi API thành công
         order.trangThaiThanhToan = newStatus
         await viewOrderDetail();
-
+        if (newStatus === 'PAID') {
+            toast.success("Đã xác nhận nhận tiền")
+        }else{
+            toast.success("Hoàn tiền thành công")
+        }
     } catch (error) {
         console.error('Failed to update invoice status:', error.response?.data || error.message)
+        if (error.response?.data) {
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     }
 }
 

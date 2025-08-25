@@ -4,10 +4,12 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Entity.*;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Enum.KhuyenMai.DoiTuongApDung;
 import org.example.websitetechworld.Enum.KhuyenMai.TrangThaiKhuyenMai;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.springframework.stereotype.Service;
@@ -30,8 +32,9 @@ public class HoaDonChiTietAdminServices {
     private final ImeiReposiory imeiReposiory;
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
     private final HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_imeiAdminServices;
+    private final HoaDonAdminService hoaDonAdminService;
 
-    public HoaDonChiTietAdminServices(ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, SanPhamRepository sanPhamRepository, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory, ImeiDaBanAdminServices imeiDaBanAdminServices, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices) {
+    public HoaDonChiTietAdminServices(ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, SanPhamRepository sanPhamRepository, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory, ImeiDaBanAdminServices imeiDaBanAdminServices, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonAdminService hoaDonAdminService) {
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
         this.hoaDonRepository = hoaDonRepository;
         this.sanPhamRepository = sanPhamRepository;
@@ -40,6 +43,7 @@ public class HoaDonChiTietAdminServices {
         this.imeiReposiory = imeiReposiory;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
         hoaDonChiTiet_imeiAdminServices = hoaDonChiTietImeiAdminServices;
+        this.hoaDonAdminService = hoaDonAdminService;
     }
 
     public ChiTietHoaDon toEntity(ChiTietHoaDonAdminRequest chiTietHoaDonAdminRequest, HoaDon hoaDon, SanPhamChiTiet sanPhamChiTiet, BigDecimal donGia){
@@ -120,6 +124,10 @@ public class HoaDonChiTietAdminServices {
         List<ImeiDaBan> imeiDaBans = imeiDaBanAdminServices.generateImeiDaBan(cthdSave,imeisDaChon,TrangThaiImei.RESERVED);
         imeiDaBanRepository.saveAll(imeiDaBans);
 
+        for (ImeiDaBan imeiDaBan : imeiDaBans) {
+            hoaDonAdminService.createLshd(hoaDon, HanhDongLichSuHoaDon.UPDATE,"Thêm sản phẩm với imei: "+imeiDaBan.getSoImei()+ " vào hóa đơn ");
+        }
+
         return cthdSave;
     }
 
@@ -180,6 +188,10 @@ public class HoaDonChiTietAdminServices {
             deleleHdct(hdctId);
         }
 
+        for (String imei : imeisToReturn) {
+            hoaDonAdminService.createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Trả sản phẩm với IMEI: "+imei);
+        }
+
     }
 
 
@@ -201,6 +213,10 @@ public class HoaDonChiTietAdminServices {
 
         hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeiList,TrangThaiImei.AVAILABLE);
         chiTietHoaDonRepository.deleteById(hdctId);
+
+        for (String imei : soImeis) {
+            hoaDonAdminService.createLshd(cthdCanXoa.getIdHoaDon(),HanhDongLichSuHoaDon.UPDATE,"Trả sản phẩm với IMEI: "+imei);
+        }
     }
 
     public void updateGiaHoaDonChiTiet (Integer idHoaDonChiTiet, BigDecimal giaBan) {

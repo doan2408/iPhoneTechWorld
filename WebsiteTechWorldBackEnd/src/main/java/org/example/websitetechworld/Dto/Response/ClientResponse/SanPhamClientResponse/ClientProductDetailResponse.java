@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ClientProductDetailResponse {
     private Integer idSpct;  //id spct
+    private String maSanPhamChiTiet;
     private String tenSanPham;
     private List<String> hinhAnh;
     private BigDecimal giaBan;

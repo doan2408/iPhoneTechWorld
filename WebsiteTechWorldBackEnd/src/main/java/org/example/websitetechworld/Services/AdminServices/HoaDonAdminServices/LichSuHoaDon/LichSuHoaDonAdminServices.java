@@ -54,7 +54,6 @@ public class LichSuHoaDonAdminServices {
 
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(
                 () -> new IllegalArgumentException("Hóa đơn không tồn tại với ID: " + hoaDonId));
-
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setIdNhanVien(nhanVien);
         lichSuHoaDon.setIdHoaDon(hoaDon);

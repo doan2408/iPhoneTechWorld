@@ -97,6 +97,8 @@
                                     <th>Trạng thái</th>
                                     <th>Giá bán</th>
                                     <th>Lý do trả hàng</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Video</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -120,6 +122,40 @@
                                     <td>
                                         <span> {{ imei.tenLyDo }}</span>
                                     </td>
+                                    <!-- Cột hình ảnh -->
+                                    <td>
+                                        <button v-if="imei.urlHinh" @click="previewImage = imei.urlHinh"
+                                            style="cursor: pointer;" class="view-button">
+                                            Xem hình ảnh
+                                        </button>
+                                        <span v-else style="color: gray; font-size: 14px;">Không có hình ảnh</span>
+                                    </td>
+
+                                    <!-- Modal hiển thị hình ảnh -->
+                                    <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
+                                        <div class="tw-modal-content"
+                                            style="max-width: 80%; max-height: 80%; padding: 0; background: transparent; box-shadow: none;">
+                                            <img :src="previewImage"
+                                                style="max-width: 100%; max-height: 100%; border-radius: 8px;" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Cột video -->
+                                    <td>
+                                        <button v-if="imei.urlVideo" @click="showVideo = true" style="cursor: pointer;"
+                                            class="view-button">
+                                            Xem video
+                                        </button>
+                                        <span v-else style="color: gray; font-size: 14px;">Không có video</span>
+                                    </td>
+
+                                    <!-- Modal hiển thị video -->
+                                    <div v-if="showVideo" class="modal" @click="closeVideo">
+                                        <video controls autoplay style="max-width: 80%; max-height: 80%;">
+                                            <source :src="imei.urlVideo" type="video/mp4" />
+                                        </video>
+                                    </div>
+
                                     <td class="action-col">
                                         <div class="row-actions">
 
@@ -129,12 +165,6 @@
                                                 :disabled="imei.trangThaiDon === 'RETURN_TO_STOCK' || imei.trangThaiDon === 'REFUND'">
                                                 📦
                                             </button>
-
-                                            <!-- <button class=" action-btn refund"
-                                                @click="openConfirm('Bạn có chắc chắn muốn xác nhận là đã hoàn tiền?', () => processImei(imei.soImei, 'refund'))"
-                                                title="Hoàn tiền" :disabled="imei.trangThaiDon !== 'RETURN_TO_STOCK'">
-                                                💰
-                                            </button> -->
                                             <ConfirmModal v-if="showConfirm" :message="confirmMessage"
                                                 @confirm="handleConfirm" @cancel="showConfirm = false" />
                                         </div>
@@ -473,6 +503,17 @@ onMounted( async () => {
     orderSanPham();
     orderInformations();
 })
+
+const previewImage = ref(null)
+const showVideo = ref(false);
+
+function openVideo() {
+    showVideo.value = true;
+}
+
+function closeVideo() {
+    showVideo.value = false;
+}
 </script>
 
 <style scoped>
@@ -1157,5 +1198,47 @@ onMounted( async () => {
     .export-actions {
         justify-content: center;
     }
+}
+.tw-modal-overlay,
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* nền mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.view-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-button:hover {
+    background-color: #0056b3;
+}
+
+.view-button:active {
+    transform: scale(0.98);
+}
+
+.view-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 </style>

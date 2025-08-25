@@ -152,10 +152,10 @@
               Chờ xử lý
             </button>
             <button
-              :class="['tab-trigger', { active: isTabActive('Vận chuyển') }]"
-              @click="setActiveTab('Vận chuyển')"
+              :class="['tab-trigger', { active: isTabActive('Chờ vận chuyển') }]"
+              @click="setActiveTab('Chờ vận chuyển')"
             >
-              Vận chuyển
+              Chờ vận chuyển
             </button>
             <button
               :class="['tab-trigger', { active: isTabActive('Chờ giao hàng') }]"
@@ -197,7 +197,7 @@
             class="order-card"
           >
             <div class="order-mvd" style="margin: 10px 3px">
-              <b>Mã vận đơn: {{ order.maVanDon }}</b>
+              <b>Mã hóa đơn: {{ order.maHoaDon }}</b> <b v-if="order.maVanDon">|| Mã vận đơn: {{ order.maVanDon }}</b> 
             </div>
             <div class="order-status-bar">
               <div class="order-status">
@@ -378,7 +378,7 @@ const filterEndDate = ref(null);
 const orderStatuses = ref([
   "Chờ xử lý",
   "Chờ thanh toán",
-  "Vận chuyển",
+  "Chờ vận chuyển",
   "Chờ giao hàng",
   "Hoàn thành",
   "Đã hủy",
@@ -574,7 +574,7 @@ const allMyOrder = async () => {
         "Chờ xử lý": "Chờ xử lý",
 
         // Tab "Vận chuyển" -> Các trạng thái giao hàng: CONFIRM, PACKED, READYFORPICKUP, SHIPPING
-        "Vận chuyển": "Vận chuyển",
+        "Chờ vận chuyển": "Chờ vận chuyển",
 
         // Tab "Chờ giao hàng" -> Trạng thái giao hàng READYFORPICKUP
         "Chờ giao hàng": "Chờ giao hàng",
@@ -992,7 +992,7 @@ const getOrderStatusClass = (status) => {
       return "status-shipping";
     case "Chờ thanh toán":
       return "status-pending-payment";
-    case "Vận chuyển":
+    case "Chờ vận chuyển":
       return "status-in-transit";
     case "Chờ giao hàng":
       return "status-awaiting-delivery";

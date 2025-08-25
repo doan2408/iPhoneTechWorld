@@ -81,9 +81,8 @@ public class PhieuGiamGiaAdminService {
     public PhieuGiamGiaAdminResponse themPhieuGiamGia (PhieuGiamGiaAdminRequest request) {
         kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
 
-        LocalDateTime currentDate = LocalDateTime.now();
-        if (request.getNgayBatDau().isBefore(currentDate)) {
-            throw new IllegalStateException("Ngày bắt đầu phải sau ngày hiện tại");
+        if (!hasNotStarted(request.getNgayBatDau())) {
+            throw new IllegalArgumentException("Ngày bắt đầu phải sau ngày hiện tại");
         }
 
         if (request.getMaGiamGia() == null || request.getMaGiamGia().trim().isEmpty()) {
@@ -111,6 +110,10 @@ public class PhieuGiamGiaAdminService {
         }
 
         kiemTraNgayHopLe(request.getNgayBatDau(), request.getNgayKetThuc());
+
+        if (!phieuGiamGia.getTrangThaiPhieuGiamGia().equals(TrangThaiPGG.EXPIRED) && !hasNotStarted(request.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày kết thúc phải sau ngày hiện tại");
+        }
 
         if (hasNotStarted(phieuGiamGia.getNgayBatDau())) {
             modelMapper.map(request, phieuGiamGia);

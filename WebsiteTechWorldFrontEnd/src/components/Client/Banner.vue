@@ -462,15 +462,16 @@ onUnmounted(() => {
   width: 100%;
   max-width: 420px;
   height: 450px;
-  object-fit: contain;
+  object-fit: fill;
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(10, 10, 10, 0.4);
-  transition: all 0.4s ease;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
   filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
 }
 
+
 .banner-img:hover {
-  transform: scale(1.05) rotateY(5deg);
+  transform: scale(1.01) rotateY(5deg);
   box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
 }
 

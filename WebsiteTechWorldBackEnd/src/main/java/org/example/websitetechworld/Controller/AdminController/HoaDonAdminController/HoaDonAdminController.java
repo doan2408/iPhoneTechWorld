@@ -1,11 +1,13 @@
 package org.example.websitetechworld.Controller.AdminController.HoaDonAdminController;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.ChiTietHoaDonAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdGiamSoLuong;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.CapNhatTrangThaiThanhToan;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -30,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -84,8 +87,8 @@ public class HoaDonAdminController {
     }
 
     @GetMapping("/{idHoaDon}/lich-su")
-    public Page<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon, @RequestParam(defaultValue = "0") int pageNo) {
-        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon, pageNo, PAGE_SIZE);
+    public List<LichSuHoaDonAdminResponse> getPageLichSu(@PathVariable Integer idHoaDon) {
+        return hoaDonAdminService.getPageLichSuHoaDon(idHoaDon);
     }
 
     @GetMapping("/{idHoaDon}/chi-tiet-thanh-toan")
@@ -194,6 +197,14 @@ public class HoaDonAdminController {
         }
     }
 
+    //total
+    @GetMapping("/count")
+    public ResponseEntity<Long> countHoaDon() {
+        Long total = hoaDonAdminService.countHoaDon();
+        return ResponseEntity.ok(total);
+
+    }
+
     //So hoa don cho xy ly
     @GetMapping("/count/pending")
     public ResponseEntity<Integer> countHoaDonPending() {
@@ -293,12 +304,30 @@ public class HoaDonAdminController {
     }
 
     @PutMapping("/update-invoice/{id}")
-    public ResponseEntity<String> updateInvoice(@PathVariable("id") Integer id, @RequestBody InvoiceRequest request) {
+    public ResponseEntity<?> updateInvoice(@PathVariable("id") Integer id, @Valid @RequestBody InvoiceRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> {
+                errors.put(error.getField(), error.getDefaultMessage());
+            });
+            return ResponseEntity.badRequest().body(Map.of("errors", errors));
+        }
+
         try {
             hoaDonAdminService.updateInvoice(id, request);
             return ResponseEntity.ok("Invoice updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error updating invoice: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/delete-shipping/{id}")
+    public ResponseEntity<?> deleteShipping(@PathVariable("id") Integer id) {
+        try {
+            hoaDonAdminService.deleteInvocieShipping(id);
+            return ResponseEntity.ok("Invoice delete successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error delete invoice: " + e.getMessage());
         }
     }
 

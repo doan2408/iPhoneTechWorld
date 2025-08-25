@@ -85,21 +85,6 @@
                     </label>
                 </div>
             </div>
-
-            <!-- Mã giảm giá / Voucher -->
-            <div class="section">
-                <h2 class="section-title">Mã giảm giá / Voucher</h2>
-                <div class="voucher-display-area">
-                    <div v-if="appliedVoucher.code" class="applied-voucher-info">
-                        <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ appliedVoucher.code
-                                }}</strong></span>
-                        <span class="applied-voucher-discount">- ₫{{ appliedVoucher.discount.toLocaleString() }}</span>
-                    </div>
-                    <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
-                    <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
             <!-- Phương thức thanh toán -->
             <div class="section">
                 <h2 class="section-title">Phương thức thanh toán</h2>

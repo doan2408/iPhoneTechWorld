@@ -8,7 +8,7 @@
 
 /* Header */
 .pos-header {
-    background: #4f46e5;
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
     padding: 12px 20px;
     display: flex;
@@ -295,7 +295,7 @@
 }
 
 .category-btn.active {
-    background: #4f46e5;
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
     border-color: #4f46e5;
 }
@@ -1266,6 +1266,7 @@ input:checked+.slider:before {
 }
 
 .payment-btn {
+    background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     padding: 12px;
     background-color: #2ecc71;
     color: white;
@@ -3212,12 +3213,123 @@ input:checked+.slider:before {
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+
 .filter-overlay {
+    position: fixed;
+    /* quan trọng: bám vào toàn màn hình */
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* phủ ngang màn hình */
+    height: 100%;
+    /* phủ dọc màn hình */
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.history-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.history-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.3s ease;
+}
+
+.history-title {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-item {
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.history-action {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.history-time {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0;
+}
+
+.history-description {
+    font-size: 13px;
+    color: #374151;
+}
+
+.no-history {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    padding: 20px;
+}
+
+.history-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.history-btn.cancel {
+    background: #ddd;
+    color: #333;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s;
+}
+
+.history-btn.cancel:hover {
+    background: #ccc;
+}
+
+.filter-overlay {
+    position: fixed;
+    /* quan trọng: bám vào toàn màn hình */
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* phủ ngang màn hình */
+    height: 100%;
+    /* phủ dọc màn hình */
     background: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
@@ -3331,3 +3443,4 @@ input:checked+.slider:before {
     pointer-events: all;
     cursor: not-allowed;
 }
+

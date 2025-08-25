@@ -10,19 +10,25 @@ import org.example.websitetechworld.Dto.Response.CommonResponse.AfterBeforeCaseR
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.ActionAfterCase;
 import org.example.websitetechworld.Enum.CaseReason.CaseType;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +46,10 @@ public class XuLySauBanHangServices {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private final ImeiReposiory imeiReposiory;
     private static final Logger log = LoggerFactory.getLogger(XuLySauBanHangServices.class);
+    private final NhanVienRepository nhanVienRepository;
+    private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
-    public XuLySauBanHangServices(XuLySauBanHangRepository xuLySauBanHangRepository, LyDoXuLyRepository lyDoXuLyRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, ImeiDaBanRepository imeiDaBanRepository, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiReposiory imeiReposiory) {
+    public XuLySauBanHangServices(XuLySauBanHangRepository xuLySauBanHangRepository, LyDoXuLyRepository lyDoXuLyRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, HoaDonRepository hoaDonRepository, ImeiDaBanRepository imeiDaBanRepository, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, SanPhamChiTietRepository sanPhamChiTietRepository, ImeiReposiory imeiReposiory, NhanVienRepository nhanVienRepository, LichSuHoaDonRepository lichSuHoaDonRepository) {
         this.xuLySauBanHangRepository = xuLySauBanHangRepository;
         this.lyDoXuLyRepository = lyDoXuLyRepository;
         this.chiTietHoaDonRepository = chiTietHoaDonRepository;
@@ -50,6 +58,8 @@ public class XuLySauBanHangServices {
         this.hoaDonChiTiet_ImeiAdminServices = hoaDonChiTiet_ImeiAdminServices;
         this.sanPhamChiTietRepository = sanPhamChiTietRepository;
         this.imeiReposiory = imeiReposiory;
+        this.nhanVienRepository = nhanVienRepository;
+        this.lichSuHoaDonRepository = lichSuHoaDonRepository;
     }
 
     public void taoDonHoanTienHuyHang(HoaDon hoaDon){
@@ -91,6 +101,7 @@ public class XuLySauBanHangServices {
                 .collect(Collectors.toList());
         if (!lstXuLySauBanHang.isEmpty()) {
             xuLySauBanHangRepository.saveAll(lstXuLySauBanHang);
+            createLshd(hoaDon, HanhDongLichSuHoaDon.FALSE_SHIPPING,"Giao thất bại");
         }
     }
     public void taoDonTraHang(CreateReturnRequest request) {
@@ -119,6 +130,7 @@ public class XuLySauBanHangServices {
                         xuLyTonTai.setUrlVideo(imeiReq.getUrlVideo());
                         xuLyTonTai.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                         xuLyTonTai.setDaKiemTra(false);
+                        createLshd(hoaDon, HanhDongLichSuHoaDon.RETURN,"Đã yêu cầu trả hàng sau khi bị từ chối với imei "+imei.getSoImei());
                         return xuLyTonTai;
                     }else {
                         LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findById(imeiReq.getIdFailReason())
@@ -134,6 +146,7 @@ public class XuLySauBanHangServices {
                         xuLy.setUrlVideo(imeiReq.getUrlVideo());
                         xuLy.setHanhDongSauVuViec(ActionAfterCase.PENDING);
                         xuLy.setDaKiemTra(false);
+                        createLshd(hoaDon, HanhDongLichSuHoaDon.RETURN,"Đã yêu cầu trả hàng với imei "+imei.getSoImei());
                         return xuLy;
                     }
 
@@ -143,6 +156,21 @@ public class XuLySauBanHangServices {
 
         if (!lstXuLySauBanHang.isEmpty()) {
             xuLySauBanHangRepository.saveAll(lstXuLySauBanHang);
+        }
+    }
+
+    public void createLshd(HoaDon hoaDon,HanhDongLichSuHoaDon action, String moTa){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Integer nhanVienId = customUserDetails.getId();
+            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+            lichSuHoaDon.setIdHoaDon(hoaDon);
+            lichSuHoaDon.setHanhDong(action);
+            lichSuHoaDon.setIdNhanVien(nhanVienRepository.findById(nhanVienId).orElse(null));
+            lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
+            lichSuHoaDon.setMoTa(moTa);
+            lichSuHoaDonRepository.save(lichSuHoaDon);
         }
     }
 
@@ -268,6 +296,8 @@ public class XuLySauBanHangServices {
             x.setDaKiemTra(true);
             x.setHanhDongSauVuViec(action.getHanhDong());
             listUpdate.add(x);
+
+            createLshd(x.getIdHoaDon(),HanhDongLichSuHoaDon.UPDATE,action.getHanhDong().getDisplayName()+" yêu cầu trả hàng");
         }
         xuLySauBanHangRepository.saveAll(listUpdate);
 

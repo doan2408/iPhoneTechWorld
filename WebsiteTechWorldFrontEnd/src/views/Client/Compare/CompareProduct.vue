@@ -37,7 +37,7 @@
                                         </div>
                                         <h3 class="product-name-large">{{ product.tenSanPham }} - {{ product.rom[0].ten
                                             }}</h3>
-                                        <button class="buy-now-btn">Mua ngay</button>
+                                        <button @click="xemChiTiet(product.idSpct)" class="buy-now-btn">Xem chi tiết</button>
                                     </div>
                                 </div>
                             </div>
@@ -561,10 +561,15 @@ const productHeader = ref(null)
 const initialHeaderOffsetTop = ref(0);
 const initialHeaderHeight = ref(0);
 
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { tr } from 'element-plus/es/locales.mjs'
 
 const route = useRoute()
+const router = useRouter()
+
+function xemChiTiet(id) {
+  router.push(`/detail/${id}`)
+}
 
 function formatNumberWithDot(amount) {
     if (isNaN(amount)) return '0';

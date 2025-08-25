@@ -34,7 +34,7 @@
                 </button>
                 <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới tab
                 </button>
             </div>
             <div id="screen-lock-overlay" style="display: none;"></div>
@@ -409,7 +409,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                            currentInvoiceDetail.tenKhachHang }}</b></span>
+                        currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -421,7 +421,7 @@
                 </div>
                 <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
+                    <span class="shipping-fee-amount">50.000</span>
                 </div>
                 <div class="discount-section" v-if="discountAmount > 0"
                     style="flex-direction: row; max-height: 40.8px;">
@@ -439,7 +439,7 @@
                             <input type="checkbox" v-model="isShipping" @change="toggleShipping">
                             <span class="slider round"></span>
                         </label>
-                        <span class="label-text">GIAO HÀNG</span>
+                        <span class="label-text">GIAO HÀNG ( Giao nhanh )</span>
                     </div>
 
                     <div class="shipping-discount-container">
@@ -454,9 +454,7 @@
                                     }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
-                                <p><strong>Phí giao hàng:</strong> {{ shippingInfo.phiShip !== null &&
-                                    shippingInfo.phiShip !== undefined ? shippingInfo.phiShip.toLocaleString('vi-VN') +
-                                    ' VNĐ' : 'Chưa tính' }}</p>
+                                <p><strong>Phí giao hàng:</strong> 50.000 VNĐ </p>
                                 <button @click="openShippingPopup" class="update-shipping-btn">Cập nhật thông tin giao
                                     hàng</button>
                             </div>
@@ -474,7 +472,8 @@
                                             placeholder="Email người nhận" class="input-field" required>
                                         <div class="address-form">
                                             <label>Chọn tỉnh:</label>
-                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box">
+                                            <select v-model="selectedTinh" @change="onTinhChange" class="select-box"
+                                                disabled>
                                                 <option disabled value="">-- Tỉnh/Thành phố --</option>
                                                 <option v-for="t in tinhList" :key="t.code" :value="t">{{ t.name }}
                                                 </option>
@@ -499,10 +498,8 @@
                                         <textarea v-model="shippingInfo.diaChiChiTiet"
                                             placeholder="Số nhà, tên đường..." class="input-field" rows="2"
                                             required></textarea>
-                                        <div class="shipping-fee-display"
-                                            v-if="shippingInfo.phiShip !== null && shippingInfo.phiShip !== undefined">
-                                            Phí giao hàng: <span class="fee-amount">{{
-                                                shippingInfo.phiShip.toLocaleString('vi-VN') }} VNĐ</span>
+                                        <div class="shipping-fee-display">
+                                            Phí giao hàng: <span class="fee-amount">50.000 VNĐ</span>
                                         </div>
                                     </div>
                                     <div class="popup-actions">
@@ -592,10 +589,6 @@
                     <label>Email</label>
                     <input v-model="newCustomer.email" type="email" class="form-input" />
                 </div>
-                <!-- <div class="form-group">
-                    <label>Địa chỉ</label>
-                    <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
-                </div> -->
             </div>
             <div class="modal-footer">
                 <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
@@ -654,6 +647,25 @@
         </div>
     </div>
 
+    <div v-if="showSalesHistoryModal" class="history-overlay">
+        <div class="history-modal">
+            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+            <div class="history-list">
+                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                    <div class="history-action">{{ history.hanhDong }}</div>
+                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                    <div class="history-description">{{ history.moTa }}</div>
+                </div>
+                <div v-if="!orderHistory.length" class="no-history">
+                    Không có lịch sử nào để hiển thị
+                </div>
+            </div>
+            <div class="history-actions">
+                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <transition name="modal-fade">
         <div v-if="isVoucherModalOpen" class="modal-overlay-pgg" @click.self="closeVoucherModal">
             <div class="modal-content-pgg">
@@ -682,57 +694,6 @@
             </div>
         </div>
     </transition>
-
-    <div v-if="showSalesHistoryModal" class="modal-overlay" @click="closeSalesHistoryModal">
-        <div class="modal-content" @click.stop style="height: 600px;">
-            <div class="modal-header">
-                <h3>Lịch sử bán hàng</h3>
-                <button @click="closeSalesHistoryModal" class="close-modal-btn">
-                    <X class="close-icon" />
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="search-box">
-                    <input v-model="salesHistorySearchQuery" type="text"
-                        placeholder="Tìm kiếm hóa đơn (mã hóa đơn, khách hàng...)" class="search-input"
-                        @input="searchSalesHistory" />
-                </div>
-                <div class="sales-history-list">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã hóa đơn</th>
-                                <th>Khách hàng</th>
-                                <th>Tổng tiền</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(history, index) in salesHistory" :key="history.id">
-                                <td>{{ salesHistoryPage * 5 + index + 1 }}</td>
-                                <td>{{ history.maHoaDon || 'N/A' }}</td>
-                                <td>{{ history.tenKhachHang || 'Khách lẻ' }}</td>
-                                <td>{{ formatCurrency(history.thanhTien || 0) }}</td>
-                                <td>{{ formatDate(history.ngayTao) }}</td>
-                                <td>{{ formatTrangThaiThanhToan(history.trangThaiThanhToan) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pagination-controls">
-                    <button @click="previousSalesHistoryPage" :disabled="salesHistoryPage === 0">Trước</button>
-                    <span>Trang {{ salesHistoryPage + 1 }} / {{ totalSalesHistoryPages }}</span>
-                    <button @click="nextSalesHistoryPage"
-                        :disabled="salesHistoryPage >= totalSalesHistoryPages - 1">Sau</button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="closeSalesHistoryModal" class="cancel-btn">Đóng</button>
-            </div>
-        </div>
-    </div>
 </template>
 
 <script setup>
@@ -754,7 +715,9 @@ import {
     , getListKhachHang, addKhachHang, selectKhachHang, getAllPhieuGiamGia, phieuGiamGia, loadPaymentMethod, thanhToan
     , findHdctByImeiDaBan, findProductByImei,
     updateGia,
-    getAllLichSuBanHang
+    getAllLichSuBanHang,
+    viewLichSuHoaDon,
+    deleteTTShipping
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -845,7 +808,7 @@ const shippingInfo = ref({
 });
 
 
-const calculateTotal = () => {
+const calculateTotal = async () => {
     totalProductAmount.value = 0;
     if (currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList?.length) {
         for (const hd of currentInvoiceDetail.value.chiTietHoaDonAdminResponseList) {
@@ -868,7 +831,13 @@ const calculateTotal = () => {
         shippingFee.value = shippingInfo.value.phiShip
     }
 
-    grandTotal.value = totalProductAmount.value + shippingFee.value - discountAmount.value
+    if (isShipping.value) {
+        grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
+        
+    }
+    else{
+        grandTotal.value = totalProductAmount.value - discountAmount.value
+    }
 }
 
 
@@ -1002,7 +971,7 @@ const loadTabHoaDon = async () => {
             const selected = invoices.value.find(i => i.id == finalId);
             if (selected && !selected.chiTietHoaDonAdminResponseList) {
                 const res = await hoaDonDetail(finalId);
-            console.log('test', res.data)
+                console.log('test', res.data)
                 if (res.data) {
                     addOrUpdateInvoice(res.data);
                     currentInvoiceDetail.value = res.data;
@@ -1060,7 +1029,6 @@ const newCustomer = reactive({
     name: '',
     phone: '',
     email: '',
-    address: ''
 })
 
 // Cart display
@@ -1197,7 +1165,6 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts();
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
@@ -1217,7 +1184,31 @@ const clearCustomer = () => {
 }
 
 const addCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return
+
+    if (!newCustomer.name || !newCustomer.name.trim()) {
+        toast.error("Vui lòng nhập tên khách hàng");
+        return;
+    }
+
+    // validate số điện thoại
+    if (!newCustomer.phone || !newCustomer.phone.trim()) {
+        toast.error("Vui lòng nhập số điện thoại");
+        return;
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(newCustomer.phone)) {
+        toast.error("Số điện thoại không đúng định dạng");
+        return;
+    }
+
+    // validate email (nếu có nhập)
+    if (newCustomer.email && newCustomer.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newCustomer.email)) {
+            toast.error("Email không đúng định dạng");
+            return;
+        }
+    }
 
     currentInvoice.value.customer = { ...newCustomer }
     // customerSearchQuery.value = newCustomer.phone
@@ -1323,7 +1314,7 @@ const fetchImeis = async (productId, page, size) => {
         // imeis = imeis.sort((a, b) => {
         //     const isASelected = selectedImeis.value.some(selected => selected.id === a.id);
         //     const isBSelected = selectedImeis.value.some(selected => selected.id === b.id);
-            
+
         //     // Nếu a được chọn và b không được chọn, a lên đầu
         //     if (isASelected && !isBSelected) return -1;
         //     // Nếu b được chọn và a không được chọn, b lên đầu
@@ -1357,7 +1348,7 @@ watch(isImeiModalOpen, (newVal) => {
 });
 
 watch(imeiSearchQuery, (newValue, oldValue) => {
-  goToImeiPage(0);
+    goToImeiPage(0);
 });
 
 // xử lý phân trang imei
@@ -1571,7 +1562,6 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
@@ -1736,15 +1726,15 @@ const onTinhChange = async () => {
 // };
 
 const onXaChange = async () => {
-    console.log("Xã được chọn:", selectedXa.value);
-    shippingInfo.value.phiShip = null;
-    if (selectedXa.value) {
-        console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
-        await updatePhiShip();
-    }
+    // console.log("Xã được chọn:", selectedXa.value);
+    // shippingInfo.value.phiShip = null;
+    // if (selectedXa.value) {
+    //     console.log('Calculating shipping fee after selecting ward:', selectedXa.value.name);
+    //     await updatePhiShip();
+    // }
 };
 
-watch(isShipping, (newVal) => {
+watch(isShipping, async (newVal)  => {
     if (!newVal) {
         console.log('Tắt giao hàng, xóa thông tin giao hàng');
         shippingInfo.value = {
@@ -1755,12 +1745,13 @@ watch(isShipping, (newVal) => {
             phiShip: null,
             shippingMethod: 'express'
         };
-        // Reset dropdowns
         selectedTinh.value = null;
-        // selectedHuyen.value = null;
         selectedXa.value = null;
-        // huyenList.value = [];
         xaList.value = [];
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const fullAddressForDB = ''
+        await deleteTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
+        calculateTotal()
     } else {
         console.log('Đã bật giao hàng');
     }
@@ -2210,10 +2201,36 @@ const showShippingPopup = ref(false);
 const openShippingPopup = () => {
     showShippingPopup.value = true;
     shippingInfo.value.diaChiChiTiet = '';
+    const haNoi = Object.values(tinhList.value).flat().find(t => t.name === "Hà Nội")
+    if (haNoi) {
+        selectedTinh.value = haNoi
+    }
+    selectedXa.value = null;
+    // huyenList.value = [];
+    xaList.value = [];
+    if (selectedTinh.value?.name) {
+        try {
+            // const res = await getHuyen(selectedTinh.value.code);
+            // const data = res.data;
+            // huyenList.value = data.districts || [];
+            // console.log("Danh sách Huyện/Quận:", huyenList.value);
+            xaList.value = allXaList.value.filter(ward =>
+                ward.path.includes(selectedTinh.value.name)
+            )
+            console.log("Danh sách Phường/Xã:", xaList.value)
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách huyện:", error);
+        }
+    }
 };
 
 const closeShippingPopup = () => {
     showShippingPopup.value = false;
+    shippingInfo.value.tenNguoiNhan = ''
+    shippingInfo.value.sdtNguoiNhan = ''
+    shippingInfo.value.emailNguoiNhan = ''
+    shippingInfo.value.diaChiChiTiet = ''
+    shippingInfo.value.tinh
 };
 
 const showMessageConfirmShipping = ref(null)
@@ -2250,17 +2267,35 @@ const confirmShippingInfo = async () => {
 
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
+        calculateTotal()
         toast.success('Cập nhật thông tin giao hàng thành công!');
 
         showMessageConfirmShipping.value = false;
         showShippingPopup.value = false;
     } catch (error) {
         console.error('Lỗi khi cập nhật hóa đơn:', error);
-        if (error.response?.status === 401) {
-            // Interceptor sẽ xử lý refresh token và thử lại hoặc chuyển hướng đến /login
+        const status = error.response?.status;
+        const data = error.response?.data;
+
+        if (status === 401) {
             toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-        } else if (error.response?.status === 500) {
-            toast.error('Lỗi server: ' + (error.response.data.message || 'Không thể cập nhật hóa đơn.'));
+            return;
+        }
+
+        if (data?.errors && typeof data.errors === 'object') {
+            Object.values(data.errors).forEach(msg => {
+                toast.warning(msg);
+            });
+            return;
+        }
+
+        if (data?.message) {
+            toast.error(data.message);
+            return;
+        }
+
+        if (status === 500) {
+            toast.error('Lỗi server: ' + (data?.message || 'Không thể cập nhật hóa đơn.'));
         } else {
             toast.error('Có lỗi xảy ra khi cập nhật thông tin giao hàng: ' + error.message);
         }
@@ -2273,22 +2308,14 @@ const onCancelCreate = () => {
 
 const toggleShipping = () => {
     if (!isShipping.value) {
-        console.log('Tắt giao hàng, xóa thông tin giao hàng');
-        shippingInfo.value = {
-            tenNguoiNhan: '',
-            sdtNguoiNhan: '',
-            diaChiChiTiet: '',
-            phiShip: null,
-            shippingMethod: 'express'
-        };
-        selectedTinh.value = null;
-        // selectedHuyen.value = null;
-        selectedXa.value = null;
-        // huyenList.value = [];
-        xaList.value = [];
-    } else {
+        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' }; 
+        selectedTinh.value = null;  
+        selectedXa.value = null;  
+        xaList.value = []; 
+    } else { 
         console.log('Đã bật giao hàng');
-    }
+        calculateTotal()
+    } 
 };
 
 // Hàm để lấy danh sách phương thức thanh toán từ API
@@ -2338,7 +2365,7 @@ const processPayment = async () => {
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip,
+        soTienKhachDua: grandTotal.value,
         soTienGiam: discountAmount.value
     };
     console.log("tien khach dua", paymentPayload);
@@ -2507,69 +2534,47 @@ const clearDiscount = () => {
 };
 
 // Biến cho modal lịch sử bán hàng
+const orderHistory = ref([]);
 const showSalesHistoryModal = ref(false);
-const salesHistory = ref([]);
-const salesHistoryPage = ref(0);
-const salesHistoryPageSize = ref(5);
-const totalSalesHistoryPages = ref(1);
-const salesHistorySearchQuery = ref('');
+const maHoaDon = ref();
 
 const openSalesHistoryModal = async () => {
     showSalesHistoryModal.value = true;
-    await loadSalesHistory();
+    await xemLichSu();
 };
 
 const closeSalesHistoryModal = () => {
     showSalesHistoryModal.value = false;
-    salesHistorySearchQuery.value = '';
-    salesHistoryPage.value = 0;
 };
 
-const loadSalesHistory = async () => {
+const xemLichSu = async () => {
     try {
-        const response = await getAllLichSuBanHang(salesHistoryPage.value, salesHistoryPageSize.value, salesHistorySearchQuery.value);
-        salesHistory.value = response.data.content || [];
-        totalSalesHistoryPages.value = response.data.totalPages || 1;
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const response = await viewLichSuHoaDon(storedId);
+        maHoaDon.value = response.data[0].maHoaDon
+        orderHistory.value = response.data;
+        showSalesHistoryModal.value = true;
     } catch (error) {
-        console.error('Lỗi khi tải lịch sử bán hàng:', error);
-        toast.error('Không thể tải lịch sử bán hàng. Vui lòng thử lại.');
-    }
-};
-
-const searchSalesHistory = async () => {
-    salesHistoryPage.value = 0; 
-    await loadSalesHistory();
-};
-
-const previousSalesHistoryPage = () => {
-    if (salesHistoryPage.value > 0) {
-        salesHistoryPage.value--;
-        loadSalesHistory();
-    }
-};
-
-const nextSalesHistoryPage = () => {
-    if (salesHistoryPage.value < totalSalesHistoryPages.value - 1) {
-        salesHistoryPage.value++;
-        loadSalesHistory();
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
     }
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) {
+        return 'N/A';
+    }
     const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+    if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+    }
 
-watch(salesHistorySearchQuery, () => {
-    searchSalesHistory();
-});
+    const day = date.getDate().toString().padStart(2, '0');      // ngày, 2 chữ số
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // tháng, 2 chữ số (tháng bắt đầu từ 0)
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
 
 const isFilterOpen = ref(false)
 
@@ -2608,8 +2613,6 @@ const resetFilters = () => {
     filters.quantityMax = null
     filters.maSpct = null
 }
-
-
 </script>
 
 <style scoped src="@/style/HoaDon/BanHang.css"></style>
