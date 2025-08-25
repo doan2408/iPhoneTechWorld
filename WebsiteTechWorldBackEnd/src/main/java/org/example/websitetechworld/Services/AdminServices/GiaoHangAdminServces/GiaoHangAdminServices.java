@@ -69,7 +69,7 @@ public class GiaoHangAdminServices {
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())){
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
-            createLshd(hoaDon, HanhDongLichSuHoaDon.COMPLETE    ,"Đơn hàng đã hoàn thành");
+            createLshd(hoaDon, HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
         }
         if (TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan()) && TrangThaiGiaoHang.CANCELLED.equals(newStatus)){
             xuLySauBanHangServices.taoDonHoanTienHuyHang(hoaDon);
