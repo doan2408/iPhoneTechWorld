@@ -2,6 +2,7 @@
 import { onMounted, ref, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LoginService from '@/Service/LoginService/SignUp'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -45,6 +46,7 @@ const handleVerify = async () => {
   try {
     const response = await LoginService.completeRegistration(email, code.value)
     success.value = true
+    ElMessage.success("Đăng kí tài khoản thành công !");
 
     setTimeout(() => {
       router.push({

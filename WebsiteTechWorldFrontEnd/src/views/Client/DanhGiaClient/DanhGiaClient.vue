@@ -50,7 +50,7 @@
                 <!-- Hiển thị số ngày còn lại để đánh giá -->
                 <div v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order?.ngayNhanhang)"
                   class="remaining-time">
-                  {{ getRemainingDays(order.ngayNhanhang) }}
+                  {{ getRemainingDays(order?.ngayNhanhang) }}
                 </div>
                 <!-- Tab "Đã đánh giá" -->
                 <div v-if="activeTab === 'Đã đánh giá' && order.reviews && order.reviews[product.idSanPhamChiTiet]"
@@ -81,8 +81,17 @@
                       <div class="media-container">
                         <div v-for="media in order.reviews[product.idSanPhamChiTiet].media" :key="media.id"
                           class="media-item">
-                          <img v-if="media.type === 'image'" :src="media.url"
-                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham" class="review-image" />
+                          <el-image v-if="media.type === 'image'" :src="media.url"
+                            :alt="'Hình ảnh đánh giá ' + product.tenSanPham" class="review-image" fit="cover"
+                            :preview-src-list="[media.url]" preview-teleported>
+                            <template #error>
+                              <div class="image-error">
+                                <el-icon>
+                                  <Picture />
+                                </el-icon>
+                              </div>
+                            </template>
+                          </el-image>
                           <video v-else-if="media.type === 'video'" :src="media.url" controls
                             class="review-video"></video>
                         </div>
@@ -151,9 +160,9 @@
               Thành tiền: <span class="total-amount">{{ formatPrice(order.thanhTien) }} VNĐ</span>
             </div>
             <div class="order-actions">
-              <button class="action-button buy-again-button" @click="buyAgain(order)">
+              <!-- <button class="action-button buy-again-button" @click="buyAgain(order)">
                 Mua lại
-              </button>
+              </button> -->
               <button class="action-button contact-seller-button" @click="contactSeller">
                 Liên hệ người bán
               </button>
@@ -252,12 +261,22 @@ const getRemainingDays = (paymentDate) => {
   if (!paymentDate) return 'Hết hạn';
   const paymentDateTime = new Date(paymentDate);
   if (isNaN(paymentDateTime)) return 'Hết hạn';
+
   const currentDate = new Date();
+
+  // reset về 00:00 cho cả 2 ngày
+  paymentDateTime.setHours(0, 0, 0, 0);
+  currentDate.setHours(0, 0, 0, 0);
+
   const diffInTime = currentDate - paymentDateTime;
   const diffInDays = diffInTime / (1000 * 3600 * 24);
   const remainingDays = 7 - diffInDays;
-  return remainingDays > 0 ? `Còn ${Math.ceil(remainingDays)} ngày để đánh giá` : 'Hết hạn';
+
+  return remainingDays > 0
+    ? `Còn ${remainingDays} ngày để đánh giá`
+    : 'Hết hạn';
 };
+
 
 // Hàm tính số giờ còn lại để sửa đánh giá
 const getRemainingHours = (reviews) => {
@@ -1075,6 +1094,28 @@ onMounted(async () => {
   font-size: 14px;
   color: #e74c3c;
   margin-top: 8px;
+}
+
+.media-item {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.media-item:hover {
+  transform: scale(1.05);
+}
+
+.review-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #f4f4f4;
 }
 </style>
 ```

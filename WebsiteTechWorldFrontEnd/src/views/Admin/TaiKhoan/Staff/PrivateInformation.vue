@@ -139,7 +139,7 @@ import {
   detailStaff,
   updateStaff,
 } from "@/Service/Adminservice/TaiKhoan/NhanVienServices";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { computed, ref, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 
@@ -222,7 +222,19 @@ const toggleEditMode = () => {
 // Hàm lưu thông tin (giả lập, vì bạn sẽ xử lý qua service riêng)
 const saveProfile = async () => {
   Object.keys(errors.value).forEach((key) => delete errors.value[key]);
+  
   try {
+    // Thêm confirm trước khi lưu
+    await ElMessageBox.confirm(
+      'Bạn có chắc chắn muốn lưu thay đổi không?',
+      'Xác nhận',
+      {
+        confirmButtonText: 'Lưu',
+        cancelButtonText: 'Hủy',
+        type: 'warning',
+      }
+    );
+
     isLoading.value = true;
 
     console.log("Saving current user profile:", form.value);
@@ -235,6 +247,12 @@ const saveProfile = async () => {
     // Tắt chế độ chỉnh sửa
     isEditing.value = false;
   } catch (err) {
+    // Kiểm tra nếu user hủy confirm thì không làm gì
+    if (err === 'cancel' || err === 'close') {
+      return;
+    }
+
+    // Xử lý lỗi từ API
     if (Array.isArray(err)) {
       // err là mảng lỗi [{field, message}, ...]
       err.forEach(({ field, message }) => {

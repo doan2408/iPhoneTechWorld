@@ -372,7 +372,7 @@ CREATE TABLE nha_cung_cap_sp (
 CREATE TABLE khuyen_mai (
                             id INT IDENTITY(1,1) PRIMARY KEY,
                             ma_khuyen_mai NVARCHAR(50),
-                            ten_khuyen_mai VARCHAR(255),
+                            ten_khuyen_mai NVARCHAR(255),
                             mo_ta TEXT,
                             phan_tram_giam INT,
                             ngay_bat_dau DATETIME,
@@ -1097,10 +1097,8 @@ INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
 VALUES
     (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
     (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
-    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
     (N'Khách đổi ý', 'RETURN'),
     (N'Sản phẩm không đúng mô tả', 'RETURN'),
-    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
     (N'Khách đổi ý', 'CANCELLED');
 
 

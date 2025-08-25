@@ -450,3 +450,16 @@ export const downloadModelSanPhamTemplate = async () => {
     throw error;
   }
 };
+
+export const downloadImeiSanPhamTemplate = async () => {
+  try {
+    const response = await api.get("/admin/product/download-template-imei", {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi tải template:", error);
+    throw error;
+  }
+};
+
