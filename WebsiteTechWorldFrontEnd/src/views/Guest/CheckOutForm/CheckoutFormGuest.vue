@@ -18,7 +18,7 @@
                         {{ shippingAddress.email || 'Chưa có' }}
                     </p>
                     <p v-if="shippingAddress.address" class="address-detail-display">
-                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }} 
+                        <span style="color: blue;">Địa chỉ nhận hàng: </span>{{ shippingAddress.address }}
                     </p>
                     <p v-else class="address-detail-display text-gray-400" style="color: red;">
                         Chưa có địa chỉ nhận hàng
@@ -30,6 +30,14 @@
             <!-- Sản phẩm -->
             <div class="section">
                 <h2 class="section-title">Sản phẩm</h2>
+                <i style="color: #d32f2f;">
+                    Theo chính sách của cửa hàng, chỉ những khách hàng đã đăng nhập/đăng ký tài khoản mới được hưởng quyền lợi đổi trả và bảo hành sản phẩm. Rất mong quý khách thông cảm.
+                </i><br>
+                <i style="color: #d32f2f;">
+                    Quý khách vui lòng đăng nhập hoặc đăng ký tài khoản để được áp dụng đầy đủ chính sách đổi trả và bảo hành khi mua sản phẩm.    
+                </i>
+                <br></br>
+                <br></br>
                 <div class="product-item-wrapper" v-for="product in product" :key="product.idGioHangChiTiet">
                     <div class="product-item">
                         <input type="checkbox" class="product-checkbox" checked disabled />
@@ -67,13 +75,16 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <div class="radio-content">
-                            <input type="radio" name="shipping-method" value="ghtk" v-model="selectedShippingMethod"
+                            <input type="radio" name="shipping-method" value="standard" v-model="selectedShippingMethod"
                                 class="radio-field" />
                             <span>Vận chuyển tiêu chuẩn</span>
                         </div>
-                        <span class="shipping-cost">₫25.000</span>
+                        <span class="shipping-cost">
+                            đ{{ formatCurrency(phiShipTieuChuan) }}
+                        </span>
                     </label>
-                    <label class="radio-option">
+                    <label class="radio-option"
+                        v-if="selectedTinh.name && selectedTinh?.name.toLowerCase() === 'hà nội'">
                         <div class="radio-content">
                             <input type="radio" name="shipping-method" value="express" v-model="selectedShippingMethod"
                                 class="radio-field" />
@@ -85,21 +96,6 @@
                     </label>
                 </div>
             </div>
-
-            <!-- Mã giảm giá / Voucher -->
-            <div class="section">
-                <h2 class="section-title">Mã giảm giá / Voucher</h2>
-                <div class="voucher-display-area">
-                    <div v-if="appliedVoucher.code" class="applied-voucher-info">
-                        <span class="applied-voucher-text">Mã đã áp dụng: <strong>{{ appliedVoucher.code
-                                }}</strong></span>
-                        <span class="applied-voucher-discount">- ₫{{ appliedVoucher.discount.toLocaleString() }}</span>
-                    </div>
-                    <div v-else class="no-voucher-text">Chưa có mã giảm giá nào được áp dụng.</div>
-                    <button @click="openVoucherModal" class="change-button">Áp dụng mã giảm giá</button>
-                </div>
-            </div>
-
             <!-- Phương thức thanh toán -->
             <div class="section">
                 <h2 class="section-title">Phương thức thanh toán</h2>
@@ -168,7 +164,7 @@
                                 </div>
                                 <div>
                                     <label for="modal-phone" class="label">Email</label>
-                                    <input id="modal-phone" v-model="modalNewAddress.email" type="tel"
+                                    <input id="modal-email" v-model="modalNewAddress.email" type="tel"
                                         placeholder="Nhập email người nhận" class="input-field" />
                                     <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
                                 </div>
@@ -502,7 +498,8 @@ const handleApplyVoucherInModal = () => {
     voucherCode.value = modalVoucherCode.value; // Keep main form's input synced
 };
 
-
+const phiShipTieuChuan = ref(0);
+const phishipDisplay = ref(0);
 // --- Other Checkout Data ---
 const selectedShippingMethod = ref('standard')
 const pointsToApply = ref('')
@@ -539,8 +536,8 @@ const insurance = ref({
 
 const getShippingCost = computed(() => {
     switch (selectedShippingMethod.value) {
-        case 'ghtk':
-            return 25000;
+        case 'standard':
+            return phiShipTieuChuan.value;
         case 'express':
             return phishipDisplay.value;
         default:
@@ -665,7 +662,7 @@ onMounted(async () => {
     fetchPaymentMethods();
 })
 
-const phishipDisplay = ref(0);
+
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount)
 }
@@ -696,11 +693,7 @@ const updatePhiShip = async () => {
         console.log("Tọa độ cửa hàng (from):", from);
         console.log("Tọa độ người nhận (to):", to);
 
-        if (!from || !to) {
-            phishipDisplay.value = 30000; // Phí mặc định
-            console.warn("Không tìm thấy tọa độ cho ít nhất một trong hai địa chỉ. Áp dụng phí mặc định: 30,000 VNĐ.");
-            return;
-        }
+        
 
         const distance = await getDistanceInKm(from, to);
         console.log("Khoảng cách tính được:", distance);
@@ -713,12 +706,14 @@ const updatePhiShip = async () => {
         // }
 
         phishipDisplay.value = calcPhiShip(distance);
+        phiShipTieuChuan.value = calcPhiShipTieuChuan(distance)
         console.log(
             `Khoảng cách: ${distance} km, Phí ship: ${phishipDisplay.value.toLocaleString('vi-VN')} VNĐ`
         );
     } catch (err) {
         console.error("Lỗi khi tính phí ship:", err);
-        phishipDisplay.value = 30000; // Phí mặc định
+        phishipDisplay.value = 50000;
+        phiShipTieuChuan.value = 30000;
         console.log("Áp dụng phí mặc định do lỗi: 30,000 VNĐ");
     }
 };
@@ -789,14 +784,27 @@ const getDistanceInKm = async (from, to) => {
     }
 };
 const calcPhiShip = (km) => {
-    const baseFee = 15000;
-    const additionalFeePerKm = 2000;
+    return 50000
+};
 
-    if (km <= 2) return baseFee;
 
-    const calculatedFee = baseFee + (km - 2) * additionalFeePerKm;
+const calcPhiShipTieuChuan = (km) => {
 
-    return calculatedFee;
+    if (km <= 30) return 30000;
+
+    if (km >= 30 || km <= 50) return 40000;
+
+    if (km >= 50 || km <= 100) {
+        return 1500 * km;
+    }
+
+    if (km >= 100 || km <= 500) {
+        return 1200 * km;
+    }
+
+    if (km => 1000) {
+        return 1000 * km;
+    }
 };
 const onTinhChange = async () => {
     selectedXa.value = '';

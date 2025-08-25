@@ -39,19 +39,9 @@
             <h3 class="section-title">Thông tin cơ bản</h3>
           </div>
           <div class="form-grid">
-            <el-form-item
-              label="Tên model"
-              prop="tenModel"
-              :error="errors.tenModel"
-            >
-              <el-input
-                v-model="modelForm.tenModel"
-                placeholder="Nhập tên model"
-                @input="clearFieldError('tenModel')"
-                clearable
-                size="large"
-                :class="{ 'updated-input': tenModelUpdated }"
-              />
+            <el-form-item label="Tên model" prop="tenModel" :error="errors.tenModel">
+              <el-input v-model="modelForm.tenModel" placeholder="Nhập tên model (bắt buộc bắt đầu bằng 'iPhone')"  @input="clearFieldError('tenModel')"
+                clearable size="large" :class="{ 'updated-input': tenModelUpdated }" />
             </el-form-item>
             <el-form-item label="Loại" prop="idLoai" :error="errors.idLoai">
               <div style="display: flex; gap: 8px; width: 100%">
@@ -462,7 +452,7 @@
         </div>
 
         <!-- Thông tin bổ sung -->
-        <div class="form-section">
+        <!-- <div class="form-section">
           <div class="section-header">
             <el-icon class="section-icon">
               <DocumentAdd />
@@ -509,7 +499,7 @@
               />
             </el-form-item>
           </div>
-        </div>
+        </div> -->
 
         <div class="form-actions">
           <el-button size="large" @click="resetForm">
@@ -595,19 +585,8 @@
             />
           </el-select>
 
-          <el-select
-            v-model="filters.idRam"
-            placeholder="Lọc theo RAM"
-            clearable
-            size="large"
-            class="filter-select"
-          >
-            <el-option
-              v-for="ram in rams"
-              :key="ram.idRam"
-              :label="ram.dungLuongRam"
-              :value="ram.idRam"
-            />
+          <el-select v-model="filters.idRam" placeholder="Lọc theo RAM" clearable size="large" class="filter-select">
+            <el-option v-for="ram in rams" :key="ram.idRam" :label="`${ram.dungLuongRam} - ${ram.loaiRam}`" :value="ram.idRam" />
           </el-select>
 
           <el-select
@@ -721,7 +700,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Trạng thái" width="150">
+        <!-- <el-table-column label="Trạng thái" width="150">
           <template #default="{ row }">
             <el-tag
               :type="statusTagType(row.trangThaiSanPhamModel)"
@@ -738,13 +717,8 @@
               {{ formatNamRaMat(row.namRaMat) }}
             </span>
           </template>
-        </el-table-column>
-        <el-table-column
-          label="Hành động"
-          width="200"
-          align="center"
-          fixed="right"
-        >
+        </el-table-column> -->
+        <el-table-column label="Hành động" width="350" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button
@@ -898,7 +872,7 @@
               }}</el-tag>
             </div>
           </div>
-          <div class="detail-item detail-full">
+          <!-- <div class="detail-item detail-full">
             <div class="detail-label">Trạng thái</div>
             <div class="detail-value">
               <el-tag
@@ -915,7 +889,7 @@
             <div class="detail-value date-text">
               {{ formatNamRaMat(viewModelData.namRaMat) }}
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -1181,8 +1155,8 @@ export default {
       idCameraSau: [],
       idXuatXu: null,
       idLoai: null,
-      trangThaiSanPhamModel: "ACTIVE",
-      namRaMat: null,
+      trangThaiSanPhamModel: 'ACTIVE',
+      namRaMat: new Date().getFullYear(),
     });
 
     const formRules = ref({

@@ -14,13 +14,12 @@
       </el-col>
 
       <!-- Các nút căn phải -->
-      <el-col :span="16" class="text-right" align="right">
-        <!-- <el-button type="primary" @click="handleSearch">Tìm kiếm</el-button> -->
+      <!-- <el-col :span="16" class="text-right" align="right">
         <el-button type="primary" @click="handleCreate">Tạo mới</el-button>
         <el-button type="primary" @click="handleRefresh" :loading="loading"
           >Làm mới</el-button
         >
-      </el-col>
+      </el-col> -->
     </el-row>
 
     <h2>Danh sách IMEI</h2>
@@ -61,7 +60,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Thao tác" width="180">
+        <!-- <el-table-column label="Thao tác" width="180">
           <template #default="{ row }">
             <div class="action-buttons-horizontal">
               <el-button
@@ -78,7 +77,7 @@
               />
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
 

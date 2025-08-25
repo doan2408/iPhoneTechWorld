@@ -50,6 +50,7 @@ const handleLogout = async () => {
   try {
     await LoginService.logout(); // Gọi API đăng xuất
     isLoggedIn.value = false;
+    localStorage.removeItem("user");
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
     console.error("Lỗi đăng xuất:", err);

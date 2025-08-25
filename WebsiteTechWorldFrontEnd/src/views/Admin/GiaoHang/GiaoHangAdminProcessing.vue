@@ -117,7 +117,7 @@
         <!-- Action Buttons -->
         <div class="actions-section">
             <div class="left-actions">
-                <button v-if="order.trangThaiThanhToan === 'PENDING' && !statusFlase.includes(order.trangThaiDonHang)"
+                <button v-if="order.trangThaiThanhToan === 'PENDING' && 'Đã giao'.includes(order.trangThaiDonHang)"
                     @click="openConfirm('Xác nhận đã nhận tiền?', () => updateStatusInvoicePaid('PAID'))"
                     class="action-btn complete-btn">
                     <CheckCircle class="icon-small" /> ĐÃ NHẬN TIỀN
@@ -145,6 +145,11 @@
                     @click="openConfirm('Xác nhận sẵn sàng giao?', () => updateOrderStatus('Sẵn sàng giao'))"
                     class="action-btn ready-btn" :disabled="isProcessing">
                     <CheckCircle class="icon-small" /> SẴN SÀNG GIAO
+                </button>
+
+                <button v-if="canReady && order.shippingMethod == 'express' && order.trangThaiThanhToan == 'PENDING'"
+                    @click="updateShippingMethod(order)" class="action-btn ship-btn">
+                    <Truck class="icon-small" /> VẬN CHUYỂN TIÊU CHUẨN
                 </button>
 
                 <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'"
@@ -188,10 +193,6 @@
                         </div>
                     </div>
                 </div>
-
-                <button v-if="canReturn" @click="openPopupReturn()" class="action-btn cancel-btn">
-                    <X class="icon-small" /> TRẢ HÀNG
-                </button>
 
                 <div v-if="showReturnPopup" class="return-overlay">
                     <div class="return-modal">
@@ -253,16 +254,8 @@
             </div>
 
             <div class="right-actions">
-                <button @click="printInvoice" class="action-btn print-btn">
-                    <Printer class="icon-small" /> IN HÓA ĐƠN
-                </button>
-
-                <button @click="printDeliveryNote" class="action-btn delivery-btn">
-                    <FileText class="icon-small" /> IN PHIẾU GIAO HÀNG
-                </button>
-
-                <button @click="editOrder" class="action-btn edit-btn">
-                    <Edit class="icon-small" /> CHỈNH SỬA
+                <button @click="xemYeuCau" class="action-btn print-btn">
+                    <Eye class="icon-small" /> XEM YÊU CẦU
                 </button>
             </div>
         </div>
@@ -304,12 +297,12 @@
                             <div class="contact-item">
                                 <Phone class="icon-small" />
                                 <span>{{ order.sdtNguoiNhan }}</span>
-                                <button @click="callCustomer" class="contact-btn">Gọi</button>
+                                <!-- <button @click="callCustomer" class="contact-btn">Gọi</button> -->
                             </div>
                             <div class="contact-item">
                                 <Mail class="icon-small" />
                                 <span>{{ order.emailNguoiNhan }}</span>
-                                <button @click="emailCustomer" class="contact-btn">Email</button>
+                                <!-- <button @click="emailCustomer" class="contact-btn">Email</button> -->
                             </div>
                         </div>
                     </div>
@@ -357,33 +350,103 @@
                 <div class="detail-card items-card">
                     <div class="card-header">
                         <Package class="icon" />
-                        <h3>Sản phẩm ({{ order.chiTietHoaDonAdminResponseList?.length || 0 }} món)</h3>
+                        <h3>Sản phẩm</h3>
                     </div>
                     <div class="card-content">
                         <div class="items-summary">
                             <div v-for="item in order.chiTietHoaDonAdminResponseList" :key="item.id" class="item-row">
-                                <img :src="item.imageSanPham" :alt="item.name" class="item-image" />
+                                <img :src="item.imageSanPham" :alt="item.tenSanPham" class="item-image" />
+
                                 <div class="item-info">
                                     <span class="item-name">{{ item.tenSanPham }}</span>
-                                    <span class="item-qty">x{{ item.soLuong }}</span>
+                                    <span class="item-spec">{{ item.rom }} • {{ item.mau }}</span>
+
+                                    <div class="imei-list">
+                                        <span class="imei-label">Số IMEI:</span>
+                                        <ul>
+                                            <li v-for="imei in item.danhSachImei" :key="imei">{{ imei }}</li>
+                                        </ul>
+                                    </div>
                                 </div>
+
                                 <span class="item-price">{{ formatCurrency(item.donGia) }}</span>
                             </div>
                         </div>
+
                         <div class="total-summary">
                             <div class="total-row">
-                                <span>Tổng cộng:</span>
+                                <span class="total-label">Tổng cộng:</span>
                                 <span class="total-price">{{ formatCurrency(order.thanhTien) }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
 
-
+        <div v-if="showRequestModal" class="request-overlay">
+            <div class="request-modal">
+                <h3 class="request-title">Danh sách yêu cầu</h3>
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>IMEI</th>
+                            <th>Loại yêu cầu</th>
+                            <th>Lý do</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian yêu cầu</th>
+                            <th>Thời gian xử lý</th>
+                            <th>Hình ảnh</th>
+                            <th>Video</th>
+                            <th>Đã kiểm tra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(request, index) in requests" :key="request.id">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ request.soImei }}</td>
+                            <td>{{ request.loaiVuViec }}</td>
+                            <td>{{ request.lyDoXuLy }}</td>
+                            <td>{{ request.hanhDongSauVuViec }}</td>
+                            <td>{{ formatDate(request.thoiGianYeuCau) }}</td>
+                            <td>{{ request.thoiGianXuLy ? formatDate(request.thoiGianXuLy) : 'Chưa xử lý' }}</td>
+                            <td>
+                                <button v-if="request.urlHinh" @click="previewImage = request.urlHinh"
+                                    style="cursor: pointer;" class="view-button">
+                                    Xem hình ảnh
+                                </button>
+                                <span v-else style="color: gray; font-size: 14px;">Không có hình ảnh</span>
+                            </td>
+                            <td>
+                                <button v-if="request.urlVideo" @click="openVideo(request.urlVideo)"
+                                    style="cursor: pointer;" class="view-button">
+                                    Xem video
+                                </button>
+                                <span v-else style="color: gray; font-size: 14px;">Không có video</span>
+                            </td>
+                            <td>{{ request.daKiemTra ? '✔️' : '❌' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="request-actions">
+                    <button class="request-btn cancel" @click="showRequestModal = false">Đóng</button>
+                </div>
+            </div>
+        </div>
+        <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
+            <div class="tw-modal-content" @click.stop>
+                <img :src="previewImage" alt="Preview Image" class="preview-image" />
+            </div>
+        </div>
+        <div v-if="showVideo" class="tw-modal-overlay" @click="closeVideo">
+            <div class="tw-modal-content" @click.stop>
+                <video controls autoplay class="preview-video">
+                    <source :src="currentVideoUrl" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -391,13 +454,14 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
     Clock, User, Phone, Mail, MapPin, Package, CreditCard, ScrollText, Check, XCircle, AlertTriangle,
-    CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw
+    CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw,
+    Eye
 } from 'lucide-vue-next'
-import { hoaDonDetail, changeStatusInvoice } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
+import { hoaDonDetail, changeStatusInvoice, viewRequests, updateShipping } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { getAllFalseReasonByCaseReason } from '@/Service/GuestService/FalseReasonServices/FalseReasonServices'
 import { createActionAfterCase, createActionAfterCaseReturn } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
-import { findHdctByImeiDaBan } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { findHdctByImeiDaBan, getOrderHistory } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
@@ -415,6 +479,7 @@ const viewOrderDetail = async () => {
     if (id) {
         try {
             const response = await hoaDonDetail(id)
+            console.log('rs', response.data)
             Object.assign(order, response.data)
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
@@ -650,7 +715,7 @@ const getAllFalseReason = async () => {
     try {
         const res = await getAllFalseReasonByCaseReason('FAILED_DELIVERY')
         failReasons.value = res.data
-    }catch(err){
+    } catch (err) {
         console.error("Lỗi load lý do:", err)
     }
 }
@@ -667,7 +732,7 @@ const openPopupShippingFalse = () => {
 
 const confirmFail = async () => {
     updateOrderStatus('Giao thất bại')
-    await createActionAfterCase(order.idHoaDon,failReason.value)
+    await createActionAfterCase(order.idHoaDon, failReason.value)
     showFailPopup.value = false
     failReason.value = ""
 }
@@ -704,9 +769,9 @@ const confirmReturn = async () => {
             imeis: imeis.value
                 .filter(i => i.selected)
                 .map(i => ({
-                    idHoaDonChiTiet: i.idHoaDonChiTiet, 
-                    soImei: i.soImei,                   
-                    idFailReason: i.reasonId            
+                    idHoaDonChiTiet: i.idHoaDonChiTiet,
+                    soImei: i.soImei,
+                    idFailReason: i.reasonId
                 }))
         }
 
@@ -739,8 +804,18 @@ const updateOrderStatus = async (newStatus) => {
         console.log(response.data);
         console.log(`Order status updated to: ${newStatus}`);
         await viewOrderDetail();
+        toast.success("Đã Cập Nhật Thành Công Trạng Thái Thành " + newStatus)
+        if (newStatus === 'Sẵn sàng giao') {
+            toast.success("Mã vận đơn đã được tạo")
+        }
     } catch (error) {
         console.error('Failed to update order status:', error.response?.data || error.message);
+        if (error.response?.data) {
+            // Nếu backend trả về object JSON { message: "..."}
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     } finally {
         isProcessing.value = false;
     }
@@ -754,9 +829,18 @@ const updateStatusInvoicePaid = async (newStatus) => {
         // Cập nhật trạng thái sau khi API thành công
         order.trangThaiThanhToan = newStatus
         await viewOrderDetail();
-
+        if (newStatus === 'PAID') {
+            toast.success("Đã xác nhận nhận tiền")
+        } else {
+            toast.success("Hoàn tiền thành công")
+        }
     } catch (error) {
         console.error('Failed to update invoice status:', error.response?.data || error.message)
+        if (error.response?.data) {
+            toast.error(error.response.data.message || error.response.data);
+        } else {
+            toast.error("Lỗi hệ thống, vui lòng thử lại sau!");
+        }
     }
 }
 
@@ -774,17 +858,34 @@ const callDriver = () => {
     }
 }
 
-const printInvoice = () => {
-    console.log('Printing invoice')
-    window.print()
+const showRequestModal = ref(false);
+
+const requests = ref([]);
+
+const xemYeuCau = async () => {
+    try {
+        const id = route.params.id;
+        const response = await viewRequests(id);
+        requests.value = response.data;
+        showRequestModal.value = true;
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
+        toast.error('Không thể tải lịch sử hóa đơn');
+    }
+};
+
+const previewImage = ref(null);
+const showVideo = ref(false);
+const currentVideoUrl = ref(null); // Thêm biến để lưu URL video hiện tại
+
+function openVideo(url) {
+    currentVideoUrl.value = url;
+    showVideo.value = true;
 }
 
-const printDeliveryNote = () => {
-    console.log('Printing delivery note')
-}
-
-const editOrder = () => {
-    console.log('Editing order')
+function closeVideo() {
+    showVideo.value = false;
+    currentVideoUrl.value = null; // Reset URL video khi đóng
 }
 
 onMounted(() => {
@@ -799,6 +900,16 @@ function openConfirm(message, callback) {
     confirmMessage.value = message
     confirmCallback = callback
     showConfirm.value = true
+}
+
+const updateShippingMethod = async (hoaDon) => {
+    try {
+        await updateShipping(hoaDon.idHoaDon)
+        order.shippingMethod = 'standard'
+        toast.success('Đã chuyển thành giao hàng tiêu chuẩn')
+    } catch (error) {
+        console.error('Lỗi khi update shipping-method:', error)
+    }
 }
 
 function handleConfirm() {

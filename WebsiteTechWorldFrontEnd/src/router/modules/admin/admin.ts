@@ -19,6 +19,7 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: "bill", component: () => import("@/views/Admin/HoaDon/HoaDonAdmin.vue") },
       { path: "shipping", component: () => import("@/views/Admin/GiaoHang/GiaoHangAdmin.vue") },
       { path: "danhGiaSanPham", component: () => import("@/views/Admin/DanhGiaSanPham/DanhGiaSanPham.vue") },
+      { path: "dieuKhoan", component: () => import("@/views/Admin/HoaDon/DieuKhoan.vue"), meta: {Title : "Điều khoản"}},
       ...clientAdminRoutes,
       ...staffAdminRoutes,
       ...hoaDonRoutes,

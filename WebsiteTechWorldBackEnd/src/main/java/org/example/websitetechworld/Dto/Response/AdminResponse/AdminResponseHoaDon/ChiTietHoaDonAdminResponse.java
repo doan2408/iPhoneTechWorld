@@ -1,14 +1,13 @@
 package org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon;
 
 import lombok.*;
-import org.example.websitetechworld.Entity.ChiTietHoaDon;
-import org.example.websitetechworld.Entity.HinhAnh;
-import org.example.websitetechworld.Entity.HoaDon;
-import org.example.websitetechworld.Entity.SanPhamChiTiet;
+import org.example.websitetechworld.Entity.*;
 
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -23,6 +22,9 @@ public class ChiTietHoaDonAdminResponse {
     private String maHoaDon;
 
     private Integer idSanPhamChiTiet;
+    private List<String> danhSachImei;
+    private String rom;
+    private String mau;
     private String maSanPhamChiTiet;
     private String imageSanPham;
 
@@ -47,6 +49,11 @@ public class ChiTietHoaDonAdminResponse {
         if (chiTietHoaDon.getIdSanPhamChiTiet() != null){
             chiTietHoaDonAdminResponse.setIdSanPhamChiTiet(chiTietHoaDon.getIdSanPhamChiTiet().getId());
             chiTietHoaDonAdminResponse.setMaSanPhamChiTiet(chiTietHoaDon.getIdSanPhamChiTiet().getMaSanPhamChiTiet());
+
+            chiTietHoaDonAdminResponse.setDanhSachImei(chiTietHoaDon.getImeiDaBans().stream()
+                    .map(ImeiDaBan::getSoImei).collect(Collectors.toList()));
+            chiTietHoaDonAdminResponse.setRom(chiTietHoaDon.getIdSanPhamChiTiet().getIdRom().getDungLuong());
+            chiTietHoaDonAdminResponse.setMau(chiTietHoaDon.getIdSanPhamChiTiet().getIdMau().getTenMau());
 
             Set<HinhAnh> hinhAnhs = chiTietHoaDon.getIdSanPhamChiTiet().getHinhAnhs();
             if (hinhAnhs != null && !hinhAnhs.isEmpty()) {

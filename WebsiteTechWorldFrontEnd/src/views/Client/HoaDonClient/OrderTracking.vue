@@ -196,7 +196,7 @@
                         <div class="return-actions">
                             <button class="return-btn cancel" @click="showReturnPopup = false">Hủy</button>
                             <button class="return-btn confirm"
-                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId)"
+                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId) || imeis.filter(i => i.selected).some(i => !i.urlHinh) || imeis.filter(i => i.selected).some(i => !i.urlVideo)"
                                 @click="confirmReturn">
                                 Xác nhận
                             </button>
@@ -302,7 +302,7 @@
                 <div class="detail-card items-card">
                     <div class="card-header">
                         <Package class="icon" />
-                        <h3>Sản phẩm ({{ order.chiTietHoaDonAdminResponseList?.length || 0 }} món)</h3>
+                        <h3>Sản phẩm</h3>
                     </div>
                     <div class="card-content">
                         <div class="items-summary">
@@ -515,7 +515,8 @@ const canCancel = computed(() =>
     ['Chờ xử lý'].includes(order.trangThaiDonHang)
 );
 const canShippingFalse = computed(() => order.trangThaiDonHang === 'Đang giao');
-const canReturn = computed(() => order.trangThaiDonHang === 'Đã giao' || order.trangThaiDonHang === 'Trả hàng');
+const user = ref(JSON.parse(localStorage.getItem("user")) || null);
+const canReturn = computed(() => (order.trangThaiDonHang === 'Đã giao' || order.trangThaiDonHang === 'Trả hàng') && order.idKhachHang === user.value?.id);
 
 //format date 
 const formatDate = (dateString) => {

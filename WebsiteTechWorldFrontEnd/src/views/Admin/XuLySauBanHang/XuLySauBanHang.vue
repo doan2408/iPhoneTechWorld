@@ -226,7 +226,7 @@
                                     <img v-if="item.urlHinh" :src="item.urlHinh"
                                         style="max-width: 80px; cursor: zoom-in;"
                                         @click="previewImage = item.urlHinh" />
-                                    <span style="color: gray; font-size: 14px;">Không có hình ảnh</span>
+                                    <span v-if="!item.urlHinh" style="color: gray; font-size: 14px;">Không có hình ảnh</span>
                                 </td>
 
                                 <div v-if="previewImage" class="tw-modal-overlay" @click="previewImage = null">
@@ -241,7 +241,7 @@
                                         style="max-width: 120px; cursor: pointer;" @click="openVideo">
                                         <source :src="item.urlVideo" type="video/mp4" />
                                     </video>
-                                    <span style="color: gray; font-size: 14px;">Không có video</span>
+                                    <span v-if="!item.urlVideo" style="color: gray; font-size: 14px;">Không có video</span>
                                 </td>
 
 

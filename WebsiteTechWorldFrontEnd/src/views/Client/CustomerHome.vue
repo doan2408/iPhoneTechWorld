@@ -30,6 +30,7 @@ import {
   ArrowDown,
   Sort,
   View,
+  Plus,
 } from "@element-plus/icons-vue";
 import { h } from "vue";
 import CompareBar from "./Compare/CompareBar.vue";

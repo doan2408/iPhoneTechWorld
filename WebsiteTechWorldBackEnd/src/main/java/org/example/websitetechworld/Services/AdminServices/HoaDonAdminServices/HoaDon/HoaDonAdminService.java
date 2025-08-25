@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -29,6 +30,7 @@ import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
@@ -77,9 +79,10 @@ public class HoaDonAdminService {
     private final GioHangRepository gioHangRepository;
     private final ViDiemRepository viDiemRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final LichSuDiemService lichSuDiemService;
 
     public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository,
-                              NhanVienRepository nhanVienRepository) {
+                              NhanVienRepository nhanVienRepository, LichSuDiemService lichSuDiemService) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -99,6 +102,7 @@ public class HoaDonAdminService {
         this.gioHangRepository = gioHangRepository;
         this.viDiemRepository = viDiemRepository;
         this.nhanVienRepository = nhanVienRepository;
+        this.lichSuDiemService = lichSuDiemService;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -171,8 +175,34 @@ public class HoaDonAdminService {
     public List<LichSuHoaDonAdminResponse> getPageLichSuHoaDon(Integer hoaDonId){
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
         return lichSuHoaDonRepository.findByIdHoaDon(hoaDon)
-                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId))
+                .stream().sorted(Comparator.comparing(LichSuHoaDon::getId).reversed())
                 .map(LichSuHoaDonAdminResponse::convertDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<XuLySauBanHangResponse> getYeuCau (Integer hoaDonId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
+        return xuLySauBanHangRepository.findXuLySauBanHangByIdHoaDon_Id(hoaDon.getId())
+                .stream().sorted(Comparator.comparing(XuLySauBanHang::getId).reversed())
+                .map(xuLySauBanHang -> {
+                    XuLySauBanHangResponse response = new XuLySauBanHangResponse();
+                    response.setId(xuLySauBanHang.getId());
+                    response.setIdHoaDon(xuLySauBanHang.getIdHoaDon().getId());
+                    response.setIdImeiDaBan(xuLySauBanHang.getIdImeiDaBan().getId());
+                    response.setSoImei(xuLySauBanHang.getIdImeiDaBan().getSoImei());
+                    response.setCaseType(xuLySauBanHang.getLoaiVuViec());
+                    response.setLoaiVuViec(xuLySauBanHang.getLoaiVuViec().getDisplayName());
+                    response.setIdLyDoXuLy(xuLySauBanHang.getIdLyDo().getId());
+                    response.setLyDoXuLy(xuLySauBanHang.getIdLyDo().getTenLyDo());
+                    response.setActionAfterCase(xuLySauBanHang.getHanhDongSauVuViec());
+                    response.setHanhDongSauVuViec(xuLySauBanHang.getHanhDongSauVuViec().getDisplayName());
+                    response.setDaKiemTra(xuLySauBanHang.getDaKiemTra());
+                    response.setThoiGianXuLy(xuLySauBanHang.getThoiGianXuLy());
+                    response.setThoiGianYeuCau(xuLySauBanHang.getThoiGianYeuCau());
+                    response.setUrlHinh(xuLySauBanHang.getUrlHinh());
+                    response.setUrlVideo(xuLySauBanHang.getUrlVideo());
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -282,6 +312,9 @@ public class HoaDonAdminService {
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
+        if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
+            createLshd(hoaDon,HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
+        }
 
         if (response.getMessage().equals("Thanh toán thành công") && Boolean.TRUE.equals(hoaDon.getIsShipping())) {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.RESERVED);
@@ -312,6 +345,10 @@ public class HoaDonAdminService {
         }
 
         hoaDonRepository.delete(hoaDon);
+    }
+
+    public Long countHoaDon () {
+        return hoaDonRepository.count();
     }
 
     public Integer countHoaDonPending () {
@@ -411,11 +448,31 @@ public class HoaDonAdminService {
                     invoice.getEmailNguoiNhan(),
                     invoice.getNgayDatHang()
             );
+            createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Cập nhật thông tin giao hàng");
         } catch (Exception e) {
             System.err.println("Error executing JPQL query for invoice id " + id + ": " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to execute JPQL query: " + e.getMessage());
         }
+    }
+
+    @Transactional
+    public void deleteInvocieShipping(Integer id){
+        HoaDon invoice = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + id));
+
+        invoice.setTenNguoiNhan(null);
+        invoice.setSdtNguoiNhan(null);
+        invoice.setEmailNguoiNhan(null);
+        invoice.setDiaChiGiaoHang(null);
+        invoice.setThanhTien(invoice.getThanhTien().subtract(invoice.getPhiShip()));
+        invoice.setPhiShip(BigDecimal.ZERO);
+        invoice.setIsShipping(false);
+        invoice.setShippingMethod(null);
+
+        hoaDonRepository.save(invoice);
+
+        createLshd(invoice,HanhDongLichSuHoaDon.UPDATE,"Thay đổi không giao hàng và xóa thông tin");
     }
 
     public void updateMaVanDon(Integer idHoaDon) {
@@ -553,14 +610,19 @@ public class HoaDonAdminService {
         hoaDon.setTrangThaiThanhToan(newStatus);
         List<ChiTietHoaDon> danhSachChiTiet = giaoHangAdminServices.getHoaDonChiTietByMaHoaDon(hoaDon.getMaHoaDon());
 
-        List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
-        for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
-            chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+        if (newStatus.equals(TrangThaiThanhToan.PAID)){
+            List<ChiTietThanhToan> chiTietThanhToanList = chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDon.getId());
+            for (ChiTietThanhToan chiTietThanhToan : chiTietThanhToanList){
+                chiTietThanhToan.setThoiGianThanhToan(LocalDateTime.now());
+            }
+            chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.THANH_TOAN,"Đã nhận được tiền");
         }
-        chiTietThanhToanRepository.saveAll(chiTietThanhToanList);
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
+            lichSuDiemService.congDiemTuHoaDon(hoaDon.getId());
         }
         if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
             XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_IdAndLoaiVuViec(hoaDon.getId(), CaseType.CANCELLED);
@@ -568,9 +630,11 @@ public class HoaDonAdminService {
             xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.REFUND);
             xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.HUY,"Tạo yêu cầu hủy đơn thành công");
         }
         if (TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.REFUNDED.equals(newStatus)){
             hoaDonChiTiet_ImeiAdminServices.updateImeiHoanTien(danhSachChiTiet, TrangThaiImei.AVAILABLE,TrangThaiImei.RETURNED);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Hoàn thành công cho khách hàng "+hoaDon.getThanhTien()+" VND");
         }
 
         hoaDonRepository.save(hoaDon);
@@ -676,11 +740,18 @@ public class HoaDonAdminService {
             Integer nhanVienId = customUserDetails.getId();
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setIdHoaDon(hoaDon);
-            lichSuHoaDon.setHanhDong(HanhDongLichSuHoaDon.UPDATE);
+            lichSuHoaDon.setHanhDong(action);
             lichSuHoaDon.setIdNhanVien(nhanVienRepository.findById(nhanVienId).orElse(null));
             lichSuHoaDon.setThoiGianThayDoi(LocalDate.now());
             lichSuHoaDon.setMoTa(moTa);
             lichSuHoaDonRepository.save(lichSuHoaDon);
         }
+    }
+
+    public void updateShippingMethod (Integer idHoaDon) {
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+        hoaDon.setShippingMethod(ShippingMethod.STANDARD);
+        hoaDonRepository.save(hoaDon);
     }
 }

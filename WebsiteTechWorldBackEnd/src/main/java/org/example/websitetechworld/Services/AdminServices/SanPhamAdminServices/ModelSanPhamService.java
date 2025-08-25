@@ -83,8 +83,8 @@ public class ModelSanPhamService {
         entity.setTenModel(tenFormat);
 
         entity.setMaModelSanPham(req.getMaModelSanPham());
-        entity.setNamRaMat(req.getNamRaMat());
-        entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
+//        entity.setNamRaMat(req.getNamRaMat());
+//        entity.setTrangThaiSanPhamModel(req.getTrangThaiSanPhamModel());
         entity.setIdRam(ramRepo.findById(req.getIdRam()).orElse(null));
         entity.setIdManHinh(manHinhRepo.findById(req.getIdManHinh()).orElse(null));
         entity.setIdHeDieuHanh(heDieuHanhRepo.findById(req.getIdHeDieuHanh()).orElse(null));
@@ -104,8 +104,8 @@ public class ModelSanPhamService {
             response.setIdModelSanPham(entity.getIdModelSanPham());
             response.setMaModelSanPham(entity.getMaModelSanPham());
             response.setTenModel(entity.getTenModel());
-            response.setNamRaMat(entity.getNamRaMat());
-            response.setTrangThaiSanPhamModel(entity.getTrangThaiSanPhamModel());
+//            response.setNamRaMat(entity.getNamRaMat());
+//            response.setTrangThaiSanPhamModel(entity.getTrangThaiSanPhamModel());
         }
 
         Ram ram = entity.getIdRam();
@@ -236,10 +236,10 @@ public class ModelSanPhamService {
             msp.setIdLoai((Integer) object[3]);
             msp.setIdRam((Integer) object[4]);
             msp.setIdXuatXu((Integer) object[5]);
-            msp.setNamRaMat(((java.sql.Date) object[6]).toLocalDate());
-            String trangThaiModel = (String) object[7];
-            TrangThaiSanPhamModel setTrangThai = TrangThaiSanPhamModel.valueOf(trangThaiModel);
-            msp.setTrangThaiSanPhamModel(setTrangThai);
+//            msp.setNamRaMat(((java.sql.Date) object[6]).toLocalDate());
+//            String trangThaiModel = (String) object[7];
+//            TrangThaiSanPhamModel setTrangThai = TrangThaiSanPhamModel.valueOf(trangThaiModel);
+//            msp.setTrangThaiSanPhamModel(setTrangThai);
             modelSanPham.add(msp);
         }
         return new PageImpl<>(modelSanPham, pageable, modelSanPhamsPage.getTotalElements());
@@ -248,7 +248,15 @@ public class ModelSanPhamService {
     @Transactional
     public ModelSanPhamAdminResponse createModelSanPham(ModelSanPhamAdminRequest request) {
 
+        if (!request.getTenModel().trim().matches("^iPhone(\\s[\\p{L}\\d]+)*$")) {
+            throw new BusinessException(
+                    "Tên model không hợp lệ. Phải bắt đầu bằng 'iPhone' và chỉ chứa chữ cái, số hoặc khoảng trắng. Ví dụ: iPhone 14 Pro Max"
+            );
+        }
+
+
         String tenFormat = formatTenModel(request.getTenModel());
+
 
         //  1. Kiểm tra trùng cấu hình (trừ camera sau)
         if (modelSanPhamRepository.existsModelWithSameConfig(
@@ -416,7 +424,7 @@ public class ModelSanPhamService {
 
             // Validate tiêu đề cột
             String[] expectedHeaders = {
-                    "tenModel", "namRaMat", "trangThai", "ram", "loaiRam",
+                    "tenModel", "ram", "loaiRam",
                     "kichThuocManHinh", "tenManHinh", "loaiManHinh",
                     "phienBanHeDieuHanh", "phienBanPin", "chipXuLy", "loaiCameraTruoc", "khauDoCameraTruoc",
                     "doPhanGiaiCameraTruoc", "maXuatXu", "tenLoaiIphone", "loaiCameraSau", "doPhanGiaiCameraSau", "khauDoCameraSau"
@@ -460,36 +468,36 @@ public class ModelSanPhamService {
                 sanPham.setTenModel(tenFormat);
 
                 // Cột 2: Năm ra mắt
-                String namRaMatStr = getCellValue(row.getCell(1));
-                if (namRaMatStr == null || namRaMatStr.trim().isEmpty()) {
-                    throw new BusinessException("Năm ra mắt không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
-                }
-                try {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy/MM/dd][d/M/yyyy]");
-                    LocalDate namRaMat = LocalDate.parse(namRaMatStr, formatter);
-                    int currentYear = LocalDate.now().getYear();
-                    if (namRaMat.getYear() < 2000 || namRaMat.getYear() > currentYear + 2) {
-                        throw new BusinessException("Năm ra mắt phải nằm trong khoảng từ 2000 đến " + (currentYear + 2) + " tại dòng " + (row.getRowNum() + 1) + ".");
-                    }
-                    sanPham.setNamRaMat(namRaMat);
-                } catch (DateTimeParseException e) {
-                    throw new BusinessException("Năm ra mắt không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Định dạng yêu cầu: yyyy/MM/dd hoặc d/M/yyyy.");
-                }
-
-                // Cột 3: Trạng thái sản phẩm
-                String trangThai = getCellValue(row.getCell(2));
-                if (trangThai == null || trangThai.trim().isEmpty()) {
-                    throw new BusinessException("Trạng thái sản phẩm không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
-                }
-                try {
-                    sanPham.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.valueOf(trangThai.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    throw new BusinessException("Trạng thái sản phẩm không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Giá trị hợp lệ: ACTIVE, DISCONTINUED, UPCOMING.");
-                }
+//                String namRaMatStr = getCellValue(row.getCell(1));
+//                if (namRaMatStr == null || namRaMatStr.trim().isEmpty()) {
+//                    throw new BusinessException("Năm ra mắt không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
+//                try {
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy/MM/dd][d/M/yyyy]");
+//                    LocalDate namRaMat = LocalDate.parse(namRaMatStr, formatter);
+//                    int currentYear = LocalDate.now().getYear();
+//                    if (namRaMat.getYear() < 2000 || namRaMat.getYear() > currentYear + 2) {
+//                        throw new BusinessException("Năm ra mắt phải nằm trong khoảng từ 2000 đến " + (currentYear + 2) + " tại dòng " + (row.getRowNum() + 1) + ".");
+//                    }
+//                    sanPham.setNamRaMat(namRaMat);
+//                } catch (DateTimeParseException e) {
+//                    throw new BusinessException("Năm ra mắt không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Định dạng yêu cầu: yyyy/MM/dd hoặc d/M/yyyy.");
+//                }
+//
+//                // Cột 3: Trạng thái sản phẩm
+//                String trangThai = getCellValue(row.getCell(2));
+//                if (trangThai == null || trangThai.trim().isEmpty()) {
+//                    throw new BusinessException("Trạng thái sản phẩm không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
+//                }
+//                try {
+//                    sanPham.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.valueOf(trangThai.toUpperCase()));
+//                } catch (IllegalArgumentException e) {
+//                    throw new BusinessException("Trạng thái sản phẩm không hợp lệ tại dòng " + (row.getRowNum() + 1) + ". Giá trị hợp lệ: ACTIVE, DISCONTINUED, UPCOMING.");
+//                }
 
                 // Cột 4, 5: RAM
-                String ramDungLuong = getCellValue(row.getCell(3));
-                String loaiRam = getCellValue(row.getCell(4));
+                String ramDungLuong = getCellValue(row.getCell(1));
+                String loaiRam = getCellValue(row.getCell(2));
                 if (ramDungLuong == null || ramDungLuong.trim().isEmpty()) {
                     throw new BusinessException("Dung lượng RAM không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -508,9 +516,9 @@ public class ModelSanPhamService {
                 sanPham.setIdRam(ram);
 
                 // Cột 6, 7, 8: Màn hình
-                String manHinhKichThuoc = getCellValue(row.getCell(5));
-                String tenManHinh = getCellValue(row.getCell(6));
-                String loaiManHinh = getCellValue(row.getCell(7));
+                String manHinhKichThuoc = getCellValue(row.getCell(3));
+                String tenManHinh = getCellValue(row.getCell(4));
+                String loaiManHinh = getCellValue(row.getCell(5));
                 if (manHinhKichThuoc == null || manHinhKichThuoc.trim().isEmpty()) {
                     throw new BusinessException("Kích thước màn hình không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -540,7 +548,7 @@ public class ModelSanPhamService {
                 sanPham.setIdManHinh(manHinh);
 
                 // Cột 9: Hệ điều hành
-                String hdhPhienBan = getCellValue(row.getCell(8));
+                String hdhPhienBan = getCellValue(row.getCell(6));
                 System.out.println(hdhPhienBan.toString()+ "aaaaaa");
                 if (hdhPhienBan == null || hdhPhienBan.trim().isEmpty()) {
                     throw new BusinessException("Hệ điều hành phiên bản không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
@@ -555,7 +563,7 @@ public class ModelSanPhamService {
                 sanPham.setIdHeDieuHanh(heDieuHanh);
 
                 // Cột 10: Pin
-                String pinPhienBan = getCellValue(row.getCell(9));
+                String pinPhienBan = getCellValue(row.getCell(7));
                 if (pinPhienBan == null || pinPhienBan.trim().isEmpty()) {
                     throw new BusinessException("Pin phiên bản không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -569,7 +577,7 @@ public class ModelSanPhamService {
                 sanPham.setIdPin(pin);
 
                 // Cột 11: CPU
-                String cpuChipXuLy = getCellValue(row.getCell(10));
+                String cpuChipXuLy = getCellValue(row.getCell(8));
                 if (cpuChipXuLy == null || cpuChipXuLy.trim().isEmpty()) {
                     throw new BusinessException("CPU chip xử lý không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -583,9 +591,9 @@ public class ModelSanPhamService {
                 sanPham.setIdCpu(cpu);
 
                 // Cột 12, 13, 14: Camera trước
-                String cameraTruocLoai = getCellValue(row.getCell(11));
-                String khauDoCamTruoc = getCellValue(row.getCell(12));
-                String doPhanGiaiCamTruoc = getCellValue(row.getCell(13));
+                String cameraTruocLoai = getCellValue(row.getCell(9));
+                String khauDoCamTruoc = getCellValue(row.getCell(10));
+                String doPhanGiaiCamTruoc = getCellValue(row.getCell(11));
                 if (cameraTruocLoai == null || cameraTruocLoai.trim().isEmpty()) {
                     throw new BusinessException("Loại camera trước không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -615,7 +623,7 @@ public class ModelSanPhamService {
                 sanPham.setIdCameraTruoc(cameraTruoc);
 
                 // Cột 15: Xuất xứ
-                String xuatXuMa = getCellValue(row.getCell(14));
+                String xuatXuMa = getCellValue(row.getCell(12));
                 if (xuatXuMa == null || xuatXuMa.trim().isEmpty()) {
                     throw new BusinessException("Xuất xứ mã không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -630,7 +638,7 @@ public class ModelSanPhamService {
                 sanPham.setIdXuatXu(xuatXu);
 
                 // Cột 16: Loại
-                String loaiTen = getCellValue(row.getCell(15));
+                String loaiTen = getCellValue(row.getCell(13));
                 if (loaiTen == null || loaiTen.trim().isEmpty()) {
                     throw new BusinessException("Loại tên không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }
@@ -650,9 +658,9 @@ public class ModelSanPhamService {
 
                 // Cột 17, 18, 19: Camera sau
                 List<ModelCameraSau> cameraSaus = new ArrayList<>();
-                String cameraLoaiStr = getCellValue(row.getCell(16));
-                String cameraDoPhanGiaiStr = getCellValue(row.getCell(17));
-                String cameraKhauDoStr = getCellValue(row.getCell(18));
+                String cameraLoaiStr = getCellValue(row.getCell(14));
+                String cameraDoPhanGiaiStr = getCellValue(row.getCell(15));
+                String cameraKhauDoStr = getCellValue(row.getCell(16));
                 if (cameraLoaiStr == null || cameraLoaiStr.trim().isEmpty()) {
                     throw new BusinessException("Danh sách loại camera sau không được để trống tại dòng " + (row.getRowNum() + 1) + ".");
                 }

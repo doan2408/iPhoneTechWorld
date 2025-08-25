@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/client/khuyen-mai")
+@RequestMapping("/khuyen-mai")
 @RequiredArgsConstructor
 public class KhuyenMaiClientController {
     private final SchedulerService schedulerService;

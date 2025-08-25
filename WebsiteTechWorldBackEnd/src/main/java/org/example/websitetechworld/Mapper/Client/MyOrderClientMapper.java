@@ -6,6 +6,7 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
 import org.example.websitetechworld.Entity.HinhAnh;
 import org.example.websitetechworld.Entity.HoaDon;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -27,6 +28,12 @@ public class MyOrderClientMapper {
         }
         dto.setThanhTien(hoaDon.getThanhTien());
         dto.setNgayDatHang(hoaDon.getNgayDatHang());
+        if (hoaDon.getLichSuHoaDons() != null) {
+            hoaDon.getLichSuHoaDons().stream()
+                    .filter(ls -> ls.getHanhDong() == HanhDongLichSuHoaDon.COMPLETE) // enum COMPLETE
+                    .findFirst()
+                    .ifPresent(ls -> dto.setNgayNhanHang(ls.getThoiGianThayDoi())); // hoặc ls.getNgayThucHien()
+        }
         dto.setMyOrderClientResponseList(
                 hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)
                         .collect(Collectors.toList())
@@ -63,6 +70,13 @@ public class MyOrderClientMapper {
             dto.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan().getDisplayName());
         }
         dto.setThanhTien(hoaDon.getThanhTien());
+        dto.setNgayThanhToan(hoaDon.getNgayThanhToan());
+        if (hoaDon.getLichSuHoaDons() != null) {
+            hoaDon.getLichSuHoaDons().stream()
+                    .filter(ls -> ls.getHanhDong() == HanhDongLichSuHoaDon.COMPLETE) // enum COMPLETE
+                    .findFirst()
+                    .ifPresent(ls -> dto.setNgayNhanhang(ls.getThoiGianThayDoi())); // hoặc ls.getNgayThucHien()
+        }
         dto.setMyOrderClientResponseList(
                 hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)
                         .collect(Collectors.toList())

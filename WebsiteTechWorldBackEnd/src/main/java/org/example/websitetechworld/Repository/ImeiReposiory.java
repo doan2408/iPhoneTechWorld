@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
@@ -61,6 +62,8 @@ public interface ImeiReposiory extends JpaRepository<Imei, Integer> {
     Page<Imei> findByIdSanPhamChiTiet_IdAndTrangThaiImei(Integer idSanPhamChiTiet, TrangThaiImei trangThaiImei, Pageable pageable);
 
     List<Imei> findByIdSanPhamChiTiet_Id(Integer idSanPhamChiTiet);
+
+    Optional<Imei> findBySoImeiAndIdSanPhamChiTiet_Id(String soImei, Integer idSanPhamChiTiet);
 
     int countByIdSanPhamChiTiet(SanPhamChiTiet chiTiet);
 

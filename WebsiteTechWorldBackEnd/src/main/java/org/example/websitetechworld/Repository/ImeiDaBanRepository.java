@@ -108,12 +108,11 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
     List<ImeiDaBan> imeiDaBanListByKhachHang(@Param("idKhachHang") Integer idKhachHang);
 
     @Query("""
-    SELECT DISTINCT imdb
-    FROM ImeiDaBan imdb
-    JOIN FETCH imdb.idBaoHanh bh
-    WHERE imdb.trangThai <> 'RETURNED'
-      AND imdb.soImei = :soImei
-      AND bh.trangThaiBaoHanh = 'UNDER_WARRANTY'
-""")
+        SELECT DISTINCT imdb
+        FROM ImeiDaBan imdb
+        LEFT JOIN FETCH imdb.idBaoHanh bh
+        WHERE imdb.trangThai <> 'RETURNED'
+          AND imdb.soImei = :soImei
+    """)
     ImeiDaBan findBySoImeiWithValidWarranty(String soImei);
 }

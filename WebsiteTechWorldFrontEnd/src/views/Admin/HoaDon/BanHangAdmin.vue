@@ -34,7 +34,7 @@
                 </button>
                 <ScreenLock ref="screenLock" :autoUnlockMinutes="2" />
                 <button class="action-btn" title="Làm mới" @click="reloadPage()">
-                    <RotateCcw class="btn-icon" /> &ensp;Làm mới danh sách hóa đơn
+                    <RotateCcw class="btn-icon" /> &ensp;Làm mới tab
                 </button>
             </div>
             <div id="screen-lock-overlay" style="display: none;"></div>
@@ -208,11 +208,11 @@
                                     v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
                                     <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
                                     <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai)
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="product-price" v-else>
                                     <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai)
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
@@ -409,7 +409,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                            currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -421,7 +421,7 @@
                 </div>
                 <div class="shipping-fee-section" v-if="isShipping">
                     <span class="shipping-fee-label">Phí giao hàng:</span>
-                    <span class="shipping-fee-amount">{{ formatCurrency(shippingFee) }}</span>
+                    <span class="shipping-fee-amount">50.000</span>
                 </div>
                 <div class="discount-section" v-if="discountAmount > 0"
                     style="flex-direction: row; max-height: 40.8px;">
@@ -451,7 +451,7 @@
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
                                 <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật'
-                                    }}
+                                }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> 50.000 VNĐ </p>
@@ -553,14 +553,22 @@
                         <div class="terms-conditions">
                             <label>
                                 <input type="checkbox" v-model="agreedToTerms">
-                                Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
-                                hàng.
+                                Tôi đồng ý với
+                                <router-link to="/admin/dieuKhoan" ttarget="blank">
+                                    Điều khoản và Điều kiện
+                                </router-link>
+                                của cửa hàng.
                             </label>
                         </div>
+
                     </div>
 
 
-                    <button @click="processPayment" class="payment-btn">THANH TOÁN</button>
+                    <!-- <button @click="processPayment" class="payment-btn">THANH TOÁN</button> -->
+                    <button @click="processPayment" class="payment-btn" :disabled="isLoadingPayment">
+                        <span v-if="isLoadingPayment">Đang xử lý...</span>
+                        <span v-else>THANH TOÁN</span>
+                    </button>
                     <InvoicePrint v-if="showInvoice" :idHoaDon="selectedInvoiceId" ref="invoiceRef" />
                 </div>
             </div>
@@ -589,10 +597,6 @@
                     <label>Email</label>
                     <input v-model="newCustomer.email" type="email" class="form-input" />
                 </div>
-                <!-- <div class="form-group">
-                    <label>Địa chỉ</label>
-                    <textarea v-model="newCustomer.address" class="form-textarea"></textarea>
-                </div> -->
             </div>
             <div class="modal-footer">
                 <button @click="showCustomerModal = false" class="cancel-btn">Hủy</button>
@@ -720,7 +724,8 @@ import {
     , findHdctByImeiDaBan, findProductByImei,
     updateGia,
     getAllLichSuBanHang,
-    viewLichSuHoaDon
+    viewLichSuHoaDon,
+    deleteTTShipping
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -811,7 +816,7 @@ const shippingInfo = ref({
 });
 
 
-const calculateTotal = () => {
+const calculateTotal = async () => {
     totalProductAmount.value = 0;
     if (currentInvoiceDetail.value?.chiTietHoaDonAdminResponseList?.length) {
         for (const hd of currentInvoiceDetail.value.chiTietHoaDonAdminResponseList) {
@@ -836,7 +841,13 @@ const calculateTotal = () => {
         shippingFee.value = shippingInfo.value.phiShip
     }
 
-    grandTotal.value = totalProductAmount.value + shippingFee.value - discountAmount.value
+    if (isShipping.value) {
+        grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
+
+    }
+    else {
+        grandTotal.value = totalProductAmount.value - discountAmount.value
+    }
 }
 
 
@@ -906,7 +917,7 @@ const selectedIdKhachHang = ref(0)
 const pulldownData = ref(null)
 
 const loadProducts = async () => {
-    
+
     const res = await fillDataFulldown();
     pulldownData.value = res.data
 
@@ -1028,7 +1039,6 @@ const newCustomer = reactive({
     name: '',
     phone: '',
     email: '',
-    address: ''
 })
 
 // Cart display
@@ -1165,7 +1175,6 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts();
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
@@ -1185,7 +1194,31 @@ const clearCustomer = () => {
 }
 
 const addCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return
+
+    if (!newCustomer.name || !newCustomer.name.trim()) {
+        toast.error("Vui lòng nhập tên khách hàng");
+        return;
+    }
+
+    // validate số điện thoại
+    if (!newCustomer.phone || !newCustomer.phone.trim()) {
+        toast.error("Vui lòng nhập số điện thoại");
+        return;
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(newCustomer.phone)) {
+        toast.error("Số điện thoại không đúng định dạng");
+        return;
+    }
+
+    // validate email (nếu có nhập)
+    if (newCustomer.email && newCustomer.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newCustomer.email)) {
+            toast.error("Email không đúng định dạng");
+            return;
+        }
+    }
 
     currentInvoice.value.customer = { ...newCustomer }
     // customerSearchQuery.value = newCustomer.phone
@@ -1539,7 +1572,6 @@ const handleRemoveSingleImei = async (item) => {
         showDeleteConfirmModal.value = false
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
-        loadTabHoaDon();
         loadProducts()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
@@ -1712,7 +1744,7 @@ const onXaChange = async () => {
     // }
 };
 
-watch(isShipping, (newVal) => {
+watch(isShipping, async (newVal) => {
     if (!newVal) {
         console.log('Tắt giao hàng, xóa thông tin giao hàng');
         shippingInfo.value = {
@@ -1726,6 +1758,10 @@ watch(isShipping, (newVal) => {
         selectedTinh.value = null;
         selectedXa.value = null;
         xaList.value = [];
+        const storedId = localStorage.getItem("selectedInvoiceId");
+        const fullAddressForDB = ''
+        await deleteTTShipping(storedId, shippingInfo.value, fullAddressForDB, isShipping.value)
+        calculateTotal()
     } else {
         console.log('Đã bật giao hàng');
     }
@@ -2241,6 +2277,7 @@ const confirmShippingInfo = async () => {
 
         shippingInfo.value.diaChiChiTiet = fullAddressForDB;
         console.log('Phản hồi từ API /update-invoice:', response.data);
+        calculateTotal()
         toast.success('Cập nhật thông tin giao hàng thành công!');
 
         showMessageConfirmShipping.value = false;
@@ -2281,21 +2318,13 @@ const onCancelCreate = () => {
 
 const toggleShipping = () => {
     if (!isShipping.value) {
-        console.log('Tắt giao hàng, xóa thông tin giao hàng');
-        shippingInfo.value = {
-            tenNguoiNhan: '',
-            sdtNguoiNhan: '',
-            diaChiChiTiet: '',
-            phiShip: null,
-            shippingMethod: 'express'
-        };
+        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' };
         selectedTinh.value = null;
-        // selectedHuyen.value = null;
         selectedXa.value = null;
-        // huyenList.value = [];
         xaList.value = [];
     } else {
         console.log('Đã bật giao hàng');
+        calculateTotal()
     }
 };
 
@@ -2328,36 +2357,40 @@ const showInvoice = ref(false);
 const selectedInvoiceId = ref(localStorage.getItem("selectedInvoiceId") || null);
 const invoiceRef = ref(null);
 // Hàm xử lý thanh toán
+
+const isLoadingPayment = ref(false)
 const processPayment = async () => {
+    if (isLoadingPayment.value) return; // tránh double click
+    isLoadingPayment.value = true;
+
     const storedId = localStorage.getItem("selectedInvoiceId");
+
     if (!selectedPaymentMethod.value) {
         toast.warning('Vui lòng chọn phương thức thanh toán.');
+        isLoadingPayment.value = false;
         return;
     }
     if (!agreedToTerms.value) {
         toast.warning('Bạn phải đồng ý với Điều khoản và Điều kiện để tiếp tục.');
+        isLoadingPayment.value = false;
         return;
     }
-    // Kiểm tra xem hóa đơn có chi tiết sản phẩm không
     if (currentInvoiceDetail.value.chiTietHoaDonAdminResponseList?.length === 0) {
         toast.error('Hóa đơn không có sản phẩm nào để thanh toán.');
+        isLoadingPayment.value = false;
         return;
     }
 
     const paymentPayload = {
         hinhThucThanhToan: selectedPaymentMethod.value,
-        soTienKhachDua: currentInvoiceDetail.value.thanhTien + shippingInfo.value.phiShip,
+        soTienKhachDua: grandTotal.value,
         soTienGiam: discountAmount.value
     };
-    console.log("tien khach dua", paymentPayload);
-    console.log(paymentPayload.soTienKhachDua);
-
 
     try {
         const response = await thanhToan(storedId, paymentPayload);
         if (response.data && response.data.message === "Thanh toán thành công") {
             toast.success('Thanh toán thành công!');
-            console.log('Hóa đơn sau thanh toán:', response.data);
             selectedInvoiceId.value = storedId;
             showInvoice.value = true;
             await nextTick();
@@ -2372,11 +2405,13 @@ const processPayment = async () => {
         }
     } catch (error) {
         console.error('Lỗi khi xử lý thanh toán:', error);
-        if (error.response && error.response.data && error.response.data.message) {
+        if (error.response?.data?.message) {
             toast.error('Lỗi thanh toán: ' + error.response.data.message);
         } else {
             toast.error('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
         }
+    } finally {
+        isLoadingPayment.value = false;
     }
 };
 
@@ -2568,7 +2603,7 @@ const filters = reactive({
     priceMax: null,
     quantityMin: null,
     quantityMax: null,
-    maSpct : ''
+    maSpct: ''
 })
 
 const toggleFilter = () => {
@@ -2579,7 +2614,7 @@ const applyFilters = async () => {
     const response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
         , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color
     );
-    
+
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
     isFilterOpen.value = false

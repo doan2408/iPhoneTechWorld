@@ -50,7 +50,7 @@
     </div>
 
     <el-dialog v-model="dialogVisible" :title="isEditMode ? 'Chỉnh sửa cpu' : 'Thêm mới cpu'"
-      :close-on-click-modal="false" :destroy-on-close="true" width="800px">
+      :close-on-click-modal="false" :destroy-on-close="true" width="1200px">
       <el-form :model="formData" ref="formRef" :rules="rules" label-width="150px">
         <el-row :gutter="20">
           <!-- Chip xử lý -->

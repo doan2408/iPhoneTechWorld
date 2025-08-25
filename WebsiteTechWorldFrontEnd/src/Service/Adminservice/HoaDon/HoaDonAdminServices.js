@@ -57,6 +57,11 @@ export const hoaDonHardDelete = (id) => {
     return api.delete(url)
 }
 
+export const countHoaDon = () => {
+    const url = url_base + '/count';
+    return api.get(url)
+}
+
 export const doanhThuTheoThang = () => {
     const url = url_base + '/doanh-thu-thang';
     return api.get(url)
@@ -191,6 +196,10 @@ export const updateTTShipping = (id, shippingInfo, fullAddressForDB, isShipping)
     });
 }
 
+export const deleteTTShipping = (id) => {
+    return api.put(`/admin/hoa-don/delete-shipping/${id}`);
+}
+
 //create pending invoice
 export const createPendingInvoice = () => {
     const url = url_base;
@@ -234,4 +243,14 @@ export const changeStatusInvoice = (id, status) => {
     const url = url_base + '/' + id + '/status'
     const body = { trangThaiThanhToan: status }
     return api.put(url, body)
+}
+
+export const viewRequests = (id) => {
+    const url = url_base + '/' + id + '/yeu-cau';
+    return api.get(url)
+}
+
+export const updateShipping = (id) => {
+    const url = url_base + '/' + id + '/update-shipping-method'
+    return api.put(url)
 }

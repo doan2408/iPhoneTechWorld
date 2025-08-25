@@ -2,18 +2,22 @@ package org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.
 
 import org.example.websitetechworld.Dto.Response.AdminResponse.AdminResponseHoaDon.ViewImeiAdminResponse;
 import org.example.websitetechworld.Entity.ChiTietHoaDon;
+import org.example.websitetechworld.Entity.HoaDon;
 import org.example.websitetechworld.Entity.Imei;
 import org.example.websitetechworld.Entity.ImeiDaBan;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Repository.ImeiDaBanRepository;
 import org.example.websitetechworld.Repository.ImeiReposiory;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
+import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,11 +27,13 @@ public class HoaDonChiTiet_ImeiAdminServices {
     private final ImeiDaBanRepository imeiDaBanRepository;
     private final ImeiReposiory imeiReposiory;
     private final ImeiDaBanAdminServices imeiDaBanAdminServices;
+    private final EmailServicces emailServicces;
 
-    public HoaDonChiTiet_ImeiAdminServices(ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory, ImeiDaBanAdminServices imeiDaBanAdminServices) {
+    public HoaDonChiTiet_ImeiAdminServices(ImeiDaBanRepository imeiDaBanRepository, ImeiReposiory imeiReposiory, ImeiDaBanAdminServices imeiDaBanAdminServices, EmailServicces emailServicces) {
         this.imeiDaBanRepository = imeiDaBanRepository;
         this.imeiReposiory = imeiReposiory;
         this.imeiDaBanAdminServices = imeiDaBanAdminServices;
+        this.emailServicces = emailServicces;
     }
 
     public void giamSoLuong(ChiTietHoaDon chiTietHoaDon, int soLuongCanGiam) {
@@ -55,7 +61,8 @@ public class HoaDonChiTiet_ImeiAdminServices {
             );
 
             if (imeis.size() < soLuong) {
-                throw new IllegalStateException("Không đủ IMEI cho sản phẩm chi tiết ID: " + idSpct);
+                sendMailHetHang(chiTiet.getIdHoaDon());
+                throw new IllegalStateException("Không đủ IMEI cho sản phẩm chi tiết tên sản phẩm: " + chiTiet.getIdSanPhamChiTiet().getIdSanPham().getTenSanPham());
             }
 
             List<ImeiDaBan> imeiDaBanList = imeiDaBanAdminServices.generateImeiDaBan(
@@ -68,6 +75,25 @@ public class HoaDonChiTiet_ImeiAdminServices {
         }
         imeiDaBanRepository.saveAll(imeiDaBansToSave);
     }
+
+    public void sendMailHetHang(HoaDon hoaDon) {
+        String subject = "Xác nhận đơn hàng #" + hoaDon.getMaHoaDon();
+
+        String html = "<h2 style='color:#e74c3c;'>Thông báo về tình trạng đơn hàng của bạn</h2>"
+                + "<p>Xin chào <b>" + hoaDon.getTenNguoiNhan() + "</b>,</p>"
+                + "<p>Rất tiếc, trong đơn hàng <b>" + hoaDon.getMaHoaDon() + "</b> có một số sản phẩm đã <b>hết hàng</b> tại thời điểm xử lý.</p>"
+                + "<p>Vui lòng chọn một trong các phương án sau:</p>"
+                + "<ul>"
+                + "  <li>Chờ hàng về (chúng tôi sẽ thông báo khi có lại).</li>"
+                + "  <li>Đổi sang sản phẩm khác tương đương.</li>"
+                + "  <li>Hủy sản phẩm này khỏi đơn hàng.</li>"
+                + "</ul>"
+                + "<p><i>Chúng tôi thành thật xin lỗi vì sự bất tiện này và rất mong bạn thông cảm.</i></p>"
+                + "<br><p>Trân trọng,</p><p>Đội ngũ bán hàng</p>";
+
+        emailServicces.sendHtmlEmail(hoaDon.getEmailNguoiNhan(), subject, html);
+    }
+
     public void tangSoLuong(ChiTietHoaDon chiTietHoaDon, int soLuongCanThem) {
         List<Imei> imeisAvailable = imeiReposiory.findTopByIdSanPhamChiTietAndTrangThaiImei(
                 chiTietHoaDon.getIdSanPhamChiTiet().getId(), "AVAILABLE", soLuongCanThem

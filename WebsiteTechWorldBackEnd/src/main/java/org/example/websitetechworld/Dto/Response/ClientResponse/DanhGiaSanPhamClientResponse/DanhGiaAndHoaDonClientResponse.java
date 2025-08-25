@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.websitetechworld.Dto.Response.ClientResponse.MediaDanhGiaClientResponse.MediaReviewClientResponse;
 import org.example.websitetechworld.Enum.DanhGiaSanPham.TrangThaiDanhGia;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,6 +22,7 @@ public class DanhGiaAndHoaDonClientResponse {
     private Integer idKhachHang;
     private Integer soSao;
     private String noiDung;
+    private LocalDateTime ngayDanhGia;
     @Enumerated(EnumType.STRING)
     private TrangThaiDanhGia trangThaiDanhGia;
     private List<MediaReviewClientResponse> reviewClientResponsesList;

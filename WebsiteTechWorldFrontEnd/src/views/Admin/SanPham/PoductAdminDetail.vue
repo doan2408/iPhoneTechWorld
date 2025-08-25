@@ -12,19 +12,19 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Tên sản phẩm" prop="tenSanPham">
-              <el-input v-model="sanPhamModel.tenSanPham" placeholder="Nhập tên sản phẩm"></el-input>
+              <el-input v-model="sanPhamModel.tenSanPham" disabled placeholder="Nhập tên sản phẩm"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="Thương hiệu" prop="thuongHieu">
-              <el-input v-model="sanPhamModel.thuongHieu" placeholder="Nhập thương hiệu"></el-input>
+              <el-input v-model="sanPhamModel.thuongHieu" disabled placeholder="Nhập thương hiệu"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Nhà cung cấp" prop="idNhaCungCap">
-              <el-select v-model="sanPhamModel.idNhaCungCaps" multiple placeholder="Chọn nhà cung cấp"
+              <el-select v-model="sanPhamModel.idNhaCungCaps" multiple disabled placeholder="Chọn nhà cung cấp"
                 style="width: 100%">
                 <el-option v-for="ncc in nhaCungCaps" :key="ncc.id" :label="ncc.tenNhaCungCap"
                   :value="ncc.id"></el-option>
@@ -43,7 +43,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Model sản phẩm" prop="idModelSanPham">
-              <el-select v-model="sanPhamModel.idModelSanPham" placeholder="Chọn model sản phẩm" style="width: 100%">
+              <el-select v-model="sanPhamModel.idModelSanPham" disabled placeholder="Chọn model sản phẩm" style="width: 100%">
                 <el-option v-for="model in modelSanPhams" :key="model.id" :label="model.tenModel"
                   :value="model.idModelSanPham"></el-option>
               </el-select>
@@ -107,11 +107,11 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="Hành động" width="100" align="center">
+            <!-- <el-table-column label="Hành động" width="100" align="center">
               <template #default="{ $index }">
                 <el-button type="danger" size="small" :icon="Delete" circle @click.stop="removeChiTiet($index)" />
               </template>
-            </el-table-column>
+            </el-table-column> -->
           </el-table>
         </div>
       </div>
@@ -409,6 +409,7 @@ const isStaff = computed(() => {
   );
 });
 const route = useRoute();
+const productId = route.params.id; 
 const router = useRouter();
 const id = ref(null); // Sử dụng ref để lưu id
 
@@ -760,9 +761,9 @@ const uploadImeiFile = async (index) => {
           sanPhamModel.sanPhamChiTiets[index].imeisInput || "";
         const existingImeis = existingImeisInput
           ? existingImeisInput
-            .split(",")
-            .map((im) => im.trim())
-            .filter((im) => im)
+              .split(",")
+              .map((im) => im.trim())
+              .filter((im) => im)
           : [];
 
         console.log(`✏️ IMEI từ nhập tay: ${existingImeis.length} mã`);
@@ -779,9 +780,9 @@ const uploadImeiFile = async (index) => {
 
         if (duplicateInSameVariant.length > 0) {
           throw new Error(
-            `Có ${duplicateInSameVariant.length
-            } IMEI trùng lặp: ${duplicateInSameVariant.slice(0, 3).join(", ")}${duplicateInSameVariant.length > 3 ? "..." : ""
-            }`
+            `Có ${duplicateInSameVariant.length} IMEI trùng lặp: ${duplicateInSameVariant
+              .slice(0, 3)
+              .join(", ")}${duplicateInSameVariant.length > 3 ? "..." : ""}`
           );
         }
 
@@ -791,8 +792,7 @@ const uploadImeiFile = async (index) => {
           throw new Error(
             `Có ${invalidImeis.length} giá trị không hợp lệ: ${invalidImeis
               .slice(0, 3)
-              .join(", ")}${invalidImeis.length > 3 ? "..." : ""
-            }. IMEI phải là số 15 chữ số.`
+              .join(", ")}${invalidImeis.length > 3 ? "..." : ""}. IMEI phải là số 15 chữ số.`
           );
         }
 
@@ -801,9 +801,9 @@ const uploadImeiFile = async (index) => {
           (chiTiet, i) =>
             i !== index
               ? (chiTiet.imeisInput || "")
-                .split(",")
-                .map((im) => im.trim())
-                .filter((im) => im)
+                  .split(",")
+                  .map((im) => im.trim())
+                  .filter((im) => im)
               : []
         );
         const duplicateImeis = uniqueImeis.filter((im) =>
@@ -811,8 +811,7 @@ const uploadImeiFile = async (index) => {
         );
         if (duplicateImeis.length > 0) {
           throw new Error(
-            `Có ${duplicateImeis.length
-            } IMEI trùng lặp với các biến thể khác: ${duplicateImeis
+            `Có ${duplicateImeis.length} IMEI trùng lặp với các biến thể khác: ${duplicateImeis
               .slice(0, 3)
               .join(", ")}${duplicateImeis.length > 3 ? "..." : ""}`
           );
@@ -835,12 +834,13 @@ const uploadImeiFile = async (index) => {
         const addedCount = newImeis.length;
         const existingCount = existingImeis.length;
 
-        ElMessage.success({
-          message: `✅ Thành công!\n📁 Từ file: ${addedCount} IMEI\n✏️ Từ nhập tay: ${existingCount} IMEI\n📊 Tổng cộng: ${finalCount} IMEI cho biến thể ${index + 1
-            }`,
-          duration: 2000,
-          showClose: true,
-        });
+        toast.success(
+          `Thành công! Từ file: ${addedCount} IMEI, Từ nhập tay: ${existingCount} IMEI, Tổng cộng: ${finalCount} IMEI cho biến thể ${index + 1}`,
+          {
+            timeout: 2000,
+            closeButton: true,
+          }
+        );
 
         console.log(`✅ Upload thành công:`, {
           fromFile: addedCount,
@@ -849,11 +849,13 @@ const uploadImeiFile = async (index) => {
           variant: index + 1,
         });
       } catch (error) {
-        console.error("❌ Lỗi khi xử lý file Excel:", error);
-        sanPhamModel.sanPhamChiTiets[index].invalidImeis = [error.message];
-        toast.error({
-          message: `Lỗi khi đọc file Excel: ${error.message}`,
-          duration: 2000,
+        console.error("Lỗi khi xử lý file Excel:", error);
+        sanPhamModel.sanPhamChiTiets[index].invalidImeis = [
+          error.message || "Lỗi không xác định",
+        ];
+        toast.error(`Lỗi khi đọc file Excel: ${error.message || "Lỗi không xác định"}`, {
+          timeout: 2000,
+          closeButton: true,
         });
       } finally {
         loadingInstance.close();
@@ -861,13 +863,21 @@ const uploadImeiFile = async (index) => {
     };
 
     reader.onerror = () => {
-      toast.error("Lỗi khi đọc file Excel.");
+      console.error("Lỗi khi đọc file Excel từ FileReader");
+      toast.error("Lỗi khi đọc file Excel.", {
+        timeout: 2000,
+        closeButton: true,
+      });
       loadingInstance.close();
     };
 
     reader.readAsArrayBuffer(file.raw);
   } catch (error) {
-    toast.error("Lỗi khi xử lý file IMEI: " + error.message);
+    console.error("Lỗi khi xử lý file IMEI:", error);
+    toast.error(`Lỗi khi xử lý file IMEI: ${error.message || "Lỗi không xác định"}`, {
+      timeout: 2000,
+      closeButton: true,
+    });
     loadingInstance.close();
   }
 };
@@ -941,6 +951,11 @@ const fetchSanPham = async (productId) => {
           imagePublicId: h.imagePublicId,
         })) || [],
     }));
+
+    console.log("Product data fetched successfully:", response);
+
+    console.log("Fetched product data:", sanPhamModel.sanPhamChiTiets.map(item => item.id));
+    console.log("Fetched product data id model:", sanPhamModel.id);
     selectedChiTiet.value = sanPhamModel.sanPhamChiTiets.length > 0 ? 0 : null;
   } catch (err) {
     error.value =
@@ -1219,19 +1234,20 @@ const submitForm = async () => {
     const formValid = await sanPhamForm.value.validate();
     console.log("✅ Form Element Plus hợp lệ:", formValid);
     if (!formValid) {
-      ElMessage.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
+      toast.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
       return;
     }
 
     const logicValid = validateForm();
     console.log("✅ Form logic validate hợp lệ:", logicValid);
     if (!logicValid) {
-      ElMessage.error(error.value);
+      toast.error(error.value);
       return;
     }
 
+
     const payload = {
-      id: id.value,
+      id: productId,
       maSanPham: sanPhamModel.maSanPham,
       tenSanPham: sanPhamModel.tenSanPham,
       thuongHieu: sanPhamModel.thuongHieu,
@@ -1269,12 +1285,15 @@ const submitForm = async () => {
       }),
     };
 
+    console.log("🔍 Kiểm tra payload trước khi gửi:", payload);
+    console.log("🔍 Kiểm tra ID sản phẩm trước khi gửi:", productId);
+
     console.log("📤 Payload gửi lên:", JSON.stringify(payload, null, 2));
 
-    await putDataSanPham(id.value, payload);
+    await putDataSanPham(productId, payload);
 
     console.log("✅ Cập nhật thành công");
-    ElMessage.success("Cập nhật sản phẩm thành công!");
+    toast.success("Cập nhật sản phẩm thành công!");
     router.push("/admin/products");
   } catch (err) {
     const errorMessage =
@@ -1289,9 +1308,9 @@ const submitForm = async () => {
       err.response?.status === 400 &&
       errorMessage.includes("IMEI trùng lặp")
     ) {
-      ElMessage.error("Không thể cập nhật: Có IMEI trùng lặp trong dữ liệu.");
+      toast.error("Không thể cập nhật: Có IMEI trùng lặp trong dữ liệu.");
     } else {
-      ElMessage.error(errorMessage);
+      toast.error(errorMessage);
     }
   } finally {
     loading.submit = false;

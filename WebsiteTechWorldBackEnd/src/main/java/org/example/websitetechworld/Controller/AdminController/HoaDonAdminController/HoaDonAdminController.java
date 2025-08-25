@@ -7,6 +7,7 @@ import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminR
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.CthdUpdateSoLuongAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.ChiTietHoaDonAdminRequest.SelectKhachHang;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.CapNhatTrangThaiThanhToan;
+import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.DeleteInvoiceRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.ThanhToanAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Request.AdminRequest.HoaDonAdminRequest.InvoiceRequest;
@@ -196,6 +197,14 @@ public class HoaDonAdminController {
         }
     }
 
+    //total
+    @GetMapping("/count")
+    public ResponseEntity<Long> countHoaDon() {
+        Long total = hoaDonAdminService.countHoaDon();
+        return ResponseEntity.ok(total);
+
+    }
+
     //So hoa don cho xy ly
     @GetMapping("/count/pending")
     public ResponseEntity<Integer> countHoaDonPending() {
@@ -312,6 +321,16 @@ public class HoaDonAdminController {
         }
     }
 
+    @PutMapping("/delete-shipping/{id}")
+    public ResponseEntity<?> deleteShipping(@PathVariable("id") Integer id) {
+        try {
+            hoaDonAdminService.deleteInvocieShipping(id);
+            return ResponseEntity.ok("Invoice delete successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error delete invoice: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{hoaDonId}/hdct-by-imei-da-ban")
     public ResponseEntity<Page<ImeiTrangHoaDonResponse>> listSpctByImeiDaBan(@RequestParam(defaultValue = "0") int pageNo,
                                                                              @RequestParam(defaultValue = "10") int pageSize,
@@ -345,5 +364,19 @@ public class HoaDonAdminController {
                                           @RequestParam BigDecimal donGia) {
         hoaDonChiTietAdminServices.updateGiaHoaDonChiTiet(idHoaDonChiTiet, donGia);
         return ResponseEntity.ok("Đã cập nhật đơn giá: " + idHoaDonChiTiet);
+    }
+
+    @GetMapping("/{idHoaDon}/yeu-cau")
+    public List<XuLySauBanHangResponse> getYeuCau (@PathVariable Integer idHoaDon) {
+        return hoaDonAdminService.getYeuCau(idHoaDon);
+    }
+
+    @PutMapping("/{idHoaDon}/update-shipping-method")
+    public void updateShippingMethod (@PathVariable Integer idHoaDon) {
+        try {
+            hoaDonAdminService.updateShippingMethod(idHoaDon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

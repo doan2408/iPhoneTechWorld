@@ -8,11 +8,13 @@ import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResp
 import org.example.websitetechworld.Dto.Response.ClientResponse.HoaDonClientResponse.MyReviewClientResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.GiaoHang.TrangThaiGiaoHang;
+import org.example.websitetechworld.Enum.HoaDon.HanhDongLichSuHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.LoaiHoaDon;
 import org.example.websitetechworld.Enum.HoaDon.TenHinhThuc;
 import org.example.websitetechworld.Enum.Imei.TrangThaiImei;
 import org.example.websitetechworld.Mapper.Client.MyOrderClientMapper;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.HoaDon.HoaDonAdminService;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.ImeiDaBan.ImeiDaBanAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
@@ -38,6 +40,7 @@ public class MyOrderClientServices {
     private final KhachHangGiamGiaRepository khachHangGiamGiaRepository;
     private final ImeiDaBanRepository imeiDaBanRepository;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
+    private final HoaDonAdminService hoaDonAdminService;
     MyOrderClientMapper myOrderClientMapper = new MyOrderClientMapper();
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanFactory thanhToanFactory;
@@ -50,7 +53,7 @@ public class MyOrderClientServices {
     private final EmailServicces emailServicces;
 
 
-    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository, LichSuHoaDonRepository lichSuHoaDonRepository) {
+    public MyOrderClientServices(HoaDonRepository hoaDonRepository, ThanhToanFactory thanhToanFactory, HoaDonChiTiet_ImeiAdminServices hoaDonChiTietImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, KhachHangRepository khachHangRepository, ChiTietHoaDonClientServices chiTietHoaDonClientServices, ImeiDaBanAdminServices imeiDaBanAdminServices, GioHangClientService gioHangClientService, EmailServicces emailServicces, DanhGiaSanPhamRepository danhGiaSanPhamRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, ImeiDaBanRepository imeiDaBanRepository, LichSuHoaDonRepository lichSuHoaDonRepository, HoaDonAdminService hoaDonAdminService) {
         this.hoaDonRepository = hoaDonRepository;
         this.thanhToanFactory = thanhToanFactory;
         hoaDonChiTiet_ImeiAdminServices = hoaDonChiTietImeiAdminServices;
@@ -64,6 +67,7 @@ public class MyOrderClientServices {
         this.khachHangGiamGiaRepository = khachHangGiamGiaRepository;
         this.imeiDaBanRepository = imeiDaBanRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
+        this.hoaDonAdminService = hoaDonAdminService;
     }
 
 
@@ -221,7 +225,7 @@ public class MyOrderClientServices {
 
     public Page<MyReviewClientResponse> getReview(Integer userLoginId, Integer pageNo, Integer pageSize) {
         // Khởi tạo phân trang
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "ngayThanhToan"));
         Page<HoaDon> lstHoaDon = hoaDonRepository.findByIdKhachHang_Id(userLoginId, pageable);
 
         List<MyReviewClientResponse> content = lstHoaDon
@@ -285,6 +289,7 @@ public class MyOrderClientServices {
 
         sendMailFromInvoice(hoaDon);
 
+        hoaDonAdminService.createLshd(hoaDon, HanhDongLichSuHoaDon.THANH_TOAN,"Hóa đơn đã được thanh toán");
 
         return response;
     }
@@ -312,6 +317,9 @@ public class MyOrderClientServices {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.RESERVED);
             hoaDonChiTiet_sanPhamAdminServices.updateSoLuongProdcut(danhSachChiTiet);
         }
+
+        hoaDonAdminService.createLshd(hoaDon, HanhDongLichSuHoaDon.THANH_TOAN,"Hóa đơn đã được thanh toán");
+
         return response;
     }
 
@@ -342,8 +350,12 @@ public class MyOrderClientServices {
         hoaDon.setTenNguoiNhan(requestThanhToanTongHop.getTenNguoiNhan());
         hoaDon.setEmailNguoiNhan(requestThanhToanTongHop.getEmailNguoiNhan());
         hoaDon.setDiaChiGiaoHang(requestThanhToanTongHop.getDiaChiGiaoHang());
-        hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien());
-        hoaDon.setThanhTien(requestThanhToanTongHop.getSoTienKhachDua());
+        if (requestThanhToanTongHop.getSoTienGiam() != null){
+            hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien().add(requestThanhToanTongHop.getSoTienGiam()).subtract(requestThanhToanTongHop.getPhiShip()));
+        }else{
+            hoaDon.setTongTien(requestThanhToanTongHop.getThanhTien().subtract(requestThanhToanTongHop.getPhiShip()));
+        }
+        hoaDon.setThanhTien(requestThanhToanTongHop.getThanhTien());
         hoaDon.setNgayTaoHoaDon(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(LoaiHoaDon.ONLINE);
         hoaDon.setTrangThaiDonHang(TrangThaiGiaoHang.PENDING);

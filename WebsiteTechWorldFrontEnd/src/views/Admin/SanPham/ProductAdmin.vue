@@ -170,15 +170,22 @@
                   <el-button size="small" type="info" :icon="View" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <router-link :to="`/admin/products/${row.id}`" v-if="isAdmin">
+
+              <router-link v-if="row.trangThaiSanPham === 'ACTIVE'" :to="`/admin/products/${row.id}`">
                 <el-tooltip content="Chỉnh sửa" placement="top">
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <el-tooltip content="Xóa sản phẩm" placement="top" v-if="false">
+
+              <el-tooltip v-else content="Kinh doanh lại" placement="top">
+                <el-button size="small" type="success" :icon="Refresh" class="action-btn-square"
+                  @click="handleDelete(row.id)" />
+              </el-tooltip>
+
+              <!-- <el-tooltip content="Xóa sản phẩm" placement="top" v-if="false">
                 <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)"
                   class="action-btn-square" />
-              </el-tooltip>
+              </el-tooltip> -->
             </div>
           </template>
         </el-table-column>
@@ -301,21 +308,21 @@ const handleDelete = async (id) => {
   }
   try {
     await ElMessageBox.confirm(
-      'Bạn có chắc chắn muốn tạm ngừng bán sản phẩm này?',
+      'Bạn có chắc chắn muốn kinh doanh lại sản phẩm này?',
       'Xác nhận',
       {
-        confirmButtonText: 'Xóa',
+        confirmButtonText: 'Kinh doanh lại',
         cancelButtonText: 'Hủy',
         type: 'warning',
       }
     );
     await deleteSanPham(id);
-    ElMessage.success('Sản phẩm tạm ngừng bán !!!');
+    ElMessage.success('Sản phẩm kinh doanh lại !!!');
     await loadSanPham();
   } catch (err) {
-    console.error('Lỗi khi xóa:', err);
+    console.error('Lỗi khi kinh doanh lại:', err);
     if (err !== 'cancel') {
-      ElMessage.error('Lỗi khi xóa sản phẩm: ' + (err.message || 'Không rõ'));
+      ElMessage.error('Lỗi khi kinh doanh lại sản phẩm: ' + (err.message || 'Không rõ'));
     }
   }
 };

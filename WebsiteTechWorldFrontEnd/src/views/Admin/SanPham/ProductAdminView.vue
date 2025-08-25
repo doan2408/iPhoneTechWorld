@@ -100,7 +100,7 @@
                   <el-input :value="sanPhamModel.modelSanPham?.maModelSanPham || ''" readonly class="readonly-input" />
                 </div>
               </el-col>
-              <el-col :xs="24" :sm="12">
+              <!-- <el-col :xs="24" :sm="12">
                 <div class="form-field">
                   <label class="field-label">Năm ra mắt</label>
                   <el-input :value="sanPhamModel.modelSanPham?.namRaMat || ''" readonly class="readonly-input" />
@@ -112,7 +112,7 @@
                   <el-input :value="getTrangThaiModelLabel(sanPhamModel.modelSanPham?.trangThaiSanPhamModel)" readonly
                     class="readonly-input" />
                 </div>
-              </el-col>
+              </el-col> -->
             </el-row>
           </el-card>
 

@@ -125,10 +125,8 @@ public class HoaDonChiTietAdminServices {
         imeiDaBanRepository.saveAll(imeiDaBans);
 
         for (ImeiDaBan imeiDaBan : imeiDaBans) {
-            hoaDonAdminService.createLshd(hoaDon, HanhDongLichSuHoaDon.UPDATE,"Thêm sản phẩm với imei: +"+imeiDaBan.getSoImei()+ "vào hóa đơn ");
+            hoaDonAdminService.createLshd(hoaDon, HanhDongLichSuHoaDon.UPDATE,"Thêm sản phẩm với imei: "+imeiDaBan.getSoImei()+ " vào hóa đơn ");
         }
-
-
 
         return cthdSave;
     }
@@ -190,6 +188,10 @@ public class HoaDonChiTietAdminServices {
             deleleHdct(hdctId);
         }
 
+        for (String imei : imeisToReturn) {
+            hoaDonAdminService.createLshd(hoaDon,HanhDongLichSuHoaDon.UPDATE,"Trả sản phẩm với IMEI: "+imei);
+        }
+
     }
 
 
@@ -211,6 +213,10 @@ public class HoaDonChiTietAdminServices {
 
         hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeiList,TrangThaiImei.AVAILABLE);
         chiTietHoaDonRepository.deleteById(hdctId);
+
+        for (String imei : soImeis) {
+            hoaDonAdminService.createLshd(cthdCanXoa.getIdHoaDon(),HanhDongLichSuHoaDon.UPDATE,"Trả sản phẩm với IMEI: "+imei);
+        }
     }
 
     public void updateGiaHoaDonChiTiet (Integer idHoaDonChiTiet, BigDecimal giaBan) {
@@ -275,5 +281,24 @@ public class HoaDonChiTietAdminServices {
 
     private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
         return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
+    }
+
+    public void deleleHdct30p(Integer hdctId){
+        ChiTietHoaDon cthdCanXoa = chiTietHoaDonRepository.findById(hdctId).orElseThrow();
+        List<ImeiDaBan> imeiDaBanList = cthdCanXoa.getImeiDaBans().stream().toList();
+
+        Integer idSanPhamChiTietDeHoanTra = cthdCanXoa.getIdSanPhamChiTiet().getId(); // Lấy ID của SanPhamChiTiet
+        int soLuongHoanTra = cthdCanXoa.getSoLuong();
+        sanPhamChiTietRepository.tangSoLuongTon(idSanPhamChiTietDeHoanTra, soLuongHoanTra);
+
+        // Lấy danh sách Imei từ soImei trong imeiDaBan
+        List<String> soImeis = imeiDaBanList.stream()
+                .map(ImeiDaBan::getSoImei)
+                .toList();
+
+        List<Imei> imeiList = imeiReposiory.findAllBySoImeiIn(soImeis);
+
+        hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeiList,TrangThaiImei.AVAILABLE);
+        chiTietHoaDonRepository.deleteById(hdctId);
     }
 }

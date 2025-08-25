@@ -238,7 +238,7 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="openSalesHistoryModal(hoaDon)">
+                  <button class="action-btn edit-btn" title="Xem lịch sử" @click="openSalesHistoryModal(hoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z">
@@ -609,22 +609,6 @@
                   </svg>
                   <span>Xử lý đơn hàng</span>
                 </button>
-
-                <button class="invoice-action-button invoice-history-button" @click="loadLichSuHoaDon(selectedInvoice)">
-                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <span>Xem lịch sử hóa đơn</span>
-                </button>
-
-                <button class="invoice-action-button invoice-payment-button">
-                  <svg class="invoice-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                  </svg>
-                  <span>Xem chi tiết thanh toán</span>
-                </button>
               </div>
               <!-- table xem lich su -->
               <div v-if="showLichSuHoaDon">
@@ -700,7 +684,7 @@
 <script setup>
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
-import { createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
+import { countHoaDon, createPendingInvoice, hoaDonGetAll } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { hoaDonDetail } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import { viewLichSuHoaDon } from "@/Service/Adminservice/HoaDon/HoaDonAdminServices";
 import {
@@ -811,13 +795,14 @@ const loadData = async () => {
   try {
     const response = await hoaDonGetAll(pageNo.value, pageSize.value, searchQuery.value, statusFilter.value, typeFilter.value, dateFilterFrom.value, dateFilterTo.value);
 
+    const total = await countHoaDon();
     const count = await countHoaDonPending();
     const doanhThu = await doanhThuTheoThang();
 
     if (Array.isArray(response.data.content)) {
       hoaDons.value = response.data.content;
       totalPage.value = response.data.totalPages || 0;
-      totalElement.value = response.data.totalElements || 0;
+      totalElement.value = total.data || 0;
       choXuLy.value = count.data || 0;
       doanhThuThang.value = formatCurrency(doanhThu.data || 0);
     } else {
