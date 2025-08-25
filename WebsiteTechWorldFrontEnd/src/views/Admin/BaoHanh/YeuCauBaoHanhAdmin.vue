@@ -25,10 +25,6 @@
                         maxlength="15">
                     <button @click="searchWarranty" class="search-btn">Tra Cứu</button>
                 </div>
-
-                <div v-if="searchError" class="error-message">
-                    {{ searchError }}
-                </div>
             </div>
 
             <!-- Hiển thị thông tin sản phẩm -->
@@ -40,7 +36,7 @@
                         <p><strong>Tên sản phẩm:</strong> {{ productInfo.tenSanPham + ' ' + productInfo.mau + ' ' +
                             productInfo.dungLuong }}</p>
                         <!-- <p><strong>Model:</strong> {{ productInfo.model }}</p> -->
-                        <p><strong>Ngày mua:</strong> {{ productInfo.ngayMuaHang }}</p>
+                        <p><strong>Ngày mua:</strong> {{ formatDate(productInfo.ngayMuaHang) }}</p>
                     </div>
 
                     <div class="warranty-types">
@@ -48,14 +44,14 @@
                         <div class="warranty-list">
                             <div v-if="productInfo.lstBaoHanh && productInfo.lstBaoHanh.length > 0">
                                 <div v-for="warranty in productInfo.lstBaoHanh" :key="warranty.idBaoHanh"
-                                    class="warranty-item" :class="{ expired: !warranty.isValid }">
-
+                                    class="warranty-item"
+                                    :class="{ expired: warranty.trangThaiBaoHanh === 'WARRANTY_EXPIRED' }">
                                     <div class="warranty-info">
                                         <h5>{{ warranty.tenLoaiBaoHanh }}</h5>
                                         <p>Thời hạn: {{ warranty.thoiGianThang }} tháng</p>
                                         <p>Hết hạn: {{ warranty.ngayHetHan }}</p>
                                         <span :class="['status', warranty.trangThaiBaoHanh]">
-                                            {{ warranty.trangThaiBaoHanh }}
+                                            {{ warranty.trangThaiBaoHanh === 'UNDER_WARRANTY' ? 'Còn bảo hành' : 'Hết bảo hành' }}
                                         </span>
                                     </div>
 
@@ -87,6 +83,7 @@
                         <label>Mô tả lỗi:</label>
                         <textarea v-model="warrantyForm.description" placeholder="Mô tả chi tiết lỗi của sản phẩm"
                             rows="4"></textarea>
+                        <p v-if="fieldErrors.lyDoBaoHanh" class="error-reason">{{ fieldErrors.lyDoBaoHanh }}</p>
                     </div>
 
                     <div class="form-actions">
@@ -191,10 +188,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { checkedWarranty, createRequestWarranty, findDonBaoHanh, findHistoryBaoHanh, hoanThanhDon } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
 import { tr } from 'element-plus/es/locales.mjs'
+import { useToast } from 'vue-toastification'
 
 const activeTab = ref('lookup')
 const searchImei = ref('')
-const searchError = ref('')
 const productInfo = ref(null)
 const selectedWarranty = ref(null)
 const warrantyForm = reactive({
@@ -211,6 +208,7 @@ const toastType = ref('success')
 const pageNo = ref(0)
 const pageSize = ref(5)
 const totalPages = ref(0)
+const toast = useToast()
 
 // Hàm tiện ích Toast
 function showToastMsg(message, type = 'success') {
@@ -222,55 +220,66 @@ function showToastMsg(message, type = 'success') {
 
 // ===== METHODS =====
 async function searchWarranty() {
-    searchError.value = ''
     productInfo.value = null
     selectedWarranty.value = null
 
     if (!searchImei.value) {
-        searchError.value = 'Vui lòng nhập IMEI'
+        toast.warning('Vui lòng nhập IMEI')
         return
     }
 
     if (searchImei.value.length !== 15 || !/^\d+$/.test(searchImei.value)) {
-        searchError.value = 'IMEI phải có đúng 15 số'
+        toast.warning('IMEI phải có đúng 15 số')
         return
     }
 
     const res = await checkedWarranty(searchImei.value);
-    if (!res) {
-        searchError.value = 'Không tìm thấy thông tin sản phẩm với IMEI này'
+    if (!res || res.data === '') {
+        toast.warning('Không tìm thấy thông tin sản phẩm với IMEI này')
         return
     }
 
     productInfo.value = res.data
-    showToastMsg('Tìm thấy thông tin sản phẩm!', 'success')
+    toast.success('Tìm thấy thông tin sản phẩm!')
 }
 
 function selectWarrantyType(warranty) {
     selectedWarranty.value = warranty
-    showToastMsg(`Đã chọn ${warranty.type}`, 'success')
+    // showToastMsg(`Đã chọn ${warranty.type}`, 'success')
+    toast.success("Đã chọn loại bảo hành "+ selectedWarranty.value.tenLoaiBaoHanh)
 }
 
+const fieldErrors = ref({})
+
 async function createWarranty() {
-    if (!warrantyForm.description ) {
-        showToastMsg('Vui lòng điền đầy đủ thông tin', 'error')
-        return
+    fieldErrors.value = {} // reset lỗi cũ
+
+    try {
+        const newWarranty = {
+            idBaoHanh: selectedWarranty.value.idBaoHanh,
+            lyDoBaoHanh: warrantyForm.description,
+        }
+
+        await createRequestWarranty(newWarranty)
+
+        // Reset form
+        productInfo.value = null
+        selectedWarranty.value = null
+        searchImei.value = ''
+        warrantyForm.description = ''
+        loadWarrantyOrders(pageNo.value)
+        toast.success('Tạo đơn bảo hành thành công!')
+
+    } catch (error) {
+        if (error.response?.status === 400 && error.response.data) {
+            fieldErrors.value = error.response.data
+            if (fieldErrors.value.idBaoHanh) {
+                showToastMsg(fieldErrors.value.idBaoHanh, 'error')
+            }
+        } else {
+            showToastMsg('Có lỗi xảy ra', 'error')
+        }
     }
-
-    const newWarranty = {
-        idBaoHanh: selectedWarranty.value.idBaoHanh,
-        lyDoBaoHanh: warrantyForm.description,
-    }
-
-    await createRequestWarranty(newWarranty)
-
-    // Reset form
-    productInfo.value = null
-    selectedWarranty.value = null
-    searchImei.value = ''
-    warrantyForm.description = ''
-
-    showToastMsg('Tạo đơn bảo hành thành công!', 'success')
 }
 
 function cancelWarranty() {
@@ -324,6 +333,15 @@ const previousPage = () => {
 onMounted(() => {
     loadWarrantyOrders(pageNo.value)
 })
+
+function formatDate(date) {
+    if (!date) return "";
+    return new Intl.DateTimeFormat("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date(date));
+}
 </script>
 
 
@@ -532,12 +550,12 @@ onMounted(() => {
     font-weight: 600;
 }
 
-.status.valid {
+.status.UNDER_WARRANTY {
     background: #d4edda;
     color: #155724;
 }
 
-.status.expired {
+.status.WARRANTY_EXPIRED {
     background: #f8d7da;
     color: #721c24;
 }
@@ -696,12 +714,12 @@ onMounted(() => {
     font-weight: 600;
 }
 
-.status-badge.pending {
+.status-badge.REPAIRED {
     background: #fff3cd;
     color: #856404;
 }
 
-.status-badge.completed {
+.status-badge.IN_REPAIR {
     background: #d4edda;
     color: #155724;
 }
@@ -1079,5 +1097,18 @@ onMounted(() => {
     font-weight: 500;
     color: #666;
     font-size: 1em;
+}
+.error-text {
+    color: red;
+    font-size: 13px;
+    margin-top: 4px;
+}
+.error-reason {
+    color: #e74c3c;
+    /* Màu đỏ nổi bật */
+    font-size: 14px;
+    margin-top: 4px;
+    display: block;
+    font-style: italic;
 }
 </style>

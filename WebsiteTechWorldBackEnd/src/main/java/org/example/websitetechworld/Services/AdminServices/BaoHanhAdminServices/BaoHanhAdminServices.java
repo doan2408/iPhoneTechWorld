@@ -129,7 +129,10 @@ public class BaoHanhAdminServices {
 
     public YeuCauBaoHanhAdminResponse  checkWarranty(String soImei){
         ImeiDaBan imeiDaBan = imeiDaBanRepository.findBySoImeiWithValidWarranty(soImei);
-        YeuCauBaoHanhAdminResponse response = baoHanhAdminMappper.toYeuCauBaoHanhAdminResponse(imeiDaBan) ;
+        YeuCauBaoHanhAdminResponse response = null;
+        if (imeiDaBan != null){
+            response = baoHanhAdminMappper.toYeuCauBaoHanhAdminResponse(imeiDaBan) ;
+        }
         return response;
     }
 
