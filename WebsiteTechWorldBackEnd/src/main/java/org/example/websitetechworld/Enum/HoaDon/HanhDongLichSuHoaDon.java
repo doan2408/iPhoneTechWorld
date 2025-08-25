@@ -8,7 +8,8 @@ public enum HanhDongLichSuHoaDon {
     , HUY("Hủy hóa đơn")
     , RETURN("Trả hàng")
     , FALSE_SHIPPING("Giao thất bại")
-    , COMFIRM("Xác nhận hóa đơn");
+    , COMFIRM("Xác nhận hóa đơn")
+    , COMPLETE("hOAN THANH");
 
     private final String displayName;
 

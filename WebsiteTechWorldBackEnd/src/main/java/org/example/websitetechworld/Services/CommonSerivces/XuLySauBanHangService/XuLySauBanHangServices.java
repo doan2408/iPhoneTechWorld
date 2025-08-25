@@ -296,6 +296,8 @@ public class XuLySauBanHangServices {
             x.setDaKiemTra(true);
             x.setHanhDongSauVuViec(action.getHanhDong());
             listUpdate.add(x);
+
+            createLshd(x.getIdHoaDon(),HanhDongLichSuHoaDon.UPDATE,action.getHanhDong().getDisplayName()+" yêu cầu trả hàng");
         }
         xuLySauBanHangRepository.saveAll(listUpdate);
 
