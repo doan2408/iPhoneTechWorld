@@ -50,7 +50,7 @@
                 <!-- Hiển thị số ngày còn lại để đánh giá -->
                 <div v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order?.ngayNhanhang)"
                   class="remaining-time">
-                  {{ getRemainingDays(order.ngayThanhToan) }}
+                  {{ getRemainingDays(order.ngayNhanhang) }}
                 </div>
                 <!-- Tab "Đã đánh giá" -->
                 <div v-if="activeTab === 'Đã đánh giá' && order.reviews && order.reviews[product.idSanPhamChiTiet]"
