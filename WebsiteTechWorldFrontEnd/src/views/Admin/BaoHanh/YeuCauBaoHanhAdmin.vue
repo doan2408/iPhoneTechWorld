@@ -87,7 +87,9 @@
                     </div>
 
                     <div class="form-actions">
-                        <button @click="createWarranty" class="create-btn">Tạo Đơn Bảo Hành</button>
+                        <button @click="createWarranty" class="create-btn" :disabled="isLoadingCreateBaoHanh">
+                            {{ isLoadingCreateBaoHanh ? 'Đang xử lý...' : 'Tạo Đơn Bảo Hành' }}
+                        </button>
                         <button @click="cancelWarranty" class="cancel-btn">Hủy</button>
                     </div>
                 </div>
@@ -130,8 +132,9 @@
                             <td>
                                 <button v-if="warranty.trangThai === 'IN_REPAIR'"
                                     @click="openConfirm('Xác nhận là đã xử lý xong?', () => completeWarranty(warranty.idLsbh))"
-                                    class="complete-btn">
-                                    Hoàn Thành
+                                    class="complete-btn" :disabled="isLoadingComplete">
+                                    <span v-if="isLoadingComplete">Đang xử lý...</span>
+                                    <span v-else>Hoàn Thành</span>
                                 </button>
                             </td>
                         </tr>
@@ -255,7 +258,15 @@ function selectWarrantyType(warranty) {
 
 const fieldErrors = ref({})
 
+
+const isLoadingCreateBaoHanh = ref(false)
+
 async function createWarranty() {
+
+    if(isLoadingCreateBaoHanh.value) return
+
+    isLoadingCreateBaoHanh.value = true
+
     fieldErrors.value = {} // reset lỗi cũ
 
     try {
@@ -284,6 +295,9 @@ async function createWarranty() {
             showToastMsg('Có lỗi xảy ra', 'error')
         }
     }
+    finally {
+        isLoadingCreateBaoHanh.value = false
+    }
 }
 
 function cancelWarranty() {
@@ -291,13 +305,18 @@ function cancelWarranty() {
     warrantyForm.description = ''
 }
 
+const isLoadingComplete = ref(false);
 async function completeWarranty(orderId) {
     try {
+        isLoadingComplete.value = true;
         await hoanThanhDon(orderId);
-        loadWarrantyOrders(pageNo.value)
-        toast.success("Đơn hàng đã được xử lý")
+        await loadWarrantyOrders(pageNo.value);
+        toast.success("Đơn hàng đã được xử lý");
     } catch (error) {
-        console.error(error)
+        console.error(error);
+        toast.error("Xử lý thất bại, vui lòng thử lại");
+    } finally {
+        isLoadingComplete.value = false;
     }
 }
 
