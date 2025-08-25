@@ -365,4 +365,9 @@ public class HoaDonAdminController {
         hoaDonChiTietAdminServices.updateGiaHoaDonChiTiet(idHoaDonChiTiet, donGia);
         return ResponseEntity.ok("Đã cập nhật đơn giá: " + idHoaDonChiTiet);
     }
+
+    @GetMapping("/{idHoaDon}/yeu-cau")
+    public List<XuLySauBanHangResponse> getYeuCau (@PathVariable Integer idHoaDon) {
+        return hoaDonAdminService.getYeuCau(idHoaDon);
+    }
 }
