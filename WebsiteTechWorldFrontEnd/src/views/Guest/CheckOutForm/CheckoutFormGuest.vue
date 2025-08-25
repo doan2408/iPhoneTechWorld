@@ -30,6 +30,14 @@
             <!-- Sản phẩm -->
             <div class="section">
                 <h2 class="section-title">Sản phẩm</h2>
+                <i style="color: #d32f2f;">
+                    Theo chính sách của cửa hàng, chỉ những khách hàng đã đăng nhập/đăng ký tài khoản mới được hưởng quyền lợi đổi trả và bảo hành sản phẩm. Rất mong quý khách thông cảm.
+                </i><br>
+                <i style="color: #d32f2f;">
+                    Quý khách vui lòng đăng nhập hoặc đăng ký tài khoản để được áp dụng đầy đủ chính sách đổi trả và bảo hành khi mua sản phẩm.    
+                </i>
+                <br></br>
+                <br></br>
                 <div class="product-item-wrapper" v-for="product in product" :key="product.idGioHangChiTiet">
                     <div class="product-item">
                         <input type="checkbox" class="product-checkbox" checked disabled />

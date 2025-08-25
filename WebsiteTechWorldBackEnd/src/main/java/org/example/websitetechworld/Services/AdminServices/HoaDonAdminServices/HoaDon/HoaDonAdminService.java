@@ -177,6 +177,32 @@ public class HoaDonAdminService {
                 .collect(Collectors.toList());
     }
 
+    public List<XuLySauBanHangResponse> getYeuCau (Integer hoaDonId){
+        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + hoaDonId));
+        return xuLySauBanHangRepository.findXuLySauBanHangByIdHoaDon_Id(hoaDon.getId())
+                .stream().sorted(Comparator.comparing(XuLySauBanHang::getId).reversed())
+                .map(xuLySauBanHang -> {
+                    XuLySauBanHangResponse response = new XuLySauBanHangResponse();
+                    response.setId(xuLySauBanHang.getId());
+                    response.setIdHoaDon(xuLySauBanHang.getIdHoaDon().getId());
+                    response.setIdImeiDaBan(xuLySauBanHang.getIdImeiDaBan().getId());
+                    response.setSoImei(xuLySauBanHang.getIdImeiDaBan().getSoImei());
+                    response.setCaseType(xuLySauBanHang.getLoaiVuViec());
+                    response.setLoaiVuViec(xuLySauBanHang.getLoaiVuViec().getDisplayName());
+                    response.setIdLyDoXuLy(xuLySauBanHang.getIdLyDo().getId());
+                    response.setLyDoXuLy(xuLySauBanHang.getIdLyDo().getTenLyDo());
+                    response.setActionAfterCase(xuLySauBanHang.getHanhDongSauVuViec());
+                    response.setHanhDongSauVuViec(xuLySauBanHang.getHanhDongSauVuViec().getDisplayName());
+                    response.setDaKiemTra(xuLySauBanHang.getDaKiemTra());
+                    response.setThoiGianXuLy(xuLySauBanHang.getThoiGianXuLy());
+                    response.setThoiGianYeuCau(xuLySauBanHang.getThoiGianYeuCau());
+                    response.setUrlHinh(xuLySauBanHang.getUrlHinh());
+                    response.setUrlVideo(xuLySauBanHang.getUrlVideo());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
     public List<ChiTietThanhToanAdminResponse> getPageChiTietThanhToan(Integer hoaDonId,Integer pageNo, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         return chiTietThanhToanRepository.findByIdHoaDon_Id(hoaDonId,pageable).stream().map(ChiTietThanhToanAdminResponse::convertDto).toList();

@@ -328,8 +328,60 @@
 }
 
 .card-content {
-    padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+
+.item-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+}
+
+.item-spec {
+  font-size: 13px;
+  color: #666;
+}
+
+.imei-list {
+  font-size: 13px;
+  color: #444;
+}
+
+.imei-list ul {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.imei-list li {
+  list-style-type: disc;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #409eff;
+  white-space: nowrap;
+}
+
+.total-summary {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.total-row {
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  gap: 10px;
+}
+
+.total-price {
+  color: #e63946;
+}
+
 
 /* Customer Card */
 .customer-info {
@@ -506,38 +558,9 @@
     gap: 2px;
 }
 
-.item-name {
-    font-weight: 500;
-    color: #1f2937;
-    font-size: 14px;
-}
-
 .item-qty {
     font-size: 12px;
     color: #6b7280;
-}
-
-.item-price {
-    font-weight: 600;
-    color: #2563eb;
-}
-
-.total-summary {
-    border-top: 1px solid #e9ecef;
-    padding-top: 15px;
-}
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.total-price {
-    color: #2563eb;
-    font-size: 18px;
 }
 
 /* Payment Card */
@@ -1269,4 +1292,177 @@
 
 .history-btn.cancel:hover {
     background: #ccc;
+}
+
+.request-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.request-modal {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.request-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.request-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.request-table th,
+.request-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.request-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.request-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.request-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.request-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.request-btn.cancel {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
+
+.request-btn.cancel:hover {
+    background-color: #d32f2f;
+}
+
+.tw-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.tw-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-image,
+.preview-video {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.tw-modal-content::before {
+    content: '✕';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.tw-modal-content:hover::before {
+    color: #dc2626;
+}
+
+.view-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-button:hover {
+    background-color: #0056b3;
+}
+
+.view-button:active {
+    transform: scale(0.98);
+}
+
+.view-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .tw-modal-content {
+        max-width: 95vw;
+        max-height: 95vh;
+        padding: 10px;
+    }
+
+    .preview-image,
+    .preview-video {
+        max-height: 70vh;
+    }
+
+    .tw-modal-content::before {
+        font-size: 16px;
+        top: 5px;
+        right: 5px;
+    }
 }

@@ -123,10 +123,6 @@
                     <X class="icon-small" /> HỦY ĐƠN
                 </button>
 
-                <button v-if="canReturn" @click="openPopupReturn()" class="action-btn cancel-btn">
-                    <X class="icon-small" /> TRẢ HÀNG
-                </button>
-
                 <div v-if="showReturnPopup" class="return-overlay">
                     <div class="return-modal">
                         <h3 class="return-title">Chọn sản phẩm/IMEI muốn trả</h3>
@@ -302,7 +298,7 @@
                 <div class="detail-card items-card">
                     <div class="card-header">
                         <Package class="icon" />
-                        <h3>Sản phẩm ({{ order.chiTietHoaDonAdminResponseList?.length || 0 }} món)</h3>
+                        <h3>Sản phẩm</h3>
                     </div>
                     <div class="card-content">
                         <div class="items-summary">

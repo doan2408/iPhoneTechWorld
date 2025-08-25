@@ -244,7 +244,7 @@
                 >
               </div>
               <div class="order-actions">
-                <button class="action-button buy-again-button">Mua Lại</button>
+                <button class="action-button buy-again-button" @click="chuyenTrang(order.idHoaDon)">Theo Dõi</button>
                 <button
                   class="action-button contact-seller-button"
                   @click="contactSeller"
@@ -346,6 +346,7 @@ import RateOrderDialog from "@/components/Admin/dialogs/DialogDanhGiaSao.vue";
 import { DanhGiaSanPhamClientService } from "@/Service/ClientService/DanhGiaSanPham/DanhGiaSanPhamClientService";
 import { MediaDanhGiaClientService } from "@/Service/ClientService/MediaDanhGiaClientService/MediaDanhGiaClientService";
 import { useToast } from "vue-toastification";
+import router from '@/router'
 // Toast instance
 const toast = useToast();
 
@@ -989,6 +990,13 @@ const contactSeller = () => {
       }
     }, 5000);
   }
+};
+
+const chuyenTrang = (id) => {
+  router.push({
+    name: "orderTracking",
+    params: { id: id },
+  });
 };
 
 onMounted(async () => {

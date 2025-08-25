@@ -244,3 +244,8 @@ export const changeStatusInvoice = (id, status) => {
     const body = { trangThaiThanhToan: status }
     return api.put(url, body)
 }
+
+export const viewRequests = (id) => {
+    const url = url_base + '/' + id + '/yeu-cau';
+    return api.get(url)
+}
