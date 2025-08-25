@@ -48,7 +48,7 @@
                 </div>
                 <div class="product-quantity">x{{ product.soLuong }}</div>
                 <!-- Hiển thị số ngày còn lại để đánh giá -->
-                <div v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order.ngayThanhToan)"
+                <div v-if="activeTab === 'Chưa đánh giá' && !order.daDanhGia && isWithin7Days(order?.ngayNhanhang)"
                   class="remaining-time">
                   {{ getRemainingDays(order.ngayThanhToan) }}
                 </div>
@@ -157,7 +157,7 @@
               <button class="action-button contact-seller-button" @click="contactSeller">
                 Liên hệ người bán
               </button>
-              <button v-if="!order.daDanhGia && isWithin7Days(order.ngayThanhToan)" class="action-button rate-button"
+              <button v-if="!order.daDanhGia && isWithin7Days(order?.ngayNhanhang)" class="action-button rate-button"
                 @click="openRateDialog(order.idHoaDon, order.myOrderClientResponseList)">
                 Đánh giá
               </button>
@@ -322,6 +322,7 @@ const allMyOrders = async () => {
     isLoading.value = true;
     const res = await getMyReview(0, 1000, user.value.id, searchTerm.value);
     const orders = Array.isArray(res.data.content) ? res.data.content : [];
+    console.log("Orders fetched:", orders);
 
     const ordersWithCheck = await Promise.all(
       orders.map(async (order) => {
