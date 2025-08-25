@@ -409,7 +409,7 @@
                 <div class="customer-display" v-if="currentInvoiceDetail.maKhachHang"
                     style="display: flex; align-items: center; justify-content: space-between;">
                     <span><b>{{ currentInvoiceDetail.maKhachHang }}: {{
-                        currentInvoiceDetail.tenKhachHang }}</b></span>
+                            currentInvoiceDetail.tenKhachHang }}</b></span>
                     <button @click="selectedKhachHang" class="toggle-cart-btn"
                         style="background: none; border: none; padding: 0; cursor: pointer;">
                         <X type="small" style="font-size: 12px; color: red;" />
@@ -560,7 +560,11 @@
                     </div>
 
 
-                    <button @click="processPayment" class="payment-btn">THANH TOÁN</button>
+                    <!-- <button @click="processPayment" class="payment-btn">THANH TOÁN</button> -->
+                    <button @click="processPayment" class="payment-btn" :disabled="isLoading">
+                        <span v-if="isLoading">Đang xử lý...</span>
+                        <span v-else>THANH TOÁN</span>
+                    </button>
                     <InvoicePrint v-if="showInvoice" :idHoaDon="selectedInvoiceId" ref="invoiceRef" />
                 </div>
             </div>
@@ -2348,18 +2352,24 @@ const selectedInvoiceId = ref(localStorage.getItem("selectedInvoiceId") || null)
 const invoiceRef = ref(null);
 // Hàm xử lý thanh toán
 const processPayment = async () => {
+    if (isLoading.value) return; // tránh double click
+    isLoading.value = true;
+
     const storedId = localStorage.getItem("selectedInvoiceId");
+
     if (!selectedPaymentMethod.value) {
         toast.warning('Vui lòng chọn phương thức thanh toán.');
+        isLoading.value = false;
         return;
     }
     if (!agreedToTerms.value) {
         toast.warning('Bạn phải đồng ý với Điều khoản và Điều kiện để tiếp tục.');
+        isLoading.value = false;
         return;
     }
-    // Kiểm tra xem hóa đơn có chi tiết sản phẩm không
     if (currentInvoiceDetail.value.chiTietHoaDonAdminResponseList?.length === 0) {
         toast.error('Hóa đơn không có sản phẩm nào để thanh toán.');
+        isLoading.value = false;
         return;
     }
 
@@ -2368,15 +2378,11 @@ const processPayment = async () => {
         soTienKhachDua: grandTotal.value,
         soTienGiam: discountAmount.value
     };
-    console.log("tien khach dua", paymentPayload);
-    console.log(paymentPayload.soTienKhachDua);
-
 
     try {
         const response = await thanhToan(storedId, paymentPayload);
         if (response.data && response.data.message === "Thanh toán thành công") {
             toast.success('Thanh toán thành công!');
-            console.log('Hóa đơn sau thanh toán:', response.data);
             selectedInvoiceId.value = storedId;
             showInvoice.value = true;
             await nextTick();
@@ -2391,11 +2397,13 @@ const processPayment = async () => {
         }
     } catch (error) {
         console.error('Lỗi khi xử lý thanh toán:', error);
-        if (error.response && error.response.data && error.response.data.message) {
+        if (error.response?.data?.message) {
             toast.error('Lỗi thanh toán: ' + error.response.data.message);
         } else {
             toast.error('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
         }
+    } finally {
+        isLoading.value = false;
     }
 };
 
