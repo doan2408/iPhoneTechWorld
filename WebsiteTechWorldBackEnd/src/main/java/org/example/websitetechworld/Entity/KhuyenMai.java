@@ -24,6 +24,7 @@ public class KhuyenMai {
     @Column(name = "ma_khuyen_mai", length = 50)
     private String maKhuyenMai;
 
+    @Nationalized
     @Column(name = "ten_khuyen_mai", length = 255)
     private String tenKhuyenMai;
 

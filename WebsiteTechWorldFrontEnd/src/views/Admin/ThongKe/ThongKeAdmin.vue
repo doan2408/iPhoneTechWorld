@@ -25,7 +25,7 @@
     <div class="stat-card">
       <img src="https://img.icons8.com/ios-filled/50/32CD32/megaphone.png" class="icon" />
       <div class="stat-content">
-        <div class="stat-title">Số Đơn Hàng</div>
+        <div class="stat-title">Số Đơn Hàng Hoàn Tất</div>
         <div class="stat-value">{{ dashboardData?.tongSoDonhang ?? '0' }}</div>
       </div>
     </div>
@@ -42,7 +42,7 @@
       <img src="https://png.pngtree.com/png-clipart/20190516/original/pngtree-users-vector-icon-png-image_3725294.jpg"
         class="icon" />
       <div class="stat-content">
-        <div class="stat-title">Số Khách Hàng</div>
+        <div class="stat-title">Số Khách Hàng Trên Hệ Thống</div>
         <div class="stat-value">{{ dashboardData?.tongSoKhachHang ?? '0' }}</div>
       </div>
     </div>
