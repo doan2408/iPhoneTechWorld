@@ -39,7 +39,7 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
         join lshd.idNhanVien nv
         join lshd.idHoaDon hd
         where nv.id = ?1 and hd.trangThaiThanhToan = ?2 and ( hd.isDelete != true  or hd.isDelete is null )
-        GROUP BY hd.id
+        AND lshd.hanhDong = 'CREATE'
 """)
     Integer countPendingHoaDonByNhanVien(Integer id, TrangThaiThanhToan trangThaiThanhToan);
 

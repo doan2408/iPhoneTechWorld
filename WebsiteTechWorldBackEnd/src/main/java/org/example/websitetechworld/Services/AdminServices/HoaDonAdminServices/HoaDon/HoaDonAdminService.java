@@ -283,6 +283,9 @@ public class HoaDonAdminService {
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
+        if (hoaDon.getIsShipping() == null || !hoaDon.getIsShipping()){
+            createLshd(hoaDon,HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
+        }
 
         if (response.getMessage().equals("Thanh toán thành công") && Boolean.TRUE.equals(hoaDon.getIsShipping())) {
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(hoaDon.getChiTietHoaDons().stream().toList(), TrangThaiImei.RESERVED);
@@ -589,6 +592,7 @@ public class HoaDonAdminService {
         if (TrangThaiGiaoHang.DELIVERED.equals(hoaDon.getTrangThaiDonHang()) && TrangThaiThanhToan.PAID.equals(hoaDon.getTrangThaiThanhToan())) {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
+            createLshd(hoaDon,HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
         }
         if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
             XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_IdAndLoaiVuViec(hoaDon.getId(), CaseType.CANCELLED);

@@ -9,7 +9,7 @@ public enum HanhDongLichSuHoaDon {
     , RETURN("Trả hàng")
     , FALSE_SHIPPING("Giao thất bại")
     , COMFIRM("Xác nhận hóa đơn")
-    , COMPLETE("hOAN THANH");
+    , COMPLETE("Hoàn thành");
 
     private final String displayName;
 
