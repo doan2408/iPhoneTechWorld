@@ -740,4 +740,11 @@ public class HoaDonAdminService {
             lichSuHoaDonRepository.save(lichSuHoaDon);
         }
     }
+
+    public void updateShippingMethod (Integer idHoaDon) {
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+        hoaDon.setShippingMethod(ShippingMethod.STANDARD);
+        hoaDonRepository.save(hoaDon);
+    }
 }

@@ -370,4 +370,13 @@ public class HoaDonAdminController {
     public List<XuLySauBanHangResponse> getYeuCau (@PathVariable Integer idHoaDon) {
         return hoaDonAdminService.getYeuCau(idHoaDon);
     }
+
+    @PutMapping("/{idHoaDon}/update-shipping-method")
+    public void updateShippingMethod (@PathVariable Integer idHoaDon) {
+        try {
+            hoaDonAdminService.updateShippingMethod(idHoaDon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
