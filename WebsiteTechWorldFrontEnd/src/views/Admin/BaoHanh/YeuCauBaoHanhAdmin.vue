@@ -129,12 +129,15 @@
                             </td>
                             <td>
                                 <button v-if="warranty.trangThai === 'IN_REPAIR'"
-                                    @click="completeWarranty(warranty.idLsbh)" class="complete-btn">
+                                    @click="openConfirm('Xác nhận là đã xử lý xong?', () => completeWarranty(warranty.idLsbh))"
+                                    class="complete-btn">
                                     Hoàn Thành
                                 </button>
                             </td>
                         </tr>
                     </tbody>
+                    <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+                        @cancel="showConfirm = false" />
                 </table>
                 <br>
                 <div class="pagination-controls" style="margin-top: 0;">
@@ -189,6 +192,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { checkedWarranty, createRequestWarranty, findDonBaoHanh, findHistoryBaoHanh, hoanThanhDon } from '@/Service/Adminservice/BaoHanh/BaoHanhService'
 import { tr } from 'element-plus/es/locales.mjs'
 import { useToast } from 'vue-toastification'
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
 
 const activeTab = ref('lookup')
 const searchImei = ref('')
@@ -291,6 +295,7 @@ async function completeWarranty(orderId) {
     try {
         await hoanThanhDon(orderId);
         loadWarrantyOrders(pageNo.value)
+        toast.success("Đơn hàng đã được xử lý")
     } catch (error) {
         console.error(error)
     }
@@ -341,6 +346,21 @@ function formatDate(date) {
         month: "2-digit",
         day: "2-digit",
     }).format(new Date(date));
+}
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
 }
 </script>
 
