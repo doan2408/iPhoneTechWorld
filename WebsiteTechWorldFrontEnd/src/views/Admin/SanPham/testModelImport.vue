@@ -326,7 +326,7 @@
           </el-select>
 
           <el-select v-model="filters.idRam" placeholder="Lọc theo RAM" clearable size="large" class="filter-select">
-            <el-option v-for="ram in rams" :key="ram.idRam" :label="ram.dungLuongRam" :value="ram.idRam" />
+            <el-option v-for="ram in rams" :key="ram.idRam" :label="`${ram.dungLuongRam} - ${ram.loaiRam}`" :value="ram.idRam" />
           </el-select>
 
           <el-select v-model="filters.idXuatXu" placeholder="Lọc theo xuất xứ" clearable size="large"
