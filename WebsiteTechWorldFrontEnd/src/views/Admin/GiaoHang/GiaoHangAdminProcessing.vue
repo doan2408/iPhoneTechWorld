@@ -147,6 +147,11 @@
                     <CheckCircle class="icon-small" /> SẴN SÀNG GIAO
                 </button>
 
+                <button v-if="canReady && order.shippingMethod == 'express' && order.trangThaiThanhToan == 'PENDING'"
+                    @click="updateShippingMethod(order)" class="action-btn ship-btn">
+                    <Truck class="icon-small" /> VẬN CHUYỂN TIÊU CHUẨN
+                </button>
+
                 <button v-if="order.trangThaiDonHang === 'Sẵn sàng giao'"
                     @click="openConfirm('Bắt đầu giao hàng?', () => updateOrderStatus('Đang giao'))"
                     class="action-btn ship-btn">
@@ -452,7 +457,7 @@ import {
     CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw,
     Eye
 } from 'lucide-vue-next'
-import { hoaDonDetail, changeStatusInvoice, viewRequests } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
+import { hoaDonDetail, changeStatusInvoice, viewRequests, updateShipping } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { getAllFalseReasonByCaseReason } from '@/Service/GuestService/FalseReasonServices/FalseReasonServices'
 import { createActionAfterCase, createActionAfterCaseReturn } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
@@ -895,6 +900,16 @@ function openConfirm(message, callback) {
     confirmMessage.value = message
     confirmCallback = callback
     showConfirm.value = true
+}
+
+const updateShippingMethod = async (hoaDon) => {
+    try {
+        await updateShipping(hoaDon.idHoaDon)
+        order.shippingMethod = 'standard'
+        toast.success('Đã chuyển thành giao hàng tiêu chuẩn')
+    } catch (error) {
+        console.error('Lỗi khi update shipping-method:', error)
+    }
 }
 
 function handleConfirm() {

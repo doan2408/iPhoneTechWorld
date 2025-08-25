@@ -249,3 +249,8 @@ export const viewRequests = (id) => {
     const url = url_base + '/' + id + '/yeu-cau';
     return api.get(url)
 }
+
+export const updateShipping = (id) => {
+    const url = url_base + '/' + id + '/update-shipping-method'
+    return api.put(url)
+}

@@ -238,7 +238,7 @@
                       </path>
                     </svg>
                   </button>
-                  <button class="action-btn edit-btn" title="Chỉnh sửa" @click="openSalesHistoryModal(hoaDon)">
+                  <button class="action-btn edit-btn" title="Xem lịch sử" @click="openSalesHistoryModal(hoaDon)">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z">
