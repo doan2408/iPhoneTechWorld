@@ -130,10 +130,44 @@ public class CpuAdminService {
 
 
     public void validateCpu(CpuAdminRequest cpuAdminRequest) {
-        String chip = cpuAdminRequest.getChipXuLy().trim().replaceAll("\\s+", " ");
-        if (!chip.matches("^[a-zA-Z0-9 ]+$")) { // chỉ còn space đơn
-            throw new BusinessException("Chíp xử lý chỉ được chứa chữ, số, không chứa ký tự đặc biệt");
+        // Lấy và trim chip xử lý
+        String chip = cpuAdminRequest.getChipXuLy().trim();
+        if (!chip.matches("^Apple[\\p{L}\\d ]*$")) {
+            throw new BusinessException("Chip xử lý phải bắt đầu bằng 'Apple' và chỉ được chứa chữ, số, khoảng trắng (ví dụ: Apple M1, Apple A16 Bionic)");
         }
+        cpuAdminRequest.setChipXuLy(chip.trim());
+
+        String soNhan = cpuAdminRequest.getSoNhan().trim();
+        if (!soNhan.matches("^[\\p{L}\\d ]+$")) {
+            throw new BusinessException("Số nhân chỉ được chứa chữ, số và khoảng trắng, không được chứa ký tự đặc biệt");
+        }
+        cpuAdminRequest.setSoNhan(soNhan.trim());
+
+        String xungNhip = cpuAdminRequest.getXungNhip().trim();
+        if (!xungNhip.matches("^[\\p{L}\\d ]+ GHz$")) {
+            throw new BusinessException("Xung nhịp chỉ được chứa chữ, số, khoảng trắng và phải kết thúc bằng 'GHz' (ví dụ: 3.5 GHz)");
+        }
+        cpuAdminRequest.setXungNhip(xungNhip);
+
+        String CNSX = cpuAdminRequest.getCongNgheSanXuat().trim();
+        if (!CNSX.matches("^[\\p{L}\\d ]+ nm$")) {
+            throw new BusinessException("Công nghệ sản xuất chỉ được chứa chữ, số, khoảng trắng và phải kết thúc bằng 'nm' (ví dụ: 7 nm, 5 nm)");
+        }
+        cpuAdminRequest.setCongNgheSanXuat(CNSX);
+
+        String boNhoDem = cpuAdminRequest.getBoNhoDem().trim();
+        if (!boNhoDem.matches("^[\\p{L}\\d ]+ MB$")) {
+            throw new BusinessException("Bộ nhớ đệm chỉ được chứa chữ, số, khoảng trắng và phải kết thúc bằng 'MB' (ví dụ: 8 MB, 12 MB)");
+        }
+        cpuAdminRequest.setBoNhoDem(boNhoDem);
+
+        String tieuThuDienNang = cpuAdminRequest.getTieuThuDienNang().trim();
+        if (!tieuThuDienNang.matches("^[\\p{L}\\d ]+ W$")) {
+            throw new BusinessException("Tiêu thụ điện năng chỉ được chứa chữ, số, khoảng trắng và phải kết thúc bằng 'W' (ví dụ: 65 W, 125 W)");
+        }
+        cpuAdminRequest.setTieuThuDienNang(tieuThuDienNang);
+
+
     }
 
 
