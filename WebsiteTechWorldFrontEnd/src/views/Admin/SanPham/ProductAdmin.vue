@@ -73,7 +73,7 @@
       </el-row>
       <!-- v-if="isAdmin" -->
 
-      <div class="mb-3 action-section" >
+      <div class="mb-3 action-section" v-if="isAdmin">
         <router-link to="/admin/products/create" class="el-link--success">
           <el-button type="success" size="default" class="action-btn">
             <el-icon>
@@ -170,7 +170,7 @@
                   <el-button size="small" type="info" :icon="View" class="action-btn-square" />
                 </el-tooltip>
               </router-link>
-              <router-link :to="`/admin/products/${row.id}`">
+              <router-link :to="`/admin/products/${row.id}`" v-if="isAdmin">
                 <el-tooltip content="Chỉnh sửa" placement="top">
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>

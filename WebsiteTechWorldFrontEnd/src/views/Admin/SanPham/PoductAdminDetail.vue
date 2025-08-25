@@ -317,7 +317,7 @@
       </div>
 
       <!-- Nút hành động -->
-      <div class="form-actions">
+      <div class="form-actions" v-if="isAdmin">
         <el-button type="success" size="large" :loading="loading.submit" @click="submitForm"
           class="action-btn primary-btn">
           <i class="el-icon-check"></i>
@@ -370,7 +370,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, onMounted, nextTick, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import { Delete, View } from "@element-plus/icons-vue";
@@ -386,8 +386,28 @@ import { debounce } from "lodash";
 import api from "@/Service/LoginService/axiosInstance";
 import * as XLSX from "xlsx";
 import { useToast } from "vue-toastification";
+import store from "@/Service/LoginService/Store";
 const toast = useToast();
 
+const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
 const route = useRoute();
 const router = useRouter();
 const id = ref(null); // Sử dụng ref để lưu id

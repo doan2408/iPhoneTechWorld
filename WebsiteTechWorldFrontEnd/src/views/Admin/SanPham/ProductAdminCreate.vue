@@ -562,7 +562,7 @@
     </el-card>
 
     <!-- Nút lưu sản phẩm -->
-    <div class="form-actions">
+    <div class="form-actions" v-if="isAdmin">
       <el-button
         type="success"
         :loading="loading.submit"
@@ -604,6 +604,7 @@ import {
 import { useRouter } from "vue-router";
 import DialogThemMauSac from "@/components/Admin/dialogs/DialogThemMauSac.vue";
 import DialogThemRom from "@/components/Admin/dialogs/DialogThemRom.vue";
+import store from "@/Service/LoginService/Store";
 
 export default {
   components: {
@@ -1816,11 +1817,33 @@ export default {
       }
     };
 
+    const isAdmin = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_ADMIN")
+  );
+});
+
+const isStaff = computed(() => {
+  const roles = store.state.roles;
+  return (
+    Array.isArray(roles) &&
+    roles
+      .map((role) => (typeof role === "string" ? role : role.authority))
+      .includes("ROLE_STAFF")
+  );
+});
+
     onMounted(() => {
       fetchDanhMuc();
     });
 
     return {
+      isAdmin,
+      isStaff,
       sanPham,
       sanPhamForm,
       nhaCungCaps,
