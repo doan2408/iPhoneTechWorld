@@ -78,9 +78,10 @@ public class CpuAdminService {
     public CpuAdminResponse createCpuQuick (CpuQuickCreateAdminRequest request) {
 
         String chip = request.getChipXuLy().trim().replaceAll("\\s+", " ");
-        if (!chip.matches("^[a-zA-Z0-9 ]+$")) { // chỉ còn space đơn
-            throw new BusinessException("Chíp xử lý chỉ được chứa chữ, số, không chứa ký tự đặc biệt");
+        if (!chip.matches("^Apple[\\p{L}\\d ]*$")) {
+            throw new BusinessException("Chip xử lý phải bắt đầu bằng 'Apple' và chỉ được chứa chữ, số, khoảng trắng (ví dụ: Apple M1, Apple A16 Bionic)");
         }
+        request.setChipXuLy(chip.trim());
 
         if (cpuRepository.existsByChipXuLy(request.getChipXuLy())) {
             throw new BusinessException("Chíp xử lý đã tồn tại");
