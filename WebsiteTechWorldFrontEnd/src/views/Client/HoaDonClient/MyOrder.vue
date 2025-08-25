@@ -253,7 +253,7 @@
                 </button>
                 <button
                   v-if="
-                    order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia
+                    order.trangThaiThanhToan === 'Hoàn tất' && !order.daDanhGia && isWithin7Days(order?.ngayNhanhang)
                   "
                   class="action-button rate-button"
                   @click="
@@ -384,6 +384,17 @@ const orderStatuses = ref([
   "Đã hủy",
   "Trả hàng/Hoàn tiền",
 ]);
+
+const isWithin7Days = (paymentDate) => {
+  if (!paymentDate) return false;
+  const paymentDateTime = new Date(paymentDate);
+  if (isNaN(paymentDateTime)) return false;
+  const currentDate = new Date();
+  const diffInTime = currentDate - paymentDateTime;
+  const diffInDays = diffInTime / (1000 * 3600 * 24);
+  return diffInDays <= 7;
+};
+
 
 // Computed để đồng bộ tab và combobox
 const currentFilterStatus = computed(() => {
@@ -603,6 +614,8 @@ const allMyOrder = async () => {
     console.log("Response từ backend:", res);
 
     const orders = res.data.content || [];
+
+    console.log("Đơn hàng nhận được:", orders);
 
     // Kiểm tra đánh giá
     const ordersWithCheck = await Promise.all(
@@ -964,8 +977,19 @@ const submitRating = async ({ payload }) => {
   }
 };
 
-
-
+// Hàm liên hệ người bán
+const contactSeller = () => {
+  if (window.Tawk_API?.toggle) {
+    window.Tawk_API.toggle();
+  } else {
+    window.Tawk_API.onLoad = () => window.Tawk_API.toggle();
+    setTimeout(() => {
+      if (!window.Tawk_API?.toggle) {
+        toast.error('Không thể mở chat. Vui lòng thử lại sau.');
+      }
+    }, 5000);
+  }
+};
 
 onMounted(async () => {
   await allMyOrder();

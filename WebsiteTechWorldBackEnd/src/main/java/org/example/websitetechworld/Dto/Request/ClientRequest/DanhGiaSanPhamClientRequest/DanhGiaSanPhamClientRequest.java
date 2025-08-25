@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Dto.Request.ClientRequest.DanhGiaSanPhamClientRequest;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

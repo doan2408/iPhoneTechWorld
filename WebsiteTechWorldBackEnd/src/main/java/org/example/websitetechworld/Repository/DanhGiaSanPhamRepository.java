@@ -166,7 +166,8 @@ public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, 
                 m.loai_media,
                 m.url_media,
                 m.ngay_upload,
-                m.trang_thai_media_danh_gia
+                m.trang_thai_media_danh_gia,
+                dg.ngay_danh_gia
             FROM danh_gia_san_pham dg
             JOIN chi_tiet_hoa_don cthd ON cthd.id_chi_tiet_hoa_don = dg.id_chi_tiet_hoa_don
             LEFT JOIN media_danh_gia m ON m.id_danh_gia = dg.id_danh_gia
