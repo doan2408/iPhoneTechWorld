@@ -794,17 +794,245 @@ public class SanPhamAdminService {
 //    }
 
 
+//    @Transactional(rollbackFor = Exception.class)
+//    public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
+//
+//        // === Bước 1: Kiểm tra dữ liệu đầu vào ===
+////        validateSanPhamRequest(sanPhamAdminRequest);
+//
+//        // === Bước 2: Tìm sản phẩm theo ID ===
+//        SanPham sanPham = sanPhamRepo.findById(id)
+//                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
+//
+//        // === Bước 3: Cập nhật thông tin chung cho sản phẩm ===
+//        sanPham.setId(sanPhamAdminRequest.getId());
+//        sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
+//        sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
+//        sanPham.setTrangThaiSanPham(Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
+//                .orElse(TrangThaiSanPham.ACTIVE));
+//
+//        nhaCungCapSpRepository.deleteBySanPham_Id(sanPham.getId());
+//        if (sanPhamAdminRequest.getIdNhaCungCaps() != null && !sanPhamAdminRequest.getIdNhaCungCaps().isEmpty()) {
+//            for (Integer idNhaCungCap : sanPhamAdminRequest.getIdNhaCungCaps()) {
+//                NhaCungCap nhaCungCap = nhaCungCapRepository.findById(idNhaCungCap)
+//                        .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + idNhaCungCap));
+//                NhaCungCapSp nhaCungCapSp = new NhaCungCapSp();
+//                nhaCungCapSp.setNhaCungCap(nhaCungCap);
+//                nhaCungCapSp.setSanPham(sanPham);
+//                nhaCungCapSpRepository.save(nhaCungCapSp);
+//            }
+//        }
+//
+//        // Cập nhật model sản phẩm nếu có
+//        if (sanPhamAdminRequest.getIdModelSanPham() != null) {
+//            ModelSanPham modelSanPham = modelSanPhamRepository.findById(sanPhamAdminRequest.getIdModelSanPham())
+//                    .orElseThrow(() -> new NotFoundException("Không tìm thấy model sản phẩm với ID: " + sanPhamAdminRequest.getIdModelSanPham()));
+//            sanPham.setIdModelSanPham(modelSanPham);
+//        }
+//
+//        // === Bước 4: Kiểm tra trùng lặp biến thể ===
+//        if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
+//            Set<String> variantKeys = new HashSet<>();
+//            for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+//                String variantKey = (rq.getIdMau() != null ? rq.getIdMau() : "null") + "-" + (rq.getIdRom() != null ? rq.getIdRom() : "null");
+//                if (!variantKeys.add(variantKey)) {
+//                    throw new BusinessException("Tổ hợp màu sắc và ROM trùng lặp: Màu ID " + rq.getIdMau() + ", ROM ID " + rq.getIdRom());
+//                }
+//            }
+//        }
+//
+//        // === Bước 5: Xử lý chi tiết sản phẩm ===
+//        Set<SanPhamChiTiet> updatedChiTietSet = new HashSet<>();
+//        if (sanPhamAdminRequest.getSanPhamChiTiets() != null && !sanPhamAdminRequest.getSanPhamChiTiets().isEmpty()) {
+//            for (SanPhamChiTietAdminRepuest rq : sanPhamAdminRequest.getSanPhamChiTiets()) {
+//                SanPhamChiTiet chiTiet;
+//                if (rq.getId() != null) {
+//                    chiTiet = sanPhamChiTietRepository.findById(rq.getId())
+//                            .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết sản phẩm ID: " + rq.getId()));
+//                } else {
+//                    chiTiet = new SanPhamChiTiet();
+//                    chiTiet.setIdSanPham(sanPham);
+//                }
+//
+//                // Cập nhật thông tin cơ bản
+//                chiTiet.setMaSanPhamChiTiet(rq.getMaSanPhamChiTiet());
+//                chiTiet.setGiaBan(rq.getGiaBan());
+//
+//                // Cập nhật màu sắc và ROM
+//                chiTiet.setIdMau(rq.getIdMau() != null
+//                        ? mauSacRepository.findById(rq.getIdMau()).orElseThrow(() -> new NotFoundException("Không tìm thấy màu sắc với ID: " + rq.getIdMau()))
+//                        : null);
+//                chiTiet.setIdRom(rq.getIdRom() != null
+//                        ? romRepository.findById(rq.getIdRom()).orElseThrow(() -> new NotFoundException("Không tìm thấy ROM với ID: " + rq.getIdRom()))
+//                        : null);
+//
+//                // Lưu chi tiết sản phẩm
+//                SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
+//
+//                // === Xử lý hình ảnh ===
+//                if (rq.getHinhAnhs() != null && !rq.getHinhAnhs().isEmpty()) {
+//                    // Lấy danh sách URL mới
+//                    Set<String> newImageUrls = rq.getHinhAnhs().stream()
+//                            .filter(ha -> ha.getUrl() != null && !ha.getUrl().trim().isEmpty())
+//                            .map(HinhAnhAdminRequest::getUrl)
+//                            .collect(Collectors.toSet());
+//
+//                    // Xóa hình ảnh cũ không còn trong danh sách mới
+//                    List<HinhAnh> oldImages = hinhAnhRepository.findByIdSanPhamChiTiet_Id(chiTietSaved.getId());
+//                    oldImages.removeIf(img -> newImageUrls.contains(img.getUrl()));
+//                    hinhAnhRepository.deleteAll(oldImages);
+//
+//                    // Thêm hình ảnh mới
+//                    List<HinhAnh> newImages = rq.getHinhAnhs().stream()
+//                            .filter(ha -> ha.getUrl() != null && !ha.getUrl().trim().isEmpty())
+////                            .filter(ha -> !hinhAnhRepository.existsByIdSanPhamChiTietAndUrl(chiTietSaved.getId(), ha.getUrl()))
+//                            .map(ha -> {
+//                                HinhAnh hinhAnh = new HinhAnh();
+//                                hinhAnh.setIdSanPhamChiTiet(chiTietSaved);
+//                                hinhAnh.setUrl(ha.getUrl());
+//                                hinhAnh.setImagePublicId(ha.getImagePublicId());
+//                                return hinhAnh;
+//                            }).toList();
+//
+//                    if (newImages.isEmpty() && newImageUrls.isEmpty()) {
+//                        throw new BusinessException("Danh sách hình ảnh không hợp lệ");
+//                    }
+//
+//                    hinhAnhRepository.saveAll(newImages);
+//                } else {
+//                    // Xóa tất cả hình ảnh nếu không có danh sách mới
+//                    hinhAnhRepository.deleteByIdSanPhamChiTiet(chiTietSaved.getId());
+//                }
+//
+//                // === Xử lý IMEI ===
+//                if (rq.getImeis() != null && !rq.getImeis().isEmpty()) {
+//                    // Lấy danh sách IMEI mới
+//                    List<String> imeisFromFE = rq.getImeis().stream()
+//                            .map(ImeiAdminRequest::getSoImei)
+//                            .filter(Objects::nonNull)
+//                            .map(String::trim)
+//                            .filter(s -> !s.isEmpty())
+//                            .toList();
+//
+//                    // Kiểm tra IMEI trùng lặp với các biến thể khác
+//                    Set<String> imeiDaTonTai = imeiReposiory.findAllBySoImeiIn(imeisFromFE).stream()
+//                            .filter(imei -> !imei.getIdSanPhamChiTiet().getId().equals(chiTietSaved.getId()))
+//                            .map(Imei::getSoImei)
+//                            .collect(Collectors.toSet());
+//
+//                    if (!imeiDaTonTai.isEmpty()) {
+//                        throw new BusinessException("Các IMEI đã tồn tại ở biến thể khác: " + String.join(", ", imeiDaTonTai));
+//                    }
+//
+//                    // Xóa IMEI cũ có trạng thái AVAILABLE
+//                    List<Imei> oldImeis = imeiReposiory.findByIdSanPhamChiTiet_Id(chiTietSaved.getId());
+//                    oldImeis.removeIf(imei -> imei.getTrangThaiImei() != TrangThaiImei.AVAILABLE);
+//                    imeiReposiory.deleteAll(oldImeis);
+//
+//                    // Thêm IMEI mới
+//                    List<Imei> imeiMoi = imeisFromFE.stream()
+//                            .filter(imei -> !imeiDaTonTai.contains(imei))
+//                            .map(soImei -> {
+//                                Imei imei = new Imei();
+//                                imei.setSoImei(soImei);
+//                                imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+//                                imei.setIdSanPhamChiTiet(chiTietSaved);
+//                                return imei;
+//                            }).toList();
+//
+//                    imeiReposiory.saveAll(imeiMoi);
+//
+//                    // Cập nhật số lượng dựa trên số IMEI
+//                    int soLuongThucTe = imeiReposiory.soLuongImei(TrangThaiImei.AVAILABLE, chiTietSaved.getId());
+//                    chiTietSaved.setSoLuong(soLuongThucTe);
+//                    sanPhamChiTietRepository.save(chiTietSaved);
+//                } else {
+//                    // Nếu không có IMEI, đặt số lượng về 0
+//                    chiTietSaved.setSoLuong(0);
+//                    sanPhamChiTietRepository.save(chiTietSaved);
+//                }
+//
+//                updatedChiTietSet.add(chiTietSaved);
+//            }
+//        }
+//
+//        // === Bước 6: Xóa các chi tiết sản phẩm cũ không còn trong request ===
+//        Set<SanPhamChiTiet> chiTietCanXoa = sanPham.getSanPhamChiTiets().stream()
+//                .filter(oldChiTiet -> updatedChiTietSet.stream()
+//                        .noneMatch(newChiTiet -> newChiTiet.getId() != null && newChiTiet.getId().equals(oldChiTiet.getId())))
+//                .collect(Collectors.toSet());
+//
+//        chiTietCanXoa.forEach(chiTiet -> {
+//            // Kiểm tra xem biến thể có IMEI đang sử dụng không
+//            long usedImeiCount = imeiReposiory.countByIdSanPhamChiTietIdAndTrangThaiImeiNot(chiTiet.getId(), TrangThaiImei.AVAILABLE);
+//            if (usedImeiCount > 0) {
+//                throw new BusinessException("Không thể xóa biến thể " + chiTiet.getMaSanPhamChiTiet() + " vì có " + usedImeiCount + " IMEI đang được sử dụng");
+//            }
+//            hinhAnhRepository.deleteByIdSanPhamChiTiet(chiTiet.getId());
+//            imeiReposiory.deleteByIdSanPhamChiTietId(chiTiet.getId());
+//        });
+//        sanPhamChiTietRepository.deleteAll(chiTietCanXoa);
+//
+//        // Cập nhật danh sách chi tiết sản phẩm
+//        sanPham.getSanPhamChiTiets().clear();
+//        sanPham.getSanPhamChiTiets().addAll(updatedChiTietSet);
+//
+//        // Lưu sản phẩm
+//        sanPham = sanPhamRepo.save(sanPham);
+//
+//        // === Bước 7: Tạo response ===
+//        SanPhamAdminResponse response = new SanPhamAdminResponse();
+//        response.setId(sanPham.getId());
+//        response.setMaSanPham(sanPham.getMaSanPham());
+//        response.setTenSanPham(sanPham.getTenSanPham());
+//        response.setThuongHieu(sanPham.getThuongHieu());
+//        response.setTrangThaiSanPham(sanPham.getTrangThaiSanPham());
+//
+//        List<NhaCungCapSp> nhaCungCapSpList = nhaCungCapSpRepository.findBySanPham_Id(sanPham.getId());
+//        List<NhaCungCapAdminResponse> nhaCungCaps = nhaCungCapSpList.stream()
+//                .map(nhaCungCapSp -> {
+//                    NhaCungCapAdminResponse nhaCungCapDto = new NhaCungCapAdminResponse();
+//                    nhaCungCapDto.setId(nhaCungCapSp.getNhaCungCap().getId()); // ĐÃ SỬA: Thêm ID nhà cung cấp
+//                    nhaCungCapDto.setTenNhaCungCap(nhaCungCapSp.getNhaCungCap().getTenNhaCungCap());
+//                    nhaCungCapDto.setDiaChi(nhaCungCapSp.getNhaCungCap().getDiaChi());
+//                    nhaCungCapDto.setSdt(nhaCungCapSp.getNhaCungCap().getSdt());
+//                    nhaCungCapDto.setEmail(nhaCungCapSp.getNhaCungCap().getEmail());
+//                    return nhaCungCapDto;
+//                })
+//                .collect(Collectors.toList());
+//        response.setNhaCungCaps(nhaCungCaps);
+//
+//        if (sanPham.getIdModelSanPham() != null) {
+//            ModelSanPham m = sanPham.getIdModelSanPham();
+//            ModelSanPhamAdminResponse modelRes = new ModelSanPhamAdminResponse();
+//            modelRes.setMaModelSanPham(m.getMaModelSanPham());
+//            modelRes.setTenModel(m.getTenModel());
+//            modelRes.setNamRaMat(m.getNamRaMat());
+//            response.setModelSanPhamAdminResponse(modelRes);
+//        }
+//
+//        if (sanPham.getSanPhamChiTiets() != null) {
+//            Set<SanPhamChiTietResponse> chiTietResponses = sanPham.getSanPhamChiTiets().stream()
+//                    .map(this::mapToChiTietResponse)
+//                    .collect(Collectors.toSet());
+//            response.setSanPhamChiTiets(chiTietResponses);
+//        }
+//
+//        return response;
+//    }
+
     @Transactional(rollbackFor = Exception.class)
     public SanPhamAdminResponse updateSanPhamAdmin(Integer id, SanPhamAdminRequest sanPhamAdminRequest) {
 
         // === Bước 1: Kiểm tra dữ liệu đầu vào ===
-//        validateSanPhamRequest(sanPhamAdminRequest);
+        // validateSanPhamRequest(sanPhamAdminRequest); // Bỏ comment nếu cần sử dụng
 
         // === Bước 2: Tìm sản phẩm theo ID ===
         SanPham sanPham = sanPhamRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
 
         // === Bước 3: Cập nhật thông tin chung cho sản phẩm ===
+        sanPham.setId(sanPhamAdminRequest.getId());
         sanPham.setTenSanPham(sanPhamAdminRequest.getTenSanPham());
         sanPham.setThuongHieu(sanPhamAdminRequest.getThuongHieu());
         sanPham.setTrangThaiSanPham(Optional.ofNullable(sanPhamAdminRequest.getTrangThaiSanPham())
@@ -869,6 +1097,7 @@ public class SanPhamAdminService {
                 SanPhamChiTiet chiTietSaved = sanPhamChiTietRepository.save(chiTiet);
 
                 // === Xử lý hình ảnh ===
+                // === Xử lý IMEI ===
                 if (rq.getHinhAnhs() != null && !rq.getHinhAnhs().isEmpty()) {
                     // Lấy danh sách URL mới
                     Set<String> newImageUrls = rq.getHinhAnhs().stream()
@@ -884,7 +1113,6 @@ public class SanPhamAdminService {
                     // Thêm hình ảnh mới
                     List<HinhAnh> newImages = rq.getHinhAnhs().stream()
                             .filter(ha -> ha.getUrl() != null && !ha.getUrl().trim().isEmpty())
-//                            .filter(ha -> !hinhAnhRepository.existsByIdSanPhamChiTietAndUrl(chiTietSaved.getId(), ha.getUrl()))
                             .map(ha -> {
                                 HinhAnh hinhAnh = new HinhAnh();
                                 hinhAnh.setIdSanPhamChiTiet(chiTietSaved);
@@ -913,40 +1141,58 @@ public class SanPhamAdminService {
                             .filter(s -> !s.isEmpty())
                             .toList();
 
-                    // Kiểm tra IMEI trùng lặp với các biến thể khác
-                    Set<String> imeiDaTonTai = imeiReposiory.findAllBySoImeiIn(imeisFromFE).stream()
-                            .filter(imei -> !imei.getIdSanPhamChiTiet().getId().equals(chiTietSaved.getId()))
+                    // Lấy danh sách IMEI hiện tại của biến thể này
+                    List<Imei> currentImeis = imeiReposiory.findByIdSanPhamChiTiet_Id(chiTietSaved.getId());
+                    List<String> currentImeiStrings = currentImeis.stream()
                             .map(Imei::getSoImei)
-                            .collect(Collectors.toSet());
+                            .collect(Collectors.toList());
 
-                    if (!imeiDaTonTai.isEmpty()) {
-                        throw new BusinessException("Các IMEI đã tồn tại ở biến thể khác: " + String.join(", ", imeiDaTonTai));
-                    }
-
-                    // Xóa IMEI cũ có trạng thái AVAILABLE
-                    List<Imei> oldImeis = imeiReposiory.findByIdSanPhamChiTiet_Id(chiTietSaved.getId());
-                    oldImeis.removeIf(imei -> imei.getTrangThaiImei() != TrangThaiImei.AVAILABLE);
+                    // Xóa tất cả IMEI cũ có trạng thái AVAILABLE
+                    List<Imei> oldImeis = currentImeis.stream()
+                            .filter(imei -> imei.getTrangThaiImei() == TrangThaiImei.AVAILABLE)
+                            .collect(Collectors.toList());
                     imeiReposiory.deleteAll(oldImeis);
 
-                    // Thêm IMEI mới
-                    List<Imei> imeiMoi = imeisFromFE.stream()
-                            .filter(imei -> !imeiDaTonTai.contains(imei))
-                            .map(soImei -> {
-                                Imei imei = new Imei();
-                                imei.setSoImei(soImei);
+                    // Thêm hoặc cập nhật IMEI
+                    List<Imei> imeiMoi = new ArrayList<>();
+                    for (String soImei : imeisFromFE) {
+                        // Kiểm tra xem IMEI có tồn tại trong cơ sở dữ liệu không
+                        Optional<Imei> existingImei = Optional.ofNullable(imeiReposiory.findBySoImei(soImei));
+                        Imei imei;
+
+                        if (existingImei.isPresent()) {
+                            imei = existingImei.get();
+                            // Nếu IMEI đã thuộc biến thể hiện tại, giữ nguyên
+                            if (imei.getIdSanPhamChiTiet().getId().equals(chiTietSaved.getId())) {
                                 imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
-                                imei.setIdSanPhamChiTiet(chiTietSaved);
-                                return imei;
-                            }).toList();
+                            } else {
+                                // Chuyển IMEI sang biến thể hiện tại nếu trạng thái là AVAILABLE
+                                if (imei.getTrangThaiImei() == TrangThaiImei.AVAILABLE) {
+                                    imei.setIdSanPhamChiTiet(chiTietSaved);
+                                    imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                                } else {
+                                    throw new BusinessException("IMEI " + soImei + " đã được sử dụng ở biến thể khác và không thể chuyển vì trạng thái không phải AVAILABLE");
+                                }
+                            }
+                        } else {
+                            // Tạo IMEI mới
+                            imei = new Imei();
+                            imei.setSoImei(soImei);
+                            imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
+                            imei.setIdSanPhamChiTiet(chiTietSaved);
+                        }
+                        imeiMoi.add(imei);
+                    }
 
                     imeiReposiory.saveAll(imeiMoi);
 
                     // Cập nhật số lượng dựa trên số IMEI
-                    int soLuongThucTe = imeiReposiory.soLuongImei(TrangThaiImei.AVAILABLE, chiTietSaved.getId());
+                    int soLuongThucTe = imeisFromFE.size();
                     chiTietSaved.setSoLuong(soLuongThucTe);
                     sanPhamChiTietRepository.save(chiTietSaved);
                 } else {
-                    // Nếu không có IMEI, đặt số lượng về 0
+                    // Nếu không có IMEI, xóa tất cả IMEI cũ và đặt số lượng về 0
+                    imeiReposiory.deleteByIdSanPhamChiTietId(chiTietSaved.getId());
                     chiTietSaved.setSoLuong(0);
                     sanPhamChiTietRepository.save(chiTietSaved);
                 }
@@ -991,7 +1237,7 @@ public class SanPhamAdminService {
         List<NhaCungCapAdminResponse> nhaCungCaps = nhaCungCapSpList.stream()
                 .map(nhaCungCapSp -> {
                     NhaCungCapAdminResponse nhaCungCapDto = new NhaCungCapAdminResponse();
-                    nhaCungCapDto.setId(nhaCungCapSp.getNhaCungCap().getId()); // ĐÃ SỬA: Thêm ID nhà cung cấp
+                    nhaCungCapDto.setId(nhaCungCapSp.getNhaCungCap().getId());
                     nhaCungCapDto.setTenNhaCungCap(nhaCungCapSp.getNhaCungCap().getTenNhaCungCap());
                     nhaCungCapDto.setDiaChi(nhaCungCapSp.getNhaCungCap().getDiaChi());
                     nhaCungCapDto.setSdt(nhaCungCapSp.getNhaCungCap().getSdt());
@@ -1025,7 +1271,7 @@ public class SanPhamAdminService {
     public void deleteSanPhamAdmin(Integer id) {
         SanPham sanPham = sanPhamRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + id));
-        sanPham.setTrangThaiSanPham(TrangThaiSanPham.TEMPORARILY_UNAVAILABLE);
+        sanPham.setTrangThaiSanPham(TrangThaiSanPham.ACTIVE);
         sanPhamRepo.save(sanPham);
     }
     public Page<SanPhamBanHangAdminResponse> getProductNames(String tenSanPham, int page, int size, Integer selectedIdKhachHang,
