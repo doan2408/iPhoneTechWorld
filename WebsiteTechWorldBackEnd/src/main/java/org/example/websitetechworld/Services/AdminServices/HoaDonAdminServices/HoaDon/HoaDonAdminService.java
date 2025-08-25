@@ -30,6 +30,7 @@ import org.example.websitetechworld.Services.AdminServices.GiaoHangAdminServces.
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.Imei.HoaDonChiTiet_ImeiAdminServices;
 import org.example.websitetechworld.Services.AdminServices.HoaDonAdminServices.SanPham.HoaDonChiTiet_SanPhamAdminServices;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.ImeiAdminService;
+import org.example.websitetechworld.Services.ClientServices.DiemServices.LichSuDiemService;
 import org.example.websitetechworld.Services.CommonSerivces.EmailCommonService.EmailServicces;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanFactory;
 import org.example.websitetechworld.Services.CommonSerivces.ThanhToanCommonServices.ThanhToanStrategy;
@@ -78,9 +79,10 @@ public class HoaDonAdminService {
     private final GioHangRepository gioHangRepository;
     private final ViDiemRepository viDiemRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final LichSuDiemService lichSuDiemService;
 
     public HoaDonAdminService(HoaDonRepository hoaDonRepository, LichSuHoaDonRepository lichSuHoaDonRepository, ChiTietThanhToanRepository chiTietThanhToanRepository, ChiTietHoaDonRepository chiTietHoaDonRepository, KhachHangRepository khachHangRepository, ThanhToanFactory thanhToanFactory, ImeiAdminService imeiAdminService, HoaDonChiTiet_ImeiAdminServices hoaDonChiTiet_ImeiAdminServices, HoaDonChiTiet_SanPhamAdminServices hoaDonChiTietSanPhamAdminServices, PhieuGiamGiaRepository phieuGiamGiaRepository, EntityManager entityManager, EmailServicces emailServicces, GiaoHangAdminServices giaoHangAdminServices, XuLySauBanHangRepository xuLySauBanHangRepository, KhachHangGiamGiaRepository khachHangGiamGiaRepository, SanPhamChiTietRepository sanPhamChiTietRepository, GioHangRepository gioHangRepository, ViDiemRepository viDiemRepository,
-                              NhanVienRepository nhanVienRepository) {
+                              NhanVienRepository nhanVienRepository, LichSuDiemService lichSuDiemService) {
         this.hoaDonRepository = hoaDonRepository;
         this.lichSuHoaDonRepository = lichSuHoaDonRepository;
         this.chiTietThanhToanRepository = chiTietThanhToanRepository;
@@ -100,6 +102,7 @@ public class HoaDonAdminService {
         this.gioHangRepository = gioHangRepository;
         this.viDiemRepository = viDiemRepository;
         this.nhanVienRepository = nhanVienRepository;
+        this.lichSuDiemService = lichSuDiemService;
     }
 
     public List<HoaDonAdminResponse> getAllHoaDon(){
@@ -619,6 +622,7 @@ public class HoaDonAdminService {
             hoaDon.setTrangThaiThanhToan(TrangThaiThanhToan.COMPLETED);
             hoaDonChiTiet_ImeiAdminServices.updateImeiStautusFromHoaDon(danhSachChiTiet, TrangThaiImei.SOLD);
             createLshd(hoaDon,HanhDongLichSuHoaDon.COMPLETE,"Đơn hàng đã hoàn thành");
+            lichSuDiemService.congDiemTuHoaDon(hoaDon.getId());
         }
         if (TrangThaiThanhToan.REFUNDED.equals(newStatus) && TrangThaiGiaoHang.CANCELLED.equals(hoaDon.getTrangThaiDonHang())){
             XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findByIdHoaDon_IdAndLoaiVuViec(hoaDon.getId(), CaseType.CANCELLED);

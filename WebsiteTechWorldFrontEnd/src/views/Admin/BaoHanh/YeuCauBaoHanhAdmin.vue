@@ -87,7 +87,9 @@
                     </div>
 
                     <div class="form-actions">
-                        <button @click="createWarranty" class="create-btn">Tạo Đơn Bảo Hành</button>
+                        <button @click="createWarranty" class="create-btn" :disabled="isLoadingCreateBaoHanh">
+                            {{ isLoadingCreateBaoHanh ? 'Đang xử lý...' : 'Tạo Đơn Bảo Hành' }}
+                        </button>
                         <button @click="cancelWarranty" class="cancel-btn">Hủy</button>
                     </div>
                 </div>
@@ -121,7 +123,7 @@
                             <td>{{ warranty.loaiBaoHanh }}</td>
                             <td>{{ warranty.tenKhachHang }}</td>
                             <td>{{ warranty.ngayTiepNhan }}</td>
-                            <td>{{ warranty.ngayHoanThanh || 'Đơn hàng đang được xử lý'}}</td>
+                            <td>{{ warranty.ngayHoanThanh || 'Đơn hàng đang được xử lý' }}</td>
                             <td>
                                 <span :class="['status-badge', warranty.status]">
                                     {{ warranty.trangThai === 'IN_REPAIR' ? 'Đang sửa chữa' : 'Đã sửa chữa' }}
@@ -130,8 +132,9 @@
                             <td>
                                 <button v-if="warranty.trangThai === 'IN_REPAIR'"
                                     @click="openConfirm('Xác nhận là đã xử lý xong?', () => completeWarranty(warranty.idLsbh))"
-                                    class="complete-btn">
-                                    Hoàn Thành
+                                    class="complete-btn" :disabled="isLoadingComplete">
+                                    <span v-if="isLoadingComplete">Đang xử lý...</span>
+                                    <span v-else>Hoàn Thành</span>
                                 </button>
                             </td>
                         </tr>
@@ -154,7 +157,7 @@
             <h2>Lịch Sử Bảo Hành</h2>
             <br>
             <div class="history-search">
-                <input v-model="historyImei" type="text" placeholder="Nhập IMEI để xem lịch sử" class="imei-input">
+                <input v-model="historyImei" type="text" placeholder="Nhập IMEI để xem lịch sử" maxlength="15" class="imei-input">
                 <button @click="searchHistory" class="search-btn">Tìm Kiếm</button>
             </div>
 
@@ -231,6 +234,7 @@ async function searchWarranty() {
         toast.warning('Vui lòng nhập IMEI')
         return
     }
+    
 
     if (searchImei.value.length !== 15 || !/^\d+$/.test(searchImei.value)) {
         toast.warning('IMEI phải có đúng 15 số')
@@ -250,12 +254,20 @@ async function searchWarranty() {
 function selectWarrantyType(warranty) {
     selectedWarranty.value = warranty
     // showToastMsg(`Đã chọn ${warranty.type}`, 'success')
-    toast.success("Đã chọn loại bảo hành "+ selectedWarranty.value.tenLoaiBaoHanh)
+    toast.success("Đã chọn loại bảo hành " + selectedWarranty.value.tenLoaiBaoHanh)
 }
 
 const fieldErrors = ref({})
 
+
+const isLoadingCreateBaoHanh = ref(false)
+
 async function createWarranty() {
+
+    if(isLoadingCreateBaoHanh.value) return
+
+    isLoadingCreateBaoHanh.value = true
+
     fieldErrors.value = {} // reset lỗi cũ
 
     try {
@@ -284,6 +296,9 @@ async function createWarranty() {
             showToastMsg('Có lỗi xảy ra', 'error')
         }
     }
+    finally {
+        isLoadingCreateBaoHanh.value = false
+    }
 }
 
 function cancelWarranty() {
@@ -291,33 +306,45 @@ function cancelWarranty() {
     warrantyForm.description = ''
 }
 
+const isLoadingComplete = ref(false);
 async function completeWarranty(orderId) {
     try {
+        isLoadingComplete.value = true;
         await hoanThanhDon(orderId);
-        loadWarrantyOrders(pageNo.value)
-        toast.success("Đơn hàng đã được xử lý")
+        await loadWarrantyOrders(pageNo.value);
+        toast.success("Đơn hàng đã được xử lý");
     } catch (error) {
-        console.error(error)
+        console.error(error);
+        toast.error("Xử lý thất bại, vui lòng thử lại");
+    } finally {
+        isLoadingComplete.value = false;
     }
 }
 
 async function searchHistory() {
-    if (!historyImei.value) {
-        showToastMsg('Vui lòng nhập IMEI', 'error')
+
+
+    if (!historyImei.value || historyImei.value.trim() === '') {
+        toast.warning('Vui lòng nhập IMEI', 'error')
         return
+    }
+
+    if (!/^\d+$/.test(historyImei.value)) {
+        toast.warning('IMEI chỉ được phép chứa số (0–9), không được nhập chữ cái hay ký tự đặc biệt.');
+        return;
     }
 
     const res = await findHistoryBaoHanh(historyImei.value);
     historyData.value = res.data
 
     if (historyData.value.length === 0) {
-        showToastMsg('Không tìm thấy lịch sử bảo hành cho IMEI này', 'error')
+        toast.warning('Không tìm thấy lịch sử bảo hành cho IMEI này', 'error')
     }
 }
 
 async function loadWarrantyOrders(pageNoPage) {
     pageNo.value = pageNoPage
-    const res = await findDonBaoHanh(pageNo.value,pageSize.value);
+    const res = await findDonBaoHanh(pageNo.value, pageSize.value);
     warrantyOrders.value = res.data.content
     totalPages.value = res.data.totalPages
 }
@@ -858,6 +885,7 @@ function handleConfirm() {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     padding: 20px 30px;
 }
+
 @media (max-width: 768px) {
     .modal-content {
         max-width: 100%;
@@ -1008,6 +1036,7 @@ function handleConfirm() {
         padding: 20px;
     }
 }
+
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -1083,6 +1112,7 @@ function handleConfirm() {
         min-width: 50px;
     }
 }
+
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -1118,11 +1148,13 @@ function handleConfirm() {
     color: #666;
     font-size: 1em;
 }
+
 .error-text {
     color: red;
     font-size: 13px;
     margin-top: 4px;
 }
+
 .error-reason {
     color: #e74c3c;
     /* Màu đỏ nổi bật */

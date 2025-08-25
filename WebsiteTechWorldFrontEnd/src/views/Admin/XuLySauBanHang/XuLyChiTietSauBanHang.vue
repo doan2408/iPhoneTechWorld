@@ -199,32 +199,7 @@
                         <span>{{ orderInformation.customerNote || 'Không có ghi chú' }}</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Warranty Tracking -->
-            <div class="warranty-section">
-                <h2>Theo dõi bảo hành ( Mẫu )</h2>
-                <div class="warranty-grid">
-                    <div class="warranty-item">
-                        <label>Thời gian bảo hành còn lại:</label>
-                        <span class="warranty-time">8 tháng 15 ngày</span>
-                    </div>
-                    <div class="warranty-item">
-                        <label>Trung tâm bảo hành gần nhất:</label>
-                        <span>123 Đường XYZ, Quận 3, TP.HCM</span>
-                        <button class="btn-link" @click="viewWarrantyCenter">Xem chi tiết</button>
-                    </div>
-                    <div class="warranty-item">
-                        <label>Lịch sử bảo hành:</label>
-                        <div class="warranty-history">
-                            <div class="history-item">
-                                <span class="history-date">10/01/2024</span>
-                                <span class="history-content">Thay màn hình - Hoàn thành</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </div>          
         </div>
     </div>
 </template>

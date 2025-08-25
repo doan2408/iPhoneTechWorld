@@ -69,7 +69,7 @@ public class XuLySauBanHangServices {
         xuLySauBanHang.setThoiGianYeuCau(LocalDateTime.now());
         LyDoXuLy lyDoXuLy = lyDoXuLyRepository.findByLoaiVuViec(CaseType.CANCELLED);
         xuLySauBanHang.setIdLyDo(lyDoXuLy);
-        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.PENDING);
+        xuLySauBanHang.setHanhDongSauVuViec(ActionAfterCase.CANCEL);
         xuLySauBanHang.setDaKiemTra(false);
         xuLySauBanHangRepository.save(xuLySauBanHang);
     }
@@ -214,7 +214,7 @@ public class XuLySauBanHangServices {
         BigDecimal thanhTien = Optional.ofNullable(hoaDon.getThanhTien()).orElse(BigDecimal.ZERO);
         BigDecimal phiShip = Optional.ofNullable(hoaDon.getPhiShip()).orElse(BigDecimal.ZERO);
 
-        BigDecimal soTienCanTra = thanhTien.subtract(phiShip.multiply(BigDecimal.TWO));
+        BigDecimal soTienCanTra = thanhTien.subtract(phiShip);
         return soTienCanTra;
     }
 

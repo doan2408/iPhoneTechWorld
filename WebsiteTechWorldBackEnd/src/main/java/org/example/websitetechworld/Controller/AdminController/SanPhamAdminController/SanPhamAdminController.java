@@ -10,11 +10,17 @@ import org.example.websitetechworld.Dto.Response.AdminResponse.SanPhamAdminRespo
 import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPham;
 import org.example.websitetechworld.Services.AdminServices.SanPhamAdminServices.SanPhamAdminService;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +119,25 @@ public class SanPhamAdminController {
     @GetMapping("/filldata-for-pulldown")
     public ResponseEntity<?> fillDatePulldown(){
         return ResponseEntity.ok(sanPhamAdminService.fillDataForPulldown());
+    }
+
+
+    @GetMapping("/download-template-imei")
+    public ResponseEntity<byte[]> downloadTemplateImei() {
+        try {
+            // Đọc file template có sẵn trong resources
+            ClassPathResource resource = new ClassPathResource("templates/ImeiSanPhamTemplate.xlsx");
+
+            byte[] data = Files.readAllBytes(resource.getFile().toPath());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "ImeiSanPhamTemplate.xlsx");
+
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

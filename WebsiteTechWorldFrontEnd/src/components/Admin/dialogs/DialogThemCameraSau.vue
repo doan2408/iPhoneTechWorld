@@ -2,18 +2,18 @@
   <el-dialog title="Thêm Camera sau mới" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
     <el-form :model="NewCameraSau" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Loại camera" prop="loaiCamera">
-        <el-input v-model="NewCameraSau.loaiCamera" autocomplete="off" />
+        <el-input v-model="NewCameraSau.loaiCamera" placeholder="Nhập loại camera, ví dụ: Wide, Ultra Wide, Telephoto" autocomplete="off" />
       </el-form-item>
     </el-form>
 
     <el-form :model="NewCameraSau" ref="formRef" label-position="top" :rules="rules">
       <el-form-item label="Độ phân giải" prop="doPhanGiai">
-        <el-input v-model="NewCameraSau.doPhanGiai" autocomplete="off" />
+        <el-input v-model="NewCameraSau.doPhanGiai" placeholder="Nhập độ phân giải, ví dụ: 12MP"  autocomplete="off" />
       </el-form-item>
     </el-form>
 
     <el-form :model="NewCameraSau" ref="formRef" label-position="top" :rules="rules">
-      <el-form-item label="Khẩu độ" prop="khauDo">
+      <el-form-item label="Khẩu độ" placeholder="Nhập khẩu độ, ví dụ: f/1.8"  prop="khauDo">
         <el-input v-model="NewCameraSau.khauDo" autocomplete="off" />
       </el-form-item>
     </el-form>
@@ -28,7 +28,7 @@
 <script setup>
 import { postCameraSauList } from '@/Service/Adminservice/Products/ProductAdminService';
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 

@@ -80,14 +80,10 @@ public class RamAdminService {
     @Transactional
     public RamAdminResponse createRamQuick(RamQuickCreateAdminRequest ramAdminRequest) {
 
-        String dungLuong = ramAdminRequest.getDungLuong();
-        if (dungLuong == null || dungLuong.trim().isEmpty()) {
-            throw new BusinessException("Dung lượng RAM không được để trống.");
+        if (!ramAdminRequest.getDungLuong().trim().matches("^\\d+GB$")) {
+            throw new BusinessException("Dung lượng phải là số và kết thúc bằng 'GB' (ví dụ: 128GB, 64GB).");
         }
-
-        if (!dungLuong.trim().matches("^[a-zA-Z0-9]+$")) {
-            throw new BusinessException("Dung lượng RAM chỉ được chứa chữ và số, không có khoảng trắng hoặc ký tự đặc biệt.");
-        }
+        ramAdminRequest.setDungLuong(ramAdminRequest.getDungLuong().trim());
 
         // Validate loại
         String loai = ramAdminRequest.getLoai();
@@ -97,6 +93,8 @@ public class RamAdminService {
         if (!loai.matches("^[a-zA-Z0-9 ]+$")) {
             throw new BusinessException("Loại RAM không được chứa ký tự đặc biệt.");
         }
+
+        ramAdminRequest.setLoai(ramAdminRequest.getLoai().trim());
 
         if (ramRepository.existsByDungLuongAndLoai(ramAdminRequest.getDungLuong(),ramAdminRequest.getLoai())) {
             throw new BusinessException(
