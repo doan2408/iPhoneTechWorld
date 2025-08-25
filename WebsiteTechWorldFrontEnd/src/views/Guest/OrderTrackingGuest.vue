@@ -356,7 +356,7 @@ import {
     CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw,
     History
 } from 'lucide-vue-next'
-import { getOrderHistory, hoaDonDetail } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { getOrderHistoryGuest, hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
 import { useToast } from 'vue-toastification'
@@ -380,7 +380,7 @@ const viewOrderDetail = async () => {
     const id = route.params.id
     if (id) {
         try {
-            const response = await hoaDonDetail(id)
+            const response = await hoaDonDetailGuest(id)
             Object.assign(order, response.data)
         } catch (error) {
             console.error('Lỗi khi tải chi tiết đơn hàng:', error)
@@ -756,7 +756,7 @@ const orderHistory = ref([]);
 const xemLichSu = async () => {
     try {
         const id = route.params.id; 
-        const response = await getOrderHistory(id);
+        const response = await getOrderHistoryGuest(id);
         orderHistory.value = response.data;
         showHistoryModal.value = true;
     } catch (error) {
@@ -773,6 +773,7 @@ watch(
 onMounted(() => {
     viewOrderDetail()
 })
+
 const showConfirm = ref(false)
 const confirmMessage = ref('')
 let confirmCallback = null

@@ -119,4 +119,10 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             @Param("search") String search,
             Pageable pageable
     );
+
+    List<HoaDon> findByLoaiHoaDonAndNgayThanhToanIsNullAndNgayTaoHoaDonBefore(
+            LoaiHoaDon loaiHoaDon, LocalDateTime thoiDiem
+    );
+
+
 }

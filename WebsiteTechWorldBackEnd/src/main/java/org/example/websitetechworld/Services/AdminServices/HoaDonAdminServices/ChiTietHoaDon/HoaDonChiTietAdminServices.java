@@ -282,4 +282,23 @@ public class HoaDonChiTietAdminServices {
     private BigDecimal tinhGiaKhuyenMai (BigDecimal giaGoc, BigDecimal tyLeGiam) {
         return giaGoc.subtract(giaGoc.multiply(tyLeGiam)).max(BigDecimal.ZERO);
     }
+
+    public void deleleHdct30p(Integer hdctId){
+        ChiTietHoaDon cthdCanXoa = chiTietHoaDonRepository.findById(hdctId).orElseThrow();
+        List<ImeiDaBan> imeiDaBanList = cthdCanXoa.getImeiDaBans().stream().toList();
+
+        Integer idSanPhamChiTietDeHoanTra = cthdCanXoa.getIdSanPhamChiTiet().getId(); // Lấy ID của SanPhamChiTiet
+        int soLuongHoanTra = cthdCanXoa.getSoLuong();
+        sanPhamChiTietRepository.tangSoLuongTon(idSanPhamChiTietDeHoanTra, soLuongHoanTra);
+
+        // Lấy danh sách Imei từ soImei trong imeiDaBan
+        List<String> soImeis = imeiDaBanList.stream()
+                .map(ImeiDaBan::getSoImei)
+                .toList();
+
+        List<Imei> imeiList = imeiReposiory.findAllBySoImeiIn(soImeis);
+
+        hoaDonChiTiet_imeiAdminServices.changeStatusImei(imeiList,TrangThaiImei.AVAILABLE);
+        chiTietHoaDonRepository.deleteById(hdctId);
+    }
 }

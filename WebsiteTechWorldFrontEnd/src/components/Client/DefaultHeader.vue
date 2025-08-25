@@ -72,7 +72,7 @@ const goToLogin = () => {
     <nav>
       <ul>
         <!-- <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li> -->
-        <li><router-link to="/orders"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
+        <li><router-link to="/order-tracking-search"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
         <li>
           <router-link to="/shopping-cart" class="cart-link">
             <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i>

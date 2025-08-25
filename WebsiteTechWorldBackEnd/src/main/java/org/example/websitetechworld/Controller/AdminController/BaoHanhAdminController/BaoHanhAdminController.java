@@ -16,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -96,9 +97,20 @@ public class BaoHanhAdminController {
     }
 
     @PostMapping("/create-request-warranty")
-    public ResponseEntity<?> creaetRequestWarranty(@RequestBody YeuCauBaoHanhAdminRequest request){
+    public ResponseEntity<?> creaetRequestWarranty(
+            @Valid @RequestBody YeuCauBaoHanhAdminRequest request,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         baoHanhAdminServices.createRequestWarranty(request);
-        return ResponseEntity.ok("Tao yeu cau bao hanh thanh cong");
+        return ResponseEntity.ok("Tạo yêu cầu bảo hành thành công");
     }
 
     @GetMapping("/find-don-bao-hang")

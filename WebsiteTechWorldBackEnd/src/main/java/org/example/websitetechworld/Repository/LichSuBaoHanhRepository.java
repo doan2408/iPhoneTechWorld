@@ -14,7 +14,7 @@ public interface LichSuBaoHanhRepository extends JpaRepository<LichSuBaoHanh,Int
     @Query("""
         SELECT lsbh
             FROM LichSuBaoHanh lsbh
-            ORDER BY lsbh.ngayTiepNhan DESC
+            ORDER BY lsbh.id DESC
     """)
     Page<LichSuBaoHanh> findDonBaoHanh(Pageable pageable);
 
