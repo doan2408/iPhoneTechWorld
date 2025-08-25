@@ -318,7 +318,7 @@
             Chờ xử lý: <strong>{{ pendingOrders }}</strong>
           </p>
           <p>
-            Tổng tiền mua: <strong>₫{{ formatCurrency(totalRevenue) }}</strong>
+            Tổng tiền mua: <strong>{{ formatCurrency(totalRevenue) }} ₫</strong>
           </p>
         </div>
       </div>
