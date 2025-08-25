@@ -196,7 +196,14 @@ export const getAllSanPham = (
 };
 
 export const postSanPham = (data) => postData("/product", data);
-export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
+// export const putDataSanPham = (id, data) => putData(`/product/${id}`, data);
+
+export const putDataSanPham = (id, data) => {
+  console.log("PUT sản phẩm với id =", id);
+  console.log("Dữ liệu gửi lên =", data);
+
+  return putData(`/product/${id}`, data);
+};
 export const getSanPhamById = (id) => fetchData(`/product/${id}`);
 export const deleteSanPham = (id) => deleteData(`/product/${id}`);
 export const getViewSanPham = (id) => fetchData(`/product/viewSanPham/${id}`);

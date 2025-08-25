@@ -28,12 +28,12 @@ public class ModelSanPhamAdminRequest {
     @Pattern(regexp = "^[\\p{L}\\d\\s]+$", message = "{model.name.invalidchars}")
     private String tenModel;
 
-    @NotNull(message = "{model.namRaMat.required}")
-    private LocalDate namRaMat;
-
-    @NotNull(message = "{model.trangThai.required}")
-    @Enumerated(EnumType.STRING)
-    private TrangThaiSanPhamModel trangThaiSanPhamModel;
+//    @NotNull(message = "{model.namRaMat.required}")
+//    private LocalDate namRaMat;
+//
+//    @NotNull(message = "{model.trangThai.required}")
+//    @Enumerated(EnumType.STRING)
+//    private TrangThaiSanPhamModel trangThaiSanPhamModel;
 
     @NotNull(message = "{model.idRam.required}")
     private Integer idRam;

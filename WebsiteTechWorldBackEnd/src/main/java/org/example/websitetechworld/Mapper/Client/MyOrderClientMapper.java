@@ -28,6 +28,12 @@ public class MyOrderClientMapper {
         }
         dto.setThanhTien(hoaDon.getThanhTien());
         dto.setNgayDatHang(hoaDon.getNgayDatHang());
+        if (hoaDon.getLichSuHoaDons() != null) {
+            hoaDon.getLichSuHoaDons().stream()
+                    .filter(ls -> ls.getHanhDong() == HanhDongLichSuHoaDon.COMPLETE) // enum COMPLETE
+                    .findFirst()
+                    .ifPresent(ls -> dto.setNgayNhanHang(ls.getThoiGianThayDoi())); // hoặc ls.getNgayThucHien()
+        }
         dto.setMyOrderClientResponseList(
                 hoaDon.getChiTietHoaDons().stream().map(this::toMyOrderProductClientResponse)
                         .collect(Collectors.toList())
