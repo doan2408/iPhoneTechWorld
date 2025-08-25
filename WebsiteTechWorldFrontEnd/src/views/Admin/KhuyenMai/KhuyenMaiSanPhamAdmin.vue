@@ -370,7 +370,9 @@ import { Plus, Edit, Delete, Search, Refresh, Calendar, View } from '@element-pl
 import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai, getKhuyenMai, nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import store from '@/Service/LoginService/Store';
 import dayjs from "dayjs";
+import { useToast } from 'vue-toastification';
 
+const toast = useToast();
 const search = ref('');
 const trangThai = ref('');
 const ngayBatDauFilter = ref(null);

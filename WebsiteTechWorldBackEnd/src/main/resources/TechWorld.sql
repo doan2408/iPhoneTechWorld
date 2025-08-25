@@ -372,7 +372,7 @@ CREATE TABLE nha_cung_cap_sp (
 CREATE TABLE khuyen_mai (
                             id INT IDENTITY(1,1) PRIMARY KEY,
                             ma_khuyen_mai NVARCHAR(50),
-                            ten_khuyen_mai VARCHAR(255),
+                            ten_khuyen_mai NVARCHAR(255),
                             mo_ta TEXT,
                             phan_tram_giam INT,
                             ngay_bat_dau DATETIME,
