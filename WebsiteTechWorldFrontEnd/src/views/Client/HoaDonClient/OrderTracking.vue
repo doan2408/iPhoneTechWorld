@@ -196,7 +196,7 @@
                         <div class="return-actions">
                             <button class="return-btn cancel" @click="showReturnPopup = false">Hủy</button>
                             <button class="return-btn confirm"
-                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId)"
+                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId) || imeis.filter(i => i.selected).some(i => !i.urlHinh) || imeis.filter(i => i.selected).some(i => !i.urlVideo)"
                                 @click="confirmReturn">
                                 Xác nhận
                             </button>
