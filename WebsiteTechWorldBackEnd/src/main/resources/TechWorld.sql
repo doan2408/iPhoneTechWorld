@@ -459,7 +459,7 @@ CREATE TABLE chi_tiet_hoa_don (
 CREATE TABLE imei_da_ban (
                              id_imei_da_ban INT IDENTITY(1,1) PRIMARY KEY,
                              id_chi_tiet_hoa_don INT REFERENCES chi_tiet_hoa_don (id_chi_tiet_hoa_don ) ON DELETE CASCADE,
-                             so_imei VARCHAR(70) NOT NULL UNIQUE,
+                             so_imei VARCHAR(70),
                              trang_thai NVARCHAR(50)
 );
 

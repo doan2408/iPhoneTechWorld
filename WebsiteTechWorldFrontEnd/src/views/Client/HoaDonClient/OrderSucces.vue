@@ -40,6 +40,7 @@ const viewMyOrder = () => {
 }
 
 onMounted( async () => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     const responseCode = route.query.vnp_ResponseCode;
     const orderId = route.query.vnp_TxnRef;
     
