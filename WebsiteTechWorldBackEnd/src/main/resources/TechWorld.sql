@@ -1112,10 +1112,8 @@ INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
 VALUES
     (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
     (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
-    (N'Sản phẩm bị lỗi khi giao', 'FAILED_DELIVERY'),
     (N'Khách đổi ý', 'RETURN'),
     (N'Sản phẩm không đúng mô tả', 'RETURN'),
-    (N'Sản phẩm bị lỗi sản xuất', 'RETURN'),
     (N'Khách đổi ý', 'CANCELLED');
 
 
@@ -1151,13 +1149,7 @@ FROM
     IMEI_Generator i;
 
 -- Ảnh 1 -> biến thể 1..4
-INSERT INTO ly_do_xu_ly (ten_ly_do, loai_vu_viec)
-VALUES
-    (N'Không liên lạc được khách hàng', 'FAILED_DELIVERY'),
-    (N'Khách hàng từ chối nhận hàng', 'FAILED_DELIVERY'),
-    (N'Khách đổi ý', 'RETURN'),
-    (N'Sản phẩm không đúng mô tả', 'RETURN'),
-    (N'Khách đổi ý', 'CANCELLED');
+
 
 -- 20 ảnh đầu tiên -> id = 1..20
 UPDATE hinh_anh
