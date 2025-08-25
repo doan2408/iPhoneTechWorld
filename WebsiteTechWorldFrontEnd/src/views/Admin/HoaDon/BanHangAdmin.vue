@@ -208,11 +208,11 @@
                                     v-if="product.giaBan && product.giaBan !== product.giaTruocKhuyenMai">
                                     <span class="product-price-sale">{{ formatCurrency(product.giaBan) }}</span>
                                     <span class="product-price-original">{{ formatCurrency(product.giaTruocKhuyenMai)
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="product-price" v-else>
                                     <span class="product-price-sale">{{ formatCurrency(product.giaTruocKhuyenMai)
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <div class="product-stock" :class="{
                                     'out-of-stock-text': product.soLuong === 0,
@@ -451,7 +451,7 @@
                                 <p><strong>Số điện thoại:</strong> {{ shippingInfo.sdtNguoiNhan || 'Chưa cập nhật' }}
                                 </p>
                                 <p><strong>Email người nhận:</strong> {{ shippingInfo.emailNguoiNhan || 'Chưa cập nhật'
-                                    }}
+                                }}
                                 </p>
                                 <p><strong>Địa chỉ:</strong> {{ shippingInfo.diaChiChiTiet || 'Chưa cập nhật' }}</p>
                                 <p><strong>Phí giao hàng:</strong> 50.000 VNĐ </p>
@@ -553,10 +553,14 @@
                         <div class="terms-conditions">
                             <label>
                                 <input type="checkbox" v-model="agreedToTerms">
-                                Tôi đồng ý với <a href="/terms" target="_blank">Điều khoản và Điều kiện</a> của cửa
-                                hàng.
+                                Tôi đồng ý với
+                                <router-link to="/admin/dieuKhoan" ttarget="blank">
+                                    Điều khoản và Điều kiện
+                                </router-link>
+                                của cửa hàng.
                             </label>
                         </div>
+
                     </div>
 
 
@@ -833,9 +837,9 @@ const calculateTotal = async () => {
 
     if (isShipping.value) {
         grandTotal.value = totalProductAmount.value + 50000 - discountAmount.value
-        
+
     }
-    else{
+    else {
         grandTotal.value = totalProductAmount.value - discountAmount.value
     }
 }
@@ -907,7 +911,7 @@ const selectedIdKhachHang = ref(0)
 const pulldownData = ref(null)
 
 const loadProducts = async () => {
-    
+
     const res = await fillDataFulldown();
     pulldownData.value = res.data
 
@@ -1734,7 +1738,7 @@ const onXaChange = async () => {
     // }
 };
 
-watch(isShipping, async (newVal)  => {
+watch(isShipping, async (newVal) => {
     if (!newVal) {
         console.log('Tắt giao hàng, xóa thông tin giao hàng');
         shippingInfo.value = {
@@ -2308,14 +2312,14 @@ const onCancelCreate = () => {
 
 const toggleShipping = () => {
     if (!isShipping.value) {
-        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' }; 
-        selectedTinh.value = null;  
-        selectedXa.value = null;  
-        xaList.value = []; 
-    } else { 
+        console.log('Tắt giao hàng, xóa thông tin giao hàng'); shippingInfo.value = { tenNguoiNhan: '', sdtNguoiNhan: '', diaChiChiTiet: '', phiShip: 0, shippingMethod: 'express' };
+        selectedTinh.value = null;
+        selectedXa.value = null;
+        xaList.value = [];
+    } else {
         console.log('Đã bật giao hàng');
         calculateTotal()
-    } 
+    }
 };
 
 // Hàm để lấy danh sách phương thức thanh toán từ API
@@ -2586,7 +2590,7 @@ const filters = reactive({
     priceMax: null,
     quantityMin: null,
     quantityMax: null,
-    maSpct : ''
+    maSpct: ''
 })
 
 const toggleFilter = () => {
@@ -2597,7 +2601,7 @@ const applyFilters = async () => {
     const response = await findSanPhamBanHang(selectedCategory.value, pageNoProduct.value, pageSizeProduct.value, selectedIdKhachHang.value
         , filters.model, filters.priceMin, filters.priceMax, filters.quantityMin, filters.quantityMax, filters.maSpct, filters.storage, filters.color
     );
-    
+
     products.value = response.data.content;
     totalPagesProdut.value = response.data.totalPages
     isFilterOpen.value = false
