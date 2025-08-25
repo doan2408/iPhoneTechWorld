@@ -252,7 +252,7 @@ public class BaoHanhAdminServices {
                         + lichSuBaoHanh.getTrangThai().getDisplayName() + "</span></p>" +
 
                         "<div style='margin:20px 0; padding:15px; background-color:#eafaf1; border-left:5px solid #2ecc71;'>" +
-                        "<p style='margin:0; font-size:14px; color:#555;'>Khi đến lấy vui lòng mang phiếu bảo hành hoặc giấy tờ liên quan. " +
+                        "<p style='margin:0; font-size:14px; color:#555;'>Khi đến lấy vui lòng mang email bảo hành " +
                         "Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!</p>" +
                         "</div>" +
 
