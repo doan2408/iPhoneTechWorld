@@ -245,7 +245,7 @@
         </div>
 
         <!-- Thông tin bổ sung -->
-        <div class="form-section">
+        <!-- <div class="form-section">
           <div class="section-header">
             <el-icon class="section-icon">
               <DocumentAdd />
@@ -266,7 +266,7 @@
                 style="width: 100%" :disabled-date="disabledDate" />
             </el-form-item>
           </div>
-        </div>
+        </div> -->
 
         <div class="form-actions">
           <el-button size="large" @click="resetForm">
@@ -408,7 +408,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Trạng thái" width="150">
+        <!-- <el-table-column label="Trạng thái" width="150">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.trangThaiSanPhamModel)" effect="dark" size="large">
               {{ statusLabel(row.trangThaiSanPhamModel) }}
@@ -421,8 +421,8 @@
               {{ formatNamRaMat(row.namRaMat) }}
             </span>
           </template>
-        </el-table-column>
-        <el-table-column label="Hành động" width="200" align="center" fixed="right">
+        </el-table-column> -->
+        <el-table-column label="Hành động" width="350" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button size="small" type="info" @click="viewModel(row)" circle class="action-btn">
@@ -527,7 +527,7 @@
               <el-tag type="primary">{{ loaiLabel(viewModelData.idLoai) }}</el-tag>
             </div>
           </div>
-          <div class="detail-item detail-full">
+          <!-- <div class="detail-item detail-full">
             <div class="detail-label">Trạng thái</div>
             <div class="detail-value">
               <el-tag :type="statusTagType(viewModelData.trangThaiSanPhamModel)" effect="dark" size="large">
@@ -540,7 +540,7 @@
             <div class="detail-value date-text">
               {{ formatNamRaMat(viewModelData.namRaMat) }}
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -794,7 +794,7 @@ export default {
       idXuatXu: null,
       idLoai: null,
       trangThaiSanPhamModel: 'ACTIVE',
-      namRaMat: null,
+      namRaMat: new Date().getFullYear(),
     });
 
     const formRules = ref({
