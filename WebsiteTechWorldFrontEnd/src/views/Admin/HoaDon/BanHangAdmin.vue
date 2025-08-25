@@ -821,7 +821,9 @@ const calculateTotal = () => {
 
     if (selectedDiscount.value?.loaiGiamGia === 'Phần trăm') {
         discountAmount.value = totalProductAmount.value * selectedDiscount.value.giaTriGiamGia / 100;
+        console.log('jj', selectedDiscount.value)
         if (selectedDiscount.value?.giaTriGiamGiaToiDa < discountAmount.value) {
+            
             discountAmount.value = selectedDiscount.value?.giaTriGiamGiaToiDa
         }
     } else if (selectedDiscount.value?.giaTriGiamGia) {
@@ -2504,6 +2506,7 @@ const closeVoucherModal = () => {
 };
 
 const applyDiscount = (discount) => {
+    console.log('ll', discount)
     selectedDiscount.value = discount;
     isVoucherModalOpen.value = false;
 };
