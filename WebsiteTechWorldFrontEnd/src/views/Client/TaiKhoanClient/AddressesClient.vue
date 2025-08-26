@@ -99,7 +99,7 @@ const rules = {
       trigger: "blur",
     },
     {
-      pattern: /^[^\s@]+@[^\s@\.]+(\.[a-zA-Z]{2,})+$/,
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.com$/i,
       message: "Email không đúng định dạng",
       trigger: ["blur", "change"],
     },
