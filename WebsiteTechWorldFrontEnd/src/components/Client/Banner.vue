@@ -1,31 +1,44 @@
 <script setup>
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { ref, onMounted, onUnmounted } from "vue";
-import img1 from "@/components/images/iphone-15-promax-denTitan.webp";
-import img2 from "@/components/images/iphone-15-promax-TitanTuNhien.webp";
-import img3 from "@/components/images/iphone15-plus-hong.webp";
 
 const banners = ref([
   {
+    id: 1,
     title: "iPhone 15 Pro Max",
     subtitle: "Giảm giá lên đến 30% - Trả góp 0%",
+    price: "29.990.000đ",
+    originalPrice: "42.990.000đ",
+    discount: "30%",
     buttonText: "Mua ngay",
-    image: img1,
+    features: ["Chip A17 Pro", "Camera 48MP", "Titanium"],
+    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=320&h=380&fit=crop&crop=center",
+    badge: "Hot Sale"
   },
   {
+    id: 2,
     title: "iPhone 16 Pro Max",
     subtitle: "Ưu đãi độc quyền - Quà tặng hấp dẫn",
+    price: "34.990.000đ",
+    originalPrice: "39.990.000đ",
+    discount: "12%",
     buttonText: "Khám phá",
-    image: img2,
+    features: ["Chip A18 Pro", "AI Camera", "Titanium Blue"],
+    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=320&h=380&fit=crop&crop=center",
+    badge: "Mới nhất"
   },
   {
+    id: 3,
     title: "iPhone 15 Plus",
     subtitle: "Giá sốc chỉ từ 15.990.000đ",
+    price: "15.990.000đ",
+    originalPrice: "24.990.000đ",
+    discount: "36%",
     buttonText: "Xem chi tiết",
-    image: img3,
-  },
+    features: ["Màn hình 6.7\"", "Camera kép", "5 màu sắc"],
+    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=320&h=380&fit=crop&crop=center",
+    badge: "Siêu Sale"
+  }
 ]);
-
 
 const currentSlide = ref(0);
 let slideInterval = null;
@@ -35,8 +48,7 @@ const goToSlide = (index) => {
 };
 
 const prevSlide = () => {
-  currentSlide.value =
-    (currentSlide.value - 1 + banners.value.length) % banners.value.length;
+  currentSlide.value = (currentSlide.value - 1 + banners.value.length) % banners.value.length;
 };
 
 const nextSlide = () => {
@@ -44,7 +56,7 @@ const nextSlide = () => {
 };
 
 onMounted(() => {
-  slideInterval = setInterval(nextSlide, 4000);
+  slideInterval = setInterval(nextSlide, 5000);
 });
 
 onUnmounted(() => {
@@ -56,38 +68,73 @@ onUnmounted(() => {
 
 <template>
   <section class="banner-slider">
+    <!-- Promo Strip -->
+    <div class="promo-strip">
+      <i class="fa fa-fire"></i> FLASH SALE - Giảm đến 50% - Miễn phí giao hàng toàn quốc
+    </div>
+
     <div class="slider-container">
       <div
         class="slide"
         v-for="(banner, index) in banners"
-        :key="index"
-        :class="{ active: currentSlide === index }"
+        :key="banner.id"
+        :class="[`slide-${index + 1}`, { active: currentSlide === index }]"
       >
-        <div class="banner-content">
-          <div class="banner-text">
-            <h2>🔥 {{ banner.title }}</h2>
-            <p><i class="fa fa-bolt"></i> {{ banner.subtitle }}</p>
-            <p class="typing">Khám phá ngay điều bất ngờ...</p>
-            <el-button type="primary" size="large" class="banner-btn">
-              {{ banner.buttonText }}
-            </el-button>
-          </div>
-          <!-- Phần giữa -->
-          <div class="banner-middle-icon pulse-icon">
-            <i class="fa fa-star"></i>
-          </div>
+        <!-- Floating Icons -->
+        <div class="floating-icons">
+          <i class="fa fa-star floating-icon icon-1"></i>
+          <i class="fa fa-bolt floating-icon icon-2"></i>
+          <i class="fa fa-gift floating-icon icon-3"></i>
+        </div>
 
+        <div class="banner-content">
+          <!-- Left Content -->
+          <div class="banner-left">
+            <div class="badge">
+              <i class="fa fa-fire"></i> {{ banner.badge }}
+            </div>
+            
+            <h1 class="banner-title">{{ banner.title }}</h1>
+            <p class="banner-subtitle">{{ banner.subtitle }}</p>
+            
+            <div class="price-section">
+              <span class="current-price">{{ banner.price }}</span>
+              <span class="original-price">{{ banner.originalPrice }}</span>
+              <span class="discount">-{{ banner.discount }}</span>
+            </div>
+            
+            <div class="features">
+              <span 
+                v-for="feature in banner.features" 
+                :key="feature"
+                class="feature-tag"
+              >
+                {{ feature }}
+              </span>
+            </div>
+            
+            <div class="banner-actions">
+              <button class="btn-primary">
+                <i class="fa fa-shopping-cart"></i>
+                {{ banner.buttonText }}
+              </button>
+              <button class="btn-secondary">
+                Tư vấn ngay
+              </button>
+            </div>
+          </div>
           
-          <div class="banner-image">
-            <img :src="banner.image" alt="Banner image" class="banner-img" />
+          <!-- Right Content -->
+          <div class="banner-right">
+            <img :src="banner.image" :alt="banner.title" class="product-image">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Dots indicator -->
-    <div class="slider-dots">
-      <span
+    <!-- Navigation Dots -->
+    <div class="navigation">
+      <span 
         v-for="(banner, index) in banners"
         :key="index"
         :class="['dot', { active: currentSlide === index }]"
@@ -95,25 +142,41 @@ onUnmounted(() => {
       ></span>
     </div>
 
-    <!-- Prev/Next buttons -->
-    <button class="slider-btn prev-btn" @click="prevSlide">
-      <ChevronLeft size="20" />
+    <!-- Arrow Buttons -->
+    <button class="arrow-btn prev" @click="prevSlide">
+      <i class="fa fa-chevron-left"></i>
     </button>
-    <button class="slider-btn next-btn" @click="nextSlide">
-      <ChevronRight size="20" />
+    <button class="arrow-btn next" @click="nextSlide">
+      <i class="fa fa-chevron-right"></i>
     </button>
   </section>
 </template>
 
 <style scoped>
-/* Enhanced Banner Slider with Rich Content */
 .banner-slider {
   position: relative;
   width: 100%;
-  height: 450px;
+  height: 470px;
   overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin: 1px auto;
+  max-width: 1450px;
+}
+
+.promo-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #0e39f9, #86e7e9);
+  color: white;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 5;
+  animation: slideInDown 0.5s ease-out;
 }
 
 .slider-container {
@@ -124,100 +187,93 @@ onUnmounted(() => {
 
 .slide {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, #66dbea 0%, #23b8c0 100%);
-  background-size: 400% 400%;
-  animation: gradientMove 15s ease infinite;
-}
+  transition: opacity 0.6s ease-in-out;
+  background: linear-gradient(135deg, #002fff 0%, #55eded 100%);
+  padding: 10px;
 
-.slide:nth-child(1) {
-  background: linear-gradient(135deg, #66eadf 0%, #002aff 100%);
-}
-
-.slide:nth-child(2) {
-  background: linear-gradient(135deg, #6797e0 0%, #0a20e8 100%);
-}
-
-.slide:nth-child(3) {
-  background: linear-gradient(135deg, #1153ef 0%, #00f2fe 100%);
 }
 
 .slide.active {
   opacity: 1;
-  transform: scale(1);
 }
 
-.slide::before {
-  content: "";
+.slide-1 { 
+  background: linear-gradient(135deg, #00e1ff 0%, #e1ff00 100%); 
+}
+.slide-2 { 
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+}
+.slide-3 { 
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
+}
+
+.floating-icons {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  backdrop-filter: blur(2px);
-  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.slide::after {
-  content: "";
+.floating-icon {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-  z-index: 0;
+  font-size: 24px;
+  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.8);
+  animation: float 3s ease-in-out infinite;
 }
 
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.icon-1 { top: 20%; left: 10%; animation-delay: 0s; }
+.icon-2 { top: 60%; right: 15%; animation-delay: 1s; }
+.icon-3 { bottom: 30%; left: 5%; animation-delay: 2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
 }
 
 .banner-content {
-  position: relative;
-  z-index: 2;
   display: grid;
-  grid-template-columns: 1.2fr 0.3fr 1fr;
+  grid-template-columns: 1fr 380px;
   align-items: center;
   height: 100%;
-  padding: 0 60px;
+  padding: 40px 60px;
   color: white;
-  max-width: 1400px;
-  margin: 0 auto;
   gap: 40px;
+  position: relative;
+  z-index: 2;
 }
 
-.banner-text {
+.banner-left {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  animation: slideInLeft 0.8s ease-out;
 }
 
-.banner-text h2 {
-  font-size: 3rem;
+.badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: bounce 2s infinite;
+}
+
+.banner-title {
+  font-size: 3.2rem;
   font-weight: 800;
   margin: 0;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
   line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   background: linear-gradient(45deg, #ffffff, #f0f0f0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -226,136 +282,97 @@ onUnmounted(() => {
 
 .banner-subtitle {
   font-size: 1.3rem;
+  font-weight: 500;
   margin: 0;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0.95;
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.banner-subtitle i {
-  color: #ffd700;
-  font-size: 1.4rem;
-  animation: flash 2s infinite;
-}
-
-@keyframes flash {
-  0%, 50%, 100% {
-    opacity: 1;
-  }
-  25%, 75% {
-    opacity: 0.5;
-  }
-}
-
-.banner-features {
-  list-style: none;
-  padding: 0;
-  margin: 16px 0;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
-.banner-features li {
+.price-section {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1rem;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-  opacity: 0;
-  animation: slideInLeft 0.6s ease forwards;
-}
-
-.banner-features li:nth-child(1) {
-  animation-delay: 0.2s;
-}
-
-.banner-features li:nth-child(2) {
-  animation-delay: 0.4s;
-}
-
-.banner-features li:nth-child(3) {
-  animation-delay: 0.6s;
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.banner-features li::before {
-  content: "✓";
-  background: linear-gradient(45deg, #00ff88, #00cc6a);
-  color: white;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.typing {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #ffd700;
+  gap: 16px;
   margin: 16px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  border-right: 3px solid #ffd700;
-  animation: typing 4s steps(30), blink 0.8s step-end infinite alternate;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
+.current-price {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffd700;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+.original-price {
+  font-size: 1.2rem;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.discount {
+  background: #ff4757;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.features {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.feature-tag {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-tag:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .banner-actions {
   display: flex;
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
-.banner-btn {
-  background: linear-gradient(45deg, #01afff, #ade6e9);
+.btn-primary {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
   color: white;
   border: none;
-  padding: 14px 28px;
+  padding: 16px 32px;
   border-radius: 30px;
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
   overflow: hidden;
 }
 
-.banner-btn::before {
+.btn-primary::before {
   content: "";
   position: absolute;
   top: 0;
@@ -366,20 +383,20 @@ onUnmounted(() => {
   transition: left 0.5s;
 }
 
-.banner-btn:hover::before {
+.btn-primary:hover::before {
   left: 100%;
 }
 
-.banner-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(107, 151, 255, 0.5);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
 }
 
-.banner-btn-secondary {
+.btn-secondary {
   background: transparent;
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  padding: 12px 24px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  padding: 14px 28px;
   border-radius: 30px;
   font-size: 1rem;
   font-weight: 600;
@@ -388,53 +405,126 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
 }
 
-.banner-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
   border-color: white;
   transform: translateY(-2px);
 }
 
-.banner-middle-icon {
+.banner-right {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  min-width: 100px;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  animation: slideInRight 0.8s ease-out;
 }
 
-.pulse-icon {
-  font-size: 48px;
-  color: #ffd700;
-  animation: pulse 2s infinite;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-}
-
-.banner-badge {
-  background: linear-gradient(45deg, #6bf5ff, #8effd4);
-  color: white;
-  padding: 6px 12px;
+.product-image {
+  width: 100%;
+  max-width: 320px;
+  height: 380px;
+  object-fit: cover;
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(179, 64, 64, 0.3);
-  animation: bounce 2s infinite;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease;
+}
+
+.product-image:hover {
+  transform: scale(1.02) rotateY(5deg);
+}
+
+.navigation {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.2);
+}
+
+.dot.active {
+  background: white;
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #333;
+  backdrop-filter: blur(10px);
+}
+
+.arrow-btn:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.prev { left: 20px; }
+.next { right: 20px; }
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes bounce {
@@ -449,220 +539,74 @@ onUnmounted(() => {
   }
 }
 
-.banner-image {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  justify-content: center;
-  position: relative;
-}
-
-.banner-img {
-  width: 100%;
-  max-width: 420px;
-  height: 450px;
-  object-fit: fill;
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(10, 10, 10, 0.4);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
-}
-
-
-.banner-img:hover {
-  transform: scale(1.01) rotateY(5deg);
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
-}
-
-.banner-price {
-  background: linear-gradient(45deg, #00ff88, #00cc6a);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 1.2rem;
-  font-weight: 800;
-  margin-top: 16px;
-  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
-  animation: priceGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes priceGlow {
-  from {
-    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
-  }
-  to {
-    box-shadow: 0 6px 25px rgba(0, 255, 136, 0.6);
-  }
-}
-
-.slider-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  padding: 16px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.slider-btn:hover {
-  background: white;
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-}
-
-.prev-btn {
-  left: 24px;
-}
-
-.next-btn {
-  right: 24px;
-}
-
-.slider-dots {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 15;
-  display: flex;
-  gap: 12px;
-}
-
-.dot {
-  width: 14px;
-  height: 14px;
-  background-color: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.dot:hover {
-  background-color: rgba(255, 255, 255, 0.7);
-  transform: scale(1.2);
-}
-
-.dot.active {
-  background-color: #ffffff;
-  transform: scale(1.4);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .banner-content {
     grid-template-columns: 1fr;
     text-align: center;
-    gap: 24px;
-    padding: 40px;
+    gap: 30px;
+    padding: 30px 40px;
   }
   
-  .banner-middle-icon {
-    order: -1;
-  }
-  
-  .banner-text h2 {
-    font-size: 2.5rem;
+  .banner-title {
+    font-size: 2.8rem;
   }
 }
 
 @media (max-width: 768px) {
   .banner-slider {
-    height: 350px;
+    height: 400px;
   }
   
   .banner-content {
-    padding: 24px;
+    padding: 20px;
     gap: 20px;
   }
   
-  .banner-text h2 {
-    font-size: 2rem;
+  .banner-title {
+    font-size: 2.4rem;
   }
   
-  .banner-subtitle {
-    font-size: 1.1rem;
+  .current-price {
+    font-size: 1.8rem;
   }
   
-  .banner-features {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .banner-img {
-    max-width: 240px;
-    height: 240px;
+  .product-image {
+    max-width: 250px;
+    height: 280px;
   }
   
   .banner-actions {
     flex-direction: column;
     align-items: center;
   }
-  
-  .typing {
-    font-size: 1rem;
-  }
 }
 
 @media (max-width: 480px) {
   .banner-slider {
-    height: 300px;
-    border-radius: 16px;
+    height: 350px;
+    border-radius: 12px;
   }
   
   .banner-content {
-    padding: 20px;
+    padding: 15px;
   }
   
-  .banner-text h2 {
-    font-size: 1.6rem;
+  .banner-title {
+    font-size: 2rem;
   }
   
-  .banner-subtitle {
-    font-size: 1rem;
+  .product-image {
+    max-width: 200px;
+    height: 240px;
   }
   
-  .banner-img {
-    max-width: 180px;
-    height: 180px;
-  }
-  
-  .slider-btn {
+  .arrow-btn {
     width: 44px;
     height: 44px;
-    padding: 12px;
   }
   
-  .prev-btn {
-    left: 16px;
-  }
-  
-  .next-btn {
-    right: 16px;
-  }
-  
-  .banner-btn {
-    padding: 12px 20px;
-    font-size: 1rem;
-  }
-  
-  .pulse-icon {
-    font-size: 36px;
-  }
+  .prev { left: 15px; }
+  .next { right: 15px; }
 }
 </style>
