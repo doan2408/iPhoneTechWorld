@@ -1,0 +1,1 @@
+import{V as n}from"./index-BFtI-PwE.js";const t="/client/hang",s=async()=>{var a;try{return(await n.get(`${t}`)).data}catch(e){throw((a=e.response)==null?void 0:a.data)||"Throw errors when getting rank of client"}},o=async()=>{var a;try{return(await n.get(`${t}/range`)).data}catch(e){(a=e.response)!=null&&a.data}};export{s as g,o as k};
