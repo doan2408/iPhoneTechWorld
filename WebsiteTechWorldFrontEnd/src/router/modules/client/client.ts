@@ -23,6 +23,7 @@ const clientRoutes: RouteRecordRaw[] = [
       { path: "khoangHang", component: () => import("@/views/Client/TaiKhoanClient/KhoangHang.vue"), meta: { title: "Mức hạng" } },
       { path: "favorites-page", name: "favoritesPage", component: () => import("@/views/Client/FavoritesPage/PageFavorites.vue"), meta: { title: "Sản phẩm yêu thích" } },
       { path: "danh-gia", name: "", component: () => import("@/views/Client/DanhGiaClient/DanhGiaClient.vue"), meta: { title: "Đánh giá" } },
+      { path: "viewer", name: "", component: () => import("@/views/Client/Viewer/Viewer.vue"), meta: { title: "Xem live stream" } },
     ],
   },
 ];

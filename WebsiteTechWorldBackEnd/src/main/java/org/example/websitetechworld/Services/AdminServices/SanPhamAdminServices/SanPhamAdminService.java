@@ -1373,6 +1373,34 @@ public class SanPhamAdminService {
         map.put("dungLuong",romRepository.findAll());
         return map;
     }
+
+    public Page<SanPhamHienThiAdminResponse> getAllSanPhamLive (String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SanPham> danhSachSanPham = sanPhamRepository.getAllSanPhamByActive(search, pageable);
+
+        Page<SanPhamHienThiAdminResponse> danhSach = danhSachSanPham.map(sanPham -> {
+            SanPhamHienThiAdminResponse response = new SanPhamHienThiAdminResponse();
+            response.setId(sanPham.getId());
+            response.setMaSanPham(sanPham.getMaSanPham());
+            response.setTenSanPham(sanPham.getTenSanPham());
+            response.setTenLoai(sanPham.getIdModelSanPham().getIdLoai().getTenLoai());
+            response.setGiaBan(
+                    sanPham.getSanPhamChiTiets().stream()
+                            .map(SanPhamChiTiet::getGiaBan)
+                            .min(BigDecimal::compareTo)
+                            .orElse(BigDecimal.ZERO)
+            );
+            response.setUrl(
+                    sanPham.getSanPhamChiTiets().stream()
+                            .flatMap(spct -> spct.getHinhAnhs().stream())
+                            .map(HinhAnh::getUrl)
+                            .findFirst()
+                            .orElse(null)
+            );
+            return response;
+        });
+        return danhSach;
+    }
 }
 
 

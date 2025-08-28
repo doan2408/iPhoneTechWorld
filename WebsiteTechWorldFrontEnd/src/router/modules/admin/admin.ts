@@ -20,6 +20,7 @@ const adminRoutes: RouteRecordRaw[] = [
       // { path: "shipping", component: () => import("@/views/Admin/GiaoHang/GiaoHangAdmin.vue") },
       { path: "danhGiaSanPham", component: () => import("@/views/Admin/DanhGiaSanPham/DanhGiaSanPham.vue") },
       { path: "dieuKhoan", component: () => import("@/views/Admin/HoaDon/DieuKhoan.vue"), meta: {Title : "Điều khoản"}},
+      { path: "live-stream", component: () => import("@/views/Admin/Streamer/LiveStreamAdmin.vue"), meta: {Title : "Live Stream"}},
       ...clientAdminRoutes,
       ...staffAdminRoutes,
       ...hoaDonRoutes,
