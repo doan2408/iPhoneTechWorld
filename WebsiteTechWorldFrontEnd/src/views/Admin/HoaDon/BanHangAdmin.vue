@@ -1213,7 +1213,7 @@ const addCustomer = () => {
 
     // validate email (nếu có nhập)
     if (newCustomer.email && newCustomer.email.trim()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.com$/i;
         if (!emailRegex.test(newCustomer.email)) {
             toast.error("Email không đúng định dạng");
             return;

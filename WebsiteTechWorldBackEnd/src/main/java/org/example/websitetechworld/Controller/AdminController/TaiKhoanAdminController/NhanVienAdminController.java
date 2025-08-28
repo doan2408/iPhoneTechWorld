@@ -48,7 +48,7 @@ public class NhanVienAdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStaff(@PathVariable("id") Integer id, @RequestBody @Validated({Default.class, UpdateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -80,7 +80,7 @@ public class NhanVienAdminController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<?> addStaff(@RequestBody @Validated({Default.class, CreateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

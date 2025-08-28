@@ -221,7 +221,7 @@ onMounted(() => {
 const compareList = ref([]);
 const addToCompare = (product) => {
   if (compareList.value.length >= 3) {
-    toast.warning('Bạn chỉ có thể so sánh tối đa 3 sản phẩm');
+    toast.warning("Bạn chỉ có thể so sánh tối đa 3 sản phẩm");
     return;
   }
 
@@ -317,7 +317,7 @@ const removeCompare = (product) => {
           <div class="view-controls">
             <div class="sort-control">
               <div class="sort-buttons">
-                <button 
+                <button
                   :class="['sort-text-btn', { active: selectedSort === '' }]"
                   @click="
                     selectedSort = '';
@@ -328,8 +328,11 @@ const removeCompare = (product) => {
                   Mặc định
                 </button>
                 <span class="sort-separator">•</span>
-                <button 
-                  :class="['sort-text-btn', { active: selectedSort === 'giaAsc' }]"
+                <button
+                  :class="[
+                    'sort-text-btn',
+                    { active: selectedSort === 'giaAsc' },
+                  ]"
                   @click="
                     selectedSort = 'giaAsc';
                     currentPage = 1;
@@ -339,8 +342,11 @@ const removeCompare = (product) => {
                   Giá tăng dần
                 </button>
                 <span class="sort-separator">•</span>
-                <button 
-                  :class="['sort-text-btn', { active: selectedSort === 'giaDesc' }]"
+                <button
+                  :class="[
+                    'sort-text-btn',
+                    { active: selectedSort === 'giaDesc' },
+                  ]"
                   @click="
                     selectedSort = 'giaDesc';
                     currentPage = 1;
@@ -522,7 +528,6 @@ const removeCompare = (product) => {
                   <div class="product-card-inner">
                     <!-- Product Image -->
                     <div class="product-image-wrapper">
-
                       <div class="product-image-container-modern">
                         <img
                           :src="sp.hinhAnh || '/img/no-image.png'"
@@ -674,19 +679,41 @@ const removeCompare = (product) => {
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1450px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
 /* Hero Search Section */
 .hero-search-section {
-  margin: 10px;
-  background: linear-gradient(135deg, #48cbd2 0%, #007afc 100%);
-  padding: 60px 0;
+  margin-top: 10px;
+  margin-inline: 35px;
+  background: linear-gradient(
+    135deg,
+    #1a2a6c 0%,
+    #2e8bc0 40%,
+    #90e0ef 70%,
+    #caf0f8 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+  padding: 80px 0;
   position: relative;
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .hero-search-section::before {
@@ -698,14 +725,45 @@ const removeCompare = (product) => {
   bottom: 0;
   background: radial-gradient(
       circle at 20% 80%,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 60%
     ),
     radial-gradient(
       circle at 80% 20%,
-      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.12) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(255, 255, 255, 0.08) 0%,
       transparent 50%
     );
+}
+
+.hero-search-section::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 1200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .search-hero {
@@ -715,131 +773,229 @@ const removeCompare = (product) => {
 
 .search-content {
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
 .search-title {
-  font-size: 3.5rem;
-  font-weight: 800;
+  font-size: 4rem;
+  font-weight: 900;
   color: white;
-  margin-bottom: 16px;
-  line-height: 1.2;
+  margin-bottom: 20px;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
 }
 
 .gradient-text {
-  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  background: linear-gradient(45deg, #ffd700, #ffed4e, #fff176, #ffd54f);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: textShimmer 3s ease-in-out infinite;
+}
+
+@keyframes textShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .search-subtitle {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 40px;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 50px;
   font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  line-height: 1.6;
 }
 
 /* Mega Search Bar */
 .mega-search-bar {
-  background: white;
-  border-radius: 24px;
-  padding: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  padding: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transform: translateY(0);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mega-search-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .search-input-container {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .mega-search-input {
-  border-radius: 16px;
+  border-radius: 20px;
   border: 2px solid #e2e8f0;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .mega-search-input:focus-within {
-  border-color: #0b35f0;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15),
+    0 8px 25px rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
 }
 
 .mega-search-input :deep(.el-input__inner) {
-  height: 56px;
-  font-size: 16px;
-  padding-left: 20px;
-  padding-right: 140px;
+  height: 64px;
+  font-size: 17px;
+  padding-left: 24px;
+  padding-right: 160px;
+  font-weight: 500;
 }
 
 .search-icon {
   color: #94a3b8;
-  font-size: 20px;
+  font-size: 22px;
+  transition: color 0.3s ease;
+}
+
+.mega-search-input:focus-within .search-icon {
+  color: #667eea;
 }
 
 .search-btn {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(45deg, #0015fc, #8ed7df);
+  background: linear-gradient(135deg, #667eea 0%, #4ba252 100%);
   color: white;
   border: none;
-  padding: 5px 20px;
-  border-radius: 12px;
-  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 2px;
-  transition: all 0.3s ease;
+  gap: 6px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .search-btn:hover {
   transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 8px 20px rgba(8, 53, 254, 0.4);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, #5a67d8 0%, #46c148 100%);
+}
+
+.search-btn:active {
+  transform: translateY(-50%) scale(0.98);
 }
 
 /* Quick Search Tags */
 .quick-search-tags {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .tags-label {
-  font-size: 14px;
+  font-size: 15px;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .tags-container {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .quick-tag {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   color: #475569;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-tag::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s ease;
 }
 
 .quick-tag:hover {
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #4ba24e 100%);
   color: white;
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  border-color: transparent;
+}
+
+.quick-tag:hover::before {
+  left: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-title {
+    font-size: 2.5rem;
+  }
+
+  .search-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .mega-search-bar {
+    padding: 16px;
+    margin: 0 10px;
+  }
+
+  .mega-search-input :deep(.el-input__inner) {
+    height: 56px;
+    font-size: 16px;
+    padding-right: 140px;
+  }
+
+  .search-btn {
+    padding: 6px 18px;
+    font-size: 14px;
+  }
 }
 
 /* Main Content */
@@ -852,39 +1008,46 @@ const removeCompare = (product) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  padding: 24px 0;
+  border-bottom: 1px solid #e2e8f0;
   margin-bottom: 32px;
-  padding: 5px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  gap: 24px;
 }
 
-.results-info h5 {
-  font-weight: 500;
+.results-info {
+  flex: 1;
+}
+
+.results-title {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #1e293b;
   margin: 0 0 8px 0;
+  line-height: 1.3;
 }
 
 .results-count {
-  color: #66ea7c;
-  font-weight: 700;
+  color: #667eea;
+  font-weight: 800;
 }
 
 .search-term {
-  font-style: italic;
   color: #64748b;
+  font-weight: 600;
+  font-style: italic;
 }
 
 .results-subtitle {
+  font-size: 0.875rem;
   color: #64748b;
-  font-size: 14px;
   margin: 0;
+  font-weight: 500;
 }
 
 .view-controls {
   display: flex;
-  gap: 16px;
   align-items: center;
+  gap: 16px;
 }
 
 .sort-control {
@@ -893,40 +1056,61 @@ const removeCompare = (product) => {
 }
 
 .sort-buttons {
-  padding-top: 30px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .sort-text-btn {
   background: none;
   border: none;
   color: #64748b;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
 .sort-text-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .sort-text-btn.active {
-  color: #0ea5e9;
-  background: #f0f9ff;
-  font-weight: 600;
+  color: #667eea;
+  background: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  font-weight: 700;
 }
 
 .sort-separator {
   color: #cbd5e1;
   font-weight: 400;
-  font-size: 12px;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .content-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .results-title {
+    font-size: 1.25rem;
+  }
+
+  .sort-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 .view-toggle {
@@ -1564,6 +1748,17 @@ const removeCompare = (product) => {
   background: #ecfdf5;
   border-color: #10b981;
   color: #059669;
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 /* Pagination */

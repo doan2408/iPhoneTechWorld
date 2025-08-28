@@ -171,7 +171,7 @@
                 </el-tooltip>
               </router-link>
 
-              <router-link v-if="row.trangThaiSanPham === 'ACTIVE'" :to="`/admin/products/${row.id}`">
+              <router-link v-if="row.trangThaiSanPham === 'ACTIVE'" :to="`/admin/products/${row.id}`" v-show="isAdmin">
                 <el-tooltip content="Chỉnh sửa" placement="top">
                   <el-button size="small" type="primary" :icon="Edit" class="action-btn-square" />
                 </el-tooltip>
