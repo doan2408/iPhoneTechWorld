@@ -85,7 +85,7 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*"); // Cho phép mọi header
         configuration.addAllowedOrigin("http://localhost:5173"); // Chỉ cho phép frontend từ cổng 5173
 //        configuration.addAllowedOriginPattern("*"); // KHÔNG nên dùng cùng lúc với addAllowedOrigin()
-        configuration.setAllowCredentials(false); // tắt gửi cookie (nếu cần)
+        configuration.setAllowCredentials(true); // tắt gửi cookie (nếu cần)
         configuration.addExposedHeader("Authorization"); // 👈 Nếu muốn đọc lại token từ header
 
 
