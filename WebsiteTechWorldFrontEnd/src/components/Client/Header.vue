@@ -176,7 +176,7 @@ const goToLogin = () => {
     <nav>
       <ul>
         <li>
-          <router-link to="/client/my-order"><i class="fa fa-box"></i> Đơn mua của tôi</router-link>
+          <router-link to="/client/viewer"><i class="fa-solid fa-circle-dot"></i> Xem live stream</router-link>
         </li>
         <li>
           <router-link to="/client/favorites-page"><i class="fa-regular fa-heart"></i> Yêu thích</router-link>

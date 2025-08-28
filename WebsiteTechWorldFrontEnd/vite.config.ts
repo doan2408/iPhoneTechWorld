@@ -33,4 +33,7 @@ export default defineConfig({
     //   clientPort: 5173
     // },
   },
+  define: {
+    global: "window",   // Fix cho sockjs-client
+  }
 });

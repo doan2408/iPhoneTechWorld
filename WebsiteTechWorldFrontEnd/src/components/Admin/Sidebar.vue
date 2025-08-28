@@ -179,7 +179,7 @@ function toggleBaoHanhMenu() {
           </ul>
 
           <li>
-            <router-link to="/admin/danhGiaSanPham">Quản lý bình luận</router-link>
+            <router-link to="/admin/danhGiaSanPham">Quản lý đánh giá</router-link>
           </li>
 
           <li @click="toggleBaoHanhMenu" class="menu-toggle">
@@ -197,6 +197,10 @@ function toggleBaoHanhMenu() {
               <router-link to="/admin/warranty-request">Yêu cầu bảo hành</router-link>
             </li>
           </ul>
+
+          <li>
+            <router-link to="/admin/live-stream" target="_blank">Mở live Stream</router-link>
+          </li>
         </ul>
       </nav>
     </div>

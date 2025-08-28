@@ -463,3 +463,12 @@ export const downloadImeiSanPhamTemplate = async () => {
   }
 };
 
+export const loadSanPham = (search, page = 0, size = 7) => {
+  return api.get('/live-san-pham', {
+    params: {
+        search,
+        page,
+        size
+    },
+  });
+};
