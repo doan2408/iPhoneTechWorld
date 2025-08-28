@@ -34,7 +34,8 @@ public class AdminClientRequest {
     private String matKhau;
 
     @Pattern(
-            regexp = "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\\.(com|net|org|edu|gov|mil|info|biz|vn|us|uk|de|fr|jp|cn)$",
+            flags = Pattern.Flag.CASE_INSENSITIVE,
             message = "Email không đúng định dạng"
     )
     private String email;

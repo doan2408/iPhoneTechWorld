@@ -187,12 +187,12 @@
                     <div class="contact-item">
                         <label>Email:</label>
                         <span>{{ orderInformation.emailNguoiNhan }}</span>
-                        <button class="btn-link" @click="sendEmail">Gửi email</button>
+                        <!-- <button class="btn-link" @click="sendEmail">Gửi email</button> -->
                     </div>
                     <div class="contact-item">
                         <label>Zalo:</label>
                         <span>{{ orderInformation.sdtNguoiNhan }}</span>
-                        <button class="btn-link" @click="openZalo">Mở Zalo</button>
+                        <!-- <button class="btn-link" @click="openZalo">Mở Zalo</button> -->
                     </div>
                     <div class="contact-item">
                         <label>Ghi chú khách hàng:</label>
@@ -301,7 +301,7 @@ const sendEmail = () => {
 }
 
 const openZalo = () => {
-    window.open(`https://zalo.me/${order.zalo}`)
+    window.open(`https://zalo.me/${orderInformation.value.sdtNguoiNhan}`)
 }
 
 const cancelOrder = () => {

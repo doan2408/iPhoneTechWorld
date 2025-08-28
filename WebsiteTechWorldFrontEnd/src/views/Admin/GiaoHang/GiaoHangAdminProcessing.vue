@@ -297,12 +297,12 @@
                             <div class="contact-item">
                                 <Phone class="icon-small" />
                                 <span>{{ order.sdtNguoiNhan }}</span>
-                                <button @click="callCustomer" class="contact-btn">Gọi</button>
+                                <!-- <button @click="callCustomer" class="contact-btn">Gọi</button> -->
                             </div>
                             <div class="contact-item">
                                 <Mail class="icon-small" />
                                 <span>{{ order.emailNguoiNhan }}</span>
-                                <button @click="emailCustomer" class="contact-btn">Email</button>
+                                <!-- <button @click="emailCustomer" class="contact-btn">Email</button> -->
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAllSanPham } from "@/Service/ClientService/ProductClientService";
+import { getAllSanPham } from "@/Service/ClientService/Products/ProductClientService";
 
 
 // Khai báo biến phản ứng
