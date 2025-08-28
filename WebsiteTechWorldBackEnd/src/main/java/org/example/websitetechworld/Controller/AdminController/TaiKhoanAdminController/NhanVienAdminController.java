@@ -80,7 +80,7 @@ public class NhanVienAdminController {
     }
 
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<?> addStaff(@RequestBody @Validated({Default.class, CreateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
