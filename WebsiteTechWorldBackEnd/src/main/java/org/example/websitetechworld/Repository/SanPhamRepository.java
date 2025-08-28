@@ -291,4 +291,22 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 """)
     List<SanPham> findByTongSoLuongGreaterThan (@Param("threshold") int threshold);
 
+    @Query(value = """
+        SELECT * 
+        FROM san_pham sp
+        WHERE (:search IS NULL 
+               OR sp.ma_san_pham LIKE %:search% 
+               OR sp.ten_san_pham LIKE %:search%)
+          AND sp.trang_thai = 'ACTIVE'
+    """,
+                countQuery = """
+        SELECT COUNT(*) 
+        FROM san_pham sp
+        WHERE (:search IS NULL 
+               OR sp.ma_san_pham LIKE %:search% 
+               OR sp.ten_san_pham LIKE %:search%)
+          AND sp.trang_thai = 'ACTIVE'
+    """,
+            nativeQuery = true)
+    Page<SanPham> getAllSanPhamByActive(@Param("search") String search, Pageable pageable);
 }
