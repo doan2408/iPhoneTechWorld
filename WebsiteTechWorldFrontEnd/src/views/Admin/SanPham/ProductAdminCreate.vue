@@ -22,7 +22,7 @@
   </div>
 
   <!-- Main Form -->
-  <el-form :model="sanPham" ref="sanPhamForm" label-width="140px" class="product-form">
+  <el-form :model="sanPham" ref="sanPhamForm" label-width="140px" class="product-form" v-if="isAdmin">
     <!-- Thông tin sản phẩm chính -->
     <el-card shadow="hover" class="section-card">
       <template #header>
@@ -352,7 +352,7 @@
 
     <!-- Nút lưu sản phẩm -->
     <div class="form-actions">
-      <el-button size="large" type="success" :loading="loading.submit" @click="confirmSubmitForm">
+      <el-button size="large" type="success" :loading="loading.submit" @click="confirmSubmitForm" v-show="isAdmin">
         <Check class="el-icon" /> Lưu sản phẩm
       </el-button>
 
