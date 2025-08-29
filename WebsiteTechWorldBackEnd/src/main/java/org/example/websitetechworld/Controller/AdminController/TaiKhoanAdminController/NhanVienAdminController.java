@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class NhanVienAdminController {
     private final NhanVienAdminService nhanVienAdminService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<AdminNhanVienResponse>> getStaff(
             @RequestParam(value = "page", defaultValue = "0") int page,

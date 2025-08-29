@@ -1,5 +1,6 @@
 package org.example.websitetechworld.Config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.example.websitetechworld.Services.LoginServices.AccountDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +58,24 @@ public class SecurityConfig {
     //                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
     //                )
                     .logout().disable() //tắt đăng xuất thủ công
-                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                    // ✅ Exception handling
+                    .exceptionHandling(ex -> ex
+                            // when user is not authenticated at all
+                            .authenticationEntryPoint((req, res, e) -> {
+                                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                                res.setContentType("application/json;charset=UTF-8");
+                                res.getWriter().write("{\"status\":401,\"message\":\"Unauthorized\"}");
+                            })
+                            // when user is authenticated but does not have permission
+                            .accessDeniedHandler((req, res, e) -> {
+                                res.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+                                res.setContentType("application/json;charset=UTF-8");
+                                res.getWriter().write("{\"status\":403,\"message\":\"Forbidden\"}");
+                            })
+                    )
+            ;;
 
             return http.build();
         }
