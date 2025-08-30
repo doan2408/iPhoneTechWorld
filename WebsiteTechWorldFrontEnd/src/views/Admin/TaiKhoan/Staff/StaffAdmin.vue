@@ -55,11 +55,16 @@ const loadStaff = async (page = 0, keyword = null) => {
       trangThai: filterStatus.value
   });
     
-    staffList.value = response.content || [];
+    staffList.value = response?.content || [];
     currentPage.value = page;
-    totalPages.value = response.totalPages || 0;
-    totalFilteredCount.value = response.totalElements;
+    totalPages.value = response?.totalPages || 0;
+    totalFilteredCount.value = response?.totalElements;
   } catch (err) {
+    const status = err.response?.status;
+
+    if(status === 403) {
+      ElMessage.error("Bạn không có quyền truy cập");
+    }
     console.error("Error loading staff:", err);
     error.value = err.message || "Có lỗi xảy ra khi tải danh sách nhân viên";
     ElMessage.error(error.value);

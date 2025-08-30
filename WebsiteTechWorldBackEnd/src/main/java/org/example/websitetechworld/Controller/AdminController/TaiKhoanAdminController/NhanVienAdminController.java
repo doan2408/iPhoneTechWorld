@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class NhanVienAdminController {
     private final NhanVienAdminService nhanVienAdminService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<AdminNhanVienResponse>> getStaff(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -80,7 +81,7 @@ public class NhanVienAdminController {
     }
 
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<?> addStaff(@RequestBody @Validated({Default.class, CreateGroups.class}) AdminStaffRequest adminStaffRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

@@ -662,39 +662,39 @@ VALUES
 -- Table phieu_giam_gia
 INSERT INTO phieu_giam_gia (ma_giam_gia, ten_giam_gia, loai_giam_gia, gia_tri_giam_gia, gia_tri_don_hang_toi_thieu, gia_tri_giam_gia_toi_da, ngay_bat_dau, ngay_ket_thuc, dieu_kien_ap_dung, hang_toi_thieu, so_luong, so_diem_can_de_doi, trang_thai_phieu_giam_gia, trang_thai_phat_hanh)
 VALUES
-    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2025-09-02', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 1000.00, N'ACTIVE', N'ISSUED'),
-    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-09-02', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200000.00, N'NOT_STARTED', N'ISSUED'),
-    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-09-02', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50000.00, N'NOT_STARTED', N'ISSUED'),
-    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-09-02', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500000.00, N'EXPIRED', N'ISSUED'),
-    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-09-02', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120000.00, N'NOT_STARTED', N'ISSUED'),
-    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-09-02', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60000.00, N'NOT_STARTED', N'ISSUED'),
-    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-09-02', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600000.00, N'EXPIRED', N'ISSUED'),
-    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-09-02', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110000.00, N'ACTIVE', N'ISSUED'),
-    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-09-02', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220000.00, N'ACTIVE', N'ISSUED'),
-    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-09-02', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55000.00, N'NOT_STARTED', N'ISSUED'),
-    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-09-02', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700000.00, N'EXPIRED', N'ISSUED'),
-    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-09-02', N'Áp dụng iPhone 14', N'GOLD', 160, 85000.00, N'NOT_STARTED', N'ISSUED');
+    (N'VC001', N'Giảm giá iPhone 10%', N'Phần trăm', 10.00, 0.00, 200000.00, '2025-05-01', '2025-09-09', N'Áp dụng cho đơn iPhone từ 1 triệu', N'SILVER', 100, 1000.00, N'ACTIVE', N'ISSUED'),
+    (N'VC002', N'Giảm 200K iPhone', N'Cố định', 200000.00, 2000000.00, 200000.00, '2025-04-15', '2025-09-09', N'Đơn iPhone từ 2 triệu', N'GOLD', 50, 200000.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC003', N'Flash Sale iPhone 15%', N'Phần trăm', 15.00, 500000.00, 300000.00, '2025-06-01', '2025-09-09', N'Flash sale iPhone cuối tuần', N'MEMBER', 200, 50000.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC004', N'Giảm 500K iPhone VIP', N'Cố định', 500000.00, 5000000.00, 500000.00, '2025-03-01', '2025-09-09', N'Đơn iPhone từ 5 triệu', N'DIAMOND', 20, 500000.00, N'EXPIRED', N'ISSUED'),
+    (N'VC005', N'Giảm giá iPhone 12%', N'Phần trăm', 12.00, 1500000.00, 250000.00, '2025-06-15', '2025-09-09', N'Áp dụng cho đơn iPhone từ 1.5 triệu', N'SILVER', 120, 120000.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC006', N'Flash Sale iPhone 20%', N'Phần trăm', 20.00, 800000.00, 400000.00, '2025-07-01', '2025-09-09', N'Flash sale iPhone hàng tuần', N'MEMBER', 250, 60000.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC007', N'Giảm 600K iPhone VIP', N'Cố định', 600000.00, 6000000.00, 600000.00, '2025-04-01', '2025-09-09', N'Đơn iPhone từ 6 triệu', N'DIAMOND', 25, 600000.00, N'EXPIRED', N'ISSUED'),
+    (N'VC008', N'Giảm giá iPhone 7%', N'Phần trăm', 7.00, 1100000.00, 130000.00, '2025-05-15', '2025-09-09', N'Áp dụng cho đơn iPhone từ 1.1 triệu', N'SILVER', 110, 110000.00, N'ACTIVE', N'ISSUED'),
+    (N'VC009', N'Giảm 250K iPhone', N'Cố định', 250000.00, 2500000.00, 250000.00, '2025-04-20', '2025-09-09', N'Đơn iPhone từ 2.5 triệu', N'GOLD', 55, 220000.00, N'ACTIVE', N'ISSUED'),
+    (N'VC010', N'Flash Sale iPhone 10%', N'Phần trăm', 10.00, 600000.00, 200000.00, '2025-07-15', '2025-09-09', N'Flash sale iPhone hàng tuần', N'MEMBER', 220, 55000.00, N'NOT_STARTED', N'ISSUED'),
+    (N'VC011', N'Giảm 700K iPhone VIP', N'Cố định', 700000.00, 7000000.00, 700000.00, '2025-03-15', '2025-09-09', N'Đơn iPhone từ 7 triệu', N'DIAMOND', 30, 700000.00, N'EXPIRED', N'ISSUED'),
+    (N'VC012', N'Giảm 6% iPhone 14', N'Phần trăm', 6.00, 1300000.00, 120000.00, '2025-06-20', '2025-09-09', N'Áp dụng iPhone 14', N'GOLD', 160, 85000.00, N'NOT_STARTED', N'ISSUED');
 
 
 
 -- Table khach_hang_giam_gia
-INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, trang_thai)
-VALUES
-    (1, 2, 1, GETDATE(), 1),
-    (2, 2, 0, GETDATE(), 1),
-    (3, 4, 0, GETDATE(), 1),
-    (4, 4, 1, GETDATE(), 1),
-    (5, 2, 1, GETDATE(), 1),
-    (1, 2, 1, GETDATE(), 1),
-    (2, 6, 0, GETDATE(), 1),
-    (3, 6, 0, GETDATE(), 1),
-    (4, 7, 1, GETDATE(), 1),
-    (5, 2, 1, GETDATE(), 1),
-    (1, 6, 1, GETDATE(), 1),
-    (2, 6, 0, GETDATE(), 1),
-    (3, 4, 0, GETDATE(), 1),
-    (4, 4, 1, GETDATE(), 1),
-    (5, 2, 1, GETDATE(), 1);
+--INSERT INTO khach_hang_giam_gia (id_khach_hang, id_phieu_giam_gia, is_user, ngay_cap, trang_thai)
+--VALUES
+--    (1, 2, 1, GETDATE(), 1),
+--    (2, 2, 0, GETDATE(), 1),
+--    (3, 4, 0, GETDATE(), 1),
+--    (4, 4, 1, GETDATE(), 1),
+--    (5, 2, 1, GETDATE(), 1),
+--    (1, 2, 1, GETDATE(), 1),
+--    (2, 6, 0, GETDATE(), 1),
+--    (3, 6, 0, GETDATE(), 1),
+--    (4, 7, 1, GETDATE(), 1),
+--    (5, 2, 1, GETDATE(), 1),
+--    (1, 6, 1, GETDATE(), 1),
+--    (2, 6, 0, GETDATE(), 1),
+--    (3, 4, 0, GETDATE(), 1),
+--    (4, 4, 1, GETDATE(), 1),
+--    (5, 2, 1, GETDATE(), 1);
 
 --Table vi_diem
 INSERT INTO vi_diem (id_khach_hang, diem_kha_dung)
@@ -1213,6 +1213,8 @@ UPDATE hinh_anh
 SET url = 'https://res.cloudinary.com/dzs764s5c/image/upload/v1753800593/bqvwkuqlwuc2slzrkzug.webp',
     image_public_id = 'bqvwkuqlwuc2slzrkzug'
 WHERE id_hinh_anh BETWEEN 26 AND 28;
+
+update phieu_giam_gia set trang_thai_phieu_giam_gia = 'ACTIVE'
 
 -- 1. Nhân viên
 SELECT * FROM nhan_vien;

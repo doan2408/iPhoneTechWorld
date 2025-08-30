@@ -57,6 +57,7 @@ public class ModelSanPhamAdminController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ModelSanPhamAdminResponse> updateModelSanPham(@PathVariable Integer id,@RequestBody ModelSanPhamAdminRequest request) {
         ModelSanPhamAdminResponse response = modelSanPhamService.updateModelSanPham(id, request);

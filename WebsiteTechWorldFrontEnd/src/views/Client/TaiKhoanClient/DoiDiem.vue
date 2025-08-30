@@ -183,6 +183,12 @@ const getHang = async () => {
   }
 };
 
+const trangThaiMap = {
+  NOT_STARTED: "Chưa bắt đầu",
+  ACTIVE: "Đang hoạt động",
+  EXPIRED: "Đã hết hạn"
+}
+
 // Chuyển trang
 const onPageChange = (p) => {
   page.value = p;
@@ -233,6 +239,7 @@ onMounted(() => {
     <el-tabs v-model="currentTab" class="tabs">
       <el-tab-pane v-for="hang in hangList" :key="hang" :label="hang" :name="hang">
         <el-table :data="vouchers" style="width: 100%" :empty-text="`Chưa có voucher cho mục ${hang}`">
+          <el-table-column prop="maGiamGia" label="Mã voucher" />
           <el-table-column prop="tenGiamGia" label="Tên voucher" />
           <el-table-column label="Điểm cần đổi">
             <template #default="scope">
@@ -243,6 +250,12 @@ onMounted(() => {
           <el-table-column label="Giá trị giảm">
             <template #default="scope">
               {{ formatDiscount(scope.row.giaTriGiamGia, scope.row.loaiGiamGia) }}
+            </template>
+          </el-table-column>
+
+          <el-table-column label="Giá trị giảm tối đa">
+            <template #default="scope">
+              {{ formatCurrency(scope.row.giaTriGiamGiaToiDa) }}
             </template>
           </el-table-column>
 
@@ -264,11 +277,17 @@ onMounted(() => {
             </template>
           </el-table-column>
 
+          <el-table-column label="Trạng thái voucher">
+            <template #default="scope">
+              {{ trangThaiMap[scope.row.trangThaiPhieuGiamGia] || 'Không xác định' }}
+            </template>
+          </el-table-column>
+
           <el-table-column label="Thao tác">
             <template #default="scope">
               <el-button type="primary" size="small" :disabled="scope.row.soDiemCanDeDoi > viDiem.diemKhaDung ||
-                !canRedeemVoucher(currentTab, hangThanhVien)
-                " @click="doiDiemVouCher(scope.row)">
+                !canRedeemVoucher(currentTab, hangThanhVien) || scope.row.trangThaiPhieuGiamGia !== 'ACTIVE'"
+                 @click="doiDiemVouCher(scope.row)">
                 Đổi điểm
               </el-button>
             </template>
