@@ -140,4 +140,9 @@ public class SanPhamAdminController {
         }
     }
 
+    @GetMapping("/check-status/{idSpct}")
+    public ResponseEntity<?> checkStatus(@PathVariable Integer idSpct) {
+        return ResponseEntity.ok(sanPhamAdminService.checkProductStatus(idSpct));
+    }
+
 }

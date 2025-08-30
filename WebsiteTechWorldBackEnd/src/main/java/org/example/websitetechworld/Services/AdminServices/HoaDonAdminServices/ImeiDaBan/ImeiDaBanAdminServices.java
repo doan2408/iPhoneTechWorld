@@ -59,11 +59,7 @@ public class ImeiDaBanAdminServices {
 
     public Page<ImeiTrangHoaDonResponse> imeiTrangHoaDonList(int pageNo, int pageSize,Integer idHoaDon, Integer idKhachHang) {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        return imeiDaBanRepository.imeiTrongHdct(idHoaDon,pageable)
-                .map(imeiTrangHoaDonResponse -> {
-                    imeiTrangHoaDonResponse.setGiaBan(khuyenMaiAdminService.tinhGiaSauKhuyenMai(getSanPhamChiTietById(imeiTrangHoaDonResponse.getIdSanPhamChiTiet()), idKhachHang));
-                    return imeiTrangHoaDonResponse;
-                });
+        return imeiDaBanRepository.imeiTrongHdct(idHoaDon,pageable);
     }
 
     public SanPhamChiTiet getSanPhamChiTietById(Integer idSpct) {

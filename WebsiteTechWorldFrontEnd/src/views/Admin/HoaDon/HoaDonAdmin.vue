@@ -570,6 +570,7 @@
                           <th>Sản phẩm</th>
                           <th class="text-center">Số lượng</th>
                           <th class="text-right">Đơn giá</th>
+                          <th class="tinh-trang">Tình trạng sản phẩm</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -583,6 +584,9 @@
                           </td>
                           <td class="text-right">
                             {{ formatCurrency(item.donGia) }}
+                          </td>
+                          <td class="text-right">
+                            {{ item.trangThaiText }}
                           </td>
                         </tr>
                       </tbody>
@@ -661,22 +665,22 @@
     </div>
 
     <div v-if="showSalesHistoryModal" class="history-overlay">
-        <div class="history-modal">
-            <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
-            <div class="history-list">
-                <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
-                    <div class="history-action">{{ history.hanhDong }}</div>
-                    <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
-                    <div class="history-description">{{ history.moTa }}</div>
-                </div>
-                <div v-if="!orderHistory.length" class="no-history">
-                    Không có lịch sử nào để hiển thị
-                </div>
-            </div>
-            <div class="history-actions">
-                <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
-            </div>
+      <div class="history-modal">
+        <h3 class="history-title">Lịch sử hóa đơn #{{ maHoaDon }}</h3>
+        <div class="history-list">
+          <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+            <div class="history-action">{{ history.hanhDong }}</div>
+            <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+            <div class="history-description">{{ history.moTa }}</div>
+          </div>
+          <div v-if="!orderHistory.length" class="no-history">
+            Không có lịch sử nào để hiển thị
+          </div>
         </div>
+        <div class="history-actions">
+          <button class="history-btn cancel" @click="closeSalesHistoryModal">Đóng</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -701,6 +705,7 @@ import store from "@/Service/LoginService/Store";
 import { fa } from "element-plus/es/locales.mjs";
 import ConfirmModal from "@/views/Popup/ConfirmModal.vue";
 import { useToast } from "vue-toastification";
+import { checkStatusProduct } from "@/Service/Adminservice/Products/ProductAdminService";
 
 const hoaDons = ref([]);
 const pageNo = ref(0);
@@ -718,7 +723,7 @@ const error = ref(null);
 const showModalCreateInvoice = ref(null);
 // Thêm các ref để quản lý modal
 const showModal = ref(false);
-const selectedInvoice = ref(null);
+const selectedInvoice = ref(null);  
 const lichSuHoaDon = ref([]);
 const showLichSuHoaDon = ref(false);
 // Thong ke
@@ -727,22 +732,72 @@ const choXuLy = ref(0);
 // Toast
 const toast = useToast()
 
+
 // Hàm mở modal và lấy chi tiết hóa đơn
-const viewInvoiceDetails = async (invoice) => {
-  isLoading.value = true;
-  try {
-    const response = await hoaDonDetail(invoice.idHoaDon); // Sử dụng idHoaDon
-    selectedInvoice.value = response.data;
-    console.log("Dữ liệu chi tiết hóa đơn:", response.data); // Kiểm tra dữ liệu
-    showModal.value = true;
-  } catch (error) {
-    console.error("Error fetching invoice details:", error);
-    selectedInvoice.value = invoice;
-    showModal.value = true;
-  } finally {
-    isLoading.value = false;
-  }
-};
+  const viewInvoiceDetails = async (invoice) => {
+    isLoading.value = true;
+    try {
+      const response = await hoaDonDetail(invoice.idHoaDon); 
+      selectedInvoice.value = response.data;
+
+      const mergedList = await fetchAndMergeStatus(selectedInvoice.value);
+
+      selectedInvoice.value = {
+        ...selectedInvoice.value,
+        chiTietHoaDonAdminResponseList: mergedList
+      };
+
+      showModal.value = true;
+    } catch (error) {
+      console.error("Error fetching invoice details:", error);
+      selectedInvoice.value = invoice;
+      showModal.value = true;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+async function fetchAndMergeStatus(chiTietLists) {
+  const chiTietList = chiTietLists.chiTietHoaDonAdminResponseList || []
+  if (!Array.isArray(chiTietList)) return [];
+
+  return Promise.all(
+    chiTietList.map(async (ct) => {
+      let trangThaiText = "Không xác định";
+      let soLuongConLai = null;
+
+      // Kiểm tra trạng thái thanh toán của đơn
+      if (chiTietLists.trangThaiThanhToan !== 'PENDING') {
+        trangThaiText = 'Đã giữ hàng cho đơn này';
+      } else {
+        const statusRes = (await checkStatusProduct(ct.idSanPhamChiTiet)).data;
+
+        if (statusRes) {
+          soLuongConLai = statusRes[ct.idSanPhamChiTiet];
+
+          if (ct.soLuong > soLuongConLai) {
+            trangThaiText = "Không đủ số lượng";
+          } else if (ct.soLuong === soLuongConLai) {
+            trangThaiText = "Mua xong thì hết hàng";
+          } else if (ct.soLuong < soLuongConLai) {
+            trangThaiText = "Còn hàng";
+          }
+        } else {
+          trangThaiText = "Sản phẩm ngừng kinh doanh";
+        }
+      }
+
+      return {
+        ...ct,
+        soLuongConLai,
+        trangThaiText
+      };
+    })
+  );
+}
+
+
+
 
 // Hàm đóng modal
 const closeModal = () => {

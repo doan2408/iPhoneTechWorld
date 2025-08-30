@@ -123,9 +123,16 @@
                     <X class="icon-small" /> HỦY ĐƠN
                 </button>
 
-                <button v-if="canReturn" @click="openPopupReturn()" class="action-btn cancel-btn">
-                    <X class="icon-small" /> TRẢ HÀNG
+                <p v-if="returnStatus.message || returnStatus.canReturn"
+                    :class="['return-message', returnStatus.canReturn ? 'success' : 'error']">
+                    {{ returnStatus.message }}
+                </p>
+
+                <button v-if="returnStatus.canReturn" @click="openPopupReturn()" :disabled="!returnStatus.canReturn"
+                    class="action-btn cancel-btn">
+                    TRẢ HÀNG
                 </button>
+
 
                 <div v-if="showReturnPopup" class="return-overlay">
                     <div class="return-modal">
@@ -142,8 +149,7 @@
                                     </span>
                                 </div>
                             </label>
-                            <div v-if="imeis.length === 0"
-                                class="return-selected-empty">
+                            <div v-if="imeis.length === 0" class="return-selected-empty">
                                 <p style="text-align: center; color: red;">
                                     Tất cả sản phẩm đều đã được gửi yêu cầu trả hàng
                                 </p>
@@ -751,18 +757,50 @@ const callDriver = () => {
 }
 
 const showHistoryModal = ref(false);
-
+const returnStatus = ref({ canReturn: false, message: "" });
 const orderHistory = ref([]);
 
 const xemLichSu = async () => {
+    showHistoryModal.value = true;
+};
+
+const fetchOrderHistory = async () => {
     try {
-        const id = route.params.id; 
+        const id = route.params.id;
         const response = await getOrderHistory(id);
         orderHistory.value = response.data;
-        showHistoryModal.value = true;
+
+        // Tính toán trạng thái trả hàng
+        const completeHistory = orderHistory.value.find(h => h.hanhDong === "Hoàn thành");
+
+        if (completeHistory) {
+            const completeDate = new Date(completeHistory.thoiGianThayDoi);
+            const now = new Date();
+
+            const diffMs = now - completeDate;
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            if (diffHours < 48) {
+                const remainingHours = 48 - diffHours;
+                const remainingDays = Math.floor(remainingHours / 24);
+                const hours = Math.floor(remainingHours % 24);
+                returnStatus.value = {
+                    canReturn: true,
+                    message: `Còn ${remainingDays} ngày ${hours} giờ để trả hàng`
+                };
+            } else {
+                returnStatus.value = {
+                    canReturn: false,
+                    message: "Hết thời gian trả hàng"
+                };
+            }
+        } else {
+            returnStatus.value = { canReturn: false, message: "Chưa hoàn tất đơn" };
+        }
+
     } catch (error) {
-        console.error('Lỗi khi lấy lịch sử hóa đơn:', error);
-        toast.error('Không thể tải lịch sử hóa đơn');
+        console.error("Lỗi khi lấy lịch sử hóa đơn:", error);
+        toast.error("Không thể tải lịch sử hóa đơn");
     }
 };
 
@@ -773,6 +811,7 @@ watch(
 
 onMounted(() => {
     viewOrderDetail()
+    fetchOrderHistory()
 })
 const showConfirm = ref(false)
 const confirmMessage = ref('')
@@ -788,6 +827,7 @@ function handleConfirm() {
     if (confirmCallback) confirmCallback()
     showConfirm.value = false
 }
+
 </script>
 
 <style scoped src="@/style/GiaoHang/GiaoHangProcessing.css"></style>

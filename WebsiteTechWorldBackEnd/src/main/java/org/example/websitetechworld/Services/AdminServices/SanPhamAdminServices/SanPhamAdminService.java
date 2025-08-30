@@ -1401,6 +1401,15 @@ public class SanPhamAdminService {
         });
         return danhSach;
     }
+
+    public Map<Integer,Integer> checkProductStatus(Integer idSpct){
+        List<Object[]> results = sanPhamChiTietRepository.checkProductStatus(idSpct);
+        Map<Integer, Integer> map = new HashMap<>();
+        for (Object[] row : results) {
+            map.put((Integer) row[0], (Integer) row[1]);
+        }
+        return map;
+    }
 }
 
 

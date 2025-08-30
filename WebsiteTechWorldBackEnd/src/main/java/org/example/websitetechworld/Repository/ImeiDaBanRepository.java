@@ -25,7 +25,7 @@ public interface ImeiDaBanRepository extends JpaRepository<ImeiDaBan, Integer> {
             imbd.id,
             imbd.soImei,
             imbd.trangThai,
-            spct.giaBan,
+            cthd.donGia,
             cthd.id,
             spct.id,
             cthd.tenSanPham,

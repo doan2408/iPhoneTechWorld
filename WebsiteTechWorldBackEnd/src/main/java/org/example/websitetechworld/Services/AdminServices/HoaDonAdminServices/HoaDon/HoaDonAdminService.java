@@ -168,6 +168,7 @@ public class HoaDonAdminService {
                 })
                 .orElseThrow(() -> new RuntimeException("Khong tim thay hoa don"));
     }
+
     public HoaDon findByIdHoaDon(Integer id){
         return hoaDonRepository.findById(id).orElseThrow();
     }

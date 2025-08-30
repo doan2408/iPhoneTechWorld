@@ -132,4 +132,11 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     List<SanPhamChiTiet> findAllByIdSanPham(SanPham idSanPham);
 
     Integer id(Integer id);
+
+    @Query("""
+        SELECT spct.id, spct.soLuong FROM SanPhamChiTiet spct
+            WHERE spct.id = :idSanPhamChiTietId
+                AND spct.idSanPham.trangThaiSanPham = 'ACTIVE'
+    """)
+    List<Object[]> checkProductStatus(@Param("idSanPhamChiTietId") Integer idSanPhamChiTietId);
 }
