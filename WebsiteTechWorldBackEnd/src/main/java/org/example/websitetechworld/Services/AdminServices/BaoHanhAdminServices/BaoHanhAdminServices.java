@@ -194,11 +194,19 @@ public class BaoHanhAdminServices {
                         "</div>";
 
         // gửi mail
-        emailServicces.sendHtmlEmail(
-                baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan(),
-                subject,
-                html
-        );
+        if (baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan() != null){
+            emailServicces.sendHtmlEmail(
+                    baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan(),
+                    subject,
+                    html
+            );
+        }else {
+            emailServicces.sendHtmlEmail(
+                    baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getIdKhachHang().getEmail(),
+                    subject,
+                    html
+            );
+        }
     }
 
 
@@ -262,10 +270,19 @@ public class BaoHanhAdminServices {
                         "</div>";
 
         // gửi mail
-        emailServicces.sendHtmlEmail(
-                baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan(),
-                subject,
-                html
-        );
+        if (baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan() != null){
+            emailServicces.sendHtmlEmail(
+                    baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getEmailNguoiNhan(),
+                    subject,
+                    html
+            );
+        }else {
+            emailServicces.sendHtmlEmail(
+                    baoHanh.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon().getIdKhachHang().getEmail(),
+                    subject,
+                    html
+            );
+        }
+
     }
 }
