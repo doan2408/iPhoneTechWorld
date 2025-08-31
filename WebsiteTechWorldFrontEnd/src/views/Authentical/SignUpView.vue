@@ -73,6 +73,7 @@ const handleRegister = async () => {
                 v-model.trim="khachHangRegister.taiKhoan"
                 type="text"
                 placeholder="Nhập tài khoản"
+                @input="khachHangRegister.taiKhoan = khachHangRegister.taiKhoan.replace(/\s/g, '')"
                 :class="{ 'error': errors.taiKhoan }"
               />
               <div v-if="errors.taiKhoan" class="error-message">
