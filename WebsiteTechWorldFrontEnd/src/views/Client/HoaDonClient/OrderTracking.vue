@@ -804,6 +804,25 @@ const fetchOrderHistory = async () => {
     }
 };
 
+const handleUpload = async (event, imei, type) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("idImei", imei.idImei)
+    formData.append("file", file)
+
+    try {
+        const res = await uploadAnhAndVid(formData)
+        const url = res.data.url
+
+        if (type === "image") imei.urlHinh = url
+        else imei.urlVideo = url
+    } catch (err) {
+        console.error("Upload lỗi:", err)
+    }
+}
+
 watch(
   () => route.params.id,
   () => viewOrderDetail()
