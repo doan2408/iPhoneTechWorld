@@ -271,8 +271,9 @@ public class XuLySauBanHangServices {
 
 
     public void changeStatus(ChangeStatusRequest request) {
+        XuLySauBanHang xuLySauBanHang = null;
         for (String s : request.getSoImeis()){
-            XuLySauBanHang xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImeiAndIdHoaDon_Id(s,request.getIdHoaDon());
+             xuLySauBanHang = xuLySauBanHangRepository.findXuLySauBanHangByIdImeiDaBan_SoImeiAndIdHoaDon_Id(s,request.getIdHoaDon());
             if (request.getStatus().equals(ActionAfterCase.RETURN_TO_STOCK)){
                 ImeiDaBan imeiDaBan = imeiDaBanRepository.findById(xuLySauBanHang.getIdImeiDaBan().getId()).orElseThrow(
                         () -> new IllegalArgumentException("Imei da ban ko ton tai")
@@ -282,12 +283,17 @@ public class XuLySauBanHangServices {
                 Imei imei = imeiReposiory.findBySoImei(s);
                 imei.setTrangThaiImei(TrangThaiImei.AVAILABLE);
                 sanPhamChiTietRepository.tangSoLuongTon(imei.getIdSanPhamChiTiet().getId(),1);
+
+                createLshd(imeiDaBan.getIdHoaDonChiTiet().getIdHoaDon(), HanhDongLichSuHoaDon.RETURN, "Hàng với Imei "+imeiDaBan.getSoImei()+" đã được hoàn về kho");
+
             }
             xuLySauBanHang.setHanhDongSauVuViec(request.getStatus());
             xuLySauBanHang.setThoiGianXuLy(LocalDateTime.now());
 //            xuLySauBanHang.setDaKiemTra(true);
             xuLySauBanHangRepository.save(xuLySauBanHang);
+
         }
+        createLshd(xuLySauBanHang.getIdImeiDaBan().getIdHoaDonChiTiet().getIdHoaDon(), HanhDongLichSuHoaDon.RETURN, "Đã hoàn tiền đơn hàng với mã "+xuLySauBanHang.getIdHoaDon().getMaHoaDon());
     }
     public void changeStatus(AccepAndInAccepAction action) {
         List<XuLySauBanHang> xuLySauBanHangList = xuLySauBanHangRepository.findByIdHoaDon_IdAndAndIdImeiDaBan_SoImei(action.getIdHoaDon(),action.getSoImei());

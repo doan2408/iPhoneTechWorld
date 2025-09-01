@@ -986,23 +986,22 @@ const fetchOrderHistory = async () => {
         const response = await getOrderHistoryGuest(id);
         orderHistory.value = response.data;
 
-        // Tính toán trạng thái trả hàng
         const completeHistory = orderHistory.value.find(h => h.hanhDong === "Hoàn thành");
 
         if (completeHistory) {
             const completeDate = new Date(completeHistory.thoiGianThayDoi);
+            completeDate.setHours(0, 0, 0, 0); 
+
             const now = new Date();
+            now.setHours(0, 0, 0, 0); 
 
-            const diffMs = now - completeDate;
-            const diffHours = diffMs / (1000 * 60 * 60);
+            const diffDays = (now - completeDate) / (1000 * 60 * 60 * 24);
 
-            if (diffHours < 48) {
-                const remainingHours = 48 - diffHours;
-                const remainingDays = Math.floor(remainingHours / 24);
-                const hours = Math.floor(remainingHours % 24);
+            if (diffDays < 2) { 
+                const remainingDays = 2 - Math.floor(diffDays);
                 returnStatus.value = {
                     canReturn: true,
-                    message: `Còn ${remainingDays} ngày ${hours} giờ để trả hàng`
+                    message: `Còn ${remainingDays} ngày để trả hàng`
                 };
             } else {
                 returnStatus.value = {

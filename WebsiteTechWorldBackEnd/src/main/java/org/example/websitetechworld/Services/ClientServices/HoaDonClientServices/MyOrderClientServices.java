@@ -448,7 +448,7 @@ public class MyOrderClientServices {
         HoaDon hoaDon = hoaDonRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn có id:" + id));
 
         return lichSuHoaDonRepository.findByIdHoaDon(hoaDon).stream()
-                .sorted(Comparator.comparing(LichSuHoaDon::getId))
+                .sorted(Comparator.comparing(LichSuHoaDon::getId).reversed())
                 .map(LichSuHoaDonAdminResponse::convertDto)
                 .collect(Collectors.toList());
     }

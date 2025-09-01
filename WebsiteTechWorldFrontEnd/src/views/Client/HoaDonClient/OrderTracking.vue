@@ -775,18 +775,19 @@ const fetchOrderHistory = async () => {
 
         if (completeHistory) {
             const completeDate = new Date(completeHistory.thoiGianThayDoi);
+            completeDate.setHours(0, 0, 0, 0); // reset về 00:00:00
+
             const now = new Date();
+            now.setHours(0, 0, 0, 0); // chỉ lấy ngày hiện tại
 
-            const diffMs = now - completeDate;
-            const diffHours = diffMs / (1000 * 60 * 60);
+            // Tính số ngày đã trôi qua
+            const diffDays = (now - completeDate) / (1000 * 60 * 60 * 24);
 
-            if (diffHours < 48) {
-                const remainingHours = 48 - diffHours;
-                const remainingDays = Math.floor(remainingHours / 24);
-                const hours = Math.floor(remainingHours % 24);
+            if (diffDays < 2) { // 2 ngày = 48h
+                const remainingDays = 2 - Math.floor(diffDays);
                 returnStatus.value = {
                     canReturn: true,
-                    message: `Còn ${remainingDays} ngày ${hours} giờ để trả hàng`
+                    message: `Còn ${remainingDays} ngày để trả hàng`
                 };
             } else {
                 returnStatus.value = {
