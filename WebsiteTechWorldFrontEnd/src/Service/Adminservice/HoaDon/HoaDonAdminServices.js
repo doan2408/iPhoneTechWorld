@@ -254,3 +254,23 @@ export const updateShipping = (id) => {
     const url = url_base + '/' + id + '/update-shipping-method'
     return api.put(url)
 }
+
+export const updateStatusPendingAdmin = (idHoaDon, soImei, hanhDong) => {
+    const url = '/admin/action-after-case/update-status'
+    const request = {
+        idHoaDon: idHoaDon,
+        soImei: soImei,
+        hanhDong: hanhDong
+    };
+    return api.put(url, request)
+}
+
+export const changeStatusPendingAdmin = (soImeis, idHoaDon, status) => {
+    const url = '/admin/action-after-case/change-status'
+    const request = {
+        soImeis: soImeis,
+        idHoaDon: idHoaDon,
+        status: status
+    };
+    return api.post(url, request)
+}

@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -68,18 +69,21 @@ public class SanPhamAdminController {
         return ResponseEntity.ok( sanPhamAdminService.getViewSanPham(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createSanPham(@Valid @RequestBody SanPhamAdminRequest request) {
             SanPhamAdminResponse response = sanPhamAdminService.createSanPhamAdmin(request);
             return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<SanPhamAdminResponse> updateSanPham(@PathVariable Integer id, @RequestBody SanPhamAdminRequest sanPhamAdminRequest) {
         SanPhamAdminResponse sanPham = sanPhamAdminService.updateSanPhamAdmin(id, sanPhamAdminRequest);
         return ResponseEntity.ok(sanPham);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSanPham(@PathVariable Integer id) {
         sanPhamAdminService.deleteSanPhamAdmin(id);
@@ -138,6 +142,11 @@ public class SanPhamAdminController {
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/check-status/{idSpct}")
+    public ResponseEntity<?> checkStatus(@PathVariable Integer idSpct) {
+        return ResponseEntity.ok(sanPhamAdminService.checkProductStatus(idSpct));
     }
 
 }

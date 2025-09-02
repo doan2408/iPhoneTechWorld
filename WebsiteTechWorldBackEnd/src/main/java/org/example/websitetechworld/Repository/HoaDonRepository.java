@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
@@ -123,6 +124,4 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     List<HoaDon> findByLoaiHoaDonAndNgayThanhToanIsNullAndNgayTaoHoaDonBefore(
             LoaiHoaDon loaiHoaDon, LocalDateTime thoiDiem
     );
-
-
 }

@@ -472,3 +472,8 @@ export const loadSanPham = (search, page = 0, size = 7) => {
     },
   });
 };
+
+export const checkStatusProduct = (id) => {
+  const url = baseURL + '/product/check-status/' + id
+  return api.get(url)
+}

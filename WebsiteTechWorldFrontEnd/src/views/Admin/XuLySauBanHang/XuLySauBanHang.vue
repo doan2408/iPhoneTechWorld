@@ -298,7 +298,7 @@ import { countDonHangByStatus, getAllCtXuLy, getAllLyDoXuLy, updateStatusPending
 import router from '@/router'
 import { useToast } from 'vue-toastification'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
-import { findHdctByImeiDaBan } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
+import { findHdctByImeiDaBan, updateStatusPendingAdmin } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 
 // Reactive data
 const activeTab = ref('all')
@@ -377,7 +377,7 @@ const getAllLyDoXuLyView = async () => {
 }
 
 const updateStatus = async (idHoaDon,imei,status) => {
-    await updateStatusPending(idHoaDon,imei,status)
+    await updateStatusPendingAdmin(idHoaDon,imei,status)
     if (status === 'HOLD') {
         toast.success("Bạn đã chấp nhận yêu cầu!")
     } else if (status === 'CANCEL') {

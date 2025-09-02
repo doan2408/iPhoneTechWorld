@@ -202,7 +202,6 @@ public class HoaDonAdminController {
     public ResponseEntity<Long> countHoaDon() {
         Long total = hoaDonAdminService.countHoaDon();
         return ResponseEntity.ok(total);
-
     }
 
     //So hoa don cho xy ly

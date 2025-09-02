@@ -194,6 +194,17 @@
                     </div>
                 </div>
 
+                <p v-if="returnStatus.message || returnStatus.canReturn"
+                    :class="['return-message', returnStatus.canReturn ? 'success' : 'error']">
+                    {{ returnStatus.message }}
+                </p>
+
+
+                <button v-if="returnStatus.canReturn" @click="openPopupReturn()" :disabled="!returnStatus.canReturn"
+                    class="action-btn cancel-btn">
+                    TRẢ HÀNG
+                </button>
+
                 <div v-if="showReturnPopup" class="return-overlay">
                     <div class="return-modal">
                         <h3 class="return-title">Chọn sản phẩm/IMEI muốn trả</h3>
@@ -209,6 +220,11 @@
                                     </span>
                                 </div>
                             </label>
+                            <div v-if="imeis.length === 0" class="return-selected-empty">
+                                <p style="text-align: center; color: red;">
+                                    Tất cả sản phẩm đều đã được gửi yêu cầu trả hàng
+                                </p>
+                            </div>
                         </div>
 
                         <div v-if="imeis.some(i => i.selected)" class="return-selected">
@@ -233,6 +249,21 @@
                                                     {{ reason.tenLyDo }}
                                                 </option>
                                             </select>
+                                            <div class="upload-group">
+                                                <label class="upload-label">Ảnh lỗi:</label>
+                                                <input type="file" accept="image/*"
+                                                    @change="e => handleUpload(e, imei, 'image')" />
+                                                <span v-if="imei.urlHinh" class="upload-preview">✅ Đã upload ảnh</span>
+                                            </div>
+
+                                            <!-- Upload video -->
+                                            <div class="upload-group">
+                                                <label class="upload-label">Video lỗi:</label>
+                                                <input type="file" accept="video/*"
+                                                    @change="e => handleUpload(e, imei, 'video')" />
+                                                <span v-if="imei.urlVideo" class="upload-preview">✅ Đã upload
+                                                    video</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -242,7 +273,7 @@
                         <div class="return-actions">
                             <button class="return-btn cancel" @click="showReturnPopup = false">Hủy</button>
                             <button class="return-btn confirm"
-                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId)"
+                                :disabled="!imeis.some(i => i.selected) || imeis.filter(i => i.selected).some(i => !i.reasonId) || imeis.filter(i => i.selected).some(i => !i.urlHinh) || imeis.filter(i => i.selected).some(i => !i.urlVideo)"
                                 @click="confirmReturn">
                                 Xác nhận
                             </button>
@@ -256,6 +287,9 @@
             <div class="right-actions">
                 <button @click="xemYeuCau" class="action-btn print-btn">
                     <Eye class="icon-small" /> XEM YÊU CẦU
+                </button>
+                <button @click="xemLichSu" class="action-btn print-btn">
+                    <History class="icon-small" /> XEM LỊCH SỬ
                 </button>
             </div>
         </div>
@@ -447,6 +481,24 @@
                 </video>
             </div>
         </div>
+        <div v-if="showHistoryModal" class="history-overlay">
+            <div class="history-modal">
+                <h3 class="history-title">Lịch sử hóa đơn #{{ order.maHoaDon }}</h3>
+                <div class="history-list">
+                    <div v-for="history in orderHistory" :key="history.idLichSuHoaDon" class="history-item">
+                        <div class="history-action">{{ history.hanhDong }}</div>
+                        <div class="history-time">{{ formatDate(history.thoiGianThayDoi) }}</div>
+                        <div class="history-description">{{ history.moTa }}</div>
+                    </div>
+                    <div v-if="!orderHistory.length" class="no-history">
+                        Không có lịch sử nào để hiển thị
+                    </div>
+                </div>
+                <div class="history-actions">
+                    <button class="history-btn cancel" @click="showHistoryModal = false">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -455,13 +507,13 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import {
     Clock, User, Phone, Mail, MapPin, Package, CreditCard, ScrollText, Check, XCircle, AlertTriangle,
     CheckCircle, X, Truck, Printer, FileText, Edit, Star, Gem, Crown, CheckSquare, Box, RefreshCcw,
-    Eye
+    Eye, History
 } from 'lucide-vue-next'
 import { hoaDonDetail, changeStatusInvoice, viewRequests, updateShipping } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 import { changeStatusOrder } from '@/Service/Adminservice/GiaoHang/GiaoHangServices'
 import { getAllFalseReasonByCaseReason } from '@/Service/GuestService/FalseReasonServices/FalseReasonServices'
-import { createActionAfterCase, createActionAfterCaseReturn } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
-import { findHdctByImeiDaBan, getOrderHistory } from '@/Service/ClientService/HoaDon/MyOrderClient'
+import { createActionAfterCase, createActionAfterCaseReturn, uploadAnhAndVid } from '@/Service/GuestService/ActionAfterCaseService/ActionAfterCaseServices'
+import { findHdctByImeiDaBan, getOrderHistory, getOrderHistoryGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import { useRoute } from 'vue-router'
 import { id } from 'element-plus/es/locales.mjs'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
@@ -771,7 +823,9 @@ const confirmReturn = async () => {
                 .map(i => ({
                     idHoaDonChiTiet: i.idHoaDonChiTiet,
                     soImei: i.soImei,
-                    idFailReason: i.reasonId
+                    idFailReason: i.reasonId,
+                    urlHinh: i.urlHinh || null,
+                    urlVideo: i.urlVideo || null
                 }))
         }
 
@@ -890,6 +944,7 @@ function closeVideo() {
 
 onMounted(() => {
     viewOrderDetail()
+    fetchOrderHistory()
 })
 
 const showConfirm = ref(false)
@@ -915,6 +970,72 @@ const updateShippingMethod = async (hoaDon) => {
 function handleConfirm() {
     if (confirmCallback) confirmCallback()
     showConfirm.value = false
+}
+
+const showHistoryModal = ref(false);
+const returnStatus = ref({ canReturn: false, message: "" });
+const orderHistory = ref([]);
+
+const xemLichSu = async () => {
+    showHistoryModal.value = true;
+};
+
+const fetchOrderHistory = async () => {
+    try {
+        const id = route.params.id;
+        const response = await getOrderHistoryGuest(id);
+        orderHistory.value = response.data;
+
+        const completeHistory = orderHistory.value.find(h => h.hanhDong === "Hoàn thành");
+
+        if (completeHistory) {
+            const completeDate = new Date(completeHistory.thoiGianThayDoi);
+            completeDate.setHours(0, 0, 0, 0); 
+
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); 
+
+            const diffDays = (now - completeDate) / (1000 * 60 * 60 * 24);
+
+            if (diffDays < 2) { 
+                const remainingDays = 2 - Math.floor(diffDays);
+                returnStatus.value = {
+                    canReturn: true,
+                    message: `Còn ${remainingDays} ngày để trả hàng`
+                };
+            } else {
+                returnStatus.value = {
+                    canReturn: false,
+                    message: "Hết thời gian trả hàng"
+                };
+            }
+        } else {
+            returnStatus.value = { canReturn: false, message: "Chưa hoàn tất đơn" };
+        }
+
+    } catch (error) {
+        console.error("Lỗi khi lấy lịch sử hóa đơn:", error);
+        toast.error("Không thể tải lịch sử hóa đơn");
+    }
+};
+
+const handleUpload = async (event, imei, type) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("idImei", imei.idImei)
+    formData.append("file", file)
+
+    try {
+        const res = await uploadAnhAndVid(formData)
+        const url = res.data.url
+
+        if (type === "image") imei.urlHinh = url
+        else imei.urlVideo = url
+    } catch (err) {
+        console.error("Upload lỗi:", err)
+    }
 }
 </script>
 

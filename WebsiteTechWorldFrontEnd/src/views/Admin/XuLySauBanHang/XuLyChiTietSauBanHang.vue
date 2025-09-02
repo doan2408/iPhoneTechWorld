@@ -212,6 +212,7 @@ import { hoaDonDetailGuest } from '@/Service/ClientService/HoaDon/MyOrderClient'
 import ConfirmModal from '@/views/Popup/ConfirmModal.vue'
 import router from '@/router'
 import { useToast } from 'vue-toastification'
+import { changeStatusPendingAdmin } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices'
 
 const route = useRoute()
 const idHoaDon = route.params.idHoaDon
@@ -425,7 +426,7 @@ const returnToStockDelivery = async (selectedImeis, action) => {
             return
         }
     }
-    const res = await changeStatusPending(selectedImeis,idHoaDon, status)
+    const res = await changeStatusPendingAdmin(selectedImeis,idHoaDon, status)
     orderSanPham()
     orderInformations()
     if (status === 'RETURN_TO_STOCK') {
@@ -445,7 +446,7 @@ const processImei = async (imeiCode, action) => {
 
     const imeiList = [imeiCode];  
 
-    const res = await changeStatusPending(imeiList,idHoaDon,status)
+    const res = await changeStatusPendingAdmin(imeiList,idHoaDon,status)
     orderSanPham()
     orderInformations()
 }

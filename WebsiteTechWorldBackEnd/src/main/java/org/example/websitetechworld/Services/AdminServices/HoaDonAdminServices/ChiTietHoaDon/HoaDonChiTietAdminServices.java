@@ -287,11 +287,10 @@ public class HoaDonChiTietAdminServices {
         ChiTietHoaDon cthdCanXoa = chiTietHoaDonRepository.findById(hdctId).orElseThrow();
         List<ImeiDaBan> imeiDaBanList = cthdCanXoa.getImeiDaBans().stream().toList();
 
-        Integer idSanPhamChiTietDeHoanTra = cthdCanXoa.getIdSanPhamChiTiet().getId(); // Lấy ID của SanPhamChiTiet
+        Integer idSanPhamChiTietDeHoanTra = cthdCanXoa.getIdSanPhamChiTiet().getId();
         int soLuongHoanTra = cthdCanXoa.getSoLuong();
         sanPhamChiTietRepository.tangSoLuongTon(idSanPhamChiTietDeHoanTra, soLuongHoanTra);
 
-        // Lấy danh sách Imei từ soImei trong imeiDaBan
         List<String> soImeis = imeiDaBanList.stream()
                 .map(ImeiDaBan::getSoImei)
                 .toList();

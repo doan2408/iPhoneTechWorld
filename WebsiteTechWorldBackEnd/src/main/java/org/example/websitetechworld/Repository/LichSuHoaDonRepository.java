@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integer> {
@@ -44,4 +45,14 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon,Integ
     Integer countPendingHoaDonByNhanVien(Integer id, TrangThaiThanhToan trangThaiThanhToan);
 
     List<LichSuHoaDon> findByIdHoaDon(HoaDon idHoaDon);
+
+    @Query("""
+        SELECT lshd
+        FROM LichSuHoaDon lshd
+        WHERE lshd.idHoaDon.id = :idHoaDon
+          AND lshd.hanhDong = 'COMPLETE'
+          AND lshd.thoiGianThayDoi <= :twoDaysAgo
+    """)
+    LichSuHoaDon checkDateReturnProduct(@Param("idHoaDon") Integer idHoaDon,
+                                        @Param("twoDaysAgo") LocalDate twoDaysAgo);
 }
