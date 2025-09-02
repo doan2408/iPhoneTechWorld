@@ -230,17 +230,15 @@
               <h3 class="section-title">Thời gian hiệu lực</h3>
               <div class="form-row">
                 <el-form-item label="Thời gian bắt đầu *" class="form-item">
-                  <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian bắt đầu"
-                    :readonly="phieuActive" class="full-width" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
-                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false"
+                  <el-date-picker v-model="formData.ngayBatDau" type="date" placeholder="Chọn thời gian bắt đầu"
+                    :readonly="phieuActive" class="full-width" format="YYYY-MM-DD"
                     :class="{ 'error': errors.ngayBatDau }" @change="handleNgayBatDauChange" />
                   <span v-if="errors.ngayBatDau" class="error-text">{{ errors.ngayBatDau }}</span>
                 </el-form-item>
 
                 <el-form-item label="Thời gian kết thúc *" class="form-item">
-                  <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian kết thúc"
-                    format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
-                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false" class="full-width"
+                  <el-date-picker v-model="formData.ngayKetThuc" type="date" placeholder="Chọn thời gian kết thúc"
+                    format="YYYY-MM-DD" class="full-width"
                     :class="{ 'error': errors.ngayKetThuc }" />
                   <span v-if="errors.ngayKetThuc" class="error-text">{{ errors.ngayKetThuc }}</span>
                 </el-form-item>
@@ -920,7 +918,7 @@ const formatToSQLDateTime = (date) => {
   const year = d.getFullYear();
   const month = pad(d.getMonth() + 1);
   const day = pad(d.getDate());
-  const hours = pad(d.getHours());
+  const hours = pad(0);
   const minutes = pad(d.getMinutes());
   const seconds = pad(d.getSeconds());
 

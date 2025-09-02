@@ -1,38 +1,29 @@
 <template>
   <div class="container py-4">
     <div class="row">
-      <!-- Video + Start Live -->
+      <!-- Video + Start/Stop -->
       <div class="col-lg-8 mb-4">
         <div class="bg-dark rounded-4 d-flex align-items-center justify-content-center" style="height: 400px;">
           <video ref="localVideoRef" autoplay playsinline muted style="width: 100%; height: 100%;"></video>
         </div>
         <div class="text-center mt-3">
-          <button v-if="!isStreaming" class="btn btn-danger px-4 py-2 fw-bold" @click="startStreaming">
-            🚀 Bắt đầu Live
-          </button>
-          <button v-else class="btn btn-secondary px-4 py-2 fw-bold" @click="stopStreaming">
-            ⏹ Dừng Live
-          </button>
+          <button v-if="!isStreaming" class="btn btn-danger px-4 py-2 fw-bold" @click="startStreaming">🚀 Bắt đầu Live</button>
+          <button v-else class="btn btn-secondary px-4 py-2 fw-bold" @click="stopStreaming">⏹ Dừng Live</button>
         </div>
       </div>
 
-      <!-- Danh sách sản phẩm -->
-      <div class="col-lg-4 mb-4">
+      <!-- Sản phẩm -->
+      <div class="col-lg-4 mb-4" v-if="isStreaming">
         <div class="card shadow-sm">
-          <div class="card-header bg-white fw-bold">
-            📦 Sản phẩm đang bán
-          </div>
+          <div class="card-header bg-white fw-bold">📦 Sản phẩm đang bán</div>
           <div class="card-body">
             <input type="text" class="form-control mb-3" v-model="searchQuery" placeholder="🔍 Tìm sản phẩm..." />
             <select class="form-select mb-3" v-model="state.selectedProduct" @change="sendSelectedProduct">
-              <option disabled value="">Chọn sản phẩm để giới thiệu</option>
-              <option v-for="p in state.products" :key="p.id" :value="p.id">
-                {{ p.maSanPham }} - {{ p.tenSanPham }}
-              </option>
+              <option disabled value="">Chọn sản phẩm</option>
+              <option v-for="p in listProduct" :key="p.id" :value="p.id">{{ p.maSanPham }} - {{ p.tenSanPham }}</option>
             </select>
             <div class="list-group" style="max-height: 250px; overflow-y: auto;">
-              <div v-for="(p, index) in state.products" :key="p.id"
-                class="list-group-item d-flex justify-content-between align-items-center">
+              <div v-for="(p,index) in listProduct" :key="p.id" class="list-group-item d-flex justify-content-between">
                 <span>{{ index + 1 }}</span>
                 <span>{{ p.maSanPham }}</span>
                 <span>{{ p.tenSanPham }}</span>
@@ -44,226 +35,174 @@
       </div>
     </div>
 
-    <!-- Chat box -->
-    <div class="card shadow-sm">
-      <div class="card-header bg-white fw-bold">
-        💬 Chat với khán giả
-      </div>
-      <div class="card-body" style="max-height: 250px; overflow-y: auto; background-color: #f9fafb;" ref="chatContainer">
-        <div v-for="(msg, i) in state.chatMessages" :key="i" class="mb-2">
-          <div :class="msg.user === 'Streamer' ? 'text-end' : 'text-start'">
+    <!-- Chat -->
+    <div class="card shadow-sm" v-if="isStreaming">
+      <div class="card-header bg-white fw-bold">💬 Chat với khán giả</div>
+      <div class="card-body" style="max-height: 250px; overflow-y:auto;" ref="chatContainer">
+        <div v-for="(msg,i) in state.chatMessages" :key="i" class="mb-2">
+          <div :class="msg.user==='Streamer' && msg.idNguoiGui === streamerId ? 'text-end':'text-start'">
             <div class="p-2 rounded shadow-sm d-inline-block"
-              :class="msg.user === 'Streamer' ? 'msg-streamer' : 'msg-viewer'" style="margin: 5px 0;">
-              <strong>{{ msg.user }}</strong><br />
+                 :class="msg.user==='Streamer' && msg.idNguoiGui === streamerId ? 'bg-success text-white':'bg-light text-dark'" style="margin:5px 0;">
+              <strong>{{ msg.tenNguoiGui }}</strong><br/>
               {{ msg.content }}
             </div>
           </div>
         </div>
       </div>
       <div class="card-footer d-flex">
-        <input type="text" class="form-control me-2" v-model="state.chatInput" placeholder="Nhập phản hồi..."
-          @keyup.enter="sendReply" />
-        <button class="btn btn-success" @click="sendReply">Gửi</button>
+        <input type="text" class="form-control me-2" v-model="state.chatInput" placeholder="Nhập tin nhắn..." @keyup.enter="sendChat" />
+        <button class="btn btn-success" @click="sendChat">Gửi</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { ref, reactive, onMounted, nextTick, onUnmounted, watch } from "vue";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import { loadSanPham } from "@/Service/Adminservice/Products/ProductAdminService";
-import { useToast } from "vue-toastification";
+import axios from "axios";
 
-const toast = useToast();
+const user = ref(null);
+
 const localVideoRef = ref(null);
-const searchQuery = ref('');
-const isStreaming = ref(false);
 const chatContainer = ref(null);
+const searchQuery = ref('');
+const listProduct = ref([]);
+const isStreaming = ref(false);
 
 const state = reactive({
   selectedProduct: null,
-  products: [],
   chatMessages: [],
-  chatInput: "",
-  isLive: isStreaming,
+  chatInput: ""
 });
 
 let stompClient = null;
 let localStream = null;
-const streamId = "123";
-const streamerId = "streamer_" + Date.now(); // Tạo ID động cho streamer
+let streamId = null;
+let streamerId = null;
+let streamerName = null;
 const peerConnections = new Map();
 const pendingCandidates = {};
 
-const connectStreamerWebSocket = () => {
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("http://localhost:8080/live-san-pham", {
+      params: { search: searchQuery.value, page: 0, size: 10 },
+    });
+    listProduct.value = res.data.content;
+  } catch (err) {
+    console.error("Error fetching products:", err);
+  }
+};
+
+const fetchStreamId = async () => {
+  const res = await axios.post("http://localhost:8080/live-stream/create");
+  streamId = res.data.streamId;
+};
+
+const connectWebSocket = () => {
   const socket = new SockJS("http://localhost:8080/ws");
   stompClient = Stomp.over(socket);
+
   stompClient.connect({}, () => {
-    // Xử lý tín hiệu WebRTC
+    stompClient.subscribe(`/topic/chat/${streamId}`, msg => {
+      const incoming = JSON.parse(msg.body);
+      if (!state.chatMessages.some(m => m.id === incoming.id)) state.chatMessages.push(incoming);
+      nextTick(() => chatContainer.value && (chatContainer.value.scrollTop = chatContainer.value.scrollHeight));
+    });
+
     stompClient.subscribe(`/topic/signal/${streamId}`, async (msg) => {
       const signal = JSON.parse(msg.body);
-      const viewerId = signal.viewerId;
 
-      if (!viewerId) return; // Bỏ qua nếu không có viewerId
+      if (signal.type === "offer") {
+        if (peerConnections.has(signal.viewerId)) {
+          peerConnections.get(signal.viewerId).close();
+          peerConnections.delete(signal.viewerId);
+        }
 
-      if (signal.type === "answer") {
-        const pc = peerConnections.get(viewerId);
-        if (pc) {
-          await pc.setRemoteDescription({ type: "answer", sdp: signal.sdp });
-          // Xử lý các ICE candidate đang chờ
-          if (pendingCandidates[viewerId]) {
-            for (const candidate of pendingCandidates[viewerId]) {
-              await pc.addIceCandidate(candidate).catch(err => console.error("Thêm ICE thất bại:", err));
-            }
-            delete pendingCandidates[viewerId];
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+        pc.onicecandidate = (e) => {
+          if (e.candidate) {
+            stompClient.send(`/app/signal/${streamId}`, {}, JSON.stringify({
+              type: "candidate",
+              candidate: e.candidate,
+              viewerId: signal.viewerId
+            }));
           }
-        }
-      } else if (signal.type === "candidate") {
-        const pc = peerConnections.get(viewerId);
-        if (pc && pc.remoteDescription) {
-          await pc.addIceCandidate(signal.candidate).catch(err => console.error("Thêm ICE thất bại:", err));
+        };
+
+        await pc.setRemoteDescription({ type: "offer", sdp: signal.sdp });
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        stompClient.send(`/app/signal/${streamId}`, {}, JSON.stringify({
+          type: "answer",
+          sdp: answer.sdp,
+          viewerId: signal.viewerId
+        }));
+
+        peerConnections.set(signal.viewerId, pc);
+      }
+
+      else if (signal.type === "candidate" && peerConnections.has(signal.viewerId)) {
+        const pc = peerConnections.get(signal.viewerId);
+        if (pc.remoteDescription) {
+          try { await pc.addIceCandidate(signal.candidate); } catch (e) { console.error(e); }
         } else {
-          if (!pendingCandidates[viewerId]) pendingCandidates[viewerId] = [];
-          pendingCandidates[viewerId].push(signal.candidate);
+          (pendingCandidates[signal.viewerId] ||= []).push(signal.candidate);
         }
       }
     });
-
-    // Xử lý khi người xem mới tham gia
-    stompClient.subscribe(`/topic/join/${streamId}`, async (msg) => {
-      const { viewerId } = JSON.parse(msg.body);
-      if (!viewerId || !localStream) return;
-
-      const pc = new RTCPeerConnection();
-      peerConnections.set(viewerId, pc);
-      localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          stompClient.send(`/app/signal/${streamId}`, {}, JSON.stringify({
-            type: "candidate",
-            candidate: event.candidate,
-            viewerId,
-            streamerId,
-          }));
-        }
-      };
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      stompClient.send(`/app/signal/${streamId}`, {}, JSON.stringify({
-        type: "offer",
-        sdp: offer.sdp,
-        viewerId,
-        streamerId,
-      }));
-    });
-
-    // Xử lý tin nhắn chat
-    stompClient.subscribe(`/topic/chat/${streamId}`, (msg) => {
-      const incoming = JSON.parse(msg.body);
-      if (!state.chatMessages.some(m => m.id === incoming.id)) {
-        state.chatMessages.push(incoming);
-        if (state.chatMessages.length > 100) { // Giới hạn số lượng tin nhắn
-          state.chatMessages.shift();
-        }
-      }
-    });
-  }, (err) => {
-    console.error("WebSocket connection failed:", err);
-    toast.error("Không thể kết nối WebSocket");
   });
 };
 
 const startStreaming = async () => {
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    localVideoRef.value.srcObject = localStream;
-    isStreaming.value = true;
-    state.isLive = true;
-
-    // Thông báo bắt đầu stream
-    if (stompClient && stompClient.connected) {
-      stompClient.send(`/app/stream/start/${streamId}`, {}, JSON.stringify({ streamerId }));
-    }
-  } catch (err) {
-    console.error("Lỗi streamer:", err);
-    toast.error("Không thể mở camera/micro");
-  }
+  await fetchStreamId();
+  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localVideoRef.value.srcObject = localStream;
+  await connectWebSocket();
+  isStreaming.value = true;
 };
 
-const stopStreaming = () => {
-  try {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
-    }
-    if (localVideoRef.value) {
-      localVideoRef.value.srcObject = null;
-    }
-    peerConnections.forEach(pc => pc.close());
-    peerConnections.clear();
-    pendingCandidates.value = {};
-
-    if (stompClient && stompClient.connected) {
-      stompClient.send(`/app/stream/stop/${streamId}`, {}, JSON.stringify({ type: "end", streamerId }));
-    }
-
-    isStreaming.value = false;
-    state.isLive = false;
-  } catch (err) {
-    console.error("Lỗi khi dừng live:", err);
-    toast.error("Không thể dừng live");
-  }
-};
-
-const sendReply = () => {
-  if (!state.chatInput.trim() || !stompClient || !stompClient.connected) return;
-  const message = {
-    id: Date.now(),
-    user: "Streamer",
-    content: state.chatInput
-  };
-  state.chatMessages.push(message);
-  stompClient.send(`/app/chat/${streamId}`, {}, JSON.stringify(message));
-  state.chatInput = "";
+const stopStreaming = async () => {
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  peerConnections.forEach((pc) => pc.close());
+  peerConnections.clear();
+  await axios.post("http://localhost:8080/live-stream/stop");
+  state.selectedProduct = null;
+  state.chatMessages = [];
+  state.chatInput = '';
+  isStreaming.value = false;
 };
 
 const sendSelectedProduct = () => {
-  if (!state.selectedProduct || !stompClient || !stompClient.connected) return;
-  const product = state.products.find(p => p.id === state.selectedProduct);
-  if (product) {
-    stompClient.send(`/app/product/${streamId}`, {}, JSON.stringify({
-      type: "product",
-      product: { id: product.id, maSanPham: product.maSanPham, tenSanPham: product.tenSanPham, giaBan: product.giaBan }
-    }));
-  }
+  const product = listProduct.value.find(p => p.id === state.selectedProduct);
+  if (!product || !stompClient) return;
+  stompClient.send(`/app/product/${streamId}`, {}, JSON.stringify({ type: 'product', product }));
 };
 
-const loadProducts = async () => {
-  try {
-    const response = await loadSanPham(searchQuery.value, 0, 7);
-    state.products = response.data.content;
-  } catch (error) {
-    console.error("Lỗi khi load danh sách sản phẩm:", error);
-    toast.error("Lỗi khi load danh sách sản phẩm");
-  }
+const sendChat = () => {
+  if (!state.chatInput.trim() || !stompClient) return;
+  const message = { id: Date.now(), user: 'Streamer', idNguoiGui: streamerId, tenNguoiGui: streamerName, content: state.chatInput };
+  state.chatMessages.push(message);
+  stompClient.send(`/app/chat/${streamId}`, {}, JSON.stringify(message));
+  state.chatInput = '';
 };
 
-watch(searchQuery, () => {
-  loadProducts();
-});
+const checkUser = () => {
+  user.value = JSON.parse(localStorage.getItem("user")) || null;
+  streamerId = user.value?.id || Date.now();
+  streamerName = user.value?.fullName || 'Người bán';
+};
 
-watch(() => state.chatMessages.length, async () => {
-  await nextTick();
-  if (chatContainer.value) {
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-  }
-});
+watch(searchQuery, fetchProducts);
 
 onMounted(() => {
-  connectStreamerWebSocket();
-  loadProducts();
+  checkUser();
+  fetchProducts();
 });
 
 onUnmounted(() => {
@@ -271,14 +210,3 @@ onUnmounted(() => {
   if (stompClient) stompClient.disconnect();
 });
 </script>
-
-<style scoped>
-.msg-streamer {
-  background-color: #28a745 !important;
-  color: #fff;
-}
-.msg-viewer {
-  background-color: #fff;
-  color: #000;
-}
-</style>

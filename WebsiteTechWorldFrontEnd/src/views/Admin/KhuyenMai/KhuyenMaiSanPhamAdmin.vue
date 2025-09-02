@@ -192,15 +192,13 @@
                             <h3 class="section-title">Thời gian hiệu lực</h3>
                             <div class="form-row">
                                 <el-form-item label="Thời gian bắt đầu" prop="ngayBatDau" class="form-item">
-                                    <el-date-picker v-model="form.ngayBatDau" type="datetime"
-                                        placeholder="Chọn thời gian bắt đầu" format="YYYY-MM-DD HH:mm"
-                                        value-format="YYYY-MM-DD HH:mm" :default-time="[new Date(2000, 1, 1, 0, 0, 0)]"
+                                    <el-date-picker v-model="form.ngayBatDau" type="date"
+                                        placeholder="Chọn thời gian bắt đầu" format="YYYY-MM-DD"
                                         :show-seconds="false" class="full-width" @change="handleNgayBatDauChange" />
                                 </el-form-item>
                                 <el-form-item label="Thời gian kết thúc" prop="ngayKetThuc" class="form-item">
-                                    <el-date-picker v-model="form.ngayKetThuc" type="datetime"
-                                        placeholder="Chọn thời gian kết thúc" format="YYYY-MM-DD HH:mm"
-                                        value-format="YYYY-MM-DD HH:mm" :default-time="[new Date(2000, 1, 1, 0, 0, 0)]"
+                                    <el-date-picker v-model="form.ngayKetThuc" type="date"
+                                        placeholder="Chọn thời gian kết thúc" format="YYYY-MM-DD"
                                         :show-seconds="false" class="full-width" />
                                 </el-form-item>
                             </div>
@@ -963,7 +961,7 @@ function formatToSQLDateTime(date) {
     const year = d.getFullYear();
     const month = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
-    const hours = pad(d.getHours());
+    const hours = pad(0);
     const minutes = pad(d.getMinutes());
     const seconds = pad(d.getSeconds());
 

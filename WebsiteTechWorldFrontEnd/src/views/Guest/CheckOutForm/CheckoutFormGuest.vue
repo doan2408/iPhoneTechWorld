@@ -616,7 +616,7 @@ const handleBuy = async () => {
             toast.dismiss(toastId); // Hủy toast loading
             toast.success('Đặt hàng thành công');
             product.value.forEach(p => {
-                const success = CartService.xoaSanPhamKhoiGio(p.idSanPhamChiTiet)
+                const success = CartService.xoaSanPhamKhoiGio(p.idGioHangChiTiet)
             });
             router.push({ name: 'successClient' });
         } else {
