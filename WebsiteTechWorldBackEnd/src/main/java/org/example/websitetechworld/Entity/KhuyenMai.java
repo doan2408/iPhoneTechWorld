@@ -28,7 +28,8 @@ public class KhuyenMai {
     @Column(name = "ten_khuyen_mai", length = 255)
     private String tenKhuyenMai;
 
-    @Column(name = "mo_ta", columnDefinition = "TEXT")
+    @Nationalized
+    @Column(name = "mo_ta", length = 255)
     private String moTa;
 
     @Column(name = "phan_tram_giam")

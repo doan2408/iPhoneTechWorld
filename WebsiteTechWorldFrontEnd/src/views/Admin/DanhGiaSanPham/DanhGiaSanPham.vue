@@ -199,8 +199,8 @@
                     <el-col v-for="(img, index) in replyForm.anhUrls" :key="index" :span="8" :xs="12">
                       <el-image
                         :src="img"
-                        class="w-24 h-24 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm"
-                        fit="cover"
+                        class="w-24 h-24 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm bg-white"
+                        fit="contain"
                         :preview-src-list="replyForm.anhUrls"
                         :initial-index="index"
                       />

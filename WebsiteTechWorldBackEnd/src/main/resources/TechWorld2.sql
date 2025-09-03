@@ -373,7 +373,7 @@ CREATE TABLE khuyen_mai (
                             id INT IDENTITY(1,1) PRIMARY KEY,
                             ma_khuyen_mai NVARCHAR(50),
                             ten_khuyen_mai NVARCHAR(255),
-                            mo_ta TEXT,
+                            mo_ta NVARCHAR(255),
                             phan_tram_giam INT,
                             ngay_bat_dau DATETIME,
                             ngay_ket_thuc DATETIME,
@@ -815,7 +815,6 @@ VALUES
     (N'Apple A9', N'Apple', N'2 nhân', N'1.8 GHz', N'7nm', N'4MB', N'15W', '2016-09-01');
 
 -- Table loai
-
 INSERT INTO loai (ten_loai)
 VALUES
     (N'Thường'),
@@ -988,6 +987,11 @@ VALUES
 INSERT INTO nha_cung_cap_sp(id_nha_cung_cap, id_san_pham) 
 VALUES
     (1,1), (1,2), (1,3), (2,4), (1,5), (1,6);
+	
+-- Insert khuyen_mai
+INSERT INTO khuyen_mai (ma_khuyen_mai, ten_khuyen_mai, mo_ta, phan_tram_giam, ngay_bat_dau, ngay_ket_thuc, doi_tuong_ap_dung, muc_do_uu_tien, ngay_tao, trang_thai)
+VALUES
+	(N'8A2D7F', N'Khuyến mãi 10%', N'Khuyến mãi 10%', 10, '2025-09-03', '2025-09-06', 'ALL', 3, '2025-09-03', 'ACTIVE')
 
 -- Insert san_pham_chi_tiet (reduced variants per product)
 INSERT INTO san_pham_chi_tiet (id_san_pham, id_mau, id_rom, so_luong, gia_ban)
@@ -1031,6 +1035,13 @@ VALUES
     (6, 9, 1, 12, 10000000.00), -- Đỏ Rực Rỡ, 128GB
     (6, 1, 2, 10, 12000000.00), -- Đen Phantôm, 256GB
     (6, 9, 2, 8, 12000000.00);  -- Đỏ Rực Rỡ, 256GB
+
+-- Insert khuyen_mai_san_pham_chi_tiet
+INSERT INTO khuyen_mai_san_pham_chi_tiet (id_khuyen_mai, id_san_pham_chi_tiet)
+VALUES (1, 1),
+	   (1, 2),
+	   (1, 3),
+	   (1, 4);
 
 -- Insert hinh_anh (one image per product variant)
 INSERT INTO hinh_anh (id_san_pham_chi_tiet, url, image_public_id)
@@ -1101,6 +1112,10 @@ VALUES
     (N'Sản phẩm không đúng mô tả', 'RETURN'),
     (N'Khách đổi ý', 'CANCELLED');
 
+-- Insert loai_bao_hanh
+INSERT INTO loai_bao_hanh (ten_loai_bao_hanh, thoi_gian_thang, id_model_san_pham, mo_ta, trang_thai)
+VALUES
+	(N'bảo hành cháy nổ', 5, 1, N'bảo hành cho sản phẩm cháy nổ, lỗi từ nhà sản xuất', 1);
 
 -- Script IMEI hoàn chỉnh
 WITH SPCT_Data AS (
