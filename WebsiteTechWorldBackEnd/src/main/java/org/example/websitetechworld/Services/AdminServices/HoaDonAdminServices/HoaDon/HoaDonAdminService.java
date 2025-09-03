@@ -149,7 +149,7 @@ public class HoaDonAdminService {
     }
 
     public List<HoaDonAdminResponse> exportExcel(){
-        List<HoaDon> hoaDonList = hoaDonRepository.findByIsDeleteFalseOrIsDeleteIsNull();
+        List<HoaDon> hoaDonList = hoaDonRepository.findAllInCurrentMonth();
         return hoaDonList.stream().map(HoaDonAdminResponse::convertDto).toList();
     }
 
@@ -504,7 +504,7 @@ public class HoaDonAdminService {
         return "VD" + invoiceId + "-" + suffix;
     }
     public void exportExcelToResponse(HttpServletResponse response) throws IOException {
-        List<HoaDonAdminResponse> hoaDonAdminResponses = exportExcel(); // giả sử đây là phương thức lấy dữ liệu
+        List<HoaDonAdminResponse> hoaDonAdminResponses = exportExcel();
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Danh sách hóa đơn");

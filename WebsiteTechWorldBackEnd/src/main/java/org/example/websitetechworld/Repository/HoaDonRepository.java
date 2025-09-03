@@ -97,6 +97,12 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     List<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull();
 
+    @Query("SELECT h FROM HoaDon h " +
+            "WHERE (h.isDelete = false OR h.isDelete IS NULL) " +
+            "AND FUNCTION('MONTH', h.ngayTaoHoaDon) = FUNCTION('MONTH', CURRENT_DATE) " +
+            "AND FUNCTION('YEAR', h.ngayTaoHoaDon) = FUNCTION('YEAR', CURRENT_DATE)")
+    List<HoaDon> findAllInCurrentMonth();
+
     List<HoaDon> findByMaHoaDon(String maHoaDon);
 
     @Query(value = """
