@@ -292,6 +292,7 @@ public class HoaDonAdminController {
             @RequestBody CthdGiamSoLuong request) {
         try {
             hoaDonChiTietAdminServices.removeImeisAndUpdateSoLuong(hoaDonId, hdctId, request);
+            hoaDonAdminService.updateTongTien(hoaDonId);
             return ResponseEntity.ok("IMEI đã được loại bỏ và chi tiết hóa đơn cập nhật thành công.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

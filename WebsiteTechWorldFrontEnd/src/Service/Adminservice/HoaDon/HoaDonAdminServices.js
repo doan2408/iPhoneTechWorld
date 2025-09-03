@@ -271,7 +271,7 @@ export const changeStatusPendingAdmin = (soImeis, idHoaDon, status) => {
         soImeis: soImeis,
         idHoaDon: idHoaDon,
         status: status
-    };
+};
     return api.post(url, request)
 }
 
