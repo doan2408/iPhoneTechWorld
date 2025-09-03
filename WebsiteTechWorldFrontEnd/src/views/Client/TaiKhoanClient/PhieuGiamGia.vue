@@ -263,6 +263,13 @@ onMounted(() => {
             </template>
           </el-table-column>
 
+          <el-table-column prop="daDung" label="Sử dụng">
+            <template #default="{ row }">
+              <span v-if="row.daDung" style="color: red; font-weight: 600;">Đã dùng</span>
+              <span v-else style="color: green; font-weight: 600;">Chưa dùng</span>
+            </template>
+          </el-table-column>
+
           <el-table-column label="Trạng thái voucher">
             <template #default="scope">
               {{ trangThaiMap[scope.row.trangThaiPhieuGiamGia] || 'Không xác định' }}
