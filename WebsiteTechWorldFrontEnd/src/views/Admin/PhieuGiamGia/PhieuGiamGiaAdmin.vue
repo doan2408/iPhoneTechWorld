@@ -155,7 +155,8 @@
               </el-tooltip>
               <el-tooltip content="Xóa" placement="top">
                 <el-button size="small" type="danger" :icon="Delete" circle
-                  @click="handleDeletePhieuGiamGia(scope.row.id)" class="action-btn delete-btn" />
+                  @click="openConfirm('Bạn có chắc muốn xóa phiếu giảm giá này?', () => handleDeletePhieuGiamGia(scope.row.id))"
+                  class="action-btn delete-btn" />
               </el-tooltip>
             </div>
           </template>
@@ -230,18 +231,15 @@
               <h3 class="section-title">Thời gian hiệu lực</h3>
               <div class="form-row">
                 <el-form-item label="Thời gian bắt đầu *" class="form-item">
-                  <el-date-picker v-model="formData.ngayBatDau" type="datetime" placeholder="Chọn thời gian bắt đầu"
-                    :readonly="phieuActive" class="full-width" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
-                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false"
+                  <el-date-picker v-model="formData.ngayBatDau" type="date" placeholder="Chọn thời gian bắt đầu"
+                    :readonly="phieuActive" class="full-width" format="YYYY-MM-DD"
                     :class="{ 'error': errors.ngayBatDau }" @change="handleNgayBatDauChange" />
                   <span v-if="errors.ngayBatDau" class="error-text">{{ errors.ngayBatDau }}</span>
                 </el-form-item>
 
                 <el-form-item label="Thời gian kết thúc *" class="form-item">
-                  <el-date-picker v-model="formData.ngayKetThuc" type="datetime" placeholder="Chọn thời gian kết thúc"
-                    format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm"
-                    :default-time="[new Date(2000, 1, 1, 0, 0, 0)]" :show-seconds="false" class="full-width"
-                    :class="{ 'error': errors.ngayKetThuc }" />
+                  <el-date-picker v-model="formData.ngayKetThuc" type="date" placeholder="Chọn thời gian kết thúc"
+                    format="YYYY-MM-DD" class="full-width" :class="{ 'error': errors.ngayKetThuc }" />
                   <span v-if="errors.ngayKetThuc" class="error-text">{{ errors.ngayKetThuc }}</span>
                 </el-form-item>
               </div>
@@ -297,7 +295,9 @@
           <el-button @click="phieuGiamGiaDialogVisible = false" size="large" class="cancel-btn">
             Hủy
           </el-button>
-          <el-button type="primary" @click="savePhieuGiamGia" size="large" class="save-btn" :loading="isLoading">
+          <el-button type="primary"
+            @click="openConfirm(`Bạn có chắc muốn ${formData.id ? 'cập nhật' : 'tạo mới'} phiếu giảm giá này?`, () => savePhieuGiamGia())"
+            size="large" class="save-btn" :loading="isLoading">
             {{ formData.id ? 'Cập nhật' : 'Tạo mới' }}
           </el-button>
         </div>
@@ -379,15 +379,17 @@
       <template #footer>
         <div class="dialog-footer">
           <div class="left">
-            <el-button type="primary" @click="giftPhieuGiamGia('BIRTHDAY')" size="large" class="gift-btn"
-              :loading="isLoading">
+            <el-button type="primary"
+              @click="openConfirm('Bạn có chắc muốn tặng phiếu giảm giá này mừng sinh nhật khách hàng?', () => giftPhieuGiamGia('BIRTHDAY'))"
+              size="large" class="gift-btn" :loading="isLoading">
               <el-icon class="btn-icon">
                 <Gift />
               </el-icon>
               Tặng sinh nhật
             </el-button>
-            <el-button type="primary" @click="giftPhieuGiamGia('NEW_CUSTOMER')" size="large" class="gift-btn"
-              :loading="isLoading">
+            <el-button type="primary"
+              @click="openConfirm('Bạn có chắc muốn tặng phiếu giảm giá này mừng khách hàng mới?', () => giftPhieuGiamGia('NEW_CUSTOMER'))"
+              size="large" class="gift-btn" :loading="isLoading">
               <el-icon class="btn-icon">
                 <Gift />
               </el-icon>
@@ -402,6 +404,7 @@
         </div>
       </template>
     </el-dialog>
+    <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm" @cancel="showConfirm = false" />
   </div>
 </template>
 
@@ -415,8 +418,12 @@ import { Gift } from "lucide-vue-next";
 import { useToast } from "vue-toastification";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
+import ConfirmModal from "@/views/Popup/ConfirmModal.vue";
 
 const toast = useToast()
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
 
 // Reactive data
 const isLoading = ref(false);
@@ -640,20 +647,6 @@ const openDialog = () => {
 };
 
 const savePhieuGiamGia = async () => {
-  const confirmSave = await Swal.fire({
-    title: formData.id ? "Xác nhận cập nhật" : "Xác nhận tạo mới",
-    text: formData.id ? "Bạn có chắc muốn cập nhật phiếu giảm giá này?" : "Bạn có chắc muốn tạo phiếu giảm giá này?",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: formData.id ? "Cập nhật" : "Tạo mới",
-    cancelButtonText: "Hủy",
-  });
-
-  if (!confirmSave.isConfirmed) {
-    toast.info(formData.id ? "Đã hủy cập nhật" : "Đã hủy tạo mới");
-    return;
-  }
-
   if (!validateForm()) {
     toast.error("Vui lòng kiểm tra các lỗi trong form");
     return;
@@ -691,20 +684,6 @@ const savePhieuGiamGia = async () => {
 };
 
 const giftPhieuGiamGia = async (type) => {
-  const confirmGift = await Swal.fire({
-    title: `Xác nhận tặng phiếu giảm giá`,
-    text: `Bạn có chắc muốn tặng phiếu giảm giá này mừng ${type === 'BIRTHDAY' ? 'sinh nhật khách hàng' : 'khách hàng mới'}?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Tặng",
-    cancelButtonText: "Hủy",
-  });
-
-  if (!confirmGift.isConfirmed) {
-    toast.info("Đã hủy tặng phiếu giảm giá");
-    return;
-  }
-
   try {
     isLoading.value = true;
     if (!detailData.id) {
@@ -739,18 +718,6 @@ const giftPhieuGiamGia = async (type) => {
 
 const handleDeletePhieuGiamGia = async (id) => {
   try {
-    const confirmDelete = await Swal.fire({
-      title: "Xác nhận xóa giảm giá",
-      text: "Bạn có chắc muốn xóa phiếu giảm giá này?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
-    });
-    if (!confirmDelete.isConfirmed) {
-      toast.info("Đã hủy xóa");
-      return;
-    }
     isLoading.value = true;
     const response = await deletePhieuGiamGia(id);
     if (response.code === 1) {
@@ -920,7 +887,7 @@ const formatToSQLDateTime = (date) => {
   const year = d.getFullYear();
   const month = pad(d.getMonth() + 1);
   const day = pad(d.getDate());
-  const hours = pad(d.getHours());
+  const hours = pad(0);
   const minutes = pad(d.getMinutes());
   const seconds = pad(d.getSeconds());
 
@@ -953,6 +920,19 @@ const getNextUpdateDelay = async () => {
     return 60_000;
   }
 };
+
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+  confirmMessage.value = message
+  confirmCallback = callback
+  showConfirm.value = true
+}
+
+function handleConfirm() {
+  if (confirmCallback) confirmCallback()
+  showConfirm.value = false
+}
 
 // Watchers
 watch([search, trangThaiFilter, ngayBatDauFilter, ngayKetThucFilter], () => {

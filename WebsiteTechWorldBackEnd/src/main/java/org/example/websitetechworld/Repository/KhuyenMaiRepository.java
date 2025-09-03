@@ -19,7 +19,8 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
             "(:search IS NULL OR k.maKhuyenMai LIKE %:search% OR k.tenKhuyenMai LIKE %:search%) AND " +
             "(:trangThai IS NULL OR k.trangThai = :trangThai) AND " +
             "(:ngayBatDau IS NULL OR k.ngayBatDau >= :ngayBatDau) AND " +
-            "(:ngayKetThuc IS NULL OR k.ngayKetThuc <= :ngayKetThuc)")
+            "(:ngayKetThuc IS NULL OR k.ngayKetThuc <= :ngayKetThuc)" +
+            "ORDER BY k.id DESC")
     Page<KhuyenMai> findAll(
             @Param("search") String search,
             @Param("trangThai") TrangThaiKhuyenMai trangThai,
