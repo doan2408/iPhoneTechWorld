@@ -244,7 +244,7 @@
             <el-table-column label="Ảnh" width="100">
               <template #default="{ row }">
                 <el-image v-for="(hinh, index) in row.hinhAnhs.slice(0, 2)" :key="hinh.imagePublicId" :src="hinh.url"
-                  :preview-src-list="[hinh.url]" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
+                  :preview-src-list="row.hinhAnhs.map(h => h.url)" style="width: 30px; height: 30px; margin-right: 3px" fit="cover" />
                 <span v-if="row.hinhAnhs.length > 2">+{{ row.hinhAnhs.length - 2 }} ảnh</span>
                 <span v-if="!row.hinhAnhs.length">Chưa có ảnh</span>
               </template>
@@ -471,6 +471,7 @@ export default {
         maMau: savedMauSac.maMau,
       });
       selectedMaus.value.push(savedMauSac.idMau);
+      errors.selectedMaus = ""
     };
 
     const handleDungLuongRomSaved = (savedDungLuong) => {
@@ -479,6 +480,7 @@ export default {
         dungLuong: savedDungLuong.dungLuong,
       });
       selectedRoms.value.push(savedDungLuong.idRom);
+      errors.selectedRoms = ""
     };
 
     // Thêm trạng thái cho thông báo tùy chỉnh
@@ -1623,7 +1625,7 @@ export default {
             selectedChiTiet.value = errorIndex;
           }
           showNotification(
-            `Lỗi xác thực: ${errorMessages.join("; ")}`,
+            `${errorMessages.join("; ")}`,
             "error",
             5000
           );
