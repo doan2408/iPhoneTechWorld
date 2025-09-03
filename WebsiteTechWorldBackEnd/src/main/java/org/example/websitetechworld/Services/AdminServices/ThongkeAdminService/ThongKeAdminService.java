@@ -229,19 +229,25 @@ public class ThongKeAdminService {
         int rowNum = 1;
         for (Map<String, Object> item : doanhThuList) {
             Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(item.get("thang").toString());
-            row.createCell(1).setCellValue(Double.parseDouble(item.get("doanh_thu").toString()));
+
+            Object thang = item.get("thang");
+            Object doanhThu = item.get("tong_doanh_thu");
+
+            row.createCell(0).setCellValue(thang != null ? thang.toString() : "");
+            row.createCell(1).setCellValue(doanhThu != null ? Double.parseDouble(doanhThu.toString()) : 0);
         }
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=doanh-thu-theo-thang.xlsx");
+        response.setHeader("Content-Disposition", "attachment; filename=\"doanh-thu-theo-thang.xlsx\"");
 
-        ServletOutputStream out = response.getOutputStream();
-        workbook.write(out);
-        out.flush();
-        workbook.close();
+        try (ServletOutputStream out = response.getOutputStream()) {
+            workbook.write(out);
+            workbook.close(); // Đóng workbook sau khi ghi xong
+        }
 
     }
+
+
     // Xuất khách hàng trung thành
     public void exportKhachHangTrungThanhExcel(HttpServletResponse response) throws IOException {
         List<Map<String, Object>> khachHangList = thongKeRepository.khachHangTrungThanh();
@@ -253,28 +259,30 @@ public class ThongKeAdminService {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("Tên khách hàng");
         headerRow.createCell(1).setCellValue("Số đơn hàng");
-        headerRow.createCell(2).setCellValue("Tổng doanh thu");
+        headerRow.createCell(2).setCellValue("Tổng doanh thu (VNĐ)");
 
         int rowNum = 1;
         for (Map<String, Object> item : khachHangList) {
             Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(item.get("ten_khach_hang").toString());
-            row.createCell(1).setCellValue(Integer.parseInt(item.get("so_don_hang").toString()));
-            row.createCell(2).setCellValue(Double.parseDouble(item.get("tong_doanh_thu").toString()));
+            row.createCell(0).setCellValue(item.get("ten_khach_hang") != null ? item.get("ten_khach_hang").toString() : "");
+            row.createCell(1).setCellValue(item.get("so_lan_mua") != null ? Integer.parseInt(item.get("so_lan_mua").toString()) : 0);
+            row.createCell(2).setCellValue(item.get("tong_doanh_thu") != null ? Double.parseDouble(item.get("tong_doanh_thu").toString()) : 0);
         }
 
         // Auto-size columns
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
+        for (int i = 0; i < 3; i++) {
+            sheet.autoSizeColumn(i);
+        }
 
         // Response setup
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=khach-hang-trung-thanh.xlsx");
 
-        ServletOutputStream out = response.getOutputStream();
-        workbook.write(out);
-        out.flush();
-        workbook.close();
+        // Xuất file
+        try (ServletOutputStream out = response.getOutputStream()) {
+            workbook.write(out);
+            workbook.close();
+        }
     }
+
 }

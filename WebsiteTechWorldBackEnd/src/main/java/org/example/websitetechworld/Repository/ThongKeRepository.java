@@ -162,7 +162,7 @@ public interface ThongKeRepository extends JpaRepository<HoaDon, Integer> {
     LEFT JOIN hoa_don hd 
         ON YEAR(hd.ngay_tao_hoa_don) = YEAR(GETDATE())
        AND MONTH(hd.ngay_tao_hoa_don) = MONTH(dau_thang)
-       AND hd.trang_thai_don_hang = 'CANCELLED'
+       AND hd.trang_thai_don_hang = 'RETURNS'
     GROUP BY FORMAT(dau_thang, 'yyyy-MM')
     ORDER BY thang
     OPTION (MAXRECURSION 100)

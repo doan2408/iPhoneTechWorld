@@ -139,7 +139,7 @@
  
   <div class="chart-container">
     <div class="header">
-      <h2 class="title">Tổng Đơn Bị Hủy</h2>
+      <h2 class="title">Tổng Đơn Trả Hàng</h2>
       <p class="subtitle">Giữa các tháng</p>
     </div>
 
@@ -330,7 +330,7 @@ const fetchCancelData = async () => {
   data: {
     labels: labelsCancel.value,
     datasets: [{
-      label: 'Số đơn bị huỷ',
+      label: 'Số đơn trả hàng',
       data: valuesCancel.value,
       backgroundColor: '#f87171',
       borderColor: '#ef4444',
