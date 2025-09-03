@@ -1,3 +1,4 @@
+```vue
 <template>
   <!-- Header Section -->
   <div class="page-header">
@@ -71,30 +72,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- <el-row :gutter="20">
-        <el-col :span="12" v-if="sanPham.trangThaiSanPham">
-          <el-form-item
-            label="Ngày ra mắt"
-            prop="ngayRaMat"
-            :error="errors.ngayRaMat"
-          >
-            <el-date-picker
-              v-model="sanPham.ngayRaMat"
-              type="datetime"
-              value-format="YYYY-MM-DDTHH:mm:ss"
-              format="DD/MM/YYYY HH:mm:ss"
-              placeholder="Chọn ngày giờ ra mắt"
-              size="large"
-              style="width: 100%"
-              :disabled-date="disabledDate"
-              :disabled-hours="disabledHours"
-              :disabled-minutes="disabledMinutes"
-              :disabled-seconds="disabledSeconds"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row> -->
     </el-card>
 
     <!-- Chọn thuộc tính để tạo biến thể -->
@@ -114,7 +91,6 @@
                 @change="errors.selectedMaus = ''" style="width: 100%">
                 <el-option v-for="mau in maus" :key="mau.id" :label="mau.tenMau" :value="mau.id" />
               </el-select>
-
               <el-button type="success" circle @click="addMauSacDialogRef.open()">
                 <el-icon>
                   <Plus />
@@ -124,7 +100,6 @@
           </el-form-item>
         </el-col>
         <DialogThemMauSac ref="addMauSacDialogRef" @saved="handleMauSacSaved" />
-
         <el-col :span="12">
           <el-form-item label="ROM" prop="selectedRoms" :error="errors.selectedRoms">
             <div style="display: flex; gap: 8px; width: 100%">
@@ -132,7 +107,6 @@
                 @change="errors.selectedRoms = ''" style="flex: 1">
                 <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id" />
               </el-select>
-
               <el-button type="success" circle @click="addRomDialogRef.open()">
                 <el-icon>
                   <Plus />
@@ -141,7 +115,6 @@
             </div>
           </el-form-item>
         </el-col>
-
         <DialogThemRom ref="addRomDialogRef" @saved="handleDungLuongRomSaved" />
       </el-row>
     </el-card>
@@ -158,9 +131,9 @@
       <el-row :gutter="20">
         <el-col :span="24" v-for="mau in selectedMaus" :key="mau">
           <el-form-item :label="getMauSacLabels(mau)" :error="errorsMauHinhAnh[mau] || ''">
-            <el-upload :file-list="hinhAnhTheoMau[mau] || []" :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)
-              " :on-remove="(file, fileList) => handleMauFileRemove(file, fileList, mau)
-                " :auto-upload="false" accept="image/jpeg,image/png,image/webp" list-type="picture-card" :limit="5"
+            <el-upload :file-list="hinhAnhTheoMau[mau] || []" :on-change="(file, fileList) => handleMauFileChange(file, fileList, mau)"
+              :on-remove="(file, fileList) => handleMauFileRemove(file, fileList, mau)"
+              :auto-upload="false" accept="image/jpeg,image/png,image/webp" list-type="picture-card" :limit="5"
               :on-exceed="handleExceed">
               <template #trigger>
                 <el-button type="primary" plain>
@@ -275,16 +248,24 @@
                   }})</span>
               </div>
             </template>
-            <el-form-item label="Giá bán" :error="errorsChiTiet[selectedChiTiet]?.giaBan || ''" class="error-container">
-              <el-input v-model="variantPriceFormatted[selectedChiTiet]" placeholder="Nhập giá bán" style="width: 100%"
-                @input="
-                  (value) => handleVariantPriceInput(value, selectedChiTiet)
-                " @change="errorsChiTiet[selectedChiTiet].giaBan = ''">
-                <template #suffix>
-                  <span style="color: #909399; font-size: 12px">VND</span>
-                </template>
-              </el-input>
-            </el-form-item>
+            <el-form-item
+  label="Giá bán"
+  :error="errorsChiTiet[selectedChiTiet]?.giaBan || ''"
+  class="error-container"
+>
+  <el-input
+    v-model="variantPriceFormatted[selectedChiTiet]"
+    placeholder="Nhập giá bán"
+    style="width: 100%"
+    :disabled="checkGiaMap[`${sanPham.sanPhamChiTiets[selectedChiTiet]?.idMau}-${sanPham.sanPhamChiTiets[selectedChiTiet]?.idRom}`]"
+    @input="(value) => handleVariantPriceInput(value, selectedChiTiet)"
+    @change="errorsChiTiet[selectedChiTiet].giaBan = ''"
+  >
+    <template #suffix>
+      <span style="color: #909399; font-size: 12px">VND</span>
+    </template>
+  </el-input>
+</el-form-item>
             <el-form-item label="Số lượng" :error="errorsChiTiet[selectedChiTiet]?.soLuong || ''"
               class="error-container">
               <el-input-number v-model="sanPham.sanPhamChiTiets[selectedChiTiet].soLuong" :min="0" :disabled="true"
@@ -293,35 +274,29 @@
             <el-form-item label="IMEI" :error="errorsChiTiet[selectedChiTiet]?.imeisInput || ''"
               class="error-container">
               <el-input type="textarea" v-model="sanPham.sanPhamChiTiets[selectedChiTiet].imeisInput"
-                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)" :rows="4" :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].isFileUploaded
-                  " @input="handleImeiInput(selectedChiTiet)" />
+                placeholder="Nhập danh sách IMEI (15 chữ số mỗi IMEI, phân tách bởi dấu phẩy)" :rows="4"
+                :disabled="sanPham.sanPhamChiTiets[selectedChiTiet].isFileUploaded"
+                @input="handleImeiInput(selectedChiTiet)" />
               <div class="imei-upload-container">
                 <el-upload :ref="`upload-${selectedChiTiet}`" :file-list="imeiFileList[selectedChiTiet] || []"
-                  :auto-upload="false" :on-change="(file, fileList) =>
-                    handleFileSelection(file, selectedChiTiet, fileList)
-                    " accept=".xlsx,.xls," :disabled="sanPham.sanPhamChiTiets[selectedChiTiet]?.imeisInput
-                      .length > 0
-                      " list-type="text" class="custom-upload">
+                  :auto-upload="false" :on-change="(file, fileList) => handleFileSelection(file, selectedChiTiet, fileList)"
+                  accept=".xlsx,.xls" :disabled="sanPham.sanPhamChiTiets[selectedChiTiet]?.imeisInput.length > 0"
+                  list-type="text" class="custom-upload">
                   <template #trigger>
                     <el-button type="default" plain class="choose-file-btn">
                       <Upload class="el-icon" /> Chọn file
                     </el-button>
                   </template>
                   <template #default>
-                    <span v-if="
-                      imeiFileList[selectedChiTiet] &&
-                      imeiFileList[selectedChiTiet].length > 0
-                    " class="file-name">
+                    <span v-if="imeiFileList[selectedChiTiet] && imeiFileList[selectedChiTiet].length > 0"
+                      class="file-name">
                       {{ imeiFileList[selectedChiTiet][0].name }}
                     </span>
                     <span v-else class="file-placeholder">Chưa chọn file</span>
                   </template>
                 </el-upload>
-                <el-button type="primary" :disabled="!(
-                  imeiFileList[selectedChiTiet] &&
-                  imeiFileList[selectedChiTiet].length > 0
-                )
-                  " @click="confirmUploadImeiFile(selectedChiTiet)" class="upload-btn">
+                <el-button type="primary" :disabled="!(imeiFileList[selectedChiTiet] && imeiFileList[selectedChiTiet].length > 0)"
+                  @click="confirmUploadImeiFile(selectedChiTiet)" class="upload-btn">
                   <Upload class="el-icon" /> Upload
                 </el-button>
                 <el-button type="warning" plain @click="confirmClearImeiInput(selectedChiTiet)" class="clear-btn">
@@ -329,8 +304,7 @@
                 </el-button>
               </div>
               <div class="imei-status">
-                <span>Số lượng IMEI:
-                  {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
+                <span>Số lượng IMEI: {{ sanPham.sanPhamChiTiets[selectedChiTiet].soLuong }}</span>
                 <el-tooltip v-if="errorsChiTiet[selectedChiTiet]?.imeisInput === 'Hợp lệ'"
                   content="Danh sách IMEI hợp lệ" placement="top">
                   <span class="valid-message">
@@ -342,8 +316,7 @@
           </el-card>
           <el-card v-else shadow="hover">
             <div class="empty-state">
-              <InfoFilled class="el-icon" /> Vui lòng chọn hoặc thêm biến thể
-              sản phẩm
+              <InfoFilled class="el-icon" /> Vui lòng chọn hoặc thêm biến thể sản phẩm
             </div>
           </el-card>
         </el-col>
@@ -355,7 +328,6 @@
       <el-button size="large" type="success" :loading="loading.submit" @click="confirmSubmitForm" v-show="isAdmin">
         <Check class="el-icon" /> Lưu sản phẩm
       </el-button>
-
       <el-button size="large" type="info" @click="downloadTemplate">
         <el-icon>
           <Download />
@@ -375,7 +347,6 @@ import {
   getAllModelSanPhamList,
   getAllNhaCungCapList,
   getAllRomList,
-  getAllXuatXuList,
   postSanPham,
 } from "@/Service/Adminservice/Products/ProductAdminService";
 import { debounce } from "chart.js/helpers";
@@ -445,9 +416,11 @@ export default {
     const modelSanPhams = ref([]);
     const selectedChiTiet = ref(null);
     const hinhAnhTheoMau = reactive({});
-    const imeiFileList = reactive({}); // Quản lý file-list cho từng biến thể
+    const imeiFileList = reactive({});
     const addMauSacDialogRef = ref(null);
     const addRomDialogRef = ref(null);
+    const checkGiaMap = reactive({});
+    const variantPriceFormatted = reactive({});
 
     const errors = reactive({
       tenSanPham: "",
@@ -458,37 +431,17 @@ export default {
       selectedMaus: "",
       selectedRoms: "",
       giaBanChung: "",
-      ngayRaMat: "",
     });
 
     const errorsChiTiet = reactive([]);
     const errorsMauHinhAnh = reactive({});
     const giaBanChung = ref(null);
+    const giaBanChungFormatted = ref("");
 
-    const handleMauSacSaved = (savedMauSac) => {
-      maus.value.push({
-        idMau: savedMauSac.id,
-        tenMau: savedMauSac.tenMau,
-        maMau: savedMauSac.maMau,
-      });
-      selectedMaus.value.push(savedMauSac.idMau);
-      errors.selectedMaus = ""
-    };
-
-    const handleDungLuongRomSaved = (savedDungLuong) => {
-      roms.value.push({
-        idRom: savedDungLuong.id,
-        dungLuong: savedDungLuong.dungLuong,
-      });
-      selectedRoms.value.push(savedDungLuong.idRom);
-      errors.selectedRoms = ""
-    };
-
-    // Thêm trạng thái cho thông báo tùy chỉnh
     const notification = reactive({
       visible: false,
       message: "",
-      type: "success", // Có thể là 'success', 'error', 'warning', 'info'
+      type: "success",
       timeout: null,
     });
 
@@ -497,7 +450,6 @@ export default {
       { label: "Ngừng kinh doanh", value: "DISCONTINUED" },
     ];
 
-    // Hàm hiển thị thông báo tùy chỉnh
     const showNotification = (message, type = "success", duration = 3000) => {
       notification.message = message;
       notification.type = type;
@@ -533,62 +485,53 @@ export default {
         const emptyLists = requiredLists.filter((item) => !item.list.length);
         if (emptyLists.length) {
           showNotification(
-            `Không thể tải danh mục: ${emptyLists
-              .map((item) => item.name)
-              .join(", ")}`,
+            `Không thể tải danh mục: ${emptyLists.map((item) => item.name).join(", ")}`,
             "error",
             3000
           );
         }
       } catch (error) {
-        showNotification(
-          "Lỗi khi tải danh mục: " + error.message,
-          "error",
-          3000
-        );
+        showNotification("Lỗi khi tải danh mục: " + error.message, "error", 3000);
       } finally {
         loadingInstance.close();
       }
     };
 
     const downloadTemplate = async () => {
-  try {
-    await ElMessageBox.confirm(
-      'Bạn có chắc chắn muốn tải template IMEI sản phẩm không?',
-      'Xác nhận',
-      {
-        confirmButtonText: 'Đồng ý',
-        cancelButtonText: 'Hủy',
-        type: 'warning',
+      try {
+        await ElMessageBox.confirm(
+          'Bạn có chắc chắn muốn tải template IMEI sản phẩm không?',
+          'Xác nhận',
+          {
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy',
+            type: 'warning',
+          }
+        );
+
+        const response = await downloadImeiSanPhamTemplate();
+        if (response.status !== 200) {
+          throw new Error('Không thể tải template');
+        }
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'ImeiSanPhamTemplate.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        toast.success('Tải template thành công!');
+      } catch (error) {
+        if (error === 'cancel') {
+          toast.info('Bạn đã hủy tải template');
+        } else {
+          console.error('Lỗi khi tải template:', error);
+          toast.error('Không thể tải template, vui lòng thử lại!');
+        }
       }
-    );
-
-    const response = await downloadImeiSanPhamTemplate();
-
-    if (response.status !== 200) {
-      throw new Error('Không thể tải template');
-    }
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'ImeiSanPhamTemplate.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    toast.success('Tải template thành công!');
-  } catch (error) {
-    if (error === 'cancel') {
-      toast.info('Bạn đã hủy tải template');
-    } else {
-      console.error('Lỗi khi tải template:', error);
-      toast.error('Không thể tải template, vui lòng thử lại!');
-    }
-  }
-};
-
+    };
 
     const onModelChange = () => {
       errors.idModelSanPham = "";
@@ -602,7 +545,7 @@ export default {
         sanPham.tenSanPham = "";
       }
       nextTick(() => {
-        scrollToError(); // Đảm bảo cuộn đến phần lỗi nếu còn
+        scrollToError();
       });
     };
 
@@ -625,16 +568,6 @@ export default {
         hinhAnhTheoMau,
       });
 
-      // TẠM THỜI COMMENT TẤT CẢ VALIDATION ĐỂ TEST
-      // if (!validateForm()) {
-      //   Object.keys(errors).forEach((key) => {
-      //     if (errors[key]) {
-      //       errorMessages.push(errors[key]);
-      //     }
-      //   });
-      //   hasError = true;
-      // }
-
       if (!selectedMaus.value.length) {
         errors.selectedMaus = "Vui lòng chọn ít nhất một màu sắc";
         errorMessages.push("Chọn ít nhất một màu sắc");
@@ -645,14 +578,6 @@ export default {
         errorMessages.push("Chọn ít nhất một ROM");
         hasError = true;
       }
-
-      // selectedMaus.value.forEach((mau) => {
-      //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-      //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
-      //     errorMessages.push(`Màu ${getMauSacLabels(mau)}: Phải có ít nhất 1 hình ảnh`);
-      //     hasError = true;
-      //   }
-      // });
 
       if (hasError) {
         loading.generate = false;
@@ -718,7 +643,7 @@ export default {
                 idMau: variant.idMau,
                 idRom: variant.idRom,
                 idLoai: sanPham.idModelSanPham,
-                idNCC: sanPham.idNhaCungCap
+                idNCC: sanPham.idNhaCungCap,
               },
               signal: controller.signal,
             }
@@ -726,9 +651,7 @@ export default {
           clearTimeout(timeoutId);
           if (res.data.exists) {
             duplicateCombinations.push(
-              `${getMauSacLabels(variant.idMau)} - ${getRomLabels(
-                variant.idRom
-              )}`
+              `${getMauSacLabels(variant.idMau)} - ${getRomLabels(variant.idRom)}`
             );
           }
         } catch (err) {
@@ -753,9 +676,7 @@ export default {
 
       if (duplicateCombinations.length > 0) {
         showNotification(
-          `Không thể tạo các biến thể đã tồn tại: ${duplicateCombinations.join(
-            ", "
-          )}`,
+          `Không thể tạo các biến thể đã tồn tại: ${duplicateCombinations.join(", ")}`,
           "error",
           2000
         );
@@ -763,9 +684,90 @@ export default {
         return;
       }
 
+      // Kiểm tra giá trùng lặp với Promise.all
+      const priceChecks = newVariants.map(async (variant, index) => {
+        try {
+          const resGia = await api.get(
+            "/admin/sanPhamChiTiet/check-duplicate-variant-gia",
+            {
+              params: {
+                idSp: sanPham.idModelSanPham,
+                idMau: variant.idMau,
+                idRom: variant.idRom,
+                idLoai: sanPham.idModelSanPham,
+              },
+            }
+          );
+          if (resGia.data.exists) {
+            try {
+              await ElMessageBox.confirm(
+                `Biến thể ${getMauSacLabels(variant.idMau)} - ${getRomLabels(
+                  variant.idRom
+                )} đã có giá ${resGia.data.giaBan?.toLocaleString("vi-VN")} VND. Bạn có muốn lấy giá không?`,
+                "Xác nhận đổi giá",
+                {
+                  confirmButtonText: "Đồng ý",
+                  cancelButtonText: "Hủy",
+                  type: "warning",
+                  confirmButtonClass: "el-button--danger",
+                }
+              );
+              return {
+                key: `${variant.idMau}-${variant.idRom}`,
+                checkGia: true,
+                giaBan: resGia.data.giaBan,
+                index,
+              };
+            } catch (error) {
+              if (error === "cancel") {
+        // Người dùng hủy: giữ giá hiện có, không hiển thị ô nhập giá
+                // if (resGia.data.giaBan != null) {
+                // sanPham.sanPhamChiTiets[index].giaBan = resGia.data.giaBan;
+                // variantPriceFormatted[index] = resGia.data.giaBan.toLocaleString("vi-VN");
+                // }
+                return {
+                key: `${variant.idMau}-${variant.idRom}`,
+                checkGia: false, // Ẩn ô nhập giá
+                giaBan: null, // Gán giá hiện có
+                index,
+                };
+            } else {
+                throw error;
+              }
+            }
+          }
+          return { key: `${variant.idMau}-${variant.idRom}`, checkGia: true, index };
+        } catch (error) {
+          console.error("Lỗi khi kiểm tra giá:", error);
+          return { key: `${variant.idMau}-${variant.idRom}`, checkGia: false, index };
+        }
+      });
+
+      const results = await Promise.allSettled(priceChecks);
+      results.forEach((result, i) => {
+        if (result.status === "fulfilled") {
+          const { key, checkGia, giaBan, index } = result.value;
+          checkGiaMap[key] = checkGia;
+          if (checkGia && giaBan !== undefined && typeof giaBan === "number" && giaBan >= 1000) {
+            newVariants[index].giaBan = giaBan;
+            variantPriceFormatted[index] = giaBan.toLocaleString("vi-VN");
+          } else {
+            newVariants[index].giaBan = null;
+            variantPriceFormatted[index] = "";
+          }
+        } else {
+          console.error("Lỗi khi kiểm tra giá:", result.reason);
+          checkGiaMap[newVariants[i].key] = false;
+          showNotification(
+            "Lỗi kiểm tra giá từ hệ thống: " + result.reason.message,
+            "error",
+            3000
+          );
+        }
+      });
+
       sanPham.sanPhamChiTiets = newVariants;
 
-      // Sync formatted values cho các biến thể mới tạo
       sanPham.sanPhamChiTiets.forEach((variant, index) => {
         if (variant.giaBan) {
           variantPriceFormatted[index] = variant.giaBan.toLocaleString("vi-VN");
@@ -774,11 +776,8 @@ export default {
         }
       });
 
-      // BỎ PHẦN VALIDATION GIÁ BÁN VÀ IMEI CHO TỪNG BIẾN THỂ
-      // Chỉ cập nhật số lượng mà không validate
       sanPham.sanPhamChiTiets.forEach((_, index) => {
         capNhatSoLuong(index, true);
-        // Bỏ phần validation IMEI ở đây
       });
 
       selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
@@ -797,47 +796,36 @@ export default {
       );
     };
 
-    const variantPriceFormatted = reactive({});
-
-    // Hàm xử lý input cho giá bán biến thể
     const handleVariantPriceInput = (value, index) => {
       const numericValue = value.replace(/[^\d]/g, "");
-
       if (numericValue === "") {
         variantPriceFormatted[index] = "";
         sanPham.sanPhamChiTiets[index].giaBan = null;
+        errorsChiTiet[index].giaBan = "";
         return;
       }
-
       const numberValue = parseInt(numericValue, 10);
-      variantPriceFormatted[index] = numberValue.toLocaleString("vi-VN");
-      sanPham.sanPhamChiTiets[index].giaBan = numberValue;
-
-      if (errorsChiTiet[index]) {
+      if (numberValue < 1000) {
+        errorsChiTiet[index].giaBan = "Giá bán phải ≥ 1000 VND";
+      } else if (numberValue > 100000000) {
+        errorsChiTiet[index].giaBan = "Giá bán không được vượt quá 100.000.000 VND";
+      } else {
         errorsChiTiet[index].giaBan = "";
+        sanPham.sanPhamChiTiets[index].giaBan = numberValue;
+        variantPriceFormatted[index] = numberValue.toLocaleString("vi-VN");
       }
     };
 
-    const giaBanChungFormatted = ref("");
-
-    // Hàm xử lý input cho el-input
     const handlePriceInput = (value) => {
-      // Chỉ cho phép nhập số
       const numericValue = value.replace(/[^\d]/g, "");
-
       if (numericValue === "") {
         giaBanChungFormatted.value = "";
         giaBanChung.value = null;
         return;
       }
-
       const numberValue = parseInt(numericValue, 10);
-
-      // Format với dấu chấm phân cách
       giaBanChungFormatted.value = numberValue.toLocaleString("vi-VN");
       giaBanChung.value = numberValue;
-
-      // Xóa lỗi khi người dùng nhập
       errors.giaBanChung = "";
     };
 
@@ -851,7 +839,6 @@ export default {
       }
     };
 
-    // Watch để đồng bộ giữa giaBanChung và giaBanChungFormatted
     watch(giaBanChung, (newValue) => {
       if (newValue === null || newValue === undefined || newValue === "") {
         giaBanChungFormatted.value = "";
@@ -860,30 +847,23 @@ export default {
       }
     });
 
-    // Cập nhật confirmApplyGiaBanChung để sử dụng với input tùy chỉnh
     const confirmApplyGiaBanChung = () => {
       if (!sanPham.sanPhamChiTiets.length) {
         showNotification("Vui lòng tạo biến thể trước!", "error", 3000);
         return;
       }
-
-      // Validate giá trị
       if (!giaBanChung.value || giaBanChung.value < 1000) {
         errors.giaBanChung = "Giá bán chung phải lớn hơn hoặc bằng 1.000 VND";
         showNotification("Vui lòng nhập giá bán chung hợp lệ!", "error", 3000);
         return;
       }
-
       if (giaBanChung.value > 100000000) {
         errors.giaBanChung = "Giá bán không được vượt quá 100.000.000 VND";
         showNotification("Giá bán quá cao!", "error", 3000);
         return;
       }
-
       ElMessageBox.confirm(
-        `Áp dụng giá ${giaBanChung.value.toLocaleString(
-          "vi-VN"
-        )} VND cho tất cả biến thể?`,
+        `Áp dụng giá ${giaBanChung.value.toLocaleString("vi-VN")} VND cho tất cả biến thể?`,
         "Xác nhận",
         {
           confirmButtonText: "Áp dụng",
@@ -901,12 +881,12 @@ export default {
 
     const applyGiaBanChung = () => {
       sanPham.sanPhamChiTiets.forEach((chiTiet, index) => {
-        chiTiet.giaBan = giaBanChung.value;
-        errorsChiTiet[index].giaBan = "";
-
-        // Sync formatted value cho input giá bán biến thể
-        variantPriceFormatted[index] =
-          giaBanChung.value.toLocaleString("vi-VN");
+        const variantKey = `${chiTiet.idMau}-${chiTiet.idRom}`;
+        if (checkGiaMap[variantKey] !== false) {
+          chiTiet.giaBan = giaBanChung.value;
+          errorsChiTiet[index].giaBan = "";
+          variantPriceFormatted[index] = giaBanChung.value.toLocaleString("vi-VN");
+        }
       });
       showNotification("Đã áp dụng giá bán chung!", "success", 3000);
     };
@@ -916,9 +896,9 @@ export default {
         const imeis = sanPham.sanPhamChiTiets[index].isFileUploaded
           ? sanPham.sanPhamChiTiets[index].imeis
           : sanPham.sanPhamChiTiets[index].imeisInput
-            .split(",")
-            .map((i) => i.trim())
-            .filter((i) => i);
+              .split(",")
+              .map((i) => i.trim())
+              .filter((i) => i);
         sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
         if (validate) {
           if (imeis.length === 0) {
@@ -930,23 +910,19 @@ export default {
                 ? chiTiet.isFileUploaded
                   ? chiTiet.imeis
                   : chiTiet.imeisInput
-                    .split(",")
-                    .map((im) => im.trim())
-                    .filter((im) => im)
+                      .split(",")
+                      .map((im) => im.trim())
+                      .filter((im) => im)
                 : []
             );
             const duplicateImeis = imeis.filter((im) => allImeis.includes(im));
             if (duplicateImeis.length > 0) {
-              errorsChiTiet[index].imeisInput = `${duplicateImeis.length
-                } IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(", ")}${duplicateImeis.length > 3 ? "..." : ""
-                }`;
+              errorsChiTiet[index].imeisInput = `${duplicateImeis.length} IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(", ")}${duplicateImeis.length > 3 ? "..." : ""}`;
               errorsChiTiet[index].soLuong = "";
             } else {
               const invalidImeis = imeis.filter((i) => !/^\d{15}$/.test(i));
               if (invalidImeis.length > 0) {
-                errorsChiTiet[index].imeisInput = `${invalidImeis.length
-                  } IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${invalidImeis.length > 3 ? "..." : ""
-                  }`;
+                errorsChiTiet[index].imeisInput = `${invalidImeis.length} IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${invalidImeis.length > 3 ? "..." : ""}`;
                 errorsChiTiet[index].soLuong = "";
               } else {
                 errorsChiTiet[index].imeisInput = "Hợp lệ";
@@ -969,17 +945,15 @@ export default {
     const handleImeiInput = (index) => {
       sanPham.sanPhamChiTiets[index].isFileUploaded = false;
       capNhatSoLuong(index, true);
-      imeiFileList[index] = []; // Làm mới file-list khi nhập thủ công
+      imeiFileList[index] = [];
     };
 
     const clearUploadFiles = (index) => {
-      imeiFileList[index] = []; // Cập nhật file-list thủ công
+      imeiFileList[index] = [];
       nextTick(() => {
-        const uploadComponent = document.querySelector(
-          `.el-upload[ref="upload-${index}"]`
-        );
+        const uploadComponent = document.querySelector(`.el-upload[ref="upload-${index}"]`);
         if (uploadComponent && uploadComponent.__vue__) {
-          uploadComponent.__vue__.clearFiles(); // Đảm bảo làm mới
+          uploadComponent.__vue__.clearFiles();
         }
       });
     };
@@ -1009,12 +983,12 @@ export default {
       sanPham.sanPhamChiTiets[index].imeis = [];
       errorsChiTiet[index].imeisInput = "";
       errorsChiTiet[index].soLuong = "";
-      clearUploadFiles(index); // Xóa danh sách file
+      clearUploadFiles(index);
       showNotification("Đã xóa danh sách IMEI!", "success", 3000);
     };
 
     const handleFileSelection = (file, index, fileList) => {
-      imeiFileList[index] = fileList; // Chỉ cập nhật file-list khi chọn file
+      imeiFileList[index] = fileList;
       if (file.raw.size > 1024 * 1024) {
         showNotification(
           "File quá lớn, vui lòng chọn file dưới 1MB",
@@ -1047,8 +1021,7 @@ export default {
         return;
       }
       ElMessageBox.confirm(
-        `Bạn có chắc muốn upload file "${imeiFileList[index][0].name
-        }" cho biến thể ${index + 1}?`,
+        `Bạn có chắc muốn upload file "${imeiFileList[index][0].name}" cho biến thể ${index + 1}?`,
         "Xác nhận",
         {
           confirmButtonText: "Upload",
@@ -1077,8 +1050,8 @@ export default {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Lấy dữ liệu thô
-            const headers = json[0]; // Dòng đầu tiên là tiêu đề
+            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            const headers = json[0];
             if (headers && headers[0] !== "soImei") {
               throw new Error(
                 "Cột đầu tiên phải có tiêu đề 'soImei'. Vui lòng sửa file Excel và thử lại."
@@ -1095,14 +1068,13 @@ export default {
               throw new Error(
                 `Có ${invalidImeis.length} giá trị không hợp lệ: ${invalidImeis
                   .slice(0, 3)
-                  .join(", ")}${invalidImeis.length > 3 ? "..." : ""
-                }. IMEI phải là số 15 chữ số. Vui lòng kiểm tra và sửa file.`
+                  .join(", ")}${invalidImeis.length > 3 ? "..." : ""}. IMEI phải là số 15 chữ số.`
               );
             }
             const imeis = allImeis.filter((imei) => /^\d{15}$/.test(imei));
             if (imeis.length === 0) {
               throw new Error(
-                "Không tìm thấy IMEI hợp lệ trong file. Vui lòng đảm bảo cột 'soImei' chứa số 15 chữ số và không có hàng trống."
+                "Không tìm thấy IMEI hợp lệ trong file. Vui lòng đảm bảo cột 'soImei' chứa số 15 chữ số."
               );
             }
             const allExistingImeis = sanPham.sanPhamChiTiets.flatMap(
@@ -1111,20 +1083,17 @@ export default {
                   ? chiTiet.isFileUploaded
                     ? chiTiet.imeis
                     : chiTiet.imeisInput
-                      .split(",")
-                      .map((im) => im.trim())
-                      .filter((im) => im)
+                        .split(",")
+                        .map((im) => im.trim())
+                        .filter((im) => im)
                   : []
             );
-            const duplicateImeis = imeis.filter((im) =>
-              allExistingImeis.includes(im)
-            );
+            const duplicateImeis = imeis.filter((im) => allExistingImeis.includes(im));
             if (duplicateImeis.length > 0) {
               throw new Error(
                 `${duplicateImeis.length} IMEI trùng lặp: ${duplicateImeis
                   .slice(0, 3)
-                  .join(", ")}${duplicateImeis.length > 3 ? "..." : ""
-                }. Vui lòng kiểm tra và loại bỏ IMEI trùng.`
+                  .join(", ")}${duplicateImeis.length > 3 ? "..." : ""}.`
               );
             }
             sanPham.sanPhamChiTiets[index].soLuong = imeis.length;
@@ -1133,17 +1102,16 @@ export default {
             sanPham.sanPhamChiTiets[index].imeisInput = imeis.join(", ");
             errorsChiTiet[index].imeisInput = "Hợp lệ";
             errorsChiTiet[index].soLuong = "";
-            imeiFileList[index] = []; // Xóa file-list sau khi upload thành công
+            imeiFileList[index] = [];
             showNotification(
-              `Đã nhập ${imeis.length} IMEI từ file ${file.name} cho biến thể ${index + 1
-              }`,
+              `Đã nhập ${imeis.length} IMEI từ file ${file.name} cho biến thể ${index + 1}`,
               "success",
               3000
             );
           } catch (error) {
             errorsChiTiet[index].imeisInput = error.message;
             showNotification(
-              `Lỗi khi đọc file Excel: ${error.message} Vui lòng kiểm tra định dạng file (cột 'soImei', số 15 chữ số) và thử lại.`,
+              `Lỗi khi đọc file Excel: ${error.message}`,
               "error",
               7000
             );
@@ -1153,9 +1121,9 @@ export default {
         };
         reader.onerror = () => {
           errorsChiTiet[index].imeisInput =
-            "Lỗi khi đọc file Excel. Vui lòng chọn file hợp lệ (.xlsx hoặc .xls) và thử lại.";
+            "Lỗi khi đọc file Excel. Vui lòng chọn file hợp lệ (.xlsx hoặc .xls).";
           showNotification(
-            "Lỗi khi đọc file Excel. Vui lòng chọn file hợp lệ (.xlsx hoặc .xls) và thử lại.",
+            "Lỗi khi đọc file Excel. Vui lòng chọn file hợp lệ (.xlsx hoặc .xls).",
             "error",
             3000
           );
@@ -1163,14 +1131,9 @@ export default {
         };
         reader.readAsArrayBuffer(file.raw);
       } catch (error) {
-        errorsChiTiet[index].imeisInput =
-          "Lỗi khi xử lý file IMEI: " +
-          error.message +
-          ". Vui lòng thử lại với file đúng định dạng.";
+        errorsChiTiet[index].imeisInput = "Lỗi khi xử lý file IMEI: " + error.message;
         showNotification(
-          "Lỗi khi xử lý file IMEI: " +
-          error.message +
-          ". Vui lòng thử lại với file đúng định dạng.",
+          "Lỗi khi xử lý file IMEI: " + error.message,
           "error",
           3000
         );
@@ -1184,9 +1147,7 @@ export default {
         text: "Đang tải ảnh...",
       });
       try {
-        if (
-          !["image/jpeg", "image/png", "image/webp"].includes(file.raw.type)
-        ) {
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.raw.type)) {
           throw new Error("Chỉ chấp nhận file JPEG, PNG hoặc WEBP");
         }
         if (file.raw.size > 5 * 1024 * 1024) {
@@ -1206,22 +1167,12 @@ export default {
           name: item.name,
           url: item.uid === file.uid ? response.data.url : item.url,
           imagePublicId:
-            item.uid === file.uid
-              ? response.data.imagePublicId
-              : item.imagePublicId,
+            item.uid === file.uid ? response.data.imagePublicId : item.imagePublicId,
         }));
-        // errorsMauHinhAnh[idMau] =
-        //   hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
-        // sanPham.sanPhamChiTiets.forEach((chiTiet) => {
-        //   if (chiTiet.idMau === idMau) {
-        //     chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
-        //   }
-        // });
         showNotification(`Tải ảnh ${file.name} thành công!`, "success", 3000);
       } catch (error) {
         errorsMauHinhAnh[idMau] =
-          "Lỗi khi tải ảnh: " +
-          (error.response?.data?.message || error.message);
+          "Lỗi khi tải ảnh: " + (error.response?.data?.message || error.message);
         showNotification(errorsMauHinhAnh[idMau], "error", 3000);
       } finally {
         loadingInstance.close();
@@ -1234,13 +1185,6 @@ export default {
         url: item.url,
         imagePublicId: item.imagePublicId,
       }));
-      // errorsMauHinhAnh[idMau] =
-      //   hinhAnhTheoMau[idMau].length > 0 ? "" : "Phải có ít nhất 1 hình ảnh";
-      // sanPham.sanPhamChiTiets.forEach((chiTiet) => {
-      //   if (chiTiet.idMau === idMau) {
-      //     chiTiet.hinhAnhs = hinhAnhTheoMau[idMau];
-      //   }
-      // });
       showNotification(`Đã xóa ảnh ${file.name}`, "success", 3000);
     };
 
@@ -1259,9 +1203,12 @@ export default {
     };
 
     const removeChiTiet = (index) => {
+      const variantKey = `${sanPham.sanPhamChiTiets[index].idMau}-${sanPham.sanPhamChiTiets[index].idRom}`;
+      delete checkGiaMap[variantKey];
+      delete variantPriceFormatted[index];
       sanPham.sanPhamChiTiets.splice(index, 1);
       errorsChiTiet.splice(index, 1);
-      delete imeiFileList[index]; // Xóa file-list của biến thể bị xóa
+      delete imeiFileList[index];
       if (selectedChiTiet.value === index) {
         selectedChiTiet.value = sanPham.sanPhamChiTiets.length > 0 ? 0 : null;
       } else if (selectedChiTiet.value > index) {
@@ -1290,10 +1237,17 @@ export default {
         sanPham.sanPhamChiTiets[index].isFileUploaded = false;
         sanPham.sanPhamChiTiets[index].imeis = [];
       }
-      imeiFileList[index] = imeiFileList[index] || []; // Đảm bảo file-list được khởi tạo
+      imeiFileList[index] = imeiFileList[index] || [];
       if (!sanPham.sanPhamChiTiets[index].isFileUploaded) {
-        imeiFileList[index] = []; // Làm mới file-list khi chọn biến thể
+        imeiFileList[index] = [];
       }
+      const variantKey = `${sanPham.sanPhamChiTiets[index].idMau}-${sanPham.sanPhamChiTiets[index].idRom}`;
+      if (!(variantKey in checkGiaMap)) {
+        checkGiaMap[variantKey] = true;
+      }
+      variantPriceFormatted[index] = sanPham.sanPhamChiTiets[index].giaBan
+        ? sanPham.sanPhamChiTiets[index].giaBan.toLocaleString("vi-VN")
+        : "";
       nextTick(() => {
         clearUploadFiles(index);
       });
@@ -1351,74 +1305,29 @@ export default {
       }, 100);
     };
 
-    // function clearFieldError(fieldName) {
-    //   if (errors[fieldName]) {
-    //     delete errors[fieldName];
-    //   }
-    // }
+    const handleMauSacSaved = (savedMauSac) => {
+      maus.value.push({
+        id: savedMauSac.id,
+        tenMau: savedMauSac.tenMau,
+        maMau: savedMauSac.maMau,
+      });
+      selectedMaus.value.push(savedMauSac.id);
+      errors.selectedMaus = "";
+    };
 
-    // const disabledDate = (date) => {
-    //   if (sanPham.trangThaiSanPham === "COMING_SOON") {
-    //     const today = new Date();
-    //     today.setHours(0, 0, 0, 0);
-    //     return date < today; // Mờ ngày trước hôm nay
-    //   }
-    //   return false;
-    // };
-
-    // const disabledHours = () => {
-    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
-    //   const now = new Date();
-    //   const selected = new Date(sanPham.ngayRaMat || now);
-
-    //   if (
-    //     selected.getFullYear() === now.getFullYear() &&
-    //     selected.getMonth() === now.getMonth() &&
-    //     selected.getDate() === now.getDate()
-    //   ) {
-    //     return Array.from({ length: now.getHours() }, (_, i) => i);
-    //   }
-    //   return [];
-    // };
-
-    // const disabledMinutes = (hour) => {
-    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
-    //   const now = new Date();
-    //   const selected = new Date(sanPham.ngayRaMat || now);
-
-    //   if (
-    //     selected.getFullYear() === now.getFullYear() &&
-    //     selected.getMonth() === now.getMonth() &&
-    //     selected.getDate() === now.getDate() &&
-    //     hour === now.getHours()
-    //   ) {
-    //     return Array.from({ length: now.getMinutes() }, (_, i) => i);
-    //   }
-    //   return [];
-    // };
-
-    // const disabledSeconds = (hour, minute) => {
-    //   if (sanPham.trangThaiSanPham !== "COMING_SOON") return [];
-    //   const now = new Date();
-    //   const selected = new Date(sanPham.ngayRaMat || now);
-
-    //   if (
-    //     selected.getFullYear() === now.getFullYear() &&
-    //     selected.getMonth() === now.getMonth() &&
-    //     selected.getDate() === now.getDate() &&
-    //     hour === now.getHours() &&
-    //     minute === now.getMinutes()
-    //   ) {
-    //     return Array.from({ length: now.getSeconds() }, (_, i) => i);
-    //   }
-    //   return [];
-    // };
+    const handleDungLuongRomSaved = (savedDungLuong) => {
+      roms.value.push({
+        id: savedDungLuong.id,
+        dungLuong: savedDungLuong.dungLuong,
+      });
+      selectedRoms.value.push(savedDungLuong.id);
+      errors.selectedRoms = "";
+    };
 
     const validateForm = () => {
       let hasError = false;
       if (!sanPham.idModelSanPham || !sanPham.tenSanPham) {
-        errors.tenSanPham =
-          "Vui lòng chọn model sản phẩm hoặc nhập tên sản phẩm";
+        errors.tenSanPham = "Vui lòng chọn model sản phẩm hoặc nhập tên sản phẩm";
         hasError = true;
       } else {
         errors.tenSanPham = "";
@@ -1439,16 +1348,6 @@ export default {
         errors.idModelSanPham = "Vui lòng chọn model sản phẩm";
         hasError = true;
       }
-      // if (!sanPham.ngayRaMat) {
-      //   errors.ngayRaMat = "Vui lòng chọn ngày ra mắt";
-      //   hasError = true;
-      // }
-      // selectedMaus.value.forEach((mau) => {
-      //   if (!hinhAnhTheoMau[mau] || !hinhAnhTheoMau[mau].length) {
-      //     errorsMauHinhAnh[mau] = "Phải có ít nhất 1 hình ảnh cho màu này";
-      //     hasError = true;
-      //   }
-      // });
       sanPham.sanPhamChiTiets.forEach((chiTiet, index) => {
         if (!chiTiet.giaBan || chiTiet.giaBan < 1000) {
           errorsChiTiet[index].giaBan = `Giá bán phải ≥ 1000 VND`;
@@ -1461,9 +1360,9 @@ export default {
         const imeis = chiTiet.isFileUploaded
           ? chiTiet.imeis
           : chiTiet.imeisInput
-            .split(",")
-            .map((i) => i.trim())
-            .filter((i) => i);
+              .split(",")
+              .map((i) => i.trim())
+              .filter((i) => i);
         if (imeis.length === 0) {
           errorsChiTiet[index].imeisInput = "Phải có ít nhất 1 IMEI";
           hasError = true;
@@ -1473,23 +1372,19 @@ export default {
               ? ct.isFileUploaded
                 ? ct.imeis
                 : ct.imeisInput
-                  .split(",")
-                  .map((im) => im.trim())
-                  .filter((im) => im)
+                    .split(",")
+                    .map((im) => im.trim())
+                    .filter((im) => im)
               : []
           );
           const duplicateImeis = imeis.filter((im) => allImeis.includes(im));
           if (duplicateImeis.length > 0) {
-            errorsChiTiet[index].imeisInput = `${duplicateImeis.length
-              } IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(", ")}${duplicateImeis.length > 3 ? "..." : ""
-              }`;
+            errorsChiTiet[index].imeisInput = `${duplicateImeis.length} IMEI trùng lặp: ${duplicateImeis.slice(0, 3).join(", ")}${duplicateImeis.length > 3 ? "..." : ""}`;
             hasError = true;
           } else {
             const invalidImeis = imeis.filter((i) => !/^\d{15}$/.test(i));
             if (invalidImeis.length > 0) {
-              errorsChiTiet[index].imeisInput = `${invalidImeis.length
-                } IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${invalidImeis.length > 3 ? "..." : ""
-                }`;
+              errorsChiTiet[index].imeisInput = `${invalidImeis.length} IMEI không hợp lệ: ${invalidImeis.slice(0, 3).join(", ")}${invalidImeis.length > 3 ? "..." : ""}`;
               hasError = true;
             }
           }
@@ -1542,15 +1437,14 @@ export default {
           thuongHieu: sanPham.thuongHieu,
           idNhaCungCaps: [sanPham.idNhaCungCap],
           trangThaiSanPham: sanPham.trangThaiSanPham,
-          ngayRaMat: sanPham.ngayRaMat,
           idModelSanPham: sanPham.idModelSanPham,
           sanPhamChiTiets: sanPham.sanPhamChiTiets.map((chiTiet) => {
             const imeis = chiTiet.isFileUploaded
               ? chiTiet.imeis
               : chiTiet.imeisInput
-                .split(",")
-                .map((i) => i.trim())
-                .filter((i) => i);
+                  .split(",")
+                  .map((i) => i.trim())
+                  .filter((i) => i);
             return {
               idMau: chiTiet.idMau,
               idRom: chiTiet.idRom,
@@ -1587,8 +1481,7 @@ export default {
                 const match = field.match(/sanPhamChiTiets\[(\d+)\]\.(.+)/);
                 if (match) {
                   const index = parseInt(match[1]);
-                  const subField =
-                    match[2] === "imeis" ? "imeisInput" : match[2];
+                  const subField = match[2] === "imeis" ? "imeisInput" : match[2];
                   if (index < errorsChiTiet.length) {
                     errorsChiTiet[index][subField] = message;
                     errorMessages.push(`Biến thể ${index + 1}: ${message}`);
@@ -1605,8 +1498,7 @@ export default {
                 const match = field.match(/sanPhamChiTiets\[(\d+)\]\.(.+)/);
                 if (match) {
                   const index = parseInt(match[1]);
-                  const subField =
-                    match[2] === "imeis" ? "imeisInput" : match[2];
+                  const subField = match[2] === "imeis" ? "imeisInput" : match[2];
                   if (index < errorsChiTiet.length) {
                     errorsChiTiet[index][subField] = message;
                     errorMessages.push(`Biến thể ${index + 1}: ${message}`);
@@ -1645,24 +1537,24 @@ export default {
     };
 
     const isAdmin = computed(() => {
-  const roles = store.state.roles;
-  return (
-    Array.isArray(roles) &&
-    roles
-      .map((role) => (typeof role === "string" ? role : role.authority))
-      .includes("ROLE_ADMIN")
-  );
-});
+      const roles = store.state.roles;
+      return (
+        Array.isArray(roles) &&
+        roles
+          .map((role) => (typeof role === "string" ? role : role.authority))
+          .includes("ROLE_ADMIN")
+      );
+    });
 
-const isStaff = computed(() => {
-  const roles = store.state.roles;
-  return (
-    Array.isArray(roles) &&
-    roles
-      .map((role) => (typeof role === "string" ? role : role.authority))
-      .includes("ROLE_STAFF")
-  );
-});
+    const isStaff = computed(() => {
+      const roles = store.state.roles;
+      return (
+        Array.isArray(roles) &&
+        roles
+          .map((role) => (typeof role === "string" ? role : role.authority))
+          .includes("ROLE_STAFF")
+      );
+    });
 
     onMounted(() => {
       fetchDanhMuc();
@@ -1686,6 +1578,7 @@ const isStaff = computed(() => {
       errorsMauHinhAnh,
       hinhAnhTheoMau,
       giaBanChung,
+      giaBanChungFormatted,
       loading,
       DialogThemMauSac,
       DialogThemRom,
@@ -1693,7 +1586,6 @@ const isStaff = computed(() => {
       addRomDialogRef,
       variantPriceFormatted,
       handleVariantPriceInput,
-      giaBanChungFormatted,
       handlePriceInput,
       validatePrice,
       handleMauSacSaved,
@@ -1721,18 +1613,15 @@ const isStaff = computed(() => {
       uploadImeiFile,
       confirmUploadImeiFile,
       router,
-      notification, // Trả về thông báo để sử dụng trong template
-      showNotification, // Hàm để gọi thông báo
+      notification,
+      showNotification,
       downloadTemplate,
-      // clearFieldError,
-      // disabledDate,
-      // disabledHours,
-      // disabledMinutes,
-      // disabledSeconds,
+      checkGiaMap,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .page-header {

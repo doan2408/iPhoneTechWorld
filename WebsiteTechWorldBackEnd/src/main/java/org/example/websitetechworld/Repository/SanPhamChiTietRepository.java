@@ -81,23 +81,61 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     int tangSoLuongTon(@Param("idSanPhamChiTiet") Integer idSanPhamChiTiet, @Param("soLuongTang") int soLuongTang);
 
 
+//    @Query(value = """
+//    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+//    FROM san_pham_chi_tiet c
+//    JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
+//    JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
+//    WHERE
+//      c.id_san_pham = :idSp
+//      AND m.id_model_san_pham = :idLoai
+//      AND c.id_mau = :idMau
+//      AND c.id_rom = :idRom
+//""", nativeQuery = true)
+//    Integer existsVariantGia(
+//            @Param("idSp") Integer idSp,
+//            @Param("idMau") Integer idMau,
+//            @Param("idRom") Integer idRom,
+//            @Param("idLoai") Integer idLoai
+//    );
+
     @Query(value = """
-    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    SELECT c.gia_ban
     FROM san_pham_chi_tiet c
     JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
     JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
-    WHERE 
+    WHERE
       c.id_san_pham = :idSp
       AND m.id_model_san_pham = :idLoai
       AND c.id_mau = :idMau
       AND c.id_rom = :idRom
 """, nativeQuery = true)
-    Integer existsVariantInLoai(
+    BigDecimal existsVariantGia(
             @Param("idSp") Integer idSp,
             @Param("idMau") Integer idMau,
             @Param("idRom") Integer idRom,
             @Param("idLoai") Integer idLoai
     );
+        @Query(value = """
+            SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+            FROM san_pham_chi_tiet c
+            JOIN san_pham sp ON c.id_san_pham = sp.id_san_pham
+            JOIN model_san_pham m ON sp.id_model_san_pham = m.id_model_san_pham
+            JOIN nha_cung_cap_sp nccsp ON sp.id_san_pham = nccsp.id_san_pham
+            WHERE 
+              c.id_san_pham = :idSp
+              AND m.id_model_san_pham = :idLoai
+              AND c.id_mau = :idMau
+              AND c.id_rom = :idRom
+              AND nccsp.id_nha_cung_cap = :idNcc
+        """, nativeQuery = true)
+        Integer existsVariantInLoai(
+                @Param("idSp") Integer idSp,
+                @Param("idMau") Integer idMau,
+                @Param("idRom") Integer idRom,
+                @Param("idLoai") Integer idLoai,
+                @Param("idNcc") Integer idNcc
+        );
 
 
     @Query(value = """
