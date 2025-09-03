@@ -274,3 +274,7 @@ export const changeStatusPendingAdmin = (soImeis, idHoaDon, status) => {
     };
     return api.post(url, request)
 }
+
+export const deletePhieuGiamGiaHoaDon = (id) => {
+    return api.delete('/admin/hoa-don/' + id + '/phieu-giam-gia')
+}
