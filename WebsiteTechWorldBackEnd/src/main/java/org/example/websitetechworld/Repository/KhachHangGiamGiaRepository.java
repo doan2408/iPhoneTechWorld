@@ -3,6 +3,8 @@ package org.example.websitetechworld.Repository;
 import org.example.websitetechworld.Entity.KhachHang;
 import org.example.websitetechworld.Entity.KhachHangGiamGia;
 import org.example.websitetechworld.Entity.PhieuGiamGia;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,4 +58,14 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
     );
 
     KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang, Boolean isUser);
+
+    @Query("""
+       SELECT k.idPhieuGiamGia 
+       FROM KhachHangGiamGia k 
+       WHERE k.idKhachHang.id = :idKhachHang
+         AND (:search IS NULL OR k.idPhieuGiamGia.maGiamGia LIKE %:search% OR k.idPhieuGiamGia.tenGiamGia LIKE %:search%)
+       """)
+    Page<PhieuGiamGia> findVouchersByKhachHangIdAndTimKiem(@Param("idKhachHang") Integer idKhachHang,
+                                                           @Param("search") String search,
+                                                           Pageable pageable);
 }
