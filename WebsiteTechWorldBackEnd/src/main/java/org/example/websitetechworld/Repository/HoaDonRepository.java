@@ -33,7 +33,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
           AND (:from IS NULL OR hd.ngayTaoHoaDon >= :from)
           AND (:to IS NULL OR hd.ngayTaoHoaDon <= :to)
     """)
-    Page<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull(
+    Page<HoaDon> findByIsDeleteIsFalseOrIsDeleteIsNull(
             @Param("keyword") String keyword,
             @Param("trangThai") TrangThaiThanhToan trangThai,
             @Param("loaiHoaDon") LoaiHoaDon loaiHoaDon,
@@ -41,7 +41,16 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             @Param("to") LocalDateTime to,
             Pageable pageable);
 
-    Integer countByTrangThaiThanhToan(TrangThaiThanhToan trangThaiThanhToan);
+    @Query("""
+        SELECT
+            COUNT_BIG(hd)
+        FROM
+            HoaDon hd
+        WHERE
+            hd.trangThaiThanhToan = :trangThaiThanhToan
+            AND (hd.isDelete IS NULL OR hd.isDelete = false )
+    """)
+    Integer countPending(TrangThaiThanhToan trangThaiThanhToan);
 
     @Query (value = """
                     SELECT
@@ -52,6 +61,8 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
                         is_delete = 0
                         AND trang_thai_thanh_toan = 'COMPLETED'
                         AND ngay_thanh_toan IS NOT NULL
+                        AND MONTH(ngay_thanh_toan) = MONTH(GETDATE())
+                        AND YEAR(ngay_thanh_toan) = YEAR(GETDATE())
                     """, nativeQuery = true)
     BigDecimal doanhThuThang();
 
@@ -95,7 +106,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
         """, nativeQuery = true)
     List<Object[]> findHoaDonAndChiTiet(@Param("idHoaDon") Integer idHoaDon);
 
-    List<HoaDon> findByIsDeleteFalseOrIsDeleteIsNull();
+    List<HoaDon> findByIsDeleteIsFalseOrIsDeleteIsNull();
 
     @Query("SELECT h FROM HoaDon h " +
             "WHERE (h.isDelete = false OR h.isDelete IS NULL) " +
@@ -130,4 +141,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     List<HoaDon> findByLoaiHoaDonAndNgayThanhToanIsNullAndNgayTaoHoaDonBefore(
             LoaiHoaDon loaiHoaDon, LocalDateTime thoiDiem
     );
+
+    Long countByIsDeleteIsNullOrIsDeleteIsFalse();
 }

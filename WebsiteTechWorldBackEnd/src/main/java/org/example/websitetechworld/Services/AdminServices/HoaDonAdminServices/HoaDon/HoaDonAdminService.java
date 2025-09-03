@@ -136,7 +136,7 @@ public class HoaDonAdminService {
 
 
         return hoaDonRepository
-                .findByIsDeleteFalseOrIsDeleteIsNull(keyword,trangThai,loaiHoaDon,fromDateTime,toDateTime,pageable)
+                .findByIsDeleteIsFalseOrIsDeleteIsNull(keyword,trangThai,loaiHoaDon,fromDateTime,toDateTime,pageable)
                 .map(GetAllHoaDonAdminResponse::convertDto);
     }
 
@@ -319,6 +319,7 @@ public class HoaDonAdminService {
                 khachHangGiamGiaRepository.save(khgg);
             }
         }
+        updateTongTien(idHoaDon);
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
@@ -358,11 +359,11 @@ public class HoaDonAdminService {
     }
 
     public Long countHoaDon () {
-        return hoaDonRepository.count();
+        return hoaDonRepository.countByIsDeleteIsNullOrIsDeleteIsFalse();
     }
 
     public Integer countHoaDonPending () {
-        return hoaDonRepository.countByTrangThaiThanhToan(TrangThaiThanhToan.PENDING);
+        return hoaDonRepository.countPending(TrangThaiThanhToan.PENDING);
     }
 
     public BigDecimal doangThuThang () {
