@@ -94,6 +94,7 @@ public class ModelSanPhamService {
 //        entity.setIdCameraSau(cameraSauRepo.findById(req.getIdCameraSau()).orElse(null));
         entity.setIdXuatXu(xuatXuRepo.findById(req.getIdXuatXu()).orElse(null));
         entity.setIdLoai(loaiRepo.findById(req.getIdLoai()).orElse(null));
+        entity.setTrangThaiSanPhamModel(TrangThaiSanPhamModel.ACTIVE);
     }
 
 
@@ -217,7 +218,7 @@ public class ModelSanPhamService {
 
 
     public List<ModelSanPhamAdminResponse> getAllListModelSanPhamAdmin() {
-        List<ModelSanPham> list = modelSanPhamRepo.findAll();
+        List<ModelSanPham> list = modelSanPhamRepo.findAllByStatus(TrangThaiSanPhamModel.ACTIVE);
 
         return mapEntityToResponseList(list);
     }
@@ -263,7 +264,8 @@ public class ModelSanPhamService {
                 tenFormat,
 //                request.getIdRam(),
                 request.getIdXuatXu(),
-                request.getIdLoai()
+                request.getIdLoai(),
+                TrangThaiSanPhamModel.ACTIVE
         )) {
             throw new BusinessException("model.duplicate.config");
         }
@@ -330,7 +332,8 @@ public class ModelSanPhamService {
             if (modelSanPhamRepository.existsModelWithSameConfig(
                     tenFormat,
                     request.getIdXuatXu(),
-                    request.getIdLoai()
+                    request.getIdLoai(),
+                    TrangThaiSanPhamModel.ACTIVE
             )) {
                 throw new BusinessException("model.duplicate.config");
             }
@@ -652,7 +655,7 @@ public class ModelSanPhamService {
                 sanPham.setIdLoai(loai);
 
                 // Kiểm tra trùng lặp
-                if (modelSanPhamRepository.existsModelWithSameConfig(tenFormat, xuatXu.getId(), loai.getId())) {
+                if (modelSanPhamRepository.existsModelWithSameConfig(tenFormat, xuatXu.getId(), loai.getId(), TrangThaiSanPhamModel.ACTIVE)) {
                     throw new BusinessException("Model trùng lặp cấu hình tại dòng " + (row.getRowNum() + 1) + ".");
                 }
 

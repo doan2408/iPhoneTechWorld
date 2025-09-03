@@ -1,6 +1,7 @@
 package org.example.websitetechworld.Repository;
 
 import org.example.websitetechworld.Entity.ModelSanPham;
+import org.example.websitetechworld.Enum.SanPham.TrangThaiSanPhamModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -88,14 +89,20 @@ public interface ModelSanPhamRepository extends JpaRepository<ModelSanPham, Inte
         lower(m.tenModel) = lower(:tenModel)
         and m.idXuatXu.id = :idXuatXu
         and m.idLoai.id = :idLoai
+        and m.trangThaiSanPhamModel = :trangThai
     """)
     boolean existsModelWithSameConfig (
             @Param("tenModel") String tenModel,
 //            @Param("idRam") Integer idRam,
             @Param("idXuatXu") Integer idXuatXu,
-            @Param("idLoai") Integer idLoai
+            @Param("idLoai") Integer idLoai,
+            @Param("trangThai") TrangThaiSanPhamModel trangThaiSanPhamModel
     );
 
     boolean existsByIdModelSanPham(Integer tenModel);
+
+    @Query(value = "select md from ModelSanPham md " +
+            "where md.trangThaiSanPhamModel =:trangThai")
+    List<ModelSanPham> findAllByStatus(@Param("trangThai")TrangThaiSanPhamModel trangThaiSanPhamModel);
 
 }

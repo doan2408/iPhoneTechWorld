@@ -177,4 +177,5 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
                 AND spct.idSanPham.trangThaiSanPham = 'ACTIVE'
     """)
     List<Object[]> checkProductStatus(@Param("idSanPhamChiTietId") Integer idSanPhamChiTietId);
+
 }

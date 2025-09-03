@@ -149,7 +149,8 @@ public class SanPhamChiTietAdminService {
 
 
     public boolean existsVariantInLoai(Integer idSp, Integer idMau, Integer idRom, Integer idLoai, Integer idNCC) {
-        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idSp, idMau, idRom, idLoai, idNCC);
+        Integer idSpNew =  sanPhamRepo.findIdSpByIdModel(idLoai);
+        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idSpNew, idMau, idRom, idLoai, idNCC);
         return result != null && result == 1;
     }
 

@@ -147,7 +147,7 @@
                     <CheckCircle class="icon-small" /> SẴN SÀNG GIAO
                 </button>
 
-                <button v-if="canReady && order.shippingMethod == 'express' && order.trangThaiThanhToan == 'PENDING'"
+                <button v-if="canConfirm && order.shippingMethod == 'express'"
                     @click="updateShippingMethod(order)" class="action-btn ship-btn">
                     <Truck class="icon-small" /> VẬN CHUYỂN TIÊU CHUẨN
                 </button>
@@ -359,18 +359,13 @@
                                 <p>{{ order.estimatedDelivery ? formatDateTime(order.estimatedDelivery) : 'Chưa xác định' }}</p>
                             </div> -->
                             <div class="info-item">
-                                <label>Người giao hàng</label>
+                                <label>Phương thức giao hàng</label>
                                 <div v-if="order.driver" class="driver-info">
                                     <div class="driver-avatar">
                                         <Truck class="icon-small" />
                                     </div>
-                                    <div>
-                                        <p class="driver-name">{{ order.driver.name }}</p>
-                                        <p class="driver-phone">{{ order.driver.phone }}</p>
-                                    </div>
-                                    <button @click="callDriver" class="contact-btn">Gọi</button>
                                 </div>
-                                <p v-else class="no-driver">Nhân viên cửa hàng</p>
+                                <p v-else class="no-driver">{{ order.shippingMethod === 'express' ? 'Giao hàng nhanh' : 'Giao hàng tiêu chuẩn' }}</p>
                             </div>
                             <div class="info-item">
                                 <label>Ghi chú</label>

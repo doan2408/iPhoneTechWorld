@@ -87,7 +87,7 @@
         <el-col :span="12">
           <el-form-item label="Màu sắc" prop="selectedMaus" :error="errors.selectedMaus">
             <div style="display: flex; gap: 8px; width: 100%">
-              <el-select v-model="selectedMaus" multiple placeholder="Chọn màu sắc" clearable
+              <el-select v-model="selectedMaus" multiple placeholder="Chọn màu sắc" clearable filterable
                 @change="errors.selectedMaus = ''" style="width: 100%">
                 <el-option v-for="mau in maus" :key="mau.id" :label="mau.tenMau" :value="mau.id" />
               </el-select>
@@ -103,7 +103,7 @@
         <el-col :span="12">
           <el-form-item label="ROM" prop="selectedRoms" :error="errors.selectedRoms">
             <div style="display: flex; gap: 8px; width: 100%">
-              <el-select v-model="selectedRoms" multiple placeholder="Chọn ROM" clearable
+              <el-select v-model="selectedRoms" multiple placeholder="Chọn ROM" clearable filterable
                 @change="errors.selectedRoms = ''" style="flex: 1">
                 <el-option v-for="rom in roms" :key="rom.id" :label="rom.dungLuong" :value="rom.id" />
               </el-select>

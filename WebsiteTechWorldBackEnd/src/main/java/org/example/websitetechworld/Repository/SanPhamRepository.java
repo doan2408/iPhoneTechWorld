@@ -309,4 +309,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     """,
             nativeQuery = true)
     Page<SanPham> getAllSanPhamByActive(@Param("search") String search, Pageable pageable);
+
+    @Query("""
+        SELECT sp.id FROM SanPham sp WHERE sp.idModelSanPham.idModelSanPham = :idModelSanPham
+    """)
+    Integer findIdSpByIdModel(Integer idModelSanPham);
 }
