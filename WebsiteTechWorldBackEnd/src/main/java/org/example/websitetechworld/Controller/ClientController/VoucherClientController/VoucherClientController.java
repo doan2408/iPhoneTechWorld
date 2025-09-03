@@ -2,6 +2,7 @@ package org.example.websitetechworld.Controller.ClientController.VoucherClientCo
 
 import lombok.RequiredArgsConstructor;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.PhieuGiamGiaClientResponse.PhieuGiamGiaClientResponse;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminServices.PhieuGiamGiaAdminService;
@@ -41,5 +42,15 @@ public class VoucherClientController {
         return ResponseEntity.ok(response);
     }
 
-
+    @GetMapping("/khach-hang")
+    public ResponseEntity<Page<PhieuGiamGiaClientResponse>> getAllVoucherKhachHang(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Page<PhieuGiamGiaClientResponse> result = phieuGiamGiaAdminService.getAllVoucherKhachHang(
+                search, page, size, sortBy, direction);
+        return ResponseEntity.ok(result);
+    }
 }

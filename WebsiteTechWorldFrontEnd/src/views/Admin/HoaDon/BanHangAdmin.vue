@@ -674,33 +674,41 @@
         </div>
     </div>
 
-    <transition name="modal-fade">
-        <div v-if="isVoucherModalOpen" class="modal-overlay-pgg" @click.self="closeVoucherModal">
-            <div class="modal-content-pgg">
-                <div class="modal-header">
-                    <h3 class="modal-title">Chọn phiếu giảm giá</h3>
-                    <button class="modal-close-button" @click="closeVoucherModal">
-                        ✕
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <ul class="voucher-list">
-                        <p v-if="discountList.value" style="text-align: center; font-style: italic;">
-                            Khách hàng không có giảm giá nào
-                        </p>
-                        <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
-                            <div>
-                                <strong>{{ discount.tenGiamGia }}</strong>
-                                <small>Giảm: {{ discount.giaTriGiamGia }}%</small>
-                            </div>
-                            <button @click="applyDiscount(discount)" class="apply-button">
-                                Áp dụng
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    <transition name="voucher-fade">
+    <div v-if="isVoucherModalOpen" class="voucher-overlay" @click.self="closeVoucherModal">
+        <div class="voucher-modal">
+        <div class="voucher-header">
+            <h3 class="voucher-title">🎟️ Chọn phiếu giảm giá</h3>
+            <button class="voucher-close" @click="closeVoucherModal">✕</button>
         </div>
+
+        <div class="voucher-body">
+            <p v-if="!discountList || discountList.length === 0" class="voucher-empty">
+            Khách hàng không có phiếu giảm giá nào
+            </p>
+
+            <ul class="voucher-list">
+            <li v-for="discount in discountList" :key="discount.id" class="voucher-item">
+                <div class="voucher-info">
+                <strong class="voucher-name">{{ discount.tenGiamGia }}</strong>
+                <div class="voucher-details">
+                    <span v-if="discount.loaiGiamGia === 'Phần trăm'">
+                    Giảm: {{ discount.giaTriGiamGia }}% <br>
+                    Tối đa: {{ formatCurrency(discount.giaTriGiamGiaToiDa) }}
+                    </span>
+                    <span v-else>
+                    Giảm: {{ formatCurrency(discount.giaTriGiamGia) }}
+                    </span>
+                </div>
+                </div>
+                <button @click="applyDiscount(discount)" class="voucher-apply">
+                Áp dụng
+                </button>
+            </li>
+            </ul>
+        </div>
+        </div>
+    </div>
     </transition>
 </template>
 
@@ -725,7 +733,8 @@ import {
     updateGia,
     getAllLichSuBanHang,
     viewLichSuHoaDon,
-    deleteTTShipping
+    deleteTTShipping,
+    deletePhieuGiamGiaHoaDon
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -743,6 +752,7 @@ import tienMatPng from '@/assets/HinhAnh/tienmat.png'
 import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import ScreenLock from '../AdminLock/ScreenLock.vue';
+import { deletePhieuGiamGia } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -2546,8 +2556,11 @@ const applyDiscount = (discount) => {
     isVoucherModalOpen.value = false;
 };
 
-const clearDiscount = () => {
+const clearDiscount = async ()  => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    await deletePhieuGiamGiaHoaDon(storedId)
     selectedDiscount.value = null;
+
 };
 
 // Biến cho modal lịch sử bán hàng

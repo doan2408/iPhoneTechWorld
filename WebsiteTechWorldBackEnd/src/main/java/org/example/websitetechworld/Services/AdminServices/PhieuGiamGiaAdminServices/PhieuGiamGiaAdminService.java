@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminSer
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.PhieuGiamGiaClientResponse.PhieuGiamGiaClientResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
@@ -9,7 +10,9 @@ import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Events.PhieuGiamGiaUpdatedEvent;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
+import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -263,6 +268,25 @@ public class PhieuGiamGiaAdminService {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
+    private PhieuGiamGiaClientResponse anhXa (KhachHangGiamGia khachHangGiamGia) {
+        PhieuGiamGiaClientResponse response = new PhieuGiamGiaClientResponse();
+        response.setId(khachHangGiamGia.getIdPhieuGiamGia().getId());
+        response.setMaGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getMaGiamGia());
+        response.setTenGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getTenGiamGia());
+        response.setLoaiGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getLoaiGiamGia());
+        response.setGiaTriGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriGiamGia());
+        response.setGiaTriDonHangToiThieu(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriDonHangToiThieu());
+        response.setGiaTriGiamGiaToiDa(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriGiamGiaToiDa());
+        response.setNgayBatDau(khachHangGiamGia.getIdPhieuGiamGia().getNgayBatDau());
+        response.setNgayKetThuc(khachHangGiamGia.getIdPhieuGiamGia().getNgayKetThuc());
+        response.setSoLuong(khachHangGiamGia.getIdPhieuGiamGia().getSoLuong());
+        response.setDaDung(khachHangGiamGia.getIsUser());
+        response.setTrangThaiPhatHanh(khachHangGiamGia.getIdPhieuGiamGia().getTrangThaiPhatHanh());
+        response.setTrangThaiPhieuGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getTrangThaiPhieuGiamGia());
+
+        return response;
+    }
+
     //Hoa don
 
 
@@ -275,6 +299,30 @@ public class PhieuGiamGiaAdminService {
         Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
         Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.getDoiVoucher(timKiem, trangThai, ngayBatDau, ngayKetThuc, hangKhachHang, phanTrang);
         return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
+    }
+
+    public Page<PhieuGiamGiaClientResponse> getAllVoucherKhachHang(
+            String search, int trang, int kichThuoc,
+            String sapXepTheo, String huongSapXep) {
+        List<Map<String, String>> errors = new ArrayList<>();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer idKhachHang = null;
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            idKhachHang = userDetails.getId();
+        } else {
+            errors.add(Map.of("field", "taiKhoan", "message", "Không xác định được khách hàng"));
+        }
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+        Sort sapXep = huongSapXep.equalsIgnoreCase("desc")
+                ? Sort.by(sapXepTheo).descending()
+                : Sort.by(sapXepTheo).ascending();
+        Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
+        Page<KhachHangGiamGia> trangKhachHangGiamGia =
+                khachHangGiamGiaRepository.findVouchersByKhachHangIdAndTimKiem(idKhachHang, search, phanTrang);
+
+        return trangKhachHangGiamGia.map(this::anhXa);
     }
 
     @Transactional
