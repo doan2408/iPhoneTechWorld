@@ -9,7 +9,9 @@ import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPGG;
 import org.example.websitetechworld.Enum.PhieuGiamGia.TrangThaiPhatHanh;
 import org.example.websitetechworld.Events.PhieuGiamGiaUpdatedEvent;
 import org.example.websitetechworld.Repository.*;
+import org.example.websitetechworld.Services.LoginServices.CustomUserDetails;
 import org.example.websitetechworld.exception.ResourceNotFoundException;
+import org.example.websitetechworld.exception.ValidationException;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -274,6 +278,30 @@ public class PhieuGiamGiaAdminService {
         Sort sapXep = huongSapXep.equalsIgnoreCase("desc") ? Sort.by(sapXepTheo).descending() : Sort.by(sapXepTheo).ascending();
         Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
         Page<PhieuGiamGia> trangPhieuGiamGia = phieuGiamGiaRepository.getDoiVoucher(timKiem, trangThai, ngayBatDau, ngayKetThuc, hangKhachHang, phanTrang);
+        return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
+    }
+
+    public Page<PhieuGiamGiaAdminResponse> getAllVoucherKhachHang(
+            String search, int trang, int kichThuoc,
+            String sapXepTheo, String huongSapXep) {
+        List<Map<String, String>> errors = new ArrayList<>();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer idKhachHang = null;
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            idKhachHang = userDetails.getId();
+        } else {
+            errors.add(Map.of("field", "taiKhoan", "message", "Không xác định được khách hàng"));
+        }
+        if(!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+        Sort sapXep = huongSapXep.equalsIgnoreCase("desc")
+                ? Sort.by(sapXepTheo).descending()
+                : Sort.by(sapXepTheo).ascending();
+        Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
+        Page<PhieuGiamGia> trangPhieuGiamGia =
+                khachHangGiamGiaRepository.findVouchersByKhachHangIdAndTimKiem(idKhachHang, search, phanTrang);
+
         return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
     }
 

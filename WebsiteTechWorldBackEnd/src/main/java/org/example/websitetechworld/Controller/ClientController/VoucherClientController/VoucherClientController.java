@@ -41,5 +41,15 @@ public class VoucherClientController {
         return ResponseEntity.ok(response);
     }
 
-
+    @GetMapping("/khach-hang")
+    public ResponseEntity<Page<PhieuGiamGiaAdminResponse>> getAllVoucherKhachHang(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Page<PhieuGiamGiaAdminResponse> result = phieuGiamGiaAdminService.getAllVoucherKhachHang(
+                search, page, size, sortBy, direction);
+        return ResponseEntity.ok(result);
+    }
 }
