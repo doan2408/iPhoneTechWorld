@@ -265,6 +265,7 @@ public class HoaDonAdminController {
     @PutMapping("/{idHoaDon}/thanh-toan")
     public ResponseEntity<?> thanhToan(@PathVariable Integer idHoaDon, @RequestBody ThanhToanAdminRequest thanhToanAdminRequest) {
         try {
+            hoaDonAdminService.updateTongTien(idHoaDon);
             ThanhToanAdminResponse response = hoaDonAdminService.xuLyThanhToan(idHoaDon, thanhToanAdminRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
