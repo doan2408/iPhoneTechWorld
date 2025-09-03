@@ -2,6 +2,7 @@ package org.example.websitetechworld.Services.AdminServices.PhieuGiamGiaAdminSer
 
 import org.example.websitetechworld.Dto.Request.AdminRequest.PhieuGiamGiaAdminRequest.PhieuGiamGiaAdminRequest;
 import org.example.websitetechworld.Dto.Response.AdminResponse.PhieuGiamGiaAdminResponse.PhieuGiamGiaAdminResponse;
+import org.example.websitetechworld.Dto.Response.ClientResponse.PhieuGiamGiaClientResponse.PhieuGiamGiaClientResponse;
 import org.example.websitetechworld.Entity.*;
 import org.example.websitetechworld.Enum.KhachHang.HangKhachHang;
 import org.example.websitetechworld.Enum.KhachHang.LoaiDiem;
@@ -267,6 +268,25 @@ public class PhieuGiamGiaAdminService {
         return modelMapper.map(phieuGiamGia, PhieuGiamGiaAdminResponse.class);
     }
 
+    private PhieuGiamGiaClientResponse anhXa (KhachHangGiamGia khachHangGiamGia) {
+        PhieuGiamGiaClientResponse response = new PhieuGiamGiaClientResponse();
+        response.setId(khachHangGiamGia.getIdPhieuGiamGia().getId());
+        response.setMaGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getMaGiamGia());
+        response.setTenGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getTenGiamGia());
+        response.setLoaiGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getLoaiGiamGia());
+        response.setGiaTriGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriGiamGia());
+        response.setGiaTriDonHangToiThieu(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriDonHangToiThieu());
+        response.setGiaTriGiamGiaToiDa(khachHangGiamGia.getIdPhieuGiamGia().getGiaTriGiamGiaToiDa());
+        response.setNgayBatDau(khachHangGiamGia.getIdPhieuGiamGia().getNgayBatDau());
+        response.setNgayKetThuc(khachHangGiamGia.getIdPhieuGiamGia().getNgayKetThuc());
+        response.setSoLuong(khachHangGiamGia.getIdPhieuGiamGia().getSoLuong());
+        response.setDaDung(khachHangGiamGia.getIsUser());
+        response.setTrangThaiPhatHanh(khachHangGiamGia.getIdPhieuGiamGia().getTrangThaiPhatHanh());
+        response.setTrangThaiPhieuGiamGia(khachHangGiamGia.getIdPhieuGiamGia().getTrangThaiPhieuGiamGia());
+
+        return response;
+    }
+
     //Hoa don
 
 
@@ -281,7 +301,7 @@ public class PhieuGiamGiaAdminService {
         return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
     }
 
-    public Page<PhieuGiamGiaAdminResponse> getAllVoucherKhachHang(
+    public Page<PhieuGiamGiaClientResponse> getAllVoucherKhachHang(
             String search, int trang, int kichThuoc,
             String sapXepTheo, String huongSapXep) {
         List<Map<String, String>> errors = new ArrayList<>();
@@ -299,10 +319,10 @@ public class PhieuGiamGiaAdminService {
                 ? Sort.by(sapXepTheo).descending()
                 : Sort.by(sapXepTheo).ascending();
         Pageable phanTrang = PageRequest.of(trang, kichThuoc, sapXep);
-        Page<PhieuGiamGia> trangPhieuGiamGia =
+        Page<KhachHangGiamGia> trangKhachHangGiamGia =
                 khachHangGiamGiaRepository.findVouchersByKhachHangIdAndTimKiem(idKhachHang, search, phanTrang);
 
-        return trangPhieuGiamGia.map(this::anhXaPhieuGiamGia);
+        return trangKhachHangGiamGia.map(this::anhXa);
     }
 
     @Transactional
