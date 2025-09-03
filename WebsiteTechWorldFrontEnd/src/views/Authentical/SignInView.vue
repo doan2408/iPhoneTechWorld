@@ -112,6 +112,7 @@ watch([tai_khoan, mat_khau], () => {
             v-model.trim="tai_khoan"
             type="text"
             placeholder="Nhập tài khoản"
+            @input="tai_khoan = tai_khoan.replace(/\s/g, '')"
             class="form-control"
           />
           <div v-if="errors.tai_khoan" class="text-danger mb-1">

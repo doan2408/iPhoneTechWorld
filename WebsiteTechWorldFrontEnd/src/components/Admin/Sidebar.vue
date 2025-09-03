@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginService from "@/Service/LoginService/Login";
 import { useStore } from "vuex";
+import { ElMessageBox } from "element-plus";
 
 const store = useStore();
 // Biến lưu trạng thái đăng nhập
@@ -48,12 +49,20 @@ onMounted(async () => {
 // Xử lý đăng xuất
 const handleLogout = async () => {
   try {
+    await ElMessageBox.confirm("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", {
+      confirmButtonText: "Đăng xuất",
+      cancelButtonText: "Hủy",
+      type: "warning",
+    });
+
     await LoginService.logout(); // Gọi API đăng xuất
     isLoggedIn.value = false;
     localStorage.removeItem("user");
     router.push("/login"); // Điều hướng về trang đăng nhập
   } catch (err) {
-    console.error("Lỗi đăng xuất:", err);
+    if (err !== "cancel" && err !== "close") {
+      console.error("Lỗi đăng xuất:", err);
+    }
   }
 };
 
@@ -87,11 +96,16 @@ function toggleBaoHanhMenu() {
   <div class="admin-sidebar">
     <div>
       <div class="logo">
-        <img src="/src/components/images/LogoTechWorld-removebg-preview.png" alt="TechWorld" />
+        <img
+          src="/src/components/images/LogoTechWorld-removebg-preview.png"
+          alt="TechWorld"
+        />
       </div>
       <div class="user-info" v-if="isLoggedIn">
         <router-link to="/admin/staff/infor">
-          <span class="username"><i class="bi-person-lines-fill"></i> {{ user?.fullName }}</span>
+          <span class="username"
+            ><i class="bi-person-lines-fill"></i> {{ user?.fullName }}</span
+          >
         </router-link>
       </div>
 
@@ -100,7 +114,8 @@ function toggleBaoHanhMenu() {
           <!-- <li><router-link to="/admin/dashboard">Dashboard</router-link></li> -->
 
           <li>
-            <router-link to="/admin/statistical" class="icon stats-icon">Thống Kê
+            <router-link to="/admin/statistical" class="icon stats-icon"
+              >Thống Kê
             </router-link>
           </li>
 
@@ -109,8 +124,11 @@ function toggleBaoHanhMenu() {
           <!-- Quản lý sản phẩm có submenu -->
           <li @click="toggleProductMenu" class="menu-toggle">
             Quản lý sản phẩm
-            <i :class="showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
-              "></i>
+            <i
+              :class="
+                showProductMenu ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
+              "
+            ></i>
           </li>
           <ul v-if="showProductMenu" class="submenu">
             <li><router-link to="/admin/products">Sản phẩm</router-link></li>
@@ -141,7 +159,9 @@ function toggleBaoHanhMenu() {
 
           <li @click="toggleUserstMenu" v-if="isAdmin" class="menu-toggle">
             Quản lý người dùng
-            <i :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="showUsers ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
+            ></i>
           </li>
           <ul v-if="showUsers" class="submenu">
             <li>
@@ -153,25 +173,35 @@ function toggleBaoHanhMenu() {
           </ul>
 
           <li>
-            <router-link v-if="isStaff" to="/admin/client">Quản lý khách hàng</router-link>
+            <router-link v-if="isStaff" to="/admin/client"
+              >Quản lý khách hàng</router-link
+            >
           </li>
 
           <li @click="toggleOrderMenu" class="menu-toggle">
             Quản lý đơn hàng
-            <i :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
+            ></i>
           </li>
           <ul v-if="showOrders" class="submenu">
             <li><router-link to="/admin/bill">Quản lý hóa đơn</router-link></li>
-            <li><router-link to="/admin/handle">Quản lý yêu cầu</router-link></li>
+            <li>
+              <router-link to="/admin/handle">Quản lý yêu cầu</router-link>
+            </li>
           </ul>
 
           <li @click="toggleUuDaiMenu" class="menu-toggle">
             Quản lý ưu đãi
-            <i :class="showUuDai ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="showUuDai ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
+            ></i>
           </li>
           <ul v-if="showUuDai" class="submenu">
             <li>
-              <router-link to="/admin/promotions">Khuyến mãi sản phẩm</router-link>
+              <router-link to="/admin/promotions"
+                >Khuyến mãi sản phẩm</router-link
+              >
             </li>
             <li>
               <router-link to="/admin/voucher">Phiếu giảm giá</router-link>
@@ -179,12 +209,18 @@ function toggleBaoHanhMenu() {
           </ul>
 
           <li>
-            <router-link to="/admin/danhGiaSanPham">Quản lý đánh giá</router-link>
+            <router-link to="/admin/danhGiaSanPham"
+              >Quản lý đánh giá</router-link
+            >
           </li>
 
           <li @click="toggleBaoHanhMenu" class="menu-toggle">
             Quản lý bảo hành
-            <i :class="showBaoHanh ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+            <i
+              :class="
+                showBaoHanh ? 'bi bi-chevron-down' : 'bi bi-chevron-right'
+              "
+            ></i>
           </li>
           <ul v-if="showBaoHanh" class="submenu">
             <li>
@@ -194,12 +230,16 @@ function toggleBaoHanhMenu() {
               <router-link to="/admin/warranty">Quản lý bảo hành</router-link>
             </li>
             <li>
-              <router-link to="/admin/warranty-request">Yêu cầu bảo hành</router-link>
+              <router-link to="/admin/warranty-request"
+                >Yêu cầu bảo hành</router-link
+              >
             </li>
           </ul>
 
           <li>
-            <router-link to="/admin/live-stream" target="_blank">Mở live Stream</router-link>
+            <router-link to="/admin/live-stream" target="_blank"
+              >Mở live Stream</router-link
+            >
           </li>
         </ul>
       </nav>
@@ -210,7 +250,9 @@ function toggleBaoHanhMenu() {
       <a href="#" @click.prevent="handleLogout">Đăng xuất</a>
     </div>
     <div class="logout-section" v-if="!isLoggedIn">
-      <router-link to="/login" @click.prevent="handleLogout">Đăng nhập</router-link>
+      <router-link to="/login" @click.prevent="handleLogout"
+        >Đăng nhập</router-link
+      >
     </div>
   </div>
 </template>
@@ -219,11 +261,13 @@ function toggleBaoHanhMenu() {
 .admin-sidebar {
   width: 220px;
   height: 100vh;
-  background: linear-gradient(135deg,
-      #1e3a8a 0%,
-      #3b82f6 30%,
-      #1e40af 70%,
-      #1e3a8a 100%);
+  background: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #3b82f6 30%,
+    #1e40af 70%,
+    #1e3a8a 100%
+  );
   color: white;
   position: fixed;
   top: 0;
@@ -246,17 +290,23 @@ function toggleBaoHanhMenu() {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: radial-gradient(1px 1px at 20px 30px,
+  background-image: radial-gradient(
+      1px 1px at 20px 30px,
       rgba(255, 255, 255, 0.6),
-      transparent),
+      transparent
+    ),
     radial-gradient(1px 1px at 40px 70px, rgba(147, 197, 253, 0.5), transparent),
     radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(1px 1px at 130px 80px,
+    radial-gradient(
+      1px 1px at 130px 80px,
       rgba(191, 219, 254, 0.6),
-      transparent),
-    radial-gradient(1px 1px at 160px 120px,
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 160px 120px,
       rgba(255, 255, 255, 0.5),
-      transparent);
+      transparent
+    );
   background-repeat: repeat;
   background-size: 200px 150px;
   animation: sidebarStars 6s ease-in-out infinite alternate;
@@ -353,7 +403,6 @@ function toggleBaoHanhMenu() {
 .user-info a:hover {
   text-decoration: none;
 }
-
 
 nav {
   position: relative;
@@ -462,9 +511,11 @@ nav a.router-link-exact-active {
 
 .submenu {
   padding-left: 15px;
-  background: linear-gradient(135deg,
-      rgba(59, 130, 246, 0.4) 0%,
-      rgba(96, 165, 250, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.4) 0%,
+    rgba(96, 165, 250, 0.3) 100%
+  );
   margin-top: 5px;
   border-left: 3px solid #60a5fa;
   border-radius: 10px;
