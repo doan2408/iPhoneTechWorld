@@ -1006,6 +1006,7 @@ const capNhatSoLuong = debounce((index) => {
     .map((i) => i.trim())
     .filter((i) => i);
 
+    
   // Loại bỏ trùng lặp trong cùng danh sách
   const uniqueImeis = [...new Set(imeis)];
   const duplicateInSameVariant = imeis.filter(
@@ -1148,6 +1149,7 @@ const validateForm = () => {
     error.value = "Vui lòng thêm ít nhất một biến thể sản phẩm";
     hasError = true;
   }
+  
 
   // Kiểm tra chi tiết sản phẩm
   const allImeis = new Set();
@@ -1172,12 +1174,13 @@ const validateForm = () => {
     //   error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 hình ảnh`;
     //   hasError = true;
     // }
+    
 
     const imeis = chiTiet.imeisInput
       .split(",")
       .map((i) => i.trim())
       .filter((i) => i);
-    if (imeis.length === 0) {
+    if (imeis.length === 0 ) {
       // error.value = `Biến thể ${index + 1}: Phải có ít nhất 1 IMEI`;
       // hasError = true;
     } else {
@@ -1220,6 +1223,7 @@ const validateForm = () => {
 };
 
 const submitForm = async () => {
+  
   let loadingInstance = null;
   loading.submit = true;
   try {
@@ -1231,19 +1235,19 @@ const submitForm = async () => {
     }
     console.log("🧾 ID sản phẩm:", id.value);
 
-    const formValid = await sanPhamForm.value.validate();
-    console.log("✅ Form Element Plus hợp lệ:", formValid);
-    if (!formValid) {
-      toast.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
-      return;
-    }
+    // const formValid = await sanPhamForm.value.validate();
+    // console.log("✅ Form Element Plus hợp lệ:", formValid);
+    // if (!formValid) {
+    //   toast.error("Vui lòng kiểm tra lại dữ liệu nhập vào");
+    //   return;
+    // }
 
-    const logicValid = validateForm();
-    console.log("✅ Form logic validate hợp lệ:", logicValid);
-    if (!logicValid) {
-      toast.error(error.value);
-      return;
-    }
+    // const logicValid = validateForm();
+    // console.log("✅ Form logic validate hợp lệ:", logicValid);
+    // if (!logicValid) {
+    //   toast.error(error.value);
+    //   return;
+    // }
 
 
     const payload = {
@@ -1284,6 +1288,7 @@ const submitForm = async () => {
         };
       }),
     };
+
 
     console.log("🔍 Kiểm tra payload trước khi gửi:", payload);
     console.log("🔍 Kiểm tra ID sản phẩm trước khi gửi:", productId);

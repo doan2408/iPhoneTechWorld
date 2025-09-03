@@ -54,7 +54,7 @@ public class SanPhamChiTietAdminController {
 
     @GetMapping("/check-duplicate-variant")
     public ResponseEntity<?> checkDuplicateVariant(
-            @RequestParam Integer idSp,
+            @RequestParam (required = false) Integer idSp,
             @RequestParam Integer idMau,
             @RequestParam Integer idRom,
             @RequestParam (required = false) Integer idLoai
