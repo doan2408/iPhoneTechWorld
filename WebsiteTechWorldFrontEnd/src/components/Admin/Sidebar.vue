@@ -179,7 +179,7 @@ function toggleBaoHanhMenu() {
           </li>
 
           <li @click="toggleOrderMenu" class="menu-toggle">
-            Quản lý đơn hàng
+            Quản lý hóa đơn
             <i
               :class="showOrders ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"
             ></i>

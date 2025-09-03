@@ -20,6 +20,7 @@ public class GetAllHoaDonAdminResponse {
     private String tenNguoiMua;
     private String sdtNguoiMua;
     private BigDecimal tongTien;
+    private BigDecimal thanhTien;
     private LocalDateTime ngayTao;
     private String loaiHoaDon;
     private String trangThaiThanhToan;
@@ -34,6 +35,7 @@ public class GetAllHoaDonAdminResponse {
         response.setNgayTao(hoaDon.getNgayTaoHoaDon());
         response.setLoaiHoaDon(hoaDon.getLoaiHoaDon() != null ? hoaDon.getLoaiHoaDon().getDisplayName() : null);
         response.setTrangThaiThanhToan(hoaDon.getTrangThaiThanhToan() != null ? hoaDon.getTrangThaiThanhToan().getDisplayName() : null);
+        response.setThanhTien(hoaDon.getThanhTien());
         return  response;
     }
 }

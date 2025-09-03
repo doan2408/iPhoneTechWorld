@@ -184,7 +184,7 @@
               <th class="table-th">Người mua</th>
               <td class="table-th">Số điện thoại</td>
               <th class="table-th">Ngày tạo</th>
-              <th class="table-th">Tổng tiền</th>
+              <th class="table-th">Thành tiền</th>
               <th class="table-th">Loại</th>
               <th class="table-th">Trạng thái thanh toán</th>
               <th class="table-th">Hành động</th>
@@ -215,7 +215,7 @@
                 <div class="date">{{ formatDate(hoaDon.ngayTao) }}</div>
               </td>
               <td class="table-td">
-                <div class="amount">{{ formatCurrency(hoaDon.tongTien) }}</div>
+                <div class="amount">{{ formatCurrency(hoaDon.thanhTien) }}</div>
               </td>
               <td class="table-td">
                 <span class="type-badge" :class="getTypeBadgeClass(hoaDon.loaiHoaDon)">
