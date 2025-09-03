@@ -60,13 +60,12 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
     KhachHangGiamGia findByIdPhieuGiamGiaAndIdKhachHangAndIsUser(PhieuGiamGia idPhieuGiamGia, KhachHang idKhachHang, Boolean isUser);
 
     @Query("""
-       SELECT k.idPhieuGiamGia 
+       SELECT k 
        FROM KhachHangGiamGia k 
        WHERE k.idKhachHang.id = :idKhachHang
-         AND k.isUser = false
          AND (:search IS NULL OR k.idPhieuGiamGia.maGiamGia LIKE %:search% OR k.idPhieuGiamGia.tenGiamGia LIKE %:search%)
        """)
-    Page<PhieuGiamGia> findVouchersByKhachHangIdAndTimKiem(@Param("idKhachHang") Integer idKhachHang,
+    Page<KhachHangGiamGia> findVouchersByKhachHangIdAndTimKiem(@Param("idKhachHang") Integer idKhachHang,
                                                            @Param("search") String search,
                                                            Pageable pageable);
 }
