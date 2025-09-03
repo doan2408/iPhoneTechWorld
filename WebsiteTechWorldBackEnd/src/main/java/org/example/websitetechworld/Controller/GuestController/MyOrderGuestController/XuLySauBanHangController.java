@@ -76,9 +76,7 @@ public class XuLySauBanHangController {
     public ResponseEntity<?> updateStatus(@PathVariable Integer idHoaDon,
                                           @RequestBody CapNhatTrangThaiDTO request) {
         TrangThaiGiaoHang trangThai = TrangThaiGiaoHang.fromDisplayName(request.getTrangThaiDonHang());
-        if (trangThai.equals(TrangThaiGiaoHang.RETURNS)){
-            giaoHangAdminServices.updateStatus(idHoaDon, trangThai);
-        }
+        giaoHangAdminServices.updateStatus(idHoaDon, trangThai);
         return ResponseEntity.ok("Đã cập nhật trạng thái: " + trangThai.getDisplayName());
     }
     @PutMapping("/update-status")
