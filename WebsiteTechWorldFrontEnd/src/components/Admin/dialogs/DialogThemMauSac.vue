@@ -1,7 +1,7 @@
 <template>
   <el-dialog title="Thêm màu sắc" v-model="dialogVisible" width="600px" @close="handleClose" destroy-on-close>
 
-    <el-form :model="NewMauSac" ref="formRef" label-position="top" :rules="rules">
+    <el-form :model="NewMauSac" ref="formRef" label-position="top">
       <el-form-item label="Tên màu sắc" prop="tenMau">
         <el-input v-model="NewMauSac.tenMau" autocomplete="off" />
       </el-form-item>

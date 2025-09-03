@@ -131,7 +131,8 @@
                             </el-tooltip>
                             <el-tooltip content="Xóa" placement="top">
                                 <el-button size="small" type="danger" :icon="Delete" circle
-                                    @click="xoaKhuyenMai(scope.row)" class="action-btn delete" />
+                                    @click="openConfirm('Bạn có chắc chắn muốn xóa khuyến mãi này?', () => xoaKhuyenMai(scope.row))"
+                                    class="action-btn delete" />
                             </el-tooltip>
                         </div>
                     </template>
@@ -192,16 +193,14 @@
                             <h3 class="section-title">Thời gian hiệu lực</h3>
                             <div class="form-row">
                                 <el-form-item label="Thời gian bắt đầu" prop="ngayBatDau" class="form-item">
-                                    <el-date-picker v-model="form.ngayBatDau" type="datetime"
-                                        placeholder="Chọn thời gian bắt đầu" format="YYYY-MM-DD HH:mm"
-                                        value-format="YYYY-MM-DD HH:mm" :default-time="[new Date(2000, 1, 1, 0, 0, 0)]"
-                                        :show-seconds="false" class="full-width" @change="handleNgayBatDauChange" />
+                                    <el-date-picker v-model="form.ngayBatDau" type="date"
+                                        placeholder="Chọn thời gian bắt đầu" format="YYYY-MM-DD" :show-seconds="false"
+                                        class="full-width" @change="handleNgayBatDauChange" />
                                 </el-form-item>
                                 <el-form-item label="Thời gian kết thúc" prop="ngayKetThuc" class="form-item">
-                                    <el-date-picker v-model="form.ngayKetThuc" type="datetime"
-                                        placeholder="Chọn thời gian kết thúc" format="YYYY-MM-DD HH:mm"
-                                        value-format="YYYY-MM-DD HH:mm" :default-time="[new Date(2000, 1, 1, 0, 0, 0)]"
-                                        :show-seconds="false" class="full-width" />
+                                    <el-date-picker v-model="form.ngayKetThuc" type="date"
+                                        placeholder="Chọn thời gian kết thúc" format="YYYY-MM-DD" :show-seconds="false"
+                                        class="full-width" />
                                 </el-form-item>
                             </div>
                         </div>
@@ -297,7 +296,9 @@
             <template #footer>
                 <div class="dialog-footer">
                     <el-button @click="dialog = false" size="large" class="cancel-btn">Hủy</el-button>
-                    <el-button type="primary" @click="saveKhuyenMai" size="large" class="save-btn" :loading="loading">
+                    <el-button type="primary"
+                        @click="openConfirm(`Bạn có chắc muốn ${isEdit ? 'cập nhật' : 'tạo mới'} khuyến mãi này?`, () => saveKhuyenMai())"
+                        size="large" class="save-btn" :loading="loading">
                         {{ isEdit ? 'Cập nhật' : 'Tạo mới' }}
                     </el-button>
                 </div>
@@ -310,25 +311,25 @@
                 <h3 class="section-title">Chi tiết khuyến mãi</h3>
                 <el-descriptions :column="2" border>
                     <el-descriptions-item label="Mã khuyến mãi">{{ selectedKhuyenMai?.maKhuyenMai
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Tên khuyến mãi">{{ selectedKhuyenMai?.tenKhuyenMai
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Phần trăm giảm">{{ selectedKhuyenMai?.phanTramGiam
-                        }}%</el-descriptions-item>
+                    }}%</el-descriptions-item>
                     <el-descriptions-item label="Mức độ ưu tiên">{{
                         converMucDoUuTien(selectedKhuyenMai?.mucDoUuTien)
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Thời gian bắt đầu">{{ formatDateTime(selectedKhuyenMai?.ngayBatDau)
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Thời gian kết thúc">{{ formatDateTime(selectedKhuyenMai?.ngayKetThuc)
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Đối tượng áp dụng">{{
                         convertDoiTuongApDung(selectedKhuyenMai?.doiTuongApDung)
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Trạng thái">{{ convertTrangThai(selectedKhuyenMai?.trangThai)
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="Mô tả" :span="2">{{ selectedKhuyenMai?.moTa || 'Không có mô tả'
-                        }}</el-descriptions-item>
+                    }}</el-descriptions-item>
                 </el-descriptions>
                 <div class="form-section" style="margin-top: 20px;">
                     <h3 class="section-title">Sản phẩm chi tiết áp dụng</h3>
@@ -360,19 +361,26 @@
                 </div>
             </template>
         </el-dialog>
+
+        <ConfirmModal v-if="showConfirm" :message="confirmMessage" @confirm="handleConfirm"
+            @cancel="showConfirm = false" />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Edit, Delete, Search, Refresh, Calendar, View } from '@element-plus/icons-vue';
 import { createKhuyenMai, deleteKhuyenMai, getAllKhuyenMai, updateKhuyenMai, getAllSanPham, getSanPhamChiTietsBySanPhamIds, getSanPhamChiTietByIdKhuyenMai, getKhuyenMai, nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import store from '@/Service/LoginService/Store';
 import dayjs from "dayjs";
 import { useToast } from 'vue-toastification';
+import ConfirmModal from '@/views/Popup/ConfirmModal.vue';
 
 const toast = useToast();
+
+const showConfirm = ref(false)
+const confirmMessage = ref('')
+
 const search = ref('');
 const trangThai = ref('');
 const ngayBatDauFilter = ref(null);
@@ -532,7 +540,7 @@ const fetchKhuyenMai = async () => {
         khuyenMais.value = response.content;
         pagination.value.total = response.totalElements;
     } catch (error) {
-        ElMessage.error(error?.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi');
+        toast.error(error?.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi');
     } finally {
         loading.value = false;
     }
@@ -577,7 +585,7 @@ const fetchSanPhams = async () => {
         }));
         sanPhamPagination.value.total = response.length;
     } catch (error) {
-        ElMessage.error('Lỗi khi lấy danh sách sản phẩm');
+        toast.error('Lỗi khi lấy danh sách sản phẩm');
         console.error(error)
     } finally {
         sanPhamLoading.value = false;
@@ -640,7 +648,7 @@ const fetchSanPhamChiTiets = async (sanPhamIds) => {
         }));
         sanPhamChiTietPagination.value.total = response.length;
     } catch (error) {
-        ElMessage.error('Lỗi khi lấy danh sách sản phẩm chi tiết');
+        toast.error('Lỗi khi lấy danh sách sản phẩm chi tiết');
         console.error(error)
     } finally {
         sanPhamChiTietLoading.value = false;
@@ -660,7 +668,7 @@ const fetchDetailSanPhamChiTiets = async (idKhuyenMai) => {
         detailSanPhamChiTiets.value = response
         detailSanPhamChiTietPagination.value.total = detailSanPhamChiTiets.value.length;
     } catch (error) {
-        ElMessage.error('Lỗi khi lấy danh sách sản phẩm chi tiết');
+        toast.error('Lỗi khi lấy danh sách sản phẩm chi tiết');
     } finally {
         detailLoading.value = false;
     }
@@ -750,46 +758,37 @@ const saveKhuyenMai = async () => {
                 };
                 if (isEdit.value) {
                     await updateKhuyenMai(form.value.id, payload);
-                    ElMessage.success('Cập nhật khuyến mãi thành công');
+                    toast.success('Cập nhật khuyến mãi thành công');
                 } else {
                     await createKhuyenMai(payload);
-                    ElMessage.success('Tạo khuyến mãi thành công');
+                    toast.success('Tạo khuyến mãi thành công');
                 }
                 dialog.value = false;
                 fetchKhuyenMai();
             } catch (error) {
-                ElMessage.error(error?.message || 'Lỗi khi lưu khuyến mãi');
+                toast.error(error?.message || 'Lỗi khi lưu khuyến mãi');
             } finally {
                 loading.value = false;
             }
         } else {
-            ElMessage.error('Vui lòng kiểm tra các lỗi trong form');
+            toast.error('Vui lòng kiểm tra các lỗi trong form');
         }
     });
 };
 
 const xoaKhuyenMai = async (item) => {
     try {
-        await ElMessageBox.confirm("Bạn có chắc chắn muốn xóa khuyến mãi này?", 'Xác nhận', {
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy',
-            type: 'warning'
-        });
         if (new Date(item.ngayBatDau) < new Date()) {
-            ElMessage.error('Không thể xóa khuyến mại đã bắt đầu');
+            toast.error('Không thể xóa khuyến mại đã bắt đầu');
         } else {
             loading.value = true;
             await deleteKhuyenMai(item.id);
-            ElMessage.success('Xóa khuyến mãi thành công');
+            toast.success('Xóa khuyến mãi thành công');
             fetchKhuyenMai();
         }
     } catch (error) {
-        if (error === 'cancel') {
-            ElMessage.info('Đã hủy xóa');
-        } else {
-            console.error(error.message || "Lỗi khi xóa khuyến mãi");
-            ElMessage.error(error.message || 'Lỗi khi xóa khuyến mãi');
-        }
+        console.error(error.message || "Lỗi khi xóa khuyến mãi");
+        toast.error(error.message || 'Lỗi khi xóa khuyến mãi');
     } finally {
         loading.value = false;
     }
@@ -963,7 +962,7 @@ function formatToSQLDateTime(date) {
     const year = d.getFullYear();
     const month = pad(d.getMonth() + 1);
     const day = pad(d.getDate());
-    const hours = pad(d.getHours());
+    const hours = pad(0);
     const minutes = pad(d.getMinutes());
     const seconds = pad(d.getSeconds());
 
@@ -983,6 +982,19 @@ const getNextUpdateDelay = async () => {
         return 60_000;
     }
 };
+
+let confirmCallback = null
+
+function openConfirm(message, callback) {
+    confirmMessage.value = message
+    confirmCallback = callback
+    showConfirm.value = true
+}
+
+function handleConfirm() {
+    if (confirmCallback) confirmCallback()
+    showConfirm.value = false
+}
 
 watch(
     () => sanPhams.value.map(sp => ({ id: sp.id, selected: sp.selected })),
@@ -1438,7 +1450,7 @@ onUnmounted(() => {
 .form-item :deep(.el-input__wrapper.is-focus),
 .form-item :deep(.el-select .el-input__wrapper.is-focus),
 .form-item :deep(.el-date-editor.el-input.is-focus),
-.form-item :deep(.el-textarea__inner:focus) {    
+.form-item :deep(.el-textarea__inner:focus) {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -1577,6 +1589,14 @@ onUnmounted(() => {
 .custom-pagination :deep(.el-pager li.is-active) {
     background: linear-gradient(135deg, #143adf 0%, #14a8cd 100%);
     color: white;
+}
+
+:deep(.el-overlay) {
+  z-index: 1000 !important;
+}
+
+:deep(.el-overlay .el-dialog) {
+  z-index: 1000 !important;
 }
 
 @media (max-width: 768px) {
