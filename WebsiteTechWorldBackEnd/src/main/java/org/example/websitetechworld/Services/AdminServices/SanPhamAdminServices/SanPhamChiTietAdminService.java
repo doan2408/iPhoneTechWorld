@@ -148,15 +148,29 @@ public class SanPhamChiTietAdminService {
     }
 
 
-    public boolean existsVariantInLoai(Integer idSp, Integer idMau, Integer idRom, Integer idLoai) {
-        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idSp, idMau, idRom, idLoai);
+    public boolean existsVariantInLoai(Integer idSp, Integer idMau, Integer idRom, Integer idLoai, Integer idNCC) {
+        Integer result = sanPhamChiTietRepo.existsVariantInLoai(idSp, idMau, idRom, idLoai, idNCC);
         return result != null && result == 1;
     }
 
+
+//    public boolean existsVariantGia(Integer idSp, Integer idMau, Integer idRom, Integer idLoai) {
+//        Integer result = sanPhamChiTietRepo.existsVariantGia(idSp, idMau, idRom, idLoai);
+//        return result != null && result == 1;
+//    }
+
+    public Map<String, Object> existsVariantGia(Integer idSp, Integer idMau, Integer idRom, Integer idLoai) {
+        BigDecimal giaBan = sanPhamChiTietRepo.existsVariantGia(idSp, idMau, idRom, idLoai);
+        Map<String, Object> response = new HashMap<>();
+        response.put("exists", giaBan != null);
+        response.put("giaBan", giaBan != null ? giaBan.doubleValue() : null);
+        return response;
+    }
+
     // Optional: kiểm tra nhiều biến thể 1 lần
-    public void validateKhongTrungBienTheTheoLoai(Integer idLoai, Set<SanPhamChiTietAdminRepuest> chiTiets) {
+    public void validateKhongTrungBienTheTheoLoai(Integer idLoai, Integer idNCC, Set<SanPhamChiTietAdminRepuest> chiTiets) {
         for (SanPhamChiTietAdminRepuest ct : chiTiets) {
-            boolean exists = existsVariantInLoai(ct.getIdSanPham(), ct.getIdMau(), ct.getIdRom(), idLoai);
+            boolean exists = existsVariantInLoai(ct.getIdSanPham(), ct.getIdMau(), ct.getIdRom(), idLoai, idNCC);
             if (exists) {
                 throw new BusinessException("Biến thể màu + ROM này đã tồn tại trong cùng loại sản phẩm.");
             }

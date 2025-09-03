@@ -1308,64 +1308,64 @@ public class SanPhamAdminService {
         return sanPhamRepo.findTenDongSanPham(pageable);
     }
 
-    private void validateSanPhamRequest(SanPhamAdminRequest request, Boolean isUpdate) {
-        Set<String> variantKeySet = new HashSet<>();
-        Set<String> allImeis = new HashSet<>();
-
-        ModelSanPham model = modelSanPhamRepository
-                .findById(request.getIdModelSanPham())
-                .orElseThrow(() -> new BusinessException("model.notFound"));
-
-        Integer idLoai = model.getIdLoai().getId();
-
-        if (isUpdate) {
-            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai_Update(idLoai, request.getSanPhamChiTiets());
-        } else {
-            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets());
-        }
-
-        for (SanPhamChiTietAdminRepuest rq : request.getSanPhamChiTiets()) {
-            String key = rq.getIdMau() + "-" + rq.getIdRom();
-
-            if (!variantKeySet.add(key)) {
-                throw new BusinessException("chitiet.variant.duplicate", "Biến thể trùng tổ hợp màu - ROM: " + key);
-            }
-
-            List<String> imeis = rq.getImeis().stream()
-                    .map(i -> i.getSoImei().trim())
-                    .filter(s -> !s.isEmpty())
-                    .toList();
-
-            // 1. IMEI trùng trong cùng biến thể
-            if (new HashSet<>(imeis).size() < imeis.size()) {
-                throw new BusinessException("chitiet.imei.duplicate.self", "IMEI bị trùng trong cùng biến thể");
-            }
-
-            for (String imei : imeis) {
-                // 2. IMEI trùng giữa các biến thể
-                if (!allImeis.add(imei)) {
-                    throw new BusinessException("chitiet.imei.duplicate.cross", "IMEI trùng giữa các biến thể: " + imei);
-                }
-
-                // 3. IMEI đã tồn tại trong DB (trừ chính biến thể)
-                boolean exists;
-                if (isUpdate && rq.getId() != null) {
-                    exists = imeiReposiory.existsBySoImeiExceptChiTietId(imei, rq.getId()) == 1;
-                } else {
-                    exists = imeiReposiory.existsBySoImei(imei);
-                }
-
-                if (exists) {
-                    throw new BusinessException("chitiet.imei.exists", "IMEI đã tồn tại: " + imei);
-                }
-            }
-
-            // 4. So sánh số lượng IMEI và số lượng sản phẩm
-            if (!Objects.equals(rq.getSoLuong(), imeis.size())) {
-                throw new BusinessException("IMEI phải đúng với số lượng: " + rq.getSoLuong());
-            }
-        }
-    }
+//    private void validateSanPhamRequest(SanPhamAdminRequest request, Boolean isUpdate) {
+//        Set<String> variantKeySet = new HashSet<>();
+//        Set<String> allImeis = new HashSet<>();
+//
+//        ModelSanPham model = modelSanPhamRepository
+//                .findById(request.getIdModelSanPham())
+//                .orElseThrow(() -> new BusinessException("model.notFound"));
+//
+//        Integer idLoai = model.getIdLoai().getId();
+//
+//        if (isUpdate) {
+//            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai_Update(idLoai, request.getSanPhamChiTiets());
+//        } else {
+//            sanPhamChiTietAdminService.validateKhongTrungBienTheTheoLoai(idLoai, request.getSanPhamChiTiets());
+//        }
+//
+//        for (SanPhamChiTietAdminRepuest rq : request.getSanPhamChiTiets()) {
+//            String key = rq.getIdMau() + "-" + rq.getIdRom();
+//
+//            if (!variantKeySet.add(key)) {
+//                throw new BusinessException("chitiet.variant.duplicate", "Biến thể trùng tổ hợp màu - ROM: " + key);
+//            }
+//
+//            List<String> imeis = rq.getImeis().stream()
+//                    .map(i -> i.getSoImei().trim())
+//                    .filter(s -> !s.isEmpty())
+//                    .toList();
+//
+//            // 1. IMEI trùng trong cùng biến thể
+//            if (new HashSet<>(imeis).size() < imeis.size()) {
+//                throw new BusinessException("chitiet.imei.duplicate.self", "IMEI bị trùng trong cùng biến thể");
+//            }
+//
+//            for (String imei : imeis) {
+//                // 2. IMEI trùng giữa các biến thể
+//                if (!allImeis.add(imei)) {
+//                    throw new BusinessException("chitiet.imei.duplicate.cross", "IMEI trùng giữa các biến thể: " + imei);
+//                }
+//
+//                // 3. IMEI đã tồn tại trong DB (trừ chính biến thể)
+//                boolean exists;
+//                if (isUpdate && rq.getId() != null) {
+//                    exists = imeiReposiory.existsBySoImeiExceptChiTietId(imei, rq.getId()) == 1;
+//                } else {
+//                    exists = imeiReposiory.existsBySoImei(imei);
+//                }
+//
+//                if (exists) {
+//                    throw new BusinessException("chitiet.imei.exists", "IMEI đã tồn tại: " + imei);
+//                }
+//            }
+//
+//            // 4. So sánh số lượng IMEI và số lượng sản phẩm
+//            if (!Objects.equals(rq.getSoLuong(), imeis.size())) {
+//                throw new BusinessException("IMEI phải đúng với số lượng: " + rq.getSoLuong());
+//            }
+//        }
+//    }
 
     public Map<String,List<?>> fillDataForPulldown(){
         Map<String,List<?>> map = new HashMap<>();
