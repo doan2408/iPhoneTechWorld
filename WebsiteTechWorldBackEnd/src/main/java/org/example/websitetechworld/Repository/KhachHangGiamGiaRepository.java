@@ -63,6 +63,7 @@ public interface KhachHangGiamGiaRepository extends JpaRepository<KhachHangGiamG
        SELECT k.idPhieuGiamGia 
        FROM KhachHangGiamGia k 
        WHERE k.idKhachHang.id = :idKhachHang
+         AND k.isUser = false
          AND (:search IS NULL OR k.idPhieuGiamGia.maGiamGia LIKE %:search% OR k.idPhieuGiamGia.tenGiamGia LIKE %:search%)
        """)
     Page<PhieuGiamGia> findVouchersByKhachHangIdAndTimKiem(@Param("idKhachHang") Integer idKhachHang,
