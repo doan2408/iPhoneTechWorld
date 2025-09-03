@@ -709,7 +709,7 @@ const openEditDialog = async (item) => {
     form.value = {
         ...item,
         doiTuongApDung: item.doiTuongApDung || 'ALL',
-        mucDoUuTien: item.mucDoUuTien.toString(),
+        mucDoUuTien: item.mucDoUuTien?.toString(),
         idSanPhamChiTietList: item.idSanPhamChiTietList || [],
     };
     selectedSanPhamChiTietIds.value = form.value.idSanPhamChiTietList;
