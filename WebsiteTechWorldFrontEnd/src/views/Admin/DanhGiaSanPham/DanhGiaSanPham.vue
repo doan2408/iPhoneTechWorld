@@ -48,8 +48,8 @@
                 <el-col v-for="(img, index) in row.anhUrls" :key="index" :span="6">
                   <el-image
                     :src="img"
-                    class="w-14 h-14 rounded-md border border-gray-200 hover:border-blue-400 transition"
-                    fit="cover"
+                    class="w-24 h-24 rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-300 shadow-sm bg-white"
+                    fit="contain"
                     :preview-src-list="row.anhUrls"
                     :initial-index="index"
                     preview-teleported
