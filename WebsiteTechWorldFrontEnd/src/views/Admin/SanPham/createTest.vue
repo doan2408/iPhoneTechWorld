@@ -257,7 +257,7 @@
     v-model="variantPriceFormatted[selectedChiTiet]"
     placeholder="Nhập giá bán"
     style="width: 100%"
-    :disabled="checkGiaMap[`${sanPham.sanPhamChiTiets[selectedChiTiet]?.idMau}-${sanPham.sanPhamChiTiets[selectedChiTiet]?.idRom}`]"
+    v-if="checkGiaMap[`${sanPham.sanPhamChiTiets[selectedChiTiet]?.idMau}-${sanPham.sanPhamChiTiets[selectedChiTiet]?.idRom}`]"
     @input="(value) => handleVariantPriceInput(value, selectedChiTiet)"
     @change="errorsChiTiet[selectedChiTiet].giaBan = ''"
   >

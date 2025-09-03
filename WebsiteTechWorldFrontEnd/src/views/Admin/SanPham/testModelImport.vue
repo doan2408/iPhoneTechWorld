@@ -744,7 +744,7 @@
                   <Edit />
                 </el-icon>
               </el-button>
-              <el-button
+              <!-- <el-button
                 size="small"
                 type="danger"
                 @click="deleteModel(row.idModelSanPham, row)"
@@ -755,7 +755,7 @@
                 <el-icon>
                   <Delete />
                 </el-icon>
-              </el-button>
+              </el-button> -->
             </div>
           </template>
         </el-table-column>
