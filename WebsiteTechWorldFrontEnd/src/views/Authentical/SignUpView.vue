@@ -1,6 +1,6 @@
 <script setup>
 import router from "@/router";
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useStore } from "vuex";
 
 const khachHangRegister = ref({});
@@ -51,6 +51,10 @@ const handleRegister = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+})
 </script>
 
 <template>

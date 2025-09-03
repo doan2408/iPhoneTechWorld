@@ -335,7 +335,7 @@ public class HoaDonAdminController {
                                                                              @RequestParam(defaultValue = "10") int pageSize,
                                                                              @RequestParam(defaultValue = "0") int idKhachHang,
                                                                              @PathVariable(value = "hoaDonId") Integer hoaDonId){
-        return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId, idKhachHang));
+            return ResponseEntity.ok(imeiDaBanAdminServices.imeiTrangHoaDonList(pageNo,pageSize,hoaDonId, idKhachHang));
     }
 
     @GetMapping("/export")
@@ -377,5 +377,11 @@ public class HoaDonAdminController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @DeleteMapping("/{idHoaDon}/phieu-giam-gia")
+    public ResponseEntity<?> deletePhieuGiamGia (@PathVariable Integer idHoaDon) {
+        hoaDonAdminService.deletePhieuGiamGia(idHoaDon);
+        return ResponseEntity.ok("Thêm phiếu giảm giá cho hóa đơn thành công");
     }
 }

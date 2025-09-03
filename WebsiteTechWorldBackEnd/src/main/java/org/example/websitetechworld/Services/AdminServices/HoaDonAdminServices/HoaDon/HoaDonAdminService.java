@@ -291,6 +291,15 @@ public class HoaDonAdminService {
         hoaDonRepository.save(hoaDon);
     }
 
+    @Transactional
+    public void deletePhieuGiamGia(Integer idHoaDon){
+        HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại: " + idHoaDon));
+
+        hoaDon.setIdPhieuGiamGia(null);
+        hoaDonRepository.save(hoaDon);
+    }
+
 
     public ThanhToanAdminResponse xuLyThanhToan(Integer idHoaDon, ThanhToanAdminRequest request){
         HoaDon hoaDon = hoaDonRepository.findById(idHoaDon)

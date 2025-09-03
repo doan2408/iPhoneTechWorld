@@ -725,7 +725,8 @@ import {
     updateGia,
     getAllLichSuBanHang,
     viewLichSuHoaDon,
-    deleteTTShipping
+    deleteTTShipping,
+    deletePhieuGiamGiaHoaDon
 } from '@/Service/Adminservice/HoaDon/HoaDonAdminServices';
 import { ca, da } from 'element-plus/es/locales.mjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -743,6 +744,7 @@ import tienMatPng from '@/assets/HinhAnh/tienmat.png'
 import chuyenKhoanPng from '@/assets/HinhAnh/chuyenkhoan.png'
 import { nextDelay } from '@/Service/Adminservice/KhuyenMai/KhuyenMaiSanPhamService';
 import ScreenLock from '../AdminLock/ScreenLock.vue';
+import { deletePhieuGiamGia } from '@/Service/Adminservice/PhieuGiamGia/PhieuGiamGiaAdminService';
 
 // Search queries
 const productSearchQuery = ref('')
@@ -2546,8 +2548,11 @@ const applyDiscount = (discount) => {
     isVoucherModalOpen.value = false;
 };
 
-const clearDiscount = () => {
+const clearDiscount = async ()  => {
+    const storedId = localStorage.getItem("selectedInvoiceId");
+    await deletePhieuGiamGiaHoaDon(storedId)
     selectedDiscount.value = null;
+
 };
 
 // Biến cho modal lịch sử bán hàng
