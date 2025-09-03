@@ -99,6 +99,10 @@ watch([tai_khoan, mat_khau], () => {
   delete errors.mat_khau;
   delete errors.server;
 });
+
+onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+})
 </script>
 
 <template>

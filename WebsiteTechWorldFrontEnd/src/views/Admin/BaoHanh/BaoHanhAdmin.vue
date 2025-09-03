@@ -7,7 +7,6 @@
           <p class="page-subtitle">Tạo và quản lý các chương trình bảo hành</p>
         </div>
         <el-button
-          v-if="isAdmin"
           type="primary"
           size="large"
           class="create-btn"
@@ -218,7 +217,6 @@
               </el-tooltip>
               <el-tooltip content="Chỉnh sửa" placement="top">
                 <el-button
-                  v-if="isAdmin"
                   size="small"
                   type="primary"
                   :icon="Edit"

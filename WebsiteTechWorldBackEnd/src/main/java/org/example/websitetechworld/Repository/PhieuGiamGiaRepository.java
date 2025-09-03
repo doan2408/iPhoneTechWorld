@@ -61,6 +61,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
           AND (:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)
           AND (:hangToiThieu IS NULL OR p.hangToiThieu = :hangToiThieu)
           AND (p.trangThaiPhatHanh = 'ISSUED')
+          AND (p.soLuong > 0)
     """)
     Page<PhieuGiamGia> getDoiVoucher (
             @Param("search") String search,
