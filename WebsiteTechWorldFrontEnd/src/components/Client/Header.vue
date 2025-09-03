@@ -220,6 +220,9 @@ const goToLogin = () => {
               <router-link to="/client/danh-gia" class="nav-link">
                 <i class="fa fa-star"></i> Đánh giá
               </router-link>
+              <router-link to="/client/phieu-giam-gia">
+                <i class="fa fa-ticket-alt"></i> Voucher của tôi
+              </router-link>
               <router-link to="/client/doiDiem">
                 <i class="fa fa-exchange-alt"></i> Đổi điểm
               </router-link>

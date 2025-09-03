@@ -13,3 +13,15 @@ export const getAllVoucher = async ({ params }) => {
     );
   }
 };
+
+export const getAllVoucherKhachHang = async ({ params }) => {
+  try {
+    const response = await api.get(`${baseUrl}` + `/khach-hang`, { params });
+    return response.data;
+  } catch (err) {
+    console.error("Errors when getting vouchers");
+    throw (
+      err.response?.data || new Error("Lỗi khi lấy danh sách phiếu giảm giá của khách hàng")
+    );
+  }
+};
