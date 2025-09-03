@@ -25,6 +25,7 @@ const router = createRouter({
       { path: "verify-register", name: "verifyRegister", component: () => import("@/views/Authentical/VerifyRegister.vue"), meta: { title: "Xác nhận đăng ký" } },
       { path: "order-tracking-search", name: "orderTrackingSearch", component: () => import("@/views/Guest/OrderTrackingSearchGuest.vue"), meta: { title: "Tra cứu đơn hàng" } },
       { path: "order-tracking/:id", name: "orderTrackingGuest", component: () => import("@/views/Guest/OrderTrackingGuest.vue"), meta: { title: "Tra cứu đơn hàng" } },
+      { path: "viewer", name: "", component: () => import("@/views/Client/Viewer/Viewer.vue"), meta: { title: "Xem live stream" } },
     ]
   },
   

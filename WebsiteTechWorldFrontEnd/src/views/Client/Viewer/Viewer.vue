@@ -51,7 +51,7 @@
                   <div class="card-body py-2 px-3">
                     <h6 class="fw-semibold mb-1 text-truncate">{{ state.selectedProduct.tenSanPham }}</h6>
                     <p class="text-danger fw-bold small mb-2">{{ state.selectedProduct.giaBan }}₫</p>
-                    <button class="btn btn-sm btn-success w-100 fw-semibold" :disabled="!state.isLoggedIn"
+                    <button class="btn btn-sm btn-success w-100 fw-semibold"
                       @click="detailProduct(state.selectedProduct.id)">
                       Xem chi tiết
                     </button>
@@ -72,9 +72,10 @@
                 </div>
                 <div class="col-8">
                   <div class="card-body py-2 px-3">
+                    <h6 class="fw-semibold mb-1 text-truncate">{{ product.maSanPham }}</h6>
                     <h6 class="fw-semibold mb-1 text-truncate">{{ product.tenSanPham }}</h6>
                     <p class="text-danger fw-bold small mb-1">{{ product.giaBan }}₫</p>
-                    <button class="btn btn-sm btn-outline-primary w-100" :disabled="!state.isLoggedIn"
+                    <button class="btn btn-sm btn-outline-primary w-100"
                       @click.stop="detailProduct(product.id)">
                       Xem chi tiết
                     </button>
@@ -270,7 +271,13 @@ const sendChat = () => {
   state.chatInput = '';
 };
 
-const detailProduct = (id) => router.push(`/client/detail/${id}`);
+const detailProduct = (id) => {
+  if (state.isLoggedIn) {
+    router.push(`/client/detail/${id}`);
+  } else {
+    router.push(`/detail/${id}`);
+  }
+}
 
 const checkUser = () => {
   user.value = JSON.parse(localStorage.getItem("user")) || null;

@@ -71,6 +71,9 @@ const goToLogin = () => {
     </div>
     <nav>
       <ul>
+        <li>
+          <router-link to="/viewer"><i class="fa-solid fa-circle-dot"></i> Xem live stream</router-link>
+        </li>
         <!-- <li><router-link to="/category"><i class="fa fa-box"></i> Danh mục</router-link></li> -->
         <li><router-link to="/order-tracking-search"><i class="fa fa-file-alt"></i> Tra cứu đơn hàng</router-link></li>
         <li>
