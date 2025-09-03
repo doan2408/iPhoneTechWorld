@@ -1185,6 +1185,7 @@ const removeFromCart = async () => {
         showDeleteConfirmModal.value = false;
         await loadProducts();
         getHdctByImeiDaBan();
+        clearDiscount()
         toast.success("Trả lại sản phẩm thành công !");
 
     } catch (err) {
@@ -1583,6 +1584,7 @@ const handleRemoveSingleImei = async (item) => {
         await loadTabHoaDon(); // Load lại danh sách hóa đơn
         getHdctByImeiDaBan();
         loadProducts()
+        clearDiscount()
     } catch (error) {
         console.error('Lỗi khi trả IMEI:', error);
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
@@ -1620,6 +1622,7 @@ const confirmReturnSelected = async () => {
         await loadTabHoaDon();
         loadProducts()
         getHdctByImeiDaBan()
+        clearDiscount()
     } catch (error) {
         toast.error(`Lỗi khi trả sản phẩm: ${error.message}`);
     }
@@ -2560,7 +2563,7 @@ const clearDiscount = async ()  => {
     const storedId = localStorage.getItem("selectedInvoiceId");
     await deletePhieuGiamGiaHoaDon(storedId)
     selectedDiscount.value = null;
-
+    toast.success("Hủy áp dụng phiếu giảm giá thành công")
 };
 
 // Biến cho modal lịch sử bán hàng
