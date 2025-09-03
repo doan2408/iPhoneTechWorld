@@ -319,6 +319,7 @@ public class HoaDonAdminService {
                 khachHangGiamGiaRepository.save(khgg);
             }
         }
+        updateTongTien(idHoaDon);
         String hinhThucThanhToan = request.getHinhThucThanhToan().name();
         ThanhToanStrategy thanhToanStrategy = thanhToanFactory.getStrategy(hinhThucThanhToan);
         ThanhToanAdminResponse response = thanhToanStrategy.thanhToan(hoaDon,request);
