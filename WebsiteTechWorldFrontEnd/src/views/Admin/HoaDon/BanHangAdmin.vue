@@ -2527,6 +2527,7 @@ const onScannedImei = async (soImei) => {
             },
             [{ imei: product.data.soImei }]
         )
+        getHdctByImeiDaBan()
         toast.success("Đã thêm sản phẩm từ IMEI: " + product.data.soImei)
         // Nếu bạn muốn đóng modal sau khi quét xong:
         showQRModal.value = false
