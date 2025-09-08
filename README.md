@@ -6,8 +6,8 @@ WebsiteTechWorld là hệ thống thương mại điện tử chuyên cung cấp
 
 ## 📑 Mục lục
 
-- [🎯 Tính năng](#🎯-tính-năng)
-- [👥 Vai trò và nhiệm vụ từng thành viên](#👥-vai-trò-và-nhiệm-vụ-từng-thành-viên)
+- [Tính năng](#🎯-tính-năng)
+- [Vai trò và nhiệm vụ từng thành viên](#👥-vai-trò-và-nhiệm-vụ-từng-thành-viên)
 
 ---
 
@@ -21,7 +21,6 @@ WebsiteTechWorld là hệ thống thương mại điện tử chuyên cung cấp
 
 ### 👷 Nhân viên
 - Xử lý đơn hàng và cập nhật trạng thái
-- Quản lý kho hàng và tồn kho
 - Hỗ trợ khách hàng qua hệ thống chat hoặc email
 
 ### 🧑 Khách hàng
