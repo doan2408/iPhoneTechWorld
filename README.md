@@ -44,27 +44,27 @@ Dự án WebsiteTechWorld được triển khai bởi 5 thành viên, mỗi ngư
 
 ### 🔹 Phí Duy Mạnh – Leader  
 - Phụ trách bán hàng online và tại quầy  
-- Xử lý giao hàng, trả hàng, bảo hành  
+- Xử lý giao hàng, trả hàng, xử lý logic yêu cầu bảo hành bảo hành  
 - Quản lý đơn hàng, tra cứu đơn hàng  
-- Soạn sản phẩm, thực hiện thanh toán  
-- **Lưu ý:** Là người duy nhất có quyền **pull request** và **merge vào nhánh `main`**
+- Thực hiện thanh toán, quét qr sản phẩm
+- Xây dựng tính năng yêu thích sản phẩm
+- Xây dựng tính năng so sánh sản phẩm  
+- **Lưu ý:** Là người duy nhất được review tạo **pull request** và **merge vào nhánh `main`**
 
 ---
 
 ### 🔹 Nguyễn Bá Doãn   
-- Xây dựng chức năng đăng ký, đăng nhập  
-- Tích hợp quét mã, quẹt mã khẩu  
+- Đăng ký, đăng nhập, quên mật khẩu    
 - Quản lý nhân viên và khách hàng  
 - Phân hạng người dùng và hệ thống tích điểm  
-- Thiết kế trang chủ và chức năng bảo hành (CRUD)
+- Thiết kế trang chủ, tạo bảo hành - loại bảo hành
 
 ---
 
 ### 🔹 Nguyễn Đức Cường  
-- Quản lý sản phẩm và kho hàng  
-- Xử lý hóa đơn và chương trình khuyến mãi  
-- Phân quyền người dùng và phân công công việc  
-- Lọc và phân tích thông tin khách hàng
+- Quản lý sản phẩm   
+- Quản lý đánh giá sản phẩm
+- Hỗ trợ khách hàng
 
 ---
 
@@ -72,14 +72,13 @@ Dự án WebsiteTechWorld được triển khai bởi 5 thành viên, mỗi ngư
 - Triển khai luồng quản lý phiếu giảm giá  
 - Quản lý khuyến mãi sản phẩm  
 - Tích hợp chức năng live stream  
-- Xây dựng tính năng yêu thích sản phẩm
 
 ---
 
 ### 🔹 Bùi Thị Minh  
 - Thống kê dữ liệu người dùng  
 - Quản lý thông tin khách hàng phía frontend  
-- Xây dựng trang "My Account", đơn hàng và yêu thích
+- Xây dựng trang "My Order"
 
 ---
 
