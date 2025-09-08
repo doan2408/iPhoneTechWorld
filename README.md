@@ -36,6 +36,53 @@ WebsiteTechWorld là hệ thống thương mại điện tử chuyên cung cấp
 
 ---
 
+## 👥 Vai trò và nhiệm vụ từng thành viên
+
+Dự án WebsiteTechWorld được triển khai bởi 5 thành viên, mỗi người đảm nhận một phần công việc cụ thể nhằm đảm bảo tiến độ và chất lượng sản phẩm.
+
+---
+
+### 🔹 Phí Duy Mạnh – Leader  
+- Phụ trách bán hàng online và tại quầy  
+- Xử lý giao hàng, trả hàng, bảo hành  
+- Quản lý đơn hàng, tra cứu đơn hàng  
+- Soạn sản phẩm, thực hiện thanh toán  
+- **Lưu ý:** Là người duy nhất có quyền **pull request** và **merge vào nhánh `main`**
+
+---
+
+### 🔹 Nguyễn Bá Doãn   
+- Xây dựng chức năng đăng ký, đăng nhập  
+- Tích hợp quét mã, quẹt mã khẩu  
+- Quản lý nhân viên và khách hàng  
+- Phân hạng người dùng và hệ thống tích điểm  
+- Thiết kế trang chủ và chức năng bảo hành (CRUD)
+
+---
+
+### 🔹 Nguyễn Đức Cường  
+- Quản lý sản phẩm và kho hàng  
+- Xử lý hóa đơn và chương trình khuyến mãi  
+- Phân quyền người dùng và phân công công việc  
+- Lọc và phân tích thông tin khách hàng
+
+---
+
+### 🔹 Lê Chí Nguyên  
+- Triển khai luồng quản lý phiếu giảm giá  
+- Quản lý khuyến mãi sản phẩm  
+- Tích hợp chức năng live stream  
+- Xây dựng tính năng yêu thích sản phẩm
+
+---
+
+### 🔹 Bùi Thị Minh  
+- Thống kê dữ liệu người dùng  
+- Quản lý thông tin khách hàng phía frontend  
+- Xây dựng trang "My Account", đơn hàng và yêu thích
+
+---
+
 ## 🏗️ Kiến trúc hệ thống
 
 ```plaintext
