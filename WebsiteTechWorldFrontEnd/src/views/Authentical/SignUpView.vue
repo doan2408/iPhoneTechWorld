@@ -1,7 +1,15 @@
 <script setup>
 import router from "@/router";
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
+// Import Icon từ Element Plus để đồng bộ giao diện
+import {
+  User,
+  Lock,
+  Message,
+  Postcard,
+  ArrowRight,
+} from "@element-plus/icons-vue";
 
 const khachHangRegister = ref({});
 const confirm_mat_khau = ref("");
@@ -11,18 +19,18 @@ const store = useStore();
 const emit = defineEmits(["switchToLogin"]);
 
 const handleRegister = async () => {
-  //remove old errors
+  // Reset lỗi cũ
   Object.keys(errors).forEach((key) => delete errors[key]);
 
   const { taiKhoan, matKhau, tenKhachHang, email } = khachHangRegister.value;
 
-  // Kiểm tra input
+  // Validate inputs
   if (!taiKhoan?.trim()) errors.taiKhoan = "Vui lòng nhập tài khoản";
   if (!matKhau?.trim()) errors.matKhau = "Vui lòng nhập mật khẩu";
   if (!tenKhachHang?.trim()) errors.tenKhachHang = "Vui lòng nhập họ tên";
   if (!email?.trim()) errors.email = "Vui lòng nhập email";
   if (matKhau !== confirm_mat_khau.value) {
-    errors.confirm_mat_khau = "Mật khẩu nhập lại không khớp";
+    errors.confirm_mat_khau = "Mật khẩu xác nhận không khớp";
   }
 
   if (Object.keys(errors).length > 0) return;
@@ -31,354 +39,499 @@ const handleRegister = async () => {
     isLoading.value = true;
     console.log("Đăng ký với dữ liệu:", khachHangRegister.value);
     await store.dispatch("registerVerify", khachHangRegister.value);
+
+    // Giả lập delay một chút cho mượt hiệu ứng
     setTimeout(() => {
       router.push({
         path: "/verify-register",
-        query: { email: email }
-      })
-    }, 1000)
-    emit('switchToVerify')
+        query: { email: email },
+      });
+      emit("switchToVerify");
+    }, 800);
   } catch (err) {
     console.log("Error:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
-        errors[field] = message; // Gán lỗi vào errors
+        errors[field] = message;
       });
     } else {
-      errors.server = err.message || "Register failed";
+      errors.server = err.message || "Đăng ký thất bại";
     }
   } finally {
     isLoading.value = false;
   }
 };
 
+// Clear lỗi khi người dùng nhập lại
+watch(
+  khachHangRegister,
+  () => {
+    Object.keys(errors).forEach((key) => delete errors[key]);
+  },
+  { deep: true },
+);
+
 onMounted(() => {
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-})
+});
 </script>
 
 <template>
-  <div class="signup-page">
-    <div class="signup-container">
-      <div class="header-section">
-        <h2>Đăng ký tài khoản</h2>
-        <p class="subtitle">Tạo tài khoản để bắt đầu hành trình của bạn</p>
+  <div class="auth-wrapper">
+    <div class="auth-visual">
+      <div class="visual-content">
+        <div class="logo-area"><span class="logo-icon">🚀</span> TechWorld</div>
+        <h1 class="visual-heading">
+          Bắt đầu <br />
+          <span class="highlight-text">Hành Trình Mới</span>
+        </h1>
+        <p class="visual-desc">
+          Tạo tài khoản ngay hôm nay để nhận hàng ngàn ưu đãi độc quyền dành cho
+          thành viên mới.
+        </p>
+
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
       </div>
-      
-      <form @submit.prevent="handleRegister" class="signup-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label>
-              <i class="icon">👤</i>
-              Tài khoản
-            </label>
-            <div class="input-wrapper">
-              <input
-                v-model.trim="khachHangRegister.taiKhoan"
-                type="text"
-                placeholder="Nhập tài khoản"
-                @input="khachHangRegister.taiKhoan = khachHangRegister.taiKhoan.replace(/\s/g, '')"
-                :class="{ 'error': errors.taiKhoan }"
-              />
-              <div v-if="errors.taiKhoan" class="error-message">
-                {{ errors.taiKhoan }}
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>
-              <i class="icon">📝</i>
-              Họ tên
-            </label>
-            <div class="input-wrapper">
-              <input
-                v-model="khachHangRegister.tenKhachHang"
-                type="text"
-                placeholder="Nhập họ tên đầy đủ"
-                :class="{ 'error': errors.tenKhachHang }"
-              />
-              <div v-if="errors.tenKhachHang" class="error-message">
-                {{ errors.tenKhachHang }}
-              </div>
-            </div>
-          </div>
+      <div class="visual-overlay"></div>
+    </div>
+
+    <div class="auth-form-container">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h2>Đăng ký tài khoản ✨</h2>
+          <p>Điền thông tin bên dưới để tham gia cùng chúng tôi</p>
         </div>
 
-        <div class="form-group form-full-width">
-          <label>
-            <i class="icon">📧</i>
-            Email
-          </label>
-          <div class="input-wrapper">
-            <input
-              v-model="khachHangRegister.email"
-              type="email"
-              placeholder="example@email.com"
-              :class="{ 'error': errors.email }"
-            />
-            <div v-if="errors.emailExist" class="error-message">
-              {{ errors.emailExist }}
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>
-              <i class="icon">🔒</i>
-              Mật khẩu
-            </label>
-            <div class="input-wrapper">
-              <input
-                v-model="khachHangRegister.matKhau"
-                type="password"
-                placeholder="Tối thiểu 8 ký tự"
-                :class="{ 'error': errors.matKhau }"
-              />
-              <div v-if="errors.matKhau" class="error-message">
-                {{ errors.matKhau }}
+        <form @submit.prevent="handleRegister" class="register-form">
+          <div class="form-row">
+            <div class="input-group" :class="{ error: errors.tenKhachHang }">
+              <label>Họ và tên</label>
+              <div class="input-wrapper">
+                <el-icon class="input-icon"><Postcard /></el-icon>
+                <input
+                  v-model="khachHangRegister.tenKhachHang"
+                  type="text"
+                  placeholder="Nguyễn Văn A"
+                />
               </div>
+              <span v-if="errors.tenKhachHang" class="error-msg">{{
+                errors.tenKhachHang
+              }}</span>
             </div>
-          </div>
-          
-          <div class="form-group">
-            <label>
-              <i class="icon">🔐</i>
-              Xác nhận mật khẩu
-            </label>
-            <div class="input-wrapper">
-              <input
-                v-model="confirm_mat_khau"
-                type="password"
-                placeholder="Nhập lại mật khẩu"
-                :class="{ 'error': errors.confirm_mat_khau }"
-              />
-              <div v-if="errors.confirm_mat_khau" class="error-message">
-                {{ errors.confirm_mat_khau }}
+
+            <div class="input-group" :class="{ error: errors.taiKhoan }">
+              <label>Tài khoản</label>
+              <div class="input-wrapper">
+                <el-icon class="input-icon"><User /></el-icon>
+                <input
+                  v-model.trim="khachHangRegister.taiKhoan"
+                  type="text"
+                  placeholder="username123"
+                  @input="
+                    khachHangRegister.taiKhoan =
+                      khachHangRegister.taiKhoan.replace(/\s/g, '')
+                  "
+                />
               </div>
+              <span v-if="errors.taiKhoan" class="error-msg">{{
+                errors.taiKhoan
+              }}</span>
             </div>
           </div>
-        </div>
 
-        <button type="submit" :disabled="isLoading" class="submit-btn">
-          <span v-if="isLoading" class="loading-spinner"></span>
-          <i v-else class="icon">🚀</i>
-          {{ isLoading ? "Đang xử lý..." : "Tạo tài khoản" }}
-        </button>
+          <div
+            class="input-group"
+            :class="{ error: errors.email || errors.emailExist }"
+          >
+            <label>Email</label>
+            <div class="input-wrapper">
+              <el-icon class="input-icon"><Message /></el-icon>
+              <input
+                v-model="khachHangRegister.email"
+                type="email"
+                placeholder="example@email.com"
+              />
+            </div>
+            <span v-if="errors.email" class="error-msg">{{
+              errors.email
+            }}</span>
+            <span v-if="errors.emailExist" class="error-msg">{{
+              errors.emailExist
+            }}</span>
+          </div>
 
-        <div class="divider">
-          <span>hoặc</span>
-        </div>
+          <div class="form-row">
+            <div class="input-group" :class="{ error: errors.matKhau }">
+              <label>Mật khẩu</label>
+              <div class="input-wrapper">
+                <el-icon class="input-icon"><Lock /></el-icon>
+                <input
+                  v-model="khachHangRegister.matKhau"
+                  type="password"
+                  placeholder="••••••••"
+                />
+              </div>
+              <span v-if="errors.matKhau" class="error-msg">{{
+                errors.matKhau
+              }}</span>
+            </div>
 
-        <div class="switch-mode">
-          <p>Đã có tài khoản?</p>
-          <button type="button" @click="emit('switchToLogin')" class="switch-link">
-            Đăng nhập ngay
+            <div
+              class="input-group"
+              :class="{ error: errors.confirm_mat_khau }"
+            >
+              <label>Xác nhận</label>
+              <div class="input-wrapper">
+                <el-icon class="input-icon"><Lock /></el-icon>
+                <input
+                  v-model="confirm_mat_khau"
+                  type="password"
+                  placeholder="••••••••"
+                />
+              </div>
+              <span v-if="errors.confirm_mat_khau" class="error-msg">{{
+                errors.confirm_mat_khau
+              }}</span>
+            </div>
+          </div>
+
+          <div v-if="errors.server" class="server-error">
+            {{ errors.server }}
+          </div>
+
+          <button type="submit" :disabled="isLoading" class="btn-submit">
+            <span v-if="!isLoading">Tạo tài khoản mới</span>
+            <span v-else class="loader"></span>
+            <el-icon v-if="!isLoading" class="btn-icon"><ArrowRight /></el-icon>
           </button>
-        </div>
-      </form>
+
+          <div class="switch-auth">
+            <p>Bạn đã có tài khoản?</p>
+            <button
+              type="button"
+              @click="emit('switchToLogin')"
+              class="login-link"
+            >
+              Đăng nhập ngay
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* CSS Variables */
-:root {
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --text-primary: #ffffff;
-  --text-secondary: #ffffff;
-  --error-color: #ff0000;
-  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.15);
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.auth-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #0f172a;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  overflow: hidden;
 }
 
-/* Main container */
-.signup-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-image: url("@/components/images/loginBackground.jpg");
+/* --- PHẦN TRÁI (VISUAL) --- */
+.auth-visual {
+  flex: 1.2;
+  position: relative;
+  /* Dùng ảnh khác với trang login để phân biệt */
+  background-image: url("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  padding: 2rem;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem;
+  overflow: hidden;
 }
 
-.signup-page::before {
-  content: "";
+.visual-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(2px);
-}
-
-/* Enhanced signup container */
-.signup-container {
-  position: relative;
-  z-index: 1;
-  max-width: 650px;
   width: 100%;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 2px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 3rem;
-  box-shadow: var(--shadow-soft), var(--shadow-glow);
-  animation: containerSlideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.9) 0%,
+    rgba(88, 28, 135, 0.8) 100%
+  ); /* Tông tím hơn chút */
+  z-index: 1;
 }
 
-@keyframes containerSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Header section */
-.header-section {
-  text-align: center;
-  margin-bottom: 2.5rem;
+.visual-content {
   position: relative;
+  z-index: 2;
+  color: white;
+  animation: fadeSlideRight 1s ease-out;
 }
 
-.header-section h2 {
-  font-size: 2.5rem;
+.logo-area {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3rem;
+  color: #a78bfa;
+}
+
+.visual-heading {
+  font-size: 3.5rem;
   font-weight: 800;
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.highlight-text {
+  background: linear-gradient(to right, #a78bfa, #f472b6);
   -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-  letter-spacing: -1px;
-  animation: titlePulse 3s ease-in-out infinite;
 }
 
-@keyframes titlePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-.subtitle {
-  color: #ffffff;
+.visual-desc {
   font-size: 1.1rem;
-  margin: 0;
-  opacity: 0;
-  animation: subtitleFade 1s ease-out 0.3s forwards;
+  color: #e2e8f0;
+  max-width: 500px;
+  line-height: 1.6;
 }
 
-@keyframes subtitleFade {
-  to { opacity: 1; }
+/* Hình tròn trang trí */
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+  filter: blur(60px);
+}
+.c1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(167, 139, 250, 0.3);
+  top: -50px;
+  right: -50px;
+  animation: float 7s infinite ease-in-out;
+}
+.c2 {
+  width: 200px;
+  height: 200px;
+  background: rgba(244, 114, 182, 0.3);
+  bottom: 50px;
+  left: 50px;
+  animation: float 9s infinite ease-in-out reverse;
 }
 
-/* Form layout */
-.signup-form {
+/* --- PHẦN PHẢI (FORM) --- */
+.auth-form-container {
+  flex: 1;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow-y: auto; /* Cho phép cuộn nếu form dài */
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 500px; /* Rộng hơn login xíu vì có 2 cột */
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+.form-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-header h2 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.register-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.form-group {
+/* Input Styles */
+.input-group {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* Full width form group for email */
-.form-full-width {
-  width: 100%;
+.input-group label {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .input-wrapper {
   position: relative;
-}
-
-/* Enhanced labels with icons */
-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.icon {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-/* Modern input styling */
-input {
+.input-wrapper input {
   width: 100%;
-  padding: 1rem 1.2rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  font-size: 1rem;
-  color: #ffffff;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  backdrop-filter: blur(10px);
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 1rem 1rem 1rem 2.8rem;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
 }
 
-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
 }
 
-input:focus {
+.input-wrapper input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(102, 126, 234, 0.8);
-  box-shadow: 
-    0 0 0 4px rgba(102, 126, 234, 0.1),
-    0 8px 25px rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
+  background: #0f172a;
 }
 
-input.error {
-  border-color: var(--error-color);
-  box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.1);
+.input-wrapper input:focus + .input-icon {
+  color: #a78bfa;
 }
 
-/* Error messages */
-.error-message {
-  color: #ff0000;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  background: rgba(255, 0, 0, 0.1);
+/* Error States */
+.error input {
+  border-color: #ef4444;
+}
+.error-msg {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+.server-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 0.8rem;
   border-radius: 8px;
-  border-left: 3px solid #ff0000;
-  animation: errorSlide 0.3s ease-out;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
-@keyframes errorSlide {
+/* Button Submit */
+.btn-submit {
+  background: linear-gradient(
+    135deg,
+    #8b5cf6 0%,
+    #d946ef 100%
+  ); /* Gradient tím hồng khác login */
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Switch Auth */
+.switch-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.login-link {
+  background: none;
+  border: none;
+  color: #a78bfa;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0;
+  transition: 0.2s;
+}
+
+.login-link:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+
+/* Loader */
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(20px, -20px);
+  }
+}
+
+@keyframes fadeSlideRight {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-30px);
   }
   to {
     opacity: 1;
@@ -386,180 +539,43 @@ input.error {
   }
 }
 
-/* Enhanced submit button */
-.submit-btn {
-  width: 100%;
-  padding: 1.2rem;
-  background: var(--primary-gradient);
-  color: var(--text-primary);
-  border: none;
-  border-radius: 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-  margin-top: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.submit-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: 0.6s;
-}
-
-.submit-btn:hover::before {
-  left: 100%;
-}
-
-.submit-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-}
-
-.submit-btn:disabled {
-  background: rgba(255, 255, 255, 0.2);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Loading spinner */
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Divider */
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 1rem 0;
-}
-
-.divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  z-index: 0;
-}
-
-.divider span {
-  position: relative;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(20px);
-  padding: 0.5rem 1.5rem;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  border-radius: 20px;
-  z-index: 1;
-}
-
-/* Switch mode section */
-.switch-mode {
-  text-align: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5rem;
-}
-
-.switch-mode p {
-  color: #ffffff;
-  margin: 0 0 1rem 0;
-  font-size: 0.95rem;
-}
-
-.switch-link {
-  background: var(--success-gradient);
-  color: var(--text-primary);
-  border: none;
-  padding: 0.8rem 2rem;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.9rem;
-}
-
-.switch-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .signup-container {
-    margin: 1rem;
-    padding: 2rem;
-    max-width: none;
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .auth-visual {
+    padding: 3rem;
+  }
+  .visual-heading {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-wrapper {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .auth-visual {
+    display: none;
+  }
+  .auth-form-container {
+    padding: 1.5rem;
+    height: auto;
+    min-height: 100vh;
+  }
   .form-row {
     grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .header-section h2 {
-    font-size: 2rem;
-  }
-  
-  .subtitle {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .signup-container {
-    padding: 1.5rem;
-  }
-  
-  .header-section h2 {
-    font-size: 1.8rem;
-  }
-  
-  input, .submit-btn {
-    padding: 0.9rem;
-    font-size: 0.95rem;
-  }
+    gap: 1.2rem;
+  } /* Mobile thì input thành 1 cột */
 }
 </style>

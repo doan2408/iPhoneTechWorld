@@ -1,18 +1,18 @@
 <script setup>
 import { ElMessage } from "element-plus";
-import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
+import { User, Lock, ArrowRight } from "@element-plus/icons-vue"; // Import thêm Icon cho đẹp
 import { cartService } from '@/service/ClientService/GioHang/GioHangClientService';
 import headerState from "@/components/Client/modules/headerState";
 
 const tai_khoan = ref("");
 const mat_khau = ref("");
-const confirm_mat_khau = ref("");
 const errors = reactive({});
 const isLoading = ref(false);
 const router = useRouter();
-const route = useRoute(); // Khai báo useRoute để lấy route.query
+const route = useRoute();
 const store = useStore();
 const emit = defineEmits(["switchToRegister"]);
 
@@ -38,25 +38,17 @@ const handleLogin = async () => {
       matKhau: mat_khau.value,
     });
 
-    // 👇 Lấy đường dẫn muốn quay về (nếu có)
     let redirectPath = route.query.redirect || getDefaultRedirect();
-
-    // Nếu redirect rỗng hoặc là '/', thì dùng trang mặc định
     if (!redirectPath || redirectPath === "/") {
       redirectPath = getDefaultRedirect();
     }
 
-    // Nếu người dùng là customer và redirectPath không bắt đầu với "/client", thêm "/client" vào trước
     if (store.getters.isCustomer && !redirectPath.startsWith("/client")) {
       redirectPath = `/client${redirectPath}`;
     } else if (!store.getters.isCustomer) {
-      // Nếu không phải là customer, điều hướng về trang mặc định (getDefaultRedirect)
       redirectPath = getDefaultRedirect();
     }
 
-    console.log("path: ", redirectPath);
-
-    // Sau khi đăng nhập thành công, điều hướng tới trang trước khi đăng nhập (nếu có) hoặc trang mặc định
     router.push(redirectPath);
     
     const user = JSON.parse(localStorage.getItem("user"));
@@ -69,13 +61,12 @@ const handleLogin = async () => {
 
     ElMessage.success("Đăng nhập thành công !");
   } catch (err) {
-    console.log("Error:", err);
     if (Array.isArray(err)) {
       err.forEach(({ field, message }) => {
         if (field === "trang_thai") {
           ElMessage.error(message);
         } else {
-          errors[field] = message; //lỗi cấm tài khoản
+          errors[field] = message;
         }
       });
     }
@@ -84,15 +75,12 @@ const handleLogin = async () => {
   }
 };
 
-// Hàm phụ để xác định trang mặc định nếu không có redirect
 function getDefaultRedirect() {
   if (store.getters.isAdmin) return "/admin/ban-hang";
   if (store.getters.isStaff) return "/admin/ban-hang";
   if (store.getters.isCustomer) return "/client/home";
-  return "/"; // fallback
+  return "/";
 }
-
-const isLogin = ref(true); // true: đăng nhập, false: đăng ký
 
 watch([tai_khoan, mat_khau], () => {
   delete errors.tai_khoan;
@@ -106,364 +94,398 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-container">
-      <h2>Đăng nhập</h2>
-      <form @submit.prevent="handleLogin">
-        <div>
-          <label>Tài khoản:</label>
-          <input
-            v-model.trim="tai_khoan"
-            type="text"
-            placeholder="Nhập tài khoản"
-            @input="tai_khoan = tai_khoan.replace(/\s/g, '')"
-            class="form-control"
-          />
-          <div v-if="errors.tai_khoan" class="text-danger mb-1">
-            {{ errors.tai_khoan }}
-          </div>
+  <div class="auth-wrapper">
+    <div class="auth-visual">
+      <div class="visual-content">
+        <div class="logo-area">
+          <span class="logo-icon">💠</span> TechWorld
         </div>
-        <div>
-          <label>Mật khẩu:</label>
-          <input
-            v-model.trim="mat_khau"
-            type="password"
-            placeholder="Nhập mật khẩu"
-            class="form-control"
-          />
-          <div v-if="errors.mat_khau" class="text-danger mb-1">
-            {{ errors.mat_khau }}
-          </div>
-        </div>
-        <div v-if="errors.server" class="text-danger mb-1">
-          {{ errors.server }}
-        </div>
-        <div class="forgot-password-wrapper">
-          <router-link to="/forgot-password" class="forgot-password-link"
-            >Quên mật khẩu?</router-link
-          >
-        </div>
-        <button type="submit" :disabled="isLoading" class="btn btn-primary">
-          {{ isLoading ? "Đang xử lý..." : "Đăng nhập" }}
-        </button>
-        <p class="switch-mode">
-          Chưa có tài khoản?
-          <span @click="emit('switchToRegister')" class="switch-link"
-            >Tạo tài khoản</span
-          >
+        <h1 class="visual-heading">
+          Khám phá thế giới <br />
+          <span class="highlight-text">Công Nghệ Đỉnh Cao</span>
+        </h1>
+        <p class="visual-desc">
+          Đăng nhập để trải nghiệm mua sắm thiết bị công nghệ với ưu đãi tốt nhất dành riêng cho bạn.
         </p>
-      </form>
+        
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+      </div>
+      <div class="visual-overlay"></div>
+    </div>
+
+    <div class="auth-form-container">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h2>Chào mừng trở lại! 👋</h2>
+          <p>Vui lòng nhập thông tin để đăng nhập</p>
+        </div>
+
+        <form @submit.prevent="handleLogin" class="login-form">
+          <div class="input-group" :class="{ error: errors.tai_khoan }">
+            <label>Tài khoản</label>
+            <div class="input-wrapper">
+              <el-icon class="input-icon"><User /></el-icon>
+              <input
+                v-model.trim="tai_khoan"
+                type="text"
+                placeholder="Nhập username của bạn"
+                @input="tai_khoan = tai_khoan.replace(/\s/g, '')"
+              />
+            </div>
+            <span v-if="errors.tai_khoan" class="error-msg">{{ errors.tai_khoan }}</span>
+          </div>
+
+          <div class="input-group" :class="{ error: errors.mat_khau }">
+            <label>Mật khẩu</label>
+            <div class="input-wrapper">
+              <el-icon class="input-icon"><Lock /></el-icon>
+              <input
+                v-model.trim="mat_khau"
+                type="password"
+                placeholder="Nhập mật khẩu"
+              />
+            </div>
+            <span v-if="errors.mat_khau" class="error-msg">{{ errors.mat_khau }}</span>
+          </div>
+
+          <div v-if="errors.server" class="server-error">
+            {{ errors.server }}
+          </div>
+
+          <div class="form-actions">
+            <router-link to="/forgot-password" class="forgot-link">Quên mật khẩu?</router-link>
+          </div>
+
+          <button type="submit" :disabled="isLoading" class="btn-submit">
+            <span v-if="!isLoading">Đăng nhập ngay</span>
+            <span v-else class="loader"></span>
+            <el-icon v-if="!isLoading" class="btn-icon"><ArrowRight /></el-icon>
+          </button>
+
+          <div class="switch-auth">
+            Chưa có tài khoản?
+            <span @click="emit('switchToRegister')" class="register-link">Đăng ký ngay</span>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Tạo các biến cho màu sắc và kiểu dáng */
-:root {
-  --primary-color: #1e90ff; /* Màu chính (xanh da trời) */
-  --secondary-color: #6c757d; /* Màu phụ */
-  --text-color: #ffffff; /* Màu chữ trắng */
-  --error-color: #ff4d4f; /* Màu lỗi (đỏ) */
-  --border-radius: 20px; /* Tăng độ cong cho mềm mại */
-  --shadow: 0 15px 35px rgba(0, 0, 0, 0.2); /* Đổ bóng mềm mại */
-  --glass-bg: rgba(255, 255, 255, 0.15); /* Nền mờ cho login */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.2); /* Biên mờ */
-}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-/* Toàn bộ trang login */
-.login-page {
+.auth-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
-  background-image: url("@/components/images/loginBackground.jpg") !important; /* Chèn ảnh nền ở đây */
-  background-size: cover !important; /* Phủ ảnh toàn bộ */
-  background-position: center !important; /* Canh giữa ảnh */
-  background-repeat: no-repeat !important; /* Không lặp lại ảnh */
+  width: 100vw;
+  background-color: #0f172a; /* Màu nền tối chủ đạo */
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
 }
 
-/* Tiêu đề login - làm đẹp hơn */
-.login-container h2 {
-  background: linear-gradient(135deg, #1ed6ff 0%, #00bfff 50%, #87ceeb 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  animation: gradientShift 3s ease infinite;
+/* --- PHẦN TRÁI (VISUAL) --- */
+.auth-visual {
+  flex: 1.2;
   position: relative;
-  text-shadow: 0 4px 15px rgba(30, 214, 255, 0.4);
-  filter: drop-shadow(0 2px 8px rgba(30, 214, 255, 0.3));
-}
-
-/* Animation gradient cho chữ */
-@keyframes gradientShift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-    transform: scale(1);
-  }
-  50% {
-    background-position: 100% 50%;
-    transform: scale(1.02);
-  }
-}
-
-/* Gạch chân đẹp cho tiêu đề */
-.login-container h2::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #1ed6ff,
-    #00bfff,
-    #1ed6ff,
-    transparent
-  );
-  border-radius: 3px;
-  animation: underlineGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes underlineGlow {
-  0% {
-    box-shadow: 0 0 5px rgba(30, 214, 255, 0.5);
-    opacity: 0.8;
-  }
-  100% {
-    box-shadow: 0 0 15px rgba(30, 214, 255, 0.8);
-    opacity: 1;
-  }
-}
-
-/* Cấu trúc chính của login container */
-.login-container {
-  max-width: 420px; /* Giữ nguyên kích thước */
-  width: 100%;
-  padding: 2.5rem; /* Giữ nguyên padding */
-  background: var(--glass-bg); /* Nền mờ */
-  backdrop-filter: blur(15px); /* Tăng blur cho mềm mại hơn */
-  border: var(--glass-border);
-  border-radius: 25px; /* Tăng border-radius cho tròn trịa */
-  box-shadow: var(--shadow); /* Đổ bóng cho container */
-  text-align: center;
-  animation: slideIn 0.6s ease-out; /* Hiệu ứng slide-in khi vào trang */
-}
-
-/* Hiệu ứng slide-in khi hiển thị */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px); /* Lúc đầu bị đẩy xuống */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0); /* Cuối cùng trở về vị trí ban đầu */
-  }
-}
-
-/* Tiêu đề login */
-.login-container h2 {
-  color: #1ed6ff;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase; /* Chữ in hoa */
-  text-shadow: 0 2px 10px rgba(30, 214, 255, 0.3); /* Bóng mềm mại */
-}
-
-/* Định dạng form */
-form {
+  background-image: url("https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Giữ nguyên */
+  justify-content: center;
+  padding: 6rem;
+  overflow: hidden;
 }
 
-/* Định dạng cho các trường input */
-form div {
-  text-align: left;
+.visual-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.8) 100%);
+  z-index: 1;
 }
 
-label {
-  display: block;
-  font-size: 1rem; /* Giữ nguyên */
-  color: #1ed6ff;
-  margin-bottom: 0.5rem; /* Giữ nguyên */
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Hiệu ứng bóng cho chữ */
+.visual-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  animation: fadeSlideRight 1s ease-out;
 }
 
-/* Định dạng cho input */
-input {
+.logo-area {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3rem;
+  color: #38bdf8;
+}
+
+.visual-heading {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.highlight-text {
+  background: linear-gradient(to right, #38bdf8, #818cf8);
+  -webkit-text-fill-color: transparent;
+}
+
+.visual-desc {
+  font-size: 1.1rem;
+  color: #cbd5e1;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+/* Hình tròn trang trí */
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+  filter: blur(60px);
+}
+.c1 {
+  width: 300px; height: 300px;
+  background: rgba(56, 189, 248, 0.3);
+  top: -50px; right: -50px;
+  animation: float 6s infinite ease-in-out;
+}
+.c2 {
+  width: 200px; height: 200px;
+  background: rgba(129, 140, 248, 0.3);
+  bottom: 50px; left: 50px;
+  animation: float 8s infinite ease-in-out reverse;
+}
+
+/* --- PHẦN PHẢI (FORM) --- */
+.auth-form-container {
+  flex: 1;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.form-wrapper {
   width: 100%;
-  padding: 0.9rem; /* Giữ nguyên */
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.2); /* Tăng border để mềm mại hơn */
-  border-radius: 18px; /* Tăng border-radius cho tròn trịa */
-  font-size: 1rem; /* Giữ nguyên */
-  color: var(--text-color);
-  transition: all 0.3s ease; /* Hiệu ứng khi thay đổi */
+  max-width: 440px;
+  animation: fadeSlideUp 0.8s ease-out;
 }
 
-input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Màu cho placeholder */
+.form-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
 }
 
-input:focus {
+.form-header h2 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* Input Styles */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  width: 100%;
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 1rem 1rem 1rem 2.8rem;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.25);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 20px rgba(30, 144, 255, 0.4); /* Hiệu ứng khi focus vào input */
-  transform: translateY(-2px); /* Hiệu ứng nâng nhẹ */
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+  background: #0f172a;
 }
 
-/* Định dạng cho nút submit */
-button {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    #04abed
-  ); /* Hiệu ứng gradient */
-  color: var(--text-color);
-  padding: 1rem; /* Giữ nguyên */
+.input-wrapper input:focus + .input-icon {
+  color: #38bdf8;
+}
+
+/* Error States */
+.error input {
+  border-color: #ef4444;
+}
+.error-msg {
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+.server-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-link {
+  color: #38bdf8;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+/* Button Submit */
+.btn-submit {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
   border: none;
-  border-radius: 20px; /* Tăng border-radius cho tròn trịa */
-  font-size: 1.1rem; /* Giữ nguyên */
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(30, 144, 255, 0.3); /* Bóng mềm mại */
+  margin-top: 0.5rem;
 }
 
-/* Hiệu ứng hover cho button */
-button::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: 0.5s;
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
 }
 
-button:hover::before {
-  left: 100%;
-}
-
-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(30, 144, 255, 0.4);
-}
-
-button:disabled {
-  background: var(--secondary-color);
+.btn-submit:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
-/* Hiển thị lỗi */
-p[style*="color: red"] {
-  color: var(--error-color);
-  font-size: 0.95rem; /* Giữ nguyên */
-  margin-top: 0.8rem; /* Giữ nguyên */
-  text-align: left;
-  font-weight: 500;
-  padding: 0.8rem 1rem; /* Thêm padding cho đẹp */
-  background: rgba(255, 77, 79, 0.15);
-  border-radius: 15px; /* Tròn trịa */
-  border: 1px solid rgba(255, 77, 79, 0.3);
+/* Switch Auth */
+.switch-auth {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-top: 1rem;
 }
 
-/* Media query cho màn hình nhỏ */
-@media (max-width: 480px) {
-  .login-container {
-    max-width: 90%; /* Giữ nguyên */
-    margin: 1.5rem auto;
-    padding: 2rem; /* Giữ nguyên */
-    border-radius: 20px; /* Giữ tròn trịa trên mobile */
-  }
-
-  .login-container h2 {
-    font-size: 1.6rem; /* Giữ nguyên */
-  }
-
-  input,
-  button {
-    font-size: 0.95rem; /* Giữ nguyên */
-    padding: 0.8rem; /* Giữ nguyên */
-    border-radius: 15px; /* Tròn trịa trên mobile */
-  }
-
-  label {
-    font-size: 0.9rem; /* Giữ nguyên */
-  }
-}
-
-.forgot-password-wrapper {
-  text-align: right;
-  margin-bottom: -0.8rem; /* Giữ nguyên */
-}
-
-.forgot-password-link {
-  color: rgb(3, 220, 248);
-  text-decoration: underline;
-  font-weight: bold;
-  font-size: 0.9rem; /* Giữ nguyên */
-  transition: color 0.3s ease;
-  padding: 0.3rem 0.5rem; /* Thêm padding nhẹ */
-  border-radius: 8px; /* Tròn trịa */
-}
-
-.forgot-password-link:hover {
-  color: rgb(0, 154, 250);
-  background: rgba(0, 154, 250, 0.1); /* Nền mờ khi hover */
-}
-
-.switch-mode {
-  margin-top: 1.5rem; /* Giữ nguyên */
-  padding: 0.8rem; /* Thêm padding */
-  background: rgba(255, 255, 255, 0.1); /* Nền mờ */
-  border-radius: 12px; /* Tròn trịa */
-  backdrop-filter: blur(10px);
-}
-
-.switch-link {
-  color: #00ff44;
-  text-decoration: underline;
+.register-link {
+  color: #38bdf8;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: bold;
-  transition: color 0.2s ease;
-  padding: 0.2rem 0.4rem; /* Thêm padding nhẹ */
-  border-radius: 6px; /* Tròn trịa */
+  margin-left: 5px;
+  transition: 0.2s;
 }
 
-.switch-link:hover {
-  color: #1abc9c; /* Màu khi hover */
+.register-link:hover {
+  color: #7dd3fc;
   text-decoration: underline;
-  background: rgba(26, 188, 156, 0.1); /* Nền mờ khi hover */
 }
 
-input.form-control[type="text"],
-[type="password"] {
-  color: #ffffff !important;
+/* Loader */
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: rotation 1s linear infinite;
+}
+
+/* Keyframes */
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -20px); }
+}
+
+@keyframes fadeSlideRight {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .auth-visual {
+    padding: 3rem;
+  }
+  .visual-heading {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-wrapper {
+    flex-direction: column;
+  }
+  .auth-visual {
+    display: none; /* Ẩn phần ảnh trên mobile để tập trung login */
+  }
+  .auth-form-container {
+    padding: 1.5rem;
+  }
 }
 </style>

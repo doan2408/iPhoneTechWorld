@@ -106,10 +106,10 @@ export const findSanPhamBanHang = (
 };
 
 export const fillDataFulldown = () => {
-    const urlProduct = "/admin/product";
+  const urlProduct = "/admin/product";
   const url = urlProduct + "/filldata-for-pulldown";
-    return api.get(url);
-  };
+  return api.get(url);
+};
 
 export const findSanPhamByMa = (maSanPham, pageNo, pageSize) => {
   const urlProduct = "/admin/product";
@@ -466,9 +466,9 @@ export const downloadImeiSanPhamTemplate = async () => {
 export const loadSanPham = (search, page = 0, size = 7) => {
   return api.get('/live-san-pham', {
     params: {
-        search,
-        page,
-        size
+      search,
+      page,
+      size
     },
   });
 };
