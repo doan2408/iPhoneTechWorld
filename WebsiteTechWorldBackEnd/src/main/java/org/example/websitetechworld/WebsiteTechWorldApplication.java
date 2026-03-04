@@ -4,6 +4,7 @@ import org.example.websitetechworld.Config.EnvLoader;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,7 +16,11 @@ public class WebsiteTechWorldApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         new EnvLoader();
-        SpringApplication.run(WebsiteTechWorldApplication.class, args);
+        ApplicationContext context = SpringApplication.run(WebsiteTechWorldApplication.class, args);
+        String[] beanNames = context.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            System.out.println("bean la: " + beanName);
+        }
     }
 
     @Override
